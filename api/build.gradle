@@ -1,0 +1,22 @@
+dependencies {
+	compile (project (":core"))
+
+	compileOnly("org.projectlombok:lombok:${lombokVersion}")
+
+	compile(
+			"org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
+			"org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
+//	"org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}",
+	)
+
+
+	testCompile(
+		"org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
+	)
+}
+
+processResources {
+    from 'src/main/resources'
+}
+
+

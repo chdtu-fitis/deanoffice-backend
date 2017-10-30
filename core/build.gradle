@@ -1,0 +1,22 @@
+dependencies {
+	compileOnly("org.projectlombok:lombok:${lombokVersion}")
+
+	compile(
+			"org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
+			"org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",
+
+//			"org.springframework:spring-context:$springVersion",
+//			"org.springframework:spring-oxm:$springVersion",
+	)
+	compile("org.flywaydb:flyway-core:${flywayVersion}")
+
+	compile (
+			"com.zaxxer:HikariCP:${hikariVersion}",
+			"postgresql:postgresql:${postgresqlDriverVersion}"
+	)
+	runtime("org.postgresql:postgresql:${postgresqlVersion}")
+}
+
+processResources {
+    from 'src/main/resources'
+}

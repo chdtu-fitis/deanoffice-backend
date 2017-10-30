@@ -1,0 +1,28 @@
+group = 'ua.edu.chdtu'
+version = "${appVersin}"
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.8
+
+allprojects {
+	repositories {
+		mavenCentral()
+		maven {
+			url "https://maven.atlassian.com/3rdparty"
+		}
+	}
+
+	apply plugin: 'java'
+	apply plugin: 'idea'
+}
+
+subprojects {
+	compileJava.options.encoding = 'UTF-8'
+
+	configurations {
+		provided
+		compile.extendsFrom provided
+	}
+}
