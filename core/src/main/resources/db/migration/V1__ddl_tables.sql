@@ -342,3 +342,15 @@ alter table courses_for_groups
 		foreign key (teacher_id) references teacher
 ;
 
+INSERT INTO public.degree (name, name_eng) VALUES ('Бакалавр', 'Bachelor');
+INSERT INTO public.degree (name, name_eng) VALUES ('Спеціаліст', 'Specialist');
+INSERT INTO public.degree (name, name_eng) VALUES ('Магістр', 'Master');
+
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('іспит', 'exam', true);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('залік', 'credit', false);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('курсова робота', 'course work', true);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('курсовий проект', 'course project', true);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('диференційований залік', 'differentiated credit', true);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('державний іспит', 'state exam', true);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('атестація', 'attestation', true);
+INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('практика', 'internship', true);

@@ -21,7 +21,7 @@ public class TestService {
 
     public TestEntity getTest() {
         //just for test purposes
-        addTest("aaa" + Math.random());
+//        addTest("aaa" + Math.random());
         //----------
 
         TestEntity first = testEntityRepository.getFirst();

@@ -18,6 +18,6 @@ public class TestEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "col2")
-    private String col2;
+    @Column(name = "name")
+    private String name;
 }
