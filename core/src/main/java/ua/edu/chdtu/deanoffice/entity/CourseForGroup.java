@@ -6,10 +6,8 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name="courses_for_groups", uniqueConstraints={
-        @UniqueConstraint(columnNames = {"course_id", "studentgroup_id"})
-})
-public class CoursesForGroups extends BaseEntity {
+@Table(name="courses_for_groups")
+public class CourseForGroup extends BaseEntity {
     @ManyToOne
     private Course course;
     @ManyToOne
