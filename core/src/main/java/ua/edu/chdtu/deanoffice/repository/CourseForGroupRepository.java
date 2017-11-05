@@ -11,6 +11,6 @@ import java.util.List;
  */
 public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, Integer> {
 //    @Query("select cfg.course from CourseForGroup as cfg " +
-//            "inner join ")
+//            "inner join cfg.studentGroup on cfg.studentGroup.id = cfg.id")
 //    List<CourseForGroup> findAllByGroup();
 }
