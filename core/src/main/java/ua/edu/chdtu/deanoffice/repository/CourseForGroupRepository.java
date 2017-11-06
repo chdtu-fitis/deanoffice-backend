@@ -13,8 +13,8 @@ import java.util.List;
 public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, Integer> {
 
     @Query("select cfg.course from CourseForGroup as cfg " +
-            "join cfg.studentGroup sg join sg.specialization spec join spec.faculty " +
-            "where sg.active = 'T' and spec.faculty.id = :facultyId and spec.id = :specId")
-    List<CourseForGroup> findAllBySpecialization(@Param("facultyId") int facultyId, @Param("specId") int specId);
+            "join cfg.studentGroup sg join sg.specialization spec " +
+            "where sg.active = 'T' and spec.id = :specId")
+    List<CourseForGroup> findAllBySpecialization(@Param("specId") int specId);
 
 }
