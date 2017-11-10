@@ -11,20 +11,20 @@ create table course
 )
 ;
 
-create table coursename
+create table course_name
 (
 	id serial not null
 		constraint coursename_pkey
 			primary key,
 	name varchar(100) not null,
-	name_eng varchar(100) not null,
+	name_eng varchar(100),
 	abbreviation varchar(15)
 )
 ;
 
 alter table course
 	add constraint fk7a99giwuwqju96i92m9gw9mk3
-		foreign key (coursename_id) references coursename
+		foreign key (coursename_id) references course_name
 ;
 
 create table courses_for_groups
@@ -58,7 +58,7 @@ create table degree
 		constraint degree_pkey
 			primary key,
 	name varchar(100) not null,
-	name_eng varchar(100) not null,
+	name_eng varchar(100),
 	constraint ukhsy90ut35sobbhgmb5sb5eh7
 		unique (id, name)
 )
@@ -82,7 +82,7 @@ create table faculty
 		constraint faculty_pkey
 			primary key,
 	name varchar(100) not null,
-	name_eng varchar(100) not null,
+	name_eng varchar(100),
 	active boolean not null,
 	abbr varchar(20) not null
 		constraint uk_757mlj4kyjn7mpb0fb67owj00
@@ -118,7 +118,7 @@ create table knowledge_control
 		constraint knowledge_control_pkey
 			primary key,
 	name varchar(100) not null,
-	name_eng varchar(100) not null,
+	name_eng varchar(100),
 	has_grade boolean not null
 )
 ;
@@ -164,7 +164,7 @@ create table speciality
 		constraint speciality_pkey
 			primary key,
 	name varchar(100) not null,
-	name_eng varchar(100) not null,
+	name_eng varchar(100),
 	active boolean not null,
 	code varchar(20) not null
 		constraint uk_f7cgfesjcj3ygekov90nlvnaa
@@ -178,7 +178,7 @@ create table specialization
 		constraint specialization_pkey
 			primary key,
 	name varchar(100) not null,
-	name_eng varchar(100) not null,
+	name_eng varchar(100),
 	active boolean not null,
 	payment_extramural numeric(15,2),
 	payment_fulltime numeric(15,2),
@@ -278,7 +278,7 @@ create table student_expel
 )
 ;
 
-create table studentgroup
+create table student_group
 (
 	id serial not null
 		constraint studentgroup_pkey
@@ -299,22 +299,22 @@ create table studentgroup
 
 alter table courses_for_groups
 	add constraint fkjshxsn3dotdm41ynujr4pwp3x
-		foreign key (studentgroup_id) references studentgroup
+		foreign key (studentgroup_id) references student_group
 ;
 
 alter table student
 	add constraint fkamc5s7rcd0jaygjbknjffflba
-		foreign key (studentgroup_id) references studentgroup
+		foreign key (studentgroup_id) references student_group
 ;
 
 alter table student_academic_vacation
 	add constraint fk17xdeg7avnqjn0muw4hqegejr
-		foreign key (group_id) references studentgroup
+		foreign key (group_id) references student_group
 ;
 
 alter table student_expel
 	add constraint fkrqvkc3r60nv4phchsnjge6tb9
-		foreign key (group_id) references studentgroup
+		foreign key (group_id) references student_group
 ;
 
 create table teacher
