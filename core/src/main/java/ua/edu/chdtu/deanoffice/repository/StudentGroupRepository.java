@@ -12,9 +12,7 @@ import java.util.List;
  */
 public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer>{
 
-    @Query("select sg.id, sg.name, sg.studySemesters, sg.specialization.id from StudentGroup as sg join sg.specialization " +
-            "join sg.specialization.faculty "+
-            "where sg.active = true and sg.specialization.faculty.id = :facultyId")
+    @Query("select sg from StudentGroup as sg where sg.active = true and sg.specialization.faculty.id = :facultyId")
     List<StudentGroup> findAllByFaculty(@Param("facultyId") int facultyId);
 
 
