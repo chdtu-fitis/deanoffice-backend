@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Entity
 public class Course extends BaseEntity {
     @ManyToOne
+    @JoinColumn(name="coursename_id")
     private CourseName courseName;
     @Column(name = "semester", nullable = false)
     private Integer semester;
