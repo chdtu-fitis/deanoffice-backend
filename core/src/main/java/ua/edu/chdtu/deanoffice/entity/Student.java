@@ -4,6 +4,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.Person;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.util.Date;
 
@@ -16,6 +17,7 @@ public class Student extends Person {
     @Column(name="patronimic_eng", length = 20)
     private String patronimicEng;
     @ManyToOne
+    @JoinColumn(name="studentgroup_id")
     private StudentGroup studentGroup;
     @Column(name="birth_date")
     private Date birthDate;
