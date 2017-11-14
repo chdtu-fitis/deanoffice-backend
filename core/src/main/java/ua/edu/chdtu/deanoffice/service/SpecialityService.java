@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.speciality.service;
+package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 

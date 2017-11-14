@@ -1,9 +1,9 @@
-package ua.edu.chdtu.deanoffice.group.controller;
+package ua.edu.chdtu.deanoffice.api.speciality;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/group")
-public class GroupController {
+@RequestMapping("/speciality")
+public class SpecialityController {
 }
