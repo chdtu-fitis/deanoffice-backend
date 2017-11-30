@@ -8,17 +8,17 @@ import org.docx4j.wml.Tr;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.*;
-import static ua.edu.chdtu.deanoffice.service.document.Templates.*;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 public class DiplomaSupplementTemplateFiller {
 
     public static File fillWithStudentInformation(String templateFilepath, StudentSummary studentSummary) {
-        WordprocessingMLPackage template = getTemplate(templateFilepath);
+        WordprocessingMLPackage template = loadTemplate(templateFilepath);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(studentSummary.getStudentInfoDictionary());
         commonDict.putAll(studentSummary.getTotalDictionary());
         replacePlaceholders(template, commonDict);
-        return saveTemplate(template, studentSummary.getStudent().getInitialsUkr() + ".docx");
+        return saveDocument(template, studentSummary.getStudent().getInitialsUkr() + ".docx");
     }
 
     private static void fillTableWithGrades(WordprocessingMLPackage template,
@@ -27,7 +27,7 @@ public class DiplomaSupplementTemplateFiller {
         Set<String> placeholdersToRemove = new HashSet<>();
 
         List<Object> tables = getAllElementFromObject(template.getMainDocumentPart(), Tbl.class);
-        Tbl tempTable = getTemplateTable(tables, "#GradesTable");
+        Tbl tempTable = findTable(tables, "#GradesTable");
         placeholdersToRemove.add("#GradesTable");
         List<Object> rows = getAllElementFromObject(tempTable, Tr.class);
 

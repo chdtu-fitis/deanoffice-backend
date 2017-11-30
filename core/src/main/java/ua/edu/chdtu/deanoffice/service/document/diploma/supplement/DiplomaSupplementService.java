@@ -22,7 +22,7 @@ public class DiplomaSupplementService {
 
     private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
 
-    public File fillDiplomaSupplementTemplate(Integer studentId) {
+    public File formDiplomaSupplement(Integer studentId) {
         Student student = studentService.get(studentId);
         List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
         StudentSummary studentSummary = new StudentSummary(student, grades);

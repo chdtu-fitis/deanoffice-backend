@@ -21,6 +21,6 @@ public class DiplomaSupplementController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
     public ResponseEntity<File> generateForStudent(@PathVariable Integer studentId) {
-        return ResponseEntity.ok(diplomaSupplementService.fillDiplomaSupplementTemplate(studentId));
+        return ResponseEntity.ok(diplomaSupplementService.formDiplomaSupplement(studentId));
     }
 }

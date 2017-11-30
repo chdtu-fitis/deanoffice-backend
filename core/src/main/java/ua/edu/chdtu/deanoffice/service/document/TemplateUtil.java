@@ -10,8 +10,6 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -21,13 +19,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Templates {
+public class TemplateUtil {
 
-    private static Logger log = LoggerFactory.getLogger(Templates.class);
+    private static Logger log = LoggerFactory.getLogger(TemplateUtil.class);
 
     public static final String PLACEHOLDER_PREFIX = "#";
 
-    public static WordprocessingMLPackage getTemplate(String name) {
+    public static WordprocessingMLPackage loadTemplate(String name) {
         try {
             return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFile()));
         } catch (Docx4JException e) {
@@ -36,6 +34,16 @@ public class Templates {
             log.error("Could not find or load file!", e);
         }
         return null;
+    }
+
+    public static File saveDocument(WordprocessingMLPackage template, String target) {
+        File f = new File(target);
+        try {
+            template.save(f);
+        } catch (Docx4JException e) {
+            log.error("Could not save template!", e);
+        }
+        return f;
     }
 
     public static List<Object> getAllElementFromObject(Object obj, Class<?> toSearch) {
@@ -82,16 +90,6 @@ public class Templates {
         }
     }
 
-    public static File saveTemplate(WordprocessingMLPackage template, String target) {
-        File f = new File(target);
-        try {
-            template.save(f);
-        } catch (Docx4JException e) {
-            log.error("Could not save template!", e);
-        }
-        return f;
-    }
-    
     public static Tr findRowInTable(Tbl table, String templateKey)
             throws Docx4JException, JAXBException {
         for (Object row : table.getContent()) {
@@ -105,7 +103,7 @@ public class Templates {
         return null;
     }
 
-    public static Tbl getTemplateTable(List<Object> tables, String templateKey)
+    public static Tbl findTable(List<Object> tables, String templateKey)
             throws Docx4JException, JAXBException {
         for (Object tbl : tables) {
             List<?> textElements = getAllElementFromObject(tbl, Text.class);
