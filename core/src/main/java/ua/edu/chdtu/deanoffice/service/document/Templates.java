@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
+package ua.edu.chdtu.deanoffice.service.document;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -20,14 +21,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
-public class TemplateFillFactory {
+public class Templates {
 
-    private static Logger log = LoggerFactory.getLogger(TemplateFillFactory.class);
+    private static Logger log = LoggerFactory.getLogger(Templates.class);
 
-    private static final String PLACEHOLDER_PREFIX = "#";
+    public static final String PLACEHOLDER_PREFIX = "#";
 
-    private static WordprocessingMLPackage getTemplate(String name) {
+    public static WordprocessingMLPackage getTemplate(String name) {
         try {
             return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFile()));
         } catch (Docx4JException e) {
@@ -38,7 +38,7 @@ public class TemplateFillFactory {
         return null;
     }
 
-    private static List<Object> getAllElementFromObject(Object obj, Class<?> toSearch) {
+    public static List<Object> getAllElementFromObject(Object obj, Class<?> toSearch) {
         List<Object> result = new ArrayList<>();
         if (obj instanceof JAXBElement) obj = ((JAXBElement<?>) obj).getValue();
 
@@ -49,12 +49,11 @@ public class TemplateFillFactory {
             for (Object child : children) {
                 result.addAll(getAllElementFromObject(child, toSearch));
             }
-
         }
         return result;
     }
 
-    private static void replacePlaceholders(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
+    public static void replacePlaceholders(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
         List<Object> texts = getAllElementFromObject(template.getMainDocumentPart(), Text.class);
         List<Object> placeholders = new ArrayList<>();
         placeholders.addAll(texts.stream().filter(o -> ((Text) o).getValue().startsWith(PLACEHOLDER_PREFIX)).collect(Collectors.toList()));
@@ -72,7 +71,7 @@ public class TemplateFillFactory {
         }
     }
 
-    private static void replacePlaceholdersWithBlank(WordprocessingMLPackage template, Set<String> placeholders) {
+    public static void replacePlaceholdersWithBlank(WordprocessingMLPackage template, Set<String> placeholders) {
         List<Object> texts = getAllElementFromObject(template.getMainDocumentPart(), Text.class);
         for (Object text : texts) {
             Text textElement = (Text) text;
@@ -83,7 +82,7 @@ public class TemplateFillFactory {
         }
     }
 
-    private static File saveTemplate(WordprocessingMLPackage template, String target) {
+    public static File saveTemplate(WordprocessingMLPackage template, String target) {
         File f = new File(target);
         try {
             template.save(f);
@@ -92,53 +91,8 @@ public class TemplateFillFactory {
         }
         return f;
     }
-
-    public static File fillWithStudentInformation(String templateFilepath, StudentSummary studentSummary) {
-        WordprocessingMLPackage template = getTemplate(templateFilepath);
-        Map<String, String> commonDict = new HashMap<>();
-        commonDict.putAll(studentSummary.getStudentInfoDictionary());
-        commonDict.putAll(studentSummary.getTotalDictionary());
-        replacePlaceholders(template, commonDict);
-        return saveTemplate(template, studentSummary.getStudent().getInitialsUkr() + ".docx");
-    }
-
-    private static void fillTableWithGrades(WordprocessingMLPackage template,
-                                            List<List<Map<String, String>>> tableDataDictionary)
-            throws Docx4JException, JAXBException {
-        Set<String> placeholdersToRemove = new HashSet<>();
-
-        List<Object> tables = getAllElementFromObject(template.getMainDocumentPart(), Tbl.class);
-        Tbl tempTable = getTemplateTable(tables, "#GradesTable");
-        placeholdersToRemove.add("#GradesTable");
-        List<Object> rows = getAllElementFromObject(tempTable, Tr.class);
-
-        //Doing reverse to avoid saving file after filling each section
-        Collections.reverse(tableDataDictionary);
-
-        Tr templateRow = (Tr) rows.get(7);
-        int sectionNumber = 3;
-        int rowToAddIndex;
-
-        for (List<Map<String, String>> tableSectionDataDictionary : tableDataDictionary) {
-            if (sectionNumber > 0) {
-                String sectionPlaceholderKey = "#Section" + sectionNumber;
-                placeholdersToRemove.add(sectionPlaceholderKey);
-                rowToAddIndex = rows.indexOf(findRowInTable(tempTable, sectionPlaceholderKey)) + 1;
-            } else {
-                rowToAddIndex = 2;
-            }
-            for (Map<String, String> replacements : tableSectionDataDictionary) {
-                addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
-                rowToAddIndex++;
-            }
-            sectionNumber--;
-        }
-        tempTable.getContent().remove(templateRow);
-        replacePlaceholdersWithBlank(template, placeholdersToRemove);
-    }
-
-
-    private static Tr findRowInTable(Tbl table, String templateKey)
+    
+    public static Tr findRowInTable(Tbl table, String templateKey)
             throws Docx4JException, JAXBException {
         for (Object row : table.getContent()) {
             List<?> textElements = getAllElementFromObject(row, Text.class);
@@ -151,7 +105,7 @@ public class TemplateFillFactory {
         return null;
     }
 
-    private static Tbl getTemplateTable(List<Object> tables, String templateKey)
+    public static Tbl getTemplateTable(List<Object> tables, String templateKey)
             throws Docx4JException, JAXBException {
         for (Object tbl : tables) {
             List<?> textElements = getAllElementFromObject(tbl, Text.class);
@@ -164,7 +118,7 @@ public class TemplateFillFactory {
         return null;
     }
 
-    private static void addRowToTable(Tbl reviewTable, Tr templateRow, int rowNumber, Map<String, String> replacements) {
+    public static void addRowToTable(Tbl reviewTable, Tr templateRow, int rowNumber, Map<String, String> replacements) {
         Tr workingRow = (Tr) XmlUtils.deepCopy(templateRow);
         List<?> textElements = getAllElementFromObject(workingRow, Text.class);
         for (Object object : textElements) {

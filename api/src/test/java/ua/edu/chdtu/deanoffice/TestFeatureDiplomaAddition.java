@@ -4,9 +4,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.TemplateFillFactory;
 import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementTemplateFiller;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 
 import java.math.BigDecimal;
@@ -88,7 +88,8 @@ public class TestFeatureDiplomaAddition {
     public void testFillWithStudentInformation() {
         Student student = createStudent();
         StudentSummary studentSummary = new StudentSummary(student, new ArrayList<>());
-        Assert.assertEquals(true, TemplateFillFactory.fillWithStudentInformation(TEMPLATE, studentSummary).getAbsolutePath().endsWith(".docx"));
+        Assert.assertEquals(true, DiplomaSupplementTemplateFiller
+                .fillWithStudentInformation(TEMPLATE, studentSummary).getAbsolutePath().endsWith(".docx"));
     }
 
     @Test

@@ -35,7 +35,6 @@ public class StudentSummary {
         this.student = student;
         this.grades = new ArrayList<>();
         this.grades = grades;
-        //Collections.copy(this.grades, grades);
         normalize();
     }
 
@@ -276,8 +275,7 @@ public class StudentSummary {
 
     private Double getTotalGrade() {
         int pointSum = 0;
-        //1 is to avoid division by zero
-        int pointsCount = 1;
+        int pointsCount = 0;
         for (List<Grade> gradesSublist :
                 grades) {
             for (Grade g : gradesSublist) {
@@ -287,7 +285,9 @@ public class StudentSummary {
                 }
             }
         }
-        return (pointSum * 1.0) / (pointsCount - 1);
+        if (pointsCount == 0)
+            pointsCount = 1;
+        return (pointSum * 1.0) / pointsCount;
     }
 
     private String getTotalNationalGradeUkr() {
