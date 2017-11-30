@@ -2,11 +2,9 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 public class Course extends BaseEntity {
@@ -22,6 +20,16 @@ public class Course extends BaseEntity {
     private Integer hours;
     @Column(name = "credits", nullable = false, precision = 4, scale = 1)
     private BigDecimal credits;
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<CourseForGroup> courseForGroups;
+
+    public Set<CourseForGroup> getCourseForGroups() {
+        return courseForGroups;
+    }
+
+    public void setCourseForGroups(Set<CourseForGroup> courseForGroups) {
+        this.courseForGroups = courseForGroups;
+    }
 
     public CourseName getCourseName() {
         return courseName;

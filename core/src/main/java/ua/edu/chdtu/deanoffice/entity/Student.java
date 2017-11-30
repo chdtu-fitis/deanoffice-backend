@@ -10,47 +10,59 @@ import java.util.Date;
 
 @Entity
 public class Student extends Person {
-    @Column(name="surname_eng", length = 20)
+    @Column(name = "surname_eng", length = 20)
     private String surnameEng;
-    @Column(name="name_eng", length = 20)
+    @Column(name = "name_eng", length = 20)
     private String nameEng;
-    @Column(name="patronimic_eng", length = 20)
+    @Column(name = "patronimic_eng", length = 20)
     private String patronimicEng;
     @ManyToOne
-    @JoinColumn(name="studentgroup_id")
+    @JoinColumn(name = "studentgroup_id")
     private StudentGroup studentGroup;
-    @Column(name="birth_date")
+    @Column(name = "birth_date")
     private Date birthDate;
-    @Column(name="registration_address", length = 100)
+    @Column(name = "registration_address", length = 100)
     private String registrationAddress;
-    @Column(name="actual_address", length = 100)
+    @Column(name = "actual_address", length = 100)
     private String actualAddress;
-    @Column(name="school", length = 100)
+    @Column(name = "school", length = 100)
     private String school;
-    @Column(name="record_book_number", length = 15)
+    @Column(name = "record_book_number", length = 15)
     private String recordBookNumber;
-    @Column(name="student_card_number", length = 15)
+    @Column(name = "student_card_number", length = 15)
     private String studentCardNumber;
-    @Column(name="telephone", length = 30)
+    @Column(name = "telephone", length = 30)
     private String telephone;
-    @Column(name="email", length = 30)
+    @Column(name = "email", length = 30)
     private String email;
     @ManyToOne
     private Privilege privilege;
-    @Column(name="father_name", length = 40)
+    @Column(name = "father_name", length = 40)
     private String fatherName;
-    @Column(name="father_phone", length = 20)
+    @Column(name = "father_phone", length = 20)
     private String fatherPhone;
-    @Column(name="father_info", length = 70)
+    @Column(name = "father_info", length = 70)
     private String fatherInfo;
-    @Column(name="mother_name", length = 40)
+    @Column(name = "mother_name", length = 40)
     private String motherName;
-    @Column(name="mother_phone", length = 20)
+    @Column(name = "mother_phone", length = 20)
     private String motherPhone;
-    @Column(name="mother_info", length = 70)
+    @Column(name = "mother_info", length = 70)
     private String motherInfo;
-    @Column(name="notes", length = 150)
+    @Column(name = "notes", length = 150)
     private String notes;
+
+    public String getFullNameUkr() {
+        return getName() + " " + getPatronimic() + " " + getSurname();
+    }
+
+    public String getInitialsUkr() {
+        return getSurname() + " " + getName().substring(0, 1) + " " + getSurname().substring(0, 1);
+    }
+
+    public String getFullNameEng() {
+        return getNameEng() + " " + getSurnameEng();
+    }
 
     public String getSurnameEng() {
         return surnameEng;
