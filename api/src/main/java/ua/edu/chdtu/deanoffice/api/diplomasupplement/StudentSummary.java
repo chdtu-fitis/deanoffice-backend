@@ -1,5 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.diplomasupplement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
@@ -8,10 +10,15 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class StudentSummary {
+
+    private static Logger log = LoggerFactory.getLogger(StudentSummary.class);
 
     private List<List<Grade>> grades;
     private Student student;
@@ -27,7 +34,8 @@ public class StudentSummary {
     public StudentSummary(Student student, List<List<Grade>> grades) {
         this.student = student;
         this.grades = new ArrayList<>();
-        Collections.copy(this.grades, grades);
+        this.grades = grades;
+        //Collections.copy(this.grades, grades);
         normalize();
     }
 
@@ -240,10 +248,14 @@ public class StudentSummary {
         result.put("#SpecialityEng", student.getStudentGroup().getSpecialization().getSpeciality().getNameEng());
         result.put("#DegreeUkr", student.getStudentGroup().getSpecialization().getDegree().getName());
         result.put("#DegreeEng", student.getStudentGroup().getSpecialization().getDegree().getNameEng());
-        result.put("#QualificationUkrP1", student.getStudentGroup().getSpecialization().getQualification().split("  ")[0]);
-        result.put("#QualificationEngP1", student.getStudentGroup().getSpecialization().getQualificationEng().split("  ")[0]);
-        result.put("#QualificationUkrP2", student.getStudentGroup().getSpecialization().getQualification().split("  ")[1]);
-        result.put("#QualificationEngP2", student.getStudentGroup().getSpecialization().getQualificationEng().split("  ")[1]);
+        try {
+            result.put("#QualificationUkrP1", student.getStudentGroup().getSpecialization().getQualification().split("  ")[0]);
+            result.put("#QualificationEngP1", student.getStudentGroup().getSpecialization().getQualificationEng().split("  ")[0]);
+            result.put("#QualificationUkrP2", student.getStudentGroup().getSpecialization().getQualification().split("  ")[1]);
+            result.put("#QualificationEngP2", student.getStudentGroup().getSpecialization().getQualificationEng().split("  ")[1]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            log.warn("Qualification should consist of 2 parts, divided with double space");
+        }
         return result;
     }
 

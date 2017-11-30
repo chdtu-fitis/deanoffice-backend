@@ -27,11 +27,11 @@ public class DiplomaSupplementController {
     private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
 
     @RequestMapping(path = "/s")
-    public ResponseEntity<String> generateForStudent(@RequestParam("id") Integer id) {
+    public ResponseEntity<File> generateForStudent(@RequestParam("id") Integer id) {
         Student student = studentService.get(id);
         List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
         StudentSummary studentSummary = new StudentSummary(student, grades);
         File f = TemplateFillFactory.fillWithStudentInformation(TEMPLATE, studentSummary);
-        return ResponseEntity.ok(f.getAbsolutePath());
+        return ResponseEntity.ok(f);
     }
 }
