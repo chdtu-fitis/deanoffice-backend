@@ -4,8 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ua.edu.chdtu.deanoffice.api.diplomasupplement.StudentSummary;
-import ua.edu.chdtu.deanoffice.api.diplomasupplement.TemplateFillFactory;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.TemplateFillFactory;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 

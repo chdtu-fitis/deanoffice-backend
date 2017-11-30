@@ -8,6 +8,8 @@ import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.TemplateFillFactory;
 
 import java.io.File;
 import java.util.List;

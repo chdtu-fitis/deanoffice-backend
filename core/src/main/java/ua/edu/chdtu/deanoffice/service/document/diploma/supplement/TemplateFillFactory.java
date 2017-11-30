@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.diplomasupplement;
+package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;

@@ -3,9 +3,6 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
 
-    compile(group: 'org.docx4j', name: 'docx4j', version: '3.3.6') {
-        exclude group: 'org.slf4j'
-    }
     compile(
             "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
             "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
