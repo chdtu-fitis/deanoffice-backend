@@ -19,6 +19,14 @@ public class TestService {
         return testEntityRepository.save(testEntity);
     }
 
+   /* public TestEntity getTest() {
+        //just for test purposes
+//        addTest("aaa" + Math.random());
+        //----------
+
+        TestEntity first = testEntityRepository.getFirst();
+        return first;
+    }*/
     public TestEntity getTest() {
         //just for test purposes
 //        addTest("aaa" + Math.random());

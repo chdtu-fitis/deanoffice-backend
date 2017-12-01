@@ -11,6 +11,7 @@ public class CourseForGroup extends BaseEntity {
     @ManyToOne
     private Course course;
     @ManyToOne
+    @JoinColumn(name="studentgroup_id")
     private StudentGroup studentGroup;
     @ManyToOne
     private Teacher teacher;

@@ -1,6 +1,6 @@
 dependencies {
 	compile (project (":core"))
-
+	compile('org.modelmapper:modelmapper:1.1.0')
 	compileOnly("org.projectlombok:lombok:${lombokVersion}")
 
 	compile(
