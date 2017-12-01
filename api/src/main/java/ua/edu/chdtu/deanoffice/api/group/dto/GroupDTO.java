@@ -1,22 +1,25 @@
 package ua.edu.chdtu.deanoffice.api.group.dto;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import java.math.BigDecimal;
 
+@Getter
+@Setter
 public class GroupDTO {
     @JsonView(GroupViews.Name.class)
-    public int id;
+    private int id;
     @JsonView(GroupViews.Name.class)
-    public String name;
-    public Specialization specialization;
-    public int creationYear;
-    public char tuitionForm = 'f';//f - fulltime, e - extramural
-    public char tuitionTerm = 'r';//r - regular, s - shortened
+    private String name;
+    private Specialization specialization;
+    private int creationYear;
+    private char tuitionForm = 'f';//f - fulltime, e - extramural
+    private char tuitionTerm = 'r';//r - regular, s - shortened
     @JsonView(GroupViews.Name.class)
-    public int studySemesters;
-    public BigDecimal studyYears;
-    public int beginYears;
-    public boolean active;
-
+    private int studySemesters;
+    private BigDecimal studyYears;
+    private int beginYears;
+    private boolean active;
 }

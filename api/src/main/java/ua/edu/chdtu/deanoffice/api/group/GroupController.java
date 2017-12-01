@@ -5,10 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -26,24 +23,21 @@ public class GroupController {
 
     @Autowired
     private final GroupService groupService;
-    private ModelMapper modelMapper = new ModelMapper();
     @Autowired
     public GroupController(GroupService groupService) {
         this.groupService = groupService;
     }
 
-
-    @RequestMapping("/")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     @JsonView(GroupViews.Name.class)
     public List<GroupDTO> getGroups() {
+        ModelMapper modelMapper = new ModelMapper();
         List<StudentGroup> studentGroups = groupService.getGroups();
         Type listType = new TypeToken<List<GroupDTO>>() {}.getType();
         List<GroupDTO> groupDTOs = modelMapper.map(studentGroups,  listType);
-
         return groupDTOs;
     }
-
 
     /*@RequestMapping("{id}/courses")
     @ResponseBody
