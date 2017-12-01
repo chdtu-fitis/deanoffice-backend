@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementTemplateFiller;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 
@@ -14,6 +14,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
 
 public class TestFeatureDiplomaAddition {
 
@@ -88,7 +89,7 @@ public class TestFeatureDiplomaAddition {
     public void testFillWithStudentInformation() {
         Student student = createStudent();
         StudentSummary studentSummary = new StudentSummary(student, new ArrayList<>());
-        Assert.assertEquals(true, DiplomaSupplementTemplateFiller
+        Assert.assertEquals(true, DiplomaSupplementService
                 .fillWithStudentInformation(TEMPLATE, studentSummary).getAbsolutePath().endsWith(".docx"));
     }
 
@@ -96,7 +97,69 @@ public class TestFeatureDiplomaAddition {
     public void testAdjustAverage() {
         double[] expectedResult1 = {5, 90};
         double[] actualResult1 = StudentSummary.adjustAverageGradeAndPoints(5, 89);
-        Assert.assertArrayEquals(expectedResult1, actualResult1, 0);
+        Assert.assertArrayEquals(expectedResult1, actualResult1, 0.01);
+
+        double[] expectedResult2 = {4, 83};
+        double[] actualResult2 = StudentSummary.adjustAverageGradeAndPoints(4.5, 83);
+        Assert.assertArrayEquals(expectedResult2, actualResult2, 0.01);
+    }
+
+    @Test
+    public void testGetGradeFromPoints() {
+        Assert.assertEquals("A", StudentSummary.getECTSGrade(95));
+        Assert.assertEquals("B", StudentSummary.getECTSGrade(82));
+        Assert.assertEquals("D", StudentSummary.getECTSGrade(67));
+        Assert.assertEquals("C", StudentSummary.getECTSGrade(78));
+    }
+
+
+    private static Grade createGrade(Course course, int points) {
+        Grade grade = new Grade();
+        grade.setPoints(points);
+        grade.setCourse(course);
+        grade.setGrade(StudentSummary.getGradeFromPoints(points));
+        grade.setEcts(StudentSummary.getECTSGrade(points));
+        return grade;
+    }
+
+    private static Course createCourse(boolean knowledgeControlHasGrade) {
+        Course course = new Course();
+        KnowledgeControl kc = new KnowledgeControl();
+        kc.setHasGrade(knowledgeControlHasGrade);
+        course.setKnowledgeControl(kc);
+        return course;
+    }
+
+    @Test
+    public void testGradeSetting() {
+        Grade grade1 = createGrade(createCourse(true), 90);
+        Assert.assertEquals("Відмінно", StudentSummary.getNationalGradeUkr(grade1));
+        Assert.assertEquals("Excellent", StudentSummary.getNationalGradeEng(grade1));
+        Assert.assertEquals("A", grade1.getEcts());
+        Assert.assertEquals(5, grade1.getGrade());
+
+        Grade grade2 = createGrade(createCourse(true), 76);
+        Assert.assertEquals("Добре", StudentSummary.getNationalGradeUkr(grade2));
+        Assert.assertEquals("Good", StudentSummary.getNationalGradeEng(grade2));
+        Assert.assertEquals("C", grade2.getEcts());
+        Assert.assertEquals(4, grade2.getGrade());
+
+        Grade grade3 = createGrade(createCourse(true), 65);
+        Assert.assertEquals("Задовільно", StudentSummary.getNationalGradeUkr(grade3));
+        Assert.assertEquals("Satisfactory", StudentSummary.getNationalGradeEng(grade3));
+        Assert.assertEquals("D", grade3.getEcts());
+        Assert.assertEquals(3, grade3.getGrade());
+
+        Grade grade4 = createGrade(createCourse(false), 90);
+        Assert.assertEquals("Зараховано", StudentSummary.getNationalGradeUkr(grade4));
+        Assert.assertEquals("Passed", StudentSummary.getNationalGradeEng(grade4));
+        Assert.assertEquals("A", grade4.getEcts());
+        Assert.assertEquals(5, grade4.getGrade());
+
+        Grade grade5 = createGrade(createCourse(false), 59);
+        Assert.assertEquals("Не зараховано", StudentSummary.getNationalGradeUkr(grade5));
+        Assert.assertEquals("Fail", StudentSummary.getNationalGradeEng(grade5));
+        Assert.assertEquals("Fx", grade5.getEcts());
     }
 
 }

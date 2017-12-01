@@ -71,7 +71,7 @@ public class StudentSummary {
         });
     }
 
-    private static String getECTSGrade(long points) {
+    public static String getECTSGrade(long points) {
         if (points >= 90 && points <= 100) return "A";
         if (points >= 82 && points <= 89) return "B";
         if (points >= 74 && points <= 81) return "C";
@@ -91,50 +91,50 @@ public class StudentSummary {
         });
     }
 
-    public static double[] adjustAverageGradeAndPoints(double averageGradeScale, double averagePoints) {
+    public static double[] adjustAverageGradeAndPoints(double averageGrade, double averagePoints) {
         double[] result = new double[2];
-        if (Math.abs(averageGradeScale - 3.5) < 0.001 || Math.abs(averageGradeScale - 4.5) < 0.001) {
+        if (Math.abs(averageGrade - 3.5) < 0.001 || Math.abs(averageGrade - 4.5) < 0.001) {
             result[1] = (int) Math.round(averagePoints);
             result[0] = getGradeFromPoints(result[1]);
         } else {
-            if (getGradeFromPoints(averagePoints) == Math.round(averageGradeScale)) {
-                result[0] = (int) Math.round(averageGradeScale);
+            if (getGradeFromPoints(averagePoints) == Math.round(averageGrade)) {
+                result[0] = (int) Math.round(averageGrade);
                 result[1] = (int) Math.round(averagePoints);
             }
-            if (getGradeFromPoints(averagePoints) > Math.round(averageGradeScale)) {
-                result[0] = (int) Math.round(averageGradeScale);
-                result[1] = getMaxPointsFromGrade(averageGradeScale);
+            if (getGradeFromPoints(averagePoints) > Math.round(averageGrade)) {
+                result[0] = (int) Math.round(averageGrade);
+                result[1] = getMaxPointsFromGrade(averageGrade);
             }
-            if (getGradeFromPoints(averagePoints) < Math.round(averageGradeScale)) {
-                result[0] = (int) Math.round(averageGradeScale);
-                result[1] = getMinPointsFromGrade(averageGradeScale);
+            if (getGradeFromPoints(averagePoints) < Math.round(averageGrade)) {
+                result[0] = (int) Math.round(averageGrade);
+                result[1] = getMinPointsFromGrade(averageGrade);
             }
         }
         return result;
     }
 
-    private static int getGradeFromPoints(double points) {
+    public static int getGradeFromPoints(double points) {
         if (points >= 90 && points <= 100) return 5;
         if (points >= 74 && points <= 89) return 4;
         if (points >= 60 && points <= 73) return 3;
         return 0;
     }
 
-    private static int getMaxPointsFromGrade(double gradeScale) {
-        if (Math.round(gradeScale) == 5) return 100;//impossible situation;
-        if (Math.round(gradeScale) == 4) return 89;
-        if (Math.round(gradeScale) == 3) return 73;
+    public static int getMaxPointsFromGrade(double grade) {
+        if (Math.round(grade) == 5) return 100;//impossible situation;
+        if (Math.round(grade) == 4) return 89;
+        if (Math.round(grade) == 3) return 73;
         return 0;
     }
 
-    private static int getMinPointsFromGrade(double gradeScale) {
-        if (Math.round(gradeScale) == 5) return 90;
-        if (Math.round(gradeScale) == 4) return 74;
-        if (Math.round(gradeScale) == 3) return 60;//impossible situation;
+    public static int getMinPointsFromGrade(double grade) {
+        if (Math.round(grade) == 5) return 90;
+        if (Math.round(grade) == 4) return 74;
+        if (Math.round(grade) == 3) return 60;//impossible situation;
         return 0;
     }
 
-    private static String getNationalGradeUkr(Grade g) {
+    public static String getNationalGradeUkr(Grade g) {
         if (g.getCourse().getKnowledgeControl().isHasGrade()) {
             switch (g.getEcts()) {
                 case "A":
@@ -157,7 +157,7 @@ public class StudentSummary {
         return "";
     }
 
-    private static String getNationalGradeEng(Grade g) {
+    public static String getNationalGradeEng(Grade g) {
         if (g.getCourse().getKnowledgeControl().isHasGrade()) {
             switch (g.getEcts()) {
                 case "A":
