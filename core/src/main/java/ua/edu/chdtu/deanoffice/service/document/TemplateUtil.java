@@ -12,11 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TemplateUtil {
@@ -90,8 +92,7 @@ public class TemplateUtil {
         }
     }
 
-    public static Tr findRowInTable(Tbl table, String templateKey)
-            throws Docx4JException, JAXBException {
+    public static Tr findRowInTable(Tbl table, String templateKey) {
         for (Object row : table.getContent()) {
             List<?> textElements = getAllElementFromObject(row, Text.class);
             for (Object text : textElements) {
@@ -103,8 +104,7 @@ public class TemplateUtil {
         return null;
     }
 
-    public static Tbl findTable(List<Object> tables, String templateKey)
-            throws Docx4JException, JAXBException {
+    public static Tbl findTable(List<Object> tables, String templateKey) {
         for (Object tbl : tables) {
             List<?> textElements = getAllElementFromObject(tbl, Text.class);
             for (Object text : textElements) {

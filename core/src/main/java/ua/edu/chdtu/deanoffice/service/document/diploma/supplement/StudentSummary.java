@@ -257,17 +257,17 @@ public class StudentSummary {
         return "";
     }
 
-    private static Map<String, String> getGradeDictionary(Grade grade) {
+    public static Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.put("#UkrSubjName", grade.getCourse().getCourseName().getName());
-            result.put("#EngSubjName", grade.getCourse().getCourseName().getNameEng());
+            result.put("#CourseNameUkr", grade.getCourse().getCourseName().getName());
+            result.put("#CourseNameEng", grade.getCourse().getCourseName().getNameEng());
             result.put("#Credits", String.format("%.1f", grade.getCourse().getCredits()));
             result.put("#Hours", String.format("%d", grade.getCourse().getHours()));
-            result.put("#Points", String.format("%.0d", grade.getPoints()));
-            result.put("#UkrNatGrade", getNationalGradeUkr(grade));
-            result.put("#EngNatGrade", getNationalGradeEng(grade));
-            result.put("#ECTS", grade.getEcts());
+            result.put("#LocalGrade", String.format("%d", grade.getPoints()));
+            result.put("#NationalGradeUkr", getNationalGradeUkr(grade));
+            result.put("#NationalGradeEng", getNationalGradeEng(grade));
+            result.put("#ECTSGrade", grade.getEcts());
         } catch (NullPointerException e) {
             log.warn("Some of grade's properties are null!");
         }
@@ -276,16 +276,12 @@ public class StudentSummary {
 
     public Map<String, String> getTotalDictionary() {
         Map<String, String> result = new HashMap<>();
-        try {
             result.put("#TotalHours", String.format("%4d", getTotalHours()));
             result.put("#TotalCredits", String.format("%2.1f", getTotalCredits(30.0)));
             result.put("#TotalGrade", String.format("%2d", Math.round(getTotalGrade())));
             result.put("#TotalNGradeUkr", getTotalNationalGradeUkr());
             result.put("#TotalNGradeEng", getTotalNationalGradeEng());
             result.put("#TotalECTS", getTotalECTS());
-        } catch (NullPointerException e) {
-            //Should not happen
-        }
         return result;
     }
 
