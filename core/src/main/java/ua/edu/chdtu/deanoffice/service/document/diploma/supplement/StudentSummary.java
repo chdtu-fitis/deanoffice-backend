@@ -8,12 +8,11 @@ import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
 import java.math.BigDecimal;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class StudentSummary {
@@ -43,6 +42,7 @@ public class StudentSummary {
         setCredits(30.0);
         setECTS();
         setGrades();
+        combineMultipleSemesterCourseGrades();
     }
 
     private void setHours() {
@@ -91,8 +91,8 @@ public class StudentSummary {
         });
     }
 
-    public static double[] adjustAverageGradeAndPoints(double averageGrade, double averagePoints) {
-        double[] result = new double[2];
+    public static int[] adjustAverageGradeAndPoints(double averageGrade, double averagePoints) {
+        int[] result = new int[2];
         if (Math.abs(averageGrade - 3.5) < 0.001 || Math.abs(averageGrade - 4.5) < 0.001) {
             result[1] = (int) Math.round(averagePoints);
             result[0] = getGradeFromPoints(result[1]);
@@ -132,6 +132,83 @@ public class StudentSummary {
         if (Math.round(grade) == 4) return 74;
         if (Math.round(grade) == 3) return 60;//impossible situation;
         return 0;
+    }
+
+    private void combineMultipleSemesterCourseGrades() {
+        List<List<Grade>> gradesToCombine = new ArrayList<>();
+        sortGradesByCourseNameUkr(this.grades.get(0));
+        this.grades.get(0).forEach(grade -> {
+            if (gradesToCombine.isEmpty()) {
+                gradesToCombine.add(new ArrayList<>());
+                gradesToCombine.get(0).add(grade);
+            } else {
+                if (gradesToCombine.get(gradesToCombine.size() - 1).stream()
+                        .noneMatch(grade1 -> grade1.getCourse().getCourseName().equals(grade.getCourse().getCourseName())))
+                    gradesToCombine.add(new ArrayList<>());
+                gradesToCombine.get(gradesToCombine.size() - 1).add(grade);
+            }
+        });
+
+        List<Grade> combinedGrades = new ArrayList<>();
+        gradesToCombine.forEach(gradesList -> combinedGrades.add(combineGrades(gradesList)));
+        this.grades.get(0).clear();
+        this.grades.get(0).addAll(combinedGrades);
+    }
+
+    private void sortGradesByCourseNameUkr(List<Grade> grades) {
+        grades.sort((o1, o2) -> {
+            Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
+            return ukrainianCollator.compare(o1.getCourse().getCourseName().getName(), o2.getCourse().getCourseName().getName());
+        });
+    }
+
+    private Grade combineGrades(List<Grade> grades) {
+        if (grades == null || grades.isEmpty())
+            return null;
+        if (grades.size() == 1)
+            return grades.get(0);
+        else {
+            List<Grade> examsGrades = getExamGrades(grades);
+            if (examsGrades.size() == 0) {
+                List<Grade> differentiatedCreditGrades = getDifferentiatedCreditsGrades(grades);
+                if (examsGrades.size() == 0)
+                    return combineEqualPriorityGrades(grades);
+                if (differentiatedCreditGrades.size() == 1)
+                    return differentiatedCreditGrades.get(0);
+                else {
+                    return combineEqualPriorityGrades(differentiatedCreditGrades);
+                }
+            }
+            if (examsGrades.size() == 1)
+                return examsGrades.get(0);
+            else {
+                return combineEqualPriorityGrades(examsGrades);
+            }
+        }
+    }
+
+    private Grade combineEqualPriorityGrades(List<Grade> grades) {
+        Grade resultingGrade = grades.get(0);
+        Double pointsSum = 0.0;
+        Double gradesSum = 0.0;
+        for (Grade g : grades) {
+            pointsSum += g.getPoints();
+            gradesSum += g.getGrade();
+        }
+        int[] pointsAndGrade = adjustAverageGradeAndPoints(
+                gradesSum / grades.size(),
+                pointsSum / grades.size());
+        resultingGrade.setPoints(pointsAndGrade[1]);
+        resultingGrade.setGrade(pointsAndGrade[0]);
+        return resultingGrade;
+    }
+
+    private List<Grade> getExamGrades(List<Grade> grades) {
+        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getName().equals("іспит")).collect(Collectors.toList());
+    }
+
+    private List<Grade> getDifferentiatedCreditsGrades(List<Grade> grades) {
+        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getName().equals("диференційований залік")).collect(Collectors.toList());
     }
 
     public static String getNationalGradeUkr(Grade g) {
@@ -192,8 +269,7 @@ public class StudentSummary {
             result.put("#EngNatGrade", getNationalGradeEng(grade));
             result.put("#ECTS", grade.getEcts());
         } catch (NullPointerException e) {
-            //Debug
-            //System.out.println("Some of the grade's properties are null! " + this.getCourseName());
+            log.warn("Some of grade's properties are null!");
         }
         return result;
     }
@@ -258,7 +334,7 @@ public class StudentSummary {
         return result;
     }
 
-    private int getTotalHours() {
+    public int getTotalHours() {
         int result = 0;
         for (List<Grade> gradesSublist :
                 grades) {
@@ -269,11 +345,11 @@ public class StudentSummary {
         return result;
     }
 
-    private double getTotalCredits(double hoursPerCredit) {
+    public double getTotalCredits(double hoursPerCredit) {
         return getTotalHours() / hoursPerCredit;
     }
 
-    private Double getTotalGrade() {
+    public Double getTotalGrade() {
         int pointSum = 0;
         int pointsCount = 0;
         for (List<Grade> gradesSublist :
@@ -290,7 +366,7 @@ public class StudentSummary {
         return (pointSum * 1.0) / pointsCount;
     }
 
-    private String getTotalNationalGradeUkr() {
+    public String getTotalNationalGradeUkr() {
         Grade g = new Grade();
         g.setEcts(getTotalECTS());
         Course c = new Course();
@@ -301,7 +377,7 @@ public class StudentSummary {
         return getNationalGradeUkr(g);
     }
 
-    private String getTotalNationalGradeEng() {
+    public String getTotalNationalGradeEng() {
         Grade g = new Grade();
         g.setEcts(getTotalECTS());
         Course c = new Course();

@@ -25,16 +25,26 @@ public class DiplomaSupplementService {
         this.gradeService = gradeService;
     }
 
+    private StudentSummary studentSummary;
+
+    public StudentSummary getStudentSummary() {
+        return studentSummary;
+    }
+
+    public void setStudentSummary(StudentSummary studentSummary) {
+        this.studentSummary = studentSummary;
+    }
+
     private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
 
     public File formDiplomaSupplement(Integer studentId) {
         Student student = studentService.get(studentId);
         List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
-        StudentSummary studentSummary = new StudentSummary(student, grades);
-        return fillWithStudentInformation(TEMPLATE, studentSummary);
+        this.studentSummary = new StudentSummary(student, grades);
+        return fillWithStudentInformation(TEMPLATE);
     }
 
-    public static File fillWithStudentInformation(String templateFilepath, StudentSummary studentSummary) {
+    public File fillWithStudentInformation(String templateFilepath) {
         WordprocessingMLPackage template = loadTemplate(templateFilepath);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(studentSummary.getStudentInfoDictionary());

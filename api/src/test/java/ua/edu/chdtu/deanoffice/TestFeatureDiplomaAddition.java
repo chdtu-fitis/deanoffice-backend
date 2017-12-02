@@ -2,9 +2,18 @@ package ua.edu.chdtu.deanoffice;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.repository.GradeRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentRepository;
+import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
@@ -14,9 +23,22 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {DiplomaSupplementService.class, StudentService.class, GradeService.class,
+        StudentRepository.class, GradeRepository.class})
+@EnableAutoConfiguration
 public class TestFeatureDiplomaAddition {
+
+
+    private DiplomaSupplementService diplomaSupplementService;
+
+    @Autowired
+    public void setDiplomaSupplementService(DiplomaSupplementService diplomaSupplementService) {
+        this.diplomaSupplementService = diplomaSupplementService;
+    }
 
     private static Logger log = LoggerFactory.getLogger(Application.class);
 
@@ -85,23 +107,63 @@ public class TestFeatureDiplomaAddition {
         return student;
     }
 
+    private static List<List<Grade>> createGrades(Student student) {
+        List<List<Grade>> grades = new ArrayList<>();
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+
+        CourseName courseName1 = new CourseName();
+        courseName1.setName("Багатосеместровий курс 1");
+        courseName1.setNameEng("Multiple Semester course 1");
+
+        Course course11 = createCourse(courseName1, true);
+        Course course12 = createCourse(courseName1, true);
+        Course course13 = createCourse(courseName1, false);
+
+        Grade grade11 = createGrade(course11, student, 89);
+        Grade grade12 = createGrade(course12, student, 75);
+        Grade grade13 = createGrade(course13, student, 90);
+
+        grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13));
+
+        return grades;
+    }
+
+    @Test
+    public void testStudentSummary() {
+        Student student = createStudent();
+        StudentSummary summary = new StudentSummary(student, createGrades(student));
+
+        Assert.assertEquals(82, summary.getTotalGrade(), 0.1);
+        Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
+        Assert.assertEquals("Good", summary.getTotalNationalGradeEng());
+        Assert.assertEquals(0, summary.getTotalHours());
+        Assert.assertEquals(0, summary.getTotalCredits(30), 0.1);
+    }
+
     @Test
     public void testFillWithStudentInformation() {
+        //Student student = diplomaSupplementService.formDiplomaSupplement();
+
         Student student = createStudent();
-        StudentSummary studentSummary = new StudentSummary(student, new ArrayList<>());
-        Assert.assertEquals(true, DiplomaSupplementService
-                .fillWithStudentInformation(TEMPLATE, studentSummary).getAbsolutePath().endsWith(".docx"));
+        diplomaSupplementService.setStudentSummary(new StudentSummary(student, createGrades(student)));
+        Assert.assertEquals(true, diplomaSupplementService
+                .fillWithStudentInformation(TEMPLATE).getAbsolutePath().endsWith(".docx"));
     }
 
     @Test
     public void testAdjustAverage() {
         double[] expectedResult1 = {5, 90};
-        double[] actualResult1 = StudentSummary.adjustAverageGradeAndPoints(5, 89);
-        Assert.assertArrayEquals(expectedResult1, actualResult1, 0.01);
+        int[] actualResult1 = StudentSummary.adjustAverageGradeAndPoints(5, 89);
+        Assert.assertEquals(expectedResult1[0], actualResult1[0], 0.01);
+        Assert.assertEquals(expectedResult1[1], actualResult1[1], 0.01);
 
         double[] expectedResult2 = {4, 83};
-        double[] actualResult2 = StudentSummary.adjustAverageGradeAndPoints(4.5, 83);
-        Assert.assertArrayEquals(expectedResult2, actualResult2, 0.01);
+        int[] actualResult2 = StudentSummary.adjustAverageGradeAndPoints(4.5, 83);
+        Assert.assertEquals(expectedResult2[0], actualResult2[0], 0.01);
+        Assert.assertEquals(expectedResult2[1], actualResult2[1], 0.01);
     }
 
     @Test
@@ -122,12 +184,27 @@ public class TestFeatureDiplomaAddition {
         return grade;
     }
 
+    private static Grade createGrade(Course course, Student student, int points) {
+        Grade grade = createGrade(course, points);
+        grade.setStudent(student);
+        return grade;
+    }
+
     private static Course createCourse(boolean knowledgeControlHasGrade) {
         Course course = new Course();
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(knowledgeControlHasGrade);
+        if (knowledgeControlHasGrade)
+            kc.setName("іспит");
+        else kc.setName("залік");
         course.setKnowledgeControl(kc);
         return course;
+    }
+
+    private static Course createCourse(CourseName courseName, boolean knowledgeControlHasGrade) {
+        Course c = createCourse(knowledgeControlHasGrade);
+        c.setCourseName(courseName);
+        return c;
     }
 
     @Test
@@ -161,5 +238,4 @@ public class TestFeatureDiplomaAddition {
         Assert.assertEquals("Fail", StudentSummary.getNationalGradeEng(grade5));
         Assert.assertEquals("Fx", grade5.getEcts());
     }
-
 }
