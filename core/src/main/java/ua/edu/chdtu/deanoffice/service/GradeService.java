@@ -69,7 +69,6 @@ public class GradeService {
         List<Grade> result = gradeRepository.getByStudentIdAndCoursesAndKCTypes(student.getId(),
                 courseIds,
                 knowledgeControlTypes);
-        knowledgeControlTypes.clear();
         return result;
     }
 }
