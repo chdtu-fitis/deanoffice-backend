@@ -12,18 +12,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.Constants.*;
+
 @Service
 public class GradeService {
-
-    private static final int EXAM = 1;
-    private static final int CREDIT = 2;
-    private static final int COURSEWORK = 3;
-    private static final int COURSE_PROJECT = 4;
-    private static final int DIFFERENTIATED_CREDIT = 5;
-    private static final int STATE_EXAM = 6;
-    private static final int ATTESTATION = 7;
-    private static final int INTERNSHIP = 8;
-
     private Integer KNOWLEDGE_CONTROL_PART1[] = {EXAM, CREDIT, DIFFERENTIATED_CREDIT};
     private Integer KNOWLEDGE_CONTROL_PART2[] = {COURSEWORK, COURSE_PROJECT};
     private Integer KNOWLEDGE_CONTROL_PART3[] = {INTERNSHIP};

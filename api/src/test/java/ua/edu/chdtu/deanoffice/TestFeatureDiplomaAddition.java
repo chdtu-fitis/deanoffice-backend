@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 
 import java.math.BigDecimal;
@@ -220,7 +221,7 @@ public class TestFeatureDiplomaAddition {
         Grade grade = new Grade();
         grade.setPoints(points);
         grade.setCourse(course);
-        grade.setGrade(StudentSummary.getGradeFromPoints(points));
+        grade.setGrade(GradeUtil.getGradeFromPoints(points));
         grade.setEcts(StudentSummary.getECTSGrade(points));
         return grade;
     }
@@ -252,32 +253,32 @@ public class TestFeatureDiplomaAddition {
     @Test
     public void testGradeSetting() {
         Grade grade1 = createGrade(createCourse(true), 90);
-        Assert.assertEquals("Відмінно", StudentSummary.getNationalGradeUkr(grade1));
-        Assert.assertEquals("Excellent", StudentSummary.getNationalGradeEng(grade1));
+        Assert.assertEquals("Відмінно", GradeUtil.getNationalGradeUkr(grade1));
+        Assert.assertEquals("Excellent", GradeUtil.getNationalGradeEng(grade1));
         Assert.assertEquals("A", grade1.getEcts());
         Assert.assertEquals(5, grade1.getGrade());
 
         Grade grade2 = createGrade(createCourse(true), 76);
-        Assert.assertEquals("Добре", StudentSummary.getNationalGradeUkr(grade2));
-        Assert.assertEquals("Good", StudentSummary.getNationalGradeEng(grade2));
+        Assert.assertEquals("Добре", GradeUtil.getNationalGradeUkr(grade2));
+        Assert.assertEquals("Good", GradeUtil.getNationalGradeEng(grade2));
         Assert.assertEquals("C", grade2.getEcts());
         Assert.assertEquals(4, grade2.getGrade());
 
         Grade grade3 = createGrade(createCourse(true), 65);
-        Assert.assertEquals("Задовільно", StudentSummary.getNationalGradeUkr(grade3));
-        Assert.assertEquals("Satisfactory", StudentSummary.getNationalGradeEng(grade3));
+        Assert.assertEquals("Задовільно", GradeUtil.getNationalGradeUkr(grade3));
+        Assert.assertEquals("Satisfactory", GradeUtil.getNationalGradeEng(grade3));
         Assert.assertEquals("D", grade3.getEcts());
         Assert.assertEquals(3, grade3.getGrade());
 
         Grade grade4 = createGrade(createCourse(false), 90);
-        Assert.assertEquals("Зараховано", StudentSummary.getNationalGradeUkr(grade4));
-        Assert.assertEquals("Passed", StudentSummary.getNationalGradeEng(grade4));
+        Assert.assertEquals("Зараховано", GradeUtil.getNationalGradeUkr(grade4));
+        Assert.assertEquals("Passed", GradeUtil.getNationalGradeEng(grade4));
         Assert.assertEquals("A", grade4.getEcts());
         Assert.assertEquals(5, grade4.getGrade());
 
         Grade grade5 = createGrade(createCourse(false), 59);
-        Assert.assertEquals("Не зараховано", StudentSummary.getNationalGradeUkr(grade5));
-        Assert.assertEquals("Fail", StudentSummary.getNationalGradeEng(grade5));
+        Assert.assertEquals("Не зараховано", GradeUtil.getNationalGradeUkr(grade5));
+        Assert.assertEquals("Fail", GradeUtil.getNationalGradeEng(grade5));
         Assert.assertEquals("Fx", grade5.getEcts());
     }
 }

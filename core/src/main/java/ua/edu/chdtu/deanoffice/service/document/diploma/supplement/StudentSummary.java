@@ -2,10 +2,12 @@ package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
 import java.text.Collator;
@@ -13,7 +15,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 public class StudentSummary {
 
@@ -32,14 +33,13 @@ public class StudentSummary {
 
     public StudentSummary(Student student, List<List<Grade>> grades) {
         this.student = student;
-        this.grades = new ArrayList<>();
         this.grades = grades;
-        normalize();
+        completeGrades();
     }
 
-    private void normalize() {
+    private void completeGrades() {
         setHours();
-        setCredits(30.0);
+        setCredits();
         setECTS();
         setGrades();
         combineMultipleSemesterCourseGrades();
@@ -54,10 +54,10 @@ public class StudentSummary {
         });
     }
 
-    private void setCredits(Double hoursPerCredit) {
+    private void setCredits() {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
-                grade.getCourse().setCredits(new BigDecimal(grade.getCourse().getHours() / hoursPerCredit));
+                grade.getCourse().setCredits(new BigDecimal(grade.getCourse().getHours() / Constants.HOURS_PER_CREDIT));
             });
         });
     }
@@ -65,28 +65,16 @@ public class StudentSummary {
     private void setECTS() {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
-                grade.setEcts(getECTSGrade(grade.getPoints()));
+                grade.setEcts(GradeUtil.getECTSGrade(grade.getPoints()));
             });
 
         });
     }
 
-    public static String getECTSGrade(long points) {
-        if (points >= 90 && points <= 100) return "A";
-        if (points >= 82 && points <= 89) return "B";
-        if (points >= 74 && points <= 81) return "C";
-        if (points >= 64 && points <= 73) return "D";
-        if (points >= 60 && points <= 63) return "E";
-        if (points >= 35 && points <= 59) return "Fx";
-        if (points >= 0 && points <= 34) return "F";
-        else return "";
-    }
-
-
     private void setGrades() {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
-                grade.setGrade(getGradeFromPoints(grade.getPoints()));
+                grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
             });
         });
     }
@@ -95,43 +83,22 @@ public class StudentSummary {
         int[] result = new int[2];
         if (Math.abs(averageGrade - 3.5) < 0.001 || Math.abs(averageGrade - 4.5) < 0.001) {
             result[1] = (int) Math.round(averagePoints);
-            result[0] = getGradeFromPoints(result[1]);
+            result[0] = GradeUtil.getGradeFromPoints(result[1]);
         } else {
-            if (getGradeFromPoints(averagePoints) == Math.round(averageGrade)) {
+            if (GradeUtil.getGradeFromPoints(averagePoints) == Math.round(averageGrade)) {
                 result[0] = (int) Math.round(averageGrade);
                 result[1] = (int) Math.round(averagePoints);
             }
-            if (getGradeFromPoints(averagePoints) > Math.round(averageGrade)) {
+            if (GradeUtil.getGradeFromPoints(averagePoints) > Math.round(averageGrade)) {
                 result[0] = (int) Math.round(averageGrade);
-                result[1] = getMaxPointsFromGrade(averageGrade);
+                result[1] = GradeUtil.getMaxPointsFromGrade(averageGrade);
             }
-            if (getGradeFromPoints(averagePoints) < Math.round(averageGrade)) {
+            if (GradeUtil.getGradeFromPoints(averagePoints) < Math.round(averageGrade)) {
                 result[0] = (int) Math.round(averageGrade);
-                result[1] = getMinPointsFromGrade(averageGrade);
+                result[1] = GradeUtil.getMinPointsFromGrade(averageGrade);
             }
         }
         return result;
-    }
-
-    public static int getGradeFromPoints(double points) {
-        if (points >= 90 && points <= 100) return 5;
-        if (points >= 74 && points <= 89) return 4;
-        if (points >= 60 && points <= 73) return 3;
-        return 0;
-    }
-
-    public static int getMaxPointsFromGrade(double grade) {
-        if (Math.round(grade) == 5) return 100;//impossible situation;
-        if (Math.round(grade) == 4) return 89;
-        if (Math.round(grade) == 3) return 73;
-        return 0;
-    }
-
-    public static int getMinPointsFromGrade(double grade) {
-        if (Math.round(grade) == 5) return 90;
-        if (Math.round(grade) == 4) return 74;
-        if (Math.round(grade) == 3) return 60;//impossible situation;
-        return 0;
     }
 
     private void combineMultipleSemesterCourseGrades() {
@@ -211,52 +178,6 @@ public class StudentSummary {
         return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getName().equals("диференційований залік")).collect(Collectors.toList());
     }
 
-    public static String getNationalGradeUkr(Grade g) {
-        if (g.getCourse().getKnowledgeControl().isHasGrade()) {
-            switch (g.getEcts()) {
-                case "A":
-                    return "Відмінно";
-                case "B":
-                    return "Добре";
-                case "C":
-                    return "Добре";
-                case "D":
-                    return "Задовільно";
-                case "E":
-                    return "Задовільно";
-                case "F":
-                    return "Незадовільно";
-            }
-        } else if (g.getEcts().equals("F") || g.getEcts().equals("Fx")) {
-            return "Не зараховано";
-        } else
-            return "Зараховано";
-        return "";
-    }
-
-    public static String getNationalGradeEng(Grade g) {
-        if (g.getCourse().getKnowledgeControl().isHasGrade()) {
-            switch (g.getEcts()) {
-                case "A":
-                    return "Excellent";
-                case "B":
-                    return "Good";
-                case "C":
-                    return "Good";
-                case "D":
-                    return "Satisfactory";
-                case "E":
-                    return "Satisfactory";
-                case "F":
-                    return "Fail";
-            }
-        } else if (g.getEcts().equals("F") || g.getEcts().equals("Fx")) {
-            return "Fail";
-        } else
-            return "Passed";
-        return "";
-    }
-
     public static Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
         try {
@@ -265,8 +186,8 @@ public class StudentSummary {
             result.put("#Credits", String.format("%.1f", grade.getCourse().getCredits()));
             result.put("#Hours", String.format("%d", grade.getCourse().getHours()));
             result.put("#LocalGrade", String.format("%d", grade.getPoints()));
-            result.put("#NationalGradeUkr", getNationalGradeUkr(grade));
-            result.put("#NationalGradeEng", getNationalGradeEng(grade));
+            result.put("#NationalGradeUkr", GradeUtil.getNationalGradeUkr(grade));
+            result.put("#NationalGradeEng", GradeUtil.getNationalGradeEng(grade));
             result.put("#ECTSGrade", grade.getEcts());
         } catch (NullPointerException e) {
             log.warn("Some of grade's properties are null!");
@@ -370,7 +291,7 @@ public class StudentSummary {
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(true);
         c.setKnowledgeControl(kc);
-        return getNationalGradeUkr(g);
+        return GradeUtil.getNationalGradeUkr(g);
     }
 
     public String getTotalNationalGradeEng() {
@@ -381,11 +302,11 @@ public class StudentSummary {
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(true);
         c.setKnowledgeControl(kc);
-        return getNationalGradeEng(g);
+        return GradeUtil.getNationalGradeEng(g);
     }
 
     private String getTotalECTS() {
-        return getECTSGrade(Math.round(getTotalGrade()));
+        return GradeUtil.getECTSGrade((int)Math.round(getTotalGrade()));
     }
 
 }
