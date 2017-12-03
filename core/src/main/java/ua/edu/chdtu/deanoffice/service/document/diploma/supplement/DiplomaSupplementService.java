@@ -35,7 +35,7 @@ public class DiplomaSupplementService {
         this.studentSummary = studentSummary;
     }
 
-    private static final String TEMPLATE = "DiplomaSupplementTemplate nc.docx";
+    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
 
     public File formDiplomaSupplement(Integer studentId) {
         Student student = studentService.get(studentId);

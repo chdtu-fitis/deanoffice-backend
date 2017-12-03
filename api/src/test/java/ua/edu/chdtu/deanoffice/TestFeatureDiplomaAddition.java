@@ -42,7 +42,7 @@ public class TestFeatureDiplomaAddition {
 
     private static Logger log = LoggerFactory.getLogger(Application.class);
 
-    private static final String TEMPLATE = "DiplomaSupplementTemplate nc.docx";
+    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
 
     private static DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
 
@@ -126,7 +126,16 @@ public class TestFeatureDiplomaAddition {
         Grade grade12 = createGrade(course12, student, 75);
         Grade grade13 = createGrade(course13, student, 90);
 
-        grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13));
+        CourseName courseName12 = new CourseName();
+        courseName12.setName("Курс 2");
+        courseName12.setNameEng("Course 2");
+
+        Course course121 = createCourse(courseName12, true);
+
+        Grade grade121 = createGrade(course121, 75);
+
+
+        grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13, grade121));
 
         CourseName courseName2 = new CourseName();
         courseName2.setName("Курсова робота 1");
