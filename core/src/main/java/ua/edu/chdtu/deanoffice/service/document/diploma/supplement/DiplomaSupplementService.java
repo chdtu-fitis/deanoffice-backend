@@ -17,15 +17,16 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 @Service
 public class DiplomaSupplementService {
 
+    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
+
     private StudentService studentService;
     private GradeService gradeService;
+    private StudentSummary studentSummary;
 
     public DiplomaSupplementService(StudentService studentService, GradeService gradeService) {
         this.studentService = studentService;
         this.gradeService = gradeService;
     }
-
-    private StudentSummary studentSummary;
 
     public StudentSummary getStudentSummary() {
         return studentSummary;
@@ -34,8 +35,6 @@ public class DiplomaSupplementService {
     public void setStudentSummary(StudentSummary studentSummary) {
         this.studentSummary = studentSummary;
     }
-
-    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
 
     public File formDiplomaSupplement(Integer studentId) {
         Student student = studentService.get(studentId);
@@ -67,14 +66,10 @@ public class DiplomaSupplementService {
         int rowToAddIndex;
 
         //The table is filling upwards
-        Collections.reverse(studentSummary.getGrades());
+        List<List<Grade>> grades = getGradesReverseCopyFromStudentSummary();
         int sectionNumber = 3;
-        int courseNumber = studentSummary.getGrades().get(0).size()
-                + studentSummary.getGrades().get(1).size()
-                + studentSummary.getGrades().get(2).size()
-                + studentSummary.getGrades().get(3).size();
 
-        for (List<Grade> gradesSection : studentSummary.getGrades()) {
+        for (List<Grade> gradesSection : grades) {
             if (sectionNumber > 0) {
                 String sectionPlaceholderKey = "#Section" + sectionNumber;
                 placeholdersToRemove.add(sectionPlaceholderKey);
@@ -84,8 +79,7 @@ public class DiplomaSupplementService {
             }
             for (Grade grade : gradesSection) {
                 Map<String, String> replacements = StudentSummary.getGradeDictionary(grade);
-                replacements.put("#CourseNum", courseNumber + "");
-                courseNumber--;
+                replacements.put("#CourseNum", getGradeNumberFromBeginning(studentSummary.getGrades(), gradesSection, grade) + "");
                 addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
                 rowToAddIndex++;
             }
@@ -93,5 +87,28 @@ public class DiplomaSupplementService {
         }
         tempTable.getContent().remove(templateRow);
         replacePlaceholdersWithBlank(template, placeholdersToRemove);
+    }
+
+    private static int getGradeNumberFromBeginning(List<List<Grade>> masterList, List<Grade> sublist, Object item) {
+        int result = 0;
+        int sublistIndex = masterList.indexOf(sublist);
+        int itemIndex = sublist.indexOf(item);
+        for (int i = 0; i <= sublistIndex; i++) {
+            if (i == sublistIndex)
+                result += itemIndex + 1;
+            else result += masterList.get(i).size();
+        }
+        return result;
+    }
+
+    private List<List<Grade>> getGradesReverseCopyFromStudentSummary() {
+        List<List<Grade>> grades = new ArrayList<>();
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        Collections.copy(grades, this.studentSummary.getGrades());
+        Collections.reverse(grades);
+        return grades;
     }
 }
