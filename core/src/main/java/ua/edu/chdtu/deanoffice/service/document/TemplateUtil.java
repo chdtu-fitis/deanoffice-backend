@@ -74,9 +74,9 @@ public class TemplateUtil {
                 value = placeholdersValues.get(textElement.getValue().trim());
                 if (value != null) {
                     textElement.setValue(value);
-                } else log.warn(textElement.getValue() + " is null");
+                } else log.debug(textElement.getValue() + " is null");
             } catch (NullPointerException e) {
-                log.warn(textElement.getValue() + " is null");
+                log.debug(textElement.getValue() + " is null");
             }
         }
     }

@@ -11,14 +11,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -29,7 +33,7 @@ import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {DiplomaSupplementService.class, StudentService.class, GradeService.class,
-        StudentRepository.class, GradeRepository.class})
+        StudentRepository.class, GradeRepository.class, StudentGroupRepository.class, StudentGroupService.class})
 @EnableAutoConfiguration
 public class TestFeatureDiplomaAddition {
 
@@ -187,12 +191,11 @@ public class TestFeatureDiplomaAddition {
 
     @Test
     public void testFillWithStudentInformation() {
-        //Student student = diplomaSupplementService.formDiplomaSupplement();
-
         Student student = createStudent();
         diplomaSupplementService.setStudentSummary(new StudentSummary(student, createGrades(student)));
-        Assert.assertEquals(true, diplomaSupplementService
-                .fillWithStudentInformation(TEMPLATE).getAbsolutePath().endsWith(".docx"));
+        File diplomaSupplement = TemplateUtil.saveDocument(diplomaSupplementService.fillWithStudentInformation(TEMPLATE),
+                diplomaSupplementService.getStudentSummary().getStudent().getInitialsUkr() + ".docx");
+        Assert.assertEquals(true, diplomaSupplement.getAbsolutePath().endsWith(".docx"));
     }
 
     @Test
@@ -210,10 +213,10 @@ public class TestFeatureDiplomaAddition {
 
     @Test
     public void testGetGradeFromPoints() {
-        Assert.assertEquals("A", StudentSummary.getECTSGrade(95));
-        Assert.assertEquals("B", StudentSummary.getECTSGrade(82));
-        Assert.assertEquals("D", StudentSummary.getECTSGrade(67));
-        Assert.assertEquals("C", StudentSummary.getECTSGrade(78));
+        Assert.assertEquals("A", GradeUtil.getECTSGrade(95));
+        Assert.assertEquals("B", GradeUtil.getECTSGrade(82));
+        Assert.assertEquals("D", GradeUtil.getECTSGrade(67));
+        Assert.assertEquals("C", GradeUtil.getECTSGrade(78));
     }
 
 
@@ -222,7 +225,7 @@ public class TestFeatureDiplomaAddition {
         grade.setPoints(points);
         grade.setCourse(course);
         grade.setGrade(GradeUtil.getGradeFromPoints(points));
-        grade.setEcts(StudentSummary.getECTSGrade(points));
+        grade.setEcts(GradeUtil.getECTSGrade(points));
         return grade;
     }
 
@@ -280,5 +283,10 @@ public class TestFeatureDiplomaAddition {
         Assert.assertEquals("Не зараховано", GradeUtil.getNationalGradeUkr(grade5));
         Assert.assertEquals("Fail", GradeUtil.getNationalGradeEng(grade5));
         Assert.assertEquals("Fx", grade5.getEcts());
+    }
+
+    @Test
+    public void testGroupSupplements() {
+        diplomaSupplementService.formDiplomaSupplementForGroup(389);
     }
 }

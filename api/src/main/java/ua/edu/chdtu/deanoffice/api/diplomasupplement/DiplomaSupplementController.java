@@ -25,6 +25,11 @@ public class DiplomaSupplementController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
     public ResponseEntity<File> generateForStudent(@PathVariable Integer studentId) {
-        return ResponseEntity.ok(diplomaSupplementService.formDiplomaSupplement(studentId));
+        return ResponseEntity.ok(diplomaSupplementService.formDiplomaSupplementForStudent(studentId));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}")
+    public ResponseEntity<File> generateForGroup(@PathVariable Integer groupId) {
+        return ResponseEntity.ok(diplomaSupplementService.formDiplomaSupplementForGroup(groupId));
     }
 }

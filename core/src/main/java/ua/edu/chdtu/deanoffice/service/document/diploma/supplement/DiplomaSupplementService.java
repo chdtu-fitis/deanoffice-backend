@@ -6,7 +6,9 @@ import org.docx4j.wml.Tr;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 
 import java.io.File;
@@ -21,11 +23,13 @@ public class DiplomaSupplementService {
 
     private StudentService studentService;
     private GradeService gradeService;
+    private StudentGroupService groupService;
     private StudentSummary studentSummary;
 
-    public DiplomaSupplementService(StudentService studentService, GradeService gradeService) {
+    public DiplomaSupplementService(StudentService studentService, GradeService gradeService, StudentGroupService groupService) {
         this.studentService = studentService;
         this.gradeService = gradeService;
+        this.groupService = groupService;
     }
 
     public StudentSummary getStudentSummary() {
@@ -36,14 +40,15 @@ public class DiplomaSupplementService {
         this.studentSummary = studentSummary;
     }
 
-    public File formDiplomaSupplement(Integer studentId) {
+    public File formDiplomaSupplementForStudent(Integer studentId) {
         Student student = studentService.get(studentId);
         List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
         this.studentSummary = new StudentSummary(student, grades);
-        return fillWithStudentInformation(TEMPLATE);
+        return saveDocument(fillWithStudentInformation(TEMPLATE),
+                studentSummary.getStudent().getInitialsUkr() + ".docx");
     }
 
-    public File fillWithStudentInformation(String templateFilepath) {
+    public WordprocessingMLPackage fillWithStudentInformation(String templateFilepath) {
         WordprocessingMLPackage template = loadTemplate(templateFilepath);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(studentSummary.getStudentInfoDictionary());
@@ -52,7 +57,7 @@ public class DiplomaSupplementService {
 
         fillTableWithGrades(template);
 
-        return saveDocument(template, studentSummary.getStudent().getInitialsUkr() + ".docx");
+        return template;
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template) {
@@ -110,5 +115,25 @@ public class DiplomaSupplementService {
         Collections.copy(grades, this.studentSummary.getGrades());
         Collections.reverse(grades);
         return grades;
+    }
+
+    public File formDiplomaSupplementForGroup(Integer groupId) {
+        StudentGroup studentGroup = groupService.getById(groupId);
+        if (studentGroup == null || studentGroup.getStudents().isEmpty())
+            return null;
+        List<Student> students = new ArrayList<>(studentGroup.getStudents());
+        WordprocessingMLPackage groupTemplate = null;
+        for (Student student : students) {
+            this.studentSummary = new StudentSummary(student, gradeService.getGradesByStudentId(student.getId()));
+            WordprocessingMLPackage studentFilledTemplate = fillWithStudentInformation(TEMPLATE);
+            if (groupTemplate == null) {
+                groupTemplate = studentFilledTemplate;
+                continue;
+            }
+            for (Object o : studentFilledTemplate.getMainDocumentPart().getContent()) {
+                groupTemplate.getMainDocumentPart().addObject(o);
+            }
+        }
+        return saveDocument(groupTemplate, studentGroup.getName() + ".docx");
     }
 }

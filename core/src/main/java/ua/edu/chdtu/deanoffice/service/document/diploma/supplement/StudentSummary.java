@@ -227,7 +227,7 @@ public class StudentSummary {
         if (modeOfStudy == 'f') {
             modeOfStudyUkr = "Денна";
             modeOfStudyEng = "Full-time";
-        } else if (modeOfStudy == 's') {
+        } else if (modeOfStudy == 'e') {
             modeOfStudyUkr = "Заочна";
             modeOfStudyEng = "Extramural";
         }
@@ -246,7 +246,7 @@ public class StudentSummary {
             result.put("#QualificationUkrP2", student.getStudentGroup().getSpecialization().getQualification().split("  ")[1]);
             result.put("#QualificationEngP2", student.getStudentGroup().getSpecialization().getQualificationEng().split("  ")[1]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            log.warn("Qualification should consist of 2 parts, divided with double space");
+            log.debug("Qualification should consist of 2 parts, divided with double space");
         }
         return result;
     }
