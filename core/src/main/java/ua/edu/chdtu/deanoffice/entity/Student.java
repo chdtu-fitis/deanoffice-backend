@@ -57,7 +57,7 @@ public class Student extends Person {
     }
 
     public String getInitialsUkr() {
-        return getSurname() + " " + getName().substring(0, 1) + " " + getSurname().substring(0, 1);
+        return getSurname() + " " + getName().substring(0, 1) + " " + getPatronimic().substring(0, 1);
     }
 
     public String getFullNameEng() {
