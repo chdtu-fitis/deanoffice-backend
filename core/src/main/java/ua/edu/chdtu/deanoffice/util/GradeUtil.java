@@ -35,6 +35,13 @@ public class GradeUtil {
         return 0;
     }
 
+    public static int getPointsFromGrade(Grade g) {
+        if (Math.round(g.getGrade()) == 5) return 95;
+        if (Math.round(g.getGrade()) == 4) return 82;
+        if (Math.round(g.getGrade()) == 3) return 67;
+        return 0;
+    }
+
     public static String getNationalGradeUkr(Grade g) {
         if (g.getCourse().getKnowledgeControl().isHasGrade()) {
             switch (g.getEcts()) {

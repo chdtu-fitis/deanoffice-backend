@@ -20,8 +20,13 @@ public class StudentSummary {
 
     private static Logger log = LoggerFactory.getLogger(StudentSummary.class);
 
-    private List<List<Grade>> grades;
     private Student student;
+    private List<List<Grade>> grades;
+    private Integer totalHours = 0;
+
+    public Integer getTotalHours() {
+        return totalHours;
+    }
 
     public List<List<Grade>> getGrades() {
         return grades;
@@ -40,8 +45,9 @@ public class StudentSummary {
     private void completeGrades() {
         setHours();
         setCredits();
-        setECTS();
         setGrades();
+        setPoints();
+        setECTS();
         combineMultipleSemesterCourseGrades();
     }
 
@@ -50,6 +56,7 @@ public class StudentSummary {
             gradeSublist.forEach(grade -> {
                 if (grade.getCourse().getHours() == null)
                     grade.getCourse().setHours(0);
+                totalHours += grade.getCourse().getHours();
             });
         });
     }
@@ -62,20 +69,35 @@ public class StudentSummary {
         });
     }
 
-    private void setECTS() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                grade.setEcts(GradeUtil.getECTSGrade(grade.getPoints()));
-            });
-
-        });
-    }
-
     private void setGrades() {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
-                grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
+                if (grade.getGrade() == 0 && grade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT)
+                    grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
             });
+        });
+    }
+
+    private void setPoints() {
+        grades.forEach(gradeSublist -> {
+            gradeSublist.forEach(grade -> {
+                if (grade.getPoints() == 0)
+                    grade.setPoints(GradeUtil.getPointsFromGrade(grade));
+            });
+        });
+    }
+
+    private void setECTS() {
+        grades.forEach(gradeSublist -> {
+            gradeSublist.forEach(grade -> {
+                if (!"ABCDEFx".contains(grade.getEcts()))
+                    grade.setEcts(GradeUtil.getECTSGrade(grade.getPoints()));
+                if (grade.getCourse().getKnowledgeControl().getId() == Constants.CREDIT
+                        && "ABCDE".contains(grade.getEcts().trim())) {
+                    grade.setEcts("P");
+                }
+            });
+
         });
     }
 
@@ -132,50 +154,72 @@ public class StudentSummary {
     private Grade combineGrades(List<Grade> grades) {
         if (grades == null || grades.isEmpty())
             return null;
+        Grade resultingGrade;
+        Integer hoursSum = 0;
+        for (Grade g : grades) {
+            hoursSum += g.getCourse().getHours();
+        }
         if (grades.size() == 1)
             return grades.get(0);
         else {
-            List<Grade> examsGrades = getExamGrades(grades);
-            if (examsGrades.size() == 0) {
-                List<Grade> differentiatedCreditGrades = getDifferentiatedCreditsGrades(grades);
-                if (examsGrades.size() == 0)
-                    return combineEqualPriorityGrades(grades);
-                if (differentiatedCreditGrades.size() == 1)
-                    return differentiatedCreditGrades.get(0);
-                else {
-                    return combineEqualPriorityGrades(differentiatedCreditGrades);
-                }
-            }
+            List<Grade> examsGrades = getGradesByKnowledgeControlType(grades, Constants.EXAM);
             if (examsGrades.size() == 1)
-                return examsGrades.get(0);
-            else {
-                return combineEqualPriorityGrades(examsGrades);
+                resultingGrade = examsGrades.get(0);
+            else if (examsGrades.size() == 0) {
+                List<Grade> differentiatedCreditGrades = getGradesByKnowledgeControlType(grades, Constants.DIFFERENTIATED_CREDIT);
+                if (differentiatedCreditGrades.size() == 0)
+                    resultingGrade = combineEqualGrades(grades);
+                else if (differentiatedCreditGrades.size() == 1)
+                    resultingGrade = differentiatedCreditGrades.get(0);
+                else {
+                    resultingGrade = combineEqualGrades(differentiatedCreditGrades);
+                }
+            } else {
+                resultingGrade = combineEqualGrades(examsGrades);
             }
         }
+        resultingGrade.getCourse().setHours(hoursSum);
+        resultingGrade.getCourse().setCredits(new BigDecimal(hoursSum / Constants.HOURS_PER_CREDIT));
+        return resultingGrade;
     }
 
-    private Grade combineEqualPriorityGrades(List<Grade> grades) {
+    private Grade combineEqualGrades(List<Grade> grades) {
         Grade resultingGrade = grades.get(0);
         Double pointsSum = 0.0;
         Double gradesSum = 0.0;
+
         for (Grade g : grades) {
             pointsSum += g.getPoints();
             gradesSum += g.getGrade();
         }
-        int[] pointsAndGrade = adjustAverageGradeAndPoints(
-                gradesSum / grades.size(),
-                pointsSum / grades.size());
-        resultingGrade.setPoints(pointsAndGrade[1]);
-        resultingGrade.setGrade(pointsAndGrade[0]);
+
+        Course newCourse = new Course();
+        newCourse.setHours(0);
+        newCourse.setCourseName(resultingGrade.getCourse().getCourseName());
+        newCourse.setKnowledgeControl(resultingGrade.getCourse().getKnowledgeControl());
+        resultingGrade.setCourse(newCourse);
+
+        if (resultingGrade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT) {
+            int[] pointsAndGrade = adjustAverageGradeAndPoints(
+                    gradesSum / grades.size(),
+                    pointsSum / grades.size());
+            resultingGrade.setPoints(pointsAndGrade[1]);
+            resultingGrade.setGrade(pointsAndGrade[0]);
+            resultingGrade.setEcts(GradeUtil.getECTSGrade(resultingGrade.getPoints()));
+        } else {
+            resultingGrade.setPoints((int) Math.round(pointsSum / grades.size()));
+            resultingGrade.setGrade((int) Math.round(gradesSum / grades.size()));
+            if (resultingGrade.getPoints() >= 60)
+                resultingGrade.setEcts("P");
+            else
+                resultingGrade.setEcts("F");
+        }
         return resultingGrade;
     }
 
-    private List<Grade> getExamGrades(List<Grade> grades) {
-        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getName().equals("іспит")).collect(Collectors.toList());
-    }
 
-    private List<Grade> getDifferentiatedCreditsGrades(List<Grade> grades) {
-        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getName().equals("диференційований залік")).collect(Collectors.toList());
+    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
+        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
     }
 
     public static Map<String, String> getGradeDictionary(Grade grade) {
@@ -183,7 +227,7 @@ public class StudentSummary {
         try {
             result.put("#CourseNameUkr", grade.getCourse().getCourseName().getName());
             result.put("#CourseNameEng", grade.getCourse().getCourseName().getNameEng());
-            result.put("#Credits", String.format("%.1f", grade.getCourse().getCredits()));
+            result.put("#Credits", formatCredits(grade.getCourse().getCredits()));
             result.put("#Hours", String.format("%d", grade.getCourse().getHours()));
             result.put("#LocalGrade", String.format("%d", grade.getPoints()));
             result.put("#NationalGradeUkr", GradeUtil.getNationalGradeUkr(grade));
@@ -197,12 +241,13 @@ public class StudentSummary {
 
     public Map<String, String> getTotalDictionary() {
         Map<String, String> result = new HashMap<>();
-            result.put("#TotalHours", String.format("%4d", getTotalHours()));
-            result.put("#TotalCredits", String.format("%2.1f", getTotalCredits(30.0)));
-            result.put("#TotalGrade", String.format("%2d", Math.round(getTotalGrade())));
-            result.put("#TotalNGradeUkr", getTotalNationalGradeUkr());
-            result.put("#TotalNGradeEng", getTotalNationalGradeEng());
-            result.put("#TotalECTS", getTotalECTS());
+        result.put("#TotalHours", String.format("%4d", getTotalHours()));
+        result.put("#TotalCredits", formatCredits(getTotalCredits()));
+        result.put("#TotalGrade", String.format("%2d", Math.round(getTotalGrade())));
+        result.put("#TotalECTS", getTotalECTS());
+        result.put("#TotalNGradeUkr", getTotalNationalGradeUkr());
+        result.put("#TotalNGradeEng", getTotalNationalGradeEng());
+
         return result;
     }
 
@@ -251,19 +296,16 @@ public class StudentSummary {
         return result;
     }
 
-    public int getTotalHours() {
-        int result = 0;
-        for (List<Grade> gradesSublist :
-                grades) {
-            for (Grade g : gradesSublist) {
-                result += g.getCourse().getHours();
-            }
-        }
-        return result;
+    public BigDecimal getTotalCredits() {
+        return new BigDecimal(getTotalHours() / Constants.HOURS_PER_CREDIT);
     }
 
-    public double getTotalCredits(double hoursPerCredit) {
-        return getTotalHours() / hoursPerCredit;
+    private static String formatCredits(BigDecimal credits) {
+        String formattedCredits = String.format("%.1f", credits);
+        if (formattedCredits.split(",")[1].equals("0"))
+            return String.format("%.0f", credits);
+        else
+            return formattedCredits;
     }
 
     public Double getTotalGrade() {
@@ -272,7 +314,7 @@ public class StudentSummary {
         for (List<Grade> gradesSublist :
                 grades) {
             for (Grade g : gradesSublist) {
-                if (g.getPoints() > 0) {
+                if (g.getCourse().getKnowledgeControl().getId() != Constants.CREDIT && g.getPoints() > 0) {
                     pointSum += g.getPoints();
                     pointsCount++;
                 }
@@ -306,7 +348,6 @@ public class StudentSummary {
     }
 
     private String getTotalECTS() {
-        return GradeUtil.getECTSGrade((int)Math.round(getTotalGrade()));
+        return GradeUtil.getECTSGrade((int) Math.round(getTotalGrade()));
     }
-
 }
