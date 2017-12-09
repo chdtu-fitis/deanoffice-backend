@@ -254,11 +254,11 @@ public class StudentSummary {
     public Map<String, String> getStudentInfoDictionary() {
         Map<String, String> result = new HashMap<>();
 
-        result.put("#SurnameUkr", student.getSurname());
-        result.put("#SurnameEng", student.getSurnameEng());
-        result.put("#NameUkr", student.getName());
-        result.put("#NameEng", student.getNameEng());
-        result.put("#PatronimicUkr", student.getPatronimic());
+        result.put("#SurnameUkr", student.getSurname().toUpperCase());
+        result.put("#SurnameEng", student.getSurnameEng().toUpperCase());
+        result.put("#NameUkr", student.getName().toUpperCase());
+        result.put("#NameEng", student.getNameEng().toUpperCase());
+        result.put("#PatronimicUkr", student.getPatronimic().toUpperCase());
 
         DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
         result.put("#BirthDate",
