@@ -251,17 +251,15 @@ public class StudentSummary {
     public Map<String, String> getStudentInfoDictionary() {
         Map<String, String> result = new HashMap<>();
 
-        result.put("#SurnameUkr", student.getSurname() == null ? "" : student.getSurname().toUpperCase());
+        result.put("#SurnameUkr", student.getSurname().toUpperCase());
         result.put("#SurnameEng", student.getSurnameEng() == null ? "" : student.getSurnameEng().toUpperCase());
-        result.put("#NameUkr", student.getName() == null ? "" : student.getName().toUpperCase());
+        result.put("#NameUkr", student.getName().toUpperCase());
         result.put("#NameEng", student.getNameEng() == null ? "" : student.getNameEng().toUpperCase());
-        result.put("#PatronimicUkr", student.getPatronimic() == null ? "" : student.getPatronimic().toUpperCase());
+        result.put("#PatronimicUkr", student.getPatronimic().toUpperCase());
 
         DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
         result.put("#BirthDate",
-                student.getBirthDate() != null
-                        ? dateOfBirthFormat.format(student.getBirthDate())
-                        : "#BirthDate");
+                student.getBirthDate() != null ? dateOfBirthFormat.format(student.getBirthDate()) : "#BirthDate");
 
         String modeOfStudyUkr = "";
         String modeOfStudyEng = "";
@@ -279,13 +277,13 @@ public class StudentSummary {
         Specialization specialization = student.getStudentGroup().getSpecialization();
         Speciality speciality = specialization.getSpeciality();
         Degree degree = specialization.getDegree();
-        result.put("#SpecializationUkr", specialization.getName() == null ? "" : specialization.getName());
+        result.put("#SpecializationUkr", specialization.getName());
         result.put("#SpecializationEng", specialization.getNameEng() == null ? "" : specialization.getNameEng());
-        result.put("#SpecialityUkr", speciality.getName() == null ? "" : speciality.getName());
+        result.put("#SpecialityUkr", speciality.getName());
         result.put("#SpecialityEng", speciality.getNameEng() == null ? "" : speciality.getNameEng());
-        result.put("#DegreeUkr", degree.getName() == null ? "" : degree.getName());
+        result.put("#DegreeUkr", degree.getName());
         result.put("#DegreeEng", degree.getNameEng() == null ? "" : degree.getNameEng());
-        result.put("#DEGREEUKR", degree.getName() == null ? "" : degree.getName().toUpperCase());
+        result.put("#DEGREEUKR", degree.getName());
         result.put("#DEGREEENG", degree.getNameEng() == null ? "" : degree.getNameEng().toUpperCase());
         result.put("#QualificationUkr", specialization.getQualification() == null ? ""
                 : specialization.getQualification());
