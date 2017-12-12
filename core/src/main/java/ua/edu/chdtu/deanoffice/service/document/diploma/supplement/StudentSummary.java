@@ -285,12 +285,8 @@ public class StudentSummary {
         result.put("#SpecialityEng", student.getStudentGroup().getSpecialization().getSpeciality().getNameEng());
         result.put("#DegreeUkr", student.getStudentGroup().getSpecialization().getDegree().getName());
         result.put("#DegreeEng", student.getStudentGroup().getSpecialization().getDegree().getNameEng());
-        try {
-            result.put("#QualificationUkr", student.getStudentGroup().getSpecialization().getQualification());
-            result.put("#QualificationEng", student.getStudentGroup().getSpecialization().getQualificationEng());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            log.debug("Qualification should consist of 2 parts, divided with double space");
-        }
+        result.put("#QualificationUkr", student.getStudentGroup().getSpecialization().getQualification());
+        result.put("#QualificationEng", student.getStudentGroup().getSpecialization().getQualificationEng());
         return result;
     }
 
