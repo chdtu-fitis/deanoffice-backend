@@ -1,13 +1,15 @@
 package ua.edu.chdtu.deanoffice.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Person;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 public class Student extends Person {
     @Column(name = "surname_eng", length = 20)
@@ -51,6 +53,8 @@ public class Student extends Person {
     private String motherInfo;
     @Column(name = "notes", length = 150)
     private String notes;
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<StudentDegree> degrees;
 
     public String getFullNameUkr() {
         return getName() + " " + getPatronimic() + " " + getSurname();
@@ -63,165 +67,4 @@ public class Student extends Person {
     public String getFullNameEng() {
         return getNameEng() + " " + getSurnameEng();
     }
-
-    public String getSurnameEng() {
-        return surnameEng;
-    }
-
-    public void setSurnameEng(String surnameEng) {
-        this.surnameEng = surnameEng;
-    }
-
-    public String getNameEng() {
-        return nameEng;
-    }
-
-    public void setNameEng(String nameEng) {
-        this.nameEng = nameEng;
-    }
-
-    public String getPatronimicEng() {
-        return patronimicEng;
-    }
-
-    public void setPatronimicEng(String patronimicEng) {
-        this.patronimicEng = patronimicEng;
-    }
-
-    public StudentGroup getStudentGroup() {
-        return studentGroup;
-    }
-
-    public void setStudentGroup(StudentGroup studentGroup) {
-        this.studentGroup = studentGroup;
-    }
-
-    public Date getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public String getRegistrationAddress() {
-        return registrationAddress;
-    }
-
-    public void setRegistrationAddress(String registrationAddress) {
-        this.registrationAddress = registrationAddress;
-    }
-
-    public String getActualAddress() {
-        return actualAddress;
-    }
-
-    public void setActualAddress(String actualAddress) {
-        this.actualAddress = actualAddress;
-    }
-
-    public String getSchool() {
-        return school;
-    }
-
-    public void setSchool(String school) {
-        this.school = school;
-    }
-
-    public String getRecordBookNumber() {
-        return recordBookNumber;
-    }
-
-    public void setRecordBookNumber(String recordBookNumber) {
-        this.recordBookNumber = recordBookNumber;
-    }
-
-    public String getStudentCardNumber() {
-        return studentCardNumber;
-    }
-
-    public void setStudentCardNumber(String studentCardNumber) {
-        this.studentCardNumber = studentCardNumber;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Privilege getPrivilege() {
-        return privilege;
-    }
-
-    public void setPrivilege(Privilege privilege) {
-        this.privilege = privilege;
-    }
-
-    public String getFatherName() {
-        return fatherName;
-    }
-
-    public void setFatherName(String fatherName) {
-        this.fatherName = fatherName;
-    }
-
-    public String getFatherPhone() {
-        return fatherPhone;
-    }
-
-    public void setFatherPhone(String fatherPhone) {
-        this.fatherPhone = fatherPhone;
-    }
-
-    public String getFatherInfo() {
-        return fatherInfo;
-    }
-
-    public void setFatherInfo(String fatherInfo) {
-        this.fatherInfo = fatherInfo;
-    }
-
-    public String getMotherName() {
-        return motherName;
-    }
-
-    public void setMotherName(String motherName) {
-        this.motherName = motherName;
-    }
-
-    public String getMotherPhone() {
-        return motherPhone;
-    }
-
-    public void setMotherPhone(String motherPhone) {
-        this.motherPhone = motherPhone;
-    }
-
-    public String getMotherInfo() {
-        return motherInfo;
-    }
-
-    public void setMotherInfo(String motherInfo) {
-        this.motherInfo = motherInfo;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
 }
