@@ -222,14 +222,14 @@ public class StudentSummary {
     public static Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.put("#CourseNameUkr", grade.getCourse().getCourseName().getName());
-            result.put("#CourseNameEng", grade.getCourse().getCourseName().getNameEng());
             result.put("#Credits", formatCredits(grade.getCourse().getCredits()));
             result.put("#Hours", String.format("%d", grade.getCourse().getHours()));
             result.put("#LocalGrade", String.format("%d", grade.getPoints()));
             result.put("#NationalGradeUkr", GradeUtil.getNationalGradeUkr(grade));
             result.put("#NationalGradeEng", GradeUtil.getNationalGradeEng(grade));
             result.put("#ECTSGrade", grade.getEcts());
+            result.put("#CourseNameUkr", grade.getCourse().getCourseName().getName());
+            result.put("#CourseNameEng", grade.getCourse().getCourseName().getNameEng());
         } catch (NullPointerException e) {
             log.warn("Some of grade's properties are null!");
         }
@@ -251,11 +251,11 @@ public class StudentSummary {
     public Map<String, String> getStudentInfoDictionary() {
         Map<String, String> result = new HashMap<>();
 
-        result.put("#SurnameUkr", student.getSurname().toUpperCase());
-        result.put("#SurnameEng", student.getSurnameEng().toUpperCase());
-        result.put("#NameUkr", student.getName().toUpperCase());
-        result.put("#NameEng", student.getNameEng().toUpperCase());
-        result.put("#PatronimicUkr", student.getPatronimic().toUpperCase());
+        result.put("#SurnameUkr", student.getSurname() == null ? "" : student.getSurname().toUpperCase());
+        result.put("#SurnameEng", student.getSurnameEng() == null ? "" : student.getSurnameEng().toUpperCase());
+        result.put("#NameUkr", student.getName() == null ? "" : student.getName().toUpperCase());
+        result.put("#NameEng", student.getNameEng() == null ? "" : student.getNameEng().toUpperCase());
+        result.put("#PatronimicUkr", student.getPatronimic() == null ? "" : student.getPatronimic().toUpperCase());
 
         DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
         result.put("#BirthDate",
@@ -276,32 +276,41 @@ public class StudentSummary {
         result.put("#ModeOfStudyUkr", modeOfStudyUkr);
         result.put("#ModeOfStudyEng", modeOfStudyEng);
 
-        result.put("#SpecializationUkr", student.getStudentGroup().getSpecialization().getName());
-        result.put("#SpecializationEng", student.getStudentGroup().getSpecialization().getNameEng());
-        result.put("#SpecialityUkr", student.getStudentGroup().getSpecialization().getSpeciality().getName());
-        result.put("#SpecialityEng", student.getStudentGroup().getSpecialization().getSpeciality().getNameEng());
-        result.put("#DegreeUkr", student.getStudentGroup().getSpecialization().getDegree().getName());
-        result.put("#DegreeEng", student.getStudentGroup().getSpecialization().getDegree().getNameEng());
-        result.put("#DEGREEUKR", student.getStudentGroup().getSpecialization().getDegree().getName().toUpperCase());
-        result.put("#DEGREEENG", student.getStudentGroup().getSpecialization().getDegree().getNameEng().toUpperCase());
-        result.put("#QualificationUkr", student.getStudentGroup().getSpecialization().getQualification());
-        result.put("#QualificationEng", student.getStudentGroup().getSpecialization().getQualificationEng());
+        Specialization specialization = student.getStudentGroup().getSpecialization();
+        Speciality speciality = specialization.getSpeciality();
+        Degree degree = specialization.getDegree();
+        result.put("#SpecializationUkr", specialization.getName() == null ? "" : specialization.getName());
+        result.put("#SpecializationEng", specialization.getNameEng() == null ? "" : specialization.getNameEng());
+        result.put("#SpecialityUkr", speciality.getName() == null ? "" : speciality.getName());
+        result.put("#SpecialityEng", speciality.getNameEng() == null ? "" : speciality.getNameEng());
+        result.put("#DegreeUkr", degree.getName() == null ? "" : degree.getName());
+        result.put("#DegreeEng", degree.getNameEng() == null ? "" : degree.getNameEng());
+        result.put("#DEGREEUKR", degree.getName() == null ? "" : degree.getName().toUpperCase());
+        result.put("#DEGREEENG", degree.getNameEng() == null ? "" : degree.getNameEng().toUpperCase());
+        result.put("#QualificationUkr", specialization.getQualification() == null ? ""
+                : specialization.getQualification());
+        result.put("#QualificationEng", specialization.getQualificationEng() == null ? ""
+                : specialization.getQualificationEng());
 
         try {
-        StudentDegree studentDegree = student.getDegrees().stream().filter(
-                sd -> sd.getDegree().getName().equals(student.getStudentGroup().getSpecialization().getDegree().getName())
-        ).findFirst().get();
-        result.put("#ThesisNameUkr", studentDegree.getThesisName());
-        result.put("#ThesisNameEng", studentDegree.getThesisNameEng());
-        result.put("#ProtocolNumber", studentDegree.getProtocolNumber());
-        result.put("#PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber());
+            StudentDegree studentDegree = student.getDegrees().stream().filter(
+                    sd -> sd.getDegree().getName().equals(student.getStudentGroup().getSpecialization().getDegree().getName())
+            ).findFirst().get();
+            result.put("#ThesisNameUkr", studentDegree.getThesisName() == null ? ""
+                    : studentDegree.getThesisName());
+            result.put("#ThesisNameEng", studentDegree.getThesisNameEng() == null ? ""
+                    : studentDegree.getThesisNameEng());
+            result.put("#ProtocolNumber", studentDegree.getProtocolNumber() == null ? ""
+                    : studentDegree.getProtocolNumber());
+            result.put("#PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber() == null ? ""
+                    : studentDegree.getPreviousDiplomaNumber());
 
-        int dateStyle = DateFormat.LONG;
-        DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
-        result.put("#ProtocolDate", protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
-        DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
-        result.put("#ProtocolDateEng", protocolDateFormatEng.format(studentDegree.getProtocolDate()));
-        } catch (NoSuchElementException e){
+            int dateStyle = DateFormat.LONG;
+            DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
+            result.put("#ProtocolDate", protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
+            DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
+            result.put("#ProtocolDateEng", protocolDateFormatEng.format(studentDegree.getProtocolDate()));
+        } catch (NoSuchElementException e) {
             log.warn("There is no suitable StudentDegree for this student");
         }
 
