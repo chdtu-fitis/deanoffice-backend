@@ -3,10 +3,7 @@ package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
-import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
@@ -285,8 +282,29 @@ public class StudentSummary {
         result.put("#SpecialityEng", student.getStudentGroup().getSpecialization().getSpeciality().getNameEng());
         result.put("#DegreeUkr", student.getStudentGroup().getSpecialization().getDegree().getName());
         result.put("#DegreeEng", student.getStudentGroup().getSpecialization().getDegree().getNameEng());
+        result.put("#DEGREEUKR", student.getStudentGroup().getSpecialization().getDegree().getName().toUpperCase());
+        result.put("#DEGREEENG", student.getStudentGroup().getSpecialization().getDegree().getNameEng().toUpperCase());
         result.put("#QualificationUkr", student.getStudentGroup().getSpecialization().getQualification());
         result.put("#QualificationEng", student.getStudentGroup().getSpecialization().getQualificationEng());
+
+        try {
+        StudentDegree studentDegree = student.getDegrees().stream().filter(
+                sd -> sd.getDegree().getName().equals(student.getStudentGroup().getSpecialization().getDegree().getName())
+        ).findFirst().get();
+        result.put("#ThesisNameUkr", studentDegree.getThesisName());
+        result.put("#ThesisNameEng", studentDegree.getThesisNameEng());
+        result.put("#ProtocolNumber", studentDegree.getProtocolNumber());
+        result.put("#PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber());
+
+        int dateStyle = DateFormat.LONG;
+        DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
+        result.put("#ProtocolDate", protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
+        DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
+        result.put("#ProtocolDateEng", protocolDateFormatEng.format(studentDegree.getProtocolDate()));
+        } catch (NoSuchElementException e){
+            log.warn("There is no suitable StudentDegree for this student");
+        }
+
         return result;
     }
 
