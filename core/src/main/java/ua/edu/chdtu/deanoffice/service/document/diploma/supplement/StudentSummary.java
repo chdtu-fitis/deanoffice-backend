@@ -307,9 +307,11 @@ public class StudentSummary {
 
             int dateStyle = DateFormat.LONG;
             DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
-            result.put("#ProtocolDate", protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
+            result.put("#ProtocolDate", studentDegree.getProtocolDate() == null ? null
+                    :protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
             DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
-            result.put("#ProtocolDateEng", protocolDateFormatEng.format(studentDegree.getProtocolDate()));
+            result.put("#ProtocolDateEng", studentDegree.getProtocolDate() == null ? null
+                    : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
         } catch (NoSuchElementException e) {
             log.warn("There is no suitable StudentDegree for this student");
         }
