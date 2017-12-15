@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.service.GeneralService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
 import java.io.File;
@@ -21,6 +22,11 @@ public class DiplomaSupplementController {
 
     public DiplomaSupplementController(DiplomaSupplementService diplomaSupplementService) {
         this.diplomaSupplementService = diplomaSupplementService;
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public void start() {
+
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
