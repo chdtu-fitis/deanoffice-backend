@@ -3,6 +3,10 @@ package ua.edu.chdtu.deanoffice.service.document;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.JaxbXmlPart;
+import org.docx4j.openpackaging.parts.relationships.Namespaces;
+import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
+import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
@@ -48,7 +52,7 @@ public class TemplateUtil {
         return f;
     }
 
-    public static List<Object> getAllElementFromObject(Object obj, Class<?> toSearch) {
+    public static List<Object> getAllElementsFromObject(Object obj, Class<?> toSearch) {
         List<Object> result = new ArrayList<>();
         if (obj instanceof JAXBElement) obj = ((JAXBElement<?>) obj).getValue();
 
@@ -57,44 +61,81 @@ public class TemplateUtil {
         else if (obj instanceof ContentAccessor) {
             List<?> children = ((ContentAccessor) obj).getContent();
             for (Object child : children) {
-                result.addAll(getAllElementFromObject(child, toSearch));
+                result.addAll(getAllElementsFromObject(child, toSearch));
             }
         }
         return result;
     }
 
-    public static void replacePlaceholders(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
-        List<Object> texts = getAllElementFromObject(template.getMainDocumentPart(), Text.class);
-        List<Object> placeholders = new ArrayList<>();
-        placeholders.addAll(texts.stream().filter(o -> ((Text) o).getValue().startsWith(PLACEHOLDER_PREFIX)).collect(Collectors.toList()));
-        String value;
-        for (Object text : placeholders) {
-            Text textElement = (Text) text;
+    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
+        List<Text> placeholders = getTextsContainingPlaceholders(template);
+        replaceValuesInTextPlaceholders(placeholders, placeholdersValues);
+    }
+
+    private static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> placeholdersValues) {
+        for (Text text : placeholders) {
             try {
-                value = placeholdersValues.get(textElement.getValue().trim());
-                if (value != null) {
-                    textElement.setValue(value);
-                } else log.debug(textElement.getValue() + " is null");
+                String value = placeholdersValues.get(text.getValue().trim());
+                text.setValue(value);
             } catch (NullPointerException e) {
-                log.debug(textElement.getValue() + " is null");
+                log.debug(text.getValue() + " is null");
             }
         }
     }
 
+    private static List<Text> getTextsContainingPlaceholders(WordprocessingMLPackage template) {
+        List<Object> texts = getAllElementsFromObject(template.getMainDocumentPart(), Text.class);
+        List<Object> placeholders = texts.stream().filter(o ->
+                isAPlaceholder((Text) o)).collect(Collectors.toList());
+        List<Text> result = new ArrayList<>();
+        placeholders.forEach(p -> result.add((Text) (p)));
+        return result;
+    }
+
     public static void replacePlaceholdersWithBlank(WordprocessingMLPackage template, Set<String> placeholders) {
-        List<Object> texts = getAllElementFromObject(template.getMainDocumentPart(), Text.class);
-        for (Object text : texts) {
-            Text textElement = (Text) text;
-            if (textElement.getValue().startsWith(PLACEHOLDER_PREFIX)
-                    && placeholders.contains(textElement.getValue())) {
-                textElement.setValue("");
+        List<Text> texts = getTextsContainingPlaceholders(template);
+        for (Text text : texts) {
+            if (placeholders.contains(text.getValue())) {
+                text.setValue("");
             }
         }
+    }
+
+    private static void replacePlaceholdersInRelativeElement(WordprocessingMLPackage template, String relationType, Map<String, String> dictionary) {
+        RelationshipsPart relationshipPart = template.getMainDocumentPart().getRelationshipsPart();
+        List<Relationship> relationships = relationshipPart.getRelationshipsByType(relationType);
+        List<Text> texts = new ArrayList<>();
+        for (Relationship r : relationships) {
+            JaxbXmlPart part = (JaxbXmlPart) relationshipPart.getPart(r);
+            List<Object> textObjects = null;
+            try {
+                textObjects = getAllElementsFromObject(part.getContents(), Text.class);
+            } catch (Docx4JException e) {
+                log.debug("Could not extract contents from part", e);
+            }
+            for (Object textObject : textObjects) {
+                Text text = (Text) textObject;
+                if (isAPlaceholder(text))
+                    texts.add(text);
+            }
+
+        }
+        replaceValuesInTextPlaceholders(texts, dictionary);
+    }
+
+    public static void replacePlaceholdersInFooter(WordprocessingMLPackage template, Map<String, String> dictionary) {
+        replacePlaceholdersInRelativeElement(template,
+                Namespaces.FOOTER,
+                dictionary);
+    }
+
+    private static boolean isAPlaceholder(Text text) {
+        return text.getValue() != null && text.getValue().startsWith(PLACEHOLDER_PREFIX);
     }
 
     public static Tr findRowInTable(Tbl table, String templateKey) {
         for (Object row : table.getContent()) {
-            List<?> textElements = getAllElementFromObject(row, Text.class);
+            List<?> textElements = getAllElementsFromObject(row, Text.class);
             for (Object text : textElements) {
                 Text textElement = (Text) text;
                 if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey))
@@ -106,7 +147,7 @@ public class TemplateUtil {
 
     public static Tbl findTable(List<Object> tables, String templateKey) {
         for (Object tbl : tables) {
-            List<?> textElements = getAllElementFromObject(tbl, Text.class);
+            List<Object> textElements = getAllElementsFromObject(tbl, Text.class);
             for (Object text : textElements) {
                 Text textElement = (Text) text;
                 if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey))
@@ -117,8 +158,8 @@ public class TemplateUtil {
     }
 
     public static void addRowToTable(Tbl reviewTable, Tr templateRow, int rowNumber, Map<String, String> replacements) {
-        Tr workingRow = (Tr) XmlUtils.deepCopy(templateRow);
-        List<?> textElements = getAllElementFromObject(workingRow, Text.class);
+        Tr workingRow = XmlUtils.deepCopy(templateRow);
+        List<?> textElements = getAllElementsFromObject(workingRow, Text.class);
         for (Object object : textElements) {
             Text text = (Text) object;
             String replacementValue = replacements.get(text.getValue().trim());

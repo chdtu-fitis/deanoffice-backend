@@ -3,6 +3,8 @@ package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
@@ -12,6 +14,7 @@ import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 
 import java.io.File;
+import java.text.Collator;
 import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
@@ -20,6 +23,7 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 public class DiplomaSupplementService {
 
     private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
+    private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
     private StudentService studentService;
     private GradeService gradeService;
@@ -50,22 +54,26 @@ public class DiplomaSupplementService {
 
     public WordprocessingMLPackage fillWithStudentInformation(String templateFilepath) {
         WordprocessingMLPackage template = loadTemplate(templateFilepath);
+        fillTableWithGrades(template);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(studentSummary.getStudentInfoDictionary());
         commonDict.putAll(studentSummary.getTotalDictionary());
-        replacePlaceholders(template, commonDict);
-
-        fillTableWithGrades(template);
-
+        replaceTextPlaceholdersInTemplate(template, commonDict);
+        replacePlaceholdersInFooter(template, commonDict);
         return template;
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template) {
         Set<String> placeholdersToRemove = new HashSet<>();
 
-        List<Object> tables = getAllElementFromObject(template.getMainDocumentPart(), Tbl.class);
-        Tbl tempTable = findTable(tables, "#CourseNum");
-        List<Object> gradeTableRows = getAllElementFromObject(tempTable, Tr.class);
+        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
+        String tableWithGradesKey = "#CourseNum";
+        Tbl tempTable = findTable(tables, tableWithGradesKey);
+        if (tempTable == null) {
+            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
+            return;
+        }
+        List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
 
         Tr templateRow = (Tr) gradeTableRows.get(1);
         int rowToAddIndex;
@@ -122,18 +130,51 @@ public class DiplomaSupplementService {
         if (studentGroup == null || studentGroup.getStudents().isEmpty())
             return null;
         List<Student> students = new ArrayList<>(studentGroup.getStudents());
+        Collections.sort(students, new Comparator<Student>() {
+            @Override
+            public int compare(Student s1, Student s2) {
+                Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
+                return ukrainianCollator.compare(s1.getSurname(), s2.getSurname());
+            }
+        });
         WordprocessingMLPackage groupTemplate = null;
+        int studentNumber = 1;
         for (Student student : students) {
             this.studentSummary = new StudentSummary(student, gradeService.getGradesByStudentId(student.getId()));
             WordprocessingMLPackage studentFilledTemplate = fillWithStudentInformation(TEMPLATE);
             if (groupTemplate == null) {
                 groupTemplate = studentFilledTemplate;
+                studentNumber++;
                 continue;
             }
+//            List<Relationship> relationships = studentFilledTemplate.getMainDocumentPart()
+//                    .relationships.getRelationshipsByType(Namespaces.FOOTER);
+//            PartName footerPartName = null;
+//            PartName newFooterPartName = null;
+//            try {
+//                footerPartName = new PartName("/word/footer1.xml");
+//                newFooterPartName = new PartName("/word/footer" + studentNumber + ".xml");
+//            } catch (InvalidFormatException e) {
+//                e.printStackTrace();
+//            }
+//            Part footerPart = studentFilledTemplate.getParts().get(footerPartName);
+//            footerPart.setPartName(newFooterPartName);
+//            footerPart.setPackage(groupTemplate);
+//            groupTemplate.getParts().put(footerPart);
+//            for (Relationship r : relationships) {
+//                r.setId(String.format("%d", studentNumber + 20));
+//                r.setTarget("/word/footer" + studentNumber + ".xml");
+//                //groupTemplate.getRelationshipsPart().addRelationship(r);
+//                groupTemplate.getMainDocumentPart().getRelationshipsPart().addRelationship(r);
+//                r.setParent(groupTemplate.getRelationshipsPart());
+//            }
             for (Object o : studentFilledTemplate.getMainDocumentPart().getContent()) {
                 groupTemplate.getMainDocumentPart().addObject(o);
             }
+            studentNumber++;
         }
         return saveDocument(groupTemplate, studentGroup.getName() + ".docx");
     }
+
+
 }

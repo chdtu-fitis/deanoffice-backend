@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
@@ -160,19 +161,27 @@ public class StudentSummary {
             return grades.get(0);
         else {
             List<Grade> examsGrades = getGradesByKnowledgeControlType(grades, Constants.EXAM);
-            if (examsGrades.size() == 1)
-                resultingGrade = examsGrades.get(0);
-            else if (examsGrades.size() == 0) {
-                List<Grade> differentiatedCreditGrades = getGradesByKnowledgeControlType(grades, Constants.DIFFERENTIATED_CREDIT);
-                if (differentiatedCreditGrades.size() == 0)
-                    resultingGrade = combineEqualGrades(grades);
-                else if (differentiatedCreditGrades.size() == 1)
-                    resultingGrade = differentiatedCreditGrades.get(0);
-                else {
-                    resultingGrade = combineEqualGrades(differentiatedCreditGrades);
-                }
-            } else {
-                resultingGrade = combineEqualGrades(examsGrades);
+            switch (examsGrades.size()) {
+                case 1:
+                    resultingGrade = examsGrades.get(0);
+                    break;
+                case 0:
+                    List<Grade> differentiatedCreditGrades = getGradesByKnowledgeControlType(grades, Constants.DIFFERENTIATED_CREDIT);
+                    switch (differentiatedCreditGrades.size()) {
+                        case 0:
+                            resultingGrade = combineEqualGrades(grades);
+                            break;
+                        case 1:
+                            resultingGrade = differentiatedCreditGrades.get(0);
+                            break;
+                        default:
+                            resultingGrade = combineEqualGrades(differentiatedCreditGrades);
+                            break;
+                    }
+                    break;
+                default:
+                    resultingGrade = combineEqualGrades(examsGrades);
+                    break;
             }
         }
         resultingGrade.getCourse().setHours(hoursSum);
@@ -252,9 +261,9 @@ public class StudentSummary {
         Map<String, String> result = new HashMap<>();
 
         result.put("#SurnameUkr", student.getSurname().toUpperCase());
-        result.put("#SurnameEng", student.getSurnameEng() == null ? "" : student.getSurnameEng().toUpperCase());
+        result.put("#SurnameEng", getSafely(student.getSurnameEng()).toUpperCase());
         result.put("#NameUkr", student.getName().toUpperCase());
-        result.put("#NameEng", student.getNameEng() == null ? "" : student.getNameEng().toUpperCase());
+        result.put("#NameEng", getSafely(student.getNameEng()).toUpperCase());
         result.put("#PatronimicUkr", student.getPatronimic().toUpperCase());
 
         DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
@@ -278,43 +287,55 @@ public class StudentSummary {
         Speciality speciality = specialization.getSpeciality();
         Degree degree = specialization.getDegree();
         result.put("#SpecializationUkr", specialization.getName());
-        result.put("#SpecializationEng", specialization.getNameEng() == null ? "" : specialization.getNameEng());
+        result.put("#SpecializationEng", getSafely(specialization.getNameEng()));
         result.put("#SpecialityUkr", speciality.getName());
-        result.put("#SpecialityEng", speciality.getNameEng() == null ? "" : speciality.getNameEng());
+        result.put("#SpecialityEng", getSafely(speciality.getNameEng()));
         result.put("#DegreeUkr", degree.getName());
-        result.put("#DegreeEng", degree.getNameEng() == null ? "" : degree.getNameEng());
+        result.put("#DegreeEng", getSafely(degree.getNameEng()));
         result.put("#DEGREEUKR", degree.getName());
-        result.put("#DEGREEENG", degree.getNameEng() == null ? "" : degree.getNameEng().toUpperCase());
-        result.put("#QualificationUkr", specialization.getQualification() == null ? ""
-                : specialization.getQualification());
-        result.put("#QualificationEng", specialization.getQualificationEng() == null ? ""
-                : specialization.getQualificationEng());
+        result.put("#DEGREEENG", getSafely(degree.getNameEng()).toUpperCase());
+        result.put("#QualificationUkr", getSafely(specialization.getQualification()));
+        result.put("#QualificationEng", getSafely(specialization.getQualificationEng()));
 
         try {
+            DateFormat diplomaDateFormat = dateOfBirthFormat;
             StudentDegree studentDegree = student.getDegrees().stream().filter(
                     sd -> sd.getDegree().getName().equals(student.getStudentGroup().getSpecialization().getDegree().getName())
             ).findFirst().get();
-            result.put("#ThesisNameUkr", studentDegree.getThesisName() == null ? ""
-                    : studentDegree.getThesisName());
-            result.put("#ThesisNameEng", studentDegree.getThesisNameEng() == null ? ""
-                    : studentDegree.getThesisNameEng());
-            result.put("#ProtocolNumber", studentDegree.getProtocolNumber() == null ? ""
-                    : studentDegree.getProtocolNumber());
-            result.put("#PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber() == null ? ""
-                    : studentDegree.getPreviousDiplomaNumber());
+            result.put("#ThesisNameUkr", getSafely(studentDegree.getThesisName()));
+            result.put("#ThesisNameEng", getSafely(studentDegree.getThesisNameEng()));
+            result.put("#ProtocolNumber", getSafely(studentDegree.getProtocolNumber()));
+            result.put("#PreviousDiplomaNumber", getSafely(studentDegree.getPreviousDiplomaNumber()));
 
             int dateStyle = DateFormat.LONG;
             DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
-            result.put("#ProtocolDate", studentDegree.getProtocolDate() == null ? null
-                    :protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
+            result.put("#ProtocolDate", studentDegree.getProtocolDate() == null ? ""
+                    : protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
             DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
-            result.put("#ProtocolDateEng", studentDegree.getProtocolDate() == null ? null
+            result.put("#ProtocolDateEng", studentDegree.getProtocolDate() == null ? ""
                     : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
+
+            //FIXME
+            result.put("#SupplNumber", getSafely(studentDegree.getDiplomaNumber(), "СС № НОМЕРДОД"));
+            //FIXME
+            result.put("#SupplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДОД"
+                    : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
+            result.put("#DiplNumber", getSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
+            result.put("#DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
+                    : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         } catch (NoSuchElementException e) {
-            log.warn("There is no suitable StudentDegree for this student");
+            log.warn("There is no suitable StudentDegree for " + student.getInitialsUkr());
         }
 
         return result;
+    }
+
+    private String getSafely(String value, String ifNullOrEmpty) {
+        return StringUtils.isEmpty(value) ? ifNullOrEmpty : value;
+    }
+
+    private String getSafely(String value) {
+        return getSafely(value, "");
     }
 
     public BigDecimal getTotalCredits() {
