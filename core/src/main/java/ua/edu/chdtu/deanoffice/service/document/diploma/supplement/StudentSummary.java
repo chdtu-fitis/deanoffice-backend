@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
 import java.text.Collator;
@@ -13,6 +12,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static ua.edu.chdtu.deanoffice.util.GradeUtil.*;
 
 public class StudentSummary {
 
@@ -71,7 +72,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (grade.getGrade() == 0 && grade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT)
-                    grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
+                    grade.setGrade(getGradeFromPoints(grade.getPoints()));
             });
         });
     }
@@ -80,7 +81,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (grade.getPoints() == 0)
-                    grade.setPoints(GradeUtil.getPointsFromGrade(grade));
+                    grade.setPoints(getPointsFromGrade(grade));
             });
         });
     }
@@ -89,7 +90,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (!"ABCDEFx".contains(grade.getEcts()))
-                    grade.setEcts(GradeUtil.getECTSGrade(grade.getPoints()));
+                    grade.setEcts(getECTSGrade(grade.getPoints()));
                 if (grade.getCourse().getKnowledgeControl().getId() == Constants.CREDIT
                         && "ABCDE".contains(grade.getEcts().trim())) {
                     grade.setEcts("P");
@@ -97,28 +98,6 @@ public class StudentSummary {
             });
 
         });
-    }
-
-    public static int[] adjustAverageGradeAndPoints(double averageGrade, double averagePoints) {
-        int[] result = new int[2];
-        if (Math.abs(averageGrade - 3.5) < 0.001 || Math.abs(averageGrade - 4.5) < 0.001) {
-            result[1] = (int) Math.round(averagePoints);
-            result[0] = GradeUtil.getGradeFromPoints(result[1]);
-        } else {
-            if (GradeUtil.getGradeFromPoints(averagePoints) == Math.round(averageGrade)) {
-                result[0] = (int) Math.round(averageGrade);
-                result[1] = (int) Math.round(averagePoints);
-            }
-            if (GradeUtil.getGradeFromPoints(averagePoints) > Math.round(averageGrade)) {
-                result[0] = (int) Math.round(averageGrade);
-                result[1] = GradeUtil.getMaxPointsFromGrade(averageGrade);
-            }
-            if (GradeUtil.getGradeFromPoints(averagePoints) < Math.round(averageGrade)) {
-                result[0] = (int) Math.round(averageGrade);
-                result[1] = GradeUtil.getMinPointsFromGrade(averageGrade);
-            }
-        }
-        return result;
     }
 
     private void combineMultipleSemesterCourseGrades() {
@@ -211,7 +190,7 @@ public class StudentSummary {
                     pointsSum / grades.size());
             resultingGrade.setPoints(pointsAndGrade[1]);
             resultingGrade.setGrade(pointsAndGrade[0]);
-            resultingGrade.setEcts(GradeUtil.getECTSGrade(resultingGrade.getPoints()));
+            resultingGrade.setEcts(getECTSGrade(resultingGrade.getPoints()));
         } else {
             resultingGrade.setPoints((int) Math.round(pointsSum / grades.size()));
             resultingGrade.setGrade((int) Math.round(gradesSum / grades.size()));
@@ -234,8 +213,8 @@ public class StudentSummary {
             result.put("#Credits", formatCredits(grade.getCourse().getCredits()));
             result.put("#Hours", String.format("%d", grade.getCourse().getHours()));
             result.put("#LocalGrade", String.format("%d", grade.getPoints()));
-            result.put("#NationalGradeUkr", GradeUtil.getNationalGradeUkr(grade));
-            result.put("#NationalGradeEng", GradeUtil.getNationalGradeEng(grade));
+            result.put("#NationalGradeUkr", getNationalGradeUkr(grade));
+            result.put("#NationalGradeEng", getNationalGradeEng(grade));
             result.put("#ECTSGrade", grade.getEcts());
             result.put("#CourseNameUkr", grade.getCourse().getCourseName().getName());
             result.put("#CourseNameEng", grade.getCourse().getCourseName().getNameEng());
@@ -261,9 +240,9 @@ public class StudentSummary {
         Map<String, String> result = new HashMap<>();
 
         result.put("#SurnameUkr", student.getSurname().toUpperCase());
-        result.put("#SurnameEng", getSafely(student.getSurnameEng()).toUpperCase());
+        result.put("#SurnameEng", getSafely(student.getSurnameEng(), "Surname").toUpperCase());
         result.put("#NameUkr", student.getName().toUpperCase());
-        result.put("#NameEng", getSafely(student.getNameEng()).toUpperCase());
+        result.put("#NameEng", getSafely(student.getNameEng(), "Name").toUpperCase());
         result.put("#PatronimicUkr", student.getPatronimic().toUpperCase());
 
         DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
@@ -309,17 +288,15 @@ public class StudentSummary {
 
             int dateStyle = DateFormat.LONG;
             DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
-            result.put("#ProtocolDate", studentDegree.getProtocolDate() == null ? ""
+            result.put("#ProtocolDateUkr", studentDegree.getProtocolDate() == null ? ""
                     : protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
             DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
             result.put("#ProtocolDateEng", studentDegree.getProtocolDate() == null ? ""
                     : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
 
-            //FIXME
-            result.put("#SupplNumber", getSafely(studentDegree.getDiplomaNumber(), "СС № НОМЕРДОД"));
-            //FIXME
-            result.put("#SupplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДОД"
-                    : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
+            result.put("#SupplNumber", getSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
+            result.put("#SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
+                    : diplomaDateFormat.format(studentDegree.getSupplementDate()));
             result.put("#DiplNumber", getSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
             result.put("#DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                     : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
@@ -375,7 +352,7 @@ public class StudentSummary {
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(true);
         c.setKnowledgeControl(kc);
-        return GradeUtil.getNationalGradeUkr(g);
+        return getNationalGradeUkr(g);
     }
 
     public String getTotalNationalGradeEng() {
@@ -386,10 +363,10 @@ public class StudentSummary {
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(true);
         c.setKnowledgeControl(kc);
-        return GradeUtil.getNationalGradeEng(g);
+        return getNationalGradeEng(g);
     }
 
     private String getTotalECTS() {
-        return GradeUtil.getECTSGrade((int) Math.round(getTotalGrade()));
+        return getECTSGrade((int) Math.round(getTotalGrade()));
     }
 }

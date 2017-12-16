@@ -42,6 +42,28 @@ public class GradeUtil {
         return 0;
     }
 
+    public static int[] adjustAverageGradeAndPoints(double averageGrade, double averagePoints) {
+        int[] result = new int[2];
+        if (Math.abs(averageGrade - 3.5) < 0.001 || Math.abs(averageGrade - 4.5) < 0.001) {
+            result[1] = (int) Math.round(averagePoints);
+            result[0] = GradeUtil.getGradeFromPoints(result[1]);
+        } else {
+            if (GradeUtil.getGradeFromPoints(averagePoints) == Math.round(averageGrade)) {
+                result[0] = (int) Math.round(averageGrade);
+                result[1] = (int) Math.round(averagePoints);
+            }
+            if (GradeUtil.getGradeFromPoints(averagePoints) > Math.round(averageGrade)) {
+                result[0] = (int) Math.round(averageGrade);
+                result[1] = GradeUtil.getMaxPointsFromGrade(averageGrade);
+            }
+            if (GradeUtil.getGradeFromPoints(averagePoints) < Math.round(averageGrade)) {
+                result[0] = (int) Math.round(averageGrade);
+                result[1] = GradeUtil.getMinPointsFromGrade(averageGrade);
+            }
+        }
+        return result;
+    }
+
     public static String getNationalGradeUkr(Grade g) {
         if (g.getCourse().getKnowledgeControl().isHasGrade()) {
             switch (g.getEcts()) {

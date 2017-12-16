@@ -19,22 +19,26 @@ public class StudentDegree extends BaseEntity {
     private Student student;
     @ManyToOne
     private Degree degree;
-    @Column(name="diploma_number", length = 15)
+    @Column(name = "diploma_number", length = 15)
     private String diplomaNumber;
-    @Column(name="diploma_date")
+    @Column(name = "diploma_date")
     private Date diplomaDate;
-    @Column(name="thesis_name", length = 130)
+    @Column(name = "supplement_number", length = 15)
+    private String supplementNumber;
+    @Column(name = "supplement_date")
+    private Date supplementDate;
+    @Column(name = "thesis_name", length = 130)
     private String thesisName;
-    @Column(name="thesis_name_eng", length = 130)
+    @Column(name = "thesis_name_eng", length = 130)
     private String thesisNameEng;
-    @Column(name="protocol_number", length = 10)
+    @Column(name = "protocol_number", length = 10)
     private String protocolNumber;
-    @Column(name="protocol_date")
+    @Column(name = "protocol_date")
     private Date protocolDate;
-    @Column(name="previous_diploma_number", length = 15)
+    @Column(name = "previous_diploma_number", length = 15)
     private String previousDiplomaNumber;
-    @Column(name="previous_diploma_date")
+    @Column(name = "previous_diploma_date")
     private Date previousDiplomaDate;
-    @Column(name="awarded", nullable = false)
+    @Column(name = "awarded", nullable = false)
     private boolean awarded;
 }

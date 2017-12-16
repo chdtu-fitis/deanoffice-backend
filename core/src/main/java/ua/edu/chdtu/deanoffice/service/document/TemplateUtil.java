@@ -14,6 +14,7 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StringUtils;
 
 import javax.xml.bind.JAXBElement;
 import java.io.File;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class TemplateUtil {
 
@@ -76,17 +76,36 @@ public class TemplateUtil {
         for (Text text : placeholders) {
             try {
                 String value = placeholdersValues.get(text.getValue().trim());
+                if (StringUtils.isEmpty(value))
+                    log.warn(text.getValue() + " is empty");
                 text.setValue(value);
             } catch (NullPointerException e) {
-                log.debug(text.getValue() + " is null");
+                log.warn(text.getValue() + " is null");
             }
         }
     }
 
     private static List<Text> getTextsContainingPlaceholders(WordprocessingMLPackage template) {
         List<Object> texts = getAllElementsFromObject(template.getMainDocumentPart(), Text.class);
-        List<Object> placeholders = texts.stream().filter(o ->
-                isAPlaceholder((Text) o)).collect(Collectors.toList());
+        List<Object> placeholders = new ArrayList<>();
+        for (int i = 0; i < texts.size(); i++) {
+            Text text = ((Text) texts.get(i));
+            if (isAPlaceholder(text)) {
+                placeholders.add(text);
+                continue;
+            }
+            Text potentialPlaceholder = new Text();
+            if (text.getValue().trim().equals(PLACEHOLDER_PREFIX)) {
+                try {
+                    potentialPlaceholder = (Text) texts.get(i + 1);
+                } catch (IndexOutOfBoundsException e) {
+                    log.debug("Seems that " + PLACEHOLDER_PREFIX + " is the last symbol in template");
+                }
+                potentialPlaceholder.setValue(text.getValue() + potentialPlaceholder.getValue());
+                text.setValue("");
+                placeholders.add(potentialPlaceholder);
+            }
+        }
         List<Text> result = new ArrayList<>();
         placeholders.forEach(p -> result.add((Text) (p)));
         return result;
@@ -130,7 +149,7 @@ public class TemplateUtil {
     }
 
     private static boolean isAPlaceholder(Text text) {
-        return text.getValue() != null && text.getValue().startsWith(PLACEHOLDER_PREFIX);
+        return text.getValue() != null && text.getValue().startsWith(PLACEHOLDER_PREFIX) && text.getValue().length() > 1;
     }
 
     public static Tr findRowInTable(Tbl table, String templateKey) {
