@@ -19,7 +19,7 @@ public class GroupController {
     @Autowired
     private GraduateService graduateService;
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, path = "/graduates")
     public ResponseEntity<List<NamedDTO>> getGraduateGroups(@RequestParam Integer degreeId) {
         List<StudentGroup> groups = graduateService.getGraduateGroups(degreeId);
         ModelMapper modelMapper = new ModelMapper();
