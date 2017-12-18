@@ -211,7 +211,7 @@ public class StudentSummary {
         Map<String, String> result = new HashMap<>();
         try {
             result.put("#Credits", formatCredits(grade.getCourse().getCredits()));
-            result.put("#Hours", String.format("%d", grade.getCourse().getHours()));
+            result.put("#Hours", formatHours(grade.getCourse().getHours()));
             result.put("#LocalGrade", String.format("%d", grade.getPoints()));
             result.put("#NationalGradeUkr", getNationalGradeUkr(grade));
             result.put("#NationalGradeEng", getNationalGradeEng(grade));
@@ -320,11 +320,21 @@ public class StudentSummary {
     }
 
     private static String formatCredits(BigDecimal credits) {
-        String formattedCredits = String.format("%.1f", credits);
-        if (formattedCredits.split(",")[1].equals("0"))
-            return String.format("%.0f", credits);
-        else
-            return formattedCredits;
+        if (credits.equals(new BigDecimal(0)))
+            return "-";
+        else {
+            String formattedCredits = String.format("%.1f", credits);
+            if (formattedCredits.split(",")[1].equals("0"))
+                return String.format("%.0f", credits);
+            else
+                return formattedCredits;
+        }
+    }
+
+    private static String formatHours(int hours) {
+        if (hours == 0)
+            return "-";
+        else return String.format("%d", hours);
     }
 
     public Double getTotalGrade() {

@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {DiplomaSupplementService.class, StudentService.class, GradeService.class,
         StudentRepository.class, GradeRepository.class, StudentGroupRepository.class, StudentGroupService.class})
@@ -201,12 +203,12 @@ public class TestFeatureDiplomaAddition {
     @Test
     public void testAdjustAverage() {
         double[] expectedResult1 = {5, 90};
-        int[] actualResult1 = StudentSummary.adjustAverageGradeAndPoints(5, 89);
+        int[] actualResult1 = adjustAverageGradeAndPoints(5, 89);
         Assert.assertEquals(expectedResult1[0], actualResult1[0], 0.01);
         Assert.assertEquals(expectedResult1[1], actualResult1[1], 0.01);
 
         double[] expectedResult2 = {4, 83};
-        int[] actualResult2 = StudentSummary.adjustAverageGradeAndPoints(4.5, 83);
+        int[] actualResult2 = adjustAverageGradeAndPoints(4.5, 83);
         Assert.assertEquals(expectedResult2[0], actualResult2[0], 0.01);
         Assert.assertEquals(expectedResult2[1], actualResult2[1], 0.01);
     }
@@ -285,8 +287,8 @@ public class TestFeatureDiplomaAddition {
         Assert.assertEquals("Fx", grade5.getEcts());
     }
 
-    @Test
-    public void testGroupSupplements() {
-        diplomaSupplementService.formDiplomaSupplementForGroup(389);
-    }
+//    @Test
+//    public void testGroupSupplements() {
+//        diplomaSupplementService.formDiplomaSupplementForGroup(389);
+//    }
 }

@@ -120,7 +120,9 @@ public class TemplateUtil {
         }
     }
 
-    private static void replacePlaceholdersInRelativeElement(WordprocessingMLPackage template, String relationType, Map<String, String> dictionary) {
+    private static void replacePlaceholdersInRelativeElement(WordprocessingMLPackage template,
+                                                             String relationType,
+                                                             Map<String, String> dictionary) {
         RelationshipsPart relationshipPart = template.getMainDocumentPart().getRelationshipsPart();
         List<Relationship> relationships = relationshipPart.getRelationshipsByType(relationType);
         List<Text> texts = new ArrayList<>();
