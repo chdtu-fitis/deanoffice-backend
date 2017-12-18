@@ -29,7 +29,7 @@ public class StudentService {
     }
 
     public List<Student> getByGroupIdAndActive(Integer id, Boolean isActive) {
-        return studentRepository.getByStudentGroupIdAndActiveOrderBySurnameAsc(id, isActive);
+        return studentRepository.findAllByStudentGroupIdAndActiveOrderBySurnameAscNameAscPatronimicAsc(id, isActive);
     }
 
 
