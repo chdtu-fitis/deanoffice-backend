@@ -276,10 +276,10 @@ public class StudentSummary {
         result.put("#QualificationUkr", getSafely(specialization.getQualification()));
         result.put("#QualificationEng", getSafely(specialization.getQualificationEng()));
 
-        result.put("#ProgramHeadName", getSafely(specialization.getEducationalProgramHeadInfo()));
-        result.put("#ProgramHeadNameEng", getSafely(specialization.getEducationalProgramHeadInfo()));
+        result.put("#ProgramHeadName", getSafely(specialization.getEducationalProgramHeadName()));
+        result.put("#ProgramHeadNameEng", getSafely(specialization.getEducationalProgramHeadNameEng()));
         result.put("#ProgramHeadInfo", getSafely(specialization.getEducationalProgramHeadInfo()));
-        result.put("#ProgramHeadInfoEng", getSafely(specialization.getEducationalProgramHeadInfo()));
+        result.put("#ProgramHeadInfoEng", getSafely(specialization.getEducationalProgramHeadInfoEng()));
 
         try {
             DateFormat diplomaDateFormat = dateOfBirthFormat;
