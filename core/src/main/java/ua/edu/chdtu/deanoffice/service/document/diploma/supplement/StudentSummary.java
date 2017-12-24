@@ -273,8 +273,19 @@ public class StudentSummary {
         result.put("#DegreeEng", getSafely(degree.getNameEng()));
         result.put("#DEGREEUKR", degree.getName());
         result.put("#DEGREEENG", getSafely(degree.getNameEng()).toUpperCase());
+        result.put("#DegreeRequiredCredits", formatCredits(degree.getRequiredCredits()));
         result.put("#QualificationUkr", getSafely(specialization.getQualification()));
         result.put("#QualificationEng", getSafely(specialization.getQualificationEng()));
+        result.put("#FieldOfStudy", getSafely(speciality.getFieldOfStudy()));
+        result.put("#FieldOfStudyEng", getSafely(speciality.getFieldOfStudyEng()));
+        result.put("#QualificationLevel", getSafely(degree.getQualificationLevel()));
+        result.put("#QualificationLevelEng", getSafely(degree.getQualificationLevelEng()));
+        result.put("#AdmissionRequirements", getSafely(degree.getAdmissionRequirements()));
+        result.put("#AdmissionRequirementsEng", getSafely(degree.getAdmissionRequirementsEng()));
+        result.put("#FurtherStudyAccess", getSafely(degree.getFurtherStudyAccess()));
+        result.put("#FurtherStudyAccessEng", getSafely(degree.getFurtherStudyAccessEng()));
+        result.put("#ProfessionalStatus", getSafely(degree.getProfessionalStatus()));
+        result.put("#ProfessionalStatusEng", getSafely(degree.getProfessionalStatusEng()));
 
         result.put("#ProgramHeadName", getSafely(specialization.getEducationalProgramHeadName()));
         result.put("#ProgramHeadNameEng", getSafely(specialization.getEducationalProgramHeadNameEng()));
@@ -325,7 +336,7 @@ public class StudentSummary {
     }
 
     private static String formatCredits(BigDecimal credits) {
-        if (credits.equals(new BigDecimal(0)))
+        if (credits == null || credits.equals(new BigDecimal(0)))
             return "-";
         else {
             String formattedCredits = String.format("%.1f", credits);
