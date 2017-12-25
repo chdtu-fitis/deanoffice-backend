@@ -184,7 +184,7 @@ public class StudentSummary {
         newCourse.setKnowledgeControl(resultingGrade.getCourse().getKnowledgeControl());
         resultingGrade.setCourse(newCourse);
 
-        if (resultingGrade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT) {
+        if (!resultingGrade.getCourse().getKnowledgeControl().isHasGrade()) {
             int[] pointsAndGrade = adjustAverageGradeAndPoints(
                     gradesSum / grades.size(),
                     pointsSum / grades.size());
@@ -271,7 +271,7 @@ public class StudentSummary {
         result.put("#SpecialityEng", getSafely(speciality.getNameEng()));
         result.put("#DegreeUkr", degree.getName());
         result.put("#DegreeEng", getSafely(degree.getNameEng()));
-        result.put("#DEGREEUKR", degree.getName());
+        result.put("#DEGREEUKR", degree.getName().toUpperCase());
         result.put("#DEGREEENG", getSafely(degree.getNameEng()).toUpperCase());
         result.put("#DegreeRequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("#QualificationUkr", getSafely(specialization.getQualification()));
@@ -359,7 +359,7 @@ public class StudentSummary {
         for (List<Grade> gradesSublist :
                 grades) {
             for (Grade g : gradesSublist) {
-                if (g.getCourse().getKnowledgeControl().getId() != Constants.CREDIT && g.getPoints() > 0) {
+                if (g.getCourse().getKnowledgeControl().isHasGrade() && g.getPoints() > 0) {
                     pointSum += g.getPoints();
                     pointsCount++;
                 }
