@@ -15,16 +15,14 @@ import java.math.BigDecimal;
 @Entity
 @Table(name="degree", uniqueConstraints = {@UniqueConstraint(columnNames = {"id", "name"})})
 public class Degree extends NameWithEngEntity {
-    @Column(name = "qualification_level")
-    private String qualificationLevel;
-    @Column(name = "qualification_level_eng")
-    private String qualificationLevelEng;
+    @Column(name = "qualification_level_descr")
+    private String qualificationLevelDescription;
+    @Column(name = "qualification_level_descr_eng")
+    private String qualificationLevelDescriptionEng;
     @Column(name = "admission_requirements")
     private String admissionRequirements;
     @Column(name = "admission_requirements_eng")
     private String admissionRequirementsEng;
-    @Column(name = "required_credits", precision = 4, scale = 1)
-    private BigDecimal requiredCredits;
     @Column(name = "further_study_access")
     private String furtherStudyAccess;
     @Column(name = "further_study_access_eng")

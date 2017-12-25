@@ -273,13 +273,13 @@ public class StudentSummary {
         result.put("#DegreeEng", getSafely(degree.getNameEng()));
         result.put("#DEGREEUKR", degree.getName());
         result.put("#DEGREEENG", getSafely(degree.getNameEng()).toUpperCase());
-        result.put("#DegreeRequiredCredits", formatCredits(degree.getRequiredCredits()));
+        result.put("#DegreeRequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("#QualificationUkr", getSafely(specialization.getQualification()));
         result.put("#QualificationEng", getSafely(specialization.getQualificationEng()));
         result.put("#FieldOfStudy", getSafely(speciality.getFieldOfStudy()));
         result.put("#FieldOfStudyEng", getSafely(speciality.getFieldOfStudyEng()));
-        result.put("#QualificationLevel", getSafely(degree.getQualificationLevel()));
-        result.put("#QualificationLevelEng", getSafely(degree.getQualificationLevelEng()));
+        result.put("#QualificationLevel", getSafely(degree.getQualificationLevelDescription()));
+        result.put("#QualificationLevelEng", getSafely(degree.getQualificationLevelDescriptionEng()));
         result.put("#AdmissionRequirements", getSafely(degree.getAdmissionRequirements()));
         result.put("#AdmissionRequirementsEng", getSafely(degree.getAdmissionRequirementsEng()));
         result.put("#FurtherStudyAccess", getSafely(degree.getFurtherStudyAccess()));

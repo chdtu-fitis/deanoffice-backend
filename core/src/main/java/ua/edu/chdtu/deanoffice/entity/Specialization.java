@@ -37,4 +37,6 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String educationalProgramHeadInfo;
     @Column(name = "program_head_info_eng", nullable = false)
     private String educationalProgramHeadInfoEng;
+    @Column(name = "required_credits", precision = 4, scale = 1)
+    private BigDecimal requiredCredits;
 }
