@@ -44,7 +44,7 @@ public class DiplomaSupplementService {
         this.studentSummary = studentSummary;
     }
 
-    public File formDiplomaSupplementForStudent(Integer studentId) {
+    public synchronized File formDiplomaSupplementForStudent(Integer studentId) {
         Student student = studentService.get(studentId);
         List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
         this.studentSummary = new StudentSummary(student, grades);
@@ -125,7 +125,7 @@ public class DiplomaSupplementService {
         return grades;
     }
 
-    public File formDiplomaSupplementForGroup(Integer groupId) {
+    public synchronized File formDiplomaSupplementForGroup(Integer groupId) {
         StudentGroup studentGroup = groupService.getById(groupId);
         if (studentGroup == null || studentGroup.getStudents().isEmpty())
             return null;
