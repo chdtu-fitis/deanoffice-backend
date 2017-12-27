@@ -10,4 +10,7 @@ import java.util.List;
 public interface CourseRepository extends JpaRepository<Course, Integer> {
     @Query
     List<Course> findCourseById(@Param("courseId") int courseId);
+
+    @Query("select C from CourseForGroup CG join CG.course C where CG.studentGroup.id=:groupId")
+    List<Course> getByGroupId(@Param("groupId") Integer groupId);
 }
