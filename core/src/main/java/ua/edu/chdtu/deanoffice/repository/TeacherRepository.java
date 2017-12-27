@@ -2,9 +2,7 @@ package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.RepositoryDefinition;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 
 import java.util.List;
@@ -15,5 +13,8 @@ import java.util.List;
 public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     @Query("select t from Teacher t where t.department.faculty.id = :facultyId and t.active = true ")
     List<Teacher> findAllByFaculty(@Param("facultyId") int facultyId);
+
+    @Query
+    List<Teacher> findTeacherById(@Param("teacherId") int teacherId);
 
 }

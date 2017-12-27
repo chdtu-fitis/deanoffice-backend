@@ -17,7 +17,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
 //            "where sg.active = true and spec.id = :specId")
 //    List<CourseForGroup> findAllBySpecialization(@Param("specId") int specId);
 
-    @Query("select cfg from CourseForGroup as cfg where cfg.studentGroup.id = :groupId and cfg.studentGroup.active = true")
-    List<CourseForGroup> findAllByStudentGroup(@Param("groupId") int group);
+    @Query("select cfg from CourseForGroup as cfg where cfg.studentGroup.id = :groupId and cfg.studentGroup.active = false ")//Тут треба true, але оскільки в базі тільки не активні групи тому false покищо
+    List<CourseForGroup> findAllByStudentGroup(@Param("groupId") int groupId);
 
 }
