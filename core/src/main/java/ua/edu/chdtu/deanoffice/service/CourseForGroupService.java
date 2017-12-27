@@ -17,7 +17,7 @@ public class CourseForGroupService {
     }
 
     public List<CourseForGroup> getCourseForGroup(int idGroup) {
-        List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllByStudentGroup(idGroup);
+        List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllByStudentGroupId(idGroup);
         return courseForGroup;
     }
 }
