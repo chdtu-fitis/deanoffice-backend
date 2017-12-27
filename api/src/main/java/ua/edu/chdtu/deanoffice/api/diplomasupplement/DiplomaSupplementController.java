@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.service.GeneralService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
 import java.io.File;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/diplsuppl")
@@ -31,6 +32,7 @@ public class DiplomaSupplementController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
     public ResponseEntity<File> generateForStudent(@PathVariable Integer studentId) {
+        log.info("SUPPLEMENT STUD_ID="+studentId+" TIME: "+new Date());
         return ResponseEntity.ok(diplomaSupplementService.formDiplomaSupplementForStudent(studentId));
     }
 
