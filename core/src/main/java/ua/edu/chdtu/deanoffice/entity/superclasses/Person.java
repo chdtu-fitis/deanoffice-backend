@@ -14,7 +14,7 @@ public class Person extends BaseEntity {
     @Column(name = "active", nullable = false)
     private boolean active = true;
     @Column(name = "sex", nullable = false)
-    char sex = 'm';
+    private char sex = 'm';
 
     public boolean isActive() {
         return active;
