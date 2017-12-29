@@ -16,7 +16,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
 //            "join cfg.studentGroup sg join sg.specialization spec " +
 //            "where sg.active = true and spec.id = :specId")
 //    List<CourseForGroup> findAllBySpecialization(@Param("specId") int specId);
-    
+
     List<CourseForGroup> findAllByStudentGroupId(@Param("groupId") int groupId);
 
 }
