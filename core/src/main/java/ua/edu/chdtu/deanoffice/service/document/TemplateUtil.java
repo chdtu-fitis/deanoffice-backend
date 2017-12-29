@@ -43,7 +43,7 @@ public class TemplateUtil {
     }
 
     public static File saveDocument(WordprocessingMLPackage template, String target) {
-        File f = new File(target);
+        File f = new File(System.getProperty("java.io.tmpdir") + target);
         try {
             template.save(f);
         } catch (Docx4JException e) {
