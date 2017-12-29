@@ -287,6 +287,14 @@ public class StudentSummary {
         result.put("#ProfessionalStatus", getSafely(degree.getProfessionalStatus()));
         result.put("#ProfessionalStatusEng", getSafely(degree.getProfessionalStatusEng()));
 
+        result.put("#KnowledgeAndUndertanding", getSafely(specialization.getKnowledgeAndUnderstandingOutcomes()));
+        result.put("#KnowledgeAndUndertandingEng", getSafely(specialization.getKnowledgeAndUnderstandingOutcomesEng()));
+        result.put("#ApplyingKnowledgeAndUnderstanding", getSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomes()));
+        result.put("#ApplyingKnowledgeAndUnderstandingEng", getSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomesEng()));
+        result.put("#MakingJudgements", getSafely(specialization.getMakingJudgementsOutcomes()));
+        result.put("#MakingJudgementsEng", getSafely(specialization.getMakingJudgementsOutcomesEng()));
+
+
         result.put("#ProgramHeadName", getSafely(specialization.getEducationalProgramHeadName()));
         result.put("#ProgramHeadNameEng", getSafely(specialization.getEducationalProgramHeadNameEng()));
         result.put("#ProgramHeadInfo", getSafely(specialization.getEducationalProgramHeadInfo()));
