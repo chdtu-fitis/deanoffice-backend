@@ -39,16 +39,16 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String educationalProgramHeadInfoEng;
     @Column(name = "required_credits", precision = 4, scale = 1)
     private BigDecimal requiredCredits;
-    @Column(name = "knowledge_and_understanding_outcomes")
+    @Column(name = "knowledge_and_understanding_outcomes", length=1200)
     private String knowledgeAndUnderstandingOutcomes;
-    @Column(name = "knowledge_and_understanding_outcomes_eng")
+    @Column(name = "knowledge_and_understanding_outcomes_eng", length=1200)
     private String knowledgeAndUnderstandingOutcomesEng;
-    @Column(name = "applying_knowledge_and_understanding_outcomes")
+    @Column(name = "applying_knowledge_and_understanding_outcomes", length=1200)
     private String applyingKnowledgeAndUnderstandingOutcomes;
-    @Column(name = "applying_knowledge_and_understanding_outcomes_eng")
+    @Column(name = "applying_knowledge_and_understanding_outcomes_eng", length=1200)
     private String applyingKnowledgeAndUnderstandingOutcomesEng;
-    @Column(name = "making_judgements_outcomes")
+    @Column(name = "making_judgements_outcomes", length=1200)
     private String makingJudgementsOutcomes;
-    @Column(name = "making_judgements_outcomes_eng")
+    @Column(name = "making_judgements_outcomes_eng", length=1200)
     private String makingJudgementsOutcomesEng;
 }
