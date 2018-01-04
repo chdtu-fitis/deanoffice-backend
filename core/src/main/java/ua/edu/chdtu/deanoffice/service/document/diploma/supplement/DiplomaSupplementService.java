@@ -49,7 +49,7 @@ public class DiplomaSupplementService {
         List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
         this.studentSummary = new StudentSummary(student, grades);
         return saveDocument(fillWithStudentInformation(TEMPLATE),
-                studentSummary.getStudent().getInitialsUkr() + ".docx");
+                studentSummary.getStudent().getNameEng() + " " + studentSummary.getStudent().getSurnameEng() + ".docx");
     }
 
     public WordprocessingMLPackage fillWithStudentInformation(String templateFilepath) {

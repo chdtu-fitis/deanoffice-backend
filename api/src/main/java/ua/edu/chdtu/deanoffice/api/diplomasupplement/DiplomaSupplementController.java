@@ -35,19 +35,21 @@ public class DiplomaSupplementController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
     public ResponseEntity<Resource> generateForStudent(@PathVariable Integer studentId) {
-        return getResourceResponseEntity(diplomaSupplementService.formDiplomaSupplementForStudent(studentId), studentId + "");
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplementForStudent(studentId);
+        return getResourceResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName());
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}")
     public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId) {
-        return getResourceResponseEntity(diplomaSupplementService.formDiplomaSupplementForGroup(groupId), groupId + "");
+        File groupDiplomaSupplements = diplomaSupplementService.formDiplomaSupplementForGroup(groupId);
+        return getResourceResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
 
     private static ResponseEntity<Resource> getResourceResponseEntity(File result, String asciiName) {
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
             return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + asciiName + ".docx")
+                    .header("Content-Disposition", "attachment; filename=" + asciiName)
                     .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
                     .contentLength(result.length())
                     .body(resource);
