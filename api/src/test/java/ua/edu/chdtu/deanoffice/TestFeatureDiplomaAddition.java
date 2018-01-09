@@ -27,9 +27,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints;
 
@@ -74,9 +72,9 @@ public class TestFeatureDiplomaAddition {
         StudentGroup studentGroup = new StudentGroup();
         studentGroup.setName("АБ-123");
         studentGroup.setActive(true);
-        studentGroup.setStudySemesters(8);
-        studentGroup.setStudyYears(new BigDecimal(4));
-        studentGroup.setBeginYears(1);
+        studentGroup.setStudySemesters(3);
+        studentGroup.setStudyYears(new BigDecimal(1.5));
+        studentGroup.setBeginYears(5);
         studentGroup.setTuitionForm('f');
         studentGroup.setTuitionTerm('f');
         return studentGroup;
@@ -108,8 +106,25 @@ public class TestFeatureDiplomaAddition {
         Speciality speciality = createSpeciality();
         specialization.setSpeciality(speciality);
 
-        Degree degree = new Degree("Ступінь", "Degree");
+        Degree degree = new Degree("Магістр", "Master");
         specialization.setDegree(degree);
+
+        StudentDegree studentDegree = new StudentDegree();
+        studentDegree.setStudent(student);
+        studentDegree.setDegree(degree);
+        studentDegree.setThesisName("Тема роботи");
+        studentDegree.setThesisNameEng("Thesis");
+        studentDegree.setPreviousDiplomaDate(new Date());
+        studentDegree.setPreviousDiplomaNumber("123456");
+        studentDegree.setDiplomaDate(new Date());
+        studentDegree.setDiplomaNumber("654321");
+        studentDegree.setAwarded(false);
+        studentDegree.setProtocolDate(new Date());
+        studentDegree.setProtocolNumber("112233");
+        studentDegree.setSupplementDate(new Date());
+        studentDegree.setSupplementNumber("234567");
+        student.setDegrees(new HashSet<>());
+        student.getDegrees().add(studentDegree);
 
         return student;
     }
@@ -126,8 +141,11 @@ public class TestFeatureDiplomaAddition {
         courseName1.setNameEng("Multiple Semester course 1");
 
         Course course11 = createCourse(courseName1, true);
+        course11.setHours(60);
         Course course12 = createCourse(courseName1, true);
+        course12.setHours(60);
         Course course13 = createCourse(courseName1, false);
+        course13.setHours(30);
 
         Grade grade11 = createGrade(course11, student, 89);
         Grade grade12 = createGrade(course12, student, 75);
@@ -138,6 +156,7 @@ public class TestFeatureDiplomaAddition {
         courseName12.setNameEng("Course 2");
 
         Course course121 = createCourse(courseName12, true);
+        course121.setHours(90);
 
         Grade grade121 = createGrade(course121, 75);
 
@@ -184,11 +203,11 @@ public class TestFeatureDiplomaAddition {
         Student student = createStudent();
         StudentSummary summary = new StudentSummary(student, createGrades(student));
 
-//        Assert.assertEquals(82, summary.getTotalGrade(), 0.1);
-//        Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
-//        Assert.assertEquals("Good", summary.getTotalNationalGradeEng());
-//        Assert.assertEquals(0, summary.getTotalHours());
-//        Assert.assertEquals(0, summary.getTotalCredits(30), 0.1);
+        Assert.assertEquals(84.8, summary.getTotalGrade(), 0.1);
+        Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
+        Assert.assertEquals("Good", summary.getTotalNationalGradeEng());
+        Assert.assertEquals(510, summary.getTotalHours().intValue());
+        Assert.assertEquals(17, summary.getTotalCredits().doubleValue(), 0.1);
     }
 
     @Test
@@ -286,9 +305,4 @@ public class TestFeatureDiplomaAddition {
         Assert.assertEquals("Fail", GradeUtil.getNationalGradeEng(grade5));
         Assert.assertEquals("Fx", grade5.getEcts());
     }
-
-//    @Test
-//    public void testGroupSupplements() {
-//        diplomaSupplementService.formDiplomaSupplementForGroup(389);
-//    }
 }
