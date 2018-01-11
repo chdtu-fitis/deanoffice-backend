@@ -47,7 +47,7 @@ public class TestFeatureDiplomaAddition {
 
     private static Logger log = LoggerFactory.getLogger(Application.class);
 
-    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
+    private static final String TEMPLATE = "docs/templates/DiplomaSupplement.docx";
 
     private static DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
 

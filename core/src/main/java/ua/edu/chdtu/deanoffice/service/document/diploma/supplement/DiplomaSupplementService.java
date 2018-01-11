@@ -22,7 +22,8 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 @Service
 public class DiplomaSupplementService {
 
-    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
+    private static final String TEMPLATES_PATH = "docs/templates/";
+    private static final String TEMPLATE = TEMPLATES_PATH + "DiplomaSupplement.docx";
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
     private StudentService studentService;

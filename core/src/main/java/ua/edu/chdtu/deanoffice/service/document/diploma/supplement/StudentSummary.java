@@ -273,7 +273,10 @@ public class StudentSummary {
         result.put("#DegreeEng", getSafely(degree.getNameEng()));
         result.put("#DEGREEUKR", degree.getName().toUpperCase());
         result.put("#DEGREEENG", getSafely(degree.getNameEng()).toUpperCase());
-        result.put("#DegreeRequiredCredits", formatCredits(specialization.getRequiredCredits()));
+        result.put("#TheoreticalTrainingRequiredCredits", formatCredits(countCreditsSum(grades.get(0))));
+        result.put("#PracticalTrainingRequiredCredits", formatCredits(countCreditsSum(grades.get(2)).add(countCreditsSum(grades.get(1)))));
+        result.put("#ThesisDevelopmentRequiredCredits", formatCredits(countCreditsSum(grades.get(3))));
+        result.put("#DegreeRequiredCredits", formatCredits(getTotalCredits()));
         result.put("#QualificationUkr", getSafely(specialization.getQualification()));
         result.put("#QualificationEng", getSafely(specialization.getQualificationEng()));
         result.put("#FieldOfStudy", getSafely(speciality.getFieldOfStudy()));
@@ -337,6 +340,15 @@ public class StudentSummary {
 
     private String getSafely(String value) {
         return getSafely(value, "");
+    }
+
+    private static BigDecimal countCreditsSum(List<Grade> grades) {
+        BigDecimal result = new BigDecimal(0);
+        for (Grade g :
+                grades) {
+            result = result.add(g.getCourse().getCredits());
+        }
+        return result;
     }
 
     public BigDecimal getTotalCredits() {
