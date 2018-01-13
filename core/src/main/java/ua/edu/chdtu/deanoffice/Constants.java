@@ -14,5 +14,6 @@ public class Constants {
     public static final int STATE_EXAM = 6;
     public static final int ATTESTATION = 7;
     public static final int INTERNSHIP = 8;
+    public static final int NON_GRADED_INTERNSHIP = 9;
 
 }

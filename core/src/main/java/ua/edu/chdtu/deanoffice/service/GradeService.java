@@ -18,7 +18,7 @@ import static ua.edu.chdtu.deanoffice.Constants.*;
 public class GradeService {
     private Integer KNOWLEDGE_CONTROL_PART1[] = {EXAM, CREDIT, DIFFERENTIATED_CREDIT};
     private Integer KNOWLEDGE_CONTROL_PART2[] = {COURSEWORK, COURSE_PROJECT};
-    private Integer KNOWLEDGE_CONTROL_PART3[] = {INTERNSHIP};
+    private Integer KNOWLEDGE_CONTROL_PART3[] = {INTERNSHIP, NON_GRADED_INTERNSHIP};
     private Integer KNOWLEDGE_CONTROL_PART4[] = {ATTESTATION};
 
     private GradeRepository gradeRepository;

@@ -91,7 +91,7 @@ public class StudentSummary {
             gradeSublist.forEach(grade -> {
                 if (!"ABCDEFx".contains(grade.getEcts()))
                     grade.setEcts(getECTSGrade(grade.getPoints()));
-                if (grade.getCourse().getKnowledgeControl().getId() == Constants.CREDIT
+                if (!grade.getCourse().getKnowledgeControl().isHasGrade()
                         && "ABCDE".contains(grade.getEcts().trim())) {
                     grade.setEcts("P");
                 }
