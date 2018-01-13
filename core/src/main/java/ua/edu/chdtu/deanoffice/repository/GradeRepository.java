@@ -20,5 +20,4 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             @Param("courseIds") List<Integer> courseIds,
             @Param("KnowledgeControlIds") List<Integer> knowledgeControlsIds
     );
-
 }
