@@ -16,8 +16,8 @@ public class CourseForGroupDTO {
     @JsonView(GroupViews.Name.class)
     private CourseDTO course;
     private GroupDTO studentGroup;
-    @JsonView(GroupViews.Name.class)
+    @JsonView(GroupViews.Course.class)
     private TeacherDTO teacher;
-    @JsonView(GroupViews.Name.class)
+    @JsonView(GroupViews.Course.class)
     private Date examDate;
 }
