@@ -44,6 +44,7 @@ public class GradePercentageReportService {
         studentsReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
         List<Student> students = new ArrayList<>(group.getStudents());
+        students.removeIf(student -> !student.isActive());
         students.sort((s1, s2) -> {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
             return ukrainianCollator.compare(s1.getSurname(), s2.getSurname());
