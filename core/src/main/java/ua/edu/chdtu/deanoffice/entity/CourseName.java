@@ -11,7 +11,7 @@ import javax.persistence.Table;
 public class CourseName extends NameWithEngEntity {
     @Column(name="abbreviation", nullable = true, length = 15)
     private String abbreviation;
-
+//TODO cr: старайтеся писати в одному стилі. Якщо використовуйте ломбок в ентітях то використовуйте завжди
     public String getAbbreviation() {
         return abbreviation;
     }

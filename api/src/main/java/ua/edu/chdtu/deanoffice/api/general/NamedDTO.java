@@ -8,4 +8,5 @@ import lombok.Setter;
 public class NamedDTO {
     private int id;
     private String name;
+    //TODO cr: в ДТО можна зробити public проперті без геттерів/сетерів
 }

@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.util;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
 public class GradeUtil {
+    //TODO cr: перевести на енуми - так краще читати і більшість цих методів можна буде видалити
     public static String getECTSGrade(int points) {
         if (points >= 90 && points <= 100) return "A";
         if (points >= 82 && points <= 89) return "B";

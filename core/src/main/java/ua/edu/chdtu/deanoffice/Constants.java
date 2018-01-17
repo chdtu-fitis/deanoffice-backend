@@ -15,5 +15,6 @@ public class Constants {
     public static final int ATTESTATION = 7;
     public static final int INTERNSHIP = 8;
     public static final int NON_GRADED_INTERNSHIP = 9;
+    //TODO cr: це схоже на якийсь список для якоїсь однієї цілі. Можливо тут краще використастити енум замість констант?
 
 }

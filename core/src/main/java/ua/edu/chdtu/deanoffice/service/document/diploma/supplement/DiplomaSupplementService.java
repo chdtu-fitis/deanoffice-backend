@@ -29,6 +29,8 @@ public class DiplomaSupplementService {
     private StudentService studentService;
     private GradeService gradeService;
     private StudentGroupService groupService;
+//    TODO cr: Неправильне використання змінної. Не можна використовувати не синглтон зміну в синглтон об'єктах.
+//                  В багатопочних апп тут неможливо сказати який об'єкт використовується
     private StudentSummary studentSummary;
 
     public DiplomaSupplementService(StudentService studentService, GradeService gradeService, StudentGroupService groupService) {
@@ -51,8 +53,12 @@ public class DiplomaSupplementService {
         this.studentSummary = new StudentSummary(student, grades);
         return saveDocument(fillWithStudentInformation(TEMPLATE),
                 studentSummary.getStudent().getSurnameEng() + " " + studentSummary.getStudent().getNameEng() + ".docx");
+//TODO cr: для чого так складно - замість student.getId() можна написати studentId, а замість studentSummary.getStudent() краще просто student
+//TODO cr: тут потешційна дирка в безпеці якщо в імені студента раніше записані символи типу ../,
+//                          то можна перезаписати або зберегти файл не в тому місці де його очікують
     }
 
+    //TODO cr: вичитку і процес шаблону краще винести в окремий сервіс
     public WordprocessingMLPackage fillWithStudentInformation(String templateFilepath) {
         WordprocessingMLPackage template = loadTemplate(templateFilepath);
         fillTableWithGrades(template);
@@ -77,6 +83,7 @@ public class DiplomaSupplementService {
         List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
 
         Tr templateRow = (Tr) gradeTableRows.get(1);
+        //TODO cr: possible IndexOfBoundException
         int rowToAddIndex;
 
         //The table is filling upwards
@@ -98,11 +105,14 @@ public class DiplomaSupplementService {
                 rowToAddIndex++;
             }
             sectionNumber--;
+            //TODO cr: поки що тут не все так очевидно. добре було б добавити комент як цей повинно працювати. Скоріше за все тут іде обробка якизось додаткових секцій в темлейті
+            //TODO cr: дай імена магічним числам де треба
         }
         tempTable.getContent().remove(templateRow);
         replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
 
+    //TODO cr: якщо є складні структури даниз типу List<List<>> можна попробувати винести це в якийсь окремий об'єкт
     private static int getGradeNumberFromBeginning(List<List<Grade>> masterList, List<Grade> sublist, Object item) {
         int result = 0;
         int sublistIndex = masterList.indexOf(sublist);
@@ -127,6 +137,7 @@ public class DiplomaSupplementService {
     }
 
     public synchronized File formDiplomaSupplementForGroup(Integer groupId) {
+        //TODO cr: для чого тут synchronized?
         StudentGroup studentGroup = groupService.getById(groupId);
         if (studentGroup == null || studentGroup.getStudents().isEmpty())
             return null;

@@ -219,8 +219,10 @@ public class StudentSummary {
             result.put("#CourseNameUkr", grade.getCourse().getCourseName().getName());
             result.put("#CourseNameEng", grade.getCourse().getCourseName().getNameEng());
         } catch (NullPointerException e) {
+            //TODO cr: неправильно оброблена помилка - для тих пропертів які можуть бути нулл потрібно це перевірити і засетити якесь значення, а так резільтат роботи і що виведеться в шаблоні неможливо вгадати
             log.warn("Some of grade's properties are null!");
         }
+        //TODO cr: замість мапи тут краще повернути якийсь об'єкт - інші об'єкти не повинні знати про якийсь шаблон і що змінні в ньому повинні починатися з #
         return result;
     }
 
@@ -233,6 +235,7 @@ public class StudentSummary {
         result.put("#TotalNGradeUkr", getTotalNationalGradeUkr());
         result.put("#TotalNGradeEng", getTotalNationalGradeEng());
 
+        //TODO cr: замість мапи тут краще повернути якийсь об'єкт - інші об'єкти не повинні знати про якийсь шаблон і що змінні в ньому повинні починатися з #
         return result;
     }
 
@@ -356,6 +359,7 @@ public class StudentSummary {
     }
 
     private static String formatCredits(BigDecimal credits) {
+        //TODO cr: Об'єкт не повинен хвилюватися за форматування в шаблоні - він повинен повернути тільки дані а додаткова обробка повинна бути в тому місці де це треба
         if (credits == null || credits.equals(new BigDecimal(0)))
             return "-";
         else {

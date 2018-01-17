@@ -15,8 +15,10 @@ public class StudentGroup extends NameWithActiveEntity {
     private int creationYear;
     @Column(name = "tuition_form", nullable = false)
     private char tuitionForm = 'f';//f - fulltime, e - extramural
+    //TODO cr: замініть на енум - ніяких констант і магічних слів
     @Column(name = "tuition_term", nullable = false)
     private char tuitionTerm = 'r';//r - regular, s - shortened
+    //TODO cr: замініть на енум - ніяких констант і магічних слів
     @Column(name = "study_semesters", nullable = false)
     private int studySemesters;
     @Column(name = "study_years", nullable = false)

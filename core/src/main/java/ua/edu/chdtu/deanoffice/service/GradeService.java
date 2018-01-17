@@ -35,6 +35,7 @@ public class GradeService {
         Student student = studentRepository.getOne(studentId);
         List<Course> courses = courseRepository.getByGroupId(student.getStudentGroup().getId());
         List<List<Grade>> grades = new ArrayList<>();
+        //TODO cr: можливо тут краще зробити свій об'єкт щоб було більш наглядніше ніж list of lists
 
         if (courses.isEmpty()) {
             grades.add(new ArrayList<>());
@@ -46,6 +47,7 @@ public class GradeService {
 
         List<Integer> courseIds = new ArrayList<>();
         courses.forEach(course -> courseIds.add(course.getId()));
+        //TODO cr: List<Integer> courseIds = courses.stream.map.collect
 
         grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
         grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));

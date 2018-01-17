@@ -15,6 +15,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
     @Query("select cfg.course from CourseForGroup as cfg " +
             "join cfg.studentGroup sg join sg.specialization spec " +
             "where sg.active = 'T' and spec.id = :specId")
+    //TODO cr: не треба все скорочувати - тут краще явно написати true або 1
     List<CourseForGroup> findAllBySpecialization(@Param("specId") int specId);
 
 }

@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 public class GeneralController {
+    //TODO cr: імя непідходяще. Не потрібно створювати контролери і сервіси типу свалок куди входитиме все що не знаєте куди помістити
     @Autowired
     private GeneralService generalService;
 

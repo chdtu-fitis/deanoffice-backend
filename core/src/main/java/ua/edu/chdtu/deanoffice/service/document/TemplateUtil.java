@@ -39,6 +39,7 @@ public class TemplateUtil {
         } catch (IOException e) {
             log.error("Could not find or load file!", e);
         }
+        //TODO cr: можливо тут краще було б прокинути далі ексепш ніж далі ловити незрозумілі NullPointerException
         return null;
     }
 
@@ -48,6 +49,7 @@ public class TemplateUtil {
             template.save(f);
         } catch (Docx4JException e) {
             log.error("Could not save template!", e);
+            //TODO cr: не треба ховати помилки, якщо щось сталося треба це коректно відпрацювати
         }
         return f;
     }
@@ -78,6 +80,8 @@ public class TemplateUtil {
                 String value = placeholdersValues.get(text.getValue().trim());
                 if (StringUtils.isEmpty(value))
                     log.warn(text.getValue() + " is empty");
+                //TODO cr: text.getValue() і так пустий - для чого його виводити?
+                //TODO cr: більш наглядні і зручніше писати так: log.warn("{} is empty", text.getValue());
                 text.setValue(value);
             } catch (NullPointerException e) {
                 log.warn(text.getValue() + " is null");
@@ -98,6 +102,7 @@ public class TemplateUtil {
             if (text.getValue().trim().equals(PLACEHOLDER_PREFIX)) {
                 try {
                     potentialPlaceholder = (Text) texts.get(i + 1);
+                    //TODO cr: якщо є можливість перевірити значення до використання щоб запобігти помилці то краще так і зробити
                 } catch (IndexOutOfBoundsException e) {
                     log.debug("Seems that " + PLACEHOLDER_PREFIX + " is the last symbol in template");
                 }
@@ -108,6 +113,7 @@ public class TemplateUtil {
         }
         List<Text> result = new ArrayList<>();
         placeholders.forEach(p -> result.add((Text) (p)));
+        //TODO cr: stream.map.collect
         return result;
     }
 

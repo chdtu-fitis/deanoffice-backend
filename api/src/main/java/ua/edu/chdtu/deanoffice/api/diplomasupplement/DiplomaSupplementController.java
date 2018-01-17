@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 
 @RestController
 @RequestMapping("/diplsuppl")
+//TODO cr: change resource name
 public class DiplomaSupplementController {
 
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
@@ -28,6 +29,7 @@ public class DiplomaSupplementController {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
+    //TODO cr: remove it
     @RequestMapping(method = RequestMethod.GET)
     public void start() {
 
