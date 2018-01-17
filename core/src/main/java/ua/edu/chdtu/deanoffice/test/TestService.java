@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.TestEntity;
+import ua.edu.chdtu.deanoffice.repository.TestEntityRepository;
 
 @Service
 public class TestService {
@@ -21,7 +22,7 @@ public class TestService {
 
     public TestEntity getTest() {
         //just for test purposes
-        addTest("aaa" + Math.random());
+//        addTest("aaa" + Math.random());
         //----------
 
         TestEntity first = testEntityRepository.getFirst();

@@ -2,6 +2,7 @@
 /build/
 gradle/
 log/
+api/log/
 
 ### STS ###
 .apt_generated

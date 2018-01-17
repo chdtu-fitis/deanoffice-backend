@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 import java.util.Arrays;
 
 @Configuration
-@EnableJpaRepositories("ua.edu.chdtu.deanoffice.test")
+@EnableJpaRepositories("ua.edu.chdtu.deanoffice.repository")
 @EntityScan("ua.edu.chdtu.deanoffice.entity")
 @EnableTransactionManagement
 public class DataSourceConfiguration implements EnvironmentAware {

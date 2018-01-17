@@ -1,18 +1,17 @@
 dependencies {
-	compile (project (":core"))
+    compile(project(":core"))
+    compile('org.modelmapper:modelmapper:1.1.0')
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
 
-	compileOnly("org.projectlombok:lombok:${lombokVersion}")
-
-	compile(
-			"org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
-			"org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
+    compile(
+            "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
+            "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
 //	"org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}",
-	)
+    )
 
-
-	testCompile(
-		"org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
-	)
+    testCompile(
+            "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
+    )
 }
 
 processResources {

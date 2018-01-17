@@ -14,10 +14,11 @@ import javax.persistence.*;
 @Entity
 @Table(name = "test")
 public class TestEntity {
+    //TODO cr: час позбавлятися від тестового функціоналу
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "col2")
-    private String col2;
+    @Column(name = "name")
+    private String name;
 }
