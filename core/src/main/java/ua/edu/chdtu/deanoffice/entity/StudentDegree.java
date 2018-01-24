@@ -27,9 +27,9 @@ public class StudentDegree extends BaseEntity {
     private String supplementNumber;
     @Column(name = "supplement_date")
     private Date supplementDate;
-    @Column(name = "thesis_name", length = 130)
+    @Column(name = "thesis_name", length = 150)
     private String thesisName;
-    @Column(name = "thesis_name_eng", length = 130)
+    @Column(name = "thesis_name_eng", length = 150)
     private String thesisNameEng;
     @Column(name = "protocol_number", length = 10)
     private String protocolNumber;
