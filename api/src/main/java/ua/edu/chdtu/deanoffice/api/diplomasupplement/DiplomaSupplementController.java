@@ -1,37 +1,63 @@
 package ua.edu.chdtu.deanoffice.api.diplomasupplement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.service.GradeService;
-import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
 import java.io.File;
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 @RestController
 @RequestMapping("/diplsuppl")
+//TODO cr: change resource name
 public class DiplomaSupplementController {
 
-    private GradeService gradeService;
-    private StudentService studentService;
+    private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
 
-    public DiplomaSupplementController(GradeService gradeService, StudentService studentService) {
-        this.gradeService = gradeService;
-        this.studentService = studentService;
+    private DiplomaSupplementService diplomaSupplementService;
+
+    public DiplomaSupplementController(DiplomaSupplementService diplomaSupplementService) {
+        this.diplomaSupplementService = diplomaSupplementService;
     }
 
-    private static final String TEMPLATE = "DiplomaSupplementTemplate.docx";
+    //TODO cr: remove it
+    @RequestMapping(method = RequestMethod.GET)
+    public void start() {
 
-    @RequestMapping(path = "/s")
-    public ResponseEntity<String> generateForStudent(@RequestParam("id") Integer id) {
-        Student student = studentService.get(id);
-        List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
-        StudentSummary studentSummary = new StudentSummary(student, grades);
-        File f = TemplateFillFactory.fillWithStudentInformation(TEMPLATE, studentSummary);
-        return ResponseEntity.ok(f.getAbsolutePath());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
+    public ResponseEntity<Resource> generateForStudent(@PathVariable Integer studentId) {
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplementForStudent(studentId);
+        return getResourceResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}")
+    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId) {
+        File groupDiplomaSupplements = diplomaSupplementService.formDiplomaSupplementForGroup(groupId);
+        return getResourceResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
+    }
+
+    private static ResponseEntity<Resource> getResourceResponseEntity(File result, String asciiName) {
+        try {
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + asciiName)
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                    .contentLength(result.length())
+                    .body(resource);
+        } catch (FileNotFoundException e) {
+            log.error("Created file not found!", e);
+            return ResponseEntity.notFound().build();
+        }
     }
 }

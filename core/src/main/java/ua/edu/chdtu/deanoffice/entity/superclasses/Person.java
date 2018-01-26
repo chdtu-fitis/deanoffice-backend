@@ -15,6 +15,7 @@ public class Person extends BaseEntity {
     private boolean active = true;
     @Column(name = "sex", nullable = false)
     private char sex = 'm';
+    //TODO cr: use enum instead
 
     public boolean isActive() {
         return active;

@@ -9,19 +9,17 @@ import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.Constants.*;
 
 @Service
 public class GradeService {
-
-    public static final int EXAM = 1;
-    public static final int CREDIT = 2;
-    public static final int COURSEWORK = 3;
-    public static final int COURSE_PROJECT = 4;
-    public static final int DIFFERENTIATED_CREDIT = 5;
-    public static final int STATE_EXAM = 6;
-    public static final int ATTESTATION = 7;
-    public static final int INTERNSHIP = 8;
+    private Integer KNOWLEDGE_CONTROL_PART1[] = {EXAM, CREDIT, DIFFERENTIATED_CREDIT};
+    private Integer KNOWLEDGE_CONTROL_PART2[] = {COURSEWORK, COURSE_PROJECT};
+    private Integer KNOWLEDGE_CONTROL_PART3[] = {INTERNSHIP, NON_GRADED_INTERNSHIP};
+    private Integer KNOWLEDGE_CONTROL_PART4[] = {ATTESTATION};
 
     private GradeRepository gradeRepository;
     private CourseRepository courseRepository;
@@ -36,8 +34,8 @@ public class GradeService {
     public List<List<Grade>> getGradesByStudentId(Integer studentId) {
         Student student = studentRepository.getOne(studentId);
         List<Course> courses = courseRepository.getByGroupId(student.getStudentGroup().getId());
-        //List<Course> courses = courseRepository.findAll();
         List<List<Grade>> grades = new ArrayList<>();
+        //TODO cr: можливо тут краще зробити свій об'єкт щоб було більш наглядніше ніж list of lists
 
         if (courses.isEmpty()) {
             grades.add(new ArrayList<>());
@@ -49,22 +47,12 @@ public class GradeService {
 
         List<Integer> courseIds = new ArrayList<>();
         courses.forEach(course -> courseIds.add(course.getId()));
-        List<Integer> knowledgeControlIds = new ArrayList<>();
+        //TODO cr: List<Integer> courseIds = courses.stream.map.collect
 
-        knowledgeControlIds.add(EXAM);
-        knowledgeControlIds.add(CREDIT);
-        knowledgeControlIds.add(DIFFERENTIATED_CREDIT);
-        grades.add(getGrades(student, courseIds, knowledgeControlIds));
-
-        knowledgeControlIds.add(COURSEWORK);
-        knowledgeControlIds.add(COURSE_PROJECT);
-        grades.add(getGrades(student, courseIds, knowledgeControlIds));
-
-        knowledgeControlIds.add(INTERNSHIP);
-        grades.add(getGrades(student, courseIds, knowledgeControlIds));
-
-        knowledgeControlIds.add(ATTESTATION);
-        grades.add(getGrades(student, courseIds, knowledgeControlIds));
+        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
+        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
+        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART3)));
+        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART4)));
 
         return grades;
     }
@@ -75,7 +63,6 @@ public class GradeService {
         List<Grade> result = gradeRepository.getByStudentIdAndCoursesAndKCTypes(student.getId(),
                 courseIds,
                 knowledgeControlTypes);
-        knowledgeControlTypes.clear();
         return result;
     }
 }

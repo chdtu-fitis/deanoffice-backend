@@ -15,6 +15,7 @@ public class Course extends BaseEntity {
     private Integer semester;
     @ManyToOne
     @JoinColumn(name="kc_id")
+    //TODO cr: старайтесь не сильно скорочувати імена в таблицях. Через рік не всі будуть памятати що це означає
     private KnowledgeControl knowledgeControl;
     @Column(name = "hours", nullable = false)
     private Integer hours;
@@ -22,6 +23,7 @@ public class Course extends BaseEntity {
     private BigDecimal credits;
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<CourseForGroup> courseForGroups;
+    //TODO cr: схоже що це не використовується - старайтесь не мапити хібернейт об'єкти просто на майбутнє
 
     public Set<CourseForGroup> getCourseForGroups() {
         return courseForGroups;

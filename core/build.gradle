@@ -4,6 +4,7 @@ dependencies {
 	compile(group: 'org.docx4j', name: 'docx4j', version: '3.3.6') {
 		exclude group: 'org.slf4j'
 	}
+
 	compile(
 			"org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
 			"org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",

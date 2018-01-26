@@ -10,5 +10,5 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
 
     List<Student> getByStudentGroupAndActiveOrderBySurnameAsc(StudentGroup group, Boolean isActive);
 
-    List<Student> getByStudentGroupIdAndActiveOrderBySurnameAsc(Integer id, Boolean isActive);
+    List<Student> findAllByStudentGroupIdAndActiveOrderBySurnameAscNameAscPatronimicAsc(Integer id, Boolean isActive);
 }
