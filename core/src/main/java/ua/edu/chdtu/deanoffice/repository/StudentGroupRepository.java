@@ -10,13 +10,11 @@ import java.util.List;
 /**
  * Created by os199 on 05.11.2017.
  */
-public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer>{
+public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer> {
 
-    @Query("select sg.id, sg.name, sg.studySemesters, sg.specialization.id from StudentGroup as sg join sg.specialization " +
-            "join sg.specialization.faculty "+
-            "where sg.active = 'T' and sg.specialization.faculty.id = :facultyId")
-    //TODO cr: select sg from ...
+    @Query("select studentGroup from StudentGroup as studentGroup " +
+            "join studentGroup.specialization " +
+            "join studentGroup.specialization.faculty " +
+            "where studentGroup.active = 'T' and studentGroup.specialization.faculty.id = :facultyId")
     List<StudentGroup> findAllByFaculty(@Param("facultyId") int facultyId);
-
-
 }

@@ -12,10 +12,9 @@ import java.util.List;
  */
 public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, Integer> {
 
-    @Query("select cfg.course from CourseForGroup as cfg " +
-            "join cfg.studentGroup sg join sg.specialization spec " +
-            "where sg.active = 'T' and spec.id = :specId")
-    //TODO cr: не треба все скорочувати - тут краще явно написати true або 1
-    List<CourseForGroup> findAllBySpecialization(@Param("specId") int specId);
+    @Query("select courseForGroup.course from CourseForGroup as courseForGroup " +
+            "join courseForGroup.studentGroup studentGroup join studentGroup.specialization specialization " +
+            "where studentGroup.active = true and specialization.id = :specializationId")
+    List<CourseForGroup> findAllBySpecialization(@Param("specializationId") int specId);
 
 }

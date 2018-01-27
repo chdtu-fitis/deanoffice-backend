@@ -13,57 +13,31 @@ import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StringUtils;
 
 import javax.xml.bind.JAXBElement;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class TemplateUtil {
 
     private static Logger log = LoggerFactory.getLogger(TemplateUtil.class);
-
     public static final String PLACEHOLDER_PREFIX = "#";
-
-    public static WordprocessingMLPackage loadTemplate(String name) {
-        try {
-            return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFile()));
-        } catch (Docx4JException e) {
-            log.error("Supplied file is not a valid template!", e);
-        } catch (IOException e) {
-            log.error("Could not find or load file!", e);
-        }
-        //TODO cr: можливо тут краще було б прокинути далі ексепш ніж далі ловити незрозумілі NullPointerException
-        return null;
-    }
-
-    public static File saveDocument(WordprocessingMLPackage template, String target) {
-        File f = new File(System.getProperty("java.io.tmpdir") + target);
-        try {
-            template.save(f);
-        } catch (Docx4JException e) {
-            log.error("Could not save template!", e);
-            //TODO cr: не треба ховати помилки, якщо щось сталося треба це коректно відпрацювати
-        }
-        return f;
-    }
 
     public static List<Object> getAllElementsFromObject(Object obj, Class<?> toSearch) {
         List<Object> result = new ArrayList<>();
-        if (obj instanceof JAXBElement) obj = ((JAXBElement<?>) obj).getValue();
+        if (obj instanceof JAXBElement) {
+            obj = ((JAXBElement<?>) obj).getValue();
+        }
 
-        if (obj.getClass().equals(toSearch))
+        if (obj.getClass().equals(toSearch)) {
             result.add(obj);
-        else if (obj instanceof ContentAccessor) {
-            List<?> children = ((ContentAccessor) obj).getContent();
-            for (Object child : children) {
-                result.addAll(getAllElementsFromObject(child, toSearch));
+        } else {
+            if (obj instanceof ContentAccessor) {
+                List<?> children = ((ContentAccessor) obj).getContent();
+                for (Object child : children) {
+                    result.addAll(getAllElementsFromObject(child, toSearch));
+                }
             }
         }
         return result;
@@ -74,17 +48,13 @@ public class TemplateUtil {
         replaceValuesInTextPlaceholders(placeholders, placeholdersValues);
     }
 
-    private static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> placeholdersValues) {
+    private static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
         for (Text text : placeholders) {
-            try {
-                String value = placeholdersValues.get(text.getValue().trim());
-                if (StringUtils.isEmpty(value))
-                    log.warn(text.getValue() + " is empty");
-                //TODO cr: text.getValue() і так пустий - для чого його виводити?
-                //TODO cr: більш наглядні і зручніше писати так: log.warn("{} is empty", text.getValue());
-                text.setValue(value);
-            } catch (NullPointerException e) {
-                log.warn(text.getValue() + " is null");
+            String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
+            if (StringUtils.isEmpty(replacement)) {
+                log.warn("{} is empty", text.getValue());
+            } else {
+                text.setValue(replacement);
             }
         }
     }
@@ -98,22 +68,18 @@ public class TemplateUtil {
                 placeholders.add(text);
                 continue;
             }
-            Text potentialPlaceholder = new Text();
             if (text.getValue().trim().equals(PLACEHOLDER_PREFIX)) {
-                try {
-                    potentialPlaceholder = (Text) texts.get(i + 1);
-                    //TODO cr: якщо є можливість перевірити значення до використання щоб запобігти помилці то краще так і зробити
-                } catch (IndexOutOfBoundsException e) {
-                    log.debug("Seems that " + PLACEHOLDER_PREFIX + " is the last symbol in template");
+                Iterator<Object> iterator = texts.listIterator(i + 1);
+                if (iterator.hasNext()) {
+                    Text potentialPlaceholder = (Text) iterator.next();
+                    potentialPlaceholder.setValue(text.getValue() + potentialPlaceholder.getValue());
+                    text.setValue("");
+                    placeholders.add(potentialPlaceholder);
+                    i++;
                 }
-                potentialPlaceholder.setValue(text.getValue() + potentialPlaceholder.getValue());
-                text.setValue("");
-                placeholders.add(potentialPlaceholder);
             }
         }
-        List<Text> result = new ArrayList<>();
-        placeholders.forEach(p -> result.add((Text) (p)));
-        //TODO cr: stream.map.collect
+        List<Text> result = placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
         return result;
     }
 
@@ -128,32 +94,26 @@ public class TemplateUtil {
 
     private static void replacePlaceholdersInRelativeElement(WordprocessingMLPackage template,
                                                              String relationType,
-                                                             Map<String, String> dictionary) {
+                                                             Map<String, String> dictionary) throws Docx4JException {
         RelationshipsPart relationshipPart = template.getMainDocumentPart().getRelationshipsPart();
         List<Relationship> relationships = relationshipPart.getRelationshipsByType(relationType);
         List<Text> texts = new ArrayList<>();
         for (Relationship r : relationships) {
             JaxbXmlPart part = (JaxbXmlPart) relationshipPart.getPart(r);
-            List<Object> textObjects = null;
-            try {
-                textObjects = getAllElementsFromObject(part.getContents(), Text.class);
-            } catch (Docx4JException e) {
-                log.debug("Could not extract contents from part", e);
-            }
+            List<Object> textObjects = getAllElementsFromObject(part.getContents(), Text.class);
             for (Object textObject : textObjects) {
                 Text text = (Text) textObject;
-                if (isAPlaceholder(text))
+                if (isAPlaceholder(text)) {
                     texts.add(text);
+                }
             }
-
         }
         replaceValuesInTextPlaceholders(texts, dictionary);
     }
 
-    public static void replacePlaceholdersInFooter(WordprocessingMLPackage template, Map<String, String> dictionary) {
-        replacePlaceholdersInRelativeElement(template,
-                Namespaces.FOOTER,
-                dictionary);
+    public static void replacePlaceholdersInFooter(WordprocessingMLPackage template, Map<String, String> dictionary)
+            throws Docx4JException {
+        replacePlaceholdersInRelativeElement(template, Namespaces.FOOTER, dictionary);
     }
 
     private static boolean isAPlaceholder(Text text) {
@@ -165,8 +125,9 @@ public class TemplateUtil {
             List<?> textElements = getAllElementsFromObject(row, Text.class);
             for (Object text : textElements) {
                 Text textElement = (Text) text;
-                if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey))
+                if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey)) {
                     return (Tr) row;
+                }
             }
         }
         return null;
@@ -177,8 +138,9 @@ public class TemplateUtil {
             List<Object> textElements = getAllElementsFromObject(tbl, Text.class);
             for (Object text : textElements) {
                 Text textElement = (Text) text;
-                if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey))
+                if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey)) {
                     return (Tbl) tbl;
+                }
             }
         }
         return null;
@@ -189,10 +151,19 @@ public class TemplateUtil {
         List<?> textElements = getAllElementsFromObject(workingRow, Text.class);
         for (Object object : textElements) {
             Text text = (Text) object;
-            String replacementValue = replacements.get(text.getValue().trim());
-            if (replacementValue != null)
+            String replacementValue = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
+            if (replacementValue != null) {
                 text.setValue(replacementValue);
+            }
         }
         reviewTable.getContent().add(rowNumber, workingRow);
+    }
+
+    public static String getValueSafely(String value, String ifNullOrEmpty) {
+        return StringUtils.isEmpty(value) ? ifNullOrEmpty : value;
+    }
+
+    public static String getValueSafely(String value) {
+        return getValueSafely(value, "");
     }
 }

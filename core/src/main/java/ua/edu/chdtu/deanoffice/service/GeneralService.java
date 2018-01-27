@@ -12,7 +12,6 @@ public class GeneralService {
     @Autowired
     private DegreeRepository degreeRepository;
 
-    //TODO cr: не знаю на скільки великими можуть бути тут данні можливо додати пейжинейшн?
     public List<Degree> getDegrees() {
         return degreeRepository.findAll();
     }
