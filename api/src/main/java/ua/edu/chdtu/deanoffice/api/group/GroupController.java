@@ -20,7 +20,7 @@ import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
 
 @RestController
-@RequestMapping("/group")
+@RequestMapping("/groups")
 public class GroupController {
     @Autowired
     private GraduateService graduateService;
