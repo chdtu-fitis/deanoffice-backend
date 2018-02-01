@@ -8,7 +8,7 @@ import ua.edu.chdtu.deanoffice.repository.DegreeRepository;
 import java.util.List;
 
 @Service
-public class GeneralService {
+public class DegreeService {
     @Autowired
     private DegreeRepository degreeRepository;
 

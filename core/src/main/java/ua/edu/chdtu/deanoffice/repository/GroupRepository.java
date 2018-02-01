@@ -8,11 +8,9 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import java.util.List;
 
 public interface GroupRepository extends JpaRepository<StudentGroup, Integer> {
-    @Query(value = "SELECT * FROM student_group sg " +
-            "INNER JOIN specialization s ON s.id=sg.specialization_id " +
-            "WHERE sg.active=TRUE " +
-            "AND s.degree_id=:degreeId " +
-            "AND floor(sg.creation_year+sg.study_years-0.1)=:currYear " +
-            "ORDER BY sg.tuition_form DESC, sg.name", nativeQuery = true)
+    @Query(value = "select * from student_group sg "+
+            "inner join specialization s on s.id=sg.specialization_id "+
+            "where sg.active=true and s.degree_id=:degreeId and floor(sg.creation_year+sg.study_years-0.1)=:currYear "+
+            "order by sg.tuition_form desc, sg.name", nativeQuery = true)
     List<StudentGroup> findGraduateByDegree(@Param("degreeId") Integer degreeId, @Param("currYear") Integer currYear);
 }

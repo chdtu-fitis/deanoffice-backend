@@ -21,7 +21,6 @@ public class Course extends BaseEntity {
     private Integer semester;
     @ManyToOne
     @JoinColumn(name = "kc_id")
-    //TODO cr: старайтесь не сильно скорочувати імена в таблицях. Через рік не всі будуть памятати що це означає
     private KnowledgeControl knowledgeControl;
     @Column(name = "hours", nullable = false)
     private Integer hours;

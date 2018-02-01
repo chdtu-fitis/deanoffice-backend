@@ -8,20 +8,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.entity.Degree;
-import ua.edu.chdtu.deanoffice.service.GeneralService;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
 @RestController
-public class GeneralController {
-    //TODO cr: імя непідходяще. Не потрібно створювати контролери і сервіси типу свалок куди входитиме все що не знаєте куди помістити
+@RequestMapping("/degrees")
+public class DegreeController {
     @Autowired
-    private GeneralService generalService;
+    private DegreeService degreeService;
 
-    @RequestMapping(method = RequestMethod.GET, path = "/degrees")
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<NamedDTO>> getDegrees() {
-        List<Degree> degrees = generalService.getDegrees();
+        List<Degree> degrees = degreeService.getDegrees();
         ModelMapper modelMapper = new ModelMapper();
         Type listType = new TypeToken<List<NamedDTO>>() {}.getType();
         List<NamedDTO> degreeDTOs = modelMapper.map(degrees, listType);
