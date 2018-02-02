@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class GroupDTO {
+
     @JsonView(GroupViews.Name.class)
     private int id;
     @JsonView(GroupViews.Name.class)

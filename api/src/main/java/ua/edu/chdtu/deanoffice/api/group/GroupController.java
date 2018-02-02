@@ -54,4 +54,15 @@ public class GroupController {
         List<CourseForGroupDTO> courseForGroupDTOS = modelMapper.map(courseForGroups,listType);
         return  courseForGroupDTOS;
     }
+
+    @RequestMapping("/courses/{courseId}")
+    @ResponseBody
+    @JsonView(GroupViews.Name.class)
+    public List<GroupDTO> getGroupsByCourse(@PathVariable String courseId) {
+        List<StudentGroup> studentGroups = groupService.getGroupsByCourse(Integer.parseInt(courseId));
+        Type listType = new TypeToken<List<GroupDTO>>() {}.getType();
+        ModelMapper modelMapper = new ModelMapper();
+        List<GroupDTO> groupDTOs = modelMapper.map(studentGroups, listType);
+        return groupDTOs;
+    }
 }

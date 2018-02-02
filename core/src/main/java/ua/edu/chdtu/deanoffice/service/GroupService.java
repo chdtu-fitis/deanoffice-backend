@@ -20,4 +20,8 @@ public class GroupService {
         List<StudentGroup> studentGroups = studentGroupRepository.findAllByFaculty(1);
         return studentGroups;
     }
+    public List<StudentGroup> getGroupsByCourse(int courseId){
+        List<StudentGroup> studentGroups = studentGroupRepository.findAllByCourse(courseId);
+        return studentGroups;
+    }
 }
