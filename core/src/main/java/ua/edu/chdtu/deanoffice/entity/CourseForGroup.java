@@ -10,7 +10,9 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-@Table(name = "courses_for_groups")
+@Table(name = "courses_for_groups", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"course_id", "studentgroup_id"})
+})
 public class CourseForGroup extends BaseEntity {
     @ManyToOne
     private Course course;

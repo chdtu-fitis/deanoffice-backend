@@ -24,7 +24,8 @@ import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeUkr;
 public class TemplateFillService {
 
     private static final int FIRST_SECTION_ROW_INDEX = 2;
-    private static Logger log = LoggerFactory.getLogger(TemplateFillService.class);
+    private static final int TEMPLATE_ROW_INDEX = 1;
+    private static final Logger log = LoggerFactory.getLogger(TemplateFillService.class);
     private DocumentIOService documentIOService;
 
     public TemplateFillService(DocumentIOService documentIOService) {
@@ -38,7 +39,7 @@ public class TemplateFillService {
         result.put("LocalGrade", String.format("%d", grade.getPoints()));
         result.put("NationalGradeUkr", getNationalGradeUkr(grade));
         result.put("NationalGradeEng", getNationalGradeEng(grade));
-        result.put("ECTSGrade", grade.getEcts());
+        result.put("ECTSGrade", grade.getEcts().toString());
         result.put("CourseNameUkr", grade.getCourse().getCourseName().getName());
         result.put("CourseNameEng", grade.getCourse().getCourseName().getNameEng());
         return result;
@@ -49,7 +50,7 @@ public class TemplateFillService {
         result.put("TotalHours", String.format("%4d", studentSummary.getTotalHours()));
         result.put("TotalCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("TotalGrade", String.format("%2d", Math.round(studentSummary.getTotalGrade())));
-        result.put("TotalECTS", studentSummary.getTotalEcts());
+        result.put("TotalECTS", studentSummary.getTotalEcts().toString());
         result.put("TotalNGradeUkr", studentSummary.getTotalNationalGradeUkr());
         result.put("TotalNGradeEng", studentSummary.getTotalNationalGradeEng());
         return result;
@@ -71,12 +72,12 @@ public class TemplateFillService {
 
         String modeOfStudyUkr = "";
         String modeOfStudyEng = "";
-        char modeOfStudy = studentSummary.getStudent().getStudentGroup().getTuitionForm();
-        if (modeOfStudy == 'f') {
+        TuitionForm tuitionForm = studentSummary.getStudent().getStudentGroup().getTuitionForm();
+        if (tuitionForm == TuitionForm.FULL_TIME) {
             modeOfStudyUkr = "Денна";
             modeOfStudyEng = "Full-time";
         }
-        if (modeOfStudy == 'e') {
+        if (tuitionForm == TuitionForm.EXTRAMURAL) {
             modeOfStudyUkr = "Заочна";
             modeOfStudyEng = "Extramural";
         }
@@ -213,9 +214,11 @@ public class TemplateFillService {
             return;
         }
         List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
-
+        if (gradeTableRows.size() < TEMPLATE_ROW_INDEX + 1) {
+            log.warn("Incorrect table with grades is ignored.");
+            return;
+        }
         Tr templateRow = (Tr) gradeTableRows.get(1);
-        //TODO cr: possible IndexOfBoundException
         int rowToAddIndex = FIRST_SECTION_ROW_INDEX;
         int gradeNumber = 1;
 

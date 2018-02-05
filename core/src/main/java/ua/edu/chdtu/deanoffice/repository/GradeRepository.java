@@ -15,7 +15,6 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             " and course.knowledgeControl.id in (:KnowledgeControlIds)" +
             " and course.id in (:courseIds)" +
             " Order by course.courseName.name")
-        //TODO cr: для мене sql здається простішим і швидшим і читати його легше. але це більш як рекомендація
     List<Grade> getByStudentIdAndCoursesAndKCTypes(
             @Param("studentId") Integer studentId,
             @Param("courseIds") List<Integer> courseIds,

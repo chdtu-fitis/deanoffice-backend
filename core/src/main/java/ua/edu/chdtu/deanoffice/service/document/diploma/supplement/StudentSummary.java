@@ -4,10 +4,7 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
-import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.*;
 
 import java.math.BigDecimal;
 import java.text.Collator;
@@ -34,7 +31,7 @@ public class StudentSummary {
     }
 
     private static boolean ectsIsSet(Grade grade) {
-        return "ABCDEFxP".contains(grade.getEcts().trim());
+        return grade.getEcts() != null;
     }
 
     private void completeGrades() {
@@ -91,7 +88,7 @@ public class StudentSummary {
                 if (!ectsIsSet(grade)) {
                     if (!grade.getCourse().getKnowledgeControl().isHasGrade()
                             && grade.getPoints() >= 60) {
-                        grade.setEcts("P");
+                        grade.setEcts(EctsGrade.P);
                     } else {
                         grade.setEcts(getEctsGrade(grade.getPoints()));
                     }
@@ -198,9 +195,9 @@ public class StudentSummary {
             resultingGrade.setPoints((int) Math.round(pointsSum / grades.size()));
             resultingGrade.setGrade((int) Math.round(gradesSum / grades.size()));
             if (resultingGrade.getPoints() >= 60) {
-                resultingGrade.setEcts("P");
+                resultingGrade.setEcts(EctsGrade.P);
             } else {
-                resultingGrade.setEcts("F");
+                resultingGrade.setEcts(EctsGrade.F);
             }
         }
         return resultingGrade;
@@ -255,7 +252,7 @@ public class StudentSummary {
         return getNationalGradeEng(grade);
     }
 
-    public String getTotalEcts() {
+    public EctsGrade getTotalEcts() {
         return getEctsGrade((int) Math.round(getTotalGrade()));
     }
 }

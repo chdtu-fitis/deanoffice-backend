@@ -37,7 +37,7 @@ import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints
         StudentRepository.class, GradeRepository.class, StudentGroupRepository.class, StudentGroupService.class,
         DocumentIOService.class, TemplateFillService.class})
 @EnableAutoConfiguration
-public class TestFeatureDiplomaAddition {
+public class TestFeatureDiplomaSupplement {
 
     private DiplomaSupplementService diplomaSupplementService;
 
@@ -46,9 +46,8 @@ public class TestFeatureDiplomaAddition {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
-    private static Logger log = LoggerFactory.getLogger(Application.class);
-    private static final String TEMPLATE = "docs/templates/DiplomaSupplement.docx";
-    private static DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
+    private static final DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     private static Speciality createSpeciality() {
         Speciality speciality = new Speciality();
@@ -74,8 +73,8 @@ public class TestFeatureDiplomaAddition {
         studentGroup.setStudySemesters(3);
         studentGroup.setStudyYears(new BigDecimal(1.5));
         studentGroup.setBeginYears(5);
-        studentGroup.setTuitionForm('f');
-        studentGroup.setTuitionTerm('f');
+        studentGroup.setTuitionForm(TuitionForm.FULL_TIME);
+        studentGroup.setTuitionTerm(TuitionTerm.REGULAR);
         return studentGroup;
     }
 
@@ -250,10 +249,10 @@ public class TestFeatureDiplomaAddition {
 
     @Test
     public void testGetGradeFromPoints() {
-        Assert.assertEquals("A", GradeUtil.getEctsGrade(95));
-        Assert.assertEquals("B", GradeUtil.getEctsGrade(82));
-        Assert.assertEquals("D", GradeUtil.getEctsGrade(67));
-        Assert.assertEquals("C", GradeUtil.getEctsGrade(78));
+        Assert.assertEquals(EctsGrade.A, GradeUtil.getEctsGrade(95));
+        Assert.assertEquals(EctsGrade.B, GradeUtil.getEctsGrade(82));
+        Assert.assertEquals(EctsGrade.D, GradeUtil.getEctsGrade(67));
+        Assert.assertEquals(EctsGrade.C, GradeUtil.getEctsGrade(78));
     }
 
     private static Course createCourse(CourseName courseName, boolean knowledgeControlHasGrade) {
@@ -267,25 +266,25 @@ public class TestFeatureDiplomaAddition {
         Grade grade1 = createGrade(createCourse(true), 90);
         Assert.assertEquals("Відмінно", GradeUtil.getNationalGradeUkr(grade1));
         Assert.assertEquals("Excellent", GradeUtil.getNationalGradeEng(grade1));
-        Assert.assertEquals("A", grade1.getEcts());
+        Assert.assertEquals(EctsGrade.A, grade1.getEcts());
         Assert.assertEquals(5, grade1.getGrade());
 
         Grade grade2 = createGrade(createCourse(true), 76);
         Assert.assertEquals("Добре", GradeUtil.getNationalGradeUkr(grade2));
         Assert.assertEquals("Good", GradeUtil.getNationalGradeEng(grade2));
-        Assert.assertEquals("C", grade2.getEcts());
+        Assert.assertEquals(EctsGrade.C, grade2.getEcts());
         Assert.assertEquals(4, grade2.getGrade());
 
         Grade grade3 = createGrade(createCourse(true), 65);
         Assert.assertEquals("Задовільно", GradeUtil.getNationalGradeUkr(grade3));
         Assert.assertEquals("Satisfactory", GradeUtil.getNationalGradeEng(grade3));
-        Assert.assertEquals("D", grade3.getEcts());
+        Assert.assertEquals(EctsGrade.D, grade3.getEcts());
         Assert.assertEquals(3, grade3.getGrade());
 
         Grade grade4 = createGrade(createCourse(false), 90);
         Assert.assertEquals("Зараховано", GradeUtil.getNationalGradeUkr(grade4));
         Assert.assertEquals("Passed", GradeUtil.getNationalGradeEng(grade4));
-        Assert.assertEquals("A", grade4.getEcts());
+        Assert.assertEquals(EctsGrade.A, grade4.getEcts());
         Assert.assertEquals(5, grade4.getGrade());
 
         Grade grade5 = createGrade(createCourse(false), 59);

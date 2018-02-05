@@ -8,9 +8,9 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.Set;
 
+@Entity
 @Getter
 @Setter
-@Entity
 public class Student extends Person {
     @Column(name = "surname_eng", length = 20)
     private String surnameEng;
@@ -22,6 +22,7 @@ public class Student extends Person {
     @JoinColumn(name = "studentgroup_id")
     private StudentGroup studentGroup;
     @Column(name = "birth_date")
+    @Temporal(TemporalType.DATE)
     private Date birthDate;
     @Column(name = "registration_address", length = 100)
     private String registrationAddress;

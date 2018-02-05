@@ -21,6 +21,7 @@ public class Grade extends BaseEntity {
     private int grade;
     @Column(name = "points", nullable = false)
     private int points;
-    @Column(name = "ects", nullable = false, length = 2)
-    private String ects;
+    @Column(name = "ects", length = 2)
+    @Enumerated(value = EnumType.STRING)
+    private EctsGrade ects;
 }

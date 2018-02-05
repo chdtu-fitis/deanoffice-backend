@@ -10,8 +10,8 @@ import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
 
 @Entity
-@Getter
 @Setter
+@Getter
 public class Specialization extends NameWithEngAndActiveEntity {
     @ManyToOne
     private Speciality speciality;
@@ -39,16 +39,23 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String educationalProgramHeadInfoEng;
     @Column(name = "required_credits", precision = 4, scale = 1)
     private BigDecimal requiredCredits;
-    @Column(name = "knowledge_and_understanding_outcomes", length=1200)
+    @Column(name = "knowledge_and_understanding_outcomes", columnDefinition = "character varying(1200)", length = 1200)
     private String knowledgeAndUnderstandingOutcomes;
-    @Column(name = "knowledge_and_understanding_outcomes_eng", length=1200)
+    @Column(name = "knowledge_and_understanding_outcomes_eng", columnDefinition = "character varying(1200)", length = 1200)
     private String knowledgeAndUnderstandingOutcomesEng;
-    @Column(name = "applying_knowledge_and_understanding_outcomes", length=1200)
+    @Column(name = "applying_knowledge_and_understanding_outcomes", columnDefinition = "character varying(1200)", length = 1200)
     private String applyingKnowledgeAndUnderstandingOutcomes;
-    @Column(name = "applying_knowledge_and_understanding_outcomes_eng", length=1200)
+    @Column(name = "applying_knowledge_and_understanding_outcomes_eng", columnDefinition = "character varying(1200)", length = 1200)
     private String applyingKnowledgeAndUnderstandingOutcomesEng;
-    @Column(name = "making_judgements_outcomes", length=1200)
+    @Column(name = "making_judgements_outcomes", columnDefinition = "character varying(1200)", length = 1200)
     private String makingJudgementsOutcomes;
-    @Column(name = "making_judgements_outcomes_eng", length=1200)
+    @Column(name = "making_judgements_outcomes_eng", columnDefinition = "character varying(1200)", length = 1200)
     private String makingJudgementsOutcomesEng;
+
+    public Specialization() {
+        educationalProgramHeadName = "";
+        educationalProgramHeadNameEng = "";
+        educationalProgramHeadInfo = "";
+        educationalProgramHeadInfoEng = "";
+    }
 }

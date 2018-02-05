@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
@@ -18,7 +20,7 @@ public class Person extends BaseEntity {
     private String patronimic;
     @Column(name = "active", nullable = false)
     private boolean active = true;
-    @Column(name = "sex", nullable = false)
-    char sex = 'm';
-    //TODO cr: use enum instead
+    @Column(name = "sex", nullable = false, length = 6, columnDefinition = "varchar(6) default 'MALE'")
+    @Enumerated(value = EnumType.STRING)
+    private Sex sex = Sex.MALE;
 }
