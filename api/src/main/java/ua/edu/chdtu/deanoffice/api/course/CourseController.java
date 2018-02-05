@@ -21,7 +21,7 @@ import java.util.List;
 public class CourseController {
     @Autowired
     private CourseService courseService;
-    @RequestMapping("/{courseId}")
+    @RequestMapping("/{courseId}/groups")
     @ResponseBody
     @JsonView(GroupViews.Name.class)
     public List<GroupDTO> getGroupsByCourse(@PathVariable String courseId) {
