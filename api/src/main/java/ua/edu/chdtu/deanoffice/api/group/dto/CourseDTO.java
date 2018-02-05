@@ -13,7 +13,7 @@ public class CourseDTO {
     private int id;
     @JsonView(GroupViews.Name.class)
     private CourseNameDTO courseName;
-    @JsonView(GroupViews.Name.class)
+    @JsonView(GroupViews.Course.class)
     private Integer semester;
     @JsonView(GroupViews.Name.class)
     private KnowledgeControlDTO knowledgeControl;
