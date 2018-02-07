@@ -72,17 +72,22 @@ public class TemplateFillService {
 
         String modeOfStudyUkr = "";
         String modeOfStudyEng = "";
+        String modeOfStudyUkrAblativeCase = "";
         TuitionForm tuitionForm = studentSummary.getStudent().getStudentGroup().getTuitionForm();
         if (tuitionForm == TuitionForm.FULL_TIME) {
             modeOfStudyUkr = "Денна";
+            modeOfStudyUkrAblativeCase = "денною";
             modeOfStudyEng = "Full-time";
         }
         if (tuitionForm == TuitionForm.EXTRAMURAL) {
             modeOfStudyUkr = "Заочна";
-            modeOfStudyEng = "Extramural";
+            modeOfStudyUkrAblativeCase = "заочною";
+            modeOfStudyEng = "Part-time";
         }
         result.put("ModeOfStudyUkr", modeOfStudyUkr);
         result.put("ModeOfStudyEng", modeOfStudyEng);
+        result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
+        result.put("ModeOfStudyEngAblativeCase", modeOfStudyEng.toLowerCase());
 
         Specialization specialization = studentSummary.getStudent().getStudentGroup().getSpecialization();
         Speciality speciality = specialization.getSpeciality();
