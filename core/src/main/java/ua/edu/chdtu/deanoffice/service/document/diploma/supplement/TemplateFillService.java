@@ -57,6 +57,7 @@ public class TemplateFillService {
     }
 
     private static Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
+        StudentGroup group = studentSummary.getStudent().getStudentGroup();
         Map<String, String> result = new HashMap<>();
 
         result.put("SurnameUkr", getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
@@ -70,20 +71,23 @@ public class TemplateFillService {
                 ? dateOfBirthFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
 
+        TuitionForm tuitionForm = studentSummary.getStudent().getStudentGroup().getTuitionForm();
         String modeOfStudyUkr = "";
         String modeOfStudyEng = "";
         String modeOfStudyUkrAblativeCase = "";
-        TuitionForm tuitionForm = studentSummary.getStudent().getStudentGroup().getTuitionForm();
-        if (tuitionForm == TuitionForm.FULL_TIME) {
-            modeOfStudyUkr = "Денна";
-            modeOfStudyUkrAblativeCase = "денною";
-            modeOfStudyEng = "Full-time";
+        switch (tuitionForm) {
+            case FULL_TIME:
+                modeOfStudyUkr = "Денна";
+                modeOfStudyUkrAblativeCase = "денною";
+                modeOfStudyEng = "Full-time";
+                break;
+            case EXTRAMURAL:
+                modeOfStudyUkr = "Заочна";
+                modeOfStudyUkrAblativeCase = "заочною";
+                modeOfStudyEng = "Part-time";
+                break;
         }
-        if (tuitionForm == TuitionForm.EXTRAMURAL) {
-            modeOfStudyUkr = "Заочна";
-            modeOfStudyUkrAblativeCase = "заочною";
-            modeOfStudyEng = "Part-time";
-        }
+
         result.put("ModeOfStudyUkr", modeOfStudyUkr);
         result.put("ModeOfStudyEng", modeOfStudyEng);
         result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
@@ -104,9 +108,67 @@ public class TemplateFillService {
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
+        result.put("RequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("QualificationUkr", getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", getValueSafely(specialization.getQualificationEng()));
+        result.put("TrainingDurationYears", String.format("%1d", group.getStudyYears().intValue()));
+        switch ((int) Math.round(group.getStudyYears().doubleValue())) {
+            case 0:
+                result.put("TrainingDurationYears", " ");
+                result.put("DurationLabelYears", " ");
+                result.put("DurationLabelYearsEng", " ");
+                break;
+            case 1:
+                result.put("DurationLabelYears", "рік");
+                result.put("DurationLabelYearsEng", "year");
+                break;
+            case 2:
+                result.put("DurationLabelYears", "роки");
+                result.put("DurationLabelYearsEng", "years");
+                break;
+            case 3:
+                result.put("DurationLabelYears", "роки");
+                result.put("DurationLabelYearsEng", "years");
+                break;
+            case 4:
+                result.put("DurationLabelYears", "роки");
+                result.put("DurationLabelYearsEng", "years");
+                break;
+            default:
+                result.put("DurationLabelYears", "років");
+                result.put("DurationLabelYearsEng", "years");
+                break;
+        }
+
+        result.put("TrainingDurationMonths", getMonthsFromYears(group.getStudyYears()));
+        switch (Math.round(Integer.parseInt(result.get("TrainingDurationMonths")))) {
+            case 0:
+                result.put("TrainingDurationMonths", " ");
+                result.put("DurationLabelMonths", " ");
+                result.put("DurationLabelMonthsEng", " ");
+                break;
+            case 1:
+                result.put("DurationLabelMoths", "місяць");
+                result.put("DurationLabelMonthsEng", "month");
+                break;
+            case 2:
+                result.put("DurationLabelMoths", "місяці");
+                result.put("DurationLabelMonthsEng", "months");
+                break;
+            case 3:
+                result.put("DurationLabelMoths", "місяці");
+                result.put("DurationLabelMonthsEng", "months");
+                break;
+            case 4:
+                result.put("DurationLabelMoths", "місяці");
+                result.put("DurationLabelMonthsEng", "months");
+                break;
+            default:
+                result.put("DurationLabelMonths", "місяців");
+                result.put("DurationLabelMonthsEng", "months");
+                break;
+        }
         result.put("FieldOfStudy", getValueSafely(speciality.getFieldOfStudy()));
         result.put("FieldOfStudyEng", getValueSafely(speciality.getFieldOfStudyEng()));
         result.put("QualificationLevel", getValueSafely(degree.getQualificationLevelDescription()));
@@ -124,42 +186,41 @@ public class TemplateFillService {
         result.put("ApplyingKnowledgeAndUnderstandingEng", getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomesEng()));
         result.put("MakingJudgements", getValueSafely(specialization.getMakingJudgementsOutcomes()));
         result.put("MakingJudgementsEng", getValueSafely(specialization.getMakingJudgementsOutcomesEng()));
-
-
         result.put("ProgramHeadName", getValueSafely(specialization.getEducationalProgramHeadName()));
         result.put("ProgramHeadNameEng", getValueSafely(specialization.getEducationalProgramHeadNameEng()));
         result.put("ProgramHeadInfo", getValueSafely(specialization.getEducationalProgramHeadInfo()));
         result.put("ProgramHeadInfoEng", getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
+        DateFormat diplomaDateFormat = dateOfBirthFormat;
+        StudentDegree studentDegree;
         try {
-            DateFormat diplomaDateFormat = dateOfBirthFormat;
-            StudentDegree studentDegree = studentSummary.getStudent().getDegrees().stream().filter(
+            studentDegree = studentSummary.getStudent().getDegrees().stream().filter(
                     sd -> sd.getDegree().getName()
                             .equals(studentSummary.getStudent().getStudentGroup().getSpecialization().getDegree().getName()))
                     .findFirst().get();
-            result.put("ThesisNameUkr", getValueSafely(studentDegree.getThesisName()));
-            result.put("ThesisNameEng", getValueSafely(studentDegree.getThesisNameEng()));
-            result.put("ProtocolNumber", getValueSafely(studentDegree.getProtocolNumber()));
-            result.put("PreviousDiplomaNumber", getValueSafely(studentDegree.getPreviousDiplomaNumber()));
-
-            int dateStyle = DateFormat.LONG;
-            DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
-            result.put("ProtocolDateUkr", studentDegree.getProtocolDate() == null ? ""
-                    : protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
-            DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
-            result.put("ProtocolDateEng", studentDegree.getProtocolDate() == null ? ""
-                    : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
-
-            result.put("SupplNumber", getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
-            result.put("SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
-                    : diplomaDateFormat.format(studentDegree.getSupplementDate()));
-            result.put("DiplNumber", getValueSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
-            result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
-                    : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         } catch (NoSuchElementException e) {
             log.warn("There is no suitable StudentDegree for " + studentSummary.getStudent().getInitialsUkr());
+            return result;
         }
+        result.put("ThesisNameUkr", getValueSafely(studentDegree.getThesisName()));
+        result.put("ThesisNameEng", getValueSafely(studentDegree.getThesisNameEng()));
+        result.put("ProtocolNumber", getValueSafely(studentDegree.getProtocolNumber()));
+        result.put("PreviousDiplomaNumber", getValueSafely(studentDegree.getPreviousDiplomaNumber()));
 
+        int dateStyle = DateFormat.LONG;
+        DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
+        result.put("ProtocolDateUkr", studentDegree.getProtocolDate() == null ? ""
+                : protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
+        DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
+        result.put("ProtocolDateEng", studentDegree.getProtocolDate() == null ? ""
+                : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
+
+        result.put("SupplNumber", getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
+        result.put("SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
+                : diplomaDateFormat.format(studentDegree.getSupplementDate()));
+        result.put("DiplNumber", getValueSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
+        result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
+                : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
     }
 
@@ -191,6 +252,12 @@ public class TemplateFillService {
             result = result.add(g.getCourse().getCredits());
         }
         return result;
+    }
+
+    private static String getMonthsFromYears(BigDecimal years) {
+        int intPart = years.intValue();
+        int monthsPerYear = 12;
+        return String.format("%d", Math.round((years.doubleValue() - intPart) * monthsPerYear));
     }
 
     private Map<String, String> getReplacementsDictionary(StudentSummary studentSummary) {
