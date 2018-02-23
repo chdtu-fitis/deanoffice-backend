@@ -1,8 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,148 +11,70 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.Collator;
-import java.util.*;
-
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 @Service
 public class DiplomaSupplementService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "DiplomaSupplement.docx";
+
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
     private StudentService studentService;
     private GradeService gradeService;
     private StudentGroupService groupService;
-//    TODO cr: Неправильне використання змінної. Не можна використовувати не синглтон зміну в синглтон об'єктах.
-//                  В багатопочних апп тут неможливо сказати який об'єкт використовується
-    private StudentSummary studentSummary;
+    private DocumentIOService documentIOService;
+    private TemplateFillService templateFillService;
 
-    public DiplomaSupplementService(StudentService studentService, GradeService gradeService, StudentGroupService groupService) {
+    public DiplomaSupplementService(StudentService studentService,
+                                    GradeService gradeService,
+                                    StudentGroupService groupService,
+                                    DocumentIOService documentIOService,
+                                    TemplateFillService templateFillService) {
         this.studentService = studentService;
         this.gradeService = gradeService;
         this.groupService = groupService;
+        this.documentIOService = documentIOService;
+        this.templateFillService = templateFillService;
     }
 
-    public StudentSummary getStudentSummary() {
-        return studentSummary;
-    }
-
-    public void setStudentSummary(StudentSummary studentSummary) {
-        this.studentSummary = studentSummary;
-    }
-
-    public synchronized File formDiplomaSupplementForStudent(Integer studentId) {
+    public File formDiplomaSupplementForStudent(Integer studentId) throws Docx4JException, IOException {
         Student student = studentService.get(studentId);
-        List<List<Grade>> grades = gradeService.getGradesByStudentId(student.getId());
-        this.studentSummary = new StudentSummary(student, grades);
-        return saveDocument(fillWithStudentInformation(TEMPLATE),
-                studentSummary.getStudent().getSurnameEng() + " " + studentSummary.getStudent().getNameEng() + ".docx");
-//TODO cr: для чого так складно - замість student.getId() можна написати studentId, а замість studentSummary.getStudent() краще просто student
-//TODO cr: тут потешційна дирка в безпеці якщо в імені студента раніше записані символи типу ../,
-//                          то можна перезаписати або зберегти файл не в тому місці де його очікують
+        List<List<Grade>> grades = gradeService.getGradesByStudentId(studentId);
+        StudentSummary studentSummary = new StudentSummary(student, grades);
+        String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();
+        fileName = cleanFileName(fileName);
+        WordprocessingMLPackage filledTemplate = templateFillService.fill(TEMPLATE, studentSummary);
+        return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
     }
 
-    //TODO cr: вичитку і процес шаблону краще винести в окремий сервіс
-    public WordprocessingMLPackage fillWithStudentInformation(String templateFilepath) {
-        WordprocessingMLPackage template = loadTemplate(templateFilepath);
-        fillTableWithGrades(template);
-        Map<String, String> commonDict = new HashMap<>();
-        commonDict.putAll(studentSummary.getStudentInfoDictionary());
-        commonDict.putAll(studentSummary.getTotalDictionary());
-        replaceTextPlaceholdersInTemplate(template, commonDict);
-        replacePlaceholdersInFooter(template, commonDict);
-        return template;
+    public String cleanFileName(String fileName) {
+        return fileName.replaceAll("[\\W]*", "");
     }
 
-    private void fillTableWithGrades(WordprocessingMLPackage template) {
-        Set<String> placeholdersToRemove = new HashSet<>();
-
-        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
-        String tableWithGradesKey = "#CourseNum";
-        Tbl tempTable = findTable(tables, tableWithGradesKey);
-        if (tempTable == null) {
-            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
-            return;
-        }
-        List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
-
-        Tr templateRow = (Tr) gradeTableRows.get(1);
-        //TODO cr: possible IndexOfBoundException
-        int rowToAddIndex;
-
-        //The table is filling upwards
-        List<List<Grade>> grades = getGradesReverseCopyFromStudentSummary();
-        int sectionNumber = 3;
-
-        for (List<Grade> gradesSection : grades) {
-            if (sectionNumber > 0) {
-                String sectionPlaceholderKey = "#Section" + sectionNumber;
-                placeholdersToRemove.add(sectionPlaceholderKey);
-                rowToAddIndex = gradeTableRows.indexOf(findRowInTable(tempTable, sectionPlaceholderKey)) + 1;
-            } else {
-                rowToAddIndex = 2;
-            }
-            for (Grade grade : gradesSection) {
-                Map<String, String> replacements = StudentSummary.getGradeDictionary(grade);
-                replacements.put("#CourseNum", getGradeNumberFromBeginning(studentSummary.getGrades(), gradesSection, grade) + "");
-                addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
-                rowToAddIndex++;
-            }
-            sectionNumber--;
-            //TODO cr: поки що тут не все так очевидно. добре було б добавити комент як цей повинно працювати. Скоріше за все тут іде обробка якизось додаткових секцій в темлейті
-            //TODO cr: дай імена магічним числам де треба
-        }
-        tempTable.getContent().remove(templateRow);
-        replacePlaceholdersWithBlank(template, placeholdersToRemove);
-    }
-
-    //TODO cr: якщо є складні структури даниз типу List<List<>> можна попробувати винести це в якийсь окремий об'єкт
-    private static int getGradeNumberFromBeginning(List<List<Grade>> masterList, List<Grade> sublist, Object item) {
-        int result = 0;
-        int sublistIndex = masterList.indexOf(sublist);
-        int itemIndex = sublist.indexOf(item);
-        for (int i = 0; i <= sublistIndex; i++) {
-            if (i == sublistIndex)
-                result += itemIndex + 1;
-            else result += masterList.get(i).size();
-        }
-        return result;
-    }
-
-    private List<List<Grade>> getGradesReverseCopyFromStudentSummary() {
-        List<List<Grade>> grades = new ArrayList<>();
-        grades.add(new ArrayList<>());
-        grades.add(new ArrayList<>());
-        grades.add(new ArrayList<>());
-        grades.add(new ArrayList<>());
-        Collections.copy(grades, this.studentSummary.getGrades());
-        Collections.reverse(grades);
-        return grades;
-    }
-
-    public synchronized File formDiplomaSupplementForGroup(Integer groupId) {
-        //TODO cr: для чого тут synchronized?
+    public File formDiplomaSupplementForGroup(Integer groupId) throws Docx4JException, IOException {
         StudentGroup studentGroup = groupService.getById(groupId);
-        if (studentGroup == null || studentGroup.getStudents().isEmpty())
+        if (studentGroup == null || studentGroup.getStudents().isEmpty()) {
             return null;
+        }
         List<Student> students = new ArrayList<>(studentGroup.getStudents());
-        Collections.sort(students, new Comparator<Student>() {
-            @Override
-            public int compare(Student s1, Student s2) {
-                Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
-                return ukrainianCollator.compare(s1.getSurname(), s2.getSurname());
-            }
+        students.sort((s1, s2) -> {
+            Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
+            return ukrainianCollator.compare(s1.getSurname(), s2.getSurname());
         });
         WordprocessingMLPackage groupTemplate = null;
         int studentNumber = 1;
         for (Student student : students) {
-            this.studentSummary = new StudentSummary(student, gradeService.getGradesByStudentId(student.getId()));
-            WordprocessingMLPackage studentFilledTemplate = fillWithStudentInformation(TEMPLATE);
+            StudentSummary studentSummary = new StudentSummary(student, gradeService.getGradesByStudentId(student.getId()));
+            WordprocessingMLPackage studentFilledTemplate = templateFillService.fill(TEMPLATE, studentSummary);
             if (groupTemplate == null) {
                 groupTemplate = studentFilledTemplate;
                 studentNumber++;
@@ -167,7 +88,6 @@ public class DiplomaSupplementService {
 //                footerPartName = new PartName("/word/footer1.xml");
 //                newFooterPartName = new PartName("/word/footer" + studentNumber + ".xml");
 //            } catch (InvalidFormatException e) {
-//                e.printStackTrace();
 //            }
 //            Part footerPart = studentFilledTemplate.getParts().get(footerPartName);
 //            footerPart.setPartName(newFooterPartName);
@@ -185,8 +105,7 @@ public class DiplomaSupplementService {
             }
             studentNumber++;
         }
-        return saveDocument(groupTemplate, studentGroup.getName() + ".docx");
+        return documentIOService.saveDocumentToTemp(groupTemplate, studentGroup.getName() + ".docx");
     }
-
 
 }
