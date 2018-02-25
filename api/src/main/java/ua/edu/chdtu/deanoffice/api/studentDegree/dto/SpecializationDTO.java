@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
-class SpecializationDTO {
+public class SpecializationDTO {
     private SpecialityDTO speciality;
     private Faculty faculty;
     private Department department;

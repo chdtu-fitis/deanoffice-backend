@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 @Setter
 @Getter
-class StudentGroupDTO {
+public class StudentGroupDTO {
     private SpecializationDTO specialization;
     private int creationYear;
     private TuitionForm tuitionForm;

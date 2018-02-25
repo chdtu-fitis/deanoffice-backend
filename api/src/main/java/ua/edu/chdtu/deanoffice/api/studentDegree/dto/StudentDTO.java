@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-class StudentDTO {
+public class StudentDTO {
     private StudentGroupDTO studentGroup;
     private Integer id;
     private String surname;

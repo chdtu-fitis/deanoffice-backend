@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-class StudentDegreeDTO {
+public class StudentDegreeDTO {
     private Integer id;
     private DegreeDTO degree;
     private StudentDTO student;

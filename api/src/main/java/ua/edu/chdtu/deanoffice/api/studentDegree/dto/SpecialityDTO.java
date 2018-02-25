@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-class SpecialityDTO {
+public class SpecialityDTO {
     private Integer id;
     private String code;
     private String fieldOfStudy;

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-class DegreeDTO {
+public class DegreeDTO {
     private String qualificationLevelDescription;
     private String admissionRequirements;
     private String furtherStudyAccess;
