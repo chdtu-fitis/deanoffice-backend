@@ -7,9 +7,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
@@ -29,7 +29,7 @@ public class DiplomaSupplementController {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
-    private static ResponseEntity<Resource> buildResourceResponseEntity(File result, String asciiName) {
+    private static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName) {
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
             return ResponseEntity.ok()
@@ -43,15 +43,9 @@ public class DiplomaSupplementController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/students/{studentId}")
-    public ResponseEntity<Resource> generateForStudent(@PathVariable Integer studentId) throws IOException, Docx4JException {
-        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplementForStudent(studentId);
-        return buildResourceResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName());
-    }
-
-    @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}")
-    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId) throws IOException, Docx4JException {
-        File groupDiplomaSupplements = diplomaSupplementService.formDiplomaSupplementForGroup(groupId);
-        return buildResourceResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
+    @GetMapping(path = "/studentdegrees/{studentDegreeId}")
+    public ResponseEntity<Resource> generateForStudent(@PathVariable Integer studentDegreeId) throws IOException, Docx4JException {
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplementForStudent(studentDegreeId);
+        return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName());
     }
 }

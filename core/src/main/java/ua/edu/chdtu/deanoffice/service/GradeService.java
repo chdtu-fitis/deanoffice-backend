@@ -4,10 +4,11 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,17 +26,18 @@ public class GradeService {
 
     private GradeRepository gradeRepository;
     private CourseRepository courseRepository;
-    private StudentRepository studentRepository;
+    private StudentDegreeRepository studentDegreeRepository;
 
-    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, StudentRepository studentRepository) {
+    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, StudentDegreeRepository studentDegreeRepository) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
-        this.studentRepository = studentRepository;
+        this.studentDegreeRepository = studentDegreeRepository;
     }
 
-    public List<List<Grade>> getGradesByStudentId(Integer studentId) {
-        Student student = studentRepository.getOne(studentId);
-        List<Course> courses = courseRepository.getByGroupId(student.getStudentGroup().getId());
+    public List<List<Grade>> getGradesByStudentDegreeId(Integer studentDegreeId) {
+        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
+        Student student = studentDegree.getStudent();
+        List<Course> courses = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId());
         List<List<Grade>> grades = new ArrayList<>();
 
         if (courses.isEmpty()) {

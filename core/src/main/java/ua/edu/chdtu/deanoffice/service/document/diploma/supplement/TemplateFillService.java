@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeEng;
@@ -57,7 +60,10 @@ public class TemplateFillService {
     }
 
     private static Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
-        StudentGroup group = studentSummary.getStudent().getStudentGroup();
+        try {
+
+
+        StudentGroup group = studentSummary.getStudentGroup();
         Map<String, String> result = new HashMap<>();
 
         result.put("SurnameUkr", getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
@@ -71,7 +77,7 @@ public class TemplateFillService {
                 ? dateOfBirthFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
 
-        TuitionForm tuitionForm = studentSummary.getStudent().getStudentGroup().getTuitionForm();
+        TuitionForm tuitionForm = studentSummary.getStudentGroup().getTuitionForm();
         String modeOfStudyUkr = "";
         String modeOfStudyEng = "";
         String modeOfStudyUkrAblativeCase = "";
@@ -93,16 +99,16 @@ public class TemplateFillService {
         result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
         result.put("ModeOfStudyEngAblativeCase", modeOfStudyEng.toLowerCase());
 
-        Specialization specialization = studentSummary.getStudent().getStudentGroup().getSpecialization();
+        Specialization specialization = studentSummary.getStudentGroup().getSpecialization();
         Speciality speciality = specialization.getSpeciality();
         Degree degree = specialization.getDegree();
-        result.put("SpecializationUkr", specialization.getName());
+        result.put("SpecializationUkr", getValueSafely(specialization.getName()));
         result.put("SpecializationEng", getValueSafely(specialization.getNameEng()));
-        result.put("SpecialityUkr", speciality.getName());
+        result.put("SpecialityUkr", getValueSafely(speciality.getName()));
         result.put("SpecialityEng", getValueSafely(speciality.getNameEng()));
-        result.put("DegreeUkr", degree.getName());
+        result.put("DegreeUkr", getValueSafely(degree.getName()));
         result.put("DegreeEng", getValueSafely(degree.getNameEng()));
-        result.put("DEGREEUKR", degree.getName().toUpperCase());
+        result.put("DEGREEUKR", getValueSafely(degree.getName()).toUpperCase());
         result.put("DEGREEENG", getValueSafely(degree.getNameEng()).toUpperCase());
         result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))));
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
@@ -192,16 +198,7 @@ public class TemplateFillService {
         result.put("ProgramHeadInfoEng", getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
         DateFormat diplomaDateFormat = dateOfBirthFormat;
-        StudentDegree studentDegree;
-        try {
-            studentDegree = studentSummary.getStudent().getDegrees().stream().filter(
-                    sd -> sd.getDegree().getName()
-                            .equals(studentSummary.getStudent().getStudentGroup().getSpecialization().getDegree().getName()))
-                    .findFirst().get();
-        } catch (NoSuchElementException e) {
-            log.warn("There is no suitable StudentDegree for " + studentSummary.getStudent().getInitialsUkr());
-            return result;
-        }
+        StudentDegree studentDegree = studentSummary.getStudentDegree();
         result.put("ThesisNameUkr", getValueSafely(studentDegree.getThesisName()));
         result.put("ThesisNameEng", getValueSafely(studentDegree.getThesisNameEng()));
         result.put("ProtocolNumber", getValueSafely(studentDegree.getProtocolNumber()));
@@ -222,6 +219,10 @@ public class TemplateFillService {
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
+        }catch (Exception e){
+            log.error("omg", e);
+        }
+        return null;
     }
 
     private static String formatCredits(BigDecimal credits) {

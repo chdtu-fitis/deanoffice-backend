@@ -16,6 +16,8 @@ public class Teacher extends Person {
     private Department department;
     @ManyToOne
     private Position position;
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
     @Column(name = "scientific_degree")
     private String scientificDegree;
 }
