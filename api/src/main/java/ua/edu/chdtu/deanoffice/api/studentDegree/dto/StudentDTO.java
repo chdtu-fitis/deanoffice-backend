@@ -11,10 +11,12 @@ import java.util.Date;
 public class StudentDTO {
     private StudentGroupDTO studentGroup;
     private Integer id;
-    private String surname;
     private String name;
+    private String nameEng;
+    private String surname;
+    private String surnameEng;
     private String patronimic;
-    private boolean active;
+    private String patronimicEng;
     private Sex sex;
     private Date birthDate;
     private String registrationAddress;

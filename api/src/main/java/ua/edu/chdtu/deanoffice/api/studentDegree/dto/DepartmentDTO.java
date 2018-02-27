@@ -8,6 +8,5 @@ import lombok.Setter;
 public class DepartmentDTO {
     private Integer id;
     private String name;
-    private boolean active;
     private String abbr;
 }
