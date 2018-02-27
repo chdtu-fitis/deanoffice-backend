@@ -219,7 +219,7 @@ public class TemplateFillService {
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("omg", e);
         }
         return null;
