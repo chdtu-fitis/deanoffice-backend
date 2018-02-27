@@ -13,7 +13,7 @@ import java.util.Date;
 @Table(name = "student_academic_vacation")
 public class StudentAcademicVacation extends BaseEntity {
     @ManyToOne
-    private Student student;
+    private StudentDegree studentDegree;
     @Column(name = "vacation_start_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date vacationStartDate;
@@ -26,9 +26,8 @@ public class StudentAcademicVacation extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date orderDate;
     @ManyToOne
-    private StudentGroup group;
-    @ManyToOne
     private OrderReason reason;
     @Column(name = "application_date", nullable = false)
+    @Temporal(TemporalType.DATE)
     private Date applicationDate;
 }

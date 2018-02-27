@@ -24,13 +24,4 @@ public class StudentService {
         return studentRepository.findOne(id);
     }
 
-    public List<Student> getByGroupAndActive(StudentGroup group, Boolean isActive) {
-        return studentRepository.getByStudentGroupAndActiveOrderBySurnameAsc(group, isActive);
-    }
-
-    public List<Student> getByGroupIdAndActive(Integer id, Boolean isActive) {
-        return studentRepository.findAllByStudentGroupIdAndActiveOrderBySurnameAscNameAscPatronimicAsc(id, isActive);
-    }
-
-
 }

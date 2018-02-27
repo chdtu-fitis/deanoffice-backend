@@ -20,14 +20,22 @@ public class StudentSummary {
 
     private static Logger log = LoggerFactory.getLogger(StudentSummary.class);
 
-    private Student student;
+    private StudentDegree studentDegree;
     private List<List<Grade>> grades;
     private Integer totalHours = 0;
 
-    public StudentSummary(Student student, List<List<Grade>> grades) {
-        this.student = student;
+    public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
+        this.studentDegree = studentDegree;
         this.grades = grades;
         completeGrades();
+    }
+
+    public Student getStudent() {
+        return studentDegree.getStudent();
+    }
+
+    public StudentGroup getStudentGroup() {
+        return studentDegree.getStudentGroup();
     }
 
     private static boolean ectsIsSet(Grade grade) {

@@ -18,8 +18,6 @@ public class Person extends BaseEntity {
     private String name;
     @Column(name = "patronimic", nullable = false, length = 20)
     private String patronimic;
-    @Column(name = "active", nullable = false)
-    private boolean active = true;
     @Column(name = "sex", nullable = false, length = 6, columnDefinition = "varchar(6) default 'MALE'")
     @Enumerated(value = EnumType.STRING)
     private Sex sex = Sex.MALE;
