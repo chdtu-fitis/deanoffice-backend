@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.percentagereport;
 
 
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -17,9 +18,10 @@ import ua.edu.chdtu.deanoffice.service.document.report.gradepercentage.GradePerc
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 @RestController
-@RequestMapping("/percreport")
+@RequestMapping("/documents/percentagereport")
 public class PercentageReportController {
 
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
@@ -36,12 +38,12 @@ public class PercentageReportController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}")
-    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId) {
+    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId) throws IOException, Docx4JException {
         File groupDiplomaSupplements = gradePercentageReportService.prepareReportForGroup(groupId);
-        return getResourceResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
+        return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
 
-    private static ResponseEntity<Resource> getResourceResponseEntity(File result, String asciiName) {
+    private static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName) {
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
             return ResponseEntity.ok()

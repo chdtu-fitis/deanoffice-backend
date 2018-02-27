@@ -5,8 +5,10 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ua.edu.chdtu.deanoffice.entity.EctsGrade;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.util.HashMap;
@@ -19,7 +21,7 @@ public class StudentsReport {
 
     private static Logger log = LoggerFactory.getLogger(StudentsReport.class);
 
-    private Student student;
+    private StudentDegree studentDegree;
 
     private String satisfactoryPercentage;
     private String goodPercentage;
@@ -31,8 +33,8 @@ public class StudentsReport {
     private String DPercentage;
     private String EPercentage;
 
-    public StudentsReport(@NonNull List<Grade> grades) {
-        student = grades.get(0).getStudent();
+    public StudentsReport(StudentDegree studentDegree, @NonNull List<Grade> grades) {
+        this.studentDegree = studentDegree;
         int quantity = grades.size();
         int badGrades = 0;
 
@@ -50,14 +52,14 @@ public class StudentsReport {
             switch (grade.getGrade()) {
                 case 3: {
                     satisfactory++;
-                    if (GradeUtil.getECTSGrade(grade.getPoints()).equals("D")) {
+                    if (GradeUtil.getEctsGrade(grade.getPoints()).equals(EctsGrade.D)) {
                         d++;
                     } else e++;
                     break;
                 }
                 case 4: {
                     good++;
-                    if (GradeUtil.getECTSGrade(grade.getPoints()).equals("B")) {
+                    if (GradeUtil.getEctsGrade(grade.getPoints()).equals(EctsGrade.B)) {
                         b++;
                     } else c++;
                     break;
@@ -75,7 +77,7 @@ public class StudentsReport {
         }
 
         if (badGrades > 0) {
-            log.warn("Report for student " + student.getInitialsUkr() + " ignores " +
+            log.warn("Report for student " + studentDegree.getStudent().getInitialsUkr() + " ignores " +
                     String.format("%2d", badGrades) +
                     " grade(s) where grade is lower than satisfactory!");
         }
@@ -93,15 +95,15 @@ public class StudentsReport {
 
     public Map<String, String> getDictionary() {
         Map<String, String> result = new HashMap<>();
-        result.put("#Initials", student.getInitialsUkr());
-        result.put("#Satisfactory", satisfactoryPercentage);
-        result.put("#Good", goodPercentage);
-        result.put("#Excellent", excellentPercentage);
-        result.put("#A", APercentage);
-        result.put("#B", BPercentage);
-        result.put("#C", CPercentage);
-        result.put("#D", DPercentage);
-        result.put("#E", EPercentage);
+        result.put("Initials", studentDegree.getStudent().getInitialsUkr());
+        result.put("Satisfactory", satisfactoryPercentage);
+        result.put("Good", goodPercentage);
+        result.put("Excellent", excellentPercentage);
+        result.put("A", APercentage);
+        result.put("B", BPercentage);
+        result.put("C", CPercentage);
+        result.put("D", DPercentage);
+        result.put("E", EPercentage);
         return result;
     }
 }
