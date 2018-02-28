@@ -64,8 +64,6 @@ public class GradePercentageReportService {
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentsReport> studentsReports) {
-        Set<String> placeholdersToRemove = new HashSet<>();
-
         List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
         String tableWithGradesKey = "№";
         Tbl tempTable = findTable(tables, tableWithGradesKey);
@@ -84,7 +82,6 @@ public class GradePercentageReportService {
             rowToAddIndex++;
         }
         tempTable.getContent().remove(templateRow);
-        replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
 
 

@@ -12,7 +12,7 @@ public class LanguageUtil {
                     result.append(abcLat[x]);
                     break;
                 }
-                if (x == abcCyr.length - 1){
+                if (x == abcCyr.length - 1) {
                     result.append(message.charAt(i));
                 }
             }

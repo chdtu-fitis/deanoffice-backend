@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.entity.EctsGrade;
 import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
@@ -27,11 +26,11 @@ public class StudentsReport {
     private String goodPercentage;
     private String excellentPercentage;
 
-    private String APercentage;
-    private String BPercentage;
-    private String CPercentage;
-    private String DPercentage;
-    private String EPercentage;
+    private String aPercentage;
+    private String bPercentage;
+    private String cPercentage;
+    private String dPercentage;
+    private String ePercentage;
 
     public StudentsReport(StudentDegree studentDegree, @NonNull List<Grade> grades) {
         this.studentDegree = studentDegree;
@@ -42,31 +41,35 @@ public class StudentsReport {
         double good = 0;
         double excellent = 0;
 
-        double a = 0;
-        double b = 0;
-        double c = 0;
-        double d = 0;
-        double e = 0;
+        double aSum = 0;
+        double bSum = 0;
+        double cSum = 0;
+        double dSum = 0;
+        double eSum = 0;
 
         for (Grade grade : grades) {
             switch (grade.getGrade()) {
                 case 3: {
                     satisfactory++;
                     if (GradeUtil.getEctsGrade(grade.getPoints()).equals(EctsGrade.D)) {
-                        d++;
-                    } else e++;
+                        dSum++;
+                    } else {
+                        eSum++;
+                    }
                     break;
                 }
                 case 4: {
                     good++;
                     if (GradeUtil.getEctsGrade(grade.getPoints()).equals(EctsGrade.B)) {
-                        b++;
-                    } else c++;
+                        bSum++;
+                    } else {
+                        cSum++;
+                    }
                     break;
                 }
                 case 5: {
                     excellent++;
-                    a++;
+                    aSum++;
                     break;
                 }
                 default: {
@@ -85,11 +88,11 @@ public class StudentsReport {
         goodPercentage = String.format("%5.2f", good / (quantity - badGrades) * 100.0);
         excellentPercentage = String.format("%5.2f", excellent / (quantity - badGrades) * 100.0);
 
-        APercentage = String.format("%5.2f", a / (quantity - badGrades) * 100.0);
-        BPercentage = String.format("%5.2f", b / (quantity - badGrades) * 100.0);
-        CPercentage = String.format("%5.2f", c / (quantity - badGrades) * 100.0);
-        DPercentage = String.format("%5.2f", d / (quantity - badGrades) * 100.0);
-        EPercentage = String.format("%5.2f", e / (quantity - badGrades) * 100.0);
+        aPercentage = String.format("%5.2f", aSum / (quantity - badGrades) * 100.0);
+        bPercentage = String.format("%5.2f", bSum / (quantity - badGrades) * 100.0);
+        cPercentage = String.format("%5.2f", cSum / (quantity - badGrades) * 100.0);
+        dPercentage = String.format("%5.2f", dSum / (quantity - badGrades) * 100.0);
+        ePercentage = String.format("%5.2f", eSum / (quantity - badGrades) * 100.0);
 
     }
 
@@ -99,11 +102,11 @@ public class StudentsReport {
         result.put("Satisfactory", satisfactoryPercentage);
         result.put("Good", goodPercentage);
         result.put("Excellent", excellentPercentage);
-        result.put("A", APercentage);
-        result.put("B", BPercentage);
-        result.put("C", CPercentage);
-        result.put("D", DPercentage);
-        result.put("E", EPercentage);
+        result.put("A", aPercentage);
+        result.put("B", bPercentage);
+        result.put("C", cPercentage);
+        result.put("D", dPercentage);
+        result.put("E", ePercentage);
         return result;
     }
 }
