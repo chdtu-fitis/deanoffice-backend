@@ -13,17 +13,19 @@ import java.util.List;
 public class CourseService {
     private final StudentGroupRepository studentGroupRepository;
     private final CourseRepository courseRepository;
+
     @Autowired
-    public CourseService(CourseRepository courseRepository,StudentGroupRepository studentGroupRepository) {
+    public CourseService(CourseRepository courseRepository, StudentGroupRepository studentGroupRepository) {
         this.courseRepository = courseRepository;
         this.studentGroupRepository = studentGroupRepository;
     }
 
-    public List<Course> getCourseById(int idCourse){
+    public List<Course> getCourseById(int idCourse) {
         List<Course> courses = courseRepository.findCourseById(idCourse);
         return courses;
     }
-    public List<StudentGroup> getGroupsByCourse(int courseId){
+
+    public List<StudentGroup> getGroupsByCourse(int courseId) {
         List<StudentGroup> studentGroups = studentGroupRepository.findAllByCourse(courseId);
         return studentGroups;
     }

@@ -6,9 +6,6 @@ import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Position;
 
-import javax.persistence.Column;
-import javax.persistence.ManyToOne;
-
 @Getter
 @Setter
 public class TeacherDTO {

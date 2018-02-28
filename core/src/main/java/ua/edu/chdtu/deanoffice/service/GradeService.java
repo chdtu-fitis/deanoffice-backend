@@ -65,4 +65,14 @@ public class GradeService {
                 courseIds,
                 knowledgeControlTypes);
     }
+
+    public List<Grade> getAllDifferentiatedGradesByStudentDegreeId(Integer studentDegreeId) {
+        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
+        Student student = studentDegree.getStudent();
+        List<Integer> knowledgeControlTypes = Arrays.asList(EXAM, DIFFERENTIATED_CREDIT, COURSEWORK, COURSE_PROJECT,
+                ATTESTATION, INTERNSHIP, STATE_EXAM);
+        List<Integer> courseIds = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId())
+                .stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return new ArrayList<>(getGrades(student, courseIds, knowledgeControlTypes));
+    }
 }

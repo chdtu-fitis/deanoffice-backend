@@ -60,10 +60,6 @@ public class TemplateFillService {
     }
 
     private static Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
-        try {
-
-
-        StudentGroup group = studentSummary.getStudentGroup();
         Map<String, String> result = new HashMap<>();
 
         result.put("SurnameUkr", getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
@@ -118,6 +114,7 @@ public class TemplateFillService {
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("QualificationUkr", getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", getValueSafely(specialization.getQualificationEng()));
+        StudentGroup group = studentSummary.getStudentGroup();
         result.put("TrainingDurationYears", String.format("%1d", group.getStudyYears().intValue()));
         switch ((int) Math.round(group.getStudyYears().doubleValue())) {
             case 0:
@@ -219,10 +216,6 @@ public class TemplateFillService {
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
-        }catch (Exception e){
-            log.error("omg", e);
-        }
-        return null;
     }
 
     private static String formatCredits(BigDecimal credits) {
