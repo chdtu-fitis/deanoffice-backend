@@ -27,4 +27,20 @@ public class StudentService {
         return studentRepository.getAllByStudentIds(id);
     }
 
+    public List<Student> searchStudentByFullName(String name, String surname, String patronimic) {
+        return studentRepository.findAllByFullNameUkr(
+                stringToCapitalizeCase(name),
+                stringToCapitalizeCase(surname),
+                stringToCapitalizeCase(patronimic)
+        );
+    }
+
+    private String stringToCapitalizeCase(String string) {
+        if (string.isEmpty()) {
+            return "";
+        }
+        string = string.toLowerCase();
+        return string.substring(0, 1).toUpperCase() + string.substring(1);
+    }
+
 }

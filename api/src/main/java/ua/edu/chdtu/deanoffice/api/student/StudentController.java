@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -58,6 +59,18 @@ public class StudentController {
         return new ModelMapper().map(
                 studentDegreeService.findAllByStudentDegreeIds(studentDegreeIds),
                 new TypeToken<List<StudentDegreeDTO>>() {}.getType()
+        );
+    }
+
+    @JsonView(StudentDegreeViews.Search.class)
+    @PutMapping("/search")
+    public List<StudentDTO> searchStudentByNameSurnamePanronimic(
+            @RequestBody() StudentDTO student
+    ) {
+        return new ModelMapper().map(
+                studentService.searchStudentByFullName(
+                        student.getName(), student.getSurname(), student.getPatronimic()
+                ), new TypeToken<List<StudentDTO>>() {}.getType()
         );
     }
 }
