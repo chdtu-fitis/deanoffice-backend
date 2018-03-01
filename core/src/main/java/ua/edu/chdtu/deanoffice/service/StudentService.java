@@ -2,6 +2,8 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
@@ -10,17 +12,16 @@ import java.util.List;
 public class StudentService {
 
     private StudentRepository studentRepository;
+    private StudentGroupRepository studentGroupRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(StudentRepository studentRepository,
+                          StudentGroupRepository studentGroupRepository) {
         this.studentRepository = studentRepository;
+        this.studentGroupRepository = studentGroupRepository;
     }
 
     public List<Student> findAll() {
         return studentRepository.findAll();
-    }
-
-    public Student get(Integer id) {
-        return studentRepository.findOne(id);
     }
 
     public List<Student> findAllByStudentIds(Integer[] id) {
@@ -35,6 +36,14 @@ public class StudentService {
         );
     }
 
+    public StudentGroup getStudentGroupById(Integer studentGroupId) {
+        return this.studentGroupRepository.findOne(studentGroupId);
+    }
+
+    public Student getStudentById(Integer studentId) {
+        return this.studentRepository.findOne(studentId);
+    }
+
     private String stringToCapitalizeCase(String string) {
         if (string.isEmpty()) {
             return "";
@@ -42,5 +51,4 @@ public class StudentService {
         string = string.toLowerCase();
         return string.substring(0, 1).toUpperCase() + string.substring(1);
     }
-
 }

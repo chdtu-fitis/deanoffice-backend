@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 
@@ -17,6 +19,7 @@ import java.util.List;
 public class StudentController {
     @Autowired StudentDegreeService studentDegreeService;
     @Autowired StudentService studentService;
+    @Autowired DegreeService degreeService;
 
     private List<StudentDegreeDTO> getStudentDegreeDTOListByActive(boolean active) {
         return new ModelMapper().map(
@@ -63,14 +66,45 @@ public class StudentController {
     }
 
     @JsonView(StudentDegreeViews.Search.class)
-    @PutMapping("/search")
+    @GetMapping("/search")
     public List<StudentDTO> searchStudentByNameSurnamePanronimic(
-            @RequestBody() StudentDTO student
+            @RequestParam(value = "name", defaultValue = "", required = false) String name,
+            @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
+            @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
     ) {
+        name = java.net.URLDecoder.decode(name);
+        surname = java.net.URLDecoder.decode(surname);
+        patronimic = java.net.URLDecoder.decode(patronimic);
         return new ModelMapper().map(
-                studentService.searchStudentByFullName(
-                        student.getName(), student.getSurname(), student.getPatronimic()
-                ), new TypeToken<List<StudentDTO>>() {}.getType()
+                studentService.searchStudentByFullName(name, surname, patronimic),
+                new TypeToken<List<StudentDTO>>() {}.getType()
         );
+    }
+
+ //   @JsonView(StudentDegreeViews.Degree.class)
+    @PostMapping("/degrees")
+    public ResponseEntity<StudentDegreeDTO> createNewStudentDegree(
+            @RequestBody() NewStudentDegreeDTO newStudentDegreeDTO
+    ) {
+        return ResponseEntity.ok(
+                new ModelMapper().map(
+                        createStudentDegree(newStudentDegreeDTO),
+                        new TypeToken<StudentDegreeDTO>() {}.getType()
+                )
+        );
+    }
+
+    private StudentDegree createStudentDegree(NewStudentDegreeDTO newStudentDegreeDTO) {
+        StudentDegree newStudentDegree = new ModelMapper().map(
+                newStudentDegreeDTO,
+                new TypeToken<StudentDegree>() {}.getType()
+        );
+
+        newStudentDegree.setDegree(degreeService.getDegree(newStudentDegreeDTO.getDegreeId()));
+        newStudentDegree.setStudent(studentService.getStudentById(newStudentDegreeDTO.getStudentId()));
+        newStudentDegree.setStudentGroup(
+                studentService.getStudentGroupById(newStudentDegreeDTO.getStudentGroupId())
+        );
+        return studentDegreeService.save(newStudentDegree);
     }
 }

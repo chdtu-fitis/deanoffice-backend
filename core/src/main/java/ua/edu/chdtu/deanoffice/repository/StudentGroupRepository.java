@@ -7,10 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.List;
 
-/**
- * Created by os199 on 05.11.2017.
- */
-public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer>{
+public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer> {
 
     @Query("select studentGroup from StudentGroup as studentGroup " +
             "join studentGroup.specialization " +
