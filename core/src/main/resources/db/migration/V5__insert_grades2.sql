@@ -1,4 +1,4 @@
---
+/*--
 -- PostgreSQL database dump
 --
 
@@ -21806,3 +21806,4 @@ SELECT pg_catalog.setval('grade_id_seq', 44493, true);
 -- PostgreSQL database dump complete
 --
 
+*/
