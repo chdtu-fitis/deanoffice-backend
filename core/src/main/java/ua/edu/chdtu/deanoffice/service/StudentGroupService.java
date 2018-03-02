@@ -15,11 +15,11 @@ public class StudentGroupService {
         this.studentGroupRepository = studentGroupRepository;
     }
 
-    public StudentGroup getById(Integer groupId){
-        return studentGroupRepository.getOne(groupId);
+    public StudentGroup getStudentGroupById(Integer studentGroupId) {
+        return this.studentGroupRepository.findOne(studentGroupId);
     }
 
-    public List<StudentGroup> findByFacultyId(Integer facultyId){
+    public List<StudentGroup> findByFacultyId(Integer facultyId) {
         return studentGroupRepository.findAllByFaculty(facultyId);
     }
 }

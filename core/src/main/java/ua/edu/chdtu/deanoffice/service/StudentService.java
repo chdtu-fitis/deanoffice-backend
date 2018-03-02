@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
@@ -36,12 +35,12 @@ public class StudentService {
         );
     }
 
-    public StudentGroup getStudentGroupById(Integer studentGroupId) {
-        return this.studentGroupRepository.findOne(studentGroupId);
-    }
-
     public Student getStudentById(Integer studentId) {
         return this.studentRepository.findOne(studentId);
+    }
+
+    public Student save(Student student) {
+        return this.studentRepository.save(student);
     }
 
     private String stringToCapitalizeCase(String string) {
