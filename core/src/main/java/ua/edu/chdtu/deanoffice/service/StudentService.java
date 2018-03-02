@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
@@ -11,16 +10,9 @@ import java.util.List;
 public class StudentService {
 
     private StudentRepository studentRepository;
-    private StudentGroupRepository studentGroupRepository;
 
-    public StudentService(StudentRepository studentRepository,
-                          StudentGroupRepository studentGroupRepository) {
+    public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
-        this.studentGroupRepository = studentGroupRepository;
-    }
-
-    public List<Student> findAll() {
-        return studentRepository.findAll();
     }
 
     public List<Student> findAllByStudentIds(Integer[] id) {
@@ -40,6 +32,12 @@ public class StudentService {
     }
 
     public Student save(Student student) {
+        student.setName(stringToCapitalizeCase(student.getName()));
+        student.setNameEng(stringToCapitalizeCase(student.getNameEng()));
+        student.setSurname(stringToCapitalizeCase(student.getSurname()));
+        student.setSurnameEng(stringToCapitalizeCase(student.getSurnameEng()));
+        student.setPatronimic(stringToCapitalizeCase(student.getPatronimic()));
+        student.setPatronimicEng(stringToCapitalizeCase(student.getPatronimicEng()));
         return this.studentRepository.save(student);
     }
 
@@ -47,7 +45,6 @@ public class StudentService {
         if (string.isEmpty()) {
             return "";
         }
-        string = string.toLowerCase();
-        return string.substring(0, 1).toUpperCase() + string.substring(1);
+        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
     }
 }
