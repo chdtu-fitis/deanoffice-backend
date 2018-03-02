@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
@@ -22,6 +21,10 @@ public class StudentService {
 
     public Student get(Integer id) {
         return studentRepository.findOne(id);
+    }
+
+    public List<Student> findAllByStudentIds(Integer[] id) {
+        return studentRepository.getAllByStudentIds(id);
     }
 
 }

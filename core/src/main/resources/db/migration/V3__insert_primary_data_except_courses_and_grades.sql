@@ -1,4 +1,4 @@
---
+/*--
 -- PostgreSQL database dump
 --
 
@@ -8492,3 +8492,4 @@ SELECT pg_catalog.setval('teacher_id_seq', 566, true);
 -- PostgreSQL database dump complete
 --
 
+*/
