@@ -1,23 +1,24 @@
 package ua.edu.chdtu.deanoffice.api.group;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
+import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
+import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GroupService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.GraduateService;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+
 import java.lang.reflect.Type;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
 
 @RestController
 @RequestMapping("/groups")
@@ -33,7 +34,8 @@ public class GroupController {
     public ResponseEntity<List<NamedDTO>> getGraduateGroups(@RequestParam Integer degreeId) {
         List<StudentGroup> groups = graduateService.getGraduateGroups(degreeId);
         ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<NamedDTO>>() {}.getType();
+        Type listType = new TypeToken<List<NamedDTO>>() {
+        }.getType();
         List<NamedDTO> groupDTOs = modelMapper.map(groups, listType);
         return ResponseEntity.ok(groupDTOs);
     }
@@ -42,7 +44,8 @@ public class GroupController {
     public ResponseEntity<List<PersonFullNameDTO>> getGroupStudents(@PathVariable Integer id) {
         List<Student> students = groupService.getGroupStudents(id);
         ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<PersonFullNameDTO>>() {}.getType();
+        Type listType = new TypeToken<List<PersonFullNameDTO>>() {
+        }.getType();
         List<PersonFullNameDTO> studentDTOs = modelMapper.map(students, listType);
         return ResponseEntity.ok(studentDTOs);
     }
@@ -52,9 +55,10 @@ public class GroupController {
     @JsonView(GroupViews.Name.class)
     public List<GroupDTO> getGroups() {
         List<StudentGroup> studentGroups = groupService.getGroups();
-        Type listType = new TypeToken<List<GroupDTO>>() {}.getType();
+        Type listType = new TypeToken<List<GroupDTO>>() {
+        }.getType();
         ModelMapper modelMapper = new ModelMapper();
-        List<GroupDTO> groupDTOs = modelMapper.map(studentGroups,  listType);
+        List<GroupDTO> groupDTOs = modelMapper.map(studentGroups, listType);
         return groupDTOs;
     }
 
@@ -63,19 +67,22 @@ public class GroupController {
     @JsonView(GroupViews.Course.class)
     public List<CourseForGroupDTO> getCourses(@PathVariable String id) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroup(Integer.parseInt(id));
-        Type listType = new TypeToken<List<CourseForGroupDTO>>() {}.getType();
+        Type listType = new TypeToken<List<CourseForGroupDTO>>() {
+        }.getType();
         ModelMapper modelMapper = new ModelMapper();
-        List<CourseForGroupDTO> courseForGroupDTOS = modelMapper.map(courseForGroups,listType);
-        return  courseForGroupDTOS;
+        List<CourseForGroupDTO> courseForGroupDTOS = modelMapper.map(courseForGroups, listType);
+        return courseForGroupDTOS;
     }
+
     @RequestMapping("{id}/{semester}/courses")
     @ResponseBody
     @JsonView(GroupViews.Name.class)
-    public List<CourseForGroupDTO> getCoursesBySemester(@PathVariable String id,@PathVariable String semester) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySemester(Integer.parseInt(id),Integer.parseInt(semester));
-        Type listType = new TypeToken<List<CourseForGroupDTO>>() {}.getType();
+    public List<CourseForGroupDTO> getCoursesBySemester(@PathVariable String id, @PathVariable String semester) {
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySemester(Integer.parseInt(id), Integer.parseInt(semester));
+        Type listType = new TypeToken<List<CourseForGroupDTO>>() {
+        }.getType();
         ModelMapper modelMapper = new ModelMapper();
-        List<CourseForGroupDTO> courseForGroupDTOS = modelMapper.map(courseForGroups,listType);
-        return  courseForGroupDTOS;
+        List<CourseForGroupDTO> courseForGroupDTOS = modelMapper.map(courseForGroups, listType);
+        return courseForGroupDTOS;
     }
 }
