@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.percentagereport;
+package ua.edu.chdtu.deanoffice.api.document.percentagereport;
 
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import ua.edu.chdtu.deanoffice.api.diplomasupplement.DiplomaSupplementController;
+import ua.edu.chdtu.deanoffice.api.document.diplomasupplement.DiplomaSupplementController;
 import ua.edu.chdtu.deanoffice.service.document.report.gradepercentage.GradePercentageReportService;
 
 import java.io.File;
