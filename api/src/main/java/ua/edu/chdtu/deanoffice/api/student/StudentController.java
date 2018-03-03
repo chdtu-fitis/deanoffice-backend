@@ -43,11 +43,8 @@ public class StudentController {
         return getActiveStudentDegree(active);
     }
 
-    @GetMapping("/{student_ids}/personal-data")
-    public List<StudentDTO> getAllStudentsById(
-            @PathVariable("student_ids") Integer[] studentIds
-    ) {
-        return this.parseToStudentDTO(studentService.findAllByStudentIds(studentIds));
+    private List<StudentDegreeDTO> getActiveStudentDegree(boolean active) {
+        return parseToStudentDegreeDTO(studentDegreeService.findAllByActiveId(active));
     }
 
     @JsonView(StudentDegreeViews.Degree.class)
@@ -58,6 +55,17 @@ public class StudentController {
         return parseToStudentDegreeDTO(studentDegreeService.findAllByStudentDegreeIds(studentDegreeIds));
     }
 
+    private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
+        return new ModelMapper().map(studentDegreeList,new TypeToken<List<StudentDegreeDTO>>() {}.getType());
+    }
+
+    @GetMapping("/{student_ids}/personal-data")
+    public List<StudentDTO> getAllStudentsById(
+            @PathVariable("student_ids") Integer[] studentIds
+    ) {
+        return this.parseToStudentDTO(studentService.findAllByStudentIds(studentIds));
+    }
+
     @JsonView(StudentDegreeViews.Search.class)
     @GetMapping("/search")
     public List<StudentDTO> searchStudentByNameSurnamePanronimic(
@@ -66,6 +74,10 @@ public class StudentController {
             @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
     ) {
         return parseToStudentDTO(studentService.searchStudentByFullName(name, surname, patronimic));
+    }
+
+    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
+        return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
     }
 
     @JsonView(StudentDegreeViews.Degree.class)
@@ -116,17 +128,5 @@ public class StudentController {
 
     private URI getLocation(Integer id) {
         return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
-    }
-
-    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
-    }
-
-    private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
-        return new ModelMapper().map(studentDegreeList,new TypeToken<List<StudentDegreeDTO>>() {}.getType());
-    }
-
-    private List<StudentDegreeDTO> getActiveStudentDegree(boolean active) {
-        return parseToStudentDegreeDTO(studentDegreeService.findAllByActiveId(active));
     }
 }

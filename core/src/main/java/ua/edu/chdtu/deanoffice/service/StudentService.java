@@ -33,11 +33,8 @@ public class StudentService {
 
     public Student save(Student student) {
         student.setName(stringToCapitalizeCase(student.getName()));
-        student.setNameEng(stringToCapitalizeCase(student.getNameEng()));
         student.setSurname(stringToCapitalizeCase(student.getSurname()));
-        student.setSurnameEng(stringToCapitalizeCase(student.getSurnameEng()));
         student.setPatronimic(stringToCapitalizeCase(student.getPatronimic()));
-        student.setPatronimicEng(stringToCapitalizeCase(student.getPatronimicEng()));
         return this.studentRepository.save(student);
     }
 
