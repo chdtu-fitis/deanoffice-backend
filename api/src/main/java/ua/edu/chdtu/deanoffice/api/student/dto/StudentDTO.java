@@ -10,13 +10,13 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentDTO {
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.Search.class)
     private Integer id;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.Search.class)
     private String name;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.Search.class)
     private String surname;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.Search.class)
     private String patronimic;
     @JsonView(StudentDegreeViews.DetailAndDegree.class)
     private String nameEng;

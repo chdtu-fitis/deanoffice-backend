@@ -15,4 +15,8 @@ public class DegreeService {
     public List<Degree> getDegrees() {
         return degreeRepository.findAll();
     }
+
+    public Degree getDegree(Integer degreeId) {
+        return degreeRepository.getOne(degreeId);
+    }
 }
