@@ -4,6 +4,9 @@ version = "${appVersin}"
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+apply plugin: 'application'
+mainClassName = 'ua.edu.chdtu.deanoffice.webstarter.Application'
+
 sourceCompatibility = 1.8
 
 allprojects {
