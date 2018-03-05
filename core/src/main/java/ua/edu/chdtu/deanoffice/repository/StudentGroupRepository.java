@@ -16,7 +16,7 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     List<StudentGroup> findAllByFaculty(@Param("facultyId") int facultyId);
 
     @Query("select cfg.studentGroup from CourseForGroup as cfg " +
-            "join cfg.studentGroup sg " +
-            "where sg.active = true and cfg.course.id = :courseId")
+            "join cfg.studentGroup " +
+            "where cfg.course.id = :courseId")
     List<StudentGroup> findAllByCourse(@Param("courseId") int courseId);
 }
