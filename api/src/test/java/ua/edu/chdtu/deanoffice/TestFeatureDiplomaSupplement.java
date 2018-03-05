@@ -11,9 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -35,7 +37,7 @@ import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {DiplomaSupplementService.class, StudentService.class, GradeService.class,
         StudentRepository.class, GradeRepository.class, StudentGroupRepository.class, StudentGroupService.class,
-        DocumentIOService.class, TemplateFillService.class})
+        DocumentIOService.class, TemplateFillService.class, StudentDegreeService.class, StudentDegreeRepository.class})
 @EnableAutoConfiguration
 public class TestFeatureDiplomaSupplement {
 
@@ -96,7 +98,6 @@ public class TestFeatureDiplomaSupplement {
         }
 
         StudentGroup studentGroup = createStudentGroup();
-        student.setStudentGroup(studentGroup);
 
         Specialization specialization = createSpecialization();
         studentGroup.setSpecialization(specialization);
@@ -108,7 +109,9 @@ public class TestFeatureDiplomaSupplement {
         specialization.setDegree(degree);
 
         StudentDegree studentDegree = new StudentDegree();
+        student.getDegrees().add(studentDegree);
         studentDegree.setStudent(student);
+        studentDegree.setStudentGroup(studentGroup);
         studentDegree.setDegree(degree);
         studentDegree.setThesisName("Тема роботи");
         studentDegree.setThesisNameEng("Thesis");
@@ -116,7 +119,7 @@ public class TestFeatureDiplomaSupplement {
         studentDegree.setPreviousDiplomaNumber("123456");
         studentDegree.setDiplomaDate(new Date());
         studentDegree.setDiplomaNumber("654321");
-        studentDegree.setAwarded(false);
+        studentDegree.setActive(true);
         studentDegree.setProtocolDate(new Date());
         studentDegree.setProtocolNumber("112233");
         studentDegree.setSupplementDate(new Date());
@@ -152,42 +155,30 @@ public class TestFeatureDiplomaSupplement {
         CourseName courseName12 = new CourseName();
         courseName12.setName("Курс 2");
         courseName12.setNameEng("Course 2");
-
         Course course121 = createCourse(courseName12, true);
         course121.setHours(90);
-
         Grade grade121 = createGrade(course121, 75);
-
         grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13, grade121));
 
         CourseName courseName2 = new CourseName();
         courseName2.setName("Курсова робота 1");
         courseName2.setNameEng("Course work 1");
-
         Course course2 = createCourse(courseName2, true);
-
         Grade grade2 = createGrade(course2, 84);
-
         grades.get(1).add(grade2);
 
         CourseName courseName3 = new CourseName();
         courseName3.setName("Практика 1");
         courseName3.setNameEng("Practice 1");
-
         Course course3 = createCourse(courseName3, true);
-
         Grade grade3 = createGrade(course3, 90);
-
         grades.get(2).add(grade3);
 
         CourseName courseName4 = new CourseName();
         courseName4.setName("Дипломна робота 1");
         courseName4.setNameEng("Diploma work 1");
-
         Course course4 = createCourse(courseName4, true);
-
         Grade grade4 = createGrade(course4, 90);
-
         grades.get(3).add(grade4);
 
         return grades;
@@ -196,7 +187,8 @@ public class TestFeatureDiplomaSupplement {
     @Test
     public void testStudentSummary() {
         Student student = createStudent();
-        StudentSummary summary = new StudentSummary(student, createGrades(student));
+        StudentDegree studentDegree = student.getDegrees().iterator().next();
+        StudentSummary summary = new StudentSummary(studentDegree, createGrades(student));
 
         Assert.assertEquals(84.8, summary.getTotalGrade(), 0.1);
         Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
@@ -290,7 +282,7 @@ public class TestFeatureDiplomaSupplement {
         Grade grade5 = createGrade(createCourse(false), 59);
         Assert.assertEquals("Не зараховано", GradeUtil.getNationalGradeUkr(grade5));
         Assert.assertEquals("Fail", GradeUtil.getNationalGradeEng(grade5));
-        Assert.assertEquals("Fx", grade5.getEcts());
+        Assert.assertEquals(EctsGrade.FX, grade5.getEcts());
     }
 
     @Test

@@ -1,12 +1,10 @@
 package ua.edu.chdtu.deanoffice.api.group.dto;
 
-        import com.fasterxml.jackson.annotation.JsonView;
-        import lombok.Getter;
-        import lombok.Setter;
-        import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-        import ua.edu.chdtu.deanoffice.entity.Teacher;
+import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
+import lombok.Setter;
 
-        import java.util.Date;
+import java.util.Date;
 
 @Getter
 @Setter
