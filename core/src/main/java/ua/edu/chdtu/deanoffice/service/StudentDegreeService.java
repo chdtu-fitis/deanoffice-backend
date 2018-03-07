@@ -11,12 +11,9 @@ import java.util.List;
 @Service
 public class StudentDegreeService {
     private final StudentDegreeRepository studentDegreeRepository;
-    private final DegreeRepository degreeRepository;
 
-    public StudentDegreeService(StudentDegreeRepository studentDegreeRepository,
-                                DegreeRepository degreeRepository) {
+    public StudentDegreeService(StudentDegreeRepository studentDegreeRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
-        this.degreeRepository = degreeRepository;
     }
 
     public StudentDegree getById(Integer id) {
