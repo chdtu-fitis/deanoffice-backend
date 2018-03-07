@@ -5,7 +5,6 @@ package ua.edu.chdtu.deanoffice;
  */
 public class Constants {
     public static final double HOURS_PER_CREDIT = 30.0;
-
     public static final int EXAM = 1;
     public static final int CREDIT = 2;
     public static final int COURSEWORK = 3;

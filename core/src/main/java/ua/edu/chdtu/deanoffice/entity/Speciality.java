@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class Speciality extends NameWithEngAndActiveEntity {
-    @Column(name="code", nullable = false, unique = true, length = 20)
+    @Column(name = "code", nullable = false, unique = true, length = 20)
     private String code;
     @Column(name = "field_of_study")
     private String fieldOfStudy;
