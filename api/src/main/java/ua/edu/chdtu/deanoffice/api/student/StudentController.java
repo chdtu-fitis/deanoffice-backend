@@ -80,12 +80,14 @@ public class StudentController {
         return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
     }
 
+//TODO cr: потрібно робити обробку помилок при збереженні
     @JsonView(StudentDegreeViews.Degree.class)
     @PostMapping("/degrees")
     public ResponseEntity<StudentDegreeDTO> createNewStudentDegree(
             @RequestBody() NewStudentDegreeDTO newStudentDegreeDTO,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
+        //TODO: DegreeId передається з фронтенду, беручись там з групи (більше немає звідки). Це точно потрібно робити на фронтенді?
         if (newStudentDegreeDTO.getDegreeId() == null || newStudentDegreeDTO.getStudentGroupId() == null) {
             return ResponseEntity.notFound().build();
         }
@@ -110,6 +112,7 @@ public class StudentController {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Student newStudent = modelMapper.map(newStudentDTO, Student.class);
+        //TODO cr: без цього точно не працює?
         newStudent.setId(0);
         return studentService.save(newStudent);
     }
