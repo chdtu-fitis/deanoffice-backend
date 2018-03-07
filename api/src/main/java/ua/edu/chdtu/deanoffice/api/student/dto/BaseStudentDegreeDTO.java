@@ -11,8 +11,7 @@ import java.util.Date;
 
 @Setter
 @Getter
-//TODO cr: в назві цього класу потрібне слово DTO, мабуть
-public class BaseStudentDegree {
+public class BaseStudentDegreeDTO {
     @JsonView(StudentDegreeViews.Simple.class)
     private Integer id;
     @JsonView(StudentDegreeViews.Simple.class)

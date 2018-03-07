@@ -7,7 +7,7 @@ import ua.edu.chdtu.deanoffice.api.general.NamedDTO;
 
 @Getter
 @Setter
-public class StudentDegreeDTO extends BaseStudentDegree {
+public class StudentDegreeDTO extends BaseStudentDegreeDTO {
     @JsonView(StudentDegreeViews.Simple.class)
     private NamedDTO studentGroup;
 }

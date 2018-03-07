@@ -44,7 +44,7 @@ public class StudentController {
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegree(boolean active) {
-        return parseToStudentDegreeDTO(studentDegreeService.findAllByActiveId(active));
+        return parseToStudentDegreeDTO(studentDegreeService.getAllByActive(active));
     }
 
     @JsonView(StudentDegreeViews.Degree.class)
@@ -112,7 +112,6 @@ public class StudentController {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Student newStudent = modelMapper.map(newStudentDTO, Student.class);
-        //TODO cr: без цього точно не працює?
         newStudent.setId(0);
         return studentService.save(newStudent);
     }

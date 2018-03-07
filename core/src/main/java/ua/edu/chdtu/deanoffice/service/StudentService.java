@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.util.List;
 
@@ -21,9 +22,9 @@ public class StudentService {
 
     public List<Student> searchStudentByFullName(String name, String surname, String patronimic) {
         return studentRepository.findAllByFullNameUkr(
-                stringToCapitalizeCase(name),
-                stringToCapitalizeCase(surname),
-                stringToCapitalizeCase(patronimic)
+                PersonUtil.toCapitalizeCase(name),
+                PersonUtil.toCapitalizeCase(surname),
+                PersonUtil.toCapitalizeCase(patronimic)
         );
     }
 
@@ -32,20 +33,9 @@ public class StudentService {
     }
 
     public Student save(Student student) {
-        student.setName(stringToCapitalizeCase(student.getName()));
-        student.setSurname(stringToCapitalizeCase(student.getSurname()));
-        student.setPatronimic(stringToCapitalizeCase(student.getPatronimic()));
+        student.setName(PersonUtil.toCapitalizeCase(student.getName()));
+        student.setSurname(PersonUtil.toCapitalizeCase(student.getSurname()));
+        student.setPatronimic(PersonUtil.toCapitalizeCase(student.getPatronimic()));
         return this.studentRepository.save(student);
-    }
-
-    //TODO cr: це не метод даного класу, оскільки не використовує його полів, це класичний утилітний метод, static за сутністю,
-    // його потрібно перенести в пакет util, там же можна подивитись приклади методів.
-    // Він може використовуватись іншими сервісами також, що ще раз підтверджує потрібність перенести його в util
-    // Крім цього, потрібно врахувати можливість подвійних прізвищ, подвійних імен. В нас була одна студентка, в якої прізвище складалось з двох окремих слів
-    private String stringToCapitalizeCase(String string) {
-        if (string.isEmpty()) {
-            return "";
-        }
-        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
     }
 }

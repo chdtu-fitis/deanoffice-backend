@@ -1,9 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.repository.DegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.List;
@@ -20,10 +18,7 @@ public class StudentDegreeService {
         return studentDegreeRepository.getById(id);
     }
 
-    //TODO cr: імена методів сервісу не повинні механічно повторювати імена методів репозиторію
-    //Вони повинні формулюватись в термінах предметної області, бути зрозумілими (наскільки можливо) при читанні користувачеві
-    //Цей метод міг би називатись getActiveStudents(), наприклад; наступний - getSetOfStudents() або щось подібне, getById() - getStudent()
-    public List<StudentDegree> findAllByActiveId(boolean active) {
+    public List<StudentDegree> getAllByActive(boolean active) {
         return studentDegreeRepository.findAllByActiveForFacultyId(active, getCurrentFaculty());
     }
 
