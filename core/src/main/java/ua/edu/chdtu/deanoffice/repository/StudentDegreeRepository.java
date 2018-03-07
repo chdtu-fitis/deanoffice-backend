@@ -8,7 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import java.util.List;
 
 public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer> {
-    @Query("SELECT sd from StudentDegree as sd " +
+    @Query("SELECT sd from StudentDegree sd " +
             "where sd.active = :active and sd.studentGroup.specialization.faculty.id = :facultyId " +
             "order by sd.student.surname, sd.student.name, sd.student.patronimic, sd.studentGroup.name")
     List<StudentDegree> findAllByActiveForFacultyId(

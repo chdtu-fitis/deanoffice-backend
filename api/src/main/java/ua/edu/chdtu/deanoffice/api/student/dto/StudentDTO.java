@@ -28,7 +28,7 @@ public class StudentDTO {
     private String telephone;
     @JsonView(StudentDegreeViews.Detail.class)
     private Sex sex;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.Search.class)
     private Date birthDate;
     @JsonView(StudentDegreeViews.Detail.class)
     private String registrationAddress;

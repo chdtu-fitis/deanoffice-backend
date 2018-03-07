@@ -6,7 +6,7 @@ import static java.util.Arrays.asList;
 
 public class PersonUtil {
 
-    public static String toCapitalizeCase(String string) {
+    public static String toCapitalizedCase(String string) {
         if (string.isEmpty()) {
             return "";
         }

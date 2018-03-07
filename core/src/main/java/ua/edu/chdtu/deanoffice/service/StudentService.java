@@ -22,9 +22,9 @@ public class StudentService {
 
     public List<Student> searchStudentByFullName(String name, String surname, String patronimic) {
         return studentRepository.findAllByFullNameUkr(
-                PersonUtil.toCapitalizeCase(name),
-                PersonUtil.toCapitalizeCase(surname),
-                PersonUtil.toCapitalizeCase(patronimic)
+                PersonUtil.toCapitalizedCase(name),
+                PersonUtil.toCapitalizedCase(surname),
+                PersonUtil.toCapitalizedCase(patronimic)
         );
     }
 
@@ -33,9 +33,9 @@ public class StudentService {
     }
 
     public Student save(Student student) {
-        student.setName(PersonUtil.toCapitalizeCase(student.getName()));
-        student.setSurname(PersonUtil.toCapitalizeCase(student.getSurname()));
-        student.setPatronimic(PersonUtil.toCapitalizeCase(student.getPatronimic()));
+        student.setName(PersonUtil.toCapitalizedCase(student.getName()));
+        student.setSurname(PersonUtil.toCapitalizedCase(student.getSurname()));
+        student.setPatronimic(PersonUtil.toCapitalizedCase(student.getPatronimic()));
         return this.studentRepository.save(student);
     }
 }

@@ -9,7 +9,7 @@ import static org.hamcrest.CoreMatchers.is;
 public class PersonUtilTest {
 
     private void assertCapitalizeString(String initial, String expected) {
-        assertThat(PersonUtil.toCapitalizeCase(initial), is(expected));
+        assertThat(PersonUtil.toCapitalizedCase(initial), is(expected));
     }
 
     @Test
