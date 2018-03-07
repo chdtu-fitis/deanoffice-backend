@@ -3,13 +3,11 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
+import ua.edu.chdtu.deanoffice.util.PersonFullNameComparator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -41,7 +39,9 @@ public class StudentGroup extends NameWithActiveEntity {
         if (studentDegrees.isEmpty()) {
             return new ArrayList<>();
         } else {
-            return studentDegrees.stream().map(StudentDegree::getStudent).collect(Collectors.toList());
+            List<Student> students = studentDegrees.stream().map(StudentDegree::getStudent).collect(Collectors.toList());
+            Collections.sort(students, new PersonFullNameComparator());
+            return students;
         }
     }
 }
