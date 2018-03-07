@@ -87,8 +87,7 @@ public class StudentController {
             @RequestBody() NewStudentDegreeDTO newStudentDegreeDTO,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
-        //TODO: DegreeId передається з фронтенду, беручись там з групи (більше немає звідки). Це точно потрібно робити на фронтенді?
-        if (newStudentDegreeDTO.getDegreeId() == null || newStudentDegreeDTO.getStudentGroupId() == null) {
+        if (newStudentDegreeDTO.getStudentGroupId() == null) {
             return ResponseEntity.notFound().build();
         }
 
@@ -121,9 +120,9 @@ public class StudentController {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         StudentDegree newStudentDegree = modelMapper.map(newStudentDegreeDTO, StudentDegree.class);
-        newStudentDegree.setDegree(degreeService.getDegree(newStudentDegreeDTO.getDegreeId()));
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getStudentGroupById(newStudentDegreeDTO.getStudentGroupId()));
+        newStudentDegree.setDegree(newStudentDegree.getDegree());
 
         return studentDegreeService.save(newStudentDegree);
     }

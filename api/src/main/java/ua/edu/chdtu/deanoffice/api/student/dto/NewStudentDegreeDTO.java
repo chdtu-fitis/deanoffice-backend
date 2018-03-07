@@ -7,5 +7,4 @@ import lombok.Setter;
 @Setter
 public class NewStudentDegreeDTO extends BaseStudentDegreeDTO {
     private Integer studentGroupId;
-    private Integer degreeId;
 }
