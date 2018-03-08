@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
 import ua.edu.chdtu.deanoffice.util.PersonFullNameComparator;
 
@@ -32,6 +33,7 @@ public class StudentGroup extends NameWithActiveEntity {
     @Column(name = "begin_years", nullable = false)
     private int beginYears;//курс, з якого починає навчатись група
     @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Where(clause = "active = true")
     private Set<StudentDegree> studentDegrees = new HashSet<>();
     //CURATOR
 
