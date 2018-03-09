@@ -7,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.NamedDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
+import ua.edu.chdtu.deanoffice.api.group.dto.*;
 import ua.edu.chdtu.deanoffice.api.general.PersonFullNameDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.StudDegreeFullNameDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -33,21 +30,12 @@ public class GroupController {
     private CourseForGroupService courseForGroupService;
 
     @RequestMapping(method = RequestMethod.GET, path = "/graduates")
-    public ResponseEntity<List<NamedDTO>> getGraduateGroups(@RequestParam Integer degreeId) {
+    public ResponseEntity<List<GroupWithStudentsDTO>> getGraduateGroups(@RequestParam Integer degreeId) {
         List<StudentGroup> groups = graduateService.getGraduateGroups(degreeId);
         ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<NamedDTO>>() {}.getType();
-        List<NamedDTO> groupDTOs = modelMapper.map(groups, listType);
+        Type listType = new TypeToken<List<GroupWithStudentsDTO>>() {}.getType();
+        List<GroupWithStudentsDTO> groupDTOs = modelMapper.map(groups, listType);
         return ResponseEntity.ok(groupDTOs);
-    }
-
-    @RequestMapping(method = RequestMethod.GET, path = "/{id}/students")
-    public ResponseEntity<List<StudDegreeFullNameDTO>> getGroupStudents(@PathVariable Integer id) {
-        List<StudentDegree> students = groupService.getGroupStudents(id);
-        ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudDegreeFullNameDTO>>() {}.getType();
-        List<StudDegreeFullNameDTO> studentDTOs = modelMapper.map(students, listType);
-        return ResponseEntity.ok(studentDTOs);
     }
 
     @RequestMapping(method = RequestMethod.GET)
