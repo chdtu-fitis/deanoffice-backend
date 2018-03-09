@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
 import ua.edu.chdtu.deanoffice.util.PersonFullNameComparator;
+import ua.edu.chdtu.deanoffice.util.StudentDegreeFullNameComparator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -34,8 +35,13 @@ public class StudentGroup extends NameWithActiveEntity {
     private int beginYears;//курс, з якого починає навчатись група
     @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Where(clause = "active = true")
-    private Set<StudentDegree> studentDegrees = new HashSet<>();
+    private List<StudentDegree> studentDegrees = new ArrayList<>();
     //CURATOR
+
+    public List<StudentDegree> getStudentDegrees() {
+        Collections.sort(studentDegrees,new StudentDegreeFullNameComparator());
+        return studentDegrees;
+    }
 
     public List<Student> getStudents() {
         if (studentDegrees.isEmpty()) {
