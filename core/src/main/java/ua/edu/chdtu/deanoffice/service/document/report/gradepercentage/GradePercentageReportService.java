@@ -41,7 +41,7 @@ public class GradePercentageReportService {
 
     public synchronized File prepareReportForGroup(Integer groupId) throws Docx4JException, IOException {
         List<StudentsReport> studentsReports = new ArrayList<>();
-        StudentGroup group = groupService.getStudentGroupById(groupId);
+        StudentGroup group = groupService.getById(groupId);
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
         studentDegrees.removeIf(student -> !student.isActive());
         studentDegrees.sort((sd1, sd2) -> {

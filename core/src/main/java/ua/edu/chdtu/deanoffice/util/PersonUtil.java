@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -11,13 +12,16 @@ public class PersonUtil {
             return "";
         }
 
-        List<String> strings = asList(string.split("\\s+"));
-        strings.forEach(s -> strings.set(strings.indexOf(s), capitalizeWord(s)));
+        List<String> stringList = asList(string.split("\\s+"));
+        ArrayList<String> stringArrayList = new ArrayList<>(stringList);
 
-        return String.join(" ", strings);
+        stringArrayList.removeIf(s -> s.isEmpty());
+        stringArrayList.forEach(s -> stringArrayList.set(stringArrayList.indexOf(s), wordToCapitalizedCase(s)));
+
+        return String.join(" ", stringArrayList);
     }
 
-    private static String capitalizeWord(String string) {
+    private static String wordToCapitalizedCase(String string) {
         return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
     }
 }

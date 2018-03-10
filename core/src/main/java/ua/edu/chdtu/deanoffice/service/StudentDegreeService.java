@@ -22,7 +22,7 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAllByActiveForFacultyId(active, getCurrentFaculty());
     }
 
-    public List<StudentDegree> findAllByStudentDegreeIds(Integer[] id) {
+    public List<StudentDegree> findAllByIds(Integer[] id) {
         return studentDegreeRepository.getAllByStudentDegreeIds(id);
     }
 
@@ -30,8 +30,7 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.save(studentDegree);
     }
 
-    //TODO cr: зовсім не місце для такого методу, він повинен бути в іншому сервісі і братись звідти
     private Integer getCurrentFaculty() {
         return 1;
-    }
+    } //TODO Зменить на сервис
 }

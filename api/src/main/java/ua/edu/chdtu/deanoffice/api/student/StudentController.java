@@ -11,10 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.DegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
 import java.util.List;
@@ -29,7 +26,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
-    public List<StudentDegreeDTO> getActiveStudentsDegree_simple(
+    public List<StudentDegreeDTO> getActiveStudentsDegree(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
         return getActiveStudentDegree(active);
@@ -37,7 +34,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Detail.class)
     @GetMapping("/degrees/more-detail")
-    public List<StudentDegreeDTO> getActiveStudentsDegree_detail(
+    public List<StudentDegreeDTO> getActiveStudentsDegree_moreDetail(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
         return getActiveStudentDegree(active);
@@ -48,22 +45,22 @@ public class StudentController {
     }
 
     @JsonView(StudentDegreeViews.Degree.class)
-    @GetMapping("/{student_degree_ids}/degree-data")
+    @GetMapping("/degrees/{student_degree_ids}")
     public List<StudentDegreeDTO> getAllStudentsDegreeById(
             @PathVariable("student_degree_ids") Integer[] studentDegreeIds
     ) {
-        return parseToStudentDegreeDTO(studentDegreeService.findAllByStudentDegreeIds(studentDegreeIds));
+        return parseToStudentDegreeDTO(studentDegreeService.findAllByIds(studentDegreeIds));
     }
 
     private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
         return new ModelMapper().map(studentDegreeList,new TypeToken<List<StudentDegreeDTO>>() {}.getType());
     }
 
-    @GetMapping("/{student_ids}/personal-data")
+    @GetMapping("/{student_ids}")
     public List<StudentDTO> getAllStudentsById(
             @PathVariable("student_ids") Integer[] studentIds
     ) {
-        return this.parseToStudentDTO(studentService.findAllByStudentIds(studentIds));
+        return this.parseToStudentDTO(studentService.findAllByIds(studentIds));
     }
 
     @JsonView(StudentDegreeViews.Search.class)
@@ -73,7 +70,7 @@ public class StudentController {
             @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
     ) {
-        return parseToStudentDTO(studentService.searchStudentByFullName(name, surname, patronimic));
+        return parseToStudentDTO(studentService.searchByFullName(name, surname, patronimic));
     }
 
     private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
@@ -95,7 +92,7 @@ public class StudentController {
         if (newStudent) {
             student = createStudent(newStudentDegreeDTO.getStudent());
         } else {
-            student = studentService.getStudentById(newStudentDegreeDTO.getStudent().getId());
+            student = studentService.getById(newStudentDegreeDTO.getStudent().getId());
         }
         if (student == null) {
             return ResponseEntity.notFound().build();
@@ -121,7 +118,7 @@ public class StudentController {
 
         StudentDegree newStudentDegree = modelMapper.map(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
-        newStudentDegree.setStudentGroup(studentGroupService.getStudentGroupById(newStudentDegreeDTO.getStudentGroupId()));
+        newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setDegree(newStudentDegree.getDegree());
 
         return studentDegreeService.save(newStudentDegree);

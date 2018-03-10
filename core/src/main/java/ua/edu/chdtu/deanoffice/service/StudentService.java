@@ -16,11 +16,11 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-    public List<Student> findAllByStudentIds(Integer[] id) {
+    public List<Student> findAllByIds(Integer[] id) {
         return studentRepository.getAllByStudentIds(id);
     }
 
-    public List<Student> searchStudentByFullName(String name, String surname, String patronimic) {
+    public List<Student> searchByFullName(String name, String surname, String patronimic) {
         return studentRepository.findAllByFullNameUkr(
                 PersonUtil.toCapitalizedCase(name),
                 PersonUtil.toCapitalizedCase(surname),
@@ -28,7 +28,7 @@ public class StudentService {
         );
     }
 
-    public Student getStudentById(Integer studentId) {
+    public Student getById(Integer studentId) {
         return this.studentRepository.findOne(studentId);
     }
 

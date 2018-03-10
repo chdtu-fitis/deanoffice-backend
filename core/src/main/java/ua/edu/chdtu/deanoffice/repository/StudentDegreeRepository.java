@@ -16,7 +16,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("facultyId") Integer facultyId
     );
 
-//TODO cr: цей метод точно потрібен? коли практично він може бути використаний?
     @Query("SELECT sd from StudentDegree as sd where sd.id in :student_degree_ids")
     List<StudentDegree> getAllByStudentDegreeIds(@Param("student_degree_ids") Integer[] studentDegreeIds);
 
