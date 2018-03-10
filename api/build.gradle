@@ -11,6 +11,8 @@ dependencies {
             "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
 //	"org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}",
     )
+    compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+    compile("io.jsonwebtoken:jjwt:0.7.0")
 
     testCompile(
             "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
