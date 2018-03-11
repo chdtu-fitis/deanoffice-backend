@@ -31,4 +31,8 @@ public class StudentDegreeService {
     public StudentDegree save(StudentDegree studentDegree) {
         return this.studentDegreeRepository.save(studentDegree);
     }
+
+    public StudentDegree getFirstStudentDegree(Integer studentId) {
+        return this.studentDegreeRepository.findFirstStudentDegreeByStudentId(studentId);
+    }
 }

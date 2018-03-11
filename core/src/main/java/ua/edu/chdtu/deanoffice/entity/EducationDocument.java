@@ -1,7 +1,41 @@
 package ua.edu.chdtu.deanoffice.entity;
 
 public enum EducationDocument {
-    SECONDARY_SCHOOL_CERTIFICATE, JUNIOR_BACHELOR_DIPLOMA, BACHELOR_DIPLOMA, MASTER_DIPLOMA, PHD_DIPLOMA, DOCTOR_DIPLOMA, OTHER_FOREIGN;
+    SECONDARY_SCHOOL_CERTIFICATE(1),
+    JUNIOR_BACHELOR_DIPLOMA(2),
+    BACHELOR_DIPLOMA(3),
+    MASTER_DIPLOMA(4),
+    PHD_DIPLOMA(5),
+    DOCTOR_DIPLOMA(6),
+    OTHER_FOREIGN(7);
+
+    final int code;
+
+    EducationDocument(int code) {
+        this.code = code;
+    }
+
+    public static boolean isExist(EducationDocument document) {
+        String eduDoc = document.toString();
+        for (EducationDocument educationDocument: values()) {
+            if (eduDoc.toLowerCase().equals(educationDocument.toString().toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static EducationDocument getPreviousDiplomaType(Integer degreeId) {
+        switch (degreeId) {
+            case 1: case 2: return SECONDARY_SCHOOL_CERTIFICATE;
+            case 3: return BACHELOR_DIPLOMA;
+            default: return SECONDARY_SCHOOL_CERTIFICATE;
+        }
+    }
+
+    public int getCode() {
+        return code;
+    }
 
     public String getUkrainianName() {
         switch (this) {
@@ -43,10 +77,5 @@ public enum EducationDocument {
             default:
                 return "Document";
         }
-    }
-
-    @Override
-    public String toString() {
-        return getEnglishName();
     }
 }

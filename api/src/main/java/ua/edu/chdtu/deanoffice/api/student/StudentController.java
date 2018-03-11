@@ -7,14 +7,17 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.*;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.util.Util.getNewResourceLocation;
 
@@ -136,7 +139,19 @@ public class StudentController {
         StudentDegree newStudentDegree = modelMapper.map(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
-        newStudentDegree.setDegree(newStudentDegree.getDegree());
+        newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
+
+        if (EducationDocument.isExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
+            newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
+            if (newStudentDegree.getDegree().getId() == 3) {
+                StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
+                newStudentDegree.setPreviousDiplomaDate(firstStudentDegree.getDiplomaDate());
+                newStudentDegree.setPreviousDiplomaNumber(firstStudentDegree.getDiplomaNumber());
+            }
+        } else {
+            newStudentDegree.setPreviousDiplomaType(newStudentDegreeDTO.getPreviousDiplomaType());
+        }
+
 
         return studentDegreeService.save(newStudentDegree);
     }
