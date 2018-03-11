@@ -7,7 +7,6 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -16,6 +15,8 @@ import ua.edu.chdtu.deanoffice.service.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.util.Util.getNewResourceLocation;
 
 @RestController
 @RequestMapping("/students")
@@ -115,7 +116,7 @@ public class StudentController {
         }
 
         StudentDegree studentDegree = createStudentDegree(newStudentDegree, student);
-        URI location = getLocation(studentDegree.getId());
+        URI location = getNewResourceLocation(studentDegree.getId());
         return ResponseEntity.created(location).body(new ModelMapper().map(studentDegree, StudentDegreeDTO.class));
     }
 
@@ -138,9 +139,5 @@ public class StudentController {
         newStudentDegree.setDegree(newStudentDegree.getDegree());
 
         return studentDegreeService.save(newStudentDegree);
-    }
-
-    private URI getLocation(Integer id) {
-        return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
     }
 }
