@@ -36,16 +36,4 @@ public enum EducationDocument {
             default: return SECONDARY_SCHOOL_CERTIFICATE;
         }
     }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getUkrainianName() {
-        return nameUkr;
-    }
-
-    public String getEnglishName() {
-        return nameEng;
-    }
 }
