@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -56,6 +57,7 @@ public class StudentController {
         return new ModelMapper().map(studentDegreeList,new TypeToken<List<StudentDegreeDTO>>() {}.getType());
     }
 
+    @JsonView(StudentDegreeViews.Personal.class)
     @GetMapping("/{student_ids}")
     public List<StudentDTO> getAllStudentsById(
             @PathVariable("student_ids") Integer[] studentIds
@@ -63,42 +65,56 @@ public class StudentController {
         return this.parseToStudentDTO(studentService.findAllByIds(studentIds));
     }
 
+    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
+        return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
+    }
+
     @JsonView(StudentDegreeViews.Search.class)
     @GetMapping("/search")
-    public List<StudentDTO> searchStudentByNameSurnamePanronimic(
+    public List<StudentDTO> searchStudentByFullName(
             @RequestParam(value = "name", defaultValue = "", required = false) String name,
             @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
     ) {
-        return parseToStudentDTO(studentService.searchByFullName(name, surname, patronimic));
+        List<Student> foundStudent = studentService.searchByFullName(name, surname, patronimic);
+        List<StudentDTO> foundStudentDTO = parseToStudentDTO(foundStudent);
+        foundStudentDTO.forEach(studentDTO -> {
+            Student student = foundStudent.get(foundStudentDTO.indexOf(studentDTO));
+            studentDTO.setGroups(getGroupNamesForStudent(student));
+        });
+        return foundStudentDTO;
     }
 
-    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
+    private String getGroupNamesForStudent(Student student) {
+        List<String> groupNames = new ArrayList<>();
+        student.getDegrees().forEach(
+                studentDegree -> groupNames.add(studentDegree.getStudentGroup().getName())
+        );
+        return String.join(", ", groupNames);
     }
 
 //TODO cr: потрібно робити обробку помилок при збереженні
     @JsonView(StudentDegreeViews.Degree.class)
     @PostMapping("/degrees")
     public ResponseEntity<StudentDegreeDTO> createNewStudentDegree(
-            @RequestBody() NewStudentDegreeDTO newStudentDegreeDTO,
+            @RequestBody() StudentDegreeDTO newStudentDegree,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
-        if (newStudentDegreeDTO.getStudentGroupId() == null) {
+        if (newStudentDegree.getStudentGroupId() == null) {
             return ResponseEntity.notFound().build();
         }
 
         Student student;
         if (newStudent) {
-            student = createStudent(newStudentDegreeDTO.getStudent());
+            student = createStudent(newStudentDegree.getStudent());
         } else {
-            student = studentService.getById(newStudentDegreeDTO.getStudent().getId());
+            student = studentService.getById(newStudentDegree.getStudent().getId());
         }
         if (student == null) {
             return ResponseEntity.notFound().build();
         }
 
-        StudentDegree studentDegree = createStudentDegree(newStudentDegreeDTO, student);
+        StudentDegree studentDegree = createStudentDegree(newStudentDegree, student);
         URI location = getLocation(studentDegree.getId());
         return ResponseEntity.created(location).body(new ModelMapper().map(studentDegree, StudentDegreeDTO.class));
     }
@@ -112,7 +128,7 @@ public class StudentController {
         return studentService.save(newStudent);
     }
 
-    private StudentDegree createStudentDegree(NewStudentDegreeDTO newStudentDegreeDTO, Student student) {
+    private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 

@@ -3,7 +3,8 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
-import ua.edu.chdtu.deanoffice.util.PersonUtil;
+
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 
 import java.util.List;
 
@@ -22,9 +23,9 @@ public class StudentService {
 
     public List<Student> searchByFullName(String name, String surname, String patronimic) {
         return studentRepository.findAllByFullNameUkr(
-                PersonUtil.toCapitalizedCase(name),
-                PersonUtil.toCapitalizedCase(surname),
-                PersonUtil.toCapitalizedCase(patronimic)
+                toCapitalizedCase(name),
+                toCapitalizedCase(surname),
+                toCapitalizedCase(patronimic)
         );
     }
 
@@ -33,9 +34,9 @@ public class StudentService {
     }
 
     public Student save(Student student) {
-        student.setName(PersonUtil.toCapitalizedCase(student.getName()));
-        student.setSurname(PersonUtil.toCapitalizedCase(student.getSurname()));
-        student.setPatronimic(PersonUtil.toCapitalizedCase(student.getPatronimic()));
+        student.setName(toCapitalizedCase(student.getName()));
+        student.setSurname(toCapitalizedCase(student.getSurname()));
+        student.setPatronimic(toCapitalizedCase(student.getPatronimic()));
         return this.studentRepository.save(student);
     }
 }

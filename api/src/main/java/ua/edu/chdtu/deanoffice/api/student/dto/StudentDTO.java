@@ -10,13 +10,13 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentDTO {
-    @JsonView(StudentDegreeViews.Search.class)
+    @JsonView(StudentDegreeViews.SearchAndSimple.class)
     private Integer id;
-    @JsonView(StudentDegreeViews.Search.class)
+    @JsonView(StudentDegreeViews.SearchAndSimple.class)
     private String name;
-    @JsonView(StudentDegreeViews.Search.class)
+    @JsonView(StudentDegreeViews.SearchAndSimple.class)
     private String surname;
-    @JsonView(StudentDegreeViews.Search.class)
+    @JsonView(StudentDegreeViews.SearchAndSimple.class)
     private String patronimic;
     @JsonView(StudentDegreeViews.DetailAndDegree.class)
     private String nameEng;
@@ -28,7 +28,7 @@ public class StudentDTO {
     private String telephone;
     @JsonView(StudentDegreeViews.Detail.class)
     private Sex sex;
-    @JsonView(StudentDegreeViews.Search.class)
+    @JsonView(StudentDegreeViews.SearchAndSimple.class)
     private Date birthDate;
     @JsonView(StudentDegreeViews.Detail.class)
     private String registrationAddress;
@@ -36,13 +36,24 @@ public class StudentDTO {
     private String studentCardNumber;
     @JsonView(StudentDegreeViews.Detail.class)
     private String actualAddress;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String school;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String fatherName;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String fatherPhone;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String fatherInfo;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String motherName;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String motherPhone;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String motherInfo;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String notes;
+    @JsonView(StudentDegreeViews.Personal.class)
     private String email;
+    @JsonView(StudentDegreeViews.Search.class)
+    private String groups;
 }
