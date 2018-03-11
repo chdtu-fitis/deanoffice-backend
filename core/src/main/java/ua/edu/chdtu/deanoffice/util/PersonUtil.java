@@ -8,6 +8,10 @@ import static java.util.Arrays.asList;
 public class PersonUtil {
 
     public static String toCapitalizedCase(String string) {
+        if (string == null) {
+            return "";
+        }
+
         if (string.isEmpty()) {
             return "";
         }

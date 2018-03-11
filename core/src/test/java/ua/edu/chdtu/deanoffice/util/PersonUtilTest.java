@@ -35,4 +35,9 @@ public class PersonUtilTest {
     public void startedBySpaces() {
         assertCapitalizedCase("  hello", "Hello");
     }
+
+    @Test
+    public void nullToCapitalizedCase() {
+        assertCapitalizedCase(null, "");
+    }
 }
