@@ -60,7 +60,11 @@ public class TemplateUtil {
     }
 
     private static List<Text> getTextsContainingPlaceholders(WordprocessingMLPackage template) {
-        List<Object> texts = getAllElementsFromObject(template.getMainDocumentPart(), Text.class);
+        return getTextsFromContentAccessor(template.getMainDocumentPart());
+    }
+
+    private static List<Text> getTextsFromContentAccessor(ContentAccessor contentAccessor) {
+        List<Object> texts = getAllElementsFromObject(contentAccessor, Text.class);
         List<Object> placeholders = new ArrayList<>();
         for (int i = 0; i < texts.size(); i++) {
             Text text = ((Text) texts.get(i));
@@ -148,15 +152,13 @@ public class TemplateUtil {
 
     public static void addRowToTable(Tbl reviewTable, Tr templateRow, int rowNumber, Map<String, String> replacements) {
         Tr workingRow = XmlUtils.deepCopy(templateRow);
-        List<?> textElements = getAllElementsFromObject(workingRow, Text.class);
-        for (Object object : textElements) {
-            Text text = (Text) object;
-            String replacementValue = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
-            if (replacementValue != null) {
-                text.setValue(replacementValue);
-            }
-        }
+        replaceInRow(workingRow, replacements);
         reviewTable.getContent().add(rowNumber, workingRow);
+    }
+
+    public static void replaceInRow(Tr tableRow, Map<String, String> replacements) {
+        List<Text> textElements = getTextsFromContentAccessor(tableRow);
+        replaceValuesInTextPlaceholders(textElements, replacements);
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {

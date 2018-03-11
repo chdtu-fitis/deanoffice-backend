@@ -29,4 +29,8 @@ public class CourseService {
         List<StudentGroup> studentGroups = studentGroupRepository.findAllByCourse(courseId);
         return studentGroups;
     }
+
+    public Course getCourse(int id) {
+        return courseRepository.findOne(id);
+    }
 }

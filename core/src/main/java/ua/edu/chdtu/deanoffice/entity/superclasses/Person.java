@@ -21,4 +21,12 @@ public class Person extends BaseEntity {
     @Column(name = "sex", nullable = false, length = 6, columnDefinition = "varchar(6) default 'MALE'")
     @Enumerated(value = EnumType.STRING)
     private Sex sex = Sex.MALE;
+
+    public String getFullNameUkr() {
+        return getName() + " " + getPatronimic() + " " + getSurname();
+    }
+
+    public String getInitialsUkr() {
+        return getSurname() + " " + getName().substring(0, 1) + ". " + getPatronimic().substring(0, 1) + ".";
+    }
 }

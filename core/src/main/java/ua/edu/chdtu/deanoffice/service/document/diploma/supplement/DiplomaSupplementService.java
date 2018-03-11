@@ -45,12 +45,9 @@ public class DiplomaSupplementService {
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegreeId);
         StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
         String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();
-        fileName = cleanFileName(fileName);
         WordprocessingMLPackage filledTemplate = templateFillService.fill(TEMPLATE, studentSummary);
         return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
     }
 
-    public String cleanFileName(String fileName) {
-        return fileName.replaceAll("[\\W]*", "");
-    }
+
 }

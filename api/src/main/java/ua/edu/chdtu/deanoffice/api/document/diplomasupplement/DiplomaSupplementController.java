@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
 import java.io.File;
@@ -20,27 +21,13 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/documents/diplomas/supplements")
-public class DiplomaSupplementController {
+public class DiplomaSupplementController extends DocumentResponseController {
 
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
     private DiplomaSupplementService diplomaSupplementService;
 
     public DiplomaSupplementController(DiplomaSupplementService diplomaSupplementService) {
         this.diplomaSupplementService = diplomaSupplementService;
-    }
-
-    private static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName) {
-        try {
-            InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=" + asciiName)
-                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
-                    .contentLength(result.length())
-                    .body(resource);
-        } catch (FileNotFoundException e) {
-            log.error("Created file not found!", e);
-            return ResponseEntity.notFound().build();
-        }
     }
 
     @GetMapping(path = "/studentdegrees/{studentDegreeId}")
