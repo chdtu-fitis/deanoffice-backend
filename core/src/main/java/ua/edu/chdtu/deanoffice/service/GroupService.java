@@ -22,4 +22,8 @@ public class GroupService {
     public List<Student> getGroupStudents(Integer groupId) {
         return studentGroupRepository.findOne(groupId).getStudents();
     }
+
+    public StudentGroup getGroup(Integer id) {
+        return studentGroupRepository.findOne(id);
+    }
 }

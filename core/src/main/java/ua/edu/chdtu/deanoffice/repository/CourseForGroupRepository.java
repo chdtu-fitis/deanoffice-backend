@@ -18,6 +18,9 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
     List<CourseForGroup> findAllBySpecialization(@Param("specializationId") int specId);
 
     List<CourseForGroup> findAllByStudentGroupId(@Param("groupId") int groupId);
-    List<CourseForGroup> findAllByStudentGroupIdAndCourse_Semester(@Param("groupId") int groupId,@Param("semester") int semester);
+
+    List<CourseForGroup> findAllByStudentGroupIdAndCourse_Semester(@Param("groupId") int groupId, @Param("semester") int semester);
+
+    CourseForGroup findByStudentGroupIdAndCourseId(@Param("studentGroupId") int groupId, @Param("courseId") int courseId);
 
 }
