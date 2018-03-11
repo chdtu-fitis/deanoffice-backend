@@ -1,18 +1,22 @@
 package ua.edu.chdtu.deanoffice.entity;
 
 public enum EducationDocument {
-    SECONDARY_SCHOOL_CERTIFICATE(1),
-    JUNIOR_BACHELOR_DIPLOMA(2),
-    BACHELOR_DIPLOMA(3),
-    MASTER_DIPLOMA(4),
-    PHD_DIPLOMA(5),
-    DOCTOR_DIPLOMA(6),
-    OTHER_FOREIGN(7);
+    SECONDARY_SCHOOL_CERTIFICATE(1, "Атестат про повну середню освіту", "Secondary School Leaving Certificate"),
+    JUNIOR_BACHELOR_DIPLOMA(2, "Диплом молодшого бакалавра", "Junior Bachelor diploma"),
+    BACHELOR_DIPLOMA(3, "Диплом бакалавра", "Bachelor diploma"),
+    MASTER_DIPLOMA(4, "Диплом магістра", "Master diploma"),
+    PHD_DIPLOMA(5, "Диплом доктора філософії", "PHD diploma"),
+    DOCTOR_DIPLOMA(6, "Диплом доктора наук", "Doctor diploma"),
+    OTHER_FOREIGN(7, "Іноземний документ", "Foreign document");
 
     final int code;
+    final String nameUkr;
+    final String nameEng;
 
-    EducationDocument(int code) {
+    EducationDocument(int code, String nameUkr, String nameEng) {
         this.code = code;
+        this.nameUkr = nameUkr;
+        this.nameEng = nameEng;
     }
 
     public static boolean isExist(EducationDocument document) {
@@ -38,44 +42,10 @@ public enum EducationDocument {
     }
 
     public String getUkrainianName() {
-        switch (this) {
-            case SECONDARY_SCHOOL_CERTIFICATE:
-                return "Атестат про повну середню освіту";
-            case JUNIOR_BACHELOR_DIPLOMA:
-                return "Диплом молодшого бакалавра";
-            case BACHELOR_DIPLOMA:
-                return "Диплом бакалавра";
-            case MASTER_DIPLOMA:
-                return "Диплом магістра";
-            case PHD_DIPLOMA:
-                return "Диплом доктора філософії";
-            case DOCTOR_DIPLOMA:
-                return "Диплом доктора наук";
-            case OTHER_FOREIGN:
-                return "Іноземний документ";
-            default:
-                return "Документ";
-        }
+        return nameUkr;
     }
 
     public String getEnglishName() {
-        switch (this) {
-            case SECONDARY_SCHOOL_CERTIFICATE:
-                return "Secondary School Leaving Certificate";
-            case JUNIOR_BACHELOR_DIPLOMA:
-                return "Junior Bachelor diploma";
-            case BACHELOR_DIPLOMA:
-                return "Bachelor diploma";
-            case MASTER_DIPLOMA:
-                return "Master diploma";
-            case PHD_DIPLOMA:
-                return "PhD diploma";
-            case DOCTOR_DIPLOMA:
-                return "Doctor diploma";
-            case OTHER_FOREIGN:
-                return "Foreign document";
-            default:
-                return "Document";
-        }
+        return nameEng;
     }
 }
