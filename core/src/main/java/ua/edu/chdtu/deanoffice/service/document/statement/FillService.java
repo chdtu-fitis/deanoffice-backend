@@ -98,6 +98,7 @@ public class FillService {
         result.put("GroupName", studentGroup.getName());
         result.put("Specialization", studentGroup.getSpecialization().getName());
         result.put("FacultyAbbr", studentGroup.getSpecialization().getDepartment().getFaculty().getAbbr());
+        result.put("DeanInitials", makeInitials(studentGroup.getSpecialization().getDepartment().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 
@@ -112,5 +113,13 @@ public class FillService {
         } else {
             return String.format("%4d-%4d", currentYear - 1, currentYear);
         }
+    }
+
+    private String makeInitials(String fullName) {
+        List<String> fullNameParts = Arrays.asList(fullName.split(" "));
+        String result = fullNameParts.get(0) + " "
+                + fullNameParts.get(1).substring(0, 1).toUpperCase() + ". "
+                + fullNameParts.get(2).substring(0, 1).toUpperCase() + ".";
+        return result;
     }
 }

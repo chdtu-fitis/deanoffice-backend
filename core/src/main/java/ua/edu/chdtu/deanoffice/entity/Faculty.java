@@ -13,5 +13,6 @@ import javax.persistence.Entity;
 public class Faculty extends NameWithEngAndActiveEntity {
     @Column(name = "abbr", nullable = false, unique = true, length = 20)
     private String abbr;
-    //DEAN
+    @Column(name = "dean", length = 70)
+    private String dean;
 }

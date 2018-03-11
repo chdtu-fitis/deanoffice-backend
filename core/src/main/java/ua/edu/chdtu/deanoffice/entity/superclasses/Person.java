@@ -23,7 +23,7 @@ public class Person extends BaseEntity {
     private Sex sex = Sex.MALE;
 
     public String getFullNameUkr() {
-        return getName() + " " + getPatronimic() + " " + getSurname();
+        return getSurname() + " " + getName() + " " + getPatronimic();
     }
 
     public String getInitialsUkr() {
