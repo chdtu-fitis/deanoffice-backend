@@ -16,6 +16,13 @@ allprojects {
 
 	apply plugin: 'java'
 	apply plugin: 'idea'
+
+	tasks.withType(JavaCompile) {
+		options.encoding = 'UTF-8'
+	}
+	test {
+		systemProperty "file.encoding", "utf-8"
+	}
 }
 
 subprojects {
@@ -26,3 +33,4 @@ subprojects {
 		compile.extendsFrom provided
 	}
 }
+
