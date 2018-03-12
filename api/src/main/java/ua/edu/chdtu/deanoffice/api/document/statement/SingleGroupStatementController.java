@@ -27,7 +27,7 @@ public class SingleGroupStatementController extends DocumentResponseController {
         this.singleGroupStatementService = singleGroupStatementService;
     }
 
-    @GetMapping(path = "/groups/{groupId}/{courseId}")
+    @GetMapping(path = "/groups/{groupId}/courses/{courseId}")
     public ResponseEntity<Resource> generateForSingleCourse(@PathVariable Integer groupId,
                                                             @PathVariable Integer courseId) throws IOException, Docx4JException {
         File groupStatement = singleGroupStatementService.formGroupStatement(groupId, courseId);
