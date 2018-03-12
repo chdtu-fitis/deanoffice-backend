@@ -8701,28 +8701,6 @@ SELECT pg_catalog.setval('grade_id_seq', 90554, true);
 
 
 --
--- Data for Name: knowledge_control; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (1, 'іспит', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (2, 'залік', '', false);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (3, 'курсова робота', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (4, 'курсовий проект', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (5, 'диференційований залік', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (6, 'державний іспит', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (7, 'атестація', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (8, 'практика', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (9, 'практика', '', false);
-
-
---
--- Name: knowledge_control_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('knowledge_control_id_seq', 9, true);
-
-
---
 -- Data for Name: order_reason; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -8773,13 +8751,6 @@ INSERT INTO privilege (id, name, active) VALUES (4, 'сирота', true);
 --
 
 SELECT pg_catalog.setval('privilege_id_seq', 4, true);
-
-
---
--- Data for Name: schema_version; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO schema_version (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (1, '1', '<< Flyway Baseline >>', 'BASELINE', '<< Flyway Baseline >>', NULL, 'postgres', '2018-03-11 21:27:25.13793', 0, true);
 
 
 --
