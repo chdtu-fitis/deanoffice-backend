@@ -18,7 +18,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 
 
-import static ua.edu.chdtu.deanoffice.util.Util.getNewResourceLocation;
+import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 @RequestMapping("/students")

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.util;
+package ua.edu.chdtu.deanoffice.api.general;
 
 import java.net.URI;
 
