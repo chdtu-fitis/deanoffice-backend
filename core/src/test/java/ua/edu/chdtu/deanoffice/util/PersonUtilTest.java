@@ -37,6 +37,6 @@ class PersonUtilTest {
 
     @Test
     void nullToCapitalizedCase() {
-        assertCapitalizedCase(null, "");
+        assertCapitalizedCase(null, null);
     }
 }

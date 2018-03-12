@@ -9,12 +9,12 @@ public enum EducationDocument {
     DOCTOR_DIPLOMA(6, "Диплом доктора наук", "Doctor diploma"),
     OTHER_FOREIGN(7, "Іноземний документ", "Foreign document");
 
-    final int code;
-    final String nameUkr;
-    final String nameEng;
+    private final int id;
+    private final String nameUkr;
+    private final String nameEng;
 
-    EducationDocument(int code, String nameUkr, String nameEng) {
-        this.code = code;
+    EducationDocument(int id, String nameUkr, String nameEng) {
+        this.id = id;
         this.nameUkr = nameUkr;
         this.nameEng = nameEng;
     }
@@ -29,11 +29,28 @@ public enum EducationDocument {
         return false;
     }
 
+    public static boolean isNotExist(EducationDocument document) {
+        return !isExist(document);
+    }
+
     public static EducationDocument getPreviousDiplomaType(Integer degreeId) {
         switch (degreeId) {
-            case 1: case 2: return SECONDARY_SCHOOL_CERTIFICATE;
+            case 1: return SECONDARY_SCHOOL_CERTIFICATE;
+            case 2: return JUNIOR_BACHELOR_DIPLOMA;
             case 3: return BACHELOR_DIPLOMA;
             default: return SECONDARY_SCHOOL_CERTIFICATE;
         }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getNameEng() {
+        return nameEng;
+    }
+
+    public String getNameUkr() {
+        return nameUkr;
     }
 }

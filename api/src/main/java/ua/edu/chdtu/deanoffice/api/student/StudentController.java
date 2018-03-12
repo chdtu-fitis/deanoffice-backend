@@ -12,6 +12,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.Student;
@@ -104,21 +105,20 @@ public class StudentController {
             @RequestBody() StudentDegreeDTO newStudentDegree,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
-        if (newStudentDegree.getStudentGroupId() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         Student student;
-        if (newStudent) {
-            student = createStudent(newStudentDegree.getStudent());
-        } else {
-            student = studentService.getById(newStudentDegree.getStudent().getId());
-        }
-        if (student == null) {
-            return ResponseEntity.notFound().build();
+        StudentDegree studentDegree;
+
+        try {
+            if (newStudent) {
+                student = createStudent(newStudentDegree.getStudent());
+            } else {
+                student = studentService.getById(newStudentDegree.getStudent().getId());
+            }
+            studentDegree = createStudentDegree(newStudentDegree, student);
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception);
         }
 
-        StudentDegree studentDegree = createStudentDegree(newStudentDegree, student);
         URI location = getNewResourceLocation(studentDegree.getId());
         return ResponseEntity.created(location).body(new ModelMapper().map(studentDegree, StudentDegreeDTO.class));
     }
@@ -141,16 +141,21 @@ public class StudentController {
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
 
-        if (EducationDocument.isExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
-            newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
-            if (newStudentDegree.getDegree().getId() == 3) {
-                StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
-                newStudentDegree.setPreviousDiplomaDate(firstStudentDegree.getDiplomaDate());
-                newStudentDegree.setPreviousDiplomaNumber(firstStudentDegree.getDiplomaNumber());
+        try {
+            if (EducationDocument.isNotExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
+                newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
+                if (newStudentDegree.getDegree().getId() == 3) {
+                    StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
+                    newStudentDegree.setPreviousDiplomaDate(firstStudentDegree.getDiplomaDate());
+                    newStudentDegree.setPreviousDiplomaNumber(firstStudentDegree.getDiplomaNumber());
+                }
+            } else {
+                newStudentDegree.setPreviousDiplomaType(newStudentDegreeDTO.getPreviousDiplomaType());
             }
-        } else {
-            newStudentDegree.setPreviousDiplomaType(newStudentDegreeDTO.getPreviousDiplomaType());
+        } catch (Exception e) {
+            newStudentDegree.setPreviousDiplomaType(EducationDocument.SECONDARY_SCHOOL_CERTIFICATE);
         }
+
 
 
         return studentDegreeService.save(newStudentDegree);

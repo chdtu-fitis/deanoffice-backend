@@ -9,7 +9,7 @@ public class PersonUtil {
 
     public static String toCapitalizedCase(String string) {
         if (string == null) {
-            return "";
+            return null;
         }
 
         if (string.isEmpty()) {
