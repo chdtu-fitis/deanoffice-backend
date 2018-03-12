@@ -9,22 +9,26 @@ public class PersonUtil {
 
     public static String toCapitalizedCase(String string) {
         try {
+            if (string == null) {
+                return null;
+            }
+
             if (string.isEmpty()) {
                 return "";
             }
 
-            String[] words = string.split("\\s+");
-            return String.join(" ", wordsToCapitalizedCase(asList(words)));
+            return wordsToCapitalizedCase(string);
         } catch (Exception exception) {
-            return null;
+            throw exception;
         }
     }
 
-    private static List<String> wordsToCapitalizedCase(List<String> words) {
+    private static String wordsToCapitalizedCase(String string) {
+        List<String> words = asList(string.split("\\s+"));
         return words.stream()
                 .filter(s -> !s.isEmpty())
                 .map(s -> wordToCapitalizedCase(s))
-                .collect(Collectors.toList());
+                .collect(Collectors.joining(" "));
     }
 
     private static String wordToCapitalizedCase(String string) {

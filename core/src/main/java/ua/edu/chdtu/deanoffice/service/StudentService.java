@@ -37,6 +37,9 @@ public class StudentService {
         student.setName(toCapitalizedCase(student.getName()));
         student.setSurname(toCapitalizedCase(student.getSurname()));
         student.setPatronimic(toCapitalizedCase(student.getPatronimic()));
+        student.setNameEng(toCapitalizedCase(student.getNameEng()));
+        student.setSurnameEng(toCapitalizedCase(student.getSurnameEng()));
+        student.setPatronimicEng(toCapitalizedCase(student.getPatronimicEng()));
         return this.studentRepository.save(student);
     }
 }

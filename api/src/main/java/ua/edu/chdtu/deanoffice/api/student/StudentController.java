@@ -151,8 +151,6 @@ public class StudentController {
             newStudentDegree.setPreviousDiplomaType(EducationDocument.SECONDARY_SCHOOL_CERTIFICATE);
         }
 
-
-
         return studentDegreeService.save(newStudentDegree);
     }
 }
