@@ -25,7 +25,7 @@ public class StudentDegreeService {
     }
 
     public List<StudentDegree> findAllByIds(Integer[] id) {
-        return studentDegreeRepository.getAllByStudentDegreeIds(id);
+        return studentDegreeRepository.getAllByIds(id);
     }
 
     public StudentDegree save(StudentDegree studentDegree) {
@@ -33,6 +33,7 @@ public class StudentDegreeService {
     }
 
     public StudentDegree getFirstStudentDegree(Integer studentId) {
-        return this.studentDegreeRepository.findFirstStudentDegreeByStudentId(studentId);
+        List<StudentDegree> studentDegreeList = this.studentDegreeRepository.findByStudentId(studentId);
+        return (studentDegreeList.isEmpty()) ? null : studentDegreeList.get(0);
     }
 }

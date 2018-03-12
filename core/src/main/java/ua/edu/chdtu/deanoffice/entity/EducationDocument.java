@@ -20,6 +20,14 @@ public enum EducationDocument {
     }
 
     public static boolean isExist(EducationDocument document) {
+        if (document != null) {
+            return checkDocumentExist(document);
+        } else {
+            return false;
+        }
+    }
+
+    private static boolean checkDocumentExist(EducationDocument document) {
         String eduDoc = document.toString();
         for (EducationDocument educationDocument: values()) {
             if (eduDoc.toLowerCase().equals(educationDocument.toString().toLowerCase())) {

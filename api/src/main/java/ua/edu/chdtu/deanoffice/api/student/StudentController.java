@@ -136,19 +136,17 @@ public class StudentController {
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
 
-        try {
-            if (EducationDocument.isNotExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
-                newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
-                if (newStudentDegree.getDegree().getId() == 3) {
-                    StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
+        if (EducationDocument.isNotExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
+            newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
+            if (newStudentDegree.getDegree().getId() == 3) {
+                StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
+                if (firstStudentDegree != null) {
                     newStudentDegree.setPreviousDiplomaDate(firstStudentDegree.getDiplomaDate());
                     newStudentDegree.setPreviousDiplomaNumber(firstStudentDegree.getDiplomaNumber());
                 }
-            } else {
-                newStudentDegree.setPreviousDiplomaType(newStudentDegreeDTO.getPreviousDiplomaType());
             }
-        } catch (Exception e) {
-            newStudentDegree.setPreviousDiplomaType(EducationDocument.SECONDARY_SCHOOL_CERTIFICATE);
+        } else {
+            newStudentDegree.setPreviousDiplomaType(newStudentDegreeDTO.getPreviousDiplomaType());
         }
 
         return studentDegreeService.save(newStudentDegree);
