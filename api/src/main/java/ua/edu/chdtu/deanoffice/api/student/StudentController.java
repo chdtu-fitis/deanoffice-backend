@@ -138,7 +138,8 @@ public class StudentController {
 
         if (EducationDocument.isNotExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
             newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
-            if (newStudentDegree.getDegree().getId() == 3) {
+            Integer degreeId = newStudentDegree.getDegree().getId();
+            if (degreeId == 3 || degreeId == 2) {
                 StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
                 if (firstStudentDegree != null) {
                     newStudentDegree.setPreviousDiplomaDate(firstStudentDegree.getDiplomaDate());
