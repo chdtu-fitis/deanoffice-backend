@@ -1,22 +1,20 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
+import org.modelmapper.*;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 
 
@@ -91,14 +89,11 @@ public class StudentController {
     }
 
     private String getGroupNamesForStudent(Student student) {
-        List<String> groupNames = new ArrayList<>();
-        student.getDegrees().forEach(
-                studentDegree -> groupNames.add(studentDegree.getStudentGroup().getName())
-        );
-        return String.join(", ", groupNames);
+        return student.getDegrees().stream()
+                .map(studentDegree -> studentDegree.getStudentGroup().getName())
+                .collect(Collectors.joining(", "));
     }
 
-//TODO cr: потрібно робити обробку помилок при збереженні
     @JsonView(StudentDegreeViews.Degree.class)
     @PostMapping("/degrees")
     public ResponseEntity<StudentDegreeDTO> createNewStudentDegree(

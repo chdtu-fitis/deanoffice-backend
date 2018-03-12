@@ -1,28 +1,30 @@
 package ua.edu.chdtu.deanoffice.util;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
 public class PersonUtil {
 
     public static String toCapitalizedCase(String string) {
-        if (string == null) {
+        try {
+            if (string.isEmpty()) {
+                return "";
+            }
+
+            String[] words = string.split("\\s+");
+            return String.join(" ", wordsToCapitalizedCase(asList(words)));
+        } catch (Exception exception) {
             return null;
         }
+    }
 
-        if (string.isEmpty()) {
-            return "";
-        }
-
-        List<String> stringList = asList(string.split("\\s+"));
-        ArrayList<String> stringArrayList = new ArrayList<>(stringList);
-
-        stringArrayList.removeIf(s -> s.isEmpty());
-        stringArrayList.forEach(s -> stringArrayList.set(stringArrayList.indexOf(s), wordToCapitalizedCase(s)));
-
-        return String.join(" ", stringArrayList);
+    private static List<String> wordsToCapitalizedCase(List<String> words) {
+        return words.stream()
+                .filter(s -> !s.isEmpty())
+                .map(s -> wordToCapitalizedCase(s))
+                .collect(Collectors.toList());
     }
 
     private static String wordToCapitalizedCase(String string) {
