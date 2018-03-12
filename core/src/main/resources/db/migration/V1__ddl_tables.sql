@@ -1,4 +1,4 @@
-/*create table course
+create table course
 (
 	id serial not null
 		constraint course_pkey
@@ -354,4 +354,3 @@ INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('диф
 INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('державний іспит', 'state exam', true);
 INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('атестація', 'attestation', true);
 INSERT INTO public.knowledge_control (name, name_eng, has_grade) VALUES ('практика', 'internship', true);
-*/

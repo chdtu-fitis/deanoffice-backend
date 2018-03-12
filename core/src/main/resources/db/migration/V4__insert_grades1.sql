@@ -1,4 +1,4 @@
-/*--
+--
 -- PostgreSQL database dump
 --
 
@@ -22721,4 +22721,3 @@ INSERT INTO grade (id, ects, grade, points, course_id, student_id) VALUES (22707
 INSERT INTO grade (id, ects, grade, points, course_id, student_id) VALUES (22708, 'C', 4, 75, 2698, 1201);
 INSERT INTO grade (id, ects, grade, points, course_id, student_id) VALUES (22709, 'C', 4, 75, 2698, 1202);
 INSERT INTO grade (id, ects, grade, points, course_id, student_id) VALUES (22710, 'C', 4, 75, 2698, 1203);
-*/
