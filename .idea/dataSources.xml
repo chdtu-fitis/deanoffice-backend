@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="deanoffice-migrate@localhost" uuid="8a9bb515-9a99-4860-abfa-7e5f1815af7a">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/deanoffice-migrate</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="deanoffice-fet@localhost" uuid="2df96fb4-aa53-4c91-ae67-e1507516da51">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/deanoffice-fet</jdbc-url>
+    </data-source>
+  </component>
+</project>
