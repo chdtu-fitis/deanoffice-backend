@@ -27,4 +27,8 @@ public class CourseForGroupService {
     public List<CourseForGroup> getCourseForGroupBySpecialization(int specialization, int semester){
         return courseForGroupRepository.findAllBySpecialization(specialization, semester);
     }
+
+    public List<CourseForGroup> getCourseForGroupBySemester(int semester){
+        return courseForGroupRepository.findAllBySemester(semester);
+    }
 }
