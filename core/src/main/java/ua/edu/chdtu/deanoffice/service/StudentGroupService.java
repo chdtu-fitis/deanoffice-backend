@@ -4,8 +4,6 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
-import java.util.List;
-
 @Service
 public class StudentGroupService {
 
@@ -15,11 +13,7 @@ public class StudentGroupService {
         this.studentGroupRepository = studentGroupRepository;
     }
 
-    public StudentGroup getById(Integer groupId) {
-        return studentGroupRepository.getOne(groupId);
-    }
-
-    public List<StudentGroup> findByFacultyId(Integer facultyId) {
-        return studentGroupRepository.findAllByFaculty(facultyId);
+    public StudentGroup getById(Integer studentGroupId) {
+        return this.studentGroupRepository.findOne(studentGroupId);
     }
 }

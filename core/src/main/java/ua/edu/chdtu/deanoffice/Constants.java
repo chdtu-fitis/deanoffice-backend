@@ -1,8 +1,5 @@
 package ua.edu.chdtu.deanoffice;
 
-/**
- * Created by user on 03.12.2017.
- */
 public class Constants {
     public static final double HOURS_PER_CREDIT = 30.0;
     public static final int EXAM = 1;
@@ -14,6 +11,7 @@ public class Constants {
     public static final int ATTESTATION = 7;
     public static final int INTERNSHIP = 8;
     public static final int NON_GRADED_INTERNSHIP = 9;
+    public static final int FACULTY_ID = 1;
     //TODO cr: це схоже на якийсь список для якоїсь однієї цілі. Можливо тут краще використастити енум замість констант?
 
 }
