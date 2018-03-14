@@ -1,6 +1,6 @@
-#.gradle
+.gradle
 /build/
-#gradle/
+gradle/
 log/
 *.log
 api/log/
@@ -14,11 +14,11 @@ api/log/
 .springBeans
 
 ### IntelliJ IDEA ###
-#.idea
-#*.iws
-#*.iml
-#*.ipr
-#.idea/
+.idea
+*.iws
+*.iml
+*.ipr
+.idea/
 out/
 
 ### NetBeans ###
