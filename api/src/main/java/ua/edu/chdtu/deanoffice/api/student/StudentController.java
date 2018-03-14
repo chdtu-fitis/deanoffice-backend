@@ -135,6 +135,7 @@ public class StudentController {
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
+        newStudentDegree.setActive(true);
 
         if (EducationDocument.isNotExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
             newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
