@@ -463,6 +463,7 @@ ALTER TABLE privilege_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE privilege_id_seq OWNED BY privilege.id;
 
+
 --
 -- Name: speciality; Type: TABLE; Schema: public; Owner: postgres
 --
