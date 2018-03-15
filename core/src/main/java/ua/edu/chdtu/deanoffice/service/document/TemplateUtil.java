@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 public class TemplateUtil {
 
+    //TODO Все ок, тільки іноді не завадить вертикального розділення, тому що читати трошки скадновато
     private static Logger log = LoggerFactory.getLogger(TemplateUtil.class);
     public static final String PLACEHOLDER_PREFIX = "#";
 
@@ -123,7 +124,7 @@ public class TemplateUtil {
     private static boolean isAPlaceholder(Text text) {
         return text.getValue() != null && text.getValue().startsWith(PLACEHOLDER_PREFIX) && text.getValue().length() > 1;
     }
-
+    //TODO потрібно прибрати
     public static Tr findRowInTable(Tbl table, String templateKey) {
         for (Object row : table.getContent()) {
             List<?> textElements = getAllElementsFromObject(row, Text.class);

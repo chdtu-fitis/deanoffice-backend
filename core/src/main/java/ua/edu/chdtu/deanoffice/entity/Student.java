@@ -54,6 +54,7 @@ public class Student extends Person {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentDegree> degrees = new HashSet<>();
 
+    //TODO Потрібно видалити. Гірше такий кусків коду є тільки закоментарений код
     public String getFullNameEng() {
         return getNameEng() + " " + getSurnameEng();
     }

@@ -19,17 +19,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+//TODO дуже велика адреса ресурсу. її краще скоротити, наприклад до "/students/degrees/{id}/diploma"
 @RestController
 @RequestMapping("/documents/diplomas/supplements")
 public class DiplomaSupplementController extends DocumentResponseController {
 
+    //TODO Потрібно прибирати код, який не використувається (якщо він буде потрібен, то система контролю версій тобі
+    // його збереже)
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
+
     private DiplomaSupplementService diplomaSupplementService;
 
     public DiplomaSupplementController(DiplomaSupplementService diplomaSupplementService) {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
+    //TODO Краще уникати в адресах ресурсів таких моментів "studentdegrees", таке краще розділяти на "/student/degrees/"
     @GetMapping(path = "/studentdegrees/{studentDegreeId}")
     public ResponseEntity<Resource> generateForStudent(@PathVariable Integer studentDegreeId) throws IOException, Docx4JException {
         File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplementForStudent(studentDegreeId);

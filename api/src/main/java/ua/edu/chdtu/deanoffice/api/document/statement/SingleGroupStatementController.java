@@ -15,10 +15,13 @@ import ua.edu.chdtu.deanoffice.service.document.statement.SingleGroupStatementSe
 import java.io.File;
 import java.io.IOException;
 
+//TODO Ось тут вже більше похоже на те, які мають бути адреси ресурсів, але я небагато сумніваюсь на рахунок, чи
+// правильна воженість. Якщо файл може видаватись для різних груп, то все ок, в іншому випадку краще переробити
 @RestController
 @RequestMapping("/documents/statements")
 public class SingleGroupStatementController extends DocumentResponseController {
 
+    //TODO потрібно видалити
     private static Logger log = LoggerFactory.getLogger(SingleGroupStatementController.class);
 
     private SingleGroupStatementService singleGroupStatementService;
@@ -27,9 +30,12 @@ public class SingleGroupStatementController extends DocumentResponseController {
         this.singleGroupStatementService = singleGroupStatementService;
     }
 
+    //TODO краще якось більш зручно структурувати аргументи в методах, щоб вони не займали дуже багато місця, наприклад так
     @GetMapping(path = "/groups/{groupId}/courses/{courseId}")
-    public ResponseEntity<Resource> generateForSingleCourse(@PathVariable Integer groupId,
-                                                            @PathVariable Integer courseId) throws IOException, Docx4JException {
+    public ResponseEntity<Resource> generateForSingleCourse(
+            @PathVariable Integer groupId,
+            @PathVariable Integer courseId
+    ) throws IOException, Docx4JException {
         File groupStatement = singleGroupStatementService.formGroupStatement(groupId, courseId);
         return buildDocumentResponseEntity(groupStatement, groupStatement.getName());
     }

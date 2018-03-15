@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
+//TODO Цей клас не є рест-контроллером і, можливо, потрібно змінити назву, щоб все було в одному стилі
 public class DocumentResponseController {
 
     private static Logger log = LoggerFactory.getLogger(DocumentResponseController.class);
@@ -27,7 +27,7 @@ public class DocumentResponseController {
         } catch (FileNotFoundException e) {
             log.error("Created file not found!", e);
             return ResponseEntity.notFound().build();
-        }
+        } //TODO cr: Для повернення виключень використовуй клас ExceptionHandleAdvice
     }
 
     public static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName) {

@@ -16,6 +16,7 @@ public class CourseForGroupService {
         this.courseForGroupRepository = courseForGroupRepository;
     }
 
+    //TODO Якщо не потрібно робити додаткових перетворень, то краще робити без проміжних змінних
     public List<CourseForGroup> getCourseForGroup(int idGroup) {
         List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllByStudentGroupId(idGroup);
         return courseForGroup;
@@ -25,6 +26,7 @@ public class CourseForGroupService {
         return courseForGroupRepository.findByStudentGroupIdAndCourseId(groupId, courseId);
     }
 
+    //TODO див. пункт 1
     public List<CourseForGroup> getCourseForGroupBySemester(int idGroup, int semester) {
         List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllByStudentGroupIdAndCourse_Semester(idGroup, semester);
         return courseForGroup;
