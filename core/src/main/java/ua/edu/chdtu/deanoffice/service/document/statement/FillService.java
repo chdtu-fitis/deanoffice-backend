@@ -1,5 +1,5 @@
 package ua.edu.chdtu.deanoffice.service.document.statement;
-
+//TODO краще скоротити список імпортів
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
@@ -21,6 +21,7 @@ import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
+//TODO Занадто неточна та розпливчаста назва, раще замінити
 @Service
 public class FillService {
 
@@ -44,6 +45,7 @@ public class FillService {
         return template;
     }
 
+    //TODO Краще розбити на декілька методів. Тіло циклів рекомендується виносити в свій метод, це полегшує читання та розуміння коду
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
         List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
         String tableWithGradesKey = "№";
@@ -115,6 +117,7 @@ public class FillService {
         }
     }
 
+    //TODO краще винести в інший клас, де буде можливість перевикористання цього методу
     private String makeInitials(String fullName) {
         List<String> fullNameParts = Arrays.asList(fullName.split(" "));
         String result = fullNameParts.get(0) + " "

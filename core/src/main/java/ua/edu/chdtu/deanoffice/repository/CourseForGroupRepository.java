@@ -12,6 +12,7 @@ import java.util.List;
  */
 public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, Integer> {
 
+    //TODO аліас "courseForGroup" краще скоротити до cfg, та знову метод, який не використувається
     @Query("select courseForGroup.course from CourseForGroup as courseForGroup " +
             "join courseForGroup.studentGroup studentGroup join studentGroup.specialization specialization " +
             "where studentGroup.active = true and specialization.id = :specializationId")

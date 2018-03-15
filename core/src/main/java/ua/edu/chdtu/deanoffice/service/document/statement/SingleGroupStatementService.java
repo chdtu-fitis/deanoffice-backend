@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @Service
 public class SingleGroupStatementService {
-
+    //TODO Потрібно прибрати
     private static Logger log = LoggerFactory.getLogger(SingleGroupStatementService.class);
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "SingleGroupStatement.docx";
@@ -33,7 +33,7 @@ public class SingleGroupStatementService {
         this.courseForGroupService = courseForGroupService;
         this.fillService = fillService;
     }
-
+    //TODO Важковато читається, можливо потрібно розбити на декілька підметодів
     public File formGroupStatement(Integer groupId, Integer courseId) throws IOException, Docx4JException {
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseId);
         StudentGroup group = courseForGroup.getStudentGroup();
@@ -43,5 +43,5 @@ public class SingleGroupStatementService {
         return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
     }
 
-
+//TODO Загальна рекомендація: Старайся робити менші коміти
 }

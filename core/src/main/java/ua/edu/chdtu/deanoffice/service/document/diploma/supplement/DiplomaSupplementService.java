@@ -1,5 +1,5 @@
 package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
-
+//TODO краще скоротити список імпортів
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class DiplomaSupplementService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "DiplomaSupplement.docx";
-
+    //TODO потрібно прибрати
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
     private GradeService gradeService;
@@ -38,7 +38,8 @@ public class DiplomaSupplementService {
         this.documentIOService = documentIOService;
         this.templateFillService = templateFillService;
     }
-
+    //TODO Потрібно вертикально розділяти рядки. Так буде більш легко розібратись в коді
+    //TODO Можлво слід розбити цей метод на декілька менших
     public File formDiplomaSupplementForStudent(Integer studentDegreeId) throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();

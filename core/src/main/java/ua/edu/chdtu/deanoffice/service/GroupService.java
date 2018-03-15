@@ -22,7 +22,7 @@ public class GroupService {
     public List<Student> getGroupStudents(Integer groupId) {
         return studentGroupRepository.findOne(groupId).getStudents();
     }
-
+    //TODO потрібно прибрати
     public StudentGroup getGroup(Integer id) {
         return studentGroupRepository.findOne(id);
     }
