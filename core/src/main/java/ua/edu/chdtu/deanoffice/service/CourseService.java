@@ -29,4 +29,10 @@ public class CourseService {
         List<StudentGroup> studentGroups = studentGroupRepository.findAllByCourse(courseId);
         return studentGroups;
     }
+
+    public List<Course> getCoursesBySemester(int semester) {
+        List<Course> courses = courseRepository.findAllBySemester(semester);
+        return courses;
+    }
+
 }

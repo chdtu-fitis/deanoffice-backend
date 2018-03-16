@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.group.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
+import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -41,12 +43,12 @@ public class CourseController {
     @RequestMapping("/{semester}")
     @ResponseBody
     @JsonView(GroupViews.Name.class)
-    public List<CourseForGroupDTO> getCoursesBySemester(@PathVariable String semester) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySemester(Integer.parseInt(semester));
-        Type listType = new TypeToken<List<CourseForGroupDTO>>() {}.getType();
+    public List<CourseDTO> getCoursesBySemester(@PathVariable String semester) {
+        List<Course> courses = courseService.getCoursesBySemester(Integer.parseInt(semester));
+        Type listType = new TypeToken<List<CourseDTO>>() {}.getType();
         ModelMapper modelMapper = new ModelMapper();
-        List<CourseForGroupDTO> courseForGroupDTOS = modelMapper.map(courseForGroups, listType);
-        return courseForGroupDTOS;
+        List<CourseDTO> coursesDTOS = modelMapper.map(courses, listType);
+        return coursesDTOS;
     }
 
 }
