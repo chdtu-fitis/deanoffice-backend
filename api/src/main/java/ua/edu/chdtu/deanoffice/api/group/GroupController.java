@@ -49,6 +49,15 @@ public class GroupController {
         return groupDTOs;
     }
 
+    @RequestMapping(method = RequestMethod.GET, path = "/year")
+    public ResponseEntity<List<GroupWithStudentsDTO>> getGroupsByYear(@RequestParam Integer year) {
+        List<StudentGroup> groups = groupService.getGroupsByYear(year);
+        ModelMapper modelMapper = new ModelMapper();
+        Type listType = new TypeToken<List<GroupWithStudentsDTO>>() {}.getType();
+        List<GroupWithStudentsDTO> groupDTOs = modelMapper.map(groups, listType);
+        return ResponseEntity.ok(groupDTOs);
+    }
+
     @RequestMapping("{id}/courses")
     @ResponseBody
     @JsonView(GroupViews.Course.class)
