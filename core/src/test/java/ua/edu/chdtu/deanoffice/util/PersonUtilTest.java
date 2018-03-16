@@ -1,42 +1,42 @@
 package ua.edu.chdtu.deanoffice.util;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-class PersonUtilTest {
+public class PersonUtilTest {
 
     private void assertCapitalizedCase(String initial, String expected) {
         assertEquals(expected, PersonUtil.toCapitalizedCase(initial));
     }
 
     @Test
-    void oneWordToCapitalizedCase() {
+    public void oneWordToCapitalizedCase() {
         assertCapitalizedCase("word", "Word");
     }
 
     @Test
-    void twoWordsToCapitalizedCase() {
+    public void twoWordsToCapitalizedCase() {
         assertCapitalizedCase("hello world", "Hello World");
     }
 
     @Test
-    void emptyString() {
+    public void emptyString() {
         assertCapitalizedCase("", "");
     }
 
     @Test
-    void stringWithSeveralSpaces() {
+    public void stringWithSeveralSpaces() {
         assertCapitalizedCase("hello       world ", "Hello World");
     }
 
     @Test
-    void startedBySpaces() {
+    public void startedBySpaces() {
         assertCapitalizedCase("  hello", "Hello");
     }
 
     @Test
-    void nullToCapitalizedCase() {
+    public void nullToCapitalizedCase() {
         assertCapitalizedCase(null, null);
     }
 }
