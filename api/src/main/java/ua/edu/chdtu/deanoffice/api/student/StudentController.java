@@ -54,30 +54,15 @@ public class StudentController {
     }
 
     @JsonView(StudentDegreeViews.Degree.class)
-    @GetMapping("/degrees/{student_degree_ids}")
+    @GetMapping("/degrees/{ids}")
     public List<StudentDegreeDTO> getAllStudentsDegreeById(
-            @PathVariable("student_degree_ids") Integer[] studentDegreeIds
+            @PathVariable("ids") Integer[] studentDegreeIds
     ) {
         return parseToStudentDegreeDTO(studentDegreeService.findAllByIds(studentDegreeIds));
     }
 
     private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
         return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
-    }
-
-    @JsonView(StudentDegreeViews.Personal.class)
-    @GetMapping("/{student_id}")
-    public ResponseEntity<StudentDTO> getAllStudentsId(
-            @PathVariable("student_id") Integer studentId
-    ) {
-        StudentDTO studentDTO = new ModelMapper().map(
-                studentService.findAllById(studentId), StudentDTO.class
-        );
-        return ResponseEntity.ok(studentDTO);
-    }
-
-    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
     }
 
     @JsonView(StudentDegreeViews.Search.class)
@@ -94,6 +79,10 @@ public class StudentController {
             studentDTO.setGroups(getGroupNamesForStudent(student));
         });
         return foundStudentDTO;
+    }
+
+    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
+        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {}.getType());
     }
 
     private String getGroupNamesForStudent(Student student) {
@@ -132,7 +121,7 @@ public class StudentController {
 
         Student newStudent = modelMapper.map(newStudentDTO, Student.class);
         newStudent.setId(0);
-        return studentService.save(newStudent);
+        return studentService.create(newStudent);
     }
 
     private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
@@ -161,4 +150,29 @@ public class StudentController {
 
         return studentDegreeService.save(newStudentDegree);
     }
+
+    @JsonView(StudentDegreeViews.Personal.class)
+    @GetMapping("/{id}")
+    public ResponseEntity<StudentDTO> getAllStudentsId(
+            @PathVariable("id") Integer studentId
+    ) {
+        return ResponseEntity.ok(parseToStudentDTO(studentService.findAllById(studentId)));
+    }
+
+    private StudentDTO parseToStudentDTO(Student student) {
+        return new ModelMapper().map(student, StudentDTO.class);
+    }
+
+    @PutMapping("/")
+    public ResponseEntity<StudentDTO> updateStudent(@RequestBody StudentDTO studentDTO) {
+        Student upStudent;
+        try {
+            Student student = new ModelMapper().map(studentDTO, Student.class);
+            upStudent = studentService.update(student);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+        return ResponseEntity.ok(parseToStudentDTO(upStudent));
+    }
+
 }

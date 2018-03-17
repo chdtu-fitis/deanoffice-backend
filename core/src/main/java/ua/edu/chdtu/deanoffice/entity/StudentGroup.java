@@ -4,12 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
-import ua.edu.chdtu.deanoffice.util.PersonFullNameComparator;
-import ua.edu.chdtu.deanoffice.util.StudentDegreeFullNameComparator;
+import ua.edu.chdtu.deanoffice.util.comparators.PersonFullNameComparator;
+import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity

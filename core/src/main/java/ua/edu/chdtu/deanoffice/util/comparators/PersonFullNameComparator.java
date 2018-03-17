@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.util;
+package ua.edu.chdtu.deanoffice.util.comparators;
 
 import ua.edu.chdtu.deanoffice.entity.superclasses.Person;
 
@@ -6,9 +6,6 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
 
-/**
- * Created by user on 07.03.2018.
- */
 public class PersonFullNameComparator implements Comparator<Person> {
     public int compare(Person p1, Person p2) {
         Collator ukCollator = Collator.getInstance(new Locale("uk", "UA")); //Your locale here
