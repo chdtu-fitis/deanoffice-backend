@@ -24,9 +24,9 @@ public class GradeService {
     private static final Integer[] KNOWLEDGE_CONTROL_PART3 = {INTERNSHIP, NON_GRADED_INTERNSHIP};
     private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {ATTESTATION};
 
-    private GradeRepository gradeRepository;
-    private CourseRepository courseRepository;
-    private StudentDegreeRepository studentDegreeRepository;
+    private final GradeRepository gradeRepository;
+    private final CourseRepository courseRepository;
+    private final StudentDegreeRepository studentDegreeRepository;
 
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, StudentDegreeRepository studentDegreeRepository) {
         this.gradeRepository = gradeRepository;
@@ -66,7 +66,7 @@ public class GradeService {
                 knowledgeControlTypes);
     }
 
-    public List<Grade> getAllDifferentiatedGradesByStudentDegreeId(Integer studentDegreeId) {
+    public List<Grade> getAllDifferentiatedGrades(Integer studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
         List<Integer> knowledgeControlTypes = Arrays.asList(EXAM, DIFFERENTIATED_CREDIT, COURSEWORK, COURSE_PROJECT,

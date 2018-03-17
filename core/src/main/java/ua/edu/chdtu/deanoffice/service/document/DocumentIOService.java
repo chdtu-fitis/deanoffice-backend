@@ -23,7 +23,7 @@ public class DocumentIOService {
         return documentFile;
     }
 
-    private String cleanFileName(String fileName) {
+    public String cleanFileName(String fileName) {
         String extension = fileName.substring(fileName.lastIndexOf("."));
         String name = fileName.substring(0, fileName.lastIndexOf("."));
         return name.replaceAll("[\\W]*", "") + extension;

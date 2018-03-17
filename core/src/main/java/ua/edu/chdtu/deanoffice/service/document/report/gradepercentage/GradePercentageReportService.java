@@ -27,11 +27,11 @@ public class GradePercentageReportService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesPercentage.docx";
-    private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
+    private static final Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
-    private GradeService gradeService;
-    private StudentGroupService groupService;
-    private DocumentIOService documentIOService;
+    private final GradeService gradeService;
+    private final StudentGroupService groupService;
+    private final DocumentIOService documentIOService;
 
     public GradePercentageReportService(GradeService gradeService, StudentGroupService groupService, DocumentIOService documentIOService) {
         this.gradeService = gradeService;
@@ -48,13 +48,16 @@ public class GradePercentageReportService {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
             return ukrainianCollator.compare(sd1.getStudent().getSurname(), sd2.getStudent().getSurname());
         });
-        studentDegrees.forEach(studentDegree -> {
-            studentsReports.add(new StudentsReport(studentDegree, gradeService.getAllDifferentiatedGradesByStudentDegreeId(studentDegree.getId())));
-        });
-        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, studentsReports), LanguageUtil.transliterate(group.getName()) + ".docx");
+        studentDegrees.forEach(studentDegree ->
+                studentsReports.add(new StudentsReport(studentDegree, gradeService.getAllDifferentiatedGrades(studentDegree.getId())))
+        );
+        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, studentsReports),
+                LanguageUtil.transliterate(group.getName()) + ".docx");
     }
 
-    private WordprocessingMLPackage fillTemplate(String templateName, List<StudentsReport> studentsReports) throws IOException, Docx4JException {
+    private WordprocessingMLPackage fillTemplate(String templateName,
+                                                 List<StudentsReport> studentsReports)
+            throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         fillTableWithGrades(template, studentsReports);
         Map<String, String> commonDict = new HashMap<>();

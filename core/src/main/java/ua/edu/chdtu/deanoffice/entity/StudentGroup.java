@@ -9,7 +9,8 @@ import ua.edu.chdtu.deanoffice.util.StudentDegreeFullNameComparator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
@@ -39,7 +40,7 @@ public class StudentGroup extends NameWithActiveEntity {
     //CURATOR
 
     public List<StudentDegree> getStudentDegrees() {
-        Collections.sort(studentDegrees,new StudentDegreeFullNameComparator());
+        studentDegrees.sort(new StudentDegreeFullNameComparator());
         return studentDegrees;
     }
 
@@ -47,9 +48,10 @@ public class StudentGroup extends NameWithActiveEntity {
         if (studentDegrees.isEmpty()) {
             return new ArrayList<>();
         } else {
-            List<Student> students = studentDegrees.stream().map(StudentDegree::getStudent).collect(Collectors.toList());
-            Collections.sort(students, new PersonFullNameComparator());
-            return students;
+            return studentDegrees.stream()
+                    .map(StudentDegree::getStudent)
+                    .sorted(new PersonFullNameComparator())
+                    .collect(Collectors.toList());
         }
     }
 

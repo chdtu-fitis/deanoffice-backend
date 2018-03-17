@@ -1,5 +1,5 @@
 package ua.edu.chdtu.deanoffice.service.document.statement;
-//TODO краще скоротити список імпортів
+
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
@@ -20,17 +20,17 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitials;
 
-//TODO Занадто неточна та розпливчаста назва, раще замінити
 @Service
-public class FillService {
+class StatementTemplateFillService {
 
     private static final int STARTING_ROW_INDEX = 7;
 
-    private DocumentIOService documentIOService;
-    private static Logger log = LoggerFactory.getLogger(FillService.class);
+    private final DocumentIOService documentIOService;
+    private static final Logger log = LoggerFactory.getLogger(StatementTemplateFillService.class);
 
-    public FillService(DocumentIOService documentIOService) {
+    public StatementTemplateFillService(DocumentIOService documentIOService) {
         this.documentIOService = documentIOService;
     }
 
@@ -45,7 +45,6 @@ public class FillService {
         return template;
     }
 
-    //TODO Краще розбити на декілька методів. Тіло циклів рекомендується виносити в свій метод, це полегшує читання та розуміння коду
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
         List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
         String tableWithGradesKey = "№";
@@ -58,10 +57,7 @@ public class FillService {
 
         int currentRowIndex = STARTING_ROW_INDEX;
         List<Student> students = studentGroup.getActiveStudents();
-        students.sort((o1, o2) -> {
-            Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
-            return ukrainianCollator.compare(o1.getInitialsUkr(), o2.getInitialsUkr());
-        });
+        sortStudentsByInitials(students);
         for (Student student : students) {
             Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
             Map<String, String> replacements = new HashMap<>();
@@ -71,6 +67,17 @@ public class FillService {
             replaceInRow(currentRow, replacements);
             currentRowIndex++;
         }
+        removeUnfilledPlaceholders(template);
+    }
+
+    private void sortStudentsByInitials(List<Student> students) {
+        students.sort((o1, o2) -> {
+            Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
+            return ukrainianCollator.compare(o1.getInitialsUkr(), o2.getInitialsUkr());
+        });
+    }
+
+    private void removeUnfilledPlaceholders(WordprocessingMLPackage template) {
         Set<String> placeholdersToRemove = new HashSet<>();
         placeholdersToRemove.add("#StudentInitials");
         placeholdersToRemove.add("#RecBook");
@@ -115,14 +122,5 @@ public class FillService {
         } else {
             return String.format("%4d-%4d", currentYear - 1, currentYear);
         }
-    }
-
-    //TODO краще винести в інший клас, де буде можливість перевикористання цього методу
-    private String makeInitials(String fullName) {
-        List<String> fullNameParts = Arrays.asList(fullName.split(" "));
-        String result = fullNameParts.get(0) + " "
-                + fullNameParts.get(1).substring(0, 1).toUpperCase() + ". "
-                + fullNameParts.get(2).substring(0, 1).toUpperCase() + ".";
-        return result;
     }
 }

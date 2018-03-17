@@ -24,14 +24,14 @@ import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeEng;
 import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeUkr;
 
 @Service
-public class TemplateFillService {
+public class SupplementTemplateFillService {
 
     private static final int FIRST_SECTION_ROW_INDEX = 2;
     private static final int TEMPLATE_ROW_INDEX = 1;
-    private static final Logger log = LoggerFactory.getLogger(TemplateFillService.class);
-    private DocumentIOService documentIOService;
+    private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
+    private final DocumentIOService documentIOService;
 
-    public TemplateFillService(DocumentIOService documentIOService) {
+    private SupplementTemplateFillService(DocumentIOService documentIOService) {
         this.documentIOService = documentIOService;
     }
 
@@ -290,7 +290,7 @@ public class TemplateFillService {
 
         for (List<Grade> gradesSection : studentSummary.getGrades()) {
             for (Grade grade : gradesSection) {
-                Map<String, String> replacements = TemplateFillService.getGradeDictionary(grade);
+                Map<String, String> replacements = SupplementTemplateFillService.getGradeDictionary(grade);
                 replacements.put("CourseNum", String.format("%2d", gradeNumber++));
                 addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
                 rowToAddIndex++;

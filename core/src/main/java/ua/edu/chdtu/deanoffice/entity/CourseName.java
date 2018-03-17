@@ -13,6 +13,6 @@ import javax.persistence.Table;
 @Setter
 @Table(name = "course_name")
 public class CourseName extends NameWithEngEntity {
-    @Column(name = "abbreviation", nullable = true, length = 15)
+    @Column(name = "abbreviation", length = 15)
     private String abbreviation;
 }

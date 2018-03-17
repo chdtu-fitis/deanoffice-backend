@@ -12,15 +12,13 @@ import java.util.List;
  */
 public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, Integer> {
 
-    //TODO аліас "courseForGroup" краще скоротити до cfg, та знову метод, який не використувається
-    @Query("select courseForGroup.course from CourseForGroup as courseForGroup " +
-            "join courseForGroup.studentGroup studentGroup join studentGroup.specialization specialization " +
-            "where studentGroup.active = true and specialization.id = :specializationId and courseForGroup.course.semester = :semester")
+    @Query("select cfg.course from CourseForGroup as cfg " +
+            "join cfg.studentGroup studentGroup join studentGroup.specialization specialization " +
+            "where studentGroup.active = true and specialization.id = :specializationId and cfg.course.semester = :semester")
     List<CourseForGroup> findAllBySpecialization(@Param("specializationId") int specId, @Param("semester") int semester);
 
-
-    @Query("select courseForGroup.course from CourseForGroup as courseForGroup " +
-            "where courseForGroup.course.semester = :semester order by courseForGroup.course.courseName.name desc, courseForGroup.course.knowledgeControl.name desc, courseForGroup.course.hours")
+    @Query("select cfg.course from CourseForGroup as cfg " +
+            "where cfg.course.semester = :semester order by cfg.course.courseName.name desc, cfg.course.knowledgeControl.name desc, cfg.course.hours")
     List<CourseForGroup> findAllBySemester(@Param("semester") int semester);
     List<CourseForGroup> findAllByStudentGroupId(@Param("groupId") int groupId);
 

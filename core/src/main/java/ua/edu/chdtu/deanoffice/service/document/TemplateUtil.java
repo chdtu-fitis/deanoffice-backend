@@ -21,9 +21,8 @@ import java.util.stream.Collectors;
 
 public class TemplateUtil {
 
-    //TODO Все ок, тільки іноді не завадить вертикального розділення, тому що читати трошки скадновато
-    private static Logger log = LoggerFactory.getLogger(TemplateUtil.class);
-    public static final String PLACEHOLDER_PREFIX = "#";
+    private static final Logger log = LoggerFactory.getLogger(TemplateUtil.class);
+    private static final String PLACEHOLDER_PREFIX = "#";
 
     public static List<Object> getAllElementsFromObject(Object obj, Class<?> toSearch) {
         List<Object> result = new ArrayList<>();
@@ -84,8 +83,7 @@ public class TemplateUtil {
                 }
             }
         }
-        List<Text> result = placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
-        return result;
+        return placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
     }
 
     public static void replacePlaceholdersWithBlank(WordprocessingMLPackage template, Set<String> placeholders) {
@@ -123,19 +121,6 @@ public class TemplateUtil {
 
     private static boolean isAPlaceholder(Text text) {
         return text.getValue() != null && text.getValue().startsWith(PLACEHOLDER_PREFIX) && text.getValue().length() > 1;
-    }
-    //TODO потрібно прибрати
-    public static Tr findRowInTable(Tbl table, String templateKey) {
-        for (Object row : table.getContent()) {
-            List<?> textElements = getAllElementsFromObject(row, Text.class);
-            for (Object text : textElements) {
-                Text textElement = (Text) text;
-                if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey)) {
-                    return (Tr) row;
-                }
-            }
-        }
-        return null;
     }
 
     public static Tbl findTable(List<Object> tables, String templateKey) {
