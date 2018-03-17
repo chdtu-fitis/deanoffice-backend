@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
-
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 
 @Service
 public class StudentService {
@@ -17,8 +17,8 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-    public List<Student> findAllByIds(Integer[] id) {
-        return studentRepository.getAllByStudentIds(id);
+    public Student findAllById(Integer id) {
+        return studentRepository.getOne(id);
     }
 
     public List<Student> searchByFullName(String name, String surname, String patronimic) {

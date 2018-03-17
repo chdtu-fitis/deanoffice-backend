@@ -1,23 +1,28 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.*;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeViews;
+import ua.edu.chdtu.deanoffice.entity.EducationDocument;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.StudentService;
 
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.api.student.dto.*;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.*;
-
-
+import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -57,15 +62,18 @@ public class StudentController {
     }
 
     private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
-        return new ModelMapper().map(studentDegreeList,new TypeToken<List<StudentDegreeDTO>>() {}.getType());
+        return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
     }
 
     @JsonView(StudentDegreeViews.Personal.class)
-    @GetMapping("/{student_ids}")
-    public List<StudentDTO> getAllStudentsById(
-            @PathVariable("student_ids") Integer[] studentIds
+    @GetMapping("/{student_id}")
+    public ResponseEntity<StudentDTO> getAllStudentsId(
+            @PathVariable("student_id") Integer studentId
     ) {
-        return this.parseToStudentDTO(studentService.findAllByIds(studentIds));
+        StudentDTO studentDTO = new ModelMapper().map(
+                studentService.findAllById(studentId), StudentDTO.class
+        );
+        return ResponseEntity.ok(studentDTO);
     }
 
     private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
@@ -111,7 +119,7 @@ public class StudentController {
             }
             studentDegree = createStudentDegree(newStudentDegree, student);
         } catch (Exception exception) {
-            return ExceptionHandlerAdvice.handleException(exception);
+            return handleException(exception);
         }
 
         URI location = getNewResourceLocation(studentDegree.getId());
