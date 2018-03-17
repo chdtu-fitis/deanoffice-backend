@@ -22,4 +22,8 @@ public class GroupService {
     public List<StudentDegree> getGroupStudents(Integer groupId) {
         return studentGroupRepository.findOne(groupId).getStudentDegrees();
     }
+    //TODO потрібно прибрати
+    public StudentGroup getGroup(Integer id) {
+        return studentGroupRepository.findOne(id);
+    }
 }
