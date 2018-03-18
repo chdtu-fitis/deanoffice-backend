@@ -53,16 +53,4 @@ public class Student extends Person {
     private String notes;
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentDegree> degrees = new HashSet<>();
-
-    public String getFullNameUkr() {
-        return getName() + " " + getPatronimic() + " " + getSurname();
-    }
-
-    public String getInitialsUkr() {
-        return getSurname() + " " + getName().substring(0, 1) + " " + getPatronimic().substring(0, 1);
-    }
-
-    public String getFullNameEng() {
-        return getNameEng() + " " + getSurnameEng();
-    }
 }

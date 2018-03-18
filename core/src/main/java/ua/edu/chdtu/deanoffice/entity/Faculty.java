@@ -11,7 +11,10 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 public class Faculty extends NameWithEngAndActiveEntity {
+    //TODO Це не є помилкою, але а на замітку: якщо не потрібно вказати іншу назву колонки, то JPA(Hibernate?) сам візьме з назви
+    // поля та перетворить в snake_case
     @Column(name = "abbr", nullable = false, unique = true, length = 20)
     private String abbr;
-    //DEAN
+    @Column(name = "dean", length = 70)
+    private String dean;
 }

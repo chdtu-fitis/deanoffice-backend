@@ -17,7 +17,6 @@ public class KnowledgeControlService {
     }
 
     public List<KnowledgeControl> getKnowledgeControlById(int idKnowledgeControl) {
-        List<KnowledgeControl> knowledgeControls = knowledgeControlRepository.findKnowledgeControlById(idKnowledgeControl);
-        return knowledgeControls;
+        return knowledgeControlRepository.findKnowledgeControlById(idKnowledgeControl);
     }
 }

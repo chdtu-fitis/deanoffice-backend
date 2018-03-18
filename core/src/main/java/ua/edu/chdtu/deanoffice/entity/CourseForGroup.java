@@ -21,6 +21,6 @@ public class CourseForGroup extends BaseEntity {
     private StudentGroup studentGroup;
     @ManyToOne
     private Teacher teacher;
-    @Column(name = "exam_date", nullable = true)
+    @Column(name = "exam_date")
     private Date examDate;
 }
