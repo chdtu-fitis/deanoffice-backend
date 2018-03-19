@@ -21,13 +21,13 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private Faculty faculty;
     @ManyToOne
     private Department department;
-    @Column(name = "qualification", unique = false, length = 100)
+    @Column(name = "qualification", length = 100)
     private String qualification;
-    @Column(name = "qualification_eng", unique = false, length = 100)
+    @Column(name = "qualification_eng", length = 100)
     private String qualificationEng;
-    @Column(name = "payment_fulltime", nullable = true, precision = 15, scale = 2)
+    @Column(name = "payment_fulltime", precision = 15, scale = 2)
     private BigDecimal paymentFulltime;
-    @Column(name = "payment_extramural", nullable = true, precision = 15, scale = 2)
+    @Column(name = "payment_extramural", precision = 15, scale = 2)
     private BigDecimal paymentExtramural;
     @Column(name = "program_head_name", nullable = false)
     private String educationalProgramHeadName;

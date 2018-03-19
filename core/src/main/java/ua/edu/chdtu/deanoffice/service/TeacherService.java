@@ -17,7 +17,6 @@ public class TeacherService {
     }
 
     public List<Teacher> getTeacherById(int idTeacher) {
-        List<Teacher> teachers = teacherRepository.findTeacherById(idTeacher);
-        return teachers;
+        return teacherRepository.findTeacherById(idTeacher);
     }
 }

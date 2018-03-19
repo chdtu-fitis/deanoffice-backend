@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
@@ -29,6 +28,10 @@ public class GroupService {
 
     public List<StudentDegree> getGroupStudents(Integer groupId) {
         return studentGroupRepository.findOne(groupId).getStudentDegrees();
+    }
+
+    public StudentGroup getGroup(Integer id) {
+        return studentGroupRepository.findOne(id);
     }
 
     public List<StudentGroup> getGroupsByYear(int year) {
