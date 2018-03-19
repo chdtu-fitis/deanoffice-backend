@@ -1,32 +1,41 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.*;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeViews;
+import ua.edu.chdtu.deanoffice.entity.EducationDocument;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.StudentService;
 
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.api.student.dto.*;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.*;
-
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 @RequestMapping("/students")
 public class StudentController {
-    @Autowired StudentDegreeService studentDegreeService;
-    @Autowired StudentService studentService;
-    @Autowired DegreeService degreeService;
-    @Autowired StudentGroupService studentGroupService;
+    @Autowired
+    StudentDegreeService studentDegreeService;
+    @Autowired
+    StudentService studentService;
+    @Autowired
+    DegreeService degreeService;
+    @Autowired
+    StudentGroupService studentGroupService;
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
@@ -57,7 +66,8 @@ public class StudentController {
     }
 
     private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
-        return new ModelMapper().map(studentDegreeList,new TypeToken<List<StudentDegreeDTO>>() {}.getType());
+        return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {
+        }.getType());
     }
 
     @JsonView(StudentDegreeViews.Personal.class)
@@ -69,7 +79,8 @@ public class StudentController {
     }
 
     private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList,new TypeToken<List<StudentDTO>>() {}.getType());
+        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {
+        }.getType());
     }
 
     @JsonView(StudentDegreeViews.Search.class)
