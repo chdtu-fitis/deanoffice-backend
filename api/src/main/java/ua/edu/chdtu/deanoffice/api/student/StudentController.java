@@ -142,8 +142,10 @@ public class StudentController {
 
         PreviousDiplomaDTO previousDiplomaDTO = getPreviousDiploma(newStudentDegree);
         newStudentDegree.setPreviousDiplomaType(previousDiplomaDTO.getType());
-        newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
-        newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
+        if (newStudentDegree.getDegree().getId() != 1) {
+            newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
+            newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
+        }
 
 
 
@@ -151,17 +153,14 @@ public class StudentController {
     }
 
     private PreviousDiplomaDTO getPreviousDiploma(StudentDegree studentDegree) {
-        Integer degreeId = studentDegree.getDegree().getId();
         EducationDocument educationDocument = getPreviousDiplomaType(studentDegree);
-        if (degreeId == 3 || degreeId == 2) {
-            StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(studentDegree.getStudent().getId());
-            if (firstStudentDegree != null) {
-                return new PreviousDiplomaDTO(
-                        firstStudentDegree.getPreviousDiplomaDate(),
-                        firstStudentDegree.getPreviousDiplomaNumber(),
-                        educationDocument
-                );
-            }
+        StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(studentDegree.getStudent().getId());
+        if (firstStudentDegree != null) {
+            return new PreviousDiplomaDTO(
+                    firstStudentDegree.getPreviousDiplomaDate(),
+                    firstStudentDegree.getPreviousDiplomaNumber(),
+                    educationDocument
+            );
         }
         return new PreviousDiplomaDTO(educationDocument);
     }
