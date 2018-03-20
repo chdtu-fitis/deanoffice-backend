@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
-import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
-
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 
 @Service
 public class StudentDegreeService {
@@ -24,8 +24,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAllByActiveForFacultyId(active, FACULTY_ID);
     }
 
-    public List<StudentDegree> findAllByIds(Integer[] id) {
-        return studentDegreeRepository.getAllByIds(id);
+    public List<StudentDegree> findAllByStudentId(Integer studentId) {
+        return studentDegreeRepository.findByStudentId(studentId);
     }
 
     public StudentDegree save(StudentDegree studentDegree) {

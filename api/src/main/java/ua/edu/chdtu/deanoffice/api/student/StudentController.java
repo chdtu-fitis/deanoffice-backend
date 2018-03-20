@@ -58,14 +58,6 @@ public class StudentController {
         return parseToStudentDegreeDTO(studentDegreeService.getAllByActive(active));
     }
 
-    @JsonView(StudentDegreeViews.Degree.class)
-    @GetMapping("/degrees/{ids}")
-    public List<StudentDegreeDTO> getAllStudentsDegreeByIds(
-            @PathVariable("ids") Integer[] studentDegreeIds
-    ) {
-        return parseToStudentDegreeDTO(studentDegreeService.findAllByIds(studentDegreeIds));
-    }
-
     private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
         return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
     }
@@ -197,4 +189,12 @@ public class StudentController {
         return ResponseEntity.ok(parseToStudentDTO(upStudent));
     }
 
+
+    @JsonView(StudentDegreeViews.Degree.class)
+    @GetMapping("/{id}/degrees")
+    public List<StudentDegreeDTO> getAllStudentsDegreeByIds(
+            @PathVariable("id") Integer studentId
+    ) {
+        return parseToStudentDegreeDTO(studentDegreeService.findAllByStudentId(studentId));
+    }
 }

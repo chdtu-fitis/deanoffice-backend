@@ -32,7 +32,7 @@ public class StudentDTO {
     private Date birthDate;
     @JsonView(StudentDegreeViews.Detail.class)
     private String registrationAddress;
-    @JsonView(StudentDegreeViews.Detail.class)
+    @JsonView(StudentDegreeViews.DetailAndDegree.class)
     private String studentCardNumber;
     @JsonView(StudentDegreeViews.Detail.class)
     private String actualAddress;
