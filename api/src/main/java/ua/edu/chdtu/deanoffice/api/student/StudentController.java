@@ -28,10 +28,14 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 @RestController
 @RequestMapping("/students")
 public class StudentController {
-    @Autowired StudentDegreeService studentDegreeService;
-    @Autowired StudentService studentService;
-    @Autowired DegreeService degreeService;
-    @Autowired StudentGroupService studentGroupService;
+    @Autowired
+    StudentDegreeService studentDegreeService;
+    @Autowired
+    StudentService studentService;
+    @Autowired
+    DegreeService degreeService;
+    @Autowired
+    StudentGroupService studentGroupService;
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
@@ -55,7 +59,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Degree.class)
     @GetMapping("/degrees/{ids}")
-    public List<StudentDegreeDTO> getAllStudentsDegreeById(
+    public List<StudentDegreeDTO> getAllStudentsDegreeByIds(
             @PathVariable("ids") Integer[] studentDegreeIds
     ) {
         return parseToStudentDegreeDTO(studentDegreeService.findAllByIds(studentDegreeIds));
@@ -63,6 +67,11 @@ public class StudentController {
 
     private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
         return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
+    }
+
+    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
+        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {
+        }.getType());
     }
 
     @JsonView(StudentDegreeViews.Search.class)
@@ -79,10 +88,6 @@ public class StudentController {
             studentDTO.setGroups(getGroupNamesForStudent(student));
         });
         return foundStudentDTO;
-    }
-
-    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {}.getType());
     }
 
     private String getGroupNamesForStudent(Student student) {
@@ -156,7 +161,7 @@ public class StudentController {
     public ResponseEntity<StudentDTO> getAllStudentsId(
             @PathVariable("id") Integer studentId
     ) {
-        return ResponseEntity.ok(parseToStudentDTO(studentService.findAllById(studentId)));
+        return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
     }
 
     private StudentDTO parseToStudentDTO(Student student) {

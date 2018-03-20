@@ -1,7 +1,5 @@
 package ua.edu.chdtu.deanoffice.webstarter;
 
-import java.io.Serializable;
-
 public class ErrorMessageResponse {
     private final String message;
 
