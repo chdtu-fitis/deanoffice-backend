@@ -197,4 +197,20 @@ public class StudentController {
     ) {
         return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
     }
+
+    @JsonView(StudentDegreeViews.Degrees.class)
+    @PutMapping("/{id}/degrees")
+    public ResponseEntity<StudentDTO> updateStudentDegrees(
+            @RequestBody List<StudentDegree> studentDegrees,
+            @PathVariable(value = "id") Integer studentId
+    ) {
+        Student upStudent;
+        try {
+            studentDegreeService.update(studentDegrees);
+            upStudent = studentService.findById(studentId);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+        return ResponseEntity.ok(parseToStudentDTO(upStudent));
+    }
 }

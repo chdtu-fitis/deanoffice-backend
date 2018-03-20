@@ -13,5 +13,11 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/deanoffice-fet</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="deanoffice@localhost" uuid="f3b9cd67-5b9e-4522-891a-5198d609bd90">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/deanoffice</jdbc-url>
+    </data-source>
   </component>
 </project>

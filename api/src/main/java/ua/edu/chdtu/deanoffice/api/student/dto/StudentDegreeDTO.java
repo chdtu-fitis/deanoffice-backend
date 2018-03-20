@@ -13,7 +13,7 @@ import java.util.Date;
 @Setter
 public class StudentDegreeDTO {
     private Integer studentGroupId;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
     private NamedDTO studentGroup;
     @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
     private Integer id;

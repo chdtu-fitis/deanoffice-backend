@@ -24,12 +24,12 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAllByActiveForFacultyId(active, FACULTY_ID);
     }
 
-    public List<StudentDegree> findAllByStudentId(Integer studentId) {
-        return studentDegreeRepository.findByStudentId(studentId);
-    }
-
     public StudentDegree save(StudentDegree studentDegree) {
         return this.studentDegreeRepository.save(studentDegree);
+    }
+
+    public List<StudentDegree> update(List<StudentDegree> studentDegreeSet) {
+        return studentDegreeRepository.save(studentDegreeSet);
     }
 
     public StudentDegree getFirstStudentDegree(Integer studentId) {
