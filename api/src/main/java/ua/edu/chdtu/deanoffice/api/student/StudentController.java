@@ -7,6 +7,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeViews;
@@ -139,22 +140,40 @@ public class StudentController {
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
         newStudentDegree.setActive(true);
 
-        if (EducationDocument.isNotExist(newStudentDegreeDTO.getPreviousDiplomaType())) {
-            newStudentDegree.setPreviousDiplomaType(EducationDocument.getPreviousDiplomaType(newStudentDegree.getDegree().getId()));
-            Integer degreeId = newStudentDegree.getDegree().getId();
-            if (degreeId == 3 || degreeId == 2) {
-                StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(newStudentDegree.getStudent().getId());
-                if (firstStudentDegree != null) {
-                    newStudentDegree.setPreviousDiplomaDate(firstStudentDegree.getDiplomaDate());
-                    newStudentDegree.setPreviousDiplomaNumber(firstStudentDegree.getDiplomaNumber());
-                }
-            }
-        } else {
-            newStudentDegree.setPreviousDiplomaType(newStudentDegreeDTO.getPreviousDiplomaType());
-        }
+        PreviousDiplomaDTO previousDiplomaDTO = getPreviousDiploma(newStudentDegree);
+        newStudentDegree.setPreviousDiplomaType(previousDiplomaDTO.getType());
+        newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
+        newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
+
+
 
         return studentDegreeService.save(newStudentDegree);
     }
+
+    private PreviousDiplomaDTO getPreviousDiploma(StudentDegree studentDegree) {
+        Integer degreeId = studentDegree.getDegree().getId();
+        EducationDocument educationDocument = getPreviousDiplomaType(studentDegree);
+        if (degreeId == 3 || degreeId == 2) {
+            StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(studentDegree.getStudent().getId());
+            if (firstStudentDegree != null) {
+                return new PreviousDiplomaDTO(
+                        firstStudentDegree.getPreviousDiplomaDate(),
+                        firstStudentDegree.getPreviousDiplomaNumber(),
+                        educationDocument
+                );
+            }
+        }
+        return new PreviousDiplomaDTO(educationDocument);
+    }
+
+    private EducationDocument getPreviousDiplomaType(StudentDegree studentDegree) {
+        if (EducationDocument.isExist(studentDegree.getPreviousDiplomaType())) {
+            return studentDegree.getPreviousDiplomaType();
+        }
+        return EducationDocument.getPreviousDiplomaType(studentDegree.getDegree().getId());
+    }
+
+
 
     @JsonView(StudentDegreeViews.Personal.class)
     @GetMapping("/{id}")
