@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
-import ua.edu.chdtu.deanoffice.util.comparators.PersonFullNameComparator;
 import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 
 import javax.persistence.*;

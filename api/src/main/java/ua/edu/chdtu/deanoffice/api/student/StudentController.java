@@ -169,10 +169,9 @@ public class StudentController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<StudentDTO> updateStudent(@RequestBody StudentDTO studentDTO) {
+    public ResponseEntity<StudentDTO> updateStudent(@RequestBody Student student) {
         Student upStudent;
         try {
-            Student student = new ModelMapper().map(studentDTO, Student.class);
             upStudent = studentService.update(student);
         } catch (Exception exception) {
             return handleException(exception);
