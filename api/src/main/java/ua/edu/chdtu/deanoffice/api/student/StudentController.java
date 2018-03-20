@@ -102,7 +102,7 @@ public class StudentController {
             if (newStudent) {
                 student = createStudent(newStudentDegree.getStudent());
             } else {
-                student = studentService.getById(newStudentDegree.getStudent().getId());
+                student = studentService.findById(newStudentDegree.getStudent().getId());
             }
             studentDegree = createStudentDegree(newStudentDegree, student);
         } catch (Exception exception) {
@@ -190,11 +190,11 @@ public class StudentController {
     }
 
 
-    @JsonView(StudentDegreeViews.Degree.class)
+    @JsonView(StudentDegreeViews.Degrees.class)
     @GetMapping("/{id}/degrees")
-    public List<StudentDegreeDTO> getAllStudentsDegreeByIds(
+    public ResponseEntity<StudentDTO> getAllStudentsDegreeById(
             @PathVariable("id") Integer studentId
     ) {
-        return parseToStudentDegreeDTO(studentDegreeService.findAllByStudentId(studentId));
+        return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
     }
 }

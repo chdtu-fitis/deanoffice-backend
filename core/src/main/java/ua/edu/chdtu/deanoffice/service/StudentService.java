@@ -29,10 +29,6 @@ public class StudentService {
         );
     }
 
-    public Student getById(Integer studentId) {
-        return this.studentRepository.findOne(studentId);
-    }
-
     public Student create(Student student) {
         student.setName(toCapitalizedCase(student.getName()));
         student.setSurname(toCapitalizedCase(student.getSurname()));

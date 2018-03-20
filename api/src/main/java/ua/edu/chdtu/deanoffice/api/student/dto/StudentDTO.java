@@ -6,17 +6,18 @@ import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
 public class StudentDTO {
-    @JsonView(StudentDegreeViews.SearchAndSimple.class)
+    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
     private Integer id;
-    @JsonView(StudentDegreeViews.SearchAndSimple.class)
+    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
     private String name;
-    @JsonView(StudentDegreeViews.SearchAndSimple.class)
+    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
     private String surname;
-    @JsonView(StudentDegreeViews.SearchAndSimple.class)
+    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
     private String patronimic;
     @JsonView(StudentDegreeViews.DetailAndDegree.class)
     private String nameEng;
@@ -28,7 +29,7 @@ public class StudentDTO {
     private String telephone;
     @JsonView(StudentDegreeViews.Detail.class)
     private Sex sex;
-    @JsonView(StudentDegreeViews.SearchAndSimple.class)
+    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
     private Date birthDate;
     @JsonView(StudentDegreeViews.Detail.class)
     private String registrationAddress;
@@ -56,4 +57,6 @@ public class StudentDTO {
     private String email;
     @JsonView(StudentDegreeViews.Search.class)
     private String groups;
+    @JsonView(StudentDegreeViews.Degrees.class)
+    private Set<StudentDegreeDTO> degrees;
 }
