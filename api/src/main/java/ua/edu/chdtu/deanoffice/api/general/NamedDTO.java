@@ -7,8 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NamedDTO {
-    @JsonView(NamedView.Named.class)
+    @JsonView(GeneralView.Named.class)
     private int id;
-    @JsonView(NamedView.Named.class)
+    @JsonView(GeneralView.Named.class)
     private String name;
 }

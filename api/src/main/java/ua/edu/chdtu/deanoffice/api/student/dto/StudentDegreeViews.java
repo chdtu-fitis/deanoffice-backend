@@ -1,6 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.student.dto;
 
-import static ua.edu.chdtu.deanoffice.api.general.NamedView.Named;
+import static ua.edu.chdtu.deanoffice.api.general.GeneralView.Named;
 
 public class StudentDegreeViews {
     public interface DetailAndDegree {}
