@@ -14,11 +14,13 @@ import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeViews;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -201,16 +203,30 @@ public class StudentController {
     @JsonView(StudentDegreeViews.Degrees.class)
     @PutMapping("/{id}/degrees")
     public ResponseEntity<StudentDTO> updateStudentDegrees(
-            @RequestBody List<StudentDegree> studentDegrees,
+            @RequestBody List<StudentDegreeDTO> studentDegreesDTO,
             @PathVariable(value = "id") Integer studentId
     ) {
         Student upStudent;
         try {
+            ModelMapper modelMapper = new ModelMapper();
+            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+            Type type = new TypeToken<List<StudentDegree>>() {}.getType();
+            List<StudentDegree> studentDegrees = modelMapper.map(studentDegreesDTO, type);
+
+            studentDegrees.forEach(studentDegree -> {
+                Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
+                studentDegree.setStudentGroup(getStudentGroup(groupId));
+            });
+
             studentDegreeService.update(studentDegrees);
             upStudent = studentService.findById(studentId);
         } catch (Exception exception) {
             return handleException(exception);
         }
         return ResponseEntity.ok(parseToStudentDTO(upStudent));
+    }
+
+    private StudentGroup getStudentGroup(Integer groupId) {
+        return this.studentGroupService.getById(groupId);
     }
 }
