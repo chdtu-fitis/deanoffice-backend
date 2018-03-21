@@ -11,6 +11,7 @@ import java.util.Date;
 @Setter
 public class StudentExpelDTO {
     private Integer studentDegreeId;
+    private Integer reasonId;
     @JsonView(StudentDegreeViews.Expel.class)
     private Integer id;
     @JsonView(StudentDegreeViews.Simple.class)

@@ -9,10 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.DegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.*;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -33,6 +30,8 @@ public class StudentController {
     DegreeService degreeService;
     @Autowired
     StudentGroupService studentGroupService;
+    @Autowired
+    OrderReasonService orderReasonService;
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
@@ -232,8 +231,9 @@ public class StudentController {
             List<StudentExpel> studentExpels = modelMapper.map(studentExpelDTOs, type);
 
             studentExpels.forEach(studentExpel -> {
-                Integer studentDegreeId = studentExpelDTOs.get(studentExpels.indexOf(studentExpel)).getStudentDegreeId();
-                studentExpel.setStudentDegree(studentDegreeService.getById(studentDegreeId));
+                StudentExpelDTO studentExpelDTO = studentExpelDTOs.get(studentExpels.indexOf(studentExpel));
+                studentExpel.setStudentDegree(studentDegreeService.getById(studentExpelDTO.getStudentDegreeId()));
+                studentExpel.setReason(orderReasonService.getById(studentExpelDTO.getReasonId()));
             });
 
             List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(studentExpels);
@@ -241,6 +241,7 @@ public class StudentController {
         } catch (Exception exception) {
             return handleException(exception);
         }
+        
         Object[] ids = studentExpelDTOList.stream().map(StudentExpelDTO::getId).toArray();
         URI location = getNewResourceLocation(ids);
         return ResponseEntity.created(location).body(studentExpelDTOList);
