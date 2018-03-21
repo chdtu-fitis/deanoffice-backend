@@ -1,32 +1,41 @@
 package ua.edu.chdtu.deanoffice.service.document;
 
+import org.docx4j.Docx4J;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 @Service
 public class DocumentIOService {
+
+    private String getJavaTempDirectory() {
+        return System.getProperty("java.io.tmpdir");
+    }
 
     public WordprocessingMLPackage loadTemplate(String name) throws IOException, Docx4JException {
         return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFile()));
     }
 
-    public File saveDocumentToTemp(WordprocessingMLPackage template, String fileName) throws Docx4JException {
-        String finalFileName = cleanFileName(fileName);
-        File documentFile = new File(System.getProperty("java.io.tmpdir") + finalFileName);
+    public File saveDocxToTemp(WordprocessingMLPackage template, String fileName)
+            throws Docx4JException {
+        String finalFileName = cleanFileName(fileName) + ".docx";
+        File documentFile = new File(getJavaTempDirectory() + finalFileName);
         template.save(documentFile);
         return documentFile;
     }
 
-    public String cleanFileName(String fileName) {
-        String extension = fileName.substring(fileName.lastIndexOf("."));
-        String name = fileName.substring(0, fileName.lastIndexOf("."));
-        return name.replaceAll("[\\W]*", "") + extension;
+    public File savePdfToTemp(WordprocessingMLPackage template, String fileName)
+            throws Docx4JException, FileNotFoundException {
+        String finalFileName = cleanFileName(fileName) + ".pdf";
+        File documentFile = new File(getJavaTempDirectory() + finalFileName);
+        Docx4J.toPDF(template, new FileOutputStream(documentFile));
+        return documentFile;
     }
 
+    public String cleanFileName(String fileName) {
+        return fileName.replaceAll("[\\W]*", "");
+    }
 }

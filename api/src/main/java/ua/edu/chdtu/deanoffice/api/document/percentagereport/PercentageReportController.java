@@ -23,9 +23,20 @@ public class PercentageReportController extends DocumentResponseController {
         this.gradePercentageReportService = gradePercentageReportService;
     }
 
-    @GetMapping(path = "/groups/{groupId}")
-    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId) throws IOException, Docx4JException {
-        File groupDiplomaSupplements = gradePercentageReportService.prepareReportForGroup(groupId);
-        return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
+    @GetMapping(path = "/groups/{groupId}/{format}")
+    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId,
+                                                     @PathVariable String format)
+            throws IOException, Docx4JException {
+        File groupReport;
+        switch (format) {
+            case "pdf": {
+                groupReport = gradePercentageReportService.prepareReportForGroup(groupId, format);
+                return buildDocumentResponseEntity(groupReport, groupReport.getName(), MEDIA_TYPE_PDF);
+            }
+            default: {
+                groupReport = gradePercentageReportService.prepareReportForGroup(groupId, format);
+                return buildDocumentResponseEntity(groupReport, groupReport.getName(), MEDIA_TYPE_DOCX);
+            }
+        }
     }
 }

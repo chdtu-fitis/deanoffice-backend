@@ -39,7 +39,8 @@ public class GradePercentageReportService {
         this.documentIOService = documentIOService;
     }
 
-    public synchronized File prepareReportForGroup(Integer groupId) throws Docx4JException, IOException {
+    public File prepareReportForGroup(Integer groupId, String format)
+            throws Docx4JException, IOException {
         List<StudentsReport> studentsReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
@@ -51,8 +52,17 @@ public class GradePercentageReportService {
         studentDegrees.forEach(studentDegree ->
                 studentsReports.add(new StudentsReport(studentDegree, gradeService.getAllDifferentiatedGrades(studentDegree.getId())))
         );
-        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, studentsReports),
-                LanguageUtil.transliterate(group.getName()) + ".docx");
+
+        WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsReports);
+        String fileName = LanguageUtil.transliterate(group.getName());
+        switch (format) {
+            case "pdf": {
+                return documentIOService.savePdfToTemp(filledTemplate, fileName);
+            }
+            default: {
+                return documentIOService.saveDocxToTemp(filledTemplate, fileName);
+            }
+        }
     }
 
     private WordprocessingMLPackage fillTemplate(String templateName,

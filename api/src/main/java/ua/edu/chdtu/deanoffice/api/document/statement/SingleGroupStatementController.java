@@ -23,12 +23,22 @@ public class SingleGroupStatementController extends DocumentResponseController {
         this.singleGroupStatementService = singleGroupStatementService;
     }
 
-    @GetMapping(path = "/groups/{groupId}/courses/{courseId}")
+    @GetMapping(path = "/groups/{groupId}/courses/{courseId}/{format}")
     public ResponseEntity<Resource> generateForSingleCourse(
             @PathVariable Integer groupId,
-            @PathVariable Integer courseId
+            @PathVariable Integer courseId,
+            @PathVariable String format
     ) throws IOException, Docx4JException {
-        File groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId);
-        return buildDocumentResponseEntity(groupStatement, groupStatement.getName());
+        File groupStatement;
+        switch (format) {
+            case "pdf": {
+                groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, format);
+                return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_PDF);
+            }
+            default: {
+                groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, format);
+                return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_DOCX);
+            }
+        }
     }
 }

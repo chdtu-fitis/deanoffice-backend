@@ -30,13 +30,21 @@ public class SingleGroupStatementService {
         this.statementTemplateFillService = statementTemplateFillService;
     }
 
-    public File createGroupStatement(Integer groupId, Integer courseId) throws IOException, Docx4JException {
+    public File createGroupStatement(Integer groupId, Integer courseId, String format)
+            throws IOException, Docx4JException {
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseId);
         StudentGroup group = courseForGroup.getStudentGroup();
         Course course = courseForGroup.getCourse();
 
         String fileName = LanguageUtil.transliterate(group.getName() + "_" + course.getCourseName().getNameEng());
         WordprocessingMLPackage filledTemplate = statementTemplateFillService.fillTemplate(TEMPLATE, courseForGroup);
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
+        switch (format) {
+            case "pdf": {
+                return documentIOService.savePdfToTemp(filledTemplate, fileName);
+            }
+            default: {
+                return documentIOService.saveDocxToTemp(filledTemplate, fileName);
+            }
+        }
     }
 }
