@@ -51,6 +51,8 @@ public class Student extends Person {
     private String motherInfo;
     @Column(name = "notes", length = 150)
     private String notes;
+    @Column(name = "photo")
+    private byte[] photo;
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentDegree> degrees = new HashSet<>();
 
