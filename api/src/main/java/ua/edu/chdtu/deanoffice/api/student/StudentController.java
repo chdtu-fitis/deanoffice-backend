@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
@@ -29,6 +30,7 @@ public class StudentController {
     private final StudentGroupService studentGroupService;
     private final OrderReasonService orderReasonService;
 
+    @Autowired
     public StudentController(
             StudentDegreeService studentDegreeService,
             StudentService studentService,
@@ -121,7 +123,9 @@ public class StudentController {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         Student newStudent = modelMapper.map(newStudentDTO, Student.class);
-        newStudent.setId(0);
+        if (newStudent.getId() != 0) {
+            newStudent.setId(0);
+        }
         return studentService.create(newStudent);
     }
 
@@ -186,6 +190,21 @@ public class StudentController {
             return handleException(exception);
         }
         return ResponseEntity.ok(parseToStudentDTO(upStudent));
+    }
+
+    @PutMapping("/{id}/photo")
+    public ResponseEntity uploadPhotoForStudent(
+            @RequestBody byte[] photo,
+            @PathVariable(value = "id") Integer id
+            ) {
+        try {
+            Student student = studentService.findById(id);
+            student.setPhoto(photo);
+            studentService.update(student);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @JsonView(StudentDegreeViews.Degrees.class)
