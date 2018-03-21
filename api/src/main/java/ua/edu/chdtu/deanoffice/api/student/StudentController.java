@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.service.OrderReasonService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.StudentService;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -22,23 +24,29 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 @RestController
 @RequestMapping("/students")
 public class StudentController {
-    @Autowired
-    StudentDegreeService studentDegreeService;
-    @Autowired
-    StudentService studentService;
-    @Autowired
-    DegreeService degreeService;
-    @Autowired
-    StudentGroupService studentGroupService;
-    @Autowired
-    OrderReasonService orderReasonService;
+    private final StudentDegreeService studentDegreeService;
+    private final StudentService studentService;
+    private final StudentGroupService studentGroupService;
+    private final OrderReasonService orderReasonService;
+
+    public StudentController(
+            StudentDegreeService studentDegreeService,
+            StudentService studentService,
+            StudentGroupService studentGroupService,
+            OrderReasonService orderReasonService
+    ) {
+        this.studentDegreeService = studentDegreeService;
+        this.studentService = studentService;
+        this.studentGroupService = studentGroupService;
+        this.orderReasonService = orderReasonService;
+    }
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
     public ResponseEntity getActiveStudentsDegree(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
-        return ResponseEntity.ok(getActiveStudentDegree(active));
+        return ResponseEntity.ok(getActiveStudentDegrees(active));
     }
 
     @JsonView(StudentDegreeViews.Detail.class)
@@ -46,10 +54,10 @@ public class StudentController {
     public ResponseEntity getActiveStudentsDegree_moreDetail(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
-        return ResponseEntity.ok(getActiveStudentDegree(active));
+        return ResponseEntity.ok(getActiveStudentDegrees(active));
     }
 
-    private List<StudentDegreeDTO> getActiveStudentDegree(boolean active) {
+    private List<StudentDegreeDTO> getActiveStudentDegrees(boolean active) {
         return parseToStudentDegreeDTO(studentDegreeService.getAllByActive(active));
     }
 
@@ -129,7 +137,8 @@ public class StudentController {
 
         PreviousDiplomaDTO previousDiplomaDTO = getPreviousDiploma(newStudentDegree);
         newStudentDegree.setPreviousDiplomaType(previousDiplomaDTO.getType());
-        if (newStudentDegree.getDegree().getId() != 1) {
+        boolean degreeIsNotBachelor = newStudentDegree.getDegree().getId() != 1;
+        if (degreeIsNotBachelor) {
             newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
             newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
         }
@@ -156,8 +165,6 @@ public class StudentController {
         return EducationDocument.getPreviousDiplomaType(studentDegree.getDegree().getId());
     }
 
-
-
     @JsonView(StudentDegreeViews.Personal.class)
     @GetMapping("/{id}")
     public ResponseEntity getAllStudentsId(
@@ -180,7 +187,6 @@ public class StudentController {
         }
         return ResponseEntity.ok(parseToStudentDTO(upStudent));
     }
-
 
     @JsonView(StudentDegreeViews.Degrees.class)
     @GetMapping("/{id}/degrees")
