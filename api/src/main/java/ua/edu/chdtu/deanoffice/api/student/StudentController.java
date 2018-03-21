@@ -7,14 +7,8 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeViews;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.api.student.dto.*;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -42,18 +36,18 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
-    public List<StudentDegreeDTO> getActiveStudentsDegree(
+    public ResponseEntity getActiveStudentsDegree(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
-        return getActiveStudentDegree(active);
+        return ResponseEntity.ok(getActiveStudentDegree(active));
     }
 
     @JsonView(StudentDegreeViews.Detail.class)
     @GetMapping("/degrees/more-detail")
-    public List<StudentDegreeDTO> getActiveStudentsDegree_moreDetail(
+    public ResponseEntity getActiveStudentsDegree_moreDetail(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
-        return getActiveStudentDegree(active);
+        return ResponseEntity.ok(getActiveStudentDegree(active));
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegree(boolean active) {
@@ -64,14 +58,9 @@ public class StudentController {
         return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
     }
 
-    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {
-        }.getType());
-    }
-
     @JsonView(StudentDegreeViews.Search.class)
     @GetMapping("/search")
-    public List<StudentDTO> searchStudentByFullName(
+    public List searchStudentByFullName(
             @RequestParam(value = "name", defaultValue = "", required = false) String name,
             @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
@@ -85,6 +74,11 @@ public class StudentController {
         return foundStudentDTO;
     }
 
+    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
+        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {
+        }.getType());
+    }
+
     private String getGroupNamesForStudent(Student student) {
         return student.getDegrees().stream()
                 .map(studentDegree -> studentDegree.getStudentGroup().getName())
@@ -93,7 +87,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Degree.class)
     @PostMapping("/degrees")
-    public ResponseEntity<StudentDegreeDTO> createNewStudentDegree(
+    public ResponseEntity createNewStudentDegree(
             @RequestBody() StudentDegreeDTO newStudentDegree,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
@@ -140,9 +134,6 @@ public class StudentController {
             newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
             newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
         }
-
-
-
         return studentDegreeService.save(newStudentDegree);
     }
 
@@ -170,7 +161,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Personal.class)
     @GetMapping("/{id}")
-    public ResponseEntity<StudentDTO> getAllStudentsId(
+    public ResponseEntity getAllStudentsId(
             @PathVariable("id") Integer studentId
     ) {
         return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
@@ -181,7 +172,7 @@ public class StudentController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<StudentDTO> updateStudent(@RequestBody Student student) {
+    public ResponseEntity updateStudent(@RequestBody Student student) {
         Student upStudent;
         try {
             upStudent = studentService.update(student);
@@ -194,7 +185,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Degrees.class)
     @GetMapping("/{id}/degrees")
-    public ResponseEntity<StudentDTO> getAllStudentsDegreeById(
+    public ResponseEntity getAllStudentsDegreeById(
             @PathVariable("id") Integer studentId
     ) {
         return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
@@ -202,7 +193,7 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Degrees.class)
     @PutMapping("/{id}/degrees")
-    public ResponseEntity<StudentDTO> updateStudentDegrees(
+    public ResponseEntity updateStudentDegrees(
             @RequestBody List<StudentDegreeDTO> studentDegreesDTO,
             @PathVariable(value = "id") Integer studentId
     ) {
@@ -228,5 +219,30 @@ public class StudentController {
 
     private StudentGroup getStudentGroup(Integer groupId) {
         return this.studentGroupService.getById(groupId);
+    }
+
+    @JsonView(StudentDegreeViews.Expel.class)
+    @PostMapping("/degrees/expels")
+    public ResponseEntity expelStudentDegree(@RequestBody List<StudentExpelDTO> studentExpelDTOs) {
+        List<StudentExpelDTO> studentExpelDTOList;
+        try {
+            ModelMapper modelMapper = new ModelMapper();
+            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+            Type type = new TypeToken<List<StudentExpel>>() {}.getType();
+            List<StudentExpel> studentExpels = modelMapper.map(studentExpelDTOs, type);
+
+            studentExpels.forEach(studentExpel -> {
+                Integer studentDegreeId = studentExpelDTOs.get(studentExpels.indexOf(studentExpel)).getStudentDegreeId();
+                studentExpel.setStudentDegree(studentDegreeService.getById(studentDegreeId));
+            });
+
+            List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(studentExpels);
+            studentExpelDTOList = new ModelMapper().map(studentExpelList, new TypeToken<List<StudentExpelDTO>>() {}.getType());
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+        Object[] ids = studentExpelDTOList.stream().map(StudentExpelDTO::getId).toArray();
+        URI location = getNewResourceLocation(ids);
+        return ResponseEntity.created(location).body(studentExpelDTOList);
     }
 }
