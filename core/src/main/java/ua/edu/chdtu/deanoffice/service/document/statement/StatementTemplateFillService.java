@@ -91,7 +91,11 @@ class StatementTemplateFillService {
         result.put("Hours", String.format("%d", course.getHours()));
 
         DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        result.put("ExamDate", dateFormat.format(courseForGroup.getExamDate()));
+        if (courseForGroup.getExamDate() != null) {
+            result.put("ExamDate", dateFormat.format(courseForGroup.getExamDate()));
+        } else {
+            result.put("ExamDate", "");
+        }
         result.put("Course", String.format("%d", Calendar.getInstance().get(Calendar.YEAR) - courseForGroup.getStudentGroup().getCreationYear()));
         result.put("KCType", course.getKnowledgeControl().getName());
         result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
