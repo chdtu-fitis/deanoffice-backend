@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.group.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
@@ -56,6 +56,18 @@ public class CourseController {
         ModelMapper modelMapper = new ModelMapper();
         List<CourseDTO> coursesDTOS = modelMapper.map(courses, listType);
         return coursesDTOS;
+    }
+
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity createCourse(@RequestBody Course course){
+        try {
+            this.courseService.createCourse(course);
+            return new ResponseEntity(HttpStatus.CREATED);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
