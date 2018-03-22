@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Service
-public class SingleGroupStatementService {
+public class GroupStatementService {
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "SingleGroupStatement.docx";
 
@@ -22,15 +22,16 @@ public class SingleGroupStatementService {
     private final CourseForGroupService courseForGroupService;
     private final StatementTemplateFillService statementTemplateFillService;
 
-    public SingleGroupStatementService(DocumentIOService documentIOService,
-                                       CourseForGroupService courseForGroupService,
-                                       StatementTemplateFillService statementTemplateFillService) {
+    public GroupStatementService(DocumentIOService documentIOService,
+                                 CourseForGroupService courseForGroupService,
+                                 StatementTemplateFillService statementTemplateFillService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
         this.statementTemplateFillService = statementTemplateFillService;
     }
 
-    public File createGroupStatement(Integer groupId, Integer courseId) throws IOException, Docx4JException {
+    public File createGroupStatement(Integer groupId, Integer courseId)
+            throws IOException, Docx4JException, NullPointerException {
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseId);
         StudentGroup group = courseForGroup.getStudentGroup();
         Course course = courseForGroup.getCourse();
