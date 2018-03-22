@@ -17,4 +17,8 @@ public class CourseService {
         return courses;
     }
 
+    public void createCourse(Course course){
+        this.courseRepository.save(course);
+    }
+
 }
