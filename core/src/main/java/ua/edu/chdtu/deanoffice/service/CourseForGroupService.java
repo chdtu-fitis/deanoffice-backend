@@ -22,7 +22,7 @@ public class CourseForGroupService {
         return courseForGroupRepository.findByStudentGroupIdAndCourseId(groupId, courseId);
     }
 
-    public List<CourseForGroup> getCourseForGroupBySemester(int idGroup, int semester) {
+    public List<CourseForGroup> getCoursesForGroupBySemester(int idGroup, int semester) {
         return courseForGroupRepository.findAllByStudentGroupIdAndCourse_Semester(idGroup, semester);
     }
 
@@ -30,7 +30,7 @@ public class CourseForGroupService {
         return courseForGroupRepository.findAllBySpecialization(specialization, semester);
     }
 
-    public List<CourseForGroup> getCourseForGroupBySemester(int semester){
+    public List<CourseForGroup> getCoursesForGroupBySemester(int semester){
         return courseForGroupRepository.findAllBySemester(semester);
     }
 }

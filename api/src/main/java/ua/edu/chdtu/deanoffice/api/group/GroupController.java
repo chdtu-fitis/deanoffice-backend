@@ -74,7 +74,7 @@ public class GroupController {
     @ResponseBody
     @JsonView(GroupViews.Name.class)
     public List<CourseForGroupDTO> getCoursesBySemester(@PathVariable String id, @PathVariable String semester) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySemester(Integer.parseInt(id), Integer.parseInt(semester));
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(id), Integer.parseInt(semester));
         Type listType = new TypeToken<List<CourseForGroupDTO>>() {
         }.getType();
         ModelMapper modelMapper = new ModelMapper();
