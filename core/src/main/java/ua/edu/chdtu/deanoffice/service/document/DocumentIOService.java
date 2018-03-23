@@ -7,6 +7,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Service
 public class DocumentIOService {
@@ -21,7 +24,7 @@ public class DocumentIOService {
 
     public File saveDocxToTemp(WordprocessingMLPackage template, String fileName)
             throws Docx4JException {
-        String finalFileName = cleanFileName(fileName) + ".docx";
+        String finalFileName = cleanFileName(fileName) + getFileCreationDateAndTime() + ".docx";
         File documentFile = new File(getJavaTempDirectory() + finalFileName);
         template.save(documentFile);
         return documentFile;
@@ -29,10 +32,15 @@ public class DocumentIOService {
 
     public File savePdfToTemp(WordprocessingMLPackage template, String fileName)
             throws Docx4JException, FileNotFoundException {
-        String finalFileName = cleanFileName(fileName) + ".pdf";
+        String finalFileName = cleanFileName(fileName) + getFileCreationDateAndTime() + ".pdf";
         File documentFile = new File(getJavaTempDirectory() + finalFileName);
         Docx4J.toPDF(template, new FileOutputStream(documentFile));
         return documentFile;
+    }
+
+    private String getFileCreationDateAndTime() {
+        DateFormat format = new SimpleDateFormat(" dd-MM-yyyy mm:ss");
+        return format.format(new Date());
     }
 
     public String cleanFileName(String fileName) {
