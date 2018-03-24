@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.group.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
@@ -19,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CourseService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
+import javax.websocket.server.PathParam;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -47,10 +45,10 @@ public class CourseController {
         return modelMapper.map(studentGroups, listType);
     }
 
-    @RequestMapping("/{semester}")
+    @GetMapping
     @ResponseBody
     @JsonView(GroupViews.Name.class)
-    public List<CourseDTO> getCoursesBySemester(@PathVariable String semester) {
+    public List<CourseDTO> getCoursesBySemester(@PathParam("semester") String semester) {
         List<Course> courses = courseService.getCoursesBySemester(Integer.parseInt(semester));
         Type listType = new TypeToken<List<CourseDTO>>() {}.getType();
         ModelMapper modelMapper = new ModelMapper();
@@ -58,4 +56,14 @@ public class CourseController {
         return coursesDTOS;
     }
 
+    @RequestMapping("/groups/{groupId}")
+    @ResponseBody
+    @JsonView(GroupViews.Name.class)
+    public List<CourseForGroupDTO> getCoursesByGroupAndSemester(@PathVariable String groupId, @RequestParam Integer semester) {
+        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(groupId), semester);
+        Type listType = new TypeToken<List<CourseForGroupDTO>>() {
+        }.getType();
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(coursesForGroup, listType);
+    }
 }
