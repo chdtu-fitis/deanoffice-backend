@@ -34,8 +34,8 @@ public class GroupService {
         return studentGroupRepository.findOne(id);
     }
 
-    public List<StudentGroup> getGroupsByYear(int year) {
+    public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year) {
         Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return groupRepository.findGroupsByYear(year, currYear);
+        return groupRepository.findGroupsByDegreeAndYear(degreeId, year, currYear);
     }
 }
