@@ -70,4 +70,14 @@ public class CourseController {
         }
     }
 
+    @RequestMapping("/groups/{groupId}")
+    @ResponseBody
+    @JsonView(GroupViews.Name.class)
+    public List<CourseForGroupDTO> getCoursesByGroupAndSemester(@PathVariable String groupId, @RequestParam Integer semester) {
+        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(groupId), semester);
+        Type listType = new TypeToken<List<CourseForGroupDTO>>() {
+        }.getType();
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(coursesForGroup, listType);
+    }
 }

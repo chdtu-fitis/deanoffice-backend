@@ -16,8 +16,8 @@ public interface GroupRepository extends JpaRepository<StudentGroup, Integer> {
 
     @Query(value = "SELECT * FROM student_group sg " +
             "INNER JOIN specialization s ON s.id=sg.specialization_id " +
-            "WHERE sg.active=TRUE AND :currYear-sg.creation_year+sg.begin_years=:studyYear " +
+            "WHERE sg.active=TRUE AND s.degree_id=:degreeId AND :currYear-sg.creation_year+sg.begin_years=:studyYear " +
             "ORDER BY sg.tuition_form DESC, sg.name", nativeQuery = true)
-    List<StudentGroup> findGroupsByYear(@Param("studyYear") Integer studyYear, @Param("currYear") Integer currYear);
+    List<StudentGroup> findGroupsByDegreeAndYear(@Param("degreeId") Integer degreeId, @Param("studyYear") Integer studyYear, @Param("currYear") Integer currYear);
 
 }
