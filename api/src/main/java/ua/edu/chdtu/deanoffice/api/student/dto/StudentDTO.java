@@ -59,6 +59,4 @@ public class StudentDTO {
     private String groups;
     @JsonView(StudentDegreeViews.Degrees.class)
     private Set<StudentDegreeDTO> degrees;
-    @JsonView(StudentDegreeViews.Personal.class)
-    private byte[] photo;
 }

@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
@@ -205,6 +206,19 @@ public class StudentController {
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    @GetMapping("/{id}/photo")
+    public ResponseEntity getStudentPhoto(@PathVariable(value = "id") Integer id) {
+        Student student = studentService.findById(id);
+        if (student == null) {
+            return ResponseEntity.notFound().eTag("Not found student with id " + id).build();
+        }
+        if (student.getPhoto() == null) {
+            return ResponseEntity.unprocessableEntity().body("Student with id " + id + " don`t have a photo");
+        }
+        byte[] photo = student.getPhoto();
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
     }
 
     @JsonView(StudentDegreeViews.Degrees.class)
