@@ -10,15 +10,15 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class CourseDTO {
-    @JsonView(GroupViews.Name.class)
+    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
     private int id;
-    @JsonView(GroupViews.Name.class)
+    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
     private CourseNameDTO courseName;
-    @JsonView(GroupViews.Course.class)
+    @JsonView({GroupViews.Course.class, StudentGroupView.Course.class})
     private Integer semester;
-    @JsonView(GroupViews.Name.class)
+    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
     private KnowledgeControlDTO knowledgeControl;
-    @JsonView(GroupViews.Name.class)
+    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
     private Integer hours;
     private BigDecimal credits;
 }

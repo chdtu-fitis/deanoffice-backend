@@ -7,4 +7,5 @@ public class StudentGroupView {
 
     public interface WithStudents extends Basic, PersonFullName {}
     public interface BasicGroupData extends Basic {}
+    public interface Course {}
 }

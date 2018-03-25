@@ -9,13 +9,13 @@ import java.util.Date;
 @Getter
 @Setter
 public class CourseForGroupDTO {
-    @JsonView(GroupViews.Name.class)
+    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
     private int id;
-    @JsonView(GroupViews.Name.class)
+    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
     private CourseDTO course;
     private GroupDTO studentGroup;
-    @JsonView(GroupViews.Course.class)
+    @JsonView({GroupViews.Course.class, StudentGroupView.Course.class})
     private TeacherDTO teacher;
-    @JsonView(GroupViews.Course.class)
+    @JsonView({GroupViews.Course.class, StudentGroupView.Course.class})
     private Date examDate;
 }
