@@ -22,6 +22,7 @@ public class StudentGroupDTO {
     private int creationYear;
     private TuitionForm tuitionForm;
     private TuitionTerm tuitionTerm;
+    @JsonView(StudentGroupView.BasicGroupData.class)
     private int studySemesters;
     private BigDecimal studyYears;
     private int beginYears;

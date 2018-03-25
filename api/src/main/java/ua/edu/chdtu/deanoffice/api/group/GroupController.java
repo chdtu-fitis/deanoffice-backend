@@ -54,13 +54,10 @@ public class GroupController {
     }
 
     @GetMapping()
-    @JsonView(GroupViews.Name.class)
+    @JsonView(StudentGroupView.BasicGroupData.class)
     public ResponseEntity getGroups() {
         List<StudentGroup> studentGroups = groupService.getGroups();
-        Type listType = new TypeToken<List<GroupDTO>>() {}.getType();
-        ModelMapper modelMapper = new ModelMapper();
-        List<GroupDTO> groupDTOList = modelMapper.map(studentGroups, listType);
-        return ResponseEntity.ok(groupDTOList);
+        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 
     @GetMapping("/year")

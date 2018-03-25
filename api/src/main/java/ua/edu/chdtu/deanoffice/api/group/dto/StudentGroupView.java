@@ -4,5 +4,7 @@ import ua.edu.chdtu.deanoffice.api.general.GeneralView.PersonFullName;
 
 public class StudentGroupView {
     public interface Basic {}
+
     public interface WithStudents extends Basic, PersonFullName {}
+    public interface BasicGroupData extends Basic {}
 }
