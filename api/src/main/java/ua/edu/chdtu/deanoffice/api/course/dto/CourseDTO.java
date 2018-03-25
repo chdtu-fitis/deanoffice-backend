@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.group.dto;
+package ua.edu.chdtu.deanoffice.api.course.dto;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
@@ -8,14 +8,14 @@ import ua.edu.chdtu.deanoffice.api.general.NamedDTO;
 @Getter
 @Setter
 class CourseDTO {
-    @JsonView(StudentGroupView.BasicCourse.class)
+    @JsonView(CourseForGroupView.Basic.class)
     private int id;
-    @JsonView(StudentGroupView.BasicCourse.class)
+    @JsonView(CourseForGroupView.Basic.class)
     private NamedDTO courseName;
-    @JsonView(StudentGroupView.Course.class)
+    @JsonView(CourseForGroupView.Course.class)
     private Integer semester;
-    @JsonView(StudentGroupView.BasicCourse.class)
+    @JsonView(CourseForGroupView.Basic.class)
     private NamedDTO knowledgeControl;
-    @JsonView(StudentGroupView.BasicCourse.class)
+    @JsonView(CourseForGroupView.Basic.class)
     private Integer hours;
 }

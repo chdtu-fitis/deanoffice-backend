@@ -9,9 +9,9 @@ import java.util.List;
 @Getter
 @Setter
 public class StudentGroupDTO {
-    @JsonView(StudentGroupView.BasicGroup.class)
+    @JsonView(StudentGroupView.Basic.class)
     private Integer id;
-    @JsonView(StudentGroupView.BasicGroup.class)
+    @JsonView(StudentGroupView.Basic.class)
     private String name;
     @JsonView(StudentGroupView.GroupData.class)
     private int studySemesters;
