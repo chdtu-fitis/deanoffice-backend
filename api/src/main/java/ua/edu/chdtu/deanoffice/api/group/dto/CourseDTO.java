@@ -3,22 +3,19 @@ package ua.edu.chdtu.deanoffice.api.group.dto;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.api.general.KnowledgeControlDTO;
-
-import java.math.BigDecimal;
+import ua.edu.chdtu.deanoffice.api.general.NamedDTO;
 
 @Getter
 @Setter
-public class CourseDTO {
-    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
+class CourseDTO {
+    @JsonView(StudentGroupView.BasicCourse.class)
     private int id;
-    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
-    private CourseNameDTO courseName;
-    @JsonView({GroupViews.Course.class, StudentGroupView.Course.class})
+    @JsonView(StudentGroupView.BasicCourse.class)
+    private NamedDTO courseName;
+    @JsonView(StudentGroupView.Course.class)
     private Integer semester;
-    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
-    private KnowledgeControlDTO knowledgeControl;
-    @JsonView({GroupViews.Name.class, StudentGroupView.Course.class})
+    @JsonView(StudentGroupView.BasicCourse.class)
+    private NamedDTO knowledgeControl;
+    @JsonView(StudentGroupView.BasicCourse.class)
     private Integer hours;
-    private BigDecimal credits;
 }

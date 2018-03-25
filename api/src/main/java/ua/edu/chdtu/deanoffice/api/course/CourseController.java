@@ -1,19 +1,9 @@
 package ua.edu.chdtu.deanoffice.api.course;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 @RestController
 @RequestMapping("/courses")
@@ -25,7 +15,7 @@ public class CourseController {
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
     }
-
+/*
     @RequestMapping("/{courseId}/groups")
     @ResponseBody
     @JsonView(GroupViews.Name.class)
@@ -57,5 +47,5 @@ public class CourseController {
         }.getType();
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(coursesForGroup, listType);
-    }
+    }*/
 }

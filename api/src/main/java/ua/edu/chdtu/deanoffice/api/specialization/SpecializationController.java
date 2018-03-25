@@ -1,11 +1,9 @@
 package ua.edu.chdtu.deanoffice.api.specialization;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 
@@ -22,7 +20,7 @@ public class SpecializationController {
     }
 
     @GetMapping("/{id}/courses")
-    @JsonView(GroupViews.Name.class)
+  //TODO refactor it  @JsonView(GroupViews.Name.class)
     public List<CourseForGroupDTO> getCoursesBySpecialization(@PathVariable String id, @RequestParam("semester") String semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(Integer.parseInt(id), Integer.parseInt(semester));
         Type listType = new TypeToken<List<CourseForGroupDTO>>() {

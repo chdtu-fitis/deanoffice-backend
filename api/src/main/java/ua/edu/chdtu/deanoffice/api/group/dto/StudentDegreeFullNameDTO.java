@@ -7,7 +7,7 @@ import ua.edu.chdtu.deanoffice.api.general.PersonFullNameDTO;
 
 @Getter
 @Setter
-public class StudentDegreeFullNameDTO {
+class StudentDegreeFullNameDTO {
     @JsonView(StudentGroupView.WithStudents.class)
     private int id;
     @JsonView(StudentGroupView.WithStudents.class)
