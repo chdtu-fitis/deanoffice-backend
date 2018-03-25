@@ -6,7 +6,11 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,6 +24,15 @@ public class DocumentIOService {
 
     public WordprocessingMLPackage loadTemplate(String name) throws IOException, Docx4JException {
         return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFile()));
+    }
+
+    public File saveDocument(WordprocessingMLPackage template, String filename, String format)
+            throws FileNotFoundException, Docx4JException {
+        if (format.equals("pdf")) {
+            return savePdfToTemp(template, filename);
+        } else {
+            return saveDocxToTemp(template, filename);
+        }
     }
 
     public File saveDocxToTemp(WordprocessingMLPackage template, String fileName)

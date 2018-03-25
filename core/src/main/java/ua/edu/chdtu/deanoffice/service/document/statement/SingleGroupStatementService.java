@@ -38,13 +38,6 @@ public class SingleGroupStatementService {
 
         String fileName = LanguageUtil.transliterate(group.getName() + "_" + course.getCourseName().getNameEng());
         WordprocessingMLPackage filledTemplate = statementTemplateFillService.fillTemplate(TEMPLATE, courseForGroup);
-        switch (format) {
-            case "pdf": {
-                return documentIOService.savePdfToTemp(filledTemplate, fileName);
-            }
-            default: {
-                return documentIOService.saveDocxToTemp(filledTemplate, fileName);
-            }
-        }
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 }

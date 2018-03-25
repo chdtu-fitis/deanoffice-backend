@@ -18,7 +18,11 @@ import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
@@ -55,14 +59,7 @@ public class GradePercentageReportService {
 
         WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsReports);
         String fileName = LanguageUtil.transliterate(group.getName());
-        switch (format) {
-            case "pdf": {
-                return documentIOService.savePdfToTemp(filledTemplate, fileName);
-            }
-            default: {
-                return documentIOService.saveDocxToTemp(filledTemplate, fileName);
-            }
-        }
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 
     private WordprocessingMLPackage fillTemplate(String templateName,

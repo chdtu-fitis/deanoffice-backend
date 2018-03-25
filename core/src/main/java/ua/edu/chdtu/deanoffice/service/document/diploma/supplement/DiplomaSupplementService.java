@@ -44,14 +44,7 @@ public class DiplomaSupplementService {
 
         String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();
         WordprocessingMLPackage filledTemplate = supplementTemplateFillService.fill(TEMPLATE, studentSummary);
-        switch (format) {
-            case "pdf": {
-                return documentIOService.savePdfToTemp(filledTemplate, fileName);
-            }
-            default: {
-                return documentIOService.saveDocxToTemp(filledTemplate, fileName);
-            }
-        }
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 
 

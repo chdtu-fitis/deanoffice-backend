@@ -23,22 +23,21 @@ public class SingleGroupStatementController extends DocumentResponseController {
         this.singleGroupStatementService = singleGroupStatementService;
     }
 
-    @GetMapping(path = "/groups/{groupId}/courses/{courseId}/{format}")
+    @GetMapping(path = "/groups/{groupId}/courses/{courseId}/docx")
+    public ResponseEntity<Resource> generateDocxForSingleCourse(
+            @PathVariable Integer groupId,
+            @PathVariable Integer courseId
+    ) throws IOException, Docx4JException {
+        File groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, "docx");
+        return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_DOCX);
+    }
+
+    @GetMapping(path = "/groups/{groupId}/courses/{courseId}/pdf")
     public ResponseEntity<Resource> generateForSingleCourse(
             @PathVariable Integer groupId,
-            @PathVariable Integer courseId,
-            @PathVariable String format
+            @PathVariable Integer courseId
     ) throws IOException, Docx4JException {
-        File groupStatement;
-        switch (format) {
-            case "pdf": {
-                groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, format);
-                return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_PDF);
-            }
-            default: {
-                groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, format);
-                return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_DOCX);
-            }
-        }
+        File groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, "pdf");
+        return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_PDF);
     }
 }

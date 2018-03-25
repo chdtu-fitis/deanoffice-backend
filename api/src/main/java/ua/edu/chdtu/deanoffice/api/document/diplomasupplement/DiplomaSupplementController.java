@@ -23,20 +23,17 @@ public class DiplomaSupplementController extends DocumentResponseController {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
-    @GetMapping(path = "/degrees/{studentDegreeId}/{format}")
-    public ResponseEntity<Resource> generateForStudent(@PathVariable Integer studentDegreeId,
-                                                       @PathVariable String format)
+    @GetMapping(path = "/degrees/{studentDegreeId}/docx")
+    public ResponseEntity<Resource> generateDocxForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {
-        File studentDiplomaSupplement;
-        switch (format) {
-            case "pdf": {
-                studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, format);
-                return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_PDF);
-            }
-            default: {
-                studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, format);
-                return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_DOCX);
-            }
-        }
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, "docx");
+        return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_DOCX);
+    }
+
+    @GetMapping(path = "/degrees/{studentDegreeId}/pdf")
+    public ResponseEntity<Resource> generatePdfForStudent(@PathVariable Integer studentDegreeId)
+            throws IOException, Docx4JException {
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, "pdf");
+        return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_PDF);
     }
 }
