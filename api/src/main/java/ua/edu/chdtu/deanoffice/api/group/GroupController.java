@@ -5,15 +5,12 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GroupService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.GraduateService;
 
 import java.lang.reflect.Type;
@@ -21,20 +18,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/groups")
-public class StudentGroupController {
+public class GroupController {
     private GraduateService graduateService;
     private GroupService groupService;
-    private CourseForGroupService courseForGroupService;
+    private StudentGroupService studentGroupService;
 
     @Autowired
-    public StudentGroupController(
+    public GroupController(
             GraduateService graduateService,
             GroupService groupService,
-            CourseForGroupService courseForGroupService
+            StudentGroupService studentGroupService
     ) {
+        this.studentGroupService = studentGroupService;
         this.graduateService = graduateService;
         this.groupService = groupService;
-        this.courseForGroupService = courseForGroupService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
@@ -65,5 +62,13 @@ public class StudentGroupController {
     ) {
         List<StudentGroup> groups = groupService.getGroupsByDegreeAndYear(degreeId, year);
         return ResponseEntity.ok(parseToStudentGroupDTO(groups));
+    }
+
+
+    @GetMapping("courses/{courseId}/groups")
+    @JsonView(StudentGroupView.Basic.class)
+    public List<StudentGroupDTO> getGroupsByCourse(@PathVariable String courseId) {
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(Integer.parseInt(courseId));
+        return parseToStudentGroupDTO(studentGroups);
     }
 }
