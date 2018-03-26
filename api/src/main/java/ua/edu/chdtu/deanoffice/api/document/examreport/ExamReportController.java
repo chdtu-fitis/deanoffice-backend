@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.statement;
+package ua.edu.chdtu.deanoffice.api.document.examreport;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.core.io.Resource;
