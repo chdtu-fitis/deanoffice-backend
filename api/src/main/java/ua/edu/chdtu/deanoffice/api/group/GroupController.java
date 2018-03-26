@@ -17,7 +17,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 @RestController
-@RequestMapping("/groups")
+@RequestMapping("/")
 public class GroupController {
     private GraduateService graduateService;
     private GroupService groupService;
@@ -35,7 +35,7 @@ public class GroupController {
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
-    @GetMapping("/graduates")
+    @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam Integer degreeId) {
         List<StudentGroup> groups = graduateService.getGraduateGroups(degreeId);
         return ResponseEntity.ok(parseToStudentGroupDTO(groups));
@@ -47,14 +47,14 @@ public class GroupController {
         return modelMapper.map(studentGroupList, listType);
     }
 
-    @GetMapping()
+    @GetMapping("/groups")
     @JsonView(StudentGroupView.GroupData.class)
     public ResponseEntity getGroups() {
         List<StudentGroup> studentGroups = groupService.getGroups();
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 
-    @GetMapping("/year")
+    @GetMapping("/groups/filter")
     @JsonView(StudentGroupView.WithStudents.class)
     public ResponseEntity getGroupsByDegreeAndYear(
             @RequestParam Integer degreeId,
@@ -64,11 +64,10 @@ public class GroupController {
         return ResponseEntity.ok(parseToStudentGroupDTO(groups));
     }
 
-
     @GetMapping("courses/{courseId}/groups")
     @JsonView(StudentGroupView.Basic.class)
-    public List<StudentGroupDTO> getGroupsByCourse(@PathVariable String courseId) {
+    public ResponseEntity getGroupsByCourse(@PathVariable String courseId) {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(Integer.parseInt(courseId));
-        return parseToStudentGroupDTO(studentGroups);
+        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 }

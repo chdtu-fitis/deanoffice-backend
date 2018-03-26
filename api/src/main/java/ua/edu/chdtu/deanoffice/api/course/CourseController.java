@@ -5,10 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
@@ -17,34 +14,20 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import java.lang.reflect.Type;
 import java.util.List;
 
+@RequestMapping("/")
 @RestController
-public class CourseForGroupController {
+public class CourseController {
     private CourseForGroupService courseForGroupService;
 
     @Autowired
-    public CourseForGroupController(CourseForGroupService courseForGroupService) {
+    public CourseController(CourseForGroupService courseForGroupService) {
         this.courseForGroupService = courseForGroupService;
     }
 
-    @GetMapping("courses/{semester}")
+    @GetMapping("/courses")
     @JsonView(CourseForGroupView.Basic.class)
-    public ResponseEntity getCoursesBySemester(@PathVariable String semester) {
+    public ResponseEntity getCoursesBySemester(@RequestParam String semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(semester));
-        return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
-    }
-
-    @GetMapping("courses/groups/{groupId}")
-    @JsonView(CourseForGroupView.Basic.class)
-    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable String groupId, @RequestParam Integer semester) {
-        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(groupId), semester);
-        return ResponseEntity.ok(parseToCourseForGroupDTO(coursesForGroup));
-    }
-
-
-    @GetMapping("/groups/{id}")
-    @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity getCourses(@PathVariable String id) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroup(Integer.parseInt(id));
         return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
     }
 
@@ -53,14 +36,22 @@ public class CourseForGroupController {
         return new ModelMapper().map(courseForGroupList, listType);
     }
 
-    @GetMapping("/groups/{id}/{semester}/courses")
+    @GetMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Basic.class)
-    public ResponseEntity getCoursesBySemester(@PathVariable String id, @PathVariable String semester) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(id), Integer.parseInt(semester));
+    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable String groupId, @RequestParam Integer semester) {
+        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(groupId), semester);
+        return ResponseEntity.ok(parseToCourseForGroupDTO(coursesForGroup));
+    }
+
+
+    @GetMapping("/groups/{groupId}/courses/all")
+    @JsonView(CourseForGroupView.Course.class)
+    public ResponseEntity getCourses(@PathVariable String groupId) {
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroup(Integer.parseInt(groupId));
         return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
     }
 
-    @GetMapping("specialization/{id}/courses")
+    @GetMapping("/specialization/{id}/courses")
     @JsonView(CourseForGroupView.Basic.class)
     public ResponseEntity getCoursesBySpecialization(@PathVariable String id, @RequestParam("semester") String semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(Integer.parseInt(id), Integer.parseInt(semester));
