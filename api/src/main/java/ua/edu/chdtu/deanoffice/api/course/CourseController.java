@@ -35,13 +35,12 @@ public class CourseController {
 
     @GetMapping("/courses")
     @ResponseBody
-    @JsonView(GroupViews.Name.class)
     public List<CourseDTO> getCoursesBySemester(@PathParam("semester") String semester) {
         List<Course> courses = courseService.getCoursesBySemester(Integer.parseInt(semester));
         Type listType = new TypeToken<List<CourseDTO>>() {}.getType();
         ModelMapper modelMapper = new ModelMapper();
-        List<CourseDTO> coursesDTOS = modelMapper.map(courses, listType);
-        return coursesDTOS;
+        List<CourseDTO> coursesDTO = modelMapper.map(courses, listType);
+        return coursesDTO;
     }
   
     private List<CourseForGroupDTO> parseToCourseForGroupDTO(List<CourseForGroup> courseForGroupList) {
