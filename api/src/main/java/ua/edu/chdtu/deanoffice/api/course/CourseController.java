@@ -4,31 +4,29 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
-import ua.edu.chdtu.deanoffice.entity.Course;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
+import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CourseService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+
 import javax.websocket.server.PathParam;
 import java.lang.reflect.Type;
 import java.util.List;
-import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 
 @RequestMapping("/")
 @RestController
 public class CourseController {
     private CourseForGroupService courseForGroupService;
     private CourseService courseService;
-    private StudentGroupService groupService;
-  
+
     @Autowired
-    public CourseController(StudentGroupService groupService, CourseForGroupService courseForGroupService, CourseService courseService) {
-        this.groupService = groupService;
+    public CourseController(CourseForGroupService courseForGroupService, CourseService courseService) {
         this.courseForGroupService = courseForGroupService;
         this.courseService = courseService;
     }
