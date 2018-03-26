@@ -7,7 +7,7 @@ import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 
 @Getter
 @Setter
-class CourseDTO {
+public class CourseDTO {
     @JsonView(CourseForGroupView.Basic.class)
     private int id;
     @JsonView(CourseForGroupView.Basic.class)

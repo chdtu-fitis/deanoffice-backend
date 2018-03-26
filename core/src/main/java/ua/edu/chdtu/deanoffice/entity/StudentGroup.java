@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
-import ua.edu.chdtu.deanoffice.util.StudentDegreeFullNameComparator;
+import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -46,10 +46,7 @@ public class StudentGroup extends NameWithActiveEntity {
         if (studentDegrees.isEmpty()) {
             return new ArrayList<>();
         } else {
-            return studentDegrees.stream()
-                    .filter(StudentDegree::isActive)
-                    .map(StudentDegree::getStudent)
-                    .collect(Collectors.toList());
+            return studentDegrees.stream().filter(StudentDegree::isActive).map(StudentDegree::getStudent).collect(Collectors.toList());
         }
     }
 }

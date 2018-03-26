@@ -13,6 +13,7 @@ import java.util.Date;
 @Table(name = "student_expel")
 public class StudentExpel extends BaseEntity {
     @ManyToOne
+    @JoinColumn(name="studentdegree_id")
     private StudentDegree studentDegree;
     @Column(name = "expel_date", nullable = false)
     @Temporal(TemporalType.DATE)
