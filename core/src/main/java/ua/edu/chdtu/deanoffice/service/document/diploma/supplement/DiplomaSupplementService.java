@@ -35,7 +35,8 @@ public class DiplomaSupplementService {
         this.supplementTemplateFillService = supplementTemplateFillService;
     }
 
-    public File formDiplomaSupplementForStudent(Integer studentDegreeId) throws Docx4JException, IOException {
+    public File formDiplomaSupplement(Integer studentDegreeId, String format)
+            throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegreeId);
@@ -43,7 +44,7 @@ public class DiplomaSupplementService {
 
         String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();
         WordprocessingMLPackage filledTemplate = supplementTemplateFillService.fill(TEMPLATE, studentSummary);
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 
 
