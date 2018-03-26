@@ -583,7 +583,8 @@ CREATE TABLE student (
     student_card_number character varying(15),
     surname_eng character varying(20),
     telephone character varying(30),
-    privilege_id integer
+    privilege_id integer,
+    photo bytea
 );
 
 

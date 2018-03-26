@@ -8,11 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import java.util.List;
 
 public interface StudentRepository extends JpaRepository<Student, Integer> {
-    @Query("select s from Student s " +
-            "where id in :student_ids")
-    List<Student> getAllByStudentIds(@Param("student_ids") Integer[] studentIds);
-
-    @Query("select s from Student s " +
+        @Query("select s from Student s " +
             "where s.name like %:name% and s.surname like %:surname% and s.patronimic like %:patronimic%")
     List<Student> findAllByFullNameUkr(
             @Param("name") String name,

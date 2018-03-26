@@ -18,7 +18,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.id in :student_degree_ids")
-    List<StudentDegree> getAllByIds(@Param("student_degree_ids") Integer[] studentDegreeIds);
+    List<StudentDegree> getAllByIds(@Param("student_degree_ids") List<Integer> studentDegreeIds);
 
     StudentDegree getById(Integer id);
 
