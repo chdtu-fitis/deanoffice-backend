@@ -18,7 +18,11 @@ import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
@@ -39,7 +43,8 @@ public class GradePercentageReportService {
         this.documentIOService = documentIOService;
     }
 
-    public synchronized File prepareReportForGroup(Integer groupId) throws Docx4JException, IOException {
+    public File prepareReportForGroup(Integer groupId, String format)
+            throws Docx4JException, IOException {
         List<StudentsReport> studentsReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
@@ -51,8 +56,10 @@ public class GradePercentageReportService {
         studentDegrees.forEach(studentDegree ->
                 studentsReports.add(new StudentsReport(studentDegree, gradeService.getAllDifferentiatedGrades(studentDegree.getId())))
         );
-        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, studentsReports),
-                LanguageUtil.transliterate(group.getName()) + ".docx");
+
+        WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsReports);
+        String fileName = LanguageUtil.transliterate(group.getName());
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 
     private WordprocessingMLPackage fillTemplate(String templateName,

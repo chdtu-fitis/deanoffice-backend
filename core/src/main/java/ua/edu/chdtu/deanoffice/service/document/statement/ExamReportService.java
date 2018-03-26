@@ -14,30 +14,30 @@ import java.io.File;
 import java.io.IOException;
 
 @Service
-public class GroupStatementService {
+public class ExamReportService {
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "SingleGroupStatement.docx";
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
-    private final StatementTemplateFillService statementTemplateFillService;
+    private final StatementTemplateFillService examReportTemplateFillService;
 
-    public GroupStatementService(DocumentIOService documentIOService,
-                                 CourseForGroupService courseForGroupService,
-                                 StatementTemplateFillService statementTemplateFillService) {
+    public ExamReportService(DocumentIOService documentIOService,
+                             CourseForGroupService courseForGroupService,
+                             StatementTemplateFillService examReportTemplateFillService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
-        this.statementTemplateFillService = statementTemplateFillService;
+        this.examReportTemplateFillService = examReportTemplateFillService;
     }
 
-    public File createGroupStatement(Integer groupId, Integer courseId)
-            throws IOException, Docx4JException, NullPointerException {
+    public File createGroupStatement(Integer groupId, Integer courseId, String format)
+            throws IOException, Docx4JException {
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseId);
         StudentGroup group = courseForGroup.getStudentGroup();
         Course course = courseForGroup.getCourse();
 
         String fileName = LanguageUtil.transliterate(group.getName() + "_" + course.getCourseName().getNameEng());
-        WordprocessingMLPackage filledTemplate = statementTemplateFillService.fillTemplate(TEMPLATE, courseForGroup);
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
+        WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, courseForGroup);
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 }
