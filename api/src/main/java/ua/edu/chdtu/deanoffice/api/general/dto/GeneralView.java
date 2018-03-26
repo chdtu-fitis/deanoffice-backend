@@ -1,7 +1,8 @@
-package ua.edu.chdtu.deanoffice.api.general;
+package ua.edu.chdtu.deanoffice.api.general.dto;
 
 public class GeneralView {
     public interface PersonFullName {}
     public interface Named {}
+    public interface BasicDegree {}
     // Для всех ДТО, которые лежат в general
 }

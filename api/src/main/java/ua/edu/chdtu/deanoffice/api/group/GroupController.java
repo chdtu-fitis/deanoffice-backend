@@ -40,7 +40,7 @@ public class GroupController {
     }
 
     @GetMapping("/groups")
-    @JsonView(StudentGroupView.GroupData.class)
+    @JsonView(StudentGroupView.Data.class)
     public ResponseEntity getGroups() {
         List<StudentGroup> studentGroups = studentGroupService.getGroups();
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));

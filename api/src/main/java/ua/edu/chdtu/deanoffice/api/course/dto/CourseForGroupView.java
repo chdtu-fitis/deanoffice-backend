@@ -1,6 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.course.dto;
 
-import ua.edu.chdtu.deanoffice.api.general.GeneralView;
+import ua.edu.chdtu.deanoffice.api.general.dto.GeneralView;
 
 public class CourseForGroupView {
     public interface Basic extends GeneralView.Named, GeneralView.PersonFullName{}
