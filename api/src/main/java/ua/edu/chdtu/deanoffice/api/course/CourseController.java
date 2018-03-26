@@ -5,13 +5,9 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.group.dto.CourseDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.CourseForGroupDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.GroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.GroupViews;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
@@ -21,6 +17,7 @@ import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import javax.websocket.server.PathParam;
 import java.lang.reflect.Type;
 import java.util.List;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 
 @RequestMapping("/")
 @RestController
