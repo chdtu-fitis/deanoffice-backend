@@ -62,4 +62,11 @@ public class GroupController {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(Integer.parseInt(courseId));
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
+
+    @GetMapping("/groups/active")
+    @JsonView(StudentGroupView.AllGroupData.class)
+    public ResponseEntity getActiveGroups() {
+        List<StudentGroup> studentGroups = studentGroupService.getAllActive();
+        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+    }
 }
