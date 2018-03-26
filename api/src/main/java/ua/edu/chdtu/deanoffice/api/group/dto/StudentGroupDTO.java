@@ -24,7 +24,7 @@ public class StudentGroupDTO {
     @JsonView(StudentGroupView.WithStudents.class)
     private List<StudentDegreeFullNameDTO> studentDegrees;
     @JsonView(StudentGroupView.AllGroupData.class)
-    private SpecializationDTO specialization; //degree, specialization`s name, speciality`s name
+    private SpecializationDTO specialization;
     @JsonView(StudentGroupView.AllGroupData.class)
     private int creationYear;
     @JsonView(StudentGroupView.AllGroupData.class)

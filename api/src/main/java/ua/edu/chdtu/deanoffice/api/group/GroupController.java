@@ -63,10 +63,12 @@ public class GroupController {
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 
-    @GetMapping("/groups/active")
+    @GetMapping("/groups/all-data")
     @JsonView(StudentGroupView.AllGroupData.class)
-    public ResponseEntity getActiveGroups() {
-        List<StudentGroup> studentGroups = studentGroupService.getAllActive();
+    public ResponseEntity getActiveGroups(
+            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
+    ) {
+        List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 }

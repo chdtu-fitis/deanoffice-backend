@@ -44,7 +44,10 @@ public class StudentGroupService {
         return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, currYear);
     }
 
-    public List<StudentGroup> getAllActive() {
-        return this.studentGroupRepository.findAllActiveByFaculty(FACULTY_ID);
+    public List<StudentGroup> getAllByActive(boolean onlyActive) {
+        if (onlyActive) {
+            return this.studentGroupRepository.findAllActiveByFaculty(FACULTY_ID);
+        }
+        return this.studentGroupRepository.findAllByFaculty(FACULTY_ID);
     }
 }
