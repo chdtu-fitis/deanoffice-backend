@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.GroupRepository;
@@ -13,25 +13,22 @@ import java.util.List;
 @Service
 public class GroupService {
     private StudentGroupRepository studentGroupRepository;
-    @Autowired
     private GroupRepository groupRepository;
-    @Autowired
     private CurrentYearRepository currentYearRepository;
 
-    public GroupService(StudentGroupRepository studentGroupRepository) {
+    @Autowired
+    public GroupService(
+            StudentGroupRepository studentGroupRepository,
+            GroupRepository groupRepository,
+            CurrentYearRepository currentYearRepository
+    ) {
         this.studentGroupRepository = studentGroupRepository;
+        this.groupRepository = groupRepository;
+        this.currentYearRepository = currentYearRepository;
     }
 
     public List<StudentGroup> getGroups() {
-        return studentGroupRepository.findAllByFaculty(1);
-    }
-
-    public List<StudentDegree> getGroupStudents(Integer groupId) {
-        return studentGroupRepository.findOne(groupId).getStudentDegrees();
-    }
-
-    public StudentGroup getGroup(Integer id) {
-        return studentGroupRepository.findOne(id);
+        return studentGroupRepository.findAllByFaculty(Constants.FACULTY_ID);
     }
 
     public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year) {
