@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.service.GroupService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.GraduateService;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -19,25 +17,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/")
 public class GroupController {
-    private GraduateService graduateService;
-    private GroupService groupService;
     private StudentGroupService studentGroupService;
 
     @Autowired
     public GroupController(
-            GraduateService graduateService,
-            GroupService groupService,
             StudentGroupService studentGroupService
     ) {
         this.studentGroupService = studentGroupService;
-        this.graduateService = graduateService;
-        this.groupService = groupService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam Integer degreeId) {
-        List<StudentGroup> groups = graduateService.getGraduateGroups(degreeId);
+        List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
         return ResponseEntity.ok(parseToStudentGroupDTO(groups));
     }
 
@@ -50,7 +42,7 @@ public class GroupController {
     @GetMapping("/groups")
     @JsonView(StudentGroupView.GroupData.class)
     public ResponseEntity getGroups() {
-        List<StudentGroup> studentGroups = groupService.getGroups();
+        List<StudentGroup> studentGroups = studentGroupService.getGroups();
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 
@@ -60,7 +52,7 @@ public class GroupController {
             @RequestParam Integer degreeId,
             @RequestParam Integer year
     ) {
-        List<StudentGroup> groups = groupService.getGroupsByDegreeAndYear(degreeId, year);
+        List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year);
         return ResponseEntity.ok(parseToStudentGroupDTO(groups));
     }
 
