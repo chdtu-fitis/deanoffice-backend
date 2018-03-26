@@ -8,19 +8,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.service.document.statement.SingleGroupStatementService;
+import ua.edu.chdtu.deanoffice.service.document.statement.ExamReportService;
 
 import java.io.File;
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/documents/statements")
-public class SingleGroupStatementController extends DocumentResponseController {
+public class ExamReportController extends DocumentResponseController {
 
-    private SingleGroupStatementService singleGroupStatementService;
+    private ExamReportService examReportService;
 
-    public SingleGroupStatementController(SingleGroupStatementService singleGroupStatementService) {
-        this.singleGroupStatementService = singleGroupStatementService;
+    public ExamReportController(ExamReportService examReportService) {
+        this.examReportService = examReportService;
     }
 
     @GetMapping(path = "/groups/{groupId}/courses/{courseId}/docx")
@@ -28,8 +28,8 @@ public class SingleGroupStatementController extends DocumentResponseController {
             @PathVariable Integer groupId,
             @PathVariable Integer courseId
     ) throws IOException, Docx4JException {
-        File groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, "docx");
-        return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_DOCX);
+        File examReport = examReportService.createGroupStatement(groupId, courseId, "docx");
+        return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
     @GetMapping(path = "/groups/{groupId}/courses/{courseId}/pdf")
@@ -37,7 +37,7 @@ public class SingleGroupStatementController extends DocumentResponseController {
             @PathVariable Integer groupId,
             @PathVariable Integer courseId
     ) throws IOException, Docx4JException {
-        File groupStatement = singleGroupStatementService.createGroupStatement(groupId, courseId, "pdf");
-        return buildDocumentResponseEntity(groupStatement, groupStatement.getName(), MEDIA_TYPE_PDF);
+        File examReport = examReportService.createGroupStatement(groupId, courseId, "pdf");
+        return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);
     }
 }
