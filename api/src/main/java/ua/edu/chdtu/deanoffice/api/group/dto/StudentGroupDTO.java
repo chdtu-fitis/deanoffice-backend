@@ -19,7 +19,7 @@ public class StudentGroupDTO {
     private String name;
     @JsonView(StudentGroupView.AllGroupData.class)
     private boolean active;
-    @JsonView(StudentGroupView.Data.class)
+    @JsonView(StudentGroupView.AllGroupData.class)
     private int studySemesters;
     @JsonView(StudentGroupView.WithStudents.class)
     private List<StudentDegreeFullNameDTO> studentDegrees;
