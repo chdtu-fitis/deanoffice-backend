@@ -27,9 +27,9 @@ public class SpecialityController {
 
     @GetMapping("")
     public ResponseEntity getSpecialities(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyAcyive
+            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
     ) {
-        List<Speciality> specialities = specialityService.getSpecialitybyActive();
+        List<Speciality> specialities = specialityService.getSpecialityByActive(onlyActive);
         return ResponseEntity.ok(parseToSpecialityDTO(specialities));
     }
 
