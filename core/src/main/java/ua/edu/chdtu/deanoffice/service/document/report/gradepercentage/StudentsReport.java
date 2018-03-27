@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.entity.EctsGrade;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,7 @@ public class StudentsReport {
             switch (grade.getGrade()) {
                 case 3: {
                     satisfactory++;
-                    if (GradeUtil.getEctsGrade(grade.getPoints()).equals(EctsGrade.D)) {
+                    if (EctsGrade.getEctsGrade(grade.getPoints()).equals(EctsGrade.D)) {
                         dSum++;
                     } else {
                         eSum++;
@@ -60,7 +59,7 @@ public class StudentsReport {
                 }
                 case 4: {
                     good++;
-                    if (GradeUtil.getEctsGrade(grade.getPoints()).equals(EctsGrade.B)) {
+                    if (EctsGrade.getEctsGrade(grade.getPoints()).equals(EctsGrade.B)) {
                         bSum++;
                     } else {
                         cSum++;
