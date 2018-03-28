@@ -18,6 +18,10 @@ dependencies {
 			"com.zaxxer:HikariCP:${hikariVersion}",
 			"postgresql:postgresql:${postgresqlDriverVersion}"
 	)
+	testCompile(
+	    	"org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
+	)
+    	
 	runtime("org.postgresql:postgresql:${postgresqlVersion}")
 }
 

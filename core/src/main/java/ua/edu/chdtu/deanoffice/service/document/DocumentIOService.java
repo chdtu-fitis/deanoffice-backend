@@ -17,9 +17,16 @@ public class DocumentIOService {
     }
 
     public File saveDocumentToTemp(WordprocessingMLPackage template, String fileName) throws Docx4JException {
-        File documentFile = new File(System.getProperty("java.io.tmpdir") + fileName);
+        String finalFileName = cleanFileName(fileName);
+        File documentFile = new File(System.getProperty("java.io.tmpdir") + finalFileName);
         template.save(documentFile);
         return documentFile;
+    }
+
+    public String cleanFileName(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        String name = fileName.substring(0, fileName.lastIndexOf("."));
+        return name.replaceAll("[\\W]*", "") + extension;
     }
 
 }

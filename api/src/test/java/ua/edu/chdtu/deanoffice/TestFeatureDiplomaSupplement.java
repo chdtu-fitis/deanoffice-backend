@@ -22,7 +22,7 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.TemplateFillService;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.SupplementTemplateFillService;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 
@@ -37,11 +37,12 @@ import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {DiplomaSupplementService.class, StudentService.class, GradeService.class,
         StudentRepository.class, GradeRepository.class, StudentGroupRepository.class, StudentGroupService.class,
-        DocumentIOService.class, TemplateFillService.class, StudentDegreeService.class, StudentDegreeRepository.class})
+        DocumentIOService.class, SupplementTemplateFillService.class, StudentDegreeService.class, StudentDegreeRepository.class})
 @EnableAutoConfiguration
 public class TestFeatureDiplomaSupplement {
 
     private DiplomaSupplementService diplomaSupplementService;
+    private DocumentIOService documentIOService;
 
     @Autowired
     public void setDiplomaSupplementService(DiplomaSupplementService diplomaSupplementService) {
@@ -287,8 +288,8 @@ public class TestFeatureDiplomaSupplement {
 
     @Test
     public void testCleanFileName() {
-        Assert.assertEquals("fileName", diplomaSupplementService.cleanFileName("../file Name"));
-        Assert.assertEquals("fileName123exe", diplomaSupplementService.cleanFileName("file Name123.exe"));
+        Assert.assertEquals("fileName", documentIOService.cleanFileName("../file Name"));
+        Assert.assertEquals("fileName123exe", documentIOService.cleanFileName("file Name123.exe"));
     }
 
     @Test

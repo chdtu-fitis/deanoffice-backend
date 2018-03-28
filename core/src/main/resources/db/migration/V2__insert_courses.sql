@@ -15,26 +15,6 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 SET search_path = public, pg_catalog;
---
--- Data for Name: knowledge_control; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (1, 'іспит', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (2, 'залік', '', false);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (3, 'курсова робота', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (4, 'курсовий проект', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (5, 'диференційований залік', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (6, 'державний іспит', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (7, 'атестація', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (8, 'практика', '', true);
-INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (9, 'практика', '', false);
-
-
---
--- Name: knowledge_control_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('knowledge_control_id_seq', 9, true);
 
 --
 -- Data for Name: course_name; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -1018,6 +998,21 @@ INSERT INTO course_name (id, name, name_eng, abbreviation) VALUES (767, 'Сис�
 INSERT INTO course_name (id, name, name_eng, abbreviation) VALUES (104, 'Виробнича практика', 'Industrial internship', '');
 INSERT INTO course_name (id, name, name_eng, abbreviation) VALUES (440, 'Наукова практика', 'Scientific internship', '');
 INSERT INTO course_name (id, name, name_eng, abbreviation) VALUES (315, 'Магістерська випускна робота', 'Master''s thesis', '');
+
+
+--
+-- Data for Name: knowledge_control; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (1, 'іспит', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (2, 'залік', '', false);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (3, 'курсова робота', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (4, 'курсовий проект', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (5, 'диференційований залік', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (6, 'державний іспит', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (7, 'атестація', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (8, 'практика', '', true);
+INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (9, 'практика', '', false);
 
 
 --
@@ -10707,6 +10702,13 @@ SELECT pg_catalog.setval('course_id_seq', 9669, true);
 --
 
 SELECT pg_catalog.setval('course_name_id_seq', 978, true);
+
+
+--
+-- Name: knowledge_control_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('knowledge_control_id_seq', 9, true);
 
 
 --

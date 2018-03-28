@@ -1,24 +1,24 @@
 package ua.edu.chdtu.deanoffice.entity;
 
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Test;
 
-class EducationDocumentTest {
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+
+public class EducationDocumentTest {
     private void assertGetPreviousDiplomaType(Integer degreeId, EducationDocument expectedEducationDocument) {
         assertEquals(EducationDocument.getPreviousDiplomaType(degreeId), expectedEducationDocument);
     }
 
     @Test
-    void getPreviousDiplomaType() {
+    public void getPreviousDiplomaType() {
         assertGetPreviousDiplomaType(1, EducationDocument.SECONDARY_SCHOOL_CERTIFICATE);
         assertGetPreviousDiplomaType(4, EducationDocument.SECONDARY_SCHOOL_CERTIFICATE);
     }
 
     @Test
-    void isExist() {
+    public void isExist() {
         assertTrue(EducationDocument.isExist(EducationDocument.BACHELOR_DIPLOMA));
     }
 }
