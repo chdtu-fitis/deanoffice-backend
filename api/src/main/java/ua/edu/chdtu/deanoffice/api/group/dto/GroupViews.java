@@ -6,5 +6,4 @@ public class GroupViews {
 
     public interface Course extends Name {
     }
-
 }

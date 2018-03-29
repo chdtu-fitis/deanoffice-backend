@@ -13,9 +13,9 @@ import java.util.Date;
 @Setter
 public class StudentDegreeDTO {
     private Integer studentGroupId;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
     private NamedDTO studentGroup;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
     private Integer id;
     @JsonView(StudentDegreeViews.Simple.class)
     private StudentDTO student;
@@ -43,7 +43,7 @@ public class StudentDegreeDTO {
     private String previousDiplomaNumber;
     @JsonView(StudentDegreeViews.DetailAndDegree.class)
     private Date previousDiplomaDate;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
     private Payment payment;
     @JsonView(StudentDegreeViews.Degree.class)
     private NamedDTO degree;

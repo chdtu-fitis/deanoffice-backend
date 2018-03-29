@@ -2,8 +2,6 @@ package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
@@ -22,35 +20,32 @@ public class DiplomaSupplementService {
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "DiplomaSupplement.docx";
 
-    private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
-
-    private GradeService gradeService;
-    private StudentDegreeService studentDegreeService;
-    private DocumentIOService documentIOService;
-    private TemplateFillService templateFillService;
+    private final GradeService gradeService;
+    private final StudentDegreeService studentDegreeService;
+    private final DocumentIOService documentIOService;
+    private final SupplementTemplateFillService supplementTemplateFillService;
 
     public DiplomaSupplementService(GradeService gradeService,
                                     StudentDegreeService studentDegreeService,
                                     DocumentIOService documentIOService,
-                                    TemplateFillService templateFillService) {
+                                    SupplementTemplateFillService supplementTemplateFillService) {
         this.gradeService = gradeService;
         this.studentDegreeService = studentDegreeService;
         this.documentIOService = documentIOService;
-        this.templateFillService = templateFillService;
+        this.supplementTemplateFillService = supplementTemplateFillService;
     }
 
-    public File formDiplomaSupplementForStudent(Integer studentDegreeId) throws Docx4JException, IOException {
+    public File formDiplomaSupplement(Integer studentDegreeId, String format)
+            throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegreeId);
         StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
+
         String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();
-        fileName = cleanFileName(fileName);
-        WordprocessingMLPackage filledTemplate = templateFillService.fill(TEMPLATE, studentSummary);
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
+        WordprocessingMLPackage filledTemplate = supplementTemplateFillService.fill(TEMPLATE, studentSummary);
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 
-    public String cleanFileName(String fileName) {
-        return fileName.replaceAll("[\\W]*", "");
-    }
+
 }

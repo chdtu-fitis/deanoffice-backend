@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
-import ua.edu.chdtu.deanoffice.util.PersonFullNameComparator;
-import ua.edu.chdtu.deanoffice.util.StudentDegreeFullNameComparator;
+import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
@@ -39,17 +39,15 @@ public class StudentGroup extends NameWithActiveEntity {
     //CURATOR
 
     public List<StudentDegree> getStudentDegrees() {
-        Collections.sort(studentDegrees,new StudentDegreeFullNameComparator());
+        studentDegrees.sort(new StudentDegreeFullNameComparator());
         return studentDegrees;
     }
 
-    public List<Student> getStudents() {
+    public List<Student> getActiveStudents() {
         if (studentDegrees.isEmpty()) {
             return new ArrayList<>();
         } else {
-            List<Student> students = studentDegrees.stream().map(StudentDegree::getStudent).collect(Collectors.toList());
-            Collections.sort(students, new PersonFullNameComparator());
-            return students;
+            return studentDegrees.stream().filter(StudentDegree::isActive).map(StudentDegree::getStudent).collect(Collectors.toList());
         }
     }
 }

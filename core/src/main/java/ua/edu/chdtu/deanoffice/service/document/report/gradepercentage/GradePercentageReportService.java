@@ -18,7 +18,11 @@ import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
@@ -27,11 +31,11 @@ public class GradePercentageReportService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesPercentage.docx";
-    private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
+    private static final Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
-    private GradeService gradeService;
-    private StudentGroupService groupService;
-    private DocumentIOService documentIOService;
+    private final GradeService gradeService;
+    private final StudentGroupService groupService;
+    private final DocumentIOService documentIOService;
 
     public GradePercentageReportService(GradeService gradeService, StudentGroupService groupService, DocumentIOService documentIOService) {
         this.gradeService = gradeService;
@@ -39,7 +43,8 @@ public class GradePercentageReportService {
         this.documentIOService = documentIOService;
     }
 
-    public synchronized File prepareReportForGroup(Integer groupId) throws Docx4JException, IOException {
+    public File prepareReportForGroup(Integer groupId, String format)
+            throws Docx4JException, IOException {
         List<StudentsReport> studentsReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
@@ -48,13 +53,18 @@ public class GradePercentageReportService {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
             return ukrainianCollator.compare(sd1.getStudent().getSurname(), sd2.getStudent().getSurname());
         });
-        studentDegrees.forEach(studentDegree -> {
-            studentsReports.add(new StudentsReport(studentDegree, gradeService.getAllDifferentiatedGradesByStudentDegreeId(studentDegree.getId())));
-        });
-        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, studentsReports), LanguageUtil.transliterate(group.getName()) + ".docx");
+        studentDegrees.forEach(studentDegree ->
+                studentsReports.add(new StudentsReport(studentDegree, gradeService.getAllDifferentiatedGrades(studentDegree.getId())))
+        );
+
+        WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsReports);
+        String fileName = LanguageUtil.transliterate(group.getName());
+        return documentIOService.saveDocument(filledTemplate, fileName, format);
     }
 
-    private WordprocessingMLPackage fillTemplate(String templateName, List<StudentsReport> studentsReports) throws IOException, Docx4JException {
+    private WordprocessingMLPackage fillTemplate(String templateName,
+                                                 List<StudentsReport> studentsReports)
+            throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         fillTableWithGrades(template, studentsReports);
         Map<String, String> commonDict = new HashMap<>();

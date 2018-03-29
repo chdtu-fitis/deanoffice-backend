@@ -24,4 +24,12 @@ public class Grade extends BaseEntity {
     @Column(name = "ects", length = 2)
     @Enumerated(value = EnumType.STRING)
     private EctsGrade ects;
+
+    public String getNationalGradeUkr() {
+        return ects.getNationalGradeUkr(this);
+    }
+
+    public String getNationalGradeEng() {
+        return ects.getNationalGradeEng(this);
+    }
 }
