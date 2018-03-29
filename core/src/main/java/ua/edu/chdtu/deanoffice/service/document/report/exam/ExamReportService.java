@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.statement;
+package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -20,11 +20,11 @@ public class ExamReportService {
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
-    private final StatementTemplateFillService examReportTemplateFillService;
+    private final ExamReportTemplateFillService examReportTemplateFillService;
 
     public ExamReportService(DocumentIOService documentIOService,
                              CourseForGroupService courseForGroupService,
-                             StatementTemplateFillService examReportTemplateFillService) {
+                             ExamReportTemplateFillService examReportTemplateFillService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
         this.examReportTemplateFillService = examReportTemplateFillService;

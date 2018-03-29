@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.service.document.statement.ExamReportService;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportService;
 
 import java.io.File;
 import java.io.IOException;
