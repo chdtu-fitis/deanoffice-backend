@@ -1,0 +1,42 @@
+package ua.edu.chdtu.deanoffice.service.document.importing;
+
+public final class HeaderPatterns {
+    public static final String FIRST_NAME = "%2-firstName%";
+    public static final String LAST_NAME = "%2-lastName%";
+    public static final String MIDDLE_NAME = "%2-middleName%";
+    public static final String FIRST_NAME_EN = "%2-firstNameEn%";
+    public static final String LAST_NAME_EN = "%2-lastNameEn%";
+    public static final String MIDDLE_NAME_EN = "%2-middleNameEn%";
+    public static final String BIRTHDAY = "%2-birthday%";
+    public static final String EDUCATION_ID = "%1-educationId%";
+    public static final String PERSONS_SEX_NAME = "%1-personSexName%";
+    public static final String EDUCATION_DATE_BEGIN = "%1-educationDateBegin%";
+    public static final String EDUCATION_DATE_END = "%1-educationDateEnd%";
+    public static final String FACULTY_NAME = "%1-facultyName%";
+    public static final String QUALIFICATION_GROUP_NAME = "%1-qualificationGroupName%";
+    public static final String BASE_QUALIFICATION_NAME = "%1-baseQualificationName%";
+    public static final String EDUCATION_FORM_NAME = "%1-educationFormName%";
+    public static final String PAYMENT_TYPE_NAME = "1-personEducationPaymentTypeName%";
+    public static final String FULL_SPECIALITY_NAME = "%1-fullSpecialityName%";
+    public static final String FULL_SPECIALIZATION_NAME = "%1-fullSpecializationName%";
+    public static final String PROGRAM_NAME = "%1-programName%";
+    public static final String PROGRAM_NAME_EN = "%1-programNameEn%";
+    public static final String PERSON_SEX_ID = "%2-id_PersonSex%";
+    public static final String COUNTRY_ID = "%2-id_Country%";
+    public static final String IPN_NUMBER = "%2-ipnNumber%";
+    public static final String PERSON_DOCUMENT_TYPE_ID = "%2-id_PersonDocumentType%";
+    public static final String DOCUMENT_SERIES = "%2-documentSeries%";
+    public static final String DOCUMENT_NUMBERS = "%2-documentNumbers%";
+    public static final String DOCUMENT_DATE_GET = "%2-documentDateGet%";
+    public static final String DOCUMENT_ISSUED = "%2-documentIssued%";
+    public static final String EDU_DOC_INFO = "%3-eduDocInfo%";
+    public static final String UNIVERSITY_FROM = "%3-universityFrom%";
+    public static final String REFILL_INFO = "%3-refillInfo%";
+    public static final String EDU_FROM_INFO = "%3-eduFromInfo%";
+    public static final String PERSON_DOCUMENT_TYPE = "%4-idPersonDocumentType%";
+    public static final String PERSON_DOCUMENT_TYPE_NAME = "%4-personDocumentTypeName%";
+    public static final String DOCUMENT_SERIES_2 = "%4-documentSeries%";
+    public static final String DOCUMENT_NUMBERS_2 = "%4-documentNumbers%";
+    public static final String DOCUMENT_DATE_GET_2 = "%4-documentDateGet%";
+    public static final String DOCUMENT_ISSUED_2 = "%4-documentIssued%";
+}
