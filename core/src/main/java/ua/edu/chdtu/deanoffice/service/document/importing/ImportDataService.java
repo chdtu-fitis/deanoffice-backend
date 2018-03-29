@@ -80,6 +80,10 @@ public class ImportDataService {
 
                 }
 
+                if (r.getR() == 1) {
+                    continue;
+                }
+
                 importedData.add(sd.getStudentData());
                 sd.cleanStudentData();
             }
