@@ -7,6 +7,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
@@ -18,6 +19,7 @@ import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.document.importing.ImportDataService;
 
 import java.net.URI;
 import java.util.List;
@@ -36,6 +38,8 @@ public class StudentController {
     DegreeService degreeService;
     @Autowired
     StudentGroupService studentGroupService;
+    @Autowired
+    ImportDataService importDataService;
 
     @JsonView(StudentDegreeViews.Simple.class)
     @GetMapping("/degrees")
@@ -128,6 +132,27 @@ public class StudentController {
         URI location = getNewResourceLocation(studentDegree.getId());
         return ResponseEntity.created(location).body(new ModelMapper().map(studentDegree, StudentDegreeDTO.class));
     }
+
+    @PostMapping("/import")
+    public ResponseEntity importStudents(@RequestParam("file") MultipartFile uploadfile) {
+
+        if (uploadfile.isEmpty()) {
+            return ResponseEntity.badRequest().body("please select a document!");
+        }
+
+        List<Object> importedData;
+
+        try {
+            importedData = importDataService.getStudentsFromStream(uploadfile.getInputStream());
+
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception);
+        }
+
+        return ResponseEntity.ok(importedData);
+
+    }
+
 
     private Student createStudent(StudentDTO newStudentDTO) {
         ModelMapper modelMapper = new ModelMapper();
