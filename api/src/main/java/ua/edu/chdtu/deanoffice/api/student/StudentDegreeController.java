@@ -164,10 +164,12 @@ public class StudentDegreeController {
             modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
             Type type = new TypeToken<List<StudentDegree>>() {}.getType();
             List<StudentDegree> studentDegrees = modelMapper.map(studentDegreesDTO, type);
+            Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
                 Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
+                studentDegree.setStudent(student);
             });
 
             studentDegreeService.update(studentDegrees);
