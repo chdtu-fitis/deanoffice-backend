@@ -75,4 +75,8 @@ public class GradeService {
                 .stream().map(BaseEntity::getId).collect(Collectors.toList());
         return new ArrayList<>(getGrades(student, courseIds, knowledgeControlTypes));
     }
+
+    public List<Grade> getGradesForStudents(List<Integer> studentsIds, List<Integer> courseIds) {
+        return gradeRepository.getGradesByCourseAndBySemeseterForStudents(studentsIds, courseIds);
+    }
 }
