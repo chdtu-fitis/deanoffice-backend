@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.report.gradepercentage.GradePercentageReportService;
 
 import java.io.File;
@@ -26,14 +27,14 @@ public class PercentageReportController extends DocumentResponseController {
     @GetMapping(path = "/groups/{groupId}/docx")
     public ResponseEntity<Resource> generateDocxForGroup(@PathVariable Integer groupId)
             throws IOException, Docx4JException {
-        File groupReport = gradePercentageReportService.prepareReportForGroup(groupId, "docx");
+        File groupReport = gradePercentageReportService.prepareReportForGroup(groupId, FileFormatEnum.DOCX);
         return buildDocumentResponseEntity(groupReport, groupReport.getName(), MEDIA_TYPE_DOCX);
     }
 
     @GetMapping(path = "/groups/{groupId}/pdf")
     public ResponseEntity<Resource> generatePdfForGroup(@PathVariable Integer groupId)
             throws IOException, Docx4JException {
-        File groupReport = gradePercentageReportService.prepareReportForGroup(groupId, "pdf");
+        File groupReport = gradePercentageReportService.prepareReportForGroup(groupId, FileFormatEnum.PDF);
         return buildDocumentResponseEntity(groupReport, groupReport.getName(), MEDIA_TYPE_PDF);
     }
 }
