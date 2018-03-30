@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.statement;
+package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
@@ -20,17 +21,17 @@ public class ExamReportService {
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
-    private final StatementTemplateFillService examReportTemplateFillService;
+    private final ExamReportTemplateFillService examReportTemplateFillService;
 
     public ExamReportService(DocumentIOService documentIOService,
                              CourseForGroupService courseForGroupService,
-                             StatementTemplateFillService examReportTemplateFillService) {
+                             ExamReportTemplateFillService examReportTemplateFillService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
         this.examReportTemplateFillService = examReportTemplateFillService;
     }
 
-    public File createGroupStatement(Integer groupId, Integer courseId, String format)
+    public File createGroupStatement(Integer groupId, Integer courseId, FileFormatEnum format)
             throws IOException, Docx4JException {
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseId);
         StudentGroup group = courseForGroup.getStudentGroup();
@@ -38,6 +39,6 @@ public class ExamReportService {
 
         String fileName = LanguageUtil.transliterate(group.getName() + "_" + course.getCourseName().getNameEng());
         WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, courseForGroup);
-        return documentIOService.saveDocument(filledTemplate, fileName, format);
+        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
     }
 }
