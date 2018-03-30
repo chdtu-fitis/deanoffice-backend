@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.statement;
+package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -23,14 +23,14 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitials;
 
 @Service
-class StatementTemplateFillService {
+class ExamReportTemplateFillService {
 
     private static final int STARTING_ROW_INDEX = 7;
 
     private final DocumentIOService documentIOService;
-    private static final Logger log = LoggerFactory.getLogger(StatementTemplateFillService.class);
+    private static final Logger log = LoggerFactory.getLogger(ExamReportTemplateFillService.class);
 
-    public StatementTemplateFillService(DocumentIOService documentIOService) {
+    public ExamReportTemplateFillService(DocumentIOService documentIOService) {
         this.documentIOService = documentIOService;
     }
 
