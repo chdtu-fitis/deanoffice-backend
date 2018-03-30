@@ -28,7 +28,7 @@ public class GroupController {
 
     @JsonView(StudentGroupView.WithStudents.class)
     @GetMapping("/groups/graduates")
-    public ResponseEntity getGraduateGroups(@RequestParam Integer degreeId) {
+    public ResponseEntity getGraduateGroups(@RequestParam int degreeId) {
         List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
         return ResponseEntity.ok(parseToStudentGroupDTO(groups));
     }
@@ -37,13 +37,6 @@ public class GroupController {
         ModelMapper modelMapper = new ModelMapper();
         Type listType = new TypeToken<List<StudentGroupDTO>>() {}.getType();
         return modelMapper.map(studentGroupList, listType);
-    }
-
-    @GetMapping("/groups")
-    @JsonView(StudentGroupView.GroupData.class)
-    public ResponseEntity getGroups() {
-        List<StudentGroup> studentGroups = studentGroupService.getGroups();
-        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 
     @GetMapping("/groups/filter")
@@ -58,8 +51,17 @@ public class GroupController {
 
     @GetMapping("courses/{courseId}/groups")
     @JsonView(StudentGroupView.Basic.class)
-    public ResponseEntity getGroupsByCourse(@PathVariable String courseId) {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(Integer.parseInt(courseId));
+    public ResponseEntity getGroupsByCourse(@PathVariable int courseId) {
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId);
+        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+    }
+
+    @GetMapping("/groups")
+    @JsonView(StudentGroupView.AllGroupData.class)
+    public ResponseEntity getActiveGroups(
+            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
+    ) {
+        List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 }

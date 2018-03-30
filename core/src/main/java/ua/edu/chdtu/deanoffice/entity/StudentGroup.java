@@ -32,11 +32,10 @@ public class StudentGroup extends NameWithActiveEntity {
     @Column(name = "study_years", nullable = false)
     private BigDecimal studyYears;
     @Column(name = "begin_years", nullable = false)
-    private int beginYears;//курс, з якого починає навчатись група
+    private int beginYears;
     @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Where(clause = "active = true")
     private List<StudentDegree> studentDegrees = new ArrayList<>();
-    //CURATOR
 
     public List<StudentDegree> getStudentDegrees() {
         studentDegrees.sort(new StudentDegreeFullNameComparator());
