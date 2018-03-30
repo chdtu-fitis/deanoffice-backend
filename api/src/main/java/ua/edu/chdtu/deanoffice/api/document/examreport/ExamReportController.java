@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.service.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportService;
 
 import java.io.File;
@@ -28,7 +29,7 @@ public class ExamReportController extends DocumentResponseController {
             @PathVariable Integer groupId,
             @PathVariable Integer courseId
     ) throws IOException, Docx4JException {
-        File examReport = examReportService.createGroupStatement(groupId, courseId, "docx");
+        File examReport = examReportService.createGroupStatement(groupId, courseId, FileFormatEnum.DOCX);
         return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
@@ -37,7 +38,7 @@ public class ExamReportController extends DocumentResponseController {
             @PathVariable Integer groupId,
             @PathVariable Integer courseId
     ) throws IOException, Docx4JException {
-        File examReport = examReportService.createGroupStatement(groupId, courseId, "pdf");
+        File examReport = examReportService.createGroupStatement(groupId, courseId, FileFormatEnum.PDF);
         return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);
     }
 }
