@@ -6,8 +6,11 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.general.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
@@ -61,5 +64,17 @@ public class GroupController {
     public ResponseEntity getGroupsByCourse(@PathVariable String courseId) {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(Integer.parseInt(courseId));
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/groups/{id}/students")
+    public ResponseEntity<List<PersonFullNameDTO>> getGroupStudents(@PathVariable Integer id) {
+        List<Student> students = studentGroupService.getGroupStudents(id);
+        return ResponseEntity.ok(parseToPersonFullNameDTO(students));
+    }
+
+    private List<PersonFullNameDTO> parseToPersonFullNameDTO(List<Student> students) {
+        ModelMapper modelMapper = new ModelMapper();
+        Type listType = new TypeToken<List<PersonFullNameDTO>>() {}.getType();
+        return modelMapper.map(students, listType);
     }
 }
