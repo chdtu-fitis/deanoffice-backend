@@ -11,6 +11,7 @@
       <module name="chdtu-dean-office_test" target="1.8" />
       <module name="core_main" target="1.8" />
       <module name="core_test" target="1.8" />
+      <module name="deanoffice-backend-core_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
