@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.dto.*;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
@@ -31,21 +33,22 @@ public class StudentController {
     private final StudentService studentService;
     private final StudentGroupService studentGroupService;
     private final OrderReasonService orderReasonService;
+    private final ImportDataService importDataService;
 
     @Autowired
-    StudentGroupService studentGroupService;
-    @Autowired
-    ImportDataService importDataService;
     public StudentController(
             StudentDegreeService studentDegreeService,
             StudentService studentService,
             StudentGroupService studentGroupService,
-            OrderReasonService orderReasonService
+            OrderReasonService orderReasonService,
+            ImportDataService importDataService
+
     ) {
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
         this.orderReasonService = orderReasonService;
+        this.importDataService = importDataService;
     }
 
     @JsonView(StudentDegreeViews.Simple.class)
