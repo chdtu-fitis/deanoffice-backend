@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,8 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeEng;
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeUkr;
 
 @Service
 public class SupplementTemplateFillService {
@@ -40,9 +39,9 @@ public class SupplementTemplateFillService {
         result.put("Credits", formatCredits(grade.getCourse().getCredits()));
         result.put("Hours", formatHours(grade.getCourse().getHours()));
         result.put("LocalGrade", String.format("%d", grade.getPoints()));
-        result.put("NationalGradeUkr", getNationalGradeUkr(grade));
-        result.put("NationalGradeEng", getNationalGradeEng(grade));
-        result.put("ECTSGrade", grade.getEcts().toString());
+        result.put("NationalGradeUkr", grade.getNationalGradeUkr());
+        result.put("NationalGradeEng", grade.getNationalGradeEng());
+        result.put("ECTSGrade", GradeUtil.getEctsGrade(grade));
         result.put("CourseNameUkr", grade.getCourse().getCourseName().getName());
         result.put("CourseNameEng", grade.getCourse().getCourseName().getNameEng());
         return result;

@@ -53,9 +53,8 @@ public class TemplateUtil {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
                 log.warn("{} is empty", text.getValue());
-            } else {
-                text.setValue(replacement);
             }
+            text.setValue(getValueSafely(replacement));
         }
     }
 
