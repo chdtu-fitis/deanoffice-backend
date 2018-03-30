@@ -7,10 +7,7 @@ import org.docx4j.openpackaging.parts.JaxbXmlPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
-import org.docx4j.wml.ContentAccessor;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Text;
-import org.docx4j.wml.Tr;
+import org.docx4j.wml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -144,6 +141,15 @@ public class TemplateUtil {
     public static void replaceInRow(Tr tableRow, Map<String, String> replacements) {
         List<Text> textElements = getTextsFromContentAccessor(tableRow);
         replaceValuesInTextPlaceholders(textElements, replacements);
+    }
+
+//    public static void addCellToRow(Tc cell, Tr templateRow) {
+//        templateRow.getContent().add(cell);
+//    }
+
+    public static void cloneLastCellInRow(Tr templateRow){
+        List<Object> cells = templateRow.getContent();
+        templateRow.getContent().add(cells.get(cells.size()-1));
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {

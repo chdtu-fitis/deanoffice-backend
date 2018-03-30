@@ -3,7 +3,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/deanoffice
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: admin
+    password: root
 #    connection-timeout: 60000
 #    maximum-pool-size: 30
   jpa:

@@ -13,7 +13,7 @@ import javax.persistence.*;
         @UniqueConstraint(columnNames = {"course_id", "student_id"})
 })
 public class Grade extends BaseEntity {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private Course course;
     @ManyToOne
     private Student student;
