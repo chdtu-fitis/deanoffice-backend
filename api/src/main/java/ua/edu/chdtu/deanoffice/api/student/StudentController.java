@@ -17,9 +17,11 @@ import ua.edu.chdtu.deanoffice.service.StudentService;
 
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -261,22 +263,12 @@ public class StudentController {
 
     @JsonView(StudentDegreeViews.Expel.class)
     @PostMapping("/degrees/expels")
-    public ResponseEntity expelStudentDegree(@RequestBody List<StudentExpelDTO> studentExpelDTOs) {
+    public ResponseEntity expelStudentDegree(@RequestBody StudentExpelDTO studentExpelDTO) {
         List<StudentExpelDTO> studentExpelDTOList;
         try {
-            ModelMapper modelMapper = new ModelMapper();
-            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-            Type type = new TypeToken<List<StudentExpel>>() {}.getType();
-            List<StudentExpel> studentExpels = modelMapper.map(studentExpelDTOs, type);
-
-            studentExpels.forEach(studentExpel -> {
-                StudentExpelDTO studentExpelDTO = studentExpelDTOs.get(studentExpels.indexOf(studentExpel));
-                studentExpel.setStudentDegree(studentDegreeService.getById(studentExpelDTO.getStudentDegreeId()));
-                studentExpel.setReason(orderReasonService.getById(studentExpelDTO.getReasonId()));
-            });
-
-            List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(studentExpels);
-            studentExpelDTOList = new ModelMapper().map(studentExpelList, new TypeToken<List<StudentExpelDTO>>() {}.getType());
+            List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(createStudentExpels(studentExpelDTO));
+            studentExpelDTOList = new ModelMapper()
+                    .map(studentExpelList, new TypeToken<List<StudentExpelDTO>>() {}.getType());
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -284,5 +276,27 @@ public class StudentController {
         Object[] ids = studentExpelDTOList.stream().map(StudentExpelDTO::getId).toArray();
         URI location = getNewResourceLocation(ids);
         return ResponseEntity.created(location).body(studentExpelDTOList);
+    }
+
+    private List<StudentExpel> createStudentExpels(StudentExpelDTO studentExpelDTO) {
+        List<Integer> studentDegreeIds = asList(studentExpelDTO.getStudentDegreeIds());
+        OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
+        return studentDegreeIds.stream()
+                .map(id -> createStudentExpel(studentExpelDTO, orderReason, id))
+                .collect(Collectors.toList());
+    }
+
+    private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, OrderReason orderReason, int studentDegreeId) {
+        StudentExpel studentExpel = parseToStudentExpel(studentExpelDTO);
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        studentExpel.setStudentDegree(studentDegree);
+        studentExpel.setReason(orderReason);
+        return studentExpel;
+    }
+
+    private StudentExpel parseToStudentExpel(StudentExpelDTO studentExpelDTO) {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        return modelMapper.map(studentExpelDTO, StudentExpel.class);
     }
 }

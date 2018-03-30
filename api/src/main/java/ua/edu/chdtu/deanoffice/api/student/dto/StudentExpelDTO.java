@@ -10,7 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentExpelDTO {
-    private Integer studentDegreeId;
+    private Integer[] studentDegreeIds;
     private Integer reasonId;
     @JsonView(StudentDegreeViews.Expel.class)
     private Integer id;
