@@ -13,38 +13,38 @@ import java.util.Date;
 @Setter
 public class StudentDegreeDTO {
     private Integer studentGroupId;
-    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
+    @JsonView(StudentView.SimpleAndDegrees.class)
     private NamedDTO studentGroup;
-    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
+    @JsonView(StudentView.SimpleAndDegrees.class)
     private Integer id;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Simple.class)
     private StudentDTO student;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String recordBookNumber;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String diplomaNumber;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private Date diplomaDate;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String supplementNumber;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private Date supplementDate;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String thesisName;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String thesisNameEng;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String protocolNumber;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private Date protocolDate;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private EducationDocument previousDiplomaType;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String previousDiplomaNumber;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private Date previousDiplomaDate;
-    @JsonView(StudentDegreeViews.SimpleAndDegrees.class)
+    @JsonView(StudentView.SimpleAndDegrees.class)
     private Payment payment;
-    @JsonView(StudentDegreeViews.Degree.class)
+    @JsonView(StudentView.Degree.class)
     private NamedDTO degree;
 }
