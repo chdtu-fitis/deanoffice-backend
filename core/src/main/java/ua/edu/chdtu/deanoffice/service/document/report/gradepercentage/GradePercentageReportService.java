@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -43,7 +44,7 @@ public class GradePercentageReportService {
         this.documentIOService = documentIOService;
     }
 
-    public File prepareReportForGroup(Integer groupId, String format)
+    public File prepareReportForGroup(Integer groupId, FileFormatEnum format)
             throws Docx4JException, IOException {
         List<StudentsReport> studentsReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
@@ -59,7 +60,7 @@ public class GradePercentageReportService {
 
         WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsReports);
         String fileName = LanguageUtil.transliterate(group.getName());
-        return documentIOService.saveDocument(filledTemplate, fileName, format);
+        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
     }
 
     private WordprocessingMLPackage fillTemplate(String templateName,
