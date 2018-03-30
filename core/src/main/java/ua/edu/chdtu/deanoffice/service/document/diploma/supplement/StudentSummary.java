@@ -4,7 +4,14 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.EctsGrade;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
 import java.text.Collator;
@@ -12,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.*;
 
 @Getter
 public class StudentSummary {
@@ -74,7 +79,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (grade.getGrade() == 0 && grade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT) {
-                    grade.setGrade(getGradeFromPoints(grade.getPoints()));
+                    grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
                 }
             });
         });
@@ -84,7 +89,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (grade.getPoints() == 0) {
-                    grade.setPoints(getAveragePointsFromGrade(grade));
+                    grade.setPoints(GradeUtil.getAveragePointsFromGrade(grade));
                 }
             });
         });
@@ -187,7 +192,7 @@ public class StudentSummary {
         resultingGrade.setCourse(newCourse);
 
         if (!resultingGrade.getCourse().getKnowledgeControl().isHasGrade()) {
-            int[] pointsAndGrade = adjustAverageGradeAndPoints(
+            int[] pointsAndGrade = GradeUtil.adjustAverageGradeAndPoints(
                     gradesSum / grades.size(),
                     pointsSum / grades.size());
             resultingGrade.setPoints(pointsAndGrade[1]);
@@ -254,7 +259,7 @@ public class StudentSummary {
         return grade.getNationalGradeEng();
     }
 
-    public EctsGrade getTotalEcts() {
+    EctsGrade getTotalEcts() {
         return EctsGrade.getEctsGrade((int) Math.round(getTotalGrade()));
     }
 }
