@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.general.dto;
+package ua.edu.chdtu.deanoffice.api.general;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
