@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
 import java.io.File;
@@ -26,14 +27,14 @@ public class DiplomaSupplementController extends DocumentResponseController {
     @GetMapping(path = "/degrees/{studentDegreeId}/docx")
     public ResponseEntity<Resource> generateDocxForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {
-        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, "docx");
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.DOCX);
         return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_DOCX);
     }
 
     @GetMapping(path = "/degrees/{studentDegreeId}/pdf")
     public ResponseEntity<Resource> generatePdfForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {
-        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, "pdf");
+        File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.PDF);
         return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_PDF);
     }
 }

@@ -30,7 +30,7 @@ public class CourseController {
     }
 
     @GetMapping("/courses")
-    public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") Integer semester) {
+    public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") int semester) {
         List<Course> courses = courseService.getCoursesBySemester(semester);
         return ResponseEntity.ok(parseToCourseDTO(courses));
     }
@@ -42,8 +42,8 @@ public class CourseController {
 
     @GetMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Basic.class)
-    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable String groupId, @RequestParam Integer semester) {
-        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(Integer.parseInt(groupId), semester);
+    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
+        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         return ResponseEntity.ok(parseToCourseForGroupDTO(coursesForGroup));
     }
 
@@ -55,15 +55,15 @@ public class CourseController {
 
     @GetMapping("/groups/{groupId}/courses/all")
     @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity getCourses(@PathVariable String groupId) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroup(Integer.parseInt(groupId));
+    public ResponseEntity getCourses(@PathVariable int groupId) {
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroup(groupId);
         return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
     }
 
     @GetMapping("/specialization/{id}/courses")
     @JsonView(CourseForGroupView.Basic.class)
-    public ResponseEntity getCoursesBySpecialization(@PathVariable String id, @RequestParam("semester") String semester) {
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(Integer.parseInt(id), Integer.parseInt(semester));
+    public ResponseEntity getCoursesBySpecialization(@PathVariable int id, @RequestParam("semester") int semester) {
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(id, semester);
         return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
     }
 }
