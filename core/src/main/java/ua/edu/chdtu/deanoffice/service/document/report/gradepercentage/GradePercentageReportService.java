@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
 public class GradePercentageReportService {
@@ -66,26 +66,26 @@ public class GradePercentageReportService {
         fillTableWithGrades(template, studentsReports);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.put("GroupName", studentsReports.get(0).getStudentDegree().getStudentGroup().getName());
-        replaceTextPlaceholdersInTemplate(template, commonDict);
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentsReport> studentsReports) {
-        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
+        List<Object> tables = TemplateUtil.getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
         String tableWithGradesKey = "№";
-        Tbl tempTable = findTable(tables, tableWithGradesKey);
+        Tbl tempTable = TemplateUtil.findTable(tables, tableWithGradesKey);
         if (tempTable == null) {
             log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
-        List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
 
         Tr templateRow = (Tr) gradeTableRows.get(1);
         int rowToAddIndex = 1;
         for (StudentsReport report : studentsReports) {
             Map<String, String> replacements = report.getDictionary();
             replacements.put("Num", String.format("%2d", studentsReports.indexOf(report) + 1));
-            addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+            TemplateUtil.addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
             rowToAddIndex++;
         }
         tempTable.getContent().remove(templateRow);
