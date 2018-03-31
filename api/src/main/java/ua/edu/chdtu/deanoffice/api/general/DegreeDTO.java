@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.general;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
+import ua.edu.chdtu.deanoffice.api.general.dto.GeneralView;
 
 @Getter
 @Setter
