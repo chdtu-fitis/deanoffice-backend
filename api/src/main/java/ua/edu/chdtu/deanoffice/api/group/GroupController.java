@@ -39,15 +39,9 @@ public class GroupController {
 
     private List<StudentGroupDTO> parseToStudentGroupDTO(List<StudentGroup> studentGroupList) {
         ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudentGroupDTO>>() {}.getType();
+        Type listType = new TypeToken<List<StudentGroupDTO>>() {
+        }.getType();
         return modelMapper.map(studentGroupList, listType);
-    }
-
-    @GetMapping("/groups")
-    @JsonView(StudentGroupView.GroupData.class)
-    public ResponseEntity getGroups() {
-        List<StudentGroup> studentGroups = studentGroupService.getGroups();
-        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 
     @GetMapping("/groups/filter")
@@ -64,6 +58,15 @@ public class GroupController {
     @JsonView(StudentGroupView.Basic.class)
     public ResponseEntity getGroupsByCourse(@PathVariable int courseId) {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId);
+        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+    }
+
+    @GetMapping("/groups")
+    @JsonView(StudentGroupView.AllGroupData.class)
+    public ResponseEntity getActiveGroups(
+            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
+    ) {
+        List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
         return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
     }
 }
