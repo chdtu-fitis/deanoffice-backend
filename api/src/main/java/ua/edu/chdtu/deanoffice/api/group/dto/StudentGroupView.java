@@ -1,11 +1,10 @@
 package ua.edu.chdtu.deanoffice.api.group.dto;
 
-import ua.edu.chdtu.deanoffice.api.general.GeneralView;
-import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
+import ua.edu.chdtu.deanoffice.api.general.dto.GeneralView;
 
 public class StudentGroupView {
     public interface Basic {}
 
     public interface WithStudents extends Basic, GeneralView.PersonFullName {}
-    public interface AllGroupData extends Basic, SpecializationView.Basic{}
+    public interface GroupData extends Basic {}
 }
