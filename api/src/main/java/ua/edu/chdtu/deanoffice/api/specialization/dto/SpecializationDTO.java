@@ -18,9 +18,9 @@ public class SpecializationDTO {
     private String name;
     private String nameEng;
     private boolean active;
-    @JsonView(SpecializationView.Basic.class)
+    @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private SpecialityDTO speciality;
-    @JsonView(SpecializationView.Basic.class)
+    @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private DegreeDTO degree;
     private DepartmentDTO department;
     private String qualification;
