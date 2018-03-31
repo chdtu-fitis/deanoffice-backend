@@ -10,7 +10,7 @@ import ua.edu.chdtu.deanoffice.service.DegreeService;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.Util.parseToNanedDTO;
+import static ua.edu.chdtu.deanoffice.api.general.Util.parseToNamedDTO;
 
 @RestController
 @RequestMapping("/degrees")
@@ -25,6 +25,6 @@ public class DegreeController {
     @GetMapping("")
     public ResponseEntity getDegrees() {
         List<Degree> degrees = degreeService.getDegrees();
-        return ResponseEntity.ok(parseToNanedDTO(degrees));
+        return ResponseEntity.ok(parseToNamedDTO(degrees));
     }
 }

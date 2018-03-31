@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
-
 public class Util {
     public static URI getNewResourceLocation(Integer id) {
         return fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
@@ -23,8 +22,7 @@ public class Util {
         return fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
     }
 
-
-    static List<NamedDTO> parseToNanedDTO(List data) {
+    static List<NamedDTO> parseToNamedDTO(List data) {
         Type listType = new TypeToken<List<NamedDTO>>() {}.getType();
         return new ModelMapper().map(data, listType);
     }
