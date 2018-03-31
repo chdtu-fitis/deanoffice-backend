@@ -22,7 +22,7 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.TemplateFillService;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.SupplementTemplateFillService;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.webstarter.Application;
 
@@ -37,15 +37,21 @@ import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {DiplomaSupplementService.class, StudentService.class, GradeService.class,
         StudentRepository.class, GradeRepository.class, StudentGroupRepository.class, StudentGroupService.class,
-        DocumentIOService.class, TemplateFillService.class, StudentDegreeService.class, StudentDegreeRepository.class})
+        DocumentIOService.class, SupplementTemplateFillService.class, StudentDegreeService.class, StudentDegreeRepository.class})
 @EnableAutoConfiguration
 public class TestFeatureDiplomaSupplement {
 
     private DiplomaSupplementService diplomaSupplementService;
+    private DocumentIOService documentIOService;
 
     @Autowired
     public void setDiplomaSupplementService(DiplomaSupplementService diplomaSupplementService) {
         this.diplomaSupplementService = diplomaSupplementService;
+    }
+
+    @Autowired
+    public void setDocumentIOService(DocumentIOService documentIOService) {
+        this.documentIOService = documentIOService;
     }
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
@@ -215,7 +221,7 @@ public class TestFeatureDiplomaSupplement {
         grade.setPoints(points);
         grade.setCourse(course);
         grade.setGrade(GradeUtil.getGradeFromPoints(points));
-        grade.setEcts(GradeUtil.getEctsGrade(points));
+        grade.setEcts(EctsGrade.getEctsGrade(points));
         return grade;
     }
 
@@ -241,10 +247,10 @@ public class TestFeatureDiplomaSupplement {
 
     @Test
     public void testGetGradeFromPoints() {
-        Assert.assertEquals(EctsGrade.A, GradeUtil.getEctsGrade(95));
-        Assert.assertEquals(EctsGrade.B, GradeUtil.getEctsGrade(82));
-        Assert.assertEquals(EctsGrade.D, GradeUtil.getEctsGrade(67));
-        Assert.assertEquals(EctsGrade.C, GradeUtil.getEctsGrade(78));
+        Assert.assertEquals(EctsGrade.A, EctsGrade.getEctsGrade(95));
+        Assert.assertEquals(EctsGrade.B, EctsGrade.getEctsGrade(82));
+        Assert.assertEquals(EctsGrade.D, EctsGrade.getEctsGrade(67));
+        Assert.assertEquals(EctsGrade.C, EctsGrade.getEctsGrade(78));
     }
 
     private static Course createCourse(CourseName courseName, boolean knowledgeControlHasGrade) {
@@ -256,39 +262,39 @@ public class TestFeatureDiplomaSupplement {
     @Test
     public void testGradeSetting() {
         Grade grade1 = createGrade(createCourse(true), 90);
-        Assert.assertEquals("Відмінно", GradeUtil.getNationalGradeUkr(grade1));
-        Assert.assertEquals("Excellent", GradeUtil.getNationalGradeEng(grade1));
+        Assert.assertEquals("Відмінно", grade1.getNationalGradeUkr());
+        Assert.assertEquals("Excellent", grade1.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.A, grade1.getEcts());
         Assert.assertEquals(5, grade1.getGrade());
 
         Grade grade2 = createGrade(createCourse(true), 76);
-        Assert.assertEquals("Добре", GradeUtil.getNationalGradeUkr(grade2));
-        Assert.assertEquals("Good", GradeUtil.getNationalGradeEng(grade2));
+        Assert.assertEquals("Добре", grade2.getNationalGradeUkr());
+        Assert.assertEquals("Good", grade2.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.C, grade2.getEcts());
         Assert.assertEquals(4, grade2.getGrade());
 
         Grade grade3 = createGrade(createCourse(true), 65);
-        Assert.assertEquals("Задовільно", GradeUtil.getNationalGradeUkr(grade3));
-        Assert.assertEquals("Satisfactory", GradeUtil.getNationalGradeEng(grade3));
+        Assert.assertEquals("Задовільно", grade3.getNationalGradeUkr());
+        Assert.assertEquals("Satisfactory", grade3.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.D, grade3.getEcts());
         Assert.assertEquals(3, grade3.getGrade());
 
         Grade grade4 = createGrade(createCourse(false), 90);
-        Assert.assertEquals("Зараховано", GradeUtil.getNationalGradeUkr(grade4));
-        Assert.assertEquals("Passed", GradeUtil.getNationalGradeEng(grade4));
+        Assert.assertEquals("Зараховано", grade4.getNationalGradeUkr());
+        Assert.assertEquals("Passed", grade4.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.A, grade4.getEcts());
         Assert.assertEquals(5, grade4.getGrade());
 
         Grade grade5 = createGrade(createCourse(false), 59);
-        Assert.assertEquals("Не зараховано", GradeUtil.getNationalGradeUkr(grade5));
-        Assert.assertEquals("Fail", GradeUtil.getNationalGradeEng(grade5));
+        Assert.assertEquals("Не зараховано", grade5.getNationalGradeUkr());
+        Assert.assertEquals("Fail", grade5.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.FX, grade5.getEcts());
     }
 
     @Test
     public void testCleanFileName() {
-        Assert.assertEquals("fileName", diplomaSupplementService.cleanFileName("../file Name"));
-        Assert.assertEquals("fileName123exe", diplomaSupplementService.cleanFileName("file Name123.exe"));
+        Assert.assertEquals("fileName", documentIOService.cleanFileName("../file Name"));
+        Assert.assertEquals("fileName123exe", documentIOService.cleanFileName("file Name123.exe"));
     }
 
     @Test

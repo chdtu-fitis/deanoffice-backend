@@ -1,31 +1,8 @@
 package ua.edu.chdtu.deanoffice.util;
 
-import ua.edu.chdtu.deanoffice.entity.EctsGrade;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
 public class GradeUtil {
-    public static EctsGrade getEctsGrade(int points) {
-        if (isBetween(points, 90, 100)) {
-            return EctsGrade.A;
-        }
-        if (isBetween(points, 82, 89)) {
-            return EctsGrade.B;
-        }
-        if (isBetween(points, 74, 81)) {
-            return EctsGrade.C;
-        }
-        if (isBetween(points, 64, 73)) {
-            return EctsGrade.D;
-        }
-        if (isBetween(points, 60, 63)) {
-            return EctsGrade.E;
-        }
-        if (isBetween(points, 35, 59)) {
-            return EctsGrade.FX;
-        } else {
-            return EctsGrade.F;
-        }
-    }
 
     public static int getGradeFromPoints(int points) {
         if (isBetween(points, 90, 100)) {
@@ -105,51 +82,13 @@ public class GradeUtil {
         return result;
     }
 
-    public static String getNationalGradeUkr(Grade grade) {
-        if (grade.getCourse().getKnowledgeControl().isHasGrade()) {
-            switch (grade.getEcts()) {
-                case A:
-                    return "Відмінно";
-                case B:
-                    return "Добре";
-                case C:
-                    return "Добре";
-                case D:
-                    return "Задовільно";
-                case E:
-                    return "Задовільно";
-                case F:
-                    return "Незадовільно";
-                default:
-                    return "";
-            }
-        } else if (grade.getEcts().equals(EctsGrade.F) || grade.getEcts().equals(EctsGrade.FX)) {
-            return "Не зараховано";
+    public static String getEctsGrade(Grade grade){
+        if (grade.getCourse().getKnowledgeControl().isHasGrade()){
+            return grade.getEcts().toString();
+        } else if (grade.getPoints()>=60){
+            return "P";
+        } else {
+            return "F";
         }
-        return "Зараховано";
-    }
-
-    public static String getNationalGradeEng(Grade grade) {
-        if (grade.getCourse().getKnowledgeControl().isHasGrade()) {
-            switch (grade.getEcts()) {
-                case A:
-                    return "Excellent";
-                case B:
-                    return "Good";
-                case C:
-                    return "Good";
-                case D:
-                    return "Satisfactory";
-                case E:
-                    return "Satisfactory";
-                case F:
-                    return "Fail";
-                default:
-                    return "";
-            }
-        } else if (grade.getEcts().equals(EctsGrade.F) || grade.getEcts().equals(EctsGrade.FX)) {
-            return "Fail";
-        }
-        return "Passed";
     }
 }

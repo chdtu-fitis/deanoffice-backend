@@ -2,26 +2,44 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
+
 @Service
 public class StudentService {
 
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
     public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
 
-    public List<Student> findAll() {
-        return studentRepository.findAll();
+    public Student findById(Integer id) {
+        return studentRepository.getOne(id);
     }
 
-    public Student get(Integer id) {
-        return studentRepository.findOne(id);
+    public List<Student> searchByFullName(String name, String surname, String patronimic) {
+        return studentRepository.findAllByFullNameUkr(
+                toCapitalizedCase(name),
+                toCapitalizedCase(surname),
+                toCapitalizedCase(patronimic)
+        );
     }
 
+    public Student create(Student student) {
+        student.setName(toCapitalizedCase(student.getName()));
+        student.setSurname(toCapitalizedCase(student.getSurname()));
+        student.setPatronimic(toCapitalizedCase(student.getPatronimic()));
+        student.setNameEng(toCapitalizedCase(student.getNameEng()));
+        student.setSurnameEng(toCapitalizedCase(student.getSurnameEng()));
+        student.setPatronimicEng(toCapitalizedCase(student.getPatronimicEng()));
+        return this.studentRepository.save(student);
+    }
+
+    public Student update(Student student) {
+        return studentRepository.save(student);
+    }
 }

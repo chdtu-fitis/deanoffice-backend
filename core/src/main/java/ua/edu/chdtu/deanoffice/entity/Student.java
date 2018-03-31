@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Person;
 
 import javax.persistence.*;
@@ -51,18 +52,9 @@ public class Student extends Person {
     private String motherInfo;
     @Column(name = "notes", length = 150)
     private String notes;
+    @Type(type="org.hibernate.type.BinaryType")
+    @Column(name = "photo")
+    private byte[] photo;
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentDegree> degrees = new HashSet<>();
-
-    public String getFullNameUkr() {
-        return getName() + " " + getPatronimic() + " " + getSurname();
-    }
-
-    public String getInitialsUkr() {
-        return getSurname() + " " + getName().substring(0, 1) + " " + getPatronimic().substring(0, 1);
-    }
-
-    public String getFullNameEng() {
-        return getNameEng() + " " + getSurnameEng();
-    }
 }
