@@ -8,7 +8,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
-public class SheetData {
+class SheetData {
     private ImportedData headerData;
     private ImportedData studentData;
 
@@ -17,7 +17,7 @@ public class SheetData {
         studentData = new ImportedData();
     }
 
-    public void assignHeader(String pattern, String columnName) {
+    void assignHeader(String pattern, String columnName) {
         columnName = removeDigits(columnName);
 
         switch (pattern) {
@@ -138,7 +138,7 @@ public class SheetData {
         }
     }
 
-    public void setCellData(String columnName, String value) {
+    void setCellData(String columnName, String value) {
         String col = removeDigits(columnName);
 
         ReflectionUtils.doWithFields(studentData.getClass(), field -> {
@@ -150,12 +150,8 @@ public class SheetData {
         });
     }
 
-    public void cleanStudentData() {
+    void cleanStudentData() {
         studentData = new ImportedData();
-    }
-
-    public void cleanHeaderData() {
-        headerData = new ImportedData();
     }
 
     private String removeDigits(String value) {
