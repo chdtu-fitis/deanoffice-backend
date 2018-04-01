@@ -18,7 +18,7 @@ public class OrderReasonService {
         return this.orderReasonRepository.findOne(id);
     }
 
-    public List<OrderReason> getFiredStudentReasons() {
-        return this.orderReasonRepository.findAllByKindOrderByName("fired_students");
+    public List<OrderReason> getAllByKind(String kind) {
+        return this.orderReasonRepository.findAllByKindOrderByName(kind);
     }
 }

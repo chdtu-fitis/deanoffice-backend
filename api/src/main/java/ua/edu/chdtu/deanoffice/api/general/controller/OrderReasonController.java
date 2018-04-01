@@ -24,7 +24,19 @@ public class OrderReasonController {
 
     @GetMapping("/fired-students")
     public ResponseEntity getFiredStudentReasons() {
-        List<OrderReason> orderReasons = orderReasonService.getFiredStudentReasons();
+        List<OrderReason> orderReasons = orderReasonService.getAllByKind("fired_students");
+        return ResponseEntity.ok(parseToNamedDTO(orderReasons));
+    }
+
+    @GetMapping("/zarah")
+    public ResponseEntity getZarahReasons() {
+        List<OrderReason> orderReasons = orderReasonService.getAllByKind("zarah");
+        return ResponseEntity.ok(parseToNamedDTO(orderReasons));
+    }
+
+    @GetMapping("/vidp-students")
+    public ResponseEntity getVidpStudentReasons() {
+        List<OrderReason> orderReasons = orderReasonService.getAllByKind("vidp_students");
         return ResponseEntity.ok(parseToNamedDTO(orderReasons));
     }
 }
