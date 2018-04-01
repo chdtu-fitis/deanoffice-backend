@@ -13,15 +13,18 @@ import java.util.Date;
 @Table(name = "student_degree")
 public class StudentDegree extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "student_id")
     private Student student;
     @ManyToOne
-    @JoinColumn(name = "studentgroup_id")
+    @JoinColumn(name="studentgroup_id")
     private StudentGroup studentGroup;
     @ManyToOne
     private Degree degree;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Specialization specialization;
     @Column(name = "record_book_number", length = 15)
     private String recordBookNumber;
+    @Column(name = "student_card_number", length = 15)
+    private String studentCardNumber;
     @Column(name = "admission_order_number", length = 15)
     private String admissionOrderNumber;
     @Column(name = "admission_order_date")

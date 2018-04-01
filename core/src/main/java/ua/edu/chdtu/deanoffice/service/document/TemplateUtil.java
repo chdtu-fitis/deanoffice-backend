@@ -16,13 +16,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import javax.xml.bind.JAXBElement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TemplateUtil {
 
-    private static Logger log = LoggerFactory.getLogger(TemplateUtil.class);
-    public static final String PLACEHOLDER_PREFIX = "#";
+    private static final Logger log = LoggerFactory.getLogger(TemplateUtil.class);
+    private static final String PLACEHOLDER_PREFIX = "#";
 
     public static List<Object> getAllElementsFromObject(Object obj, Class<?> toSearch) {
         List<Object> result = new ArrayList<>();
@@ -53,14 +57,17 @@ public class TemplateUtil {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
                 log.warn("{} is empty", text.getValue());
-            } else {
-                text.setValue(replacement);
             }
+            text.setValue(getValueSafely(replacement));
         }
     }
 
     private static List<Text> getTextsContainingPlaceholders(WordprocessingMLPackage template) {
-        List<Object> texts = getAllElementsFromObject(template.getMainDocumentPart(), Text.class);
+        return getTextsFromContentAccessor(template.getMainDocumentPart());
+    }
+
+    private static List<Text> getTextsFromContentAccessor(ContentAccessor contentAccessor) {
+        List<Object> texts = getAllElementsFromObject(contentAccessor, Text.class);
         List<Object> placeholders = new ArrayList<>();
         for (int i = 0; i < texts.size(); i++) {
             Text text = ((Text) texts.get(i));
@@ -79,8 +86,7 @@ public class TemplateUtil {
                 }
             }
         }
-        List<Text> result = placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
-        return result;
+        return placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
     }
 
     public static void replacePlaceholdersWithBlank(WordprocessingMLPackage template, Set<String> placeholders) {
@@ -120,19 +126,6 @@ public class TemplateUtil {
         return text.getValue() != null && text.getValue().startsWith(PLACEHOLDER_PREFIX) && text.getValue().length() > 1;
     }
 
-    public static Tr findRowInTable(Tbl table, String templateKey) {
-        for (Object row : table.getContent()) {
-            List<?> textElements = getAllElementsFromObject(row, Text.class);
-            for (Object text : textElements) {
-                Text textElement = (Text) text;
-                if (textElement.getValue() != null && textElement.getValue().trim().equals(templateKey)) {
-                    return (Tr) row;
-                }
-            }
-        }
-        return null;
-    }
-
     public static Tbl findTable(List<Object> tables, String templateKey) {
         for (Object tbl : tables) {
             List<Object> textElements = getAllElementsFromObject(tbl, Text.class);
@@ -148,15 +141,13 @@ public class TemplateUtil {
 
     public static void addRowToTable(Tbl reviewTable, Tr templateRow, int rowNumber, Map<String, String> replacements) {
         Tr workingRow = XmlUtils.deepCopy(templateRow);
-        List<?> textElements = getAllElementsFromObject(workingRow, Text.class);
-        for (Object object : textElements) {
-            Text text = (Text) object;
-            String replacementValue = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
-            if (replacementValue != null) {
-                text.setValue(replacementValue);
-            }
-        }
+        replaceInRow(workingRow, replacements);
         reviewTable.getContent().add(rowNumber, workingRow);
+    }
+
+    public static void replaceInRow(Tr tableRow, Map<String, String> replacements) {
+        List<Text> textElements = getTextsFromContentAccessor(tableRow);
+        replaceValuesInTextPlaceholders(textElements, replacements);
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {

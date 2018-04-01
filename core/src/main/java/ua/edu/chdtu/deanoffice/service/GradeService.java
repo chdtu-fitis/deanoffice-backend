@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
@@ -15,18 +16,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ua.edu.chdtu.deanoffice.Constants.*;
 
 @Service
 public class GradeService {
-    private static final Integer[] KNOWLEDGE_CONTROL_PART1 = {EXAM, CREDIT, DIFFERENTIATED_CREDIT};
-    private static final Integer[] KNOWLEDGE_CONTROL_PART2 = {COURSEWORK, COURSE_PROJECT};
-    private static final Integer[] KNOWLEDGE_CONTROL_PART3 = {INTERNSHIP, NON_GRADED_INTERNSHIP};
-    private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {ATTESTATION};
+    private static final Integer[] KNOWLEDGE_CONTROL_PART1 = {Constants.EXAM, Constants.CREDIT, Constants.DIFFERENTIATED_CREDIT};
+    private static final Integer[] KNOWLEDGE_CONTROL_PART2 = {Constants.COURSEWORK, Constants.COURSE_PROJECT};
+    private static final Integer[] KNOWLEDGE_CONTROL_PART3 = {Constants.INTERNSHIP, Constants.NON_GRADED_INTERNSHIP};
+    private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {Constants.ATTESTATION};
 
-    private GradeRepository gradeRepository;
-    private CourseRepository courseRepository;
-    private StudentDegreeRepository studentDegreeRepository;
+    private final GradeRepository gradeRepository;
+    private final CourseRepository courseRepository;
+    private final StudentDegreeRepository studentDegreeRepository;
 
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, StudentDegreeRepository studentDegreeRepository) {
         this.gradeRepository = gradeRepository;
@@ -66,11 +66,11 @@ public class GradeService {
                 knowledgeControlTypes);
     }
 
-    public List<Grade> getAllDifferentiatedGradesByStudentDegreeId(Integer studentDegreeId) {
+    public List<Grade> getAllDifferentiatedGrades(Integer studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
-        List<Integer> knowledgeControlTypes = Arrays.asList(EXAM, DIFFERENTIATED_CREDIT, COURSEWORK, COURSE_PROJECT,
-                ATTESTATION, INTERNSHIP, STATE_EXAM);
+        List<Integer> knowledgeControlTypes = Arrays.asList(Constants.EXAM, Constants.DIFFERENTIATED_CREDIT, Constants.COURSEWORK, Constants.COURSE_PROJECT,
+                Constants.ATTESTATION, Constants.INTERNSHIP, Constants.STATE_EXAM);
         List<Integer> courseIds = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId())
                 .stream().map(BaseEntity::getId).collect(Collectors.toList());
         return new ArrayList<>(getGrades(student, courseIds, knowledgeControlTypes));
