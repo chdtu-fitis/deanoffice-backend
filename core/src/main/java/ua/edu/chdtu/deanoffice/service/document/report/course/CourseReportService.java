@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
@@ -46,7 +47,7 @@ public class CourseReportService {
     public synchronized File prepareReportForGroup(Integer groupId,Integer semestrId) throws Docx4JException, IOException {
         List<CourseReport> courseReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySemester((int)groupId,(int)semestrId);
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semestrId);
         Format formatter = new SimpleDateFormat("yyyy.MM.dd");
         courseForGroups.forEach(courseForGroup -> {
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
@@ -56,7 +57,7 @@ public class CourseReportService {
                                                                        +courseForGroup.getTeacher().getPatronimic().charAt(0)+".",
                                                                courseForGroup.getExamDate() == null ? "" :  formatter.format(courseForGroup.getExamDate())));
         });
-        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, courseReports), LanguageUtil.transliterate(group.getName()) + ".docx");
+        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, courseReports), LanguageUtil.transliterate(group.getName()) + ".docx", FileFormatEnum.DOCX);
     }
 
     private WordprocessingMLPackage fillTemplate(String templateName, List<CourseReport> courseReports) throws IOException, Docx4JException {
