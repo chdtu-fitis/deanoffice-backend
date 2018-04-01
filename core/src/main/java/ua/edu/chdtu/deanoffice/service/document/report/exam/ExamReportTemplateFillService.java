@@ -12,14 +12,20 @@ import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
 import java.io.IOException;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitials;
 
 @Service
@@ -41,19 +47,19 @@ class ExamReportTemplateFillService {
         Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(getGroupInfoReplacements(courseForGroup));
         commonDict.putAll(getCourseInfoReplacements(courseForGroup));
-        replaceTextPlaceholdersInTemplate(template, commonDict);
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
 
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
-        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
+        List<Object> tables = TemplateUtil.getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
         String tableWithGradesKey = "№";
-        Tbl tempTable = findTable(tables, tableWithGradesKey);
+        Tbl tempTable = TemplateUtil.findTable(tables, tableWithGradesKey);
         if (tempTable == null) {
             log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
-        List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
 
         int currentRowIndex = STARTING_ROW_INDEX;
         List<Student> students = studentGroup.getActiveStudents();
@@ -64,7 +70,7 @@ class ExamReportTemplateFillService {
             replacements.put("StudentInitials", student.getInitialsUkr());
             replacements.put("RecBook", studentGroup.getStudentDegrees().stream().filter(studentDegree ->
                     studentDegree.getStudent().equals(student)).findFirst().get().getRecordBookNumber());
-            replaceInRow(currentRow, replacements);
+            TemplateUtil.replaceInRow(currentRow, replacements);
             currentRowIndex++;
         }
         removeUnfilledPlaceholders(template);
@@ -81,7 +87,7 @@ class ExamReportTemplateFillService {
         Set<String> placeholdersToRemove = new HashSet<>();
         placeholdersToRemove.add("#StudentInitials");
         placeholdersToRemove.add("#RecBook");
-        replacePlaceholdersWithBlank(template, placeholdersToRemove);
+        TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
 
     private Map<String, String> getCourseInfoReplacements(CourseForGroup courseForGroup) {

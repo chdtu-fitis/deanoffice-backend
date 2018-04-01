@@ -15,10 +15,10 @@ import java.io.FileNotFoundException;
 public class DocumentResponseController {
 
     private static Logger log = LoggerFactory.getLogger(DocumentResponseController.class);
-    public static final String MEDIA_TYPE_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    public static final String MEDIA_TYPE_PDF = "application/pdf";
+    protected static final String MEDIA_TYPE_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    protected static final String MEDIA_TYPE_PDF = "application/pdf";
 
-    public static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName, String mediaType) {
+    protected static ResponseEntity buildDocumentResponseEntity(File result, String asciiName, String mediaType) {
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
             return ResponseEntity.ok()

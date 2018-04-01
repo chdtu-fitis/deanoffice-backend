@@ -3,61 +3,56 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.student.dto.*;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.OrderReasonService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
+import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
-import ua.edu.chdtu.deanoffice.service.document.importing.ImportDataService;
 
+import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
+import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
+import static ua.edu.chdtu.deanoffice.api.student.StudentController.parseToStudentDTO;
 
 @RestController
 @RequestMapping("/students")
-public class StudentController {
+public class StudentDegreeController {
+    private final StudentDegreeService studentDegreeService;
     private final StudentService studentService;
     private final StudentGroupService studentGroupService;
-    private final OrderReasonService orderReasonService;
-    private final ImportDataService importDataService;
 
     @Autowired
-    public StudentController(
+    public StudentDegreeController(
             StudentDegreeService studentDegreeService,
             StudentService studentService,
-            StudentGroupService studentGroupService,
-            OrderReasonService orderReasonService,
-            ImportDataService importDataService
-
+            StudentGroupService studentGroupService
     ) {
         this.studentDegreeService = studentDegreeService;
-    public StudentController(StudentService studentService) {
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
-        this.orderReasonService = orderReasonService;
-        this.importDataService = importDataService;
     }
 
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Simple.class)
     @GetMapping("/degrees")
     public ResponseEntity getActiveStudentsDegree(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
@@ -65,7 +60,7 @@ public class StudentController {
         return ResponseEntity.ok(getActiveStudentDegrees(active));
     }
 
-    @JsonView(StudentDegreeViews.Detail.class)
+    @JsonView(StudentView.Detail.class)
     @GetMapping("/degrees/more-detail")
     public ResponseEntity getActiveStudentsDegree_moreDetail(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
@@ -81,33 +76,7 @@ public class StudentController {
         return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
     }
 
-    @JsonView(StudentView.Search.class)
-    @GetMapping("/search")
-    public List searchStudentByFullName(
-            @RequestParam(value = "name", defaultValue = "", required = false) String name,
-            @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
-            @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
-    ) {
-        List<Student> foundStudent = studentService.searchByFullName(name, surname, patronimic);
-        List<StudentDTO> foundStudentDTO = parseToStudentDTO(foundStudent);
-        foundStudentDTO.forEach(studentDTO -> {
-            Student student = foundStudent.get(foundStudentDTO.indexOf(studentDTO));
-            studentDTO.setGroups(getGroupNamesForStudent(student));
-        });
-        return foundStudentDTO;
-    }
-
-    private List<StudentDTO> parseToStudentDTO(List<Student> studentList) {
-        return new ModelMapper().map(studentList, new TypeToken<List<StudentDTO>>() {}.getType());
-    }
-
-    private String getGroupNamesForStudent(Student student) {
-        return student.getDegrees().stream()
-                .map(studentDegree -> studentDegree.getStudentGroup().getName())
-                .collect(Collectors.joining(", "));
-    }
-
-    @JsonView(StudentDegreeViews.Degree.class)
+    @JsonView(StudentView.Degree.class)
     @PostMapping("/degrees")
     public ResponseEntity createNewStudentDegree(
             @RequestBody() StudentDegreeDTO newStudentDegree,
@@ -130,27 +99,6 @@ public class StudentController {
         URI location = getNewResourceLocation(studentDegree.getId());
         return ResponseEntity.created(location).body(new ModelMapper().map(studentDegree, StudentDegreeDTO.class));
     }
-
-    @PostMapping("/import")
-    public ResponseEntity importStudents(@RequestParam("file") MultipartFile uploadfile) {
-
-        if (uploadfile.isEmpty()) {
-            return ResponseEntity.badRequest().body("please select a document!");
-        }
-
-        List<Object> importedData;
-
-        try {
-            importedData = importDataService.getStudentsFromStream(uploadfile.getInputStream());
-
-        } catch (Exception exception) {
-            return ExceptionHandlerAdvice.handleException(exception);
-        }
-
-        return ResponseEntity.ok(importedData);
-
-    }
-
 
     private Student createStudent(StudentDTO newStudentDTO) {
         ModelMapper modelMapper = new ModelMapper();
@@ -203,56 +151,7 @@ public class StudentController {
         return EducationDocument.getPreviousDiplomaType(studentDegree.getDegree().getId());
     }
 
-    @JsonView(StudentDegreeViews.Personal.class)
-    @JsonView(StudentView.Personal.class)
-    @GetMapping("/{id}")
-    public ResponseEntity getAllStudentsId(
-            @PathVariable("id") Integer studentId
-    ) {
-        return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
-    }
-
-    static StudentDTO parseToStudentDTO(Student student) {
-        return new ModelMapper().map(student, StudentDTO.class);
-    }
-
-    @PutMapping("/")
-    public ResponseEntity updateStudent(@RequestBody Student student) {
-        Student upStudent;
-        try {
-            upStudent = studentService.update(student);
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-        return ResponseEntity.ok(parseToStudentDTO(upStudent));
-    }
-
-    @PutMapping("/{id}/photo")
-    public ResponseEntity uploadPhotoForStudent(@RequestBody byte[] photo, @PathVariable(value = "id") Integer id) {
-        try {
-            Student student = studentService.findById(id);
-            student.setPhoto(photo);
-            studentService.update(student);
-            return ResponseEntity.ok().build();
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-    }
-
-    @GetMapping("/{id}/photo")
-    public ResponseEntity getStudentPhoto(@PathVariable(value = "id") Integer id) {
-        Student student = studentService.findById(id);
-        if (student == null) {
-            return ResponseEntity.notFound().eTag("Not found student with id " + id).build();
-        }
-        if (student.getPhoto() == null) {
-            return ResponseEntity.unprocessableEntity().body("Student with id " + id + " don`t have a photo");
-        }
-        byte[] photo = student.getPhoto();
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
-    }
-
-    @JsonView(StudentDegreeViews.Degrees.class)
+    @JsonView(StudentView.Degrees.class)
     @GetMapping("/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(
             @PathVariable("id") Integer studentId
@@ -260,7 +159,7 @@ public class StudentController {
         return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
     }
 
-    @JsonView(StudentDegreeViews.Degrees.class)
+    @JsonView(StudentView.Degrees.class)
     @PutMapping("/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
             @RequestBody List<StudentDegreeDTO> studentDegreesDTO,
@@ -272,10 +171,12 @@ public class StudentController {
             modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
             Type type = new TypeToken<List<StudentDegree>>() {}.getType();
             List<StudentDegree> studentDegrees = modelMapper.map(studentDegreesDTO, type);
+            Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
                 Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
+                studentDegree.setStudent(student);
             });
 
             studentDegreeService.update(studentDegrees);
@@ -288,32 +189,5 @@ public class StudentController {
 
     private StudentGroup getStudentGroup(Integer groupId) {
         return this.studentGroupService.getById(groupId);
-    }
-
-    @JsonView(StudentDegreeViews.Expel.class)
-    @PostMapping("/degrees/expels")
-    public ResponseEntity expelStudentDegree(@RequestBody List<StudentExpelDTO> studentExpelDTOs) {
-        List<StudentExpelDTO> studentExpelDTOList;
-        try {
-            ModelMapper modelMapper = new ModelMapper();
-            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-            Type type = new TypeToken<List<StudentExpel>>() {}.getType();
-            List<StudentExpel> studentExpels = modelMapper.map(studentExpelDTOs, type);
-
-            studentExpels.forEach(studentExpel -> {
-                StudentExpelDTO studentExpelDTO = studentExpelDTOs.get(studentExpels.indexOf(studentExpel));
-                studentExpel.setStudentDegree(studentDegreeService.getById(studentExpelDTO.getStudentDegreeId()));
-                studentExpel.setReason(orderReasonService.getById(studentExpelDTO.getReasonId()));
-            });
-
-            List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(studentExpels);
-            studentExpelDTOList = new ModelMapper().map(studentExpelList, new TypeToken<List<StudentExpelDTO>>() {}.getType());
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-
-        Object[] ids = studentExpelDTOList.stream().map(StudentExpelDTO::getId).toArray();
-        URI location = getNewResourceLocation(ids);
-        return ResponseEntity.created(location).body(studentExpelDTOList);
     }
 }
