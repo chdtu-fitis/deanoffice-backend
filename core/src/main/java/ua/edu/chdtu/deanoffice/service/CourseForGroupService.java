@@ -19,16 +19,18 @@ public class CourseForGroupService {
         List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllByStudentGroupId(idGroup);
         return courseForGroup;
     }
+    public List<CourseForGroup> getCourseForGroupBySemester(int semester){
+        List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllBySemester(semester);
+        return courseForGroup;
+    }
+
     public List<CourseForGroup> getCourseForGroupBySemester(int idGroup, int semester) {
         List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllByStudentGroupIdAndCourse_Semester(idGroup, semester);
         return courseForGroup;
     }
 
     public List<CourseForGroup> getCourseForGroupBySpecialization(int specialization, int semester){
-        return courseForGroupRepository.findAllBySpecialization(specialization, semester);
-    }
-
-    public List<CourseForGroup> getCourseForGroupBySemester(int semester){
-        return courseForGroupRepository.findAllBySemester(semester);
+        List<CourseForGroup> courseForGroup = courseForGroupRepository.findAllBySpecialization(specialization, semester);
+        return courseForGroup;
     }
 }
