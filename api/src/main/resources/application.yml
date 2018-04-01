@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/deanoffice-migrate
+    url: jdbc:postgresql://localhost:5432/deanoffice
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: Ftvonk.2
