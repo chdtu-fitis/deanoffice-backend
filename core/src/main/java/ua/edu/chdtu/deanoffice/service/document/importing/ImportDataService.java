@@ -25,8 +25,6 @@ import java.util.Objects;
 
 @Service
 public class ImportDataService {
-
-
     private static Logger log = LoggerFactory.getLogger(ImportDataService.class);
     private final DocumentIOService documentIOService;
 
@@ -77,7 +75,6 @@ public class ImportDataService {
                     } else {
                         sd.setCellData(c.getR(), cellValue);
                     }
-
                 }
 
                 if (r.getR() == 1) {
@@ -102,8 +99,7 @@ public class ImportDataService {
     private List<StudentDegree> fetchStudentDegree(List<ImportedData> importedData) {
         throw new UnsupportedOperationException("Not implemented, yet");
     }
-
-
+    
     private List<Object> fetchStudentAndStudentDegree(List<ImportedData> importedData) {
         throw new UnsupportedOperationException("Not implemented, yet");
     }
