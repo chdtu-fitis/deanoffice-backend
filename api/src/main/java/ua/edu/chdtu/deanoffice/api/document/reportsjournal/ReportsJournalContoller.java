@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.coursereport;
+package ua.edu.chdtu.deanoffice.api.document.reportsjournal;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.slf4j.Logger;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.diplomasupplement.DiplomaSupplementController;
-import ua.edu.chdtu.deanoffice.service.document.report.course.CourseReportService;
+import ua.edu.chdtu.deanoffice.service.document.report.journal.ReportsCoursesService;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,14 +21,14 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/documents/coursereport")
-public class CourseReportContoller {
+public class ReportsJournalContoller {
 
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
 
-    private CourseReportService courseReportService;
+    private ReportsCoursesService reportsCoursesService;
 
-    public CourseReportContoller(CourseReportService courseReportService) {
-        this.courseReportService = courseReportService;
+    public ReportsJournalContoller(ReportsCoursesService reportsCoursesService) {
+        this.reportsCoursesService = reportsCoursesService;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -38,7 +38,7 @@ public class CourseReportContoller {
 
     @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}/{semestrId}")
     public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId,@PathVariable Integer semestrId) throws IOException, Docx4JException {
-        File groupDiplomaSupplements = courseReportService.prepareReportForGroup(groupId, semestrId);
+        File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semestrId);
         return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
 

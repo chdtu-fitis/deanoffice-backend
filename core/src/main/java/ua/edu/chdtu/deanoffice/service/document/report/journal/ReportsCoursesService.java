@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.course;
+package ua.edu.chdtu.deanoffice.service.document.report.journal;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -26,7 +26,7 @@ import java.util.*;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
-public class CourseReportService {
+public class ReportsCoursesService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "PredmJourn.docx";
@@ -37,7 +37,7 @@ public class CourseReportService {
     private CourseForGroupService courseForGroupService;
     private DocumentIOService documentIOService;
 
-    public CourseReportService(GradeService gradeService, StudentGroupService groupService, DocumentIOService documentIOService, CourseForGroupService courseForGroupService) {
+    public ReportsCoursesService(GradeService gradeService, StudentGroupService groupService, DocumentIOService documentIOService, CourseForGroupService courseForGroupService) {
         this.gradeService = gradeService;
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;

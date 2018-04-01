@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.course;
+package ua.edu.chdtu.deanoffice.service.document.report.journal;
 
 import lombok.Getter;
 import lombok.Setter;
