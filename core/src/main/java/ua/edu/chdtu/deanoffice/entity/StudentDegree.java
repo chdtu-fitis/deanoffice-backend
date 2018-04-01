@@ -30,6 +30,8 @@ public class StudentDegree extends BaseEntity {
     private Degree degree;
     @Column(name = "record_book_number", length = 15)
     private String recordBookNumber;
+    @Column(name = "student_card_number", length = 15)
+    private String studentCardNumber;
     @Column(name = "admission_order_number", length = 15)
     private String admissionOrderNumber;
     @Column(name = "admission_order_date")
