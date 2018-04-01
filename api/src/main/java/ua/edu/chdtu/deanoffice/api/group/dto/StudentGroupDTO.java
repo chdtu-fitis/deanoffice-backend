@@ -15,6 +15,8 @@ public class StudentGroupDTO {
     private String name;
     @JsonView(StudentGroupView.GroupData.class)
     private int studySemesters;
+    @JsonView(StudentGroupView.Basic.class)
+    private int creationYear;
     @JsonView(StudentGroupView.WithStudents.class)
     private List<StudentDegreeFullNameDTO> studentDegrees;
 }
