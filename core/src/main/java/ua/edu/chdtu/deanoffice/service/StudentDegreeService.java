@@ -40,13 +40,17 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegreeSet);
     }
 
+    public List<StudentDegree> getStudentDegree(Integer studentId) {
+        return this.studentDegreeRepository.findByStudentId(studentId);
+    }
+
     public StudentDegree getFirstStudentDegree(Integer studentId) {
         List<StudentDegree> studentDegreeList = this.studentDegreeRepository.findByStudentId(studentId);
         return (studentDegreeList.isEmpty()) ? null : studentDegreeList.get(0);
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
-        List<Integer> idList= studentExpels.stream().map(studentExpel -> studentExpel.getStudentDegree().getId()).collect(Collectors.toList());
+        List<Integer> idList = studentExpels.stream().map(studentExpel -> studentExpel.getStudentDegree().getId()).collect(Collectors.toList());
 
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(idList);
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
