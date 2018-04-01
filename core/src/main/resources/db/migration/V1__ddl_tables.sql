@@ -42,6 +42,7 @@ CREATE TABLE course (
     id integer NOT NULL,
     credits numeric(4,1) NOT NULL,
     hours integer NOT NULL,
+    hours_per_credit integer NOT NULL,
     semester integer NOT NULL,
     coursename_id integer,
     kc_id integer
@@ -300,7 +301,7 @@ CREATE TABLE grade (
     grade integer NOT NULL,
     points integer NOT NULL,
     course_id integer,
-    student_id integer
+    studentdegree_id integer
 );
 
 
@@ -463,7 +464,6 @@ ALTER TABLE privilege_id_seq OWNER TO postgres;
 
 ALTER SEQUENCE privilege_id_seq OWNED BY privilege.id;
 
-
 --
 -- Name: speciality; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -578,13 +578,12 @@ CREATE TABLE student (
     name_eng character varying(20),
     notes character varying(150),
     patronimic_eng character varying(20),
+    photo bytea,
     registration_address character varying(100),
     school character varying(100),
-    student_card_number character varying(15),
     surname_eng character varying(20),
     telephone character varying(30),
-    privilege_id integer,
-    photo bytea
+    privilege_id integer
 );
 
 
@@ -649,11 +648,13 @@ CREATE TABLE student_degree (
     protocol_date date,
     protocol_number character varying(10),
     record_book_number character varying(15),
+    student_card_number character varying(15),
     supplement_date date,
     supplement_number character varying(15),
     thesis_name character varying(150),
     thesis_name_eng character varying(150),
     degree_id integer,
+    specialization_id integer,
     student_id integer,
     studentgroup_id integer
 );
@@ -1155,11 +1156,11 @@ ALTER TABLE ONLY degree
 
 
 --
--- Name: grade ukm4rb6f2efyvns11hpghb8qilv; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: grade ukl3vnak67el3n0fbi0x5i4tqaw; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY grade
-    ADD CONSTRAINT ukm4rb6f2efyvns11hpghb8qilv UNIQUE (course_id, student_id);
+    ADD CONSTRAINT ukl3vnak67el3n0fbi0x5i4tqaw UNIQUE (course_id, studentdegree_id);
 
 
 --
@@ -1203,14 +1204,6 @@ ALTER TABLE ONLY department
 
 
 --
--- Name: grade fk5secqnjjwgh9wxk4h1xwgj1n0; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY grade
-    ADD CONSTRAINT fk5secqnjjwgh9wxk4h1xwgj1n0 FOREIGN KEY (student_id) REFERENCES student(id);
-
-
---
 -- Name: student_degree fk9st6a1j5cw6s3xkakvnavyi99; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1248,6 +1241,14 @@ ALTER TABLE ONLY courses_for_groups
 
 ALTER TABLE ONLY student_academic_vacation
     ADD CONSTRAINT fkgc4mk336psudyg6uf3v717u7i FOREIGN KEY (studentdegree_id) REFERENCES student_degree(id);
+
+
+--
+-- Name: student_degree fkj1llwoe8g31ishojdh9xv44t8; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY student_degree
+    ADD CONSTRAINT fkj1llwoe8g31ishojdh9xv44t8 FOREIGN KEY (specialization_id) REFERENCES specialization(id);
 
 
 --
@@ -1336,6 +1337,14 @@ ALTER TABLE ONLY courses_for_groups
 
 ALTER TABLE ONLY specialization
     ADD CONSTRAINT fkq2c76cyld8gltdkxod8fosvub FOREIGN KEY (department_id) REFERENCES department(id);
+
+
+--
+-- Name: grade fkrmlhwxl09lax1ospfv9f2p0d3; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY grade
+    ADD CONSTRAINT fkrmlhwxl09lax1ospfv9f2p0d3 FOREIGN KEY (studentdegree_id) REFERENCES student_degree(id);
 
 
 --

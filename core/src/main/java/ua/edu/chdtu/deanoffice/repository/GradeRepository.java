@@ -11,7 +11,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     @Query("Select grade From Grade grade" +
             " Join grade.course course" +
-            " Where grade.student.id = :studentId" +
+            " Where grade.studentDegree.student.id = :studentId" +
             " and course.knowledgeControl.id in (:KnowledgeControlIds)" +
             " and course.id in (:courseIds)" +
             " Order by course.courseName.name")
