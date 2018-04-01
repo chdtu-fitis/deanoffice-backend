@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.general;
+package ua.edu.chdtu.deanoffice.api.general.dto;
 
 import lombok.Getter;
 import lombok.Setter;

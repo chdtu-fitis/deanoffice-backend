@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 
 import java.util.List;
+
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;

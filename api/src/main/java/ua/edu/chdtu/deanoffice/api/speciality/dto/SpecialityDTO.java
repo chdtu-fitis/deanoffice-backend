@@ -17,3 +17,4 @@ public class SpecialityDTO {
     private String fieldOfStudy;
     private String fieldOfStudyEng;
 }
+
