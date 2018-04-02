@@ -115,23 +115,24 @@ public class ImportDataService {
         if (data == null)
             return null;
 
-        List<Student> existsStudent;
-        existsStudent = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName());
+        List<Student> existsStudent = studentService.searchByFullName(data.getFirstName(), data.getLastName(),
+                data.getMiddleName());
 
-        if (existsStudent.size() > 0) {
+        if (!existsStudent.isEmpty()) {
             return existsStudent.get(0);
         }
 
+        Date birthDate = null;
         Student student = new Student();
         DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
 
         try {
-            Date birthDate = formatter.parse(data.getBirthday());
-            student.setBirthDate(birthDate);
+            birthDate = formatter.parse(data.getBirthday());
         } catch (Exception e) {
             log.debug(e.getMessage());
         }
 
+        student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
         student.setPatronimic(data.getMiddleName());
@@ -142,7 +143,6 @@ public class ImportDataService {
         student.setSchool(data.getDocumentIssued());
         student.setTelephone(null);
         student.setRegistrationAddress(null);
-        student.setStudentCardNumber(null);
         student.setActualAddress(null);
         student.setFatherName(null);
         student.setFatherInfo(null);
@@ -166,24 +166,29 @@ public class ImportDataService {
         StudentDegree studentDegree = new StudentDegree();
         Degree degree = null;
 
-        for (DegreeEnum value : DegreeEnum.values()) {
-            if (value.getNameUkr().equals(data.getQualificationGroupName())) {
-                degree = degreeService.getDegreeById(value.getId());
+        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
+            if (degreeEnum.getNameUkr().equals(data.getQualificationGroupName())) {
+                degree = degreeService.getDegreeById(degreeEnum.getId());
+                break;
             }
         }
 
         for (EducationDocument eduDocument : EducationDocument.values()) {
             if (eduDocument.getNameUkr().equals(data.getPersonDocumentType())) {
                 studentDegree.setPreviousDiplomaType(eduDocument);
+                break;
             }
         }
 
+        Date eduDateBegin = null;
+
         try {
-            Date eduDateBegin = formatter.parse(data.getEducationDateBegin());
-            studentDegree.setAdmissionOrderDate(eduDateBegin);
+            eduDateBegin = formatter.parse(data.getEducationDateBegin());
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
+
+        studentDegree.setAdmissionOrderDate(eduDateBegin);
 
         if (student.getId() > 0) {
             List<StudentDegree> studentDegreeList = studentDegreeService.getStudentDegree(student.getId());
@@ -212,34 +217,36 @@ public class ImportDataService {
         studentDegree.setContractNumber(null);
 
         try {
-            Date eduDateEnd = formatter.parse(data.getEducationDateEnd());
+            Date eduDateEnd = !data.getEducationDateEnd().isEmpty() ? formatter.parse(data.getEducationDateEnd()) : null;
             studentDegree.setActive(eduDateEnd != null && eduDateEnd.getTime() > new Date().getTime());
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
 
+        Date admissionOrderDate = null;
+        DateFormat admissionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+        final String ADMISSION_REGEXP =
+                "Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
+        Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
+
         try {
-            DateFormat admissionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
-            final String ADMISSION_REGEXP =
-                    "Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
-            Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
             Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
-
-            if (matcher.matches() && matcher.groupCount() > 0) {
-                studentDegree.setAdmissionOrderNumber(matcher.group(1));
-                studentDegree.setAdmissionOrderDate(admissionDateFormatter.parse(matcher.group(2)));
-            }
+            studentDegree.setAdmissionOrderNumber(matcher.matches() && matcher.groupCount() > 0 ? matcher.group(1) : null);
+            admissionOrderDate = matcher.matches() && matcher.groupCount() > 1 ? admissionDateFormatter.parse(matcher.group(2)) : null;
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
+
+        studentDegree.setAdmissionOrderDate(admissionOrderDate);
+        Date prevDiplomaDate = null;
 
         try {
-            Date prevDiplomaDate = formatter.parse(data.getDocumentDateGet2());
-            studentDegree.setPreviousDiplomaDate(prevDiplomaDate);
+            prevDiplomaDate = formatter.parse(data.getDocumentDateGet2());
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
 
+        studentDegree.setPreviousDiplomaDate(prevDiplomaDate);
         return studentDegree;
     }
 
@@ -253,7 +260,9 @@ public class ImportDataService {
             Student student = fetchStudent(data);
             StudentDegree studentDegree = fetchStudentDegree(data, student);
 
-            if (!student.getDegrees().contains(studentDegree)) {
+            if (studentDegree.getId() > 0 && studentDegree.getStudent() != null && studentDegree.getStudent().getId() > 0) {
+                student = studentDegree.getStudent();
+            } else if (!student.getDegrees().contains(studentDegree)) {
                 Set<StudentDegree> studentDegrees = student.getDegrees();
                 studentDegrees.add(studentDegree);
                 student.setDegrees(studentDegrees);
