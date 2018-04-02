@@ -68,7 +68,7 @@ public class CourseController {
         return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
     }
 
-    @PostMapping
+    @PostMapping("/courses")
     @ResponseBody
     public ResponseEntity createCourse(@RequestBody Course course){
         try {
