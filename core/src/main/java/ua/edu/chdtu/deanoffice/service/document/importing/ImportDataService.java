@@ -16,6 +16,7 @@ import org.xlsx4j.sml.Worksheet;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.PrivilegeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -36,13 +37,15 @@ public class ImportDataService {
     private final StudentService studentService;
     private final StudentDegreeService studentDegreeService;
     private final DegreeService degreeService;
+    private final PrivilegeService privilegeService;
 
     @Autowired
-    public ImportDataService(DocumentIOService documentIOService, StudentService studentService, StudentDegreeService studentDegreeService, DegreeService degreeService) {
+    public ImportDataService(DocumentIOService documentIOService, StudentService studentService, StudentDegreeService studentDegreeService, DegreeService degreeService, PrivilegeService privilegeService) {
         this.documentIOService = documentIOService;
         this.studentService = studentService;
         this.studentDegreeService = studentDegreeService;
         this.degreeService = degreeService;
+        this.privilegeService = privilegeService;
     }
 
     public List<Student> getStudentsFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
@@ -132,6 +135,8 @@ public class ImportDataService {
             log.debug(e.getMessage());
         }
 
+        Privilege privilage = privilegeService.getPrivilegeByName("без пільг");
+
         student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
@@ -153,7 +158,8 @@ public class ImportDataService {
         student.setNotes(null);
         student.setEmail("");
         student.setPhoto(null);
-        student.setPrivilege(new Privilege());
+        student.setPrivilege(privilage);
+
 
         return student;
     }
