@@ -15,9 +15,10 @@ import java.io.FileNotFoundException;
 public class DocumentResponseController {
 
     private static Logger log = LoggerFactory.getLogger(DocumentResponseController.class);
-    private static final String MEDIA_TYPE_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    protected static final String MEDIA_TYPE_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    protected static final String MEDIA_TYPE_PDF = "application/pdf";
 
-    public static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName, String mediaType) {
+    protected static ResponseEntity buildDocumentResponseEntity(File result, String asciiName, String mediaType) {
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
             return ResponseEntity.ok()
@@ -29,9 +30,5 @@ public class DocumentResponseController {
             log.error("Created file not found!", e);
             return ExceptionHandlerAdvice.handleException(e);
         }
-    }
-
-    public static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName) {
-        return buildDocumentResponseEntity(result, asciiName, MEDIA_TYPE_DOCX);
     }
 }

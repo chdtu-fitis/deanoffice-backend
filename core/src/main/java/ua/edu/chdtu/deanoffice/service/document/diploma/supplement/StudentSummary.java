@@ -4,7 +4,14 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.EctsGrade;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
 import java.text.Collator;
@@ -12,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.*;
 
 @Getter
 public class StudentSummary {
@@ -74,7 +79,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (grade.getGrade() == 0 && grade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT) {
-                    grade.setGrade(getGradeFromPoints(grade.getPoints()));
+                    grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
                 }
             });
         });
@@ -84,7 +89,7 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (grade.getPoints() == 0) {
-                    grade.setPoints(getAveragePointsFromGrade(grade));
+                    grade.setPoints(GradeUtil.getAveragePointsFromGrade(grade));
                 }
             });
         });
@@ -94,14 +99,8 @@ public class StudentSummary {
         grades.forEach(gradeSublist -> {
             gradeSublist.forEach(grade -> {
                 if (!ectsIsSet(grade)) {
-                    if (!grade.getCourse().getKnowledgeControl().isHasGrade()
-                            && grade.getPoints() >= 60) {
-                        grade.setEcts(EctsGrade.P);
-                    } else {
-                        grade.setEcts(getEctsGrade(grade.getPoints()));
-                    }
+                    grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
                 }
-
             });
         });
     }
@@ -193,17 +192,17 @@ public class StudentSummary {
         resultingGrade.setCourse(newCourse);
 
         if (!resultingGrade.getCourse().getKnowledgeControl().isHasGrade()) {
-            int[] pointsAndGrade = adjustAverageGradeAndPoints(
+            int[] pointsAndGrade = GradeUtil.adjustAverageGradeAndPoints(
                     gradesSum / grades.size(),
                     pointsSum / grades.size());
             resultingGrade.setPoints(pointsAndGrade[1]);
             resultingGrade.setGrade(pointsAndGrade[0]);
-            resultingGrade.setEcts(getEctsGrade(resultingGrade.getPoints()));
+            resultingGrade.setEcts(EctsGrade.getEctsGrade(resultingGrade.getPoints()));
         } else {
             resultingGrade.setPoints((int) Math.round(pointsSum / grades.size()));
             resultingGrade.setGrade((int) Math.round(gradesSum / grades.size()));
             if (resultingGrade.getPoints() >= 60) {
-                resultingGrade.setEcts(EctsGrade.P);
+                resultingGrade.setEcts(EctsGrade.getEctsGrade(resultingGrade.getPoints()));
             } else {
                 resultingGrade.setEcts(EctsGrade.F);
             }
@@ -246,7 +245,7 @@ public class StudentSummary {
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(true);
         course.setKnowledgeControl(kc);
-        return getNationalGradeUkr(grade);
+        return grade.getNationalGradeUkr();
     }
 
     public String getTotalNationalGradeEng() {
@@ -257,10 +256,10 @@ public class StudentSummary {
         KnowledgeControl kc = new KnowledgeControl();
         kc.setHasGrade(true);
         course.setKnowledgeControl(kc);
-        return getNationalGradeEng(grade);
+        return grade.getNationalGradeEng();
     }
 
-    public EctsGrade getTotalEcts() {
-        return getEctsGrade((int) Math.round(getTotalGrade()));
+    EctsGrade getTotalEcts() {
+        return EctsGrade.getEctsGrade((int) Math.round(getTotalGrade()));
     }
 }

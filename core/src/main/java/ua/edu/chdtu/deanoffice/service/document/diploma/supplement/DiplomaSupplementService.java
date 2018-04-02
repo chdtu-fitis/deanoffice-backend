@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -35,7 +36,8 @@ public class DiplomaSupplementService {
         this.supplementTemplateFillService = supplementTemplateFillService;
     }
 
-    public File formDiplomaSupplementForStudent(Integer studentDegreeId) throws Docx4JException, IOException {
+    public File formDiplomaSupplement(Integer studentDegreeId, FileFormatEnum format)
+            throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegreeId);
@@ -43,7 +45,7 @@ public class DiplomaSupplementService {
 
         String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();
         WordprocessingMLPackage filledTemplate = supplementTemplateFillService.fill(TEMPLATE, studentSummary);
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName + ".docx");
+        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
     }
 
 

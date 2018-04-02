@@ -1,6 +1,6 @@
 .gradle
 /build/
-gradle/
+#gradle/
 log/
 *.log
 api/log/

@@ -7,8 +7,16 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.Degree;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.Speciality;
+import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,9 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeEng;
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.getNationalGradeUkr;
 
 @Service
 public class SupplementTemplateFillService {
@@ -40,9 +45,9 @@ public class SupplementTemplateFillService {
         result.put("Credits", formatCredits(grade.getCourse().getCredits()));
         result.put("Hours", formatHours(grade.getCourse().getHours()));
         result.put("LocalGrade", String.format("%d", grade.getPoints()));
-        result.put("NationalGradeUkr", getNationalGradeUkr(grade));
-        result.put("NationalGradeEng", getNationalGradeEng(grade));
-        result.put("ECTSGrade", grade.getEcts().toString());
+        result.put("NationalGradeUkr", grade.getNationalGradeUkr());
+        result.put("NationalGradeEng", grade.getNationalGradeEng());
+        result.put("ECTSGrade", GradeUtil.getEctsGrade(grade));
         result.put("CourseNameUkr", grade.getCourse().getCourseName().getName());
         result.put("CourseNameEng", grade.getCourse().getCourseName().getNameEng());
         return result;
@@ -62,11 +67,11 @@ public class SupplementTemplateFillService {
     private static Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
 
-        result.put("SurnameUkr", getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
-        result.put("SurnameEng", getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname").toUpperCase());
-        result.put("NameUkr", getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
-        result.put("NameEng", getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
-        result.put("PatronimicUkr", getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), "По-батькові"));
+        result.put("SurnameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
+        result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname").toUpperCase());
+        result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
+        result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
+        result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), "По-батькові"));
 
         DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
         result.put("BirthDate", studentSummary.getStudent().getBirthDate() != null
@@ -98,22 +103,22 @@ public class SupplementTemplateFillService {
         Specialization specialization = studentSummary.getStudentGroup().getSpecialization();
         Speciality speciality = specialization.getSpeciality();
         Degree degree = specialization.getDegree();
-        result.put("SpecializationUkr", getValueSafely(specialization.getName()));
-        result.put("SpecializationEng", getValueSafely(specialization.getNameEng()));
-        result.put("SpecialityUkr", getValueSafely(speciality.getName()));
-        result.put("SpecialityEng", getValueSafely(speciality.getNameEng()));
-        result.put("DegreeUkr", getValueSafely(degree.getName()));
-        result.put("DegreeEng", getValueSafely(degree.getNameEng()));
-        result.put("DEGREEUKR", getValueSafely(degree.getName()).toUpperCase());
-        result.put("DEGREEENG", getValueSafely(degree.getNameEng()).toUpperCase());
+        result.put("SpecializationUkr", TemplateUtil.getValueSafely(specialization.getName()));
+        result.put("SpecializationEng", TemplateUtil.getValueSafely(specialization.getNameEng()));
+        result.put("SpecialityUkr", TemplateUtil.getValueSafely(speciality.getName()));
+        result.put("SpecialityEng", TemplateUtil.getValueSafely(speciality.getNameEng()));
+        result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
+        result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
+        result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
+        result.put("DEGREEENG", TemplateUtil.getValueSafely(degree.getNameEng()).toUpperCase());
         result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))));
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
         result.put("RequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
-        result.put("QualificationUkr", getValueSafely(specialization.getQualification()));
-        result.put("QualificationEng", getValueSafely(specialization.getQualificationEng()));
+        result.put("QualificationUkr", TemplateUtil.getValueSafely(specialization.getQualification()));
+        result.put("QualificationEng", TemplateUtil.getValueSafely(specialization.getQualificationEng()));
         StudentGroup group = studentSummary.getStudentGroup();
         result.put("TrainingDurationYears", String.format("%1d", group.getStudyYears().intValue()));
         switch ((int) Math.round(group.getStudyYears().doubleValue())) {
@@ -172,34 +177,34 @@ public class SupplementTemplateFillService {
                 result.put("DurationLabelMonthsEng", "months");
                 break;
         }
-        result.put("FieldOfStudy", getValueSafely(speciality.getFieldOfStudy()));
-        result.put("FieldOfStudyEng", getValueSafely(speciality.getFieldOfStudyEng()));
-        result.put("QualificationLevel", getValueSafely(degree.getQualificationLevelDescription()));
-        result.put("QualificationLevelEng", getValueSafely(degree.getQualificationLevelDescriptionEng()));
-        result.put("AdmissionRequirements", getValueSafely(degree.getAdmissionRequirements()));
-        result.put("AdmissionRequirementsEng", getValueSafely(degree.getAdmissionRequirementsEng()));
-        result.put("FurtherStudyAccess", getValueSafely(degree.getFurtherStudyAccess()));
-        result.put("FurtherStudyAccessEng", getValueSafely(degree.getFurtherStudyAccessEng()));
-        result.put("ProfessionalStatus", getValueSafely(degree.getProfessionalStatus()));
-        result.put("ProfessionalStatusEng", getValueSafely(degree.getProfessionalStatusEng()));
+        result.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfStudy()));
+        result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfStudyEng()));
+        result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
+        result.put("QualificationLevelEng", TemplateUtil.getValueSafely(degree.getQualificationLevelDescriptionEng()));
+        result.put("AdmissionRequirements", TemplateUtil.getValueSafely(degree.getAdmissionRequirements()));
+        result.put("AdmissionRequirementsEng", TemplateUtil.getValueSafely(degree.getAdmissionRequirementsEng()));
+        result.put("FurtherStudyAccess", TemplateUtil.getValueSafely(degree.getFurtherStudyAccess()));
+        result.put("FurtherStudyAccessEng", TemplateUtil.getValueSafely(degree.getFurtherStudyAccessEng()));
+        result.put("ProfessionalStatus", TemplateUtil.getValueSafely(degree.getProfessionalStatus()));
+        result.put("ProfessionalStatusEng", TemplateUtil.getValueSafely(degree.getProfessionalStatusEng()));
 
-        result.put("KnowledgeAndUnderstanding", getValueSafely(specialization.getKnowledgeAndUnderstandingOutcomes()));
-        result.put("KnowledgeAndUnderstandingEng", getValueSafely(specialization.getKnowledgeAndUnderstandingOutcomesEng()));
-        result.put("ApplyingKnowledgeAndUnderstanding", getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomes()));
-        result.put("ApplyingKnowledgeAndUnderstandingEng", getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomesEng()));
-        result.put("MakingJudgements", getValueSafely(specialization.getMakingJudgementsOutcomes()));
-        result.put("MakingJudgementsEng", getValueSafely(specialization.getMakingJudgementsOutcomesEng()));
-        result.put("ProgramHeadName", getValueSafely(specialization.getEducationalProgramHeadName()));
-        result.put("ProgramHeadNameEng", getValueSafely(specialization.getEducationalProgramHeadNameEng()));
-        result.put("ProgramHeadInfo", getValueSafely(specialization.getEducationalProgramHeadInfo()));
-        result.put("ProgramHeadInfoEng", getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
+        result.put("KnowledgeAndUnderstanding", TemplateUtil.getValueSafely(specialization.getKnowledgeAndUnderstandingOutcomes()));
+        result.put("KnowledgeAndUnderstandingEng", TemplateUtil.getValueSafely(specialization.getKnowledgeAndUnderstandingOutcomesEng()));
+        result.put("ApplyingKnowledgeAndUnderstanding", TemplateUtil.getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomes()));
+        result.put("ApplyingKnowledgeAndUnderstandingEng", TemplateUtil.getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomesEng()));
+        result.put("MakingJudgements", TemplateUtil.getValueSafely(specialization.getMakingJudgementsOutcomes()));
+        result.put("MakingJudgementsEng", TemplateUtil.getValueSafely(specialization.getMakingJudgementsOutcomesEng()));
+        result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
+        result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
+        result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
+        result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
         DateFormat diplomaDateFormat = dateOfBirthFormat;
         StudentDegree studentDegree = studentSummary.getStudentDegree();
-        result.put("ThesisNameUkr", getValueSafely(studentDegree.getThesisName()));
-        result.put("ThesisNameEng", getValueSafely(studentDegree.getThesisNameEng()));
-        result.put("ProtocolNumber", getValueSafely(studentDegree.getProtocolNumber()));
-        result.put("PreviousDiplomaNumber", getValueSafely(studentDegree.getPreviousDiplomaNumber()));
+        result.put("ThesisNameUkr", TemplateUtil.getValueSafely(studentDegree.getThesisName()));
+        result.put("ThesisNameEng", TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()));
+        result.put("ProtocolNumber", TemplateUtil.getValueSafely(studentDegree.getProtocolNumber()));
+        result.put("PreviousDiplomaNumber", TemplateUtil.getValueSafely(studentDegree.getPreviousDiplomaNumber()));
 
         int dateStyle = DateFormat.LONG;
         DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
@@ -209,10 +214,10 @@ public class SupplementTemplateFillService {
         result.put("ProtocolDateEng", studentDegree.getProtocolDate() == null ? ""
                 : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
 
-        result.put("SupplNumber", getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
+        result.put("SupplNumber", TemplateUtil.getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
         result.put("SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
                 : diplomaDateFormat.format(studentDegree.getSupplementDate()));
-        result.put("DiplNumber", getValueSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
+        result.put("DiplNumber", TemplateUtil.getValueSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
@@ -261,25 +266,25 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    public WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
+    WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
             throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
         fillTableWithGrades(template, studentSummary);
         Map<String, String> commonDict = getReplacementsDictionary(studentSummary);
-        replaceTextPlaceholdersInTemplate(template, commonDict);
-        replacePlaceholdersInFooter(template, commonDict);
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+        TemplateUtil.replacePlaceholdersInFooter(template, commonDict);
         return template;
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
+        List<Object> tables = TemplateUtil.getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
         String tableWithGradesKey = "#CourseNum";
-        Tbl tempTable = findTable(tables, tableWithGradesKey);
+        Tbl tempTable = TemplateUtil.findTable(tables, tableWithGradesKey);
         if (tempTable == null) {
             log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
-        List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
         if (gradeTableRows.size() < TEMPLATE_ROW_INDEX + 1) {
             log.warn("Incorrect table with grades is ignored.");
             return;
@@ -292,7 +297,7 @@ public class SupplementTemplateFillService {
             for (Grade grade : gradesSection) {
                 Map<String, String> replacements = SupplementTemplateFillService.getGradeDictionary(grade);
                 replacements.put("CourseNum", String.format("%2d", gradeNumber++));
-                addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+                TemplateUtil.addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
                 rowToAddIndex++;
             }
             //Need to skip header of the next section

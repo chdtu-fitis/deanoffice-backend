@@ -4,10 +4,17 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
-import ua.edu.chdtu.deanoffice.util.PersonFullNameComparator;
-import ua.edu.chdtu.deanoffice.util.StudentDegreeFullNameComparator;
+import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,26 +40,14 @@ public class StudentGroup extends NameWithActiveEntity {
     @Column(name = "study_years", nullable = false)
     private BigDecimal studyYears;
     @Column(name = "begin_years", nullable = false)
-    private int beginYears;//курс, з якого починає навчатись група
+    private int beginYears;
     @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Where(clause = "active = true")
     private List<StudentDegree> studentDegrees = new ArrayList<>();
-    //CURATOR
 
     public List<StudentDegree> getStudentDegrees() {
         studentDegrees.sort(new StudentDegreeFullNameComparator());
         return studentDegrees;
-    }
-
-    public List<Student> getStudents() {
-        if (studentDegrees.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return studentDegrees.stream()
-                    .map(StudentDegree::getStudent)
-                    .sorted(new PersonFullNameComparator())
-                    .collect(Collectors.toList());
-        }
     }
 
     public List<Student> getActiveStudents() {
