@@ -38,8 +38,6 @@ public class Student extends Person {
     private String actualAddress;
     @Column(name = "school", length = 100)
     private String school;
-    @Column(name = "student_card_number", length = 15)
-    private String studentCardNumber;
     @Column(name = "telephone", length = 30)
     private String telephone;
     @Column(name = "email", length = 30)

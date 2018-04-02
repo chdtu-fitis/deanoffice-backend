@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
+import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -34,12 +35,19 @@ public class GroupController {
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId) {
         List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
-        return ResponseEntity.ok(parseToStudentGroupDTO(groups));
+        return ResponseEntity.ok(parseToStudentGroupShortDTO(groups));
     }
 
     private List<StudentGroupDTO> parseToStudentGroupDTO(List<StudentGroup> studentGroupList) {
         ModelMapper modelMapper = new ModelMapper();
         Type listType = new TypeToken<List<StudentGroupDTO>>() {
+        }.getType();
+        return modelMapper.map(studentGroupList, listType);
+    }
+
+    private List<StudentGroupShortDTO> parseToStudentGroupShortDTO(List<StudentGroup> studentGroupList) {
+        ModelMapper modelMapper = new ModelMapper();
+        Type listType = new TypeToken<List<StudentGroupShortDTO>>() {
         }.getType();
         return modelMapper.map(studentGroupList, listType);
     }
