@@ -165,6 +165,10 @@ public class StudentDegreeController {
             @RequestBody List<StudentDegreeDTO> studentDegreesDTO,
             @PathVariable(value = "id") Integer studentId
     ) {
+        if (checkNullId(studentDegreesDTO)) {
+            return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id not must be null");
+        }
+
         Student upStudent;
         try {
             ModelMapper modelMapper = new ModelMapper();
@@ -185,6 +189,15 @@ public class StudentDegreeController {
             return handleException(exception);
         }
         return ResponseEntity.ok(parseToStudentDTO(upStudent));
+    }
+
+    private boolean checkNullId(List<StudentDegreeDTO> studentDegreeDTOs) {
+        for (StudentDegreeDTO sd : studentDegreeDTOs) {
+            if (sd.getId() == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private StudentGroup getStudentGroup(Integer groupId) {

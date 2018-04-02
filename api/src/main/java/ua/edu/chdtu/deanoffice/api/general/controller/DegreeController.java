@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.general;
+package ua.edu.chdtu.deanoffice.api.general.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.service.DegreeService;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.parseToNamedDTO;
+
 
 @RestController
 @RequestMapping("/degrees")
