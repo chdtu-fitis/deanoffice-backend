@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -76,7 +77,7 @@ public class CourseController {
             return new ResponseEntity(HttpStatus.CREATED);
         }
         catch (DataIntegrityViolationException e){
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return ExceptionHandlerAdvice.handleException(e, HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 }
