@@ -114,29 +114,14 @@ public class TestFeatureDiplomaSupplement {
         Degree degree = new Degree("Магістр", "Master");
         specialization.setDegree(degree);
 
-        StudentDegree studentDegree = new StudentDegree();
-        student.getDegrees().add(studentDegree);
-        studentDegree.setStudent(student);
-        studentDegree.setStudentGroup(studentGroup);
-        studentDegree.setDegree(degree);
-        studentDegree.setThesisName("Тема роботи");
-        studentDegree.setThesisNameEng("Thesis");
-        studentDegree.setPreviousDiplomaDate(new Date());
-        studentDegree.setPreviousDiplomaNumber("123456");
-        studentDegree.setDiplomaDate(new Date());
-        studentDegree.setDiplomaNumber("654321");
-        studentDegree.setActive(true);
-        studentDegree.setProtocolDate(new Date());
-        studentDegree.setProtocolNumber("112233");
-        studentDegree.setSupplementDate(new Date());
-        studentDegree.setSupplementNumber("234567");
+        StudentDegree studentDegree = createStudentDegree(student, studentGroup);
         student.setDegrees(new HashSet<>());
         student.getDegrees().add(studentDegree);
 
         return student;
     }
 
-    private static List<List<Grade>> createGrades(Student student) {
+    private static List<List<Grade>> createGrades(StudentDegree studentDegree) {
         List<List<Grade>> grades = new ArrayList<>();
         grades.add(new ArrayList<>());
         grades.add(new ArrayList<>());
@@ -154,9 +139,9 @@ public class TestFeatureDiplomaSupplement {
         Course course13 = createCourse(courseName1, false);
         course13.setHours(30);
 
-        Grade grade11 = createGrade(course11, student, 89);
-        Grade grade12 = createGrade(course12, student, 75);
-        Grade grade13 = createGrade(course13, student, 90);
+        Grade grade11 = createGrade(course11, studentDegree, 89);
+        Grade grade12 = createGrade(course12, studentDegree, 75);
+        Grade grade13 = createGrade(course13, studentDegree, 90);
 
         CourseName courseName12 = new CourseName();
         courseName12.setName("Курс 2");
@@ -194,7 +179,7 @@ public class TestFeatureDiplomaSupplement {
     public void testStudentSummary() {
         Student student = createStudent();
         StudentDegree studentDegree = student.getDegrees().iterator().next();
-        StudentSummary summary = new StudentSummary(studentDegree, createGrades(student));
+        StudentSummary summary = new StudentSummary(studentDegree, createGrades(studentDegree));
 
         Assert.assertEquals(84.8, summary.getTotalGrade(), 0.1);
         Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
@@ -239,10 +224,32 @@ public class TestFeatureDiplomaSupplement {
         return course;
     }
 
-    private static Grade createGrade(Course course, Student student, int points) {
+    private static Grade createGrade(Course course, StudentDegree studentDegree, int points) {
         Grade grade = createGrade(course, points);
-        grade.setStudent(student);
+        grade.setStudentDegree(studentDegree);
         return grade;
+    }
+
+    private static StudentDegree createStudentDegree(Student student, StudentGroup studentGroup) {
+        StudentDegree studentDegree = new StudentDegree();
+        studentDegree.setStudent(student);
+        studentDegree.setStudentGroup(studentGroup);
+        studentDegree.setDegree(studentGroup.getSpecialization().getDegree());
+        studentDegree.setSpecialization(studentGroup.getSpecialization());
+        studentDegree.setStudent(student);
+        studentDegree.setStudentGroup(studentGroup);
+        studentDegree.setThesisName("Тема роботи");
+        studentDegree.setThesisNameEng("Thesis");
+        studentDegree.setPreviousDiplomaDate(new Date());
+        studentDegree.setPreviousDiplomaNumber("123456");
+        studentDegree.setDiplomaDate(new Date());
+        studentDegree.setDiplomaNumber("654321");
+        studentDegree.setActive(true);
+        studentDegree.setProtocolDate(new Date());
+        studentDegree.setProtocolNumber("112233");
+        studentDegree.setSupplementDate(new Date());
+        studentDegree.setSupplementNumber("234567");
+        return studentDegree;
     }
 
     @Test
