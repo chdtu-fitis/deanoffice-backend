@@ -114,94 +114,79 @@ public class TestFeatureDiplomaSupplement {
         Degree degree = new Degree("Магістр", "Master");
         specialization.setDegree(degree);
 
-        StudentDegree studentDegree = new StudentDegree();
-        student.getDegrees().add(studentDegree);
-        studentDegree.setStudent(student);
-        studentDegree.setStudentGroup(studentGroup);
-        studentDegree.setDegree(degree);
-        studentDegree.setThesisName("Тема роботи");
-        studentDegree.setThesisNameEng("Thesis");
-        studentDegree.setPreviousDiplomaDate(new Date());
-        studentDegree.setPreviousDiplomaNumber("123456");
-        studentDegree.setDiplomaDate(new Date());
-        studentDegree.setDiplomaNumber("654321");
-        studentDegree.setActive(true);
-        studentDegree.setProtocolDate(new Date());
-        studentDegree.setProtocolNumber("112233");
-        studentDegree.setSupplementDate(new Date());
-        studentDegree.setSupplementNumber("234567");
+        StudentDegree studentDegree = createStudentDegree(student, studentGroup);
         student.setDegrees(new HashSet<>());
         student.getDegrees().add(studentDegree);
 
         return student;
     }
 
-//    private static List<List<Grade>> createGrades(Student student) {
-//        List<List<Grade>> grades = new ArrayList<>();
-//        grades.add(new ArrayList<>());
-//        grades.add(new ArrayList<>());
-//        grades.add(new ArrayList<>());
-//        grades.add(new ArrayList<>());
-//
-//        CourseName courseName1 = new CourseName();
-//        courseName1.setName("Багатосеместровий курс 1");
-//        courseName1.setNameEng("Multiple Semester course 1");
-//
-//        Course course11 = createCourse(courseName1, true);
-//        course11.setHours(60);
-//        Course course12 = createCourse(courseName1, true);
-//        course12.setHours(60);
-//        Course course13 = createCourse(courseName1, false);
-//        course13.setHours(30);
-//
-//        Grade grade11 = createGrade(course11, student, 89);
-//        Grade grade12 = createGrade(course12, student, 75);
-//        Grade grade13 = createGrade(course13, student, 90);
-//
-//        CourseName courseName12 = new CourseName();
-//        courseName12.setName("Курс 2");
-//        courseName12.setNameEng("Course 2");
-//        Course course121 = createCourse(courseName12, true);
-//        course121.setHours(90);
-//        Grade grade121 = createGrade(course121, 75);
-//        grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13, grade121));
-//
-//        CourseName courseName2 = new CourseName();
-//        courseName2.setName("Курсова робота 1");
-//        courseName2.setNameEng("Course work 1");
-//        Course course2 = createCourse(courseName2, true);
-//        Grade grade2 = createGrade(course2, 84);
-//        grades.get(1).add(grade2);
-//
-//        CourseName courseName3 = new CourseName();
-//        courseName3.setName("Практика 1");
-//        courseName3.setNameEng("Practice 1");
-//        Course course3 = createCourse(courseName3, true);
-//        Grade grade3 = createGrade(course3, 90);
-//        grades.get(2).add(grade3);
-//
-//        CourseName courseName4 = new CourseName();
-//        courseName4.setName("Дипломна робота 1");
-//        courseName4.setNameEng("Diploma work 1");
-//        Course course4 = createCourse(courseName4, true);
-//        Grade grade4 = createGrade(course4, 90);
-//        grades.get(3).add(grade4);
-//
-//        return grades;
-//    }
+    private static List<List<Grade>> createGrades(StudentDegree studentDegree) {
+        List<List<Grade>> grades = new ArrayList<>();
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
+        grades.add(new ArrayList<>());
 
-//    @Test
-//    public void testStudentSummary() {
-//        Student student = createStudent();
-//        StudentDegree studentDegree = student.getDegrees().iterator().next();
-//        StudentSummary summary = new StudentSummary(studentDegree, createGrades(student));
-//
-//        Assert.assertEquals(84.8, summary.getTotalGrade(), 0.1);
-//        Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
-//        Assert.assertEquals("Good", summary.getTotalNationalGradeEng());
-//        Assert.assertEquals(510, summary.getTotalHours().intValue());
-//        Assert.assertEquals(17, summary.getTotalCredits().doubleValue(), 0.1);
-//    }
+        CourseName courseName1 = new CourseName();
+        courseName1.setName("Багатосеместровий курс 1");
+        courseName1.setNameEng("Multiple Semester course 1");
+
+        Course course11 = createCourse(courseName1, true);
+        course11.setHours(60);
+        Course course12 = createCourse(courseName1, true);
+        course12.setHours(60);
+        Course course13 = createCourse(courseName1, false);
+        course13.setHours(30);
+
+        Grade grade11 = createGrade(course11, studentDegree, 89);
+        Grade grade12 = createGrade(course12, studentDegree, 75);
+        Grade grade13 = createGrade(course13, studentDegree, 90);
+
+        CourseName courseName12 = new CourseName();
+        courseName12.setName("Курс 2");
+        courseName12.setNameEng("Course 2");
+        Course course121 = createCourse(courseName12, true);
+        course121.setHours(90);
+        Grade grade121 = createGrade(course121, 75);
+        grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13, grade121));
+
+        CourseName courseName2 = new CourseName();
+        courseName2.setName("Курсова робота 1");
+        courseName2.setNameEng("Course work 1");
+        Course course2 = createCourse(courseName2, true);
+        Grade grade2 = createGrade(course2, 84);
+        grades.get(1).add(grade2);
+
+        CourseName courseName3 = new CourseName();
+        courseName3.setName("Практика 1");
+        courseName3.setNameEng("Practice 1");
+        Course course3 = createCourse(courseName3, true);
+        Grade grade3 = createGrade(course3, 90);
+        grades.get(2).add(grade3);
+
+        CourseName courseName4 = new CourseName();
+        courseName4.setName("Дипломна робота 1");
+        courseName4.setNameEng("Diploma work 1");
+        Course course4 = createCourse(courseName4, true);
+        Grade grade4 = createGrade(course4, 90);
+        grades.get(3).add(grade4);
+
+        return grades;
+    }
+
+    @Test
+    public void testStudentSummary() {
+        Student student = createStudent();
+        StudentDegree studentDegree = student.getDegrees().iterator().next();
+        StudentSummary summary = new StudentSummary(studentDegree, createGrades(studentDegree));
+
+        Assert.assertEquals(84.8, summary.getTotalGrade(), 0.1);
+        Assert.assertEquals("Добре", summary.getTotalNationalGradeUkr());
+        Assert.assertEquals("Good", summary.getTotalNationalGradeEng());
+        Assert.assertEquals(510, summary.getTotalHours().intValue());
+        Assert.assertEquals(17, summary.getTotalCredits().doubleValue(), 0.1);
+    }
 
     @Test
     public void testAdjustAverage() {
@@ -239,11 +224,33 @@ public class TestFeatureDiplomaSupplement {
         return course;
     }
 
-//    private static Grade createGrade(Course course, Student student, int points) {
-//        Grade grade = createGrade(course, points);
-//        grade.setStudent(student);
-//        return grade;
-//    }
+    private static Grade createGrade(Course course, StudentDegree studentDegree, int points) {
+        Grade grade = createGrade(course, points);
+        grade.setStudentDegree(studentDegree);
+        return grade;
+    }
+
+    private static StudentDegree createStudentDegree(Student student, StudentGroup studentGroup) {
+        StudentDegree studentDegree = new StudentDegree();
+        studentDegree.setStudent(student);
+        studentDegree.setStudentGroup(studentGroup);
+        studentDegree.setDegree(studentGroup.getSpecialization().getDegree());
+        studentDegree.setSpecialization(studentGroup.getSpecialization());
+        studentDegree.setStudent(student);
+        studentDegree.setStudentGroup(studentGroup);
+        studentDegree.setThesisName("Тема роботи");
+        studentDegree.setThesisNameEng("Thesis");
+        studentDegree.setPreviousDiplomaDate(new Date());
+        studentDegree.setPreviousDiplomaNumber("123456");
+        studentDegree.setDiplomaDate(new Date());
+        studentDegree.setDiplomaNumber("654321");
+        studentDegree.setActive(true);
+        studentDegree.setProtocolDate(new Date());
+        studentDegree.setProtocolNumber("112233");
+        studentDegree.setSupplementDate(new Date());
+        studentDegree.setSupplementNumber("234567");
+        return studentDegree;
+    }
 
     @Test
     public void testGetGradeFromPoints() {
@@ -253,43 +260,43 @@ public class TestFeatureDiplomaSupplement {
         Assert.assertEquals(EctsGrade.C, EctsGrade.getEctsGrade(78));
     }
 
-//    private static Course createCourse(CourseName courseName, boolean knowledgeControlHasGrade) {
-//        Course c = createCourse(knowledgeControlHasGrade);
-//        c.setCourseName(courseName);
-//        return c;
-//    }
-//
-//    @Test
-//    public void testGradeSetting() {
-//        Grade grade1 = createGrade(createCourse(true), 90);
-//        Assert.assertEquals("Відмінно", grade1.getNationalGradeUkr());
-//        Assert.assertEquals("Excellent", grade1.getNationalGradeEng());
-//        Assert.assertEquals(EctsGrade.A, grade1.getEcts());
-//        Assert.assertEquals(5, grade1.getGrade());
-//
-//        Grade grade2 = createGrade(createCourse(true), 76);
-//        Assert.assertEquals("Добре", grade2.getNationalGradeUkr());
-//        Assert.assertEquals("Good", grade2.getNationalGradeEng());
-//        Assert.assertEquals(EctsGrade.C, grade2.getEcts());
-//        Assert.assertEquals(4, grade2.getGrade());
-//
-//        Grade grade3 = createGrade(createCourse(true), 65);
-//        Assert.assertEquals("Задовільно", grade3.getNationalGradeUkr());
-//        Assert.assertEquals("Satisfactory", grade3.getNationalGradeEng());
-//        Assert.assertEquals(EctsGrade.D, grade3.getEcts());
-//        Assert.assertEquals(3, grade3.getGrade());
-//
-//        Grade grade4 = createGrade(createCourse(false), 90);
-//        Assert.assertEquals("Зараховано", grade4.getNationalGradeUkr());
-//        Assert.assertEquals("Passed", grade4.getNationalGradeEng());
-//        Assert.assertEquals(EctsGrade.A, grade4.getEcts());
-//        Assert.assertEquals(5, grade4.getGrade());
-//
-//        Grade grade5 = createGrade(createCourse(false), 59);
-//        Assert.assertEquals("Не зараховано", grade5.getNationalGradeUkr());
-//        Assert.assertEquals("Fail", grade5.getNationalGradeEng());
-//        Assert.assertEquals(EctsGrade.FX, grade5.getEcts());
-//    }
+    private static Course createCourse(CourseName courseName, boolean knowledgeControlHasGrade) {
+        Course c = createCourse(knowledgeControlHasGrade);
+        c.setCourseName(courseName);
+        return c;
+    }
+
+    @Test
+    public void testGradeSetting() {
+        Grade grade1 = createGrade(createCourse(true), 90);
+        Assert.assertEquals("Відмінно", grade1.getNationalGradeUkr());
+        Assert.assertEquals("Excellent", grade1.getNationalGradeEng());
+        Assert.assertEquals(EctsGrade.A, grade1.getEcts());
+        Assert.assertEquals(5, grade1.getGrade());
+
+        Grade grade2 = createGrade(createCourse(true), 76);
+        Assert.assertEquals("Добре", grade2.getNationalGradeUkr());
+        Assert.assertEquals("Good", grade2.getNationalGradeEng());
+        Assert.assertEquals(EctsGrade.C, grade2.getEcts());
+        Assert.assertEquals(4, grade2.getGrade());
+
+        Grade grade3 = createGrade(createCourse(true), 65);
+        Assert.assertEquals("Задовільно", grade3.getNationalGradeUkr());
+        Assert.assertEquals("Satisfactory", grade3.getNationalGradeEng());
+        Assert.assertEquals(EctsGrade.D, grade3.getEcts());
+        Assert.assertEquals(3, grade3.getGrade());
+
+        Grade grade4 = createGrade(createCourse(false), 90);
+        Assert.assertEquals("Зараховано", grade4.getNationalGradeUkr());
+        Assert.assertEquals("Passed", grade4.getNationalGradeEng());
+        Assert.assertEquals(EctsGrade.A, grade4.getEcts());
+        Assert.assertEquals(5, grade4.getGrade());
+
+        Grade grade5 = createGrade(createCourse(false), 59);
+        Assert.assertEquals("Не зараховано", grade5.getNationalGradeUkr());
+        Assert.assertEquals("Fail", grade5.getNationalGradeEng());
+        Assert.assertEquals(EctsGrade.FX, grade5.getEcts());
+    }
 
     @Test
     public void testCleanFileName() {
