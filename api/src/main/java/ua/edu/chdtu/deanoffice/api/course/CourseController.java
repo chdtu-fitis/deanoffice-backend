@@ -4,15 +4,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -56,7 +55,6 @@ public class CourseController {
         return new ModelMapper().map(courseForGroupList, listType);
     }
 
-
     @GetMapping("/groups/{groupId}/courses/all")
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCourses(@PathVariable int groupId) {
@@ -69,5 +67,17 @@ public class CourseController {
     public ResponseEntity getCoursesBySpecialization(@PathVariable int id, @RequestParam("semester") int semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(id, semester);
         return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
+    }
+
+    @PostMapping("/courses")
+    @ResponseBody
+    public ResponseEntity createCourse(@RequestBody Course course){
+        try {
+            this.courseService.createCourse(course);
+            return new ResponseEntity(HttpStatus.CREATED);
+        }
+        catch (DataIntegrityViolationException e){
+            return ExceptionHandlerAdvice.handleException(e, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
     }
 }

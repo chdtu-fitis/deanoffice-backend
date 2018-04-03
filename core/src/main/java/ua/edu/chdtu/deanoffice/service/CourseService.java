@@ -18,4 +18,8 @@ public class CourseService {
         return courseRepository.findAllBySemester(semester);
     }
 
+    public void createCourse(Course course){
+        this.courseRepository.save(course);
+    }
+
 }
