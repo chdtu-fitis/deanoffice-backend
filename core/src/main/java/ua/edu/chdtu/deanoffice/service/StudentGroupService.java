@@ -1,12 +1,12 @@
 package ua.edu.chdtu.deanoffice.service;
+
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
-
-import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 
 @Service
 public class StudentGroupService {
@@ -33,6 +33,9 @@ public class StudentGroupService {
     public List<StudentGroup> getGraduateGroups(Integer degreeId) {
         Integer currYear = currentYearRepository.findOne(1).getCurrYear();
         return studentGroupRepository.findGraduateByDegree(degreeId, currYear);
+    }
+    public List<StudentGroup> getGroups() {
+        return studentGroupRepository.findAllByFaculty(Constants.FACULTY_ID);
     }
 
     public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year) {
