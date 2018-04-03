@@ -22,7 +22,7 @@ public class Util {
         return fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
     }
 
-    static List<NamedDTO> parseToNamedDTO(List data) {
+    public static List<NamedDTO> parseToNamedDTO(List data) {
         Type listType = new TypeToken<List<NamedDTO>>() {}.getType();
         return new ModelMapper().map(data, listType);
     }
