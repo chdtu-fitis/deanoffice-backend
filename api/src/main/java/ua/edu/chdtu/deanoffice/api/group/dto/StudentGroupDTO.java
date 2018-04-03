@@ -28,8 +28,6 @@ public class StudentGroupDTO {
     @JsonView(StudentGroupView.AllGroupData.class)
     private SpecializationDTO specialization;
     @JsonView(StudentGroupView.AllGroupData.class)
-    private int creationYear;
-    @JsonView(StudentGroupView.AllGroupData.class)
     private TuitionForm tuitionForm;
     @JsonView(StudentGroupView.AllGroupData.class)
     private TuitionTerm tuitionTerm;
