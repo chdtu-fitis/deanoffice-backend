@@ -130,7 +130,7 @@ public class TestFeatureDiplomaSupplement {
 
         CourseName courseName1 = new CourseName();
         courseName1.setName("Багатосеместровий курс 1");
-        courseName1.setNameEng("Multiple Semester course 1");
+        courseName1.setNameEng("Multiple Semester journal 1");
 
         Course course11 = createCourse(courseName1, true);
         course11.setHours(60);
