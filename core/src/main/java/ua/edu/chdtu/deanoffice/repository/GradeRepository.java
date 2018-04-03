@@ -23,7 +23,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     @Query("select grade from Grade grade " +
             "join grade.course course " +
-            "where grade.student.id in (:studentIds)" +
+            "where grade.studentDegree in (:studentIds)" +
             "and course.id in (:courseIds)")
     List<Grade> getGradesByCourseAndBySemeseterForStudents(
             @Param("studentIds") List<Integer> studentIds,
