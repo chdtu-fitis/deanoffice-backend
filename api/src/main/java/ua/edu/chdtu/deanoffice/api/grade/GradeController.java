@@ -29,9 +29,10 @@ public class GradeController {
     private CourseForGroupService courseForGroupService;
 
     @Autowired
-    public GradeController(GradeService gradeService,
-                           StudentGroupService studentGroupService,
-                           CourseForGroupService courseForGroupService
+    public GradeController(
+            GradeService gradeService,
+            StudentGroupService studentGroupService,
+            CourseForGroupService courseForGroupService
     ) {
         this.gradeService = gradeService;
         this.studentGroupService = studentGroupService;
