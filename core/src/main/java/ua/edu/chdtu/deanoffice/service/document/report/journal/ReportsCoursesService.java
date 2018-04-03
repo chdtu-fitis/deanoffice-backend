@@ -48,13 +48,13 @@ public class ReportsCoursesService {
         List<CourseReport> courseReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semestrId);
-        Format formatter = new SimpleDateFormat("yyyy.MM.dd");
+        Format formatter = new SimpleDateFormat("dd.MM.yyyy");
         courseForGroups.forEach(courseForGroup -> {
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
-                                                               courseForGroup.getCourse().getHours().toString(),
-                                                               courseForGroup.getTeacher().getSurname()+" "
-                                                                       +courseForGroup.getTeacher().getName().charAt(0)+"."
-                                                                       +courseForGroup.getTeacher().getPatronimic().charAt(0)+".",
+                                                courseForGroup.getCourse().getHours().toString(),
+                                                courseForGroup.getTeacher()!= null?courseForGroup.getTeacher().getSurname()+" "
+                                                +courseForGroup.getTeacher().getName().charAt(0)+"."
+                                                +courseForGroup.getTeacher().getPatronimic().charAt(0)+"." : "",
                                                                courseForGroup.getExamDate() == null ? "" :  formatter.format(courseForGroup.getExamDate())));
         });
         return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, courseReports), LanguageUtil.transliterate(group.getName()) + ".docx", FileFormatEnum.DOCX);
