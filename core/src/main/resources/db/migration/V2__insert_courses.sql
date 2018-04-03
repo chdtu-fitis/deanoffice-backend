@@ -1016,7 +1016,7 @@ INSERT INTO knowledge_control (id, name, name_eng, has_grade) VALUES (9, 'пра
 
 
 --
--- Data for Name: journal; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 INSERT INTO course (id, credits, hours, hours_per_credit, semester, coursename_id, kc_id) VALUES (1, 4.0, 144, 36, 2, 1, 2);

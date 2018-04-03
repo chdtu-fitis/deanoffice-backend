@@ -35,7 +35,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: journal; Type: TABLE; Schema: public; Owner: postgres
+-- Name: course; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE course (
@@ -824,7 +824,7 @@ ALTER SEQUENCE teacher_id_seq OWNED BY teacher.id;
 
 
 --
--- Name: journal id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: course id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY course ALTER COLUMN id SET DEFAULT nextval('course_id_seq'::regclass);
@@ -972,7 +972,7 @@ ALTER TABLE ONLY course_name
 
 
 --
--- Name: journal course_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: course course_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY course
@@ -1180,7 +1180,7 @@ ALTER TABLE ONLY courses_for_groups
 
 
 --
--- Name: journal fk2mi63y0iy38x5tkd3ms6s9qsa; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: course fk2mi63y0iy38x5tkd3ms6s9qsa; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY course
@@ -1220,7 +1220,7 @@ ALTER TABLE ONLY student_expel
 
 
 --
--- Name: journal fkfjdhbpuryee3coaafnp1w0y3n; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: course fkfjdhbpuryee3coaafnp1w0y3n; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY course
