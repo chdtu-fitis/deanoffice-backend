@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import ua.edu.chdtu.deanoffice.entity.Course;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CourseForGroupService {
@@ -19,7 +20,11 @@ public class CourseForGroupService {
         this.studentGroupRepository = studentGroupRepository;
     }
 
-    public List<CourseForGroup> getCourseForGroup(int idGroup) {
+    public CourseForGroup getCourseForGroup(int id) {
+        return courseForGroupRepository.findOne(id);
+    }
+
+    public List<CourseForGroup> getCoursesForOneGroup(int idGroup) {
         return courseForGroupRepository.findAllByStudentGroupId(idGroup);
     }
 
@@ -39,35 +44,11 @@ public class CourseForGroupService {
         return courseForGroupRepository.findAllBySemester(semester);
     }
 
-    public void addCourseForGroupAndNewChanges(List<CourseForGroup> newCourses, List<CourseForGroup> mutableCourses, List<String> deleteCoursesIdList, int idGroup){
-        StudentGroup studentGroup = this.studentGroupRepository.findOne(idGroup);
-        if (newCourses !=null){
-            for (CourseForGroup course : newCourses) {
-                CourseForGroup courseForGroup = new CourseForGroup();
-                courseForGroup.setCourse(course.getCourse());
-                courseForGroup.setStudentGroup(studentGroup);
-                courseForGroup.setTeacher(course.getTeacher());
-                courseForGroup.setExamDate(course.getExamDate());
-                courseForGroupRepository.save(courseForGroup);
-            }
-        }
-
-        if (mutableCourses != null){
-            for (CourseForGroup course : mutableCourses) {
-                CourseForGroup mutableCourse = courseForGroupRepository.findOne(course.getId());
-                mutableCourse.setCourse(course.getCourse());
-                mutableCourse.setStudentGroup(course.getStudentGroup());
-                mutableCourse.setTeacher(course.getTeacher());
-                mutableCourse.setExamDate(course.getExamDate());
-                courseForGroupRepository.save(mutableCourse);
-            }
-        }
-
-        if (deleteCoursesIdList != null){
-            for (String courseId : deleteCoursesIdList) {
-                CourseForGroup deleteCourse = courseForGroupRepository.findOne(Integer.parseInt(courseId));
-                courseForGroupRepository.delete(deleteCourse);
-            }
+    public void addCourseForGroupAndNewChanges(Set<CourseForGroup> newCourses, Set<CourseForGroup> updatedCourses, List<Integer> deleteCoursesIds){
+        courseForGroupRepository.save(newCourses);
+        courseForGroupRepository.save(updatedCourses);
+        for (Integer courseId : deleteCoursesIds) {
+            courseForGroupRepository.delete(courseId);
         }
     }
 }
