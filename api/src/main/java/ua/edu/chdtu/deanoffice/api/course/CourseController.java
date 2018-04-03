@@ -56,7 +56,7 @@ public class CourseController {
     }
 
     @GetMapping("/groups/{groupId}/courses")
-    @JsonView(CourseForGroupView.Basic.class)
+    @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
         List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         return ResponseEntity.ok(parseToCourseForGroupDTO(coursesForGroup));
@@ -69,11 +69,7 @@ public class CourseController {
 
     @PostMapping(value = "/groups/{groupId}/courses")
     public ResponseEntity.BodyBuilder addCoursesForGroup(@RequestBody Map<String,List> body,
-//            @RequestBody List<CourseForGroupDTO> newCourses,
-//            @RequestBody List<CourseForGroupDTO> updatedCourses,
-//            @RequestBody List<Integer> deleteCoursesIds,
             @PathVariable Integer groupId) {
-
         List<CourseForGroupDTO> newCourses = body.get("newCourses");
         List<CourseForGroupDTO> updatedCourses = body.get("updatedCourses");
         List<Integer> deleteCoursesIds = body.get("deleteCoursesIds");
