@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/documents/statements")
+@RequestMapping("/documents/exam-report")
 public class ExamReportController extends DocumentResponseController {
 
     private ExamReportService examReportService;
