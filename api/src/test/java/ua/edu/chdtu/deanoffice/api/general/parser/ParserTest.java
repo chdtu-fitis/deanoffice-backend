@@ -10,8 +10,9 @@ import java.util.*;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
-public class ParseTest {
+public class ParserTest {
     private StudentDTO sourceObject = new StudentDTO();
     private Student expectedObject = new Student();
 
@@ -30,10 +31,10 @@ public class ParseTest {
 
     @Test
     public void forObject() {
-        Student actualObject = (Student) Parse.toObject(sourceObject, Student.class);
+        Student actualObject = (Student) parse(sourceObject, Student.class);
         assertParser(actualObject, expectedObject);
 
-        actualObject = (Student) Parse.toObject(sourceObject, Student.class, STRICT);
+        actualObject = (Student) parse(sourceObject, Student.class, STRICT);
         assertParser(actualObject, expectedObject);
     }
 
@@ -50,10 +51,10 @@ public class ParseTest {
 
     @Test
     public void forList() {
-        List<Student> actualList = Parse.toList(sourceList, Student.class);
+        List<Student> actualList = parse(sourceList, Student.class);
         assertParser(actualList);
 
-        actualList = Parse.toList(sourceList, Student.class, STRICT);
+        actualList = parse(sourceList, Student.class, STRICT);
         assertParser(actualList);
     }
 
@@ -70,10 +71,10 @@ public class ParseTest {
 
     @Test
     public void forSet() {
-        Set<Student> actualSet = Parse.toSet(sourceSet, Student.class);
+        Set<Student> actualSet = parse(sourceSet, Student.class);
         assertParser(actualSet);
 
-        actualSet = Parse.toSet(sourceSet, Student.class, STRICT);
+        actualSet = parse(sourceSet, Student.class, STRICT);
         assertParser(actualSet);
     }
 
