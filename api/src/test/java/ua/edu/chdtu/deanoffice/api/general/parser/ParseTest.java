@@ -2,22 +2,25 @@ package ua.edu.chdtu.deanoffice.api.general.parser;
 
 import org.junit.Before;
 import org.junit.Test;
-import ua.edu.chdtu.deanoffice.api.general.parser.Parse;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
 public class ParseTest {
     private StudentDTO sourceObject = new StudentDTO();
     private Student expectedObject = new Student();
 
-    private List<StudentDTO> sourceList = new ArrayList<>();
-    private List<Student> expectedList = new ArrayList<>();
+    private List<StudentDTO> sourceList;
+    private List<Student> expectedList;
 
+    private Set<StudentDTO> sourceSet = new HashSet<>();
+    private Set<Student> expectedSet = new HashSet<>();
+
+// For objects
     @Before
     public void setUpList() {
         sourceObject.setEmail("example@com");
@@ -25,28 +28,46 @@ public class ParseTest {
     }
 
     @Test
-    public void object() {
+    public void forObject() {
         Student actualObject = (Student) Parse.toObject(sourceObject, Student.class);
-        assertStudentParser(actualObject, expectedObject);
+        assertParser(actualObject, expectedObject);
     }
 
-    private void assertStudentParser(Student actualObject, Student expectedObject) {
+    private void assertParser(Student actualObject, Student expectedObject) {
         assertEquals(actualObject.getEmail(), expectedObject.getEmail());
     }
 
+// For lists
     @Before
     public void setList() {
-        sourceList.add(sourceObject);
-        expectedList.add(expectedObject);
+        sourceList = singletonList(sourceObject);
+        expectedList = singletonList(expectedObject);
     }
 
     @Test
-    public void list() {
+    public void forList() {
         List<Student> actualList = Parse.toList(sourceList, Student.class);
-        assertStudentParser(actualList);
+        assertParser(actualList);
     }
 
-    private void assertStudentParser(List<Student> actualList) {
-        assertStudentParser(actualList.get(0), expectedList.get(0));
+    private void assertParser(List<Student> actualList) {
+        assertParser(actualList.get(0), expectedList.get(0));
+    }
+
+// For Set
+    @Before
+    public void setSet() {
+        sourceSet.add(sourceObject);
+        expectedSet.add(expectedObject);
+    }
+
+    @Test
+    public void forSet() {
+        Set<Student> actualSet = Parse.toSet(sourceSet, Student.class);
+        assertParser(actualSet);
+    }
+
+    private void assertParser(Set<Student> actualMap) {
+        assertParser((Student) actualMap.toArray()[0], (Student) expectedSet.toArray()[0]);
     }
 }

@@ -3,8 +3,10 @@ package ua.edu.chdtu.deanoffice.api.general.parser;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.spi.MatchingStrategy;
 import ua.edu.chdtu.deanoffice.api.general.parser.parameterized_type.ListParameterizedType;
+import ua.edu.chdtu.deanoffice.api.general.parser.parameterized_type.SetParameterizedType;
 
 import java.util.List;
+import java.util.Set;
 
 
 public class Parse {
@@ -25,5 +27,9 @@ public class Parse {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(matchingStrategies);
         return modelMapper.map(source, new ListParameterizedType(type));
+    }
+
+    public static Set toSet(Set source, Class type) {
+        return new ModelMapper().map(source, new SetParameterizedType(type));
     }
 }
