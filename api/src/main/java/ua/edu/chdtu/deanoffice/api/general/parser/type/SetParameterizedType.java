@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.general.parser.parameterized_type;
+package ua.edu.chdtu.deanoffice.api.general.parser.type;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

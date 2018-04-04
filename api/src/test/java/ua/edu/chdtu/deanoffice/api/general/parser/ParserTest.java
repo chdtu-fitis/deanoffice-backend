@@ -5,7 +5,9 @@ import org.junit.Test;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -22,7 +24,7 @@ public class ParserTest {
     private Set<StudentDTO> sourceSet = new HashSet<>();
     private Set<Student> expectedSet = new HashSet<>();
 
-// For objects
+// For objects --------------------------------------------------------------------
     @Before
     public void setUpList() {
         sourceObject.setEmail("example@com");
@@ -42,7 +44,7 @@ public class ParserTest {
         assertEquals(actualObject.getEmail(), expectedObject.getEmail());
     }
 
-// For lists
+// For lists ---------------------------------------------------------------------
     @Before
     public void setList() {
         sourceList = singletonList(sourceObject);
@@ -62,7 +64,7 @@ public class ParserTest {
         assertParser(actualList.get(0), expectedList.get(0));
     }
 
-// For Set
+// For Sets -----------------------------------------------------------------------
     @Before
     public void setSet() {
         sourceSet.add(sourceObject);
