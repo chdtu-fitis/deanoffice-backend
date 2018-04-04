@@ -13,10 +13,12 @@ import static org.junit.Assert.assertEquals;
 public class ParseTest {
     private StudentDTO sourceObject = new StudentDTO();
     private Student expectedObject = new Student();
+
     private List<StudentDTO> sourceList = new ArrayList<>();
     private List<Student> expectedList = new ArrayList<>();
 
-    public ParseTest() {
+    @Before
+    public void setUpList() {
         sourceObject.setEmail("example@com");
         expectedObject.setEmail("example@com");
     }
@@ -24,12 +26,15 @@ public class ParseTest {
     @Test
     public void object() {
         Student actualObject = (Student) Parse.toObject(sourceObject, Student.class);
-        String actualEmail = actualObject.getEmail();
-        assertEquals(actualEmail, expectedObject.getEmail());
+        assertStudentParser(actualObject, expectedObject);
+    }
+
+    private void assertStudentParser(Student actualObject, Student expectedObject) {
+        assertEquals(actualObject.getEmail(), expectedObject.getEmail());
     }
 
     @Before
-    public void setUpList() {
+    public void setList() {
         sourceList.add(sourceObject);
         expectedList.add(expectedObject);
     }
@@ -37,8 +42,10 @@ public class ParseTest {
     @Test
     public void list() {
         List<Student> actualList = Parse.toList(sourceList, Student.class);
-        String actualEmail = actualList.get(0).getEmail();
-        String expectedEmail = expectedList.get(0).getEmail();
-        assertEquals(actualEmail, expectedEmail);
+        assertStudentParser(actualList);
+    }
+
+    private void assertStudentParser(List<Student> actualList) {
+        assertStudentParser(actualList.get(0), expectedList.get(0));
     }
 }
