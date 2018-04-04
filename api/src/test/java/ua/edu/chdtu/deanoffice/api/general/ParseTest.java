@@ -1,9 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.general;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
