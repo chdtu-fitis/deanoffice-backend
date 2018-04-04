@@ -9,6 +9,7 @@ import java.util.*;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.modelmapper.convention.MatchingStrategies.STRICT;
 
 public class ParseTest {
     private StudentDTO sourceObject = new StudentDTO();
@@ -31,6 +32,9 @@ public class ParseTest {
     public void forObject() {
         Student actualObject = (Student) Parse.toObject(sourceObject, Student.class);
         assertParser(actualObject, expectedObject);
+
+        actualObject = (Student) Parse.toObject(sourceObject, Student.class, STRICT);
+        assertParser(actualObject, expectedObject);
     }
 
     private void assertParser(Student actualObject, Student expectedObject) {
@@ -48,6 +52,9 @@ public class ParseTest {
     public void forList() {
         List<Student> actualList = Parse.toList(sourceList, Student.class);
         assertParser(actualList);
+
+        actualList = Parse.toList(sourceList, Student.class, STRICT);
+        assertParser(actualList);
     }
 
     private void assertParser(List<Student> actualList) {
@@ -64,6 +71,9 @@ public class ParseTest {
     @Test
     public void forSet() {
         Set<Student> actualSet = Parse.toSet(sourceSet, Student.class);
+        assertParser(actualSet);
+
+        actualSet = Parse.toSet(sourceSet, Student.class, STRICT);
         assertParser(actualSet);
     }
 
