@@ -1,10 +1,9 @@
-package ua.edu.chdtu.deanoffice.api.general;
+package ua.edu.chdtu.deanoffice.api.general.parser;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.spi.MatchingStrategy;
+import ua.edu.chdtu.deanoffice.api.general.parser.parameterized_type.ListParameterizedType;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 
 
@@ -26,29 +25,5 @@ public class Parse {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(matchingStrategies);
         return modelMapper.map(source, new ListParameterizedType(type));
-    }
-}
-
-class ListParameterizedType implements ParameterizedType {
-
-    private Type type;
-
-    ListParameterizedType(Type type) {
-        this.type = type;
-    }
-
-    @Override
-    public Type[] getActualTypeArguments() {
-        return new Type[] {type};
-    }
-
-    @Override
-    public Type getRawType() {
-        return List.class;
-    }
-
-    @Override
-    public Type getOwnerType() {
-        return null;
     }
 }

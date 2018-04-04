@@ -1,7 +1,8 @@
-package ua.edu.chdtu.deanoffice.api.general;
+package ua.edu.chdtu.deanoffice.api.general.parser;
 
 import org.junit.Before;
 import org.junit.Test;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parse;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
