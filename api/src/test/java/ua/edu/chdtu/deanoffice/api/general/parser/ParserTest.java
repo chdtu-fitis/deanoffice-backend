@@ -26,7 +26,7 @@ public class ParserTest {
 
 // For objects --------------------------------------------------------------------
     @Before
-    public void setUpList() {
+    public void setUpObject() {
         sourceObject.setEmail("example@com");
         expectedObject.setEmail("example@com");
     }
@@ -46,7 +46,7 @@ public class ParserTest {
 
 // For lists ---------------------------------------------------------------------
     @Before
-    public void setList() {
+    public void setUpList() {
         sourceList = singletonList(sourceObject);
         expectedList = singletonList(expectedObject);
     }
@@ -66,7 +66,7 @@ public class ParserTest {
 
 // For Sets -----------------------------------------------------------------------
     @Before
-    public void setSet() {
+    public void setUpSet() {
         sourceSet.add(sourceObject);
         expectedSet.add(expectedObject);
     }
