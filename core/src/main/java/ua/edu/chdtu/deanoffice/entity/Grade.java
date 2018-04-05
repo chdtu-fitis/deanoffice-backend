@@ -8,9 +8,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 
 @Entity
@@ -24,6 +24,7 @@ public class Grade extends BaseEntity {
     @ManyToOne
     private Course course;
     @ManyToOne
+    @JoinColumn(name = "studentdegree_id")
     private StudentDegree studentDegree;
     @Column(name = "grade", nullable = false)
     private int grade;
