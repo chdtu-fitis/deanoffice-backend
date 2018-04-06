@@ -14,6 +14,6 @@ public class Constants {
     //TODO cr: це схоже на якийсь список для якоїсь однієї цілі. Можливо тут краще використастити енум замість констант?
 
     public static final Integer[] SUCCESS_REASON_IDS = {7, 8, 16};
-    public static final int FACULTY_ID = 1;
+    public static final Integer FACULTY_ID = 1;
 
 }

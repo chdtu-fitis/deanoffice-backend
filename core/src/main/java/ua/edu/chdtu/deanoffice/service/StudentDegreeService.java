@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
+import static ua.edu.chdtu.deanoffice.Constants.SUCCESS_REASON_IDS;
 
 @Service
 public class StudentDegreeService {
@@ -56,7 +57,7 @@ public class StudentDegreeService {
         return studentExpelRepository.save(studentExpels);
     }
 
-    public List<StudentExpel> getAllExpelStudents() {
-        return this.studentExpelRepository.findAllFired(Constants.SUCCESS_REASON_IDS);
+    public List<StudentExpel> getAllExpelStudents(Integer facultyId) {
+        return this.studentExpelRepository.findAllFired(SUCCESS_REASON_IDS, facultyId);
     }
 }

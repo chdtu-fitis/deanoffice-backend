@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface StudentExpelRepository extends JpaRepository<StudentExpel, Integer> {
     @Query("select se from StudentExpel se " +
-            "where se.reason.id not in :success_reason_id")
-    List<StudentExpel> findAllFired(@Param("success_reason_id") Integer[] successReasonId);
+            "where se.reason.id not in :success_reason_id and se.studentDegree.specialization.faculty.id = :faculty_id")
+    List<StudentExpel> findAllFired(@Param("success_reason_id") Integer[] successReasonId, @Param("faculty_id") Integer facultyId);
 }

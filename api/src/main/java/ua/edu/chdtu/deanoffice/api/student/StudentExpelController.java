@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
@@ -76,7 +77,7 @@ public class StudentExpelController {
     @GetMapping("")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllStudentExpels() {
-        List<StudentExpel> studentExpels = studentDegreeService.getAllExpelStudents();
+        List<StudentExpel> studentExpels = studentDegreeService.getAllExpelStudents(Constants.FACULTY_ID);
         return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
     }
 }
