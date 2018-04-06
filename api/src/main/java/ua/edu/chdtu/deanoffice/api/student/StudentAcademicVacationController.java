@@ -43,7 +43,7 @@ public class StudentAcademicVacationController {
 
     @JsonView(StudentView.AcademicVacation.class)
     @PostMapping("")
-    public ResponseEntity expelStudentDegree(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
+    public ResponseEntity directStudentToAcademicVacation(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
                     .moveToAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
