@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +27,7 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/students/degrees/expels")
 public class StudentExpelController {
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
@@ -42,7 +43,7 @@ public class StudentExpelController {
 
 
     @JsonView(StudentView.Expel.class)
-    @PostMapping("/degrees/expels")
+    @PostMapping("")
     public ResponseEntity expelStudentDegree(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
             OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
@@ -70,5 +71,12 @@ public class StudentExpelController {
         studentExpel.setStudentDegree(studentDegree);
         studentExpel.setReason(orderReason);
         return studentExpel;
+    }
+
+    @GetMapping("")
+    @JsonView(StudentView.Expel.class)
+    public ResponseEntity getAllStudentExpels() {
+        List<StudentExpel> studentExpels = studentDegreeService.getAllExpelStudents();
+        return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
     }
 }

@@ -12,17 +12,17 @@ import java.util.Date;
 public class StudentExpelDTO {
     @JsonView(StudentView.Expel.class)
     private Integer id;
-    @JsonView(StudentView.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private StudentDegreeDTO studentDegree;
-    @JsonView(StudentView.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private Date expelDate;
-    @JsonView(StudentView.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private String orderNumber;
-    @JsonView(StudentView.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private Date orderDate;
-    @JsonView(StudentView.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private OrderReasonDTO reason;
-    @JsonView(StudentView.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private Date applicationDate;
 
     private Integer[] studentDegreeIds;

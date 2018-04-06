@@ -54,4 +54,8 @@ public class StudentDegreeService {
 
         return studentExpelRepository.save(studentExpels);
     }
+
+    public List<StudentExpel> getAllExpelStudents() {
+        return this.studentExpelRepository.findAll();
+    }
 }
