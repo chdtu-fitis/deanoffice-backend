@@ -74,10 +74,11 @@ public class CourseController {
         List<CourseForGroupDTO> updatedCourses = body.get("updatedCourses");
         List<Integer> deleteCoursesIds = body.get("deleteCoursesIds");
 
-        if (newCourses == null || updatedCourses == null || deleteCoursesIds == null)
+        if (newCourses == null || updatedCourses == null || deleteCoursesIds == null) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY);
-        Set<CourseForGroup> newCoursesForGroup = new HashSet<CourseForGroup>();
-        Set<CourseForGroup> updatedCoursesForGroup = new HashSet<CourseForGroup>();
+        }
+        Set<CourseForGroup> newCoursesForGroup = new HashSet<>();
+        Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
         for (CourseForGroupDTO newCourseForGroup: newCourses) {
             CourseForGroup courseForGroup = new CourseForGroup();
             Course course = courseService.getCourse(newCourseForGroup.getCourse().getId());
@@ -116,13 +117,13 @@ public class CourseController {
 
     @PostMapping("/courses")
     @ResponseBody
-    public ResponseEntity createCourse(@RequestBody Course course){
+    public ResponseEntity createCourse(@RequestBody Course course) {
         try {
             this.courseService.createCourse(course);
             return new ResponseEntity(HttpStatus.CREATED);
         }
-        catch (DataIntegrityViolationException e){
-            return ExceptionHandlerAdvice.handleException(e, HttpStatus.UNPROCESSABLE_ENTITY);
+        catch (DataIntegrityViolationException exception) {
+            return ExceptionHandlerAdvice.handleException(exception);
         }
     }
 }
