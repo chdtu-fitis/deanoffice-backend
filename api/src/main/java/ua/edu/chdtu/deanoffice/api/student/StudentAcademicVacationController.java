@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,16 +12,12 @@ import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
@@ -70,12 +65,5 @@ public class StudentAcademicVacationController {
         studentAcademicVacation.setReason(orderReason);
 
         return studentAcademicVacation;
-    }
-
-    @JsonView(StudentView.AcademicVacation.class)
-    @GetMapping("")
-    public ResponseEntity getById() {
-        List<StudentAcademicVacation> studentAcademicVacation = studentAcademicVacationService.getAll();
-        return ResponseEntity.ok(parse(studentAcademicVacation, StudentAcademicVacationDTO.class, STRICT));
     }
 }
