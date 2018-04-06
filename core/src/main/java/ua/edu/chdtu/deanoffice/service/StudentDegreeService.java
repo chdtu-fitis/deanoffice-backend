@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
@@ -56,6 +57,6 @@ public class StudentDegreeService {
     }
 
     public List<StudentExpel> getAllExpelStudents() {
-        return this.studentExpelRepository.findAll();
+        return this.studentExpelRepository.findAllFired(Constants.SUCCESS_REASON_IDS);
     }
 }
