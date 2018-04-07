@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.importing.ImportDataService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,27 +103,5 @@ public class StudentController {
         }
         byte[] photo = student.getPhoto();
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
-    }
-
-
-    @JsonView(StudentView.Degrees.class)
-    @PostMapping("/import")
-    public List importStudents(@RequestParam("file") MultipartFile uploadfile) {
-
-        if (uploadfile.isEmpty()) {
-            return null;
-        }
-
-        List<Student> importedData;
-        List<StudentDTO> studentListDTO;
-
-        try {
-            importedData = importDataService.getStudentsFromStream(uploadfile.getInputStream());
-            studentListDTO = parseToStudentDTO(importedData);
-        } catch (Exception exception) {
-            return Collections.singletonList(handleException(exception));
-        }
-
-        return studentListDTO;
     }
 }
