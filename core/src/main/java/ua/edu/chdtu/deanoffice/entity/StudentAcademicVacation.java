@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -18,6 +19,7 @@ import java.util.Date;
 @Table(name = "student_academic_vacation")
 public class StudentAcademicVacation extends BaseEntity {
     @ManyToOne
+    @JoinColumn(name = "studentdegree_id")
     private StudentDegree studentDegree;
     @Column(name = "vacation_start_date", nullable = false)
     @Temporal(TemporalType.DATE)
