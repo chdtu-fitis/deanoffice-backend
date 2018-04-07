@@ -27,7 +27,7 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
-@RequestMapping("/students/academic-vacations")
+@RequestMapping("/students/degrees/academic-vacations")
 public class StudentAcademicVacationController {
     private final StudentAcademicVacationService studentAcademicVacationService;
     private final OrderReasonService orderReasonService;
