@@ -3,10 +3,12 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentAcademicVacationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
@@ -17,14 +19,14 @@ import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.net.URI;
+import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
 @RestController
-@RequestMapping("/students/academic-vacations")
+@RequestMapping("/students/degrees/academic-vacations")
 public class StudentAcademicVacationController {
     private final StudentAcademicVacationService studentAcademicVacationService;
     private final OrderReasonService orderReasonService;
@@ -49,7 +51,7 @@ public class StudentAcademicVacationController {
                     .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
 
             URI location = getNewResourceLocation(studentAcademicVacation.getId());
-            return ResponseEntity.created(location).body(parse(studentAcademicVacation, StudentAcademicVacationDTO.class));
+            return ResponseEntity.created(location).body(Parser.parse(studentAcademicVacation, StudentAcademicVacationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -57,7 +59,7 @@ public class StudentAcademicVacationController {
 
     private StudentAcademicVacation createStudentAcademicVacation(StudentAcademicVacationDTO studentAcademicVacationDTO) {
         StudentAcademicVacation studentAcademicVacation =
-                (StudentAcademicVacation) strictParse(studentAcademicVacationDTO, StudentAcademicVacation.class);
+                (StudentAcademicVacation) Parser.strictParse(studentAcademicVacationDTO, StudentAcademicVacation.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentAcademicVacationDTO.getStudentDegreeId());
         studentAcademicVacation.setStudentDegree(studentDegree);
@@ -66,5 +68,12 @@ public class StudentAcademicVacationController {
         studentAcademicVacation.setReason(orderReason);
 
         return studentAcademicVacation;
+    }
+
+    @JsonView(StudentView.AcademicVacation.class)
+    @GetMapping("")
+    public ResponseEntity getAllAcademicVacations() {
+        List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(FACULTY_ID);
+        return ResponseEntity.ok(Parser.parse(academicVacations, StudentAcademicVacationDTO.class));
     }
 }

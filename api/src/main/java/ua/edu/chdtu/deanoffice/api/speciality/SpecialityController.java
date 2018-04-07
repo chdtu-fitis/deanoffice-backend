@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
@@ -25,11 +24,14 @@ public class SpecialityController {
     }
 
     @GetMapping("")
-    public ResponseEntity getSpecialities(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
-    ) {
-        List<Speciality> specialities = specialityService.getSpecialityByActive(onlyActive);
+    public ResponseEntity getAllSpecialities() {
+        List<Speciality> specialities = specialityService.getSpecialityByActive(false);
         return ResponseEntity.ok(parse(specialities, SpecialityDTO.class));
     }
 
+    @GetMapping("/active")
+    public ResponseEntity getActiveSpecialities() {
+        List<Speciality> specialities = specialityService.getSpecialityByActive(true);
+        return ResponseEntity.ok(parse(specialities, SpecialityDTO.class));
+    }
 }
