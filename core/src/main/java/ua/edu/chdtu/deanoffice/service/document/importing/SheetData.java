@@ -145,7 +145,7 @@ class SheetData {
             field.setAccessible(true);
 
             if (Objects.equals(col, field.get(headerData))) {
-                ReflectionUtils.setField(field, studentData, value);
+                ReflectionUtils.setField(field, studentData, value.replaceAll("\"", ""));
             }
         });
     }
