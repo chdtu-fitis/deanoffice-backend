@@ -3,7 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student.dto;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.api.general.dto.OrderReasonDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 
 import java.util.Date;
 
@@ -23,7 +23,7 @@ public class StudentAcademicVacationDTO {
     @JsonView(StudentView.AcademicVacation.class)
     private Date orderDate;
     @JsonView(StudentView.AcademicVacation.class)
-    private OrderReasonDTO reason;
+    private NamedDTO reason;
     @JsonView(StudentView.AcademicVacation.class)
     private Date applicationDate;
 
