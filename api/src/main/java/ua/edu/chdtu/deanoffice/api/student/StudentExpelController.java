@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
@@ -82,7 +81,7 @@ public class StudentExpelController {
     @GetMapping("")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllStudentExpels() {
-        List<StudentExpel> studentExpels = studentDegreeService.getAllExpelStudents(Constants.FACULTY_ID);
+        List<StudentExpel> studentExpels = studentExpelService.getAllExpelStudents(Constants.FACULTY_ID);
         return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
     }
 }
