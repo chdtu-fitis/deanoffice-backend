@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
@@ -28,8 +29,6 @@ import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
 @RestController
 @RequestMapping("/students")
@@ -66,7 +65,7 @@ public class StudentDegreeController {
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegrees(boolean active) {
-        return parse(studentDegreeService.getAllByActive(active), StudentDegreeDTO.class);
+        return Parser.parse(studentDegreeService.getAllByActive(active), StudentDegreeDTO.class);
     }
 
     @JsonView(StudentView.Degree.class)
@@ -85,14 +84,14 @@ public class StudentDegreeController {
             StudentDegree studentDegree = createStudentDegree(newStudentDegree, student);
 
             URI location = getNewResourceLocation(studentDegree.getId());
-            return ResponseEntity.created(location).body(parse(studentDegree, StudentDegreeDTO.class));
+            return ResponseEntity.created(location).body(Parser.parse(studentDegree, StudentDegreeDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
     private Student createStudent(StudentDTO newStudentDTO) {
-        Student newStudent = (Student) strictParse(newStudentDTO, Student.class);
+        Student newStudent = (Student) Parser.strictParse(newStudentDTO, Student.class);
         if (newStudent.getId() != 0) {
             newStudent.setId(0);
         }
@@ -100,7 +99,7 @@ public class StudentDegreeController {
     }
 
     private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
-        StudentDegree newStudentDegree = (StudentDegree) strictParse(newStudentDegreeDTO, StudentDegree.class);
+        StudentDegree newStudentDegree = (StudentDegree) Parser.strictParse(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
@@ -140,7 +139,7 @@ public class StudentDegreeController {
     @GetMapping("/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
         Student student = studentService.findById(studentId);
-        return ResponseEntity.ok(parse(student, StudentDTO.class));
+        return ResponseEntity.ok(Parser.parse(student, StudentDTO.class));
     }
 
     @JsonView(StudentView.Degrees.class)
@@ -154,7 +153,7 @@ public class StudentDegreeController {
         }
 
         try {
-            List<StudentDegree> studentDegrees = strictParse(studentDegreesDTO, StudentDegree.class);
+            List<StudentDegree> studentDegrees = Parser.strictParse(studentDegreesDTO, StudentDegree.class);
             Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
@@ -165,7 +164,7 @@ public class StudentDegreeController {
 
             studentDegreeService.update(studentDegrees);
             Student upStudent = studentService.findById(studentId);
-            return ResponseEntity.ok(parse(upStudent, StudentDTO.class));
+            return ResponseEntity.ok(Parser.parse(upStudent, StudentDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.Constants;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
@@ -25,8 +26,6 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
 @RestController
 @RequestMapping("/students/degrees/expels")
@@ -53,7 +52,7 @@ public class StudentExpelController {
         try {
             OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
             List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO, orderReason));
-            List<StudentExpelDTO> studentExpelDTOs = parse(studentExpelList, StudentExpelDTO.class);
+            List<StudentExpelDTO> studentExpelDTOs = Parser.parse(studentExpelList, StudentExpelDTO.class);
 
             Object[] ids = studentExpelDTOs.stream().map(StudentExpelDTO::getId).toArray();
             URI location = getNewResourceLocation(ids);
@@ -71,7 +70,7 @@ public class StudentExpelController {
     }
 
     private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, OrderReason orderReason, int studentDegreeId) {
-        StudentExpel studentExpel = (StudentExpel) strictParse(studentExpelDTO, StudentExpel.class);
+        StudentExpel studentExpel = (StudentExpel) Parser.strictParse(studentExpelDTO, StudentExpel.class);
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
         studentExpel.setReason(orderReason);
@@ -82,6 +81,6 @@ public class StudentExpelController {
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllStudentExpels() {
         List<StudentExpel> studentExpels = studentExpelService.getAllExpelStudents(Constants.FACULTY_ID);
-        return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
+        return ResponseEntity.ok(Parser.parse(studentExpels, StudentExpelDTO.class));
     }
 }
