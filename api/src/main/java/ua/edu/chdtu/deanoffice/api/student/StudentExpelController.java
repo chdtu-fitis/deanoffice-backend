@@ -1,9 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +14,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 
 import java.net.URI;
 import java.util.List;
@@ -25,38 +23,40 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 @RequestMapping("/students")
 public class StudentExpelController {
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
+    private final StudentExpelService studentExpelService;
 
     @Autowired
     public StudentExpelController(
             StudentDegreeService studentDegreeService,
-            OrderReasonService orderReasonService
+            OrderReasonService orderReasonService,
+            StudentExpelService studentExpelService
     ) {
         this.studentDegreeService = studentDegreeService;
         this.orderReasonService = orderReasonService;
+        this.studentExpelService = studentExpelService;
     }
 
 
     @JsonView(StudentView.Expel.class)
     @PostMapping("/degrees/expels")
     public ResponseEntity expelStudentDegree(@RequestBody StudentExpelDTO studentExpelDTO) {
-        List<StudentExpelDTO> studentExpelDTOList;
         try {
-            List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(createStudentExpels(studentExpelDTO));
-            studentExpelDTOList = new ModelMapper()
-                    .map(studentExpelList, new TypeToken<List<StudentExpelDTO>>() {}.getType());
+            List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO));
+            List<StudentExpelDTO> studentExpelDTOs = parse(studentExpelList, StudentExpelDTO.class);
+
+            Object[] ids = studentExpelDTOs.stream().map(StudentExpelDTO::getId).toArray();
+            URI location = getNewResourceLocation(ids);
+            return ResponseEntity.created(location).body(studentExpelDTOs);
         } catch (Exception exception) {
             return handleException(exception);
         }
-
-        Object[] ids = studentExpelDTOList.stream().map(StudentExpelDTO::getId).toArray();
-        URI location = getNewResourceLocation(ids);
-        return ResponseEntity.created(location).body(studentExpelDTOList);
     }
 
     private List<StudentExpel> createStudentExpels(StudentExpelDTO studentExpelDTO) {
@@ -68,16 +68,10 @@ public class StudentExpelController {
     }
 
     private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, OrderReason orderReason, int studentDegreeId) {
-        StudentExpel studentExpel = parseToStudentExpel(studentExpelDTO);
+        StudentExpel studentExpel = (StudentExpel) parse(studentExpelDTO, StudentExpel.class);
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
         studentExpel.setReason(orderReason);
         return studentExpel;
-    }
-
-    private StudentExpel parseToStudentExpel(StudentExpelDTO studentExpelDTO) {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        return modelMapper.map(studentExpelDTO, StudentExpel.class);
     }
 }

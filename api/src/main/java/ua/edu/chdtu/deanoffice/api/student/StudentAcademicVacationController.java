@@ -18,10 +18,10 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.net.URI;
 
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
 @RestController
 @RequestMapping("/students/academic-vacations")
@@ -56,7 +56,8 @@ public class StudentAcademicVacationController {
     }
 
     private StudentAcademicVacation createStudentAcademicVacation(StudentAcademicVacationDTO studentAcademicVacationDTO) {
-        StudentAcademicVacation studentAcademicVacation = (StudentAcademicVacation) parse(studentAcademicVacationDTO, StudentAcademicVacation.class, STRICT);
+        StudentAcademicVacation studentAcademicVacation =
+                (StudentAcademicVacation) strictParse(studentAcademicVacationDTO, StudentAcademicVacation.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentAcademicVacationDTO.getStudentDegreeId());
         studentAcademicVacation.setStudentDegree(studentDegree);
