@@ -7,6 +7,8 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentAcademicVacationRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
+import java.util.List;
+
 @Service
 public class StudentAcademicVacationService {
     private final StudentAcademicVacationRepository studentAcademicVacationRepository;
@@ -29,5 +31,9 @@ public class StudentAcademicVacationService {
         studentDegreeRepository.save(studentDegree);
 
         return studentAcademicVacationRepository.save(studentAcademicVacation);
+    }
+
+    public List<StudentAcademicVacation> getAll(Integer facultyId) {
+        return studentAcademicVacationRepository.findAllByFaculty(facultyId);
     }
 }
