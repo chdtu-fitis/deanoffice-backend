@@ -1,8 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.course;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -21,11 +19,12 @@ import ua.edu.chdtu.deanoffice.service.CourseService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 
-import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RequestMapping("/")
 @RestController
@@ -47,24 +46,14 @@ public class CourseController {
     @GetMapping("/courses")
     public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") int semester) {
         List<Course> courses = courseService.getCoursesBySemester(semester);
-        return ResponseEntity.ok(parseToCourseDTO(courses));
-    }
-
-    private List<CourseDTO> parseToCourseDTO(List<Course> courses) {
-        Type listType = new TypeToken<List<CourseDTO>>() {}.getType();
-        return new ModelMapper().map(courses, listType);
+        return ResponseEntity.ok(parse(courses, CourseDTO.class));
     }
 
     @GetMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
         List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
-        return ResponseEntity.ok(parseToCourseForGroupDTO(coursesForGroup));
-    }
-
-    private List<CourseForGroupDTO> parseToCourseForGroupDTO(List<CourseForGroup> courseForGroupList) {
-        Type listType = new TypeToken<List<CourseForGroupDTO>>() {}.getType();
-        return new ModelMapper().map(courseForGroupList, listType);
+        return ResponseEntity.ok(parse(coursesForGroup, CourseForGroupDTO.class));
     }
 
     @PostMapping(value = "/groups/{groupId}/courses")
@@ -104,14 +93,14 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCourses(@PathVariable int groupId) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
-        return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
+        return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
     }
 
     @GetMapping("/specialization/{id}/courses")
     @JsonView(CourseForGroupView.Basic.class)
     public ResponseEntity getCoursesBySpecialization(@PathVariable int id, @RequestParam("semester") int semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(id, semester);
-        return ResponseEntity.ok(parseToCourseForGroupDTO(courseForGroups));
+        return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
     }
 
     @PostMapping("/courses")
