@@ -21,7 +21,7 @@ public class StudentAcademicVacationService {
         this.studentDegreeRepository = studentDegreeRepository;
     }
 
-    public StudentAcademicVacation moveToAcademicVacation(StudentAcademicVacation studentAcademicVacation) {
+    public StudentAcademicVacation giveAcademicVacation(StudentAcademicVacation studentAcademicVacation) {
         Integer id = studentAcademicVacation.getStudentDegree().getId();
 
         StudentDegree studentDegree = studentDegreeRepository.getOne(id);

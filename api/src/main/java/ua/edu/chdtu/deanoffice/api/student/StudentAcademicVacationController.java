@@ -43,10 +43,10 @@ public class StudentAcademicVacationController {
 
     @JsonView(StudentView.AcademicVacation.class)
     @PostMapping("")
-    public ResponseEntity directStudentToAcademicVacation(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
+    public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
-                    .moveToAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
+                    .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
 
             URI location = getNewResourceLocation(studentAcademicVacation.getId());
             return ResponseEntity.created(location).body(parse(studentAcademicVacation, StudentAcademicVacationDTO.class));
