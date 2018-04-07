@@ -14,4 +14,5 @@ public class StudentView {
     public interface Search extends SearchSimpleDegrees {}
     public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees{}
     public interface Expel extends Simple, GeneralView.OrderReason {}
+    public interface AcademicVacation extends Simple, GeneralView.OrderReason {}
 }
