@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
 import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 import static ua.edu.chdtu.deanoffice.Constants.SUCCESS_REASON_IDS;
 
@@ -66,8 +67,11 @@ public class StudentDegreeService {
     }
 
     public List<StudentExpel> getAllExpelStudents(Integer facultyId) {
+        return this.studentExpelRepository.findAllFired(SUCCESS_REASON_IDS, getLimitYear(), facultyId);
+    }
+
+    private Date getLimitYear() {
         int currentYear = currentYearRepository.getOne(1).getCurrYear();
-        Date limitYear = new Date(Date.parse((currentYear - 5) + "/01/01"));
-        return this.studentExpelRepository.findAllFired(SUCCESS_REASON_IDS, limitYear, facultyId);
+        return new Date((currentYear - EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW) + "/01/01");
     }
 }

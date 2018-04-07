@@ -45,7 +45,7 @@ public class StudentExpelController {
 
     @JsonView(StudentView.Expel.class)
     @PostMapping("")
-    public ResponseEntity expelStudentDegree(@RequestBody StudentExpelDTO studentExpelDTO) {
+    public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
             OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
             List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(createStudentExpels(studentExpelDTO, orderReason));
