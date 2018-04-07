@@ -8761,6 +8761,13 @@ SELECT pg_catalog.setval('privilege_id_seq', 4, true);
 
 
 --
+-- Data for Name: schema_version; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+-- INSERT INTO schema_version (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (1, '1', '<< Flyway Baseline >>', 'BASELINE', '<< Flyway Baseline >>', NULL, 'postgres', '2018-04-01 18:22:21.481628', 0, true);
+
+
+--
 -- Name: speciality_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
