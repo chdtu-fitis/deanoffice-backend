@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
-import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RequestMapping("/")
@@ -42,8 +42,12 @@ public class CourseController {
     private TeacherService teacherService;
 
     @Autowired
-    public CourseController(CourseForGroupService courseForGroupService, CourseService courseService,
-                            StudentGroupService studentGroupService, TeacherService teacherService) {
+    public CourseController(
+            CourseForGroupService courseForGroupService,
+            CourseService courseService,
+            StudentGroupService studentGroupService,
+            TeacherService teacherService
+    ) {
         this.courseForGroupService = courseForGroupService;
         this.courseService = courseService;
         this.studentGroupService = studentGroupService;
@@ -63,33 +67,44 @@ public class CourseController {
         return ResponseEntity.ok(parse(coursesForGroup, CourseForGroupDTO.class));
     }
 
-    @PostMapping(value = "/groups/{groupId}/courses")
-    public ResponseEntity.BodyBuilder addCoursesForGroup(@RequestBody Map<String,List> body,
-            @PathVariable Integer groupId) {
+    @PostMapping("/groups/{groupId}/courses")
+    public ResponseEntity.BodyBuilder addCoursesForGroup(@RequestBody Map<String,List> body, @PathVariable Integer groupId) {
         List<CourseForGroupDTO> newCourses = body.get("newCourses");
         List<CourseForGroupDTO> updatedCourses = body.get("updatedCourses");
         List<Integer> deleteCoursesIds = body.get("deleteCoursesIds");
 
-        if (newCourses == null || updatedCourses == null || deleteCoursesIds == null)
+        if (newCourses == null || updatedCourses == null || deleteCoursesIds == null) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY);
-        Set<CourseForGroup> newCoursesForGroup = new HashSet<CourseForGroup>();
-        Set<CourseForGroup> updatedCoursesForGroup = new HashSet<CourseForGroup>();
+        }
+
+        Set<CourseForGroup> newCoursesForGroup = new HashSet<>();
+        Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
+
         for (CourseForGroupDTO newCourseForGroup: newCourses) {
             CourseForGroup courseForGroup = new CourseForGroup();
+
             Course course = courseService.getCourse(newCourseForGroup.getCourse().getId());
-            StudentGroup studentGroup = studentGroupService.getById(groupId);
-            Teacher teacher = teacherService.getTeacher(newCourseForGroup.getTeacher().getId());
             courseForGroup.setCourse(course);
+
+            StudentGroup studentGroup = studentGroupService.getById(groupId);
             courseForGroup.setStudentGroup(studentGroup);
+
+            Teacher teacher = teacherService.getTeacher(newCourseForGroup.getTeacher().getId());
             courseForGroup.setTeacher(teacher);
+
             courseForGroup.setExamDate(newCourseForGroup.getExamDate());
+
             newCoursesForGroup.add(courseForGroup);
         }
+
         for (CourseForGroupDTO updatedCourseForGroup: updatedCourses) {
             CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(updatedCourseForGroup.getId());
+
             Teacher teacher = teacherService.getTeacher(updatedCourseForGroup.getTeacher().getId());
             courseForGroup.setTeacher(teacher);
+
             courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
+
             updatedCoursesForGroup.add(courseForGroup);
         }
         courseForGroupService.addCourseForGroupAndNewChanges(newCoursesForGroup, updatedCoursesForGroup, deleteCoursesIds);
@@ -110,15 +125,15 @@ public class CourseController {
         return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
     }
 
-    @PostMapping("/courses")
     @ResponseBody
-    public ResponseEntity createCourse(@RequestBody Course course){
+    @PostMapping("/courses")
+    public ResponseEntity createCourse(@RequestBody Course course) {
         try {
             this.courseService.createCourse(course);
             return new ResponseEntity(HttpStatus.CREATED);
         }
-        catch (DataIntegrityViolationException e){
-            return ExceptionHandlerAdvice.handleException(e, HttpStatus.UNPROCESSABLE_ENTITY);
+        catch (DataIntegrityViolationException exception) {
+            return handleException(exception);
         }
     }
 }
