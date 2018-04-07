@@ -46,9 +46,11 @@ public class StudentDegreeService {
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
-        List<Integer> idList= studentExpels.stream().map(studentExpel -> studentExpel.getStudentDegree().getId()).collect(Collectors.toList());
+        List<Integer> ids = studentExpels.stream()
+                .map(studentExpel -> studentExpel.getStudentDegree().getId())
+                .collect(Collectors.toList());
 
-        List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(idList);
+        List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(ids);
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
         studentDegreeRepository.save(studentDegrees);
 
