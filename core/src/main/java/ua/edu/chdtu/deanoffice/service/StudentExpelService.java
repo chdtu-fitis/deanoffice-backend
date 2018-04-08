@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.CurrentYear;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
@@ -45,11 +44,11 @@ public class StudentExpelService {
         return studentExpelRepository.save(studentExpels);
     }
 
-    public List<StudentExpel> getAllExpelStudents(Integer facultyId) {
-        return this.studentExpelRepository.findAllFired(SUCCESS_REASON_IDS, getLimitYear(), facultyId);
+    public List<StudentExpel> getAllExpelledStudents(Integer facultyId) {
+        return this.studentExpelRepository.findAllFired(SUCCESS_REASON_IDS, getLimitDate(), facultyId);
     }
 
-    private Date getLimitYear() {
+    private Date getLimitDate() {
         int currentYear = currentYearRepository.getOne(1).getCurrYear();
         return new Date((currentYear - EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW) + "/01/01");
     }

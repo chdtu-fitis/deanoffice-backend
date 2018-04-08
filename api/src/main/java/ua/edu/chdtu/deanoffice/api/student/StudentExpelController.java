@@ -79,8 +79,8 @@ public class StudentExpelController {
 
     @GetMapping("")
     @JsonView(StudentView.Expel.class)
-    public ResponseEntity getAllStudentExpels() {
-        List<StudentExpel> studentExpels = studentExpelService.getAllExpelStudents(Constants.FACULTY_ID);
+    public ResponseEntity getAllExpelledStudents() {
+        List<StudentExpel> studentExpels = studentExpelService.getAllExpelledStudents(Constants.FACULTY_ID);
         return ResponseEntity.ok(Parser.parse(studentExpels, StudentExpelDTO.class));
     }
 }
