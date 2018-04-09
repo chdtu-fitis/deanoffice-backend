@@ -16,9 +16,11 @@ public class Parser {
     public static Object parse(Object source, Class destination) {
         return new ModelMapper().map(source, destination);
     }
+
     public static List parse(List source, Class destination) {
         return new ModelMapper().map(source, new ListParameterizedType(destination));
     }
+
     public static Set parse(Set source, Class destination) {
         return new ModelMapper().map(source, new SetParameterizedType(destination));
     }
@@ -26,9 +28,11 @@ public class Parser {
     public static Object parse(Object source, Class destination, MatchingStrategy matchingStrategy) {
         return createModelMapperWithStrategy(matchingStrategy).map(source, destination);
     }
+
     public static List parse(List source, Class destination, MatchingStrategy matchingStrategy) {
         return createModelMapperWithStrategy(matchingStrategy).map(source, new ListParameterizedType(destination));
     }
+
     public static Set parse(Set source, Class destination, MatchingStrategy matchingStrategy) {
         return createModelMapperWithStrategy(matchingStrategy).map(source, new SetParameterizedType(destination));
     }
@@ -36,9 +40,11 @@ public class Parser {
     public static Object strictParse(Object source, Class destination) {
         return createModelMapperWithStrategy(STRICT_MATCHING_STRATEGY).map(source, destination);
     }
+
     public static List strictParse(List source, Class destination) {
         return createModelMapperWithStrategy(STRICT_MATCHING_STRATEGY).map(source, new ListParameterizedType(destination));
     }
+
     public static Set strictParse(Set source, Class destination) {
         return createModelMapperWithStrategy(STRICT_MATCHING_STRATEGY).map(source, new SetParameterizedType(destination));
     }
