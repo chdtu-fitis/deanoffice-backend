@@ -28,7 +28,7 @@ public class StudentExpelService {
         return studentExpels.isEmpty();
     }
 
-    public void returnStudent(int studentDegreeId) {
+    public void resumeExpelledStudent(int studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
         studentDegree.setActive(true);
         studentDegreeRepository.save(studentDegree);
