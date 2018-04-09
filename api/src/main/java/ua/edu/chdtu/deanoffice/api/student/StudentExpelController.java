@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +18,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 
 import java.net.URI;
 import java.util.List;
@@ -28,23 +31,26 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
-@RequestMapping("/students/degrees/expels")
+@RequestMapping("/students/degrees/")
 public class StudentExpelController {
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
+    private final StudentExpelService studentExpelService;
 
     @Autowired
     public StudentExpelController(
             StudentDegreeService studentDegreeService,
-            OrderReasonService orderReasonService
+            OrderReasonService orderReasonService,
+            StudentExpelService studentExpelService
     ) {
         this.studentDegreeService = studentDegreeService;
         this.orderReasonService = orderReasonService;
+        this.studentExpelService = studentExpelService;
     }
 
 
     @JsonView(StudentView.Expel.class)
-    @PostMapping("")
+    @PostMapping("/expels")
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
             OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
@@ -74,10 +80,23 @@ public class StudentExpelController {
         return studentExpel;
     }
 
-    @GetMapping("")
+    @GetMapping("/expels")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllStudentExpels() {
         List<StudentExpel> studentExpels = studentDegreeService.getAllExpelStudents(Constants.FACULTY_ID);
         return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
+    }
+
+    @PutMapping("/{student_degree_id}")
+    public ResponseEntity returnStudent(@PathVariable("student_degree_id") int studentDegreeId) {
+        try {
+            if (studentExpelService.studentIsNotExpelled(studentDegreeId)) {
+                return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") is not expelled");
+            }
+            studentExpelService.returnStudent(studentDegreeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 }
