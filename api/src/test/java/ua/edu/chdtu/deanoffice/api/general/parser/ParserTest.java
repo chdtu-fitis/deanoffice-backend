@@ -13,6 +13,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.modelmapper.convention.MatchingStrategies.STRICT;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
 public class ParserTest {
     private StudentDTO sourceObject = new StudentDTO();
@@ -36,7 +37,7 @@ public class ParserTest {
         Student actualObject = (Student) parse(sourceObject, Student.class);
         assertParser(actualObject, expectedObject);
 
-        actualObject = (Student) parse(sourceObject, Student.class, STRICT);
+        actualObject = (Student) strictParse(sourceObject, Student.class);
         assertParser(actualObject, expectedObject);
     }
 
@@ -56,7 +57,7 @@ public class ParserTest {
         List<Student> actualList = parse(sourceList, Student.class);
         assertParser(actualList);
 
-        actualList = parse(sourceList, Student.class, STRICT);
+        actualList = strictParse(sourceList, Student.class);
         assertParser(actualList);
     }
 
@@ -76,7 +77,7 @@ public class ParserTest {
         Set<Student> actualSet = parse(sourceSet, Student.class);
         assertParser(actualSet);
 
-        actualSet = parse(sourceSet, Student.class, STRICT);
+        actualSet = strictParse(sourceSet, Student.class);
         assertParser(actualSet);
     }
 

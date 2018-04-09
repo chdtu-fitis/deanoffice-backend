@@ -1,9 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
@@ -26,13 +24,11 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.student.StudentController.parseToStudentDTO;
 
 @RestController
 @RequestMapping("/students")
@@ -69,11 +65,7 @@ public class StudentDegreeController {
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegrees(boolean active) {
-        return parseToStudentDegreeDTO(studentDegreeService.getAllByActive(active));
-    }
-
-    private List<StudentDegreeDTO> parseToStudentDegreeDTO(List<StudentDegree> studentDegreeList) {
-        return new ModelMapper().map(studentDegreeList, new TypeToken<List<StudentDegreeDTO>>() {}.getType());
+        return Parser.parse(studentDegreeService.getAllByActive(active), StudentDegreeDTO.class);
     }
 
     @JsonView(StudentView.Degree.class)
@@ -82,29 +74,24 @@ public class StudentDegreeController {
             @RequestBody() StudentDegreeDTO newStudentDegree,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
-        Student student;
-        StudentDegree studentDegree;
-
         try {
+            Student student;
             if (newStudent) {
                 student = createStudent(newStudentDegree.getStudent());
             } else {
                 student = studentService.findById(newStudentDegree.getStudent().getId());
             }
-            studentDegree = createStudentDegree(newStudentDegree, student);
+            StudentDegree studentDegree = createStudentDegree(newStudentDegree, student);
+
+            URI location = getNewResourceLocation(studentDegree.getId());
+            return ResponseEntity.created(location).body(Parser.parse(studentDegree, StudentDegreeDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
-
-        URI location = getNewResourceLocation(studentDegree.getId());
-        return ResponseEntity.created(location).body(new ModelMapper().map(studentDegree, StudentDegreeDTO.class));
     }
 
     private Student createStudent(StudentDTO newStudentDTO) {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        Student newStudent = modelMapper.map(newStudentDTO, Student.class);
+        Student newStudent = (Student) Parser.strictParse(newStudentDTO, Student.class);
         if (newStudent.getId() != 0) {
             newStudent.setId(0);
         }
@@ -112,10 +99,7 @@ public class StudentDegreeController {
     }
 
     private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-
-        StudentDegree newStudentDegree = modelMapper.map(newStudentDegreeDTO, StudentDegree.class);
+        StudentDegree newStudentDegree = (StudentDegree) Parser.strictParse(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
@@ -153,10 +137,9 @@ public class StudentDegreeController {
 
     @JsonView(StudentView.Degrees.class)
     @GetMapping("/{id}/degrees")
-    public ResponseEntity getAllStudentsDegreeById(
-            @PathVariable("id") Integer studentId
-    ) {
-        return ResponseEntity.ok(parseToStudentDTO(studentService.findById(studentId)));
+    public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
+        Student student = studentService.findById(studentId);
+        return ResponseEntity.ok(Parser.parse(student, StudentDTO.class));
     }
 
     @JsonView(StudentView.Degrees.class)
@@ -169,12 +152,8 @@ public class StudentDegreeController {
             return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id not must be null");
         }
 
-        Student upStudent;
         try {
-            ModelMapper modelMapper = new ModelMapper();
-            modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-            Type type = new TypeToken<List<StudentDegree>>() {}.getType();
-            List<StudentDegree> studentDegrees = modelMapper.map(studentDegreesDTO, type);
+            List<StudentDegree> studentDegrees = Parser.strictParse(studentDegreesDTO, StudentDegree.class);
             Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
@@ -184,11 +163,11 @@ public class StudentDegreeController {
             });
 
             studentDegreeService.update(studentDegrees);
-            upStudent = studentService.findById(studentId);
+            Student upStudent = studentService.findById(studentId);
+            return ResponseEntity.ok(Parser.parse(upStudent, StudentDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
-        return ResponseEntity.ok(parseToStudentDTO(upStudent));
     }
 
     private boolean checkNullId(List<StudentDegreeDTO> studentDegreeDTOs) {

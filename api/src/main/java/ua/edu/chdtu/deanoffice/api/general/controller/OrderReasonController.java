@@ -5,12 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.Util.parseToNamedDTO;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 @RequestMapping("/reasons")
@@ -25,18 +26,18 @@ public class OrderReasonController {
     @GetMapping("/fired-students")
     public ResponseEntity getFiredStudentReasons() {
         List<OrderReason> orderReasons = orderReasonService.getAllByKind("fired_students");
-        return ResponseEntity.ok(parseToNamedDTO(orderReasons));
+        return ResponseEntity.ok(parse(orderReasons, NamedDTO.class));
     }
 
     @GetMapping("/zarah")
     public ResponseEntity getZarahReasons() {
         List<OrderReason> orderReasons = orderReasonService.getAllByKind("zarah");
-        return ResponseEntity.ok(parseToNamedDTO(orderReasons));
+        return ResponseEntity.ok(parse(orderReasons, NamedDTO.class));
     }
 
     @GetMapping("/vidp-students")
     public ResponseEntity getVidpStudentReasons() {
         List<OrderReason> orderReasons = orderReasonService.getAllByKind("vidp_students");
-        return ResponseEntity.ok(parseToNamedDTO(orderReasons));
+        return ResponseEntity.ok(parse(orderReasons, NamedDTO.class));
     }
 }
