@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentAcademicVacationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
@@ -20,11 +21,9 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import java.net.URI;
 import java.util.List;
 
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
 import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 @RequestMapping("/students/degrees/academic-vacations")
@@ -52,14 +51,15 @@ public class StudentAcademicVacationController {
                     .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
 
             URI location = getNewResourceLocation(studentAcademicVacation.getId());
-            return ResponseEntity.created(location).body(parse(studentAcademicVacation, StudentAcademicVacationDTO.class));
+            return ResponseEntity.created(location).body(Parser.parse(studentAcademicVacation, StudentAcademicVacationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
     private StudentAcademicVacation createStudentAcademicVacation(StudentAcademicVacationDTO studentAcademicVacationDTO) {
-        StudentAcademicVacation studentAcademicVacation = (StudentAcademicVacation) parse(studentAcademicVacationDTO, StudentAcademicVacation.class, STRICT);
+        StudentAcademicVacation studentAcademicVacation =
+                (StudentAcademicVacation) Parser.strictParse(studentAcademicVacationDTO, StudentAcademicVacation.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentAcademicVacationDTO.getStudentDegreeId());
         studentAcademicVacation.setStudentDegree(studentDegree);
@@ -74,6 +74,6 @@ public class StudentAcademicVacationController {
     @GetMapping("")
     public ResponseEntity getAllAcademicVacations() {
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(FACULTY_ID);
-        return ResponseEntity.ok(parse(academicVacations, StudentAcademicVacationDTO.class));
+        return ResponseEntity.ok(Parser.parse(academicVacations, StudentAcademicVacationDTO.class));
     }
 }

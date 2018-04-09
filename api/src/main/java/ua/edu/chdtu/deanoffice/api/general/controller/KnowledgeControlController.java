@@ -1,29 +1,32 @@
 package ua.edu.chdtu.deanoffice.api.general.controller;
 
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.dto.KnowledgeControlDTO;
 import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
 import ua.edu.chdtu.deanoffice.service.KnowledgeControlService;
 
-import java.lang.reflect.Type;
 import java.util.List;
 
-@RestController
-public class KnowledgeControlController {
-    @Autowired private KnowledgeControlService knowledgeControlService;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
-    private List<KnowledgeControlDTO> parseToKnowledgeControlDTO(List<KnowledgeControl> courseForGroupList) {
-        Type listType = new TypeToken<List<KnowledgeControlDTO>>() {}.getType();
-        return new ModelMapper().map(courseForGroupList, listType);
+@RestController
+@RequestMapping("/knowledgeControls")
+public class KnowledgeControlController {
+    private final KnowledgeControlService knowledgeControlService;
+
+    @Autowired
+    public KnowledgeControlController(KnowledgeControlService knowledgeControlService) {
+        this.knowledgeControlService = knowledgeControlService;
     }
 
-    @GetMapping(path = "/knowledgeControls")
-    public List<KnowledgeControlDTO> getAllKnowledgeControls(){
-        return parseToKnowledgeControlDTO(this.knowledgeControlService.getAllKnowledgeControls());
+    @GetMapping("")
+    public ResponseEntity getAllKnowledgeControls() {
+        List<KnowledgeControl> knowledgeControlDTOs = this.knowledgeControlService.getAllKnowledgeControls();
+        return ResponseEntity.ok(parse(knowledgeControlDTOs, KnowledgeControlDTO.class));
     }
 
 }
