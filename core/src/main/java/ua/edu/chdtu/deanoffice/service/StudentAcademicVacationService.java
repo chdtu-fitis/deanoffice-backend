@@ -36,4 +36,15 @@ public class StudentAcademicVacationService {
     public List<StudentAcademicVacation> getAll(Integer facultyId) {
         return studentAcademicVacationRepository.findAllByFaculty(facultyId);
     }
+
+    public boolean inAcademicVacation(int studentDegreeId) {
+        List<StudentAcademicVacation> studentAcademicVacations = studentAcademicVacationRepository.findAllActiveByStudentDegreeId(studentDegreeId);
+        return studentAcademicVacations.isEmpty();
+    }
+
+    public void moveOut(int studentDegreeId) {
+        StudentDegree studentDegree = studentDegreeRepository.getOne(studentDegreeId);
+        studentDegree.setActive(true);
+        studentDegreeRepository.save(studentDegree);
+    }
 }

@@ -2,9 +2,12 @@ package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +30,7 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
-@RequestMapping("/students/degrees/academic-vacations")
+@RequestMapping("/students/degrees")
 public class StudentAcademicVacationController {
     private final StudentAcademicVacationService studentAcademicVacationService;
     private final OrderReasonService orderReasonService;
@@ -45,7 +48,7 @@ public class StudentAcademicVacationController {
     }
 
     @JsonView(StudentView.AcademicVacation.class)
-    @PostMapping("")
+    @PostMapping("/academic-vacations")
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
@@ -71,9 +74,22 @@ public class StudentAcademicVacationController {
     }
 
     @JsonView(StudentView.AcademicVacation.class)
-    @GetMapping("")
+    @GetMapping("/academic-vacations")
     public ResponseEntity getAllAcademicVacations() {
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(FACULTY_ID);
         return ResponseEntity.ok(parse(academicVacations, StudentAcademicVacationDTO.class));
+    }
+
+    @PutMapping("{student_degree_id}/academic-vacations")
+    public ResponseEntity moveOutFromAcademicVacation(@PathVariable("student_degree_id") int studentDegreeId) {
+        try {
+            if (studentAcademicVacationService.inAcademicVacation(studentDegreeId)) {
+                return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") don`t move to academic vacation");
+            }
+            studentAcademicVacationService.moveOut(studentDegreeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 }

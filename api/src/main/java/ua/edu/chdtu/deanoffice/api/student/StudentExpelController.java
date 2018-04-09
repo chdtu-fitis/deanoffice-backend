@@ -87,13 +87,13 @@ public class StudentExpelController {
         return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
     }
 
-    @PutMapping("/{student_degree_id}")
-    public ResponseEntity returnStudent(@PathVariable("student_degree_id") int studentDegreeId) {
+    @PutMapping("/{student_degree_id}/expels")
+    public ResponseEntity resumeExpelledStudent(@PathVariable("student_degree_id") int studentDegreeId) {
         try {
             if (studentExpelService.studentIsNotExpelled(studentDegreeId)) {
                 return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") is not expelled");
             }
-            studentExpelService.returnStudent(studentDegreeId);
+            studentExpelService.resumeExpelledStudent(studentDegreeId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
