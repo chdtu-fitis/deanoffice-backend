@@ -9,11 +9,8 @@ import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
 import java.util.List;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;

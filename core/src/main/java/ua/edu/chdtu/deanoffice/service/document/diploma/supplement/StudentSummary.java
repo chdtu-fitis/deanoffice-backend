@@ -61,22 +61,18 @@ public class StudentSummary {
     }
 
     private void setCredits() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                grade.getCourse().setCredits(new BigDecimal(grade.getCourse().getHours() / Constants.HOURS_PER_CREDIT));
-            });
-        });
+        grades.forEach(gradeSublist ->
+                gradeSublist.forEach(grade ->
+                        grade.getCourse().setCredits(new BigDecimal(grade.getCourse().getHours() / Constants.HOURS_PER_CREDIT))));
     }
 
     private void setHours() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (grade.getCourse().getHours() == null) {
-                    grade.getCourse().setHours(0);
-                }
-                totalHours += grade.getCourse().getHours();
-            });
-        });
+        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
+            if (grade.getCourse().getHours() == null) {
+                grade.getCourse().setHours(0);
+            }
+            totalHours += grade.getCourse().getHours();
+        }));
     }
 
     private void setGrades() {
@@ -90,23 +86,19 @@ public class StudentSummary {
     }
 
     private void setPoints() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (grade.getPoints() == 0) {
-                    grade.setPoints(GradeUtil.getAveragePointsFromGrade(grade));
-                }
-            });
-        });
+        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
+            if (grade.getPoints() == 0) {
+                grade.setPoints(GradeUtil.getAveragePointsFromGrade(grade));
+            }
+        }));
     }
 
     private void setEcts() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (!ectsIsSet(grade)) {
-                    grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-                }
-            });
-        });
+        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
+            if (!ectsIsSet(grade)) {
+                grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
+            }
+        }));
     }
 
     private void combineMultipleSemesterCourseGrades() {

@@ -42,7 +42,11 @@ public class CourseForGroupService {
         return courseForGroupRepository.findAllBySemester(semester);
     }
 
-    public void addCourseForGroupAndNewChanges(Set<CourseForGroup> newCourses, Set<CourseForGroup> updatedCourses, List<Integer> deleteCoursesIds) {
+    public void addCourseForGroupAndNewChanges(
+            Set<CourseForGroup> newCourses,
+            Set<CourseForGroup> updatedCourses,
+            List<Integer> deleteCoursesIds
+    ) {
         courseForGroupRepository.save(newCourses);
         courseForGroupRepository.save(updatedCourses);
         for (Integer courseId : deleteCoursesIds) {
