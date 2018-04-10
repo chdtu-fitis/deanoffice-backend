@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.Constants;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
@@ -25,10 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
-import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 @RequestMapping("/students/degrees/")
@@ -54,12 +53,12 @@ public class StudentExpelController {
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
             OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
-            List<StudentExpel> studentExpelList = studentDegreeService.expelStudents(createStudentExpels(studentExpelDTO, orderReason));
-            List<StudentExpelDTO> studentExpelDTOList = parse(studentExpelList, StudentExpelDTO.class);
+            List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO, orderReason));
+            List<StudentExpelDTO> studentExpelDTOs = Parser.parse(studentExpelList, StudentExpelDTO.class);
 
-            Object[] ids = studentExpelDTOList.stream().map(StudentExpelDTO::getId).toArray();
+            Object[] ids = studentExpelDTOs.stream().map(StudentExpelDTO::getId).toArray();
             URI location = getNewResourceLocation(ids);
-            return ResponseEntity.created(location).body(studentExpelDTOList);
+            return ResponseEntity.created(location).body(studentExpelDTOs);
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -73,18 +72,22 @@ public class StudentExpelController {
     }
 
     private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, OrderReason orderReason, int studentDegreeId) {
-        StudentExpel studentExpel = (StudentExpel) parse(studentExpelDTO, StudentExpel.class, STRICT);
+        StudentExpel studentExpel = (StudentExpel) Parser.strictParse(studentExpelDTO, StudentExpel.class);
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
-        studentExpel.setReason(orderReason);
+        studentExpel.setOrderReason(orderReason);
         return studentExpel;
     }
 
     @GetMapping("/expels")
     @JsonView(StudentView.Expel.class)
-    public ResponseEntity getAllStudentExpels() {
-        List<StudentExpel> studentExpels = studentDegreeService.getAllExpelStudents(Constants.FACULTY_ID);
-        return ResponseEntity.ok(parse(studentExpels, StudentExpelDTO.class));
+    public ResponseEntity getAllExpelledStudents() {
+        List<StudentExpel> studentExpels = studentExpelService.getAllExpelledStudents(Constants.FACULTY_ID);
+        return ResponseEntity.ok(Parser.parse(studentExpels, StudentExpelDTO.class));
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentExpelController.class);
     }
 
     @PutMapping("/{student_degree_id}/expels")

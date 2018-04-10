@@ -1,8 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,14 +8,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
-import java.lang.reflect.Type;
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 @RequestMapping("/")
@@ -25,9 +25,7 @@ public class GroupController {
     private StudentGroupService studentGroupService;
 
     @Autowired
-    public GroupController(
-            StudentGroupService studentGroupService
-    ) {
+    public GroupController(StudentGroupService studentGroupService) {
         this.studentGroupService = studentGroupService;
     }
 
@@ -35,21 +33,7 @@ public class GroupController {
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId) {
         List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
-        return ResponseEntity.ok(parseToStudentGroupShortDTO(groups));
-    }
-
-    private List<StudentGroupDTO> parseToStudentGroupDTO(List<StudentGroup> studentGroupList) {
-        ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudentGroupDTO>>() {
-        }.getType();
-        return modelMapper.map(studentGroupList, listType);
-    }
-
-    private List<StudentGroupShortDTO> parseToStudentGroupShortDTO(List<StudentGroup> studentGroupList) {
-        ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudentGroupShortDTO>>() {
-        }.getType();
-        return modelMapper.map(studentGroupList, listType);
+        return ResponseEntity.ok(parse(groups, StudentGroupShortDTO.class));
     }
 
     @GetMapping("/groups/filter")
@@ -59,14 +43,13 @@ public class GroupController {
             @RequestParam Integer year
     ) {
         List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year);
-        return ResponseEntity.ok(parseToStudentGroupDTO(groups));
+        return ResponseEntity.ok(parse(groups, StudentGroupDTO.class));
     }
 
     @GetMapping("courses/{courseId}/groups")
-    @JsonView(StudentGroupView.Basic.class)
     public ResponseEntity getGroupsByCourse(@PathVariable int courseId) {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId);
-        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+        return ResponseEntity.ok(parse(studentGroups, NamedDTO.class));
     }
 
     @GetMapping("/groups")
@@ -75,6 +58,6 @@ public class GroupController {
             @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
     ) {
         List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
-        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+        return ResponseEntity.ok(parse(studentGroups, StudentGroupDTO.class));
     }
 }

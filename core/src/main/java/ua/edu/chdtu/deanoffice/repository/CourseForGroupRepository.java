@@ -17,6 +17,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
     @Query("select cfg.course from CourseForGroup as cfg " +
             "where cfg.course.semester = :semester order by cfg.course.courseName.name desc, cfg.course.knowledgeControl.name desc, cfg.course.hours")
     List<CourseForGroup> findAllBySemester(@Param("semester") int semester);
+
     List<CourseForGroup> findAllByStudentGroupId(@Param("groupId") int groupId);
 
     @Query("select cfg from CourseForGroup as cfg " +

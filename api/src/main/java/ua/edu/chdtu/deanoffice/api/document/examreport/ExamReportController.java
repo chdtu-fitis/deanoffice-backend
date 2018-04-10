@@ -24,7 +24,7 @@ public class ExamReportController extends DocumentResponseController {
         this.examReportService = examReportService;
     }
 
-    @GetMapping(path = "/groups/{groupId}/courses/{courseId}/docx")
+    @GetMapping("/groups/{groupId}/courses/{courseId}/docx")
     public ResponseEntity<Resource> generateDocxForSingleCourse(
             @PathVariable Integer groupId,
             @PathVariable Integer courseId
@@ -33,7 +33,7 @@ public class ExamReportController extends DocumentResponseController {
         return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
-    @GetMapping(path = "/groups/{groupId}/courses/{courseId}/pdf")
+    @GetMapping("/groups/{groupId}/courses/{courseId}/pdf")
     public ResponseEntity<Resource> generateForSingleCourse(
             @PathVariable Integer groupId,
             @PathVariable Integer courseId

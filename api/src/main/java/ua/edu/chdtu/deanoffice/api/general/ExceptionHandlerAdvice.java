@@ -1,27 +1,28 @@
 package ua.edu.chdtu.deanoffice.api.general;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @ControllerAdvice
 public class ExceptionHandlerAdvice {
 
-    private static final HttpStatus defaultResponseStatus = HttpStatus.UNPROCESSABLE_ENTITY;
-    private static Logger logger = LoggerFactory.getLogger(ExceptionHandlerAdvice.class);
+    private static final HttpStatus DEFAULT_RESPONSE_STATUS = HttpStatus.UNPROCESSABLE_ENTITY;
 
     @ExceptionHandler(Exception.class)
-    public static ResponseEntity handleException(Exception exception, HttpStatus responseStatus) {
-        logger.error(exception.getMessage());
-        return ResponseEntity
-                .status(responseStatus)
-                .body(exception.getMessage());
+    public static ResponseEntity handleException(String message, Class exceptionLocation, HttpStatus responseStatus) {
+        getLogger(exceptionLocation).error(message);
+        return ResponseEntity.status(responseStatus).body(message);
     }
 
-    public static ResponseEntity handleException(Exception exception) {
-        return handleException(exception, defaultResponseStatus);
+    public static ResponseEntity handleException(Exception exception, Class exceptionLocation) {
+        return handleException(exception.getMessage(), exceptionLocation, DEFAULT_RESPONSE_STATUS);
+    }
+
+    public static ResponseEntity handleException(String message, Class exceptionLocation) {
+        return handleException(message, exceptionLocation, DEFAULT_RESPONSE_STATUS);
     }
 }
