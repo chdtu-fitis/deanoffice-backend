@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.Constants;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -82,5 +82,9 @@ public class StudentExpelController {
     public ResponseEntity getAllExpelledStudents() {
         List<StudentExpel> studentExpels = studentExpelService.getAllExpelledStudents(Constants.FACULTY_ID);
         return ResponseEntity.ok(Parser.parse(studentExpels, StudentExpelDTO.class));
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentExpelController.class);
     }
 }

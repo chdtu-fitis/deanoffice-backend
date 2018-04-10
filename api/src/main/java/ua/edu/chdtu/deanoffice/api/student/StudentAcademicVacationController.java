@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentAcademicVacationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -22,7 +23,6 @@ import java.net.URI;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
-import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -75,5 +75,9 @@ public class StudentAcademicVacationController {
     public ResponseEntity getAllAcademicVacations() {
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(FACULTY_ID);
         return ResponseEntity.ok(Parser.parse(academicVacations, StudentAcademicVacationDTO.class));
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentAcademicVacationController.class);
     }
 }

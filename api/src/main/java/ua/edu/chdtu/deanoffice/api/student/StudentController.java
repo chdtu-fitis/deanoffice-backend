@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.Student;
@@ -19,7 +20,6 @@ import ua.edu.chdtu.deanoffice.service.StudentService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
@@ -91,5 +91,9 @@ public class StudentController {
         }
         byte[] photo = student.getPhoto();
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentController.class);
     }
 }
