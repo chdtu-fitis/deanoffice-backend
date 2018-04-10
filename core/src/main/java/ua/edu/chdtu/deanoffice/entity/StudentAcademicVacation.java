@@ -33,7 +33,7 @@ public class StudentAcademicVacation extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date orderDate;
     @ManyToOne
-    private OrderReason reason;
+    private OrderReason orderReason;
     @Column(name = "application_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date applicationDate;

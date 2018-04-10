@@ -73,7 +73,7 @@ public class StudentExpelController {
         StudentExpel studentExpel = (StudentExpel) Parser.strictParse(studentExpelDTO, StudentExpel.class);
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
-        studentExpel.setReason(orderReason);
+        studentExpel.setOrderReason(orderReason);
         return studentExpel;
     }
 

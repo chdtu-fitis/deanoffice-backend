@@ -10,12 +10,12 @@ import java.util.List;
 public class CourseService {
     private final CourseRepository courseRepository;
 
-    public Course getCourse(int courseId) {
-        return courseRepository.findOne(courseId);
-    }
-
     public CourseService(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
+    }
+
+    public Course getCourse(int courseId) {
+        return courseRepository.findOne(courseId);
     }
 
     public List<Course> getCoursesBySemester(int semester) {

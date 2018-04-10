@@ -27,10 +27,10 @@ public class CourseReport {
 
     public Map<String, String> getDictionary() {
         Map<String, String> result = new HashMap<>();
-        result.put("Pred",course);
-        result.put("H",hours);
-        result.put("V",teacher);
-        result.put("D",date);
+        result.put("Pred", course);
+        result.put("H", hours);
+        result.put("V", teacher);
+        result.put("D", date);
         return result;
     }
 }

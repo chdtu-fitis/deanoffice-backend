@@ -27,6 +27,19 @@ public enum EctsGrade {
         this.upperBound = upperBound;
     }
 
+    private static boolean isBetween(int number, int lowerBound, int upperBound) {
+        return (number >= lowerBound && number <= upperBound);
+    }
+
+    public static EctsGrade getEctsGrade(int points) {
+        for (EctsGrade ectsGrade : EctsGrade.values()) {
+            if (isBetween(points, ectsGrade.lowerBound, ectsGrade.upperBound)) {
+                return ectsGrade;
+            }
+        }
+        return null;
+    }
+
     public String getNationalGradeUkr(Grade grade) {
         if (!grade.getCourse().getKnowledgeControl().isHasGrade()) {
             if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
@@ -49,18 +62,5 @@ public enum EctsGrade {
         } else {
             return grade.getEcts().nameEng;
         }
-    }
-
-    private static boolean isBetween(int number, int lowerBound, int upperBound) {
-        return (number >= lowerBound && number <= upperBound);
-    }
-
-    public static EctsGrade getEctsGrade(int points) {
-        for (EctsGrade ectsGrade : EctsGrade.values()) {
-            if (isBetween(points, ectsGrade.lowerBound, ectsGrade.upperBound)) {
-                return ectsGrade;
-            }
-        }
-        return null;
     }
 }

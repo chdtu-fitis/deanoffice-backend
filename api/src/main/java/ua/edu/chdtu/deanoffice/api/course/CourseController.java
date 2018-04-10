@@ -67,7 +67,7 @@ public class CourseController {
     }
 
     @PostMapping("/groups/{groupId}/courses")
-    public ResponseEntity addCoursesForGroup(@RequestBody Map<String,List> body, @PathVariable Integer groupId) {
+    public ResponseEntity addCoursesForGroup(@RequestBody Map<String, List> body, @PathVariable Integer groupId) {
         List<CourseForGroupDTO> newCourses = body.get("newCourses");
         List<CourseForGroupDTO> updatedCourses = body.get("updatedCourses");
         List<Integer> deleteCoursesIds = body.get("deleteCoursesIds");
@@ -80,7 +80,7 @@ public class CourseController {
             Set<CourseForGroup> newCoursesForGroup = new HashSet<>();
             Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
 
-            for (CourseForGroupDTO newCourseForGroup: newCourses) {
+            for (CourseForGroupDTO newCourseForGroup : newCourses) {
                 CourseForGroup courseForGroup = new CourseForGroup();
 
                 Course course = courseService.getCourse(newCourseForGroup.getCourse().getId());
@@ -97,7 +97,7 @@ public class CourseController {
                 newCoursesForGroup.add(courseForGroup);
             }
 
-            for (CourseForGroupDTO updatedCourseForGroup: updatedCourses) {
+            for (CourseForGroupDTO updatedCourseForGroup : updatedCourses) {
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(updatedCourseForGroup.getId());
 
                 Teacher teacher = teacherService.getTeacher(updatedCourseForGroup.getTeacher().getId());
@@ -136,8 +136,7 @@ public class CourseController {
             Course newCourse = this.courseService.createCourse(course);
             URI location = getNewResourceLocation(newCourse.getId());
             return ResponseEntity.created(location).build();
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             return handleException(exception);
         }
     }

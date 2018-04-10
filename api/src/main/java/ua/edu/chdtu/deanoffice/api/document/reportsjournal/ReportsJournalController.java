@@ -27,16 +27,6 @@ public class ReportsJournalController {
         this.reportsCoursesService = reportsCoursesService;
     }
 
-    //TODO Нужно поправить на /groups/{group_id}/semester/{semester} или лучше на /groups/{group_id}?semester={semester}
-    @GetMapping("/groups/{group_id}/{semester}")
-    public ResponseEntity<Resource> generateForGroup(
-            @PathVariable("group_id") Integer groupId,
-            @PathVariable Integer semester
-    ) throws IOException, Docx4JException {
-        File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semester);
-        return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
-    }
-
     private static ResponseEntity<Resource> buildDocumentResponseEntity(File result, String asciiName) {
         try {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
@@ -52,5 +42,15 @@ public class ReportsJournalController {
 
     private static ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, ReportsJournalController.class);
+    }
+
+    //TODO Нужно поправить на /groups/{group_id}/semester/{semester} или лучше на /groups/{group_id}?semester={semester}
+    @GetMapping("/groups/{group_id}/{semester}")
+    public ResponseEntity<Resource> generateForGroup(
+            @PathVariable("group_id") Integer groupId,
+            @PathVariable Integer semester
+    ) throws IOException, Docx4JException {
+        File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semester);
+        return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
 }
