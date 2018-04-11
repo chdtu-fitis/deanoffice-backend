@@ -20,3 +20,17 @@ Example:
      return ResponseEntity.ok(userName);
     }
 ```
+
+Also, the current application user could be accessed in controller using ApplicationUserService
+Example:
+```
+    @Autowired
+    ApplicationUserService userService;
+
+    @GetMapping("username")
+    public ResponseEntity getCurrentUserName(@CurrentUser ApplicationUser applicationUser) {
+      ApplicationUser applicationUser = userService.getApplicationUser()
+    }
+
+
+```
