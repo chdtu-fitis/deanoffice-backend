@@ -24,7 +24,6 @@ public class StudentDegree extends BaseEntity {
     @ManyToOne
     private Student student;
     @ManyToOne
-    @JoinColumn(name = "studentgroup_id")
     private StudentGroup studentGroup;
     @ManyToOne
     private Degree degree;

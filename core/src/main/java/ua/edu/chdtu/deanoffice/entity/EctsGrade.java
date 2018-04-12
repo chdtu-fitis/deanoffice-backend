@@ -41,7 +41,7 @@ public enum EctsGrade {
     }
 
     public String getNationalGradeUkr(Grade grade) {
-        if (!grade.getCourse().getKnowledgeControl().isHasGrade()) {
+        if (!grade.getCourse().getKnowledgeControl().isGraded()) {
             if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
                 return "Не зараховано";
             } else {
@@ -53,7 +53,7 @@ public enum EctsGrade {
     }
 
     public String getNationalGradeEng(Grade grade) {
-        if (!grade.getCourse().getKnowledgeControl().isHasGrade()) {
+        if (!grade.getCourse().getKnowledgeControl().isGraded()) {
             if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
                 return "Fail";
             } else {
