@@ -66,12 +66,6 @@ public class GroupController {
     @GetMapping("/groups/{groupId}/students")
     public ResponseEntity getStudentsByGroupId(@PathVariable Integer groupId) {
         List<StudentDegree> students = this.studentGroupService.getStudentsByGroupId(groupId);
-        return ResponseEntity.ok(parseToStudentDegreeFullNameDTO(students));
-    }
-
-    private List<StudentDegreeFullNameDTO> parseToStudentDegreeFullNameDTO(List<StudentDegree> students) {
-        ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudentDegreeFullNameDTO>>() {}.getType();
-        return modelMapper.map(students, listType);
+        return ResponseEntity.ok(parse(students, StudentDegreeFullNameDTO.class));
     }
 }

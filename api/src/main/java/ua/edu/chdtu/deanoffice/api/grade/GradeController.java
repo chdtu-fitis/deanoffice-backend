@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+
 @Controller
 @RequestMapping("/grades")
 public class GradeController {
@@ -50,7 +52,7 @@ public class GradeController {
             @PathVariable Integer semester) {
         List<Grade> grades = this.gradeService.getGradesForStudents(getStudentsIdsByGroupId(groupId),
                 getCoursesIdsByGroupIdAndSemester(groupId, semester));
-        return ResponseEntity.ok(parseToGradesForGradeDTO(grades));
+        return ResponseEntity.ok(parse(grades, GradeDTO.class));
     }
 
     private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
@@ -61,10 +63,5 @@ public class GradeController {
     private List<Integer> getCoursesIdsByGroupIdAndSemester(Integer groupId, Integer semester) {
         List<CourseForGroup> courses = this.courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         return courses.stream().map(course -> course.getCourse().getId()).collect(Collectors.toList());
-    }
-
-    private List<GradeDTO> parseToGradesForGradeDTO(List<Grade> gradesForGroupList) {
-        Type listType = new TypeToken<List<GradeDTO>>() {}.getType();
-        return new ModelMapper().map(gradesForGroupList, listType);
     }
 }
