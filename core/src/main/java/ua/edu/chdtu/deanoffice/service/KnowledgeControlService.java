@@ -12,7 +12,7 @@ public class KnowledgeControlService {
     @Autowired
     private KnowledgeControlRepository knowledgeControlRepository;
 
-    public List<KnowledgeControl> getAllKnowledgeControls(){
+    public List<KnowledgeControl> getAllKnowledgeControls() {
         return this.knowledgeControlRepository.findAll();
     }
 }

@@ -35,16 +35,20 @@ public class StudentSummary {
         completeGrades();
     }
 
+    private static boolean ectsIsSet(Grade grade) {
+        return grade.getEcts() != null;
+    }
+
+    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
+        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
+    }
+
     public Student getStudent() {
         return studentDegree.getStudent();
     }
 
     public StudentGroup getStudentGroup() {
         return studentDegree.getStudentGroup();
-    }
-
-    private static boolean ectsIsSet(Grade grade) {
-        return grade.getEcts() != null;
     }
 
     private void completeGrades() {
@@ -208,10 +212,6 @@ public class StudentSummary {
             }
         }
         return resultingGrade;
-    }
-
-    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
-        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
     }
 
     public BigDecimal getTotalCredits() {

@@ -82,10 +82,10 @@ public class GradeUtil {
         return result;
     }
 
-    public static String getEctsGrade(Grade grade){
-        if (grade.getCourse().getKnowledgeControl().isHasGrade()){
+    public static String getEctsGrade(Grade grade) {
+        if (grade.getCourse().getKnowledgeControl().isHasGrade()) {
             return grade.getEcts().toString();
-        } else if (grade.getPoints()>=60){
+        } else if (grade.getPoints() >= 60) {
             return "P";
         } else {
             return "F";

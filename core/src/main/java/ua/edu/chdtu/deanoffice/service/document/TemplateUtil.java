@@ -56,7 +56,7 @@ public class TemplateUtil {
         for (Text text : placeholders) {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
-                log.warn("{} is empty", text.getValue());
+                log.debug("{} is empty", text.getValue());
             }
             text.setValue(getValueSafely(replacement));
         }

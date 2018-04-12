@@ -19,7 +19,7 @@ import java.util.Date;
 @Table(name = "student_expel")
 public class StudentExpel extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name="studentdegree_id")
+    @JoinColumn(name = "student_degree_id")
     private StudentDegree studentDegree;
     @Column(name = "expel_date", nullable = false)
     @Temporal(TemporalType.DATE)
@@ -30,7 +30,7 @@ public class StudentExpel extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date orderDate;
     @ManyToOne
-    private OrderReason reason;
+    private OrderReason orderReason;
     @Column(name = "application_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date applicationDate;
