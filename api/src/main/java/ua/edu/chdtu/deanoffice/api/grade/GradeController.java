@@ -5,9 +5,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
@@ -18,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,13 @@ public class GradeController {
         this.courseForGroupService = courseForGroupService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{groupId}/{semester}")
+    @PutMapping("/")
+    public ResponseEntity<List<GradeDTO>> putGrades(@RequestBody List<Grade> grades) {
+        this.gradeService.insertGrades(grades);
+        return ResponseEntity.ok(new ArrayList<>());
+    }
+
+    @GetMapping("/{groupId}/{semester}")
     public ResponseEntity<List<GradeDTO>> getGrades(
             @PathVariable Integer groupId,
             @PathVariable Integer semester) {

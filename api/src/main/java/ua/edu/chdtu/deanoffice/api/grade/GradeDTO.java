@@ -12,5 +12,5 @@ public class GradeDTO {
     private Integer points;
     @JsonView(CourseForGroupView.Course.class)
     private CourseIdDTO course;
-    private StudentIdDTO student;
+    private StudentIdDTO studentDegree;
 }
