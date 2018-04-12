@@ -15,18 +15,14 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
 
-@Entity
 @Getter
 @Setter
-@Table(name = "student_expel")
-public class StudentExpel extends BaseEntity {
+@Entity
+@Table(name = "renewed_academic_vacation_student")
+public class RenewedAcademicVacationStudent extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "student_degree_id")
-    private StudentDegree studentDegree;
-
-    @ManyToOne
-    @JoinColumn(name = "student_group_id", nullable = false)
-    private StudentGroup studentGroup;
+    @JoinColumn(name = "student_academic_vacation_id", nullable = false)
+    private StudentAcademicVacation studentAcademicVacation;
 
     @Column(name = "study_year", nullable = false)
     private int studyYear;
@@ -35,19 +31,13 @@ public class StudentExpel extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private Payment payment = Payment.BUDGET;
 
-    @Column(name = "expel_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date expelDate;
-
-    @Column(name = "order_number", nullable = false, length = 15)
-    private String orderNumber;
-
-    @Column(name = "order_date", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date orderDate;
-
     @ManyToOne
-    private OrderReason orderReason;
+    @JoinColumn(name = "student_group_id", nullable = false)
+    private StudentGroup studentGroup;
+
+    @Column(name = "renew_date")
+    @Temporal(TemporalType.DATE)
+    private Date renewDate;
 
     @Column(name = "application_date", nullable = false)
     @Temporal(TemporalType.DATE)
