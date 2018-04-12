@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.lang.reflect.Type;
@@ -26,17 +27,17 @@ import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 @RequestMapping("/grades")
 public class GradeController {
     private GradeService gradeService;
-    private StudentGroupService studentGroupService;
+    private StudentDegreeService studentDegreeService;
     private CourseForGroupService courseForGroupService;
 
     @Autowired
     public GradeController(
             GradeService gradeService,
-            StudentGroupService studentGroupService,
+            StudentDegreeService studentDegreeService,
             CourseForGroupService courseForGroupService
     ) {
         this.gradeService = gradeService;
-        this.studentGroupService = studentGroupService;
+        this.studentDegreeService = studentDegreeService;
         this.courseForGroupService = courseForGroupService;
     }
 
@@ -56,7 +57,7 @@ public class GradeController {
     }
 
     private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
-        List<StudentDegree> students = this.studentGroupService.getStudentsByGroupId(groupId);
+        List<StudentDegree> students = this.studentDegreeService.findStudentsByGroupId(groupId);
         return students.stream().map(BaseEntity::getId).collect(Collectors.toList());
     }
 

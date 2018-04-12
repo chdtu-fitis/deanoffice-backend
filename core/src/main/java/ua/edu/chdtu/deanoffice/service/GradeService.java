@@ -78,7 +78,7 @@ public class GradeService {
 
     public List<Grade> getGradesForStudents(List<Integer> studentsIds, List<Integer> courseIds) {
         if(studentsIds.isEmpty() || courseIds.isEmpty()) return new ArrayList<>();
-        return gradeRepository.getGradesByCourseAndBySemeseterForStudents(studentsIds, courseIds);
+        return gradeRepository.findGradesByCourseAndBySemeseterForStudents(studentsIds, courseIds);
     }
 
     public List<Grade> insertGrades(List<Grade> grades) {

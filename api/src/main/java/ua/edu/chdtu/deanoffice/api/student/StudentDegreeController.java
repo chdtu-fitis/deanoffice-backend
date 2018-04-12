@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
@@ -29,6 +30,7 @@ import java.net.URI;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 @RequestMapping("/students")
@@ -185,5 +187,11 @@ public class StudentDegreeController {
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, StudentDegreeController.class);
+    }
+
+    @GetMapping("/{groupId}/students")
+    public ResponseEntity getStudentsByGroupId(@PathVariable Integer groupId) {
+        List<StudentDegree> students = this.studentDegreeService.findStudentsByGroupId(groupId);
+        return ResponseEntity.ok(parse(students, StudentDegreeFullNameDTO.class));
     }
 }

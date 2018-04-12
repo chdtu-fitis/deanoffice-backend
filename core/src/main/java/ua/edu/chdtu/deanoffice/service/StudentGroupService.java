@@ -52,8 +52,4 @@ public class StudentGroupService {
         }
         return this.studentGroupRepository.findAllByFaculty(FACULTY_ID);
     }
-
-    public List<StudentDegree> getStudentsByGroupId(Integer groupId) {
-        return this.studentDegreeRepository.getStudentDegreeByStudentGroupId(groupId);
-    }
 }

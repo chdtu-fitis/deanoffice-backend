@@ -62,10 +62,4 @@ public class GroupController {
         List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
         return ResponseEntity.ok(parse(studentGroups, StudentGroupDTO.class));
     }
-
-    @GetMapping("/groups/{groupId}/students")
-    public ResponseEntity getStudentsByGroupId(@PathVariable Integer groupId) {
-        List<StudentDegree> students = this.studentGroupService.getStudentsByGroupId(groupId);
-        return ResponseEntity.ok(parse(students, StudentDegreeFullNameDTO.class));
-    }
 }
