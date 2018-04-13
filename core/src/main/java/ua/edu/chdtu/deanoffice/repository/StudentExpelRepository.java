@@ -19,4 +19,8 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
             @Param("limit_date") Date limitDate,
             @Param("faculty_id") Integer facultyId
     );
+
+    @Query("select se from StudentExpel se " +
+            "where se.id = :id and se.studentDegree.active = true")
+    StudentExpel findActiveById(@Param("id") Integer studentExpelId);
 }

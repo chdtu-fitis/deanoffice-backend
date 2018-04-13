@@ -43,17 +43,22 @@ public class ReportsCoursesService {
     private CourseForGroupService courseForGroupService;
     private DocumentIOService documentIOService;
 
-    public ReportsCoursesService(GradeService gradeService, StudentGroupService groupService, DocumentIOService documentIOService, CourseForGroupService courseForGroupService) {
+    public ReportsCoursesService(
+            GradeService gradeService,
+            StudentGroupService groupService,
+            DocumentIOService documentIOService,
+            CourseForGroupService courseForGroupService
+    ) {
         this.gradeService = gradeService;
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
     }
 
-    public synchronized File prepareReportForGroup(Integer groupId, Integer semestrId) throws Docx4JException, IOException {
+    public synchronized File prepareReportForGroup(Integer groupId, Integer semester) throws Docx4JException, IOException {
         List<CourseReport> courseReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int) groupId, (int) semestrId);
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         Format formatter = new SimpleDateFormat("dd.MM.yyyy");
         courseForGroups.forEach(courseForGroup -> {
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),

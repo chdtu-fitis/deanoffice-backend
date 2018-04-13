@@ -64,19 +64,17 @@ public class StudentController {
     @PutMapping("/")
     public ResponseEntity updateStudent(@RequestBody Student student) {
         try {
-            Student upStudent = studentService.update(student);
-            return ResponseEntity.ok(parse(upStudent, StudentDTO.class));
+            studentService.update(student);
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    @PutMapping("/{id}/photo")
-    public ResponseEntity uploadPhotoForStudent(@RequestBody byte[] photo, @PathVariable(value = "id") Integer id) {
+    @PutMapping("/{student_id}/photo")
+    public ResponseEntity uploadPhotoForStudent(@RequestBody byte[] photo, @PathVariable(value = "student_id") int studentId) {
         try {
-            Student student = studentService.findById(id);
-            student.setPhoto(photo);
-            studentService.update(student);
+            studentService.addPhoto(photo, studentId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);

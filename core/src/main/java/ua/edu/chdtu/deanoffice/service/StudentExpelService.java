@@ -2,34 +2,41 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
-import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
+import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
-import java.util.Date;
 import java.util.List;
+import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
+
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
 import static ua.edu.chdtu.deanoffice.Constants.SUCCESS_REASON_IDS;
+import static ua.edu.chdtu.deanoffice.util.StudentUtil.studentDegreeToActive;
 
 @Service
 public class StudentExpelService {
     private final StudentDegreeRepository studentDegreeRepository;
     private final StudentExpelRepository studentExpelRepository;
     private final CurrentYearRepository currentYearRepository;
+    private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
 
     @Autowired
     public StudentExpelService(
             StudentDegreeRepository studentDegreeRepository,
             StudentExpelRepository studentExpelRepository,
-            CurrentYearRepository currentYearRepository
+            CurrentYearRepository currentYearRepository,
+            RenewedExpelledStudentRepository renewedExpelledStudentRepository
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
         this.currentYearRepository = currentYearRepository;
+        this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
@@ -51,5 +58,21 @@ public class StudentExpelService {
     private Date getLimitDate() {
         int currentYear = currentYearRepository.getOne(1).getCurrYear();
         return new Date((currentYear - EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW) + "/01/01");
+    }
+
+    public boolean studentIsNotExpelled(int studentExpelId) {
+        StudentExpel studentExpel = studentExpelRepository.findActiveById(studentExpelId);
+        return studentExpel != null;
+    }
+
+    public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {
+        Integer studentDegreeId = renewedExpelledStudent.getStudentExpel().getStudentDegree().getId();
+        studentDegreeToActive(studentDegreeId, studentDegreeRepository);
+
+        return renewedExpelledStudentRepository.save(renewedExpelledStudent);
+    }
+
+    public StudentExpel getById(Integer studentExpelId) {
+        return studentExpelRepository.getOne(studentExpelId);
     }
 }

@@ -28,8 +28,8 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.save(studentDegree);
     }
 
-    public void update(List<StudentDegree> studentDegreeSet) {
-        studentDegreeRepository.save(studentDegreeSet);
+    public void update(List<StudentDegree> studentDegree) {
+        studentDegreeRepository.save(studentDegree);
     }
 
     public StudentDegree getFirstStudentDegree(Integer studentId) {
