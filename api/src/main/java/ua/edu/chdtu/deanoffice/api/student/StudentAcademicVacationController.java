@@ -75,7 +75,7 @@ public class StudentAcademicVacationController {
         StudentDegree studentDegree = studentDegreeService.getById(studentAcademicVacationDTO.getStudentDegreeId());
         studentAcademicVacation.setStudentDegree(studentDegree);
 
-        OrderReason orderReason = orderReasonService.getById(studentAcademicVacationDTO.getReasonId());
+        OrderReason orderReason = orderReasonService.getById(studentAcademicVacationDTO.getOrderReasonId());
         studentAcademicVacation.setOrderReason(orderReason);
 
         studentAcademicVacation.setStudentGroup(studentDegree.getStudentGroup());

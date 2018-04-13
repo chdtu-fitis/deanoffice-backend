@@ -23,7 +23,7 @@ public class StudentAcademicVacationDTO {
     @JsonView(StudentView.AcademicVacation.class)
     private Date orderDate;
     @JsonView(StudentView.AcademicVacation.class)
-    private NamedDTO reason;
+    private NamedDTO orderReason;
     @JsonView(StudentView.AcademicVacation.class)
     private Date applicationDate;
 
@@ -32,5 +32,5 @@ public class StudentAcademicVacationDTO {
     private String extraInformation;
 
     private Integer studentDegreeId;
-    private Integer reasonId;
+    private Integer orderReasonId;
 }

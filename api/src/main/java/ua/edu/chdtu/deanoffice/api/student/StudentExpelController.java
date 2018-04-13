@@ -57,30 +57,38 @@ public class StudentExpelController {
     @PostMapping("")
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
-            OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
-            List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO, orderReason));
+            List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO));
             List<StudentExpelDTO> studentExpelDTOs = Parser.parse(studentExpelList, StudentExpelDTO.class);
 
             Object[] ids = studentExpelDTOs.stream().map(StudentExpelDTO::getId).toArray();
             URI location = getNewResourceLocation(ids);
-            return ResponseEntity.created(location).body(studentExpelDTOs);
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    private List<StudentExpel> createStudentExpels(StudentExpelDTO studentExpelDTO, OrderReason orderReason) {
+    private List<StudentExpel> createStudentExpels(StudentExpelDTO studentExpelDTO) {
+        OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getOrderReasonId());
+        studentExpelDTO.setEntityOrderReason(orderReason);
+
         List<Integer> studentDegreeIds = asList(studentExpelDTO.getStudentDegreeIds());
         return studentDegreeIds.stream()
-                .map(id -> createStudentExpel(studentExpelDTO, orderReason, id))
+                .map(id -> createStudentExpel(studentExpelDTO, id))
                 .collect(Collectors.toList());
     }
 
-    private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, OrderReason orderReason, int studentDegreeId) {
+    private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, int studentDegreeId) {
         StudentExpel studentExpel = (StudentExpel) Parser.strictParse(studentExpelDTO, StudentExpel.class);
+
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
-        studentExpel.setOrderReason(orderReason);
+
+        studentExpel.setPayment(studentDegree.getPayment());
+        studentExpel.setStudentGroup(studentDegree.getStudentGroup());
+
+        studentExpel.setOrderReason(studentExpelDTO.getEntityOrderReason());
+
         return studentExpel;
     }
 
