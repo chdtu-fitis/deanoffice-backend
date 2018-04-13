@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.student.dto.RenewedAcademicVacationStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentAcademicVacationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
+import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
@@ -27,7 +29,7 @@ import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
-@RequestMapping("/students/degrees")
+@RequestMapping("/students/degrees/academic-vacations")
 public class StudentAcademicVacationController {
     private final StudentAcademicVacationService studentAcademicVacationService;
     private final OrderReasonService orderReasonService;
@@ -45,7 +47,7 @@ public class StudentAcademicVacationController {
     }
 
     @JsonView(StudentView.AcademicVacation.class)
-    @PostMapping("/academic-vacations")
+    @PostMapping("")
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
@@ -72,7 +74,7 @@ public class StudentAcademicVacationController {
     }
 
     @JsonView(StudentView.AcademicVacation.class)
-    @GetMapping("/academic-vacations")
+    @GetMapping("")
     public ResponseEntity getAllAcademicVacations() {
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(FACULTY_ID);
         return ResponseEntity.ok(Parser.parse(academicVacations, StudentAcademicVacationDTO.class));
@@ -82,14 +84,16 @@ public class StudentAcademicVacationController {
         return ExceptionHandlerAdvice.handleException(exception, StudentAcademicVacationController.class);
     }
 
-    @PostMapping("{student_degree_id}/academic-vacations")
-    public ResponseEntity renewAcademicVacation(@PathVariable("student_degree_id") int studentDegreeId) {
+    @PostMapping("/renewed")
+    public ResponseEntity renewAcademicVacation(
+            @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
+    ) {
         try {
-            if (studentAcademicVacationService.inAcademicVacation(studentDegreeId)) {
+            if (studentAcademicVacationService.inAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
                 return ExceptionHandlerAdvice.handleException("", StudentAcademicVacation.class);
             }
-            studentAcademicVacationService.renew(studentDegreeId);
-            URI location = getNewResourceLocation(0);
+            Integer id = studentAcademicVacationService.renew(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId()).getId();
+            URI location = getNewResourceLocation(id);
             return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
