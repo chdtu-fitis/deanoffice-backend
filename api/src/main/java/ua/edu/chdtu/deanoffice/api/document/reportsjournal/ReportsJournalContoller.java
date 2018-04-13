@@ -36,9 +36,14 @@ public class ReportsJournalContoller {
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}/{semestrId}")
-    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId,@PathVariable Integer semestrId) throws IOException, Docx4JException {
-        File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semestrId);
+    @RequestMapping(method = RequestMethod.GET, path = "/groups/{groupId}/{semesterId}")
+    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId,@PathVariable Integer semesterId) throws IOException, Docx4JException {
+        File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semesterId);
+        return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
+    }
+    @RequestMapping(method = RequestMethod.GET, path = "/year/{yearId}/{semesterId}")
+    public ResponseEntity<Resource> generateForYear(@PathVariable Integer yearId,@PathVariable Integer semesterId) throws IOException, Docx4JException {
+        File groupDiplomaSupplements = reportsCoursesService.prepareReportForYear(yearId, semesterId);
         return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
 

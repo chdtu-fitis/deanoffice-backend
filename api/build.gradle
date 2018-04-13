@@ -17,6 +17,7 @@ dependencies {
 
     testCompile(
             "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
+            "org.projectlombok:lombok:${lombokVersion}"
     )
 }
 
