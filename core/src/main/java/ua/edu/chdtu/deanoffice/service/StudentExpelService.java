@@ -61,8 +61,8 @@ public class StudentExpelService {
     }
 
     public boolean studentIsNotExpelled(int studentExpelId) {
-        StudentExpel studentExpel = studentExpelRepository.findActiveById(studentExpelId);
-        return studentExpel != null;
+        StudentExpel studentExpel = studentExpelRepository.findInactiveById(studentExpelId);
+        return studentExpel == null;
     }
 
     public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {

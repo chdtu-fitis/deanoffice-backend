@@ -95,11 +95,15 @@ public class StudentExpelController {
         return ExceptionHandlerAdvice.handleException(exception, StudentExpelController.class);
     }
 
+    private ResponseEntity handleException(String message) {
+        return ExceptionHandlerAdvice.handleException(message, StudentExpelController.class);
+    }
+
     @PostMapping("/renewed")
     public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {
             if (studentExpelService.studentIsNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
-                return ExceptionHandlerAdvice.handleException("Student is not expelled", StudentExpelController.class);
+                return handleException("Student is not expelled");
             }
             Integer id = studentExpelService
                     .renew(createRenewedExpelledStudent(renewedExpelledStudentDTO))

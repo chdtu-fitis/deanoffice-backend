@@ -55,8 +55,7 @@ public class StudentAcademicVacationController {
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             if (studentAcademicVacationService.inAcademicVacation(studentAcademicVacationDTO.getStudentDegreeId())) {
-                return ExceptionHandlerAdvice
-                        .handleException("Student already gave academic vacation", StudentAcademicVacationController.class);
+                return handleException("Student already gave academic vacation");
             }
 
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
@@ -95,13 +94,17 @@ public class StudentAcademicVacationController {
         return ExceptionHandlerAdvice.handleException(exception, StudentAcademicVacationController.class);
     }
 
+    private ResponseEntity handleException(String message) {
+        return ExceptionHandlerAdvice.handleException(message, StudentAcademicVacationController.class);
+    }
+
     @PostMapping("/renewed")
     public ResponseEntity renewAcademicVacation(
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         try {
             if (studentAcademicVacationService.notInAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
-                return ExceptionHandlerAdvice.handleException("Student didn`t give academic vacation", StudentAcademicVacation.class);
+                return handleException("Student didn`t give academic vacation");
             }
             Integer id = studentAcademicVacationService
                     .renew(createRenewedAcademicVacationStudent(renewedAcademicVacationStudentDTO))
@@ -116,8 +119,8 @@ public class StudentAcademicVacationController {
     private RenewedAcademicVacationStudent createRenewedAcademicVacationStudent(
             RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
-        RenewedAcademicVacationStudent renewedAcademicVacationStudent =
-                (RenewedAcademicVacationStudent) Parser.strictParse(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
+        RenewedAcademicVacationStudent renewedAcademicVacationStudent = (RenewedAcademicVacationStudent)
+                Parser.strictParse(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
 
         StudentAcademicVacation studentAcademicVacation =
                 studentAcademicVacationService.getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId());
