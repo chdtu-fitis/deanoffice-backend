@@ -38,9 +38,17 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "and sg.specialization.degree.id = :degree_id " +
             "and :curr_year - sg.creationYear + sg.beginYears = :study_year " +
             "order by sg.tuitionForm desc, sg.name")
-    List<StudentGroup> findGroupsByDegreeAndYear(
+   List<StudentGroup> findGroupsByDegreeAndYear(
             @Param("degree_id") Integer degreeId,
             @Param("study_year") Integer studyYear,
             @Param("curr_year") Integer currYear
-    );
+   );
+   @Query("select sg from StudentGroup sg " +
+        "where sg.active = true " +
+        "and :curr_year - sg.creationYear + sg.beginYears = :study_year " +
+        "order by sg.tuitionForm desc, sg.name")
+   List<StudentGroup> findGroupsByYear(
+        @Param("study_year") Integer studyYear,
+        @Param("curr_year") Integer currYear
+   );
 }
