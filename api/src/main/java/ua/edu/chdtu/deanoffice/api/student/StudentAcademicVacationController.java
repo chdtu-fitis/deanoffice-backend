@@ -54,6 +54,11 @@ public class StudentAcademicVacationController {
     @PostMapping("")
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
+            if (studentAcademicVacationService.inAcademicVacation(studentAcademicVacationDTO.getStudentDegreeId())) {
+                return ExceptionHandlerAdvice
+                        .handleException("Student already gave academic vacation", StudentAcademicVacationController.class);
+            }
+
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
                     .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
 
@@ -95,8 +100,8 @@ public class StudentAcademicVacationController {
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         try {
-            if (studentAcademicVacationService.inAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
-                return ExceptionHandlerAdvice.handleException("", StudentAcademicVacation.class);
+            if (studentAcademicVacationService.notInAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
+                return ExceptionHandlerAdvice.handleException("Student didn`t give academic vacation", StudentAcademicVacation.class);
             }
             Integer id = studentAcademicVacationService
                     .renew(createRenewedAcademicVacationStudent(renewedAcademicVacationStudentDTO))
