@@ -2,6 +2,8 @@ package ua.edu.chdtu.deanoffice.service.document.report.journal;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
+import org.docx4j.wml.Body;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
@@ -45,27 +47,33 @@ public class ReportsCoursesService {
     }
 
     public synchronized File prepareReportForGroup(Integer groupId,Integer semestrId) throws Docx4JException, IOException {
-        List<CourseReport> courseReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
+        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, prepareGroup(groupId,semestrId)), LanguageUtil.transliterate(group.getName())+".docx", FileFormatEnum.DOCX);
+    }
+
+    private List<CourseReport> prepareGroup(Integer groupId,Integer semestrId) {
+        List<CourseReport> courseReports = new ArrayList<>();
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semestrId);
         Format formatter = new SimpleDateFormat("yyyy.MM.dd");
         courseForGroups.forEach(courseForGroup -> {
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
-                                                               courseForGroup.getCourse().getHours().toString(),
-                                                               courseForGroup.getTeacher().getSurname()+" "
-                                                                       +courseForGroup.getTeacher().getName().charAt(0)+"."
-                                                                       +courseForGroup.getTeacher().getPatronimic().charAt(0)+".",
-                                                               courseForGroup.getExamDate() == null ? "" :  formatter.format(courseForGroup.getExamDate())));
+                    courseForGroup.getCourse().getHours().toString(),
+                    courseForGroup.getTeacher().getSurname()+" "
+                            +courseForGroup.getTeacher().getName().charAt(0)+"."
+                            +courseForGroup.getTeacher().getPatronimic().charAt(0)+".",
+                    courseForGroup.getExamDate() == null ? "" :  formatter.format(courseForGroup.getExamDate())));
         });
-        return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, courseReports), LanguageUtil.transliterate(group.getName()) + ".docx", FileFormatEnum.DOCX);
+        return courseReports;
     }
+
+
 
     private WordprocessingMLPackage fillTemplate(String templateName, List<CourseReport> courseReports) throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
-        fillTableWithGrades(template, courseReports);
-        Map<String, String> commonDict = new HashMap<>();
-        commonDict.put("GroupName","PZ-154");
-        replaceTextPlaceholdersInTemplate(template, commonDict);
+            fillTableWithGrades(template, courseReports);
+            Map<String, String> commonDict = new HashMap<>();
+            commonDict.put("GroupName", "PZ-154");
+            replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
 
