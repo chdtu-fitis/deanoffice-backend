@@ -39,7 +39,13 @@ public class StudentService {
         return this.studentRepository.save(student);
     }
 
-    public Student update(Student student) {
-        return studentRepository.save(student);
+    public void update(Student student) {
+        studentRepository.save(student);
+    }
+
+    public void addPhoto(byte[] photo, int studentId) {
+        Student student = studentRepository.getOne(studentId);
+        student.setPhoto(photo);
+        studentRepository.save(student);
     }
 }

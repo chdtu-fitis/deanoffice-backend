@@ -40,7 +40,7 @@ class ExamReportTemplateFillService {
         this.documentIOService = documentIOService;
     }
 
-    public WordprocessingMLPackage fillTemplate(String templateName, CourseForGroup courseForGroup)
+    WordprocessingMLPackage fillTemplate(String templateName, CourseForGroup courseForGroup)
             throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         fillTableWithStudentInitials(template, courseForGroup.getStudentGroup());
