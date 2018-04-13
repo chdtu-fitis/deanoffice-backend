@@ -59,7 +59,7 @@ public class StudentExpelService {
         return studentExpels.isEmpty();
     }
 
-    public void resumeExpelledStudent(int studentDegreeId) {
+    public void renew(int studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
         studentDegree.setActive(true);
         studentDegreeRepository.save(studentDegree);

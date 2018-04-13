@@ -38,11 +38,12 @@ public class StudentAcademicVacationService {
     }
 
     public boolean inAcademicVacation(int studentDegreeId) {
-        List<StudentAcademicVacation> studentAcademicVacations = studentAcademicVacationRepository.findAllActiveByStudentDegreeId(studentDegreeId);
+        List<StudentAcademicVacation> studentAcademicVacations =
+                studentAcademicVacationRepository.findAllActiveByStudentDegreeId(studentDegreeId);
         return studentAcademicVacations.isEmpty();
     }
 
-    public void moveOut(int studentDegreeId) {
+    public void renew(int studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getOne(studentDegreeId);
         studentDegree.setActive(true);
         studentDegreeRepository.save(studentDegree);

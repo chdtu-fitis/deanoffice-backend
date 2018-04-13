@@ -84,12 +84,12 @@ public class StudentAcademicVacationController {
     }
 
     @PutMapping("{student_degree_id}/academic-vacations")
-    public ResponseEntity moveOutFromAcademicVacation(@PathVariable("student_degree_id") int studentDegreeId) {
+    public ResponseEntity renewAcademicVacation(@PathVariable("student_degree_id") int studentDegreeId) {
         try {
             if (studentAcademicVacationService.inAcademicVacation(studentDegreeId)) {
                 return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") don`t move to academic vacation");
             }
-            studentAcademicVacationService.moveOut(studentDegreeId);
+            studentAcademicVacationService.renew(studentDegreeId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);

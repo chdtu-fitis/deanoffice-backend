@@ -91,12 +91,12 @@ public class StudentExpelController {
     }
 
     @PutMapping("/{student_degree_id}/expels")
-    public ResponseEntity resumeExpelledStudent(@PathVariable("student_degree_id") int studentDegreeId) {
+    public ResponseEntity renewExpelledStudent(@PathVariable("student_degree_id") int studentDegreeId) {
         try {
             if (studentExpelService.studentIsNotExpelled(studentDegreeId)) {
                 return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") is not expelled");
             }
-            studentExpelService.resumeExpelledStudent(studentDegreeId);
+            studentExpelService.renew(studentDegreeId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
