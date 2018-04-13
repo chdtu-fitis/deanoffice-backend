@@ -39,6 +39,10 @@ public class StudentGroupService {
         Integer currYear = currentYearRepository.findOne(1).getCurrYear();
         return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, currYear);
     }
+    public List<StudentGroup> getGroupsByYear( int year) {
+        Integer currYear = currentYearRepository.findOne(1).getCurrYear();
+        return studentGroupRepository.findGroupsByYear(year, currYear);
+    }
 
     public List<StudentGroup> getAllByActive(boolean onlyActive) {
         if (onlyActive) {
