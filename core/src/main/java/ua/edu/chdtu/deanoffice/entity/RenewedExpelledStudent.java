@@ -51,5 +51,5 @@ public class RenewedExpelledStudent extends BaseEntity {
     private Date academicCertificateDate;
 
     @Column(name = "academic_certificate_issued_by", nullable = false)
-    private Date academicCertificateIssuedBy;
+    private String academicCertificateIssuedBy;
 }

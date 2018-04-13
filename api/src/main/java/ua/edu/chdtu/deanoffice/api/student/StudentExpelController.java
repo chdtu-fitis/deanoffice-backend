@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,14 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.student.dto.RenewedExpelledStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
+import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.net.URI;
 import java.util.List;
@@ -29,21 +32,24 @@ import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
-@RequestMapping("/students/degrees/")
+@RequestMapping("/students/degrees")
 public class StudentExpelController {
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
     private final StudentExpelService studentExpelService;
+    private final StudentGroupService studentGroupService;
 
     @Autowired
     public StudentExpelController(
             StudentDegreeService studentDegreeService,
             OrderReasonService orderReasonService,
-            StudentExpelService studentExpelService
+            StudentExpelService studentExpelService,
+            StudentGroupService studentGroupService
     ) {
         this.studentDegreeService = studentDegreeService;
         this.orderReasonService = orderReasonService;
         this.studentExpelService = studentExpelService;
+        this.studentGroupService = studentGroupService;
     }
 
 
@@ -89,18 +95,30 @@ public class StudentExpelController {
         return ExceptionHandlerAdvice.handleException(exception, StudentExpelController.class);
     }
 
-    @PostMapping("/{student_degree_id}/expels")
-    public ResponseEntity renewExpelledStudent(@PathVariable("student_degree_id") int studentDegreeId) {
+    @PostMapping("/renewed-expels")
+    public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {
-            if (studentExpelService.studentIsNotExpelled(studentDegreeId)) {
-                return ExceptionHandlerAdvice
-                        .handleException("Student (id = " + studentDegreeId + ") is not expelled", StudentExpelController.class);
+            if (studentExpelService.studentIsNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
+                return ExceptionHandlerAdvice.handleException("Student is not expelled", StudentExpelController.class);
             }
-            studentExpelService.renew(studentDegreeId);
-            URI location = getNewResourceLocation(0);
+            Integer renewId = studentExpelService.renew(createRenewedExpelledStudent(renewedExpelledStudentDTO)).getId();
+            URI location = getNewResourceLocation(renewId);
             return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private RenewedExpelledStudent createRenewedExpelledStudent(RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
+        RenewedExpelledStudent renewedExpelledStudent =
+                (RenewedExpelledStudent) Parser.strictParse(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
+
+        StudentExpel studentExpel = studentExpelService.getById(renewedExpelledStudentDTO.getStudentExpelId());
+        renewedExpelledStudent.setStudentExpel(studentExpel);
+
+        StudentGroup studentGroup = studentGroupService.getById(renewedExpelledStudentDTO.getStudentGroupId());
+        renewedExpelledStudent.setStudentGroup(studentGroup);
+
+        return renewedExpelledStudent;
     }
 }

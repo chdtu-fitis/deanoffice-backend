@@ -21,7 +21,6 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
     );
 
     @Query("select se from StudentExpel se " +
-            "where se.studentDegree.id = :student_degree_id " +
-            "order by se.expelDate desc")
-    List<StudentExpel> findAllActiveByStudentDegreeId(@Param("student_degree_id") Integer studentDegreeId);
+            "where se.id = :id and se.studentDegree.active = true")
+    StudentExpel findActiveById(@Param("id") Integer studentExpelId);
 }

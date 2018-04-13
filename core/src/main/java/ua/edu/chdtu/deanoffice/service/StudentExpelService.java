@@ -2,8 +2,10 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
+import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
@@ -21,16 +23,19 @@ public class StudentExpelService {
     private final StudentDegreeRepository studentDegreeRepository;
     private final StudentExpelRepository studentExpelRepository;
     private final CurrentYearRepository currentYearRepository;
+    private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
 
     @Autowired
     public StudentExpelService(
             StudentDegreeRepository studentDegreeRepository,
             StudentExpelRepository studentExpelRepository,
-            CurrentYearRepository currentYearRepository
+            CurrentYearRepository currentYearRepository,
+            RenewedExpelledStudentRepository renewedExpelledStudentRepository
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
         this.currentYearRepository = currentYearRepository;
+        this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
@@ -54,14 +59,25 @@ public class StudentExpelService {
         return new Date((currentYear - EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW) + "/01/01");
     }
 
-    public boolean studentIsNotExpelled(int studentDegreeId) {
-        List<StudentExpel> studentExpels = studentExpelRepository.findAllActiveByStudentDegreeId(studentDegreeId);
-        return studentExpels.isEmpty();
+    public boolean studentIsNotExpelled(int studentExpelId) {
+        StudentExpel studentExpel = studentExpelRepository.findActiveById(studentExpelId);
+        return studentExpel != null;
     }
 
-    public void renew(int studentDegreeId) {
+    public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {
+        Integer studentDegreeId = renewedExpelledStudent.getStudentExpel().getStudentDegree().getId();
+        studentDegreeToActive(studentDegreeId);
+
+        return renewedExpelledStudentRepository.save(renewedExpelledStudent);
+    }
+
+    private void studentDegreeToActive(Integer studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
         studentDegree.setActive(true);
         studentDegreeRepository.save(studentDegree);
+    }
+
+    public StudentExpel getById(Integer studentExpelId) {
+        return studentExpelRepository.getOne(studentExpelId);
     }
 }
