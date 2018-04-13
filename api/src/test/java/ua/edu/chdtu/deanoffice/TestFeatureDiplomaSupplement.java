@@ -214,7 +214,7 @@ public class TestFeatureDiplomaSupplement {
         Course course = new Course();
         KnowledgeControl kc = new KnowledgeControl();
         course.setHours(90);
-        kc.setHasGrade(knowledgeControlHasGrade);
+        kc.setGraded(knowledgeControlHasGrade);
         if (knowledgeControlHasGrade) {
             kc.setName("іспит");
         } else {

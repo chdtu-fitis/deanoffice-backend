@@ -1,9 +1,11 @@
 package ua.edu.chdtu.deanoffice.api.student.dto;
 
+import lombok.Getter;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 
 import java.util.Date;
 
+@Getter
 public class PreviousDiplomaDTO {
     private Date date;
     private String number;
@@ -17,17 +19,5 @@ public class PreviousDiplomaDTO {
 
     public PreviousDiplomaDTO(EducationDocument type) {
         this.type = type;
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public EducationDocument getType() {
-        return type;
     }
 }
