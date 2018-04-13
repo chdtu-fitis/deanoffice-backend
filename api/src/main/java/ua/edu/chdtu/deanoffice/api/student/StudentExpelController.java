@@ -57,6 +57,10 @@ public class StudentExpelController {
     @PostMapping("")
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
+            if (studentExpelService.isExpelled(studentExpelDTO.getStudentDegreeIds())) {
+                return handleException("Some selected students was expelled");
+            }
+
             List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO));
             List<StudentExpelDTO> studentExpelDTOs = Parser.parse(studentExpelList, StudentExpelDTO.class);
 
@@ -110,7 +114,7 @@ public class StudentExpelController {
     @PostMapping("/renewed")
     public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {
-            if (studentExpelService.studentIsNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
+            if (studentExpelService.isNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
                 return handleException("Student is not expelled");
             }
             Integer id = studentExpelService
