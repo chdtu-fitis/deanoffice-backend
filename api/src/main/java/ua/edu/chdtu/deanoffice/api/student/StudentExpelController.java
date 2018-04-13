@@ -32,7 +32,7 @@ import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
-@RequestMapping("/students/degrees")
+@RequestMapping("/students/degrees/expels")
 public class StudentExpelController {
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
@@ -54,7 +54,7 @@ public class StudentExpelController {
 
 
     @JsonView(StudentView.Expel.class)
-    @PostMapping("/expels")
+    @PostMapping("")
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
             OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getReasonId());
@@ -84,7 +84,7 @@ public class StudentExpelController {
         return studentExpel;
     }
 
-    @GetMapping("/expels")
+    @GetMapping("")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllExpelledStudents() {
         List<StudentExpel> studentExpels = studentExpelService.getAllExpelledStudents(Constants.FACULTY_ID);
@@ -95,7 +95,7 @@ public class StudentExpelController {
         return ExceptionHandlerAdvice.handleException(exception, StudentExpelController.class);
     }
 
-    @PostMapping("/renewed-expels")
+    @PostMapping("/renewed")
     public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {
             if (studentExpelService.studentIsNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
