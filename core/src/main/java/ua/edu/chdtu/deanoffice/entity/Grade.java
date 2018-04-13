@@ -16,15 +16,10 @@ import javax.persistence.Table;
 @Entity
 @Getter
 @Setter
-@Table(name = "grade")
-//, uniqueConstraints = {
-//@UniqueConstraint(columnNames = {"course_id", "studentdegree_id"})
-//})
 public class Grade extends BaseEntity {
     @ManyToOne
     private Course course;
     @ManyToOne
-    @JoinColumn(name = "studentdegree_id")
     private StudentDegree studentDegree;
     @Column(name = "grade", nullable = false)
     private int grade;

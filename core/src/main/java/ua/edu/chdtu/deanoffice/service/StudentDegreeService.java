@@ -36,4 +36,8 @@ public class StudentDegreeService {
         List<StudentDegree> studentDegreeList = this.studentDegreeRepository.findByStudentId(studentId);
         return (studentDegreeList.isEmpty()) ? null : studentDegreeList.get(0);
     }
+
+    public List<StudentDegree> findStudentsByGroupId(Integer groupId) {
+        return this.studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
+    }
 }

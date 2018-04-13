@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 @Setter
 public class Course extends BaseEntity {
     @ManyToOne
-    @JoinColumn(name = "coursename_id")
     @Cascade(CascadeType.ALL)
     private CourseName courseName;
     @Column(name = "semester", nullable = false)

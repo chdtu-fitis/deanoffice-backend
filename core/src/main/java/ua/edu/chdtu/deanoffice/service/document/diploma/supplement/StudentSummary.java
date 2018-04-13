@@ -187,7 +187,7 @@ public class StudentSummary {
         newCourse.setKnowledgeControl(resultingGrade.getCourse().getKnowledgeControl());
         resultingGrade.setCourse(newCourse);
 
-        if (!resultingGrade.getCourse().getKnowledgeControl().isHasGrade()) {
+        if (!resultingGrade.getCourse().getKnowledgeControl().isGraded()) {
             int[] pointsAndGrade = GradeUtil.adjustAverageGradeAndPoints(
                     gradesSum / grades.size(),
                     pointsSum / grades.size());
@@ -217,7 +217,7 @@ public class StudentSummary {
         for (List<Grade> gradesSublist :
                 grades) {
             for (Grade g : gradesSublist) {
-                if (g.getCourse().getKnowledgeControl().isHasGrade() && g.getPoints() > 0) {
+                if (g.getCourse().getKnowledgeControl().isGraded() && g.getPoints() > 0) {
                     pointSum += g.getPoints();
                     pointsCount++;
                 }
@@ -235,7 +235,7 @@ public class StudentSummary {
         Course course = new Course();
         grade.setCourse(course);
         KnowledgeControl kc = new KnowledgeControl();
-        kc.setHasGrade(true);
+        kc.setGraded(true);
         course.setKnowledgeControl(kc);
         return grade.getNationalGradeUkr();
     }
@@ -246,7 +246,7 @@ public class StudentSummary {
         Course course = new Course();
         grade.setCourse(course);
         KnowledgeControl kc = new KnowledgeControl();
-        kc.setHasGrade(true);
+        kc.setGraded(true);
         course.setKnowledgeControl(kc);
         return grade.getNationalGradeEng();
     }
