@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -90,14 +89,16 @@ public class StudentExpelController {
         return ExceptionHandlerAdvice.handleException(exception, StudentExpelController.class);
     }
 
-    @PutMapping("/{student_degree_id}/expels")
+    @PostMapping("/{student_degree_id}/expels")
     public ResponseEntity renewExpelledStudent(@PathVariable("student_degree_id") int studentDegreeId) {
         try {
             if (studentExpelService.studentIsNotExpelled(studentDegreeId)) {
-                return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") is not expelled");
+                return ExceptionHandlerAdvice
+                        .handleException("Student (id = " + studentDegreeId + ") is not expelled", StudentExpelController.class);
             }
             studentExpelService.renew(studentDegreeId);
-            return ResponseEntity.ok().build();
+            URI location = getNewResourceLocation(0);
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }

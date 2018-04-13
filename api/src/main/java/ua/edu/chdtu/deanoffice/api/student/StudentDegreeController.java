@@ -147,10 +147,10 @@ public class StudentDegreeController {
     @JsonView(StudentView.Degrees.class)
     @PutMapping("/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
-            @RequestBody List<StudentDegreeDTO> studentDegreesDTO,
-            @PathVariable(value = "id") Integer studentId
+            @PathVariable(value = "id") Integer studentId,
+            @RequestBody List<StudentDegreeDTO> studentDegreesDTO
     ) {
-        if (checkNullId(studentDegreesDTO)) {
+        if (checkId(studentDegreesDTO)) {
             return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id not must be null");
         }
 
@@ -165,14 +165,13 @@ public class StudentDegreeController {
             });
 
             studentDegreeService.update(studentDegrees);
-            Student upStudent = studentService.findById(studentId);
-            return ResponseEntity.ok(Parser.parse(upStudent, StudentDTO.class));
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    private boolean checkNullId(List<StudentDegreeDTO> studentDegreeDTOs) {
+    private boolean checkId(List<StudentDegreeDTO> studentDegreeDTOs) {
         for (StudentDegreeDTO sd : studentDegreeDTOs) {
             if (sd.getId() == null) {
                 return true;

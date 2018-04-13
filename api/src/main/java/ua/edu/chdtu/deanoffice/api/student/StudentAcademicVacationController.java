@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,7 +52,7 @@ public class StudentAcademicVacationController {
                     .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
 
             URI location = getNewResourceLocation(studentAcademicVacation.getId());
-            return ResponseEntity.created(location).body(Parser.parse(studentAcademicVacation, StudentAcademicVacationDTO.class));
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -83,14 +82,15 @@ public class StudentAcademicVacationController {
         return ExceptionHandlerAdvice.handleException(exception, StudentAcademicVacationController.class);
     }
 
-    @PutMapping("{student_degree_id}/academic-vacations")
+    @PostMapping("{student_degree_id}/academic-vacations")
     public ResponseEntity renewAcademicVacation(@PathVariable("student_degree_id") int studentDegreeId) {
         try {
             if (studentAcademicVacationService.inAcademicVacation(studentDegreeId)) {
-                return ResponseEntity.unprocessableEntity().body("Student (id = " + studentDegreeId + ") don`t move to academic vacation");
+                return ExceptionHandlerAdvice.handleException("", StudentAcademicVacation.class);
             }
             studentAcademicVacationService.renew(studentDegreeId);
-            return ResponseEntity.ok().build();
+            URI location = getNewResourceLocation(0);
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
