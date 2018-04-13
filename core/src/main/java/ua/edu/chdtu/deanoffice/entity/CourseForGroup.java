@@ -4,12 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import java.util.Date;
 
 @Getter
@@ -23,6 +18,6 @@ public class CourseForGroup extends BaseEntity {
     private StudentGroup studentGroup;
     @ManyToOne
     private Teacher teacher;
-    @Column(name = "exam_date")
+    @Temporal(TemporalType.DATE)
     private Date examDate;
 }
