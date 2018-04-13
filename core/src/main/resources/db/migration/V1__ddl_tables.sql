@@ -466,6 +466,85 @@ ALTER SEQUENCE privilege_id_seq OWNED BY privilege.id;
 
 
 --
+-- Name: renewed_academic_vacation_student; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE renewed_academic_vacation_student (
+    id integer NOT NULL,
+    application_date date NOT NULL,
+    payment character varying(8) DEFAULT 'BUDGET'::character varying NOT NULL,
+    renew_date date,
+    study_year integer NOT NULL,
+    student_academic_vacation_id integer NOT NULL,
+    student_group_id integer NOT NULL
+);
+
+
+ALTER TABLE renewed_academic_vacation_student OWNER TO postgres;
+
+--
+-- Name: renewed_academic_vacation_student_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE renewed_academic_vacation_student_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE renewed_academic_vacation_student_id_seq OWNER TO postgres;
+
+--
+-- Name: renewed_academic_vacation_student_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE renewed_academic_vacation_student_id_seq OWNED BY renewed_academic_vacation_student.id;
+
+
+--
+-- Name: renewed_expelled_student; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE renewed_expelled_student (
+    id integer NOT NULL,
+    academic_certificate_date date NOT NULL,
+    academic_certificate_issued_by timestamp without time zone NOT NULL,
+    academic_certificate_number character varying(255) NOT NULL,
+    application_date date NOT NULL,
+    payment character varying(8) DEFAULT 'BUDGET'::character varying NOT NULL,
+    renew_date date,
+    study_year integer NOT NULL,
+    student_expel_id integer NOT NULL,
+    student_group_id integer NOT NULL
+);
+
+
+ALTER TABLE renewed_expelled_student OWNER TO postgres;
+
+--
+-- Name: renewed_expelled_student_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE renewed_expelled_student_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE renewed_expelled_student_id_seq OWNER TO postgres;
+
+--
+-- Name: renewed_expelled_student_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE renewed_expelled_student_id_seq OWNED BY renewed_expelled_student.id;
+
+
+--
 -- Name: speciality; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -914,6 +993,20 @@ ALTER TABLE ONLY privilege ALTER COLUMN id SET DEFAULT nextval('privilege_id_seq
 
 
 --
+-- Name: renewed_academic_vacation_student id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_academic_vacation_student ALTER COLUMN id SET DEFAULT nextval('renewed_academic_vacation_student_id_seq'::regclass);
+
+
+--
+-- Name: renewed_expelled_student id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_expelled_student ALTER COLUMN id SET DEFAULT nextval('renewed_expelled_student_id_seq'::regclass);
+
+
+--
 -- Name: speciality id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -1063,6 +1156,22 @@ ALTER TABLE ONLY "position"
 
 ALTER TABLE ONLY privilege
     ADD CONSTRAINT privilege_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: renewed_academic_vacation_student renewed_academic_vacation_student_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_academic_vacation_student
+    ADD CONSTRAINT renewed_academic_vacation_student_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: renewed_expelled_student renewed_expelled_student_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_expelled_student
+    ADD CONSTRAINT renewed_expelled_student_pkey PRIMARY KEY (id);
 
 
 --
@@ -1298,6 +1407,14 @@ ALTER TABLE ONLY grade
 
 
 --
+-- Name: renewed_expelled_student fk8i4ftbqmtllto4rwrehaltsdx; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_expelled_student
+    ADD CONSTRAINT fk8i4ftbqmtllto4rwrehaltsdx FOREIGN KEY (student_group_id) REFERENCES student_group(id);
+
+
+--
 -- Name: student_degree fk9st6a1j5cw6s3xkakvnavyi99; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1410,11 +1527,27 @@ ALTER TABLE ONLY student
 
 
 --
+-- Name: renewed_academic_vacation_student fknld8adwhu2yp51sdf3tk8j92f; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_academic_vacation_student
+    ADD CONSTRAINT fknld8adwhu2yp51sdf3tk8j92f FOREIGN KEY (student_group_id) REFERENCES student_group(id);
+
+
+--
 -- Name: specialization fkq2c76cyld8gltdkxod8fosvub; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY specialization
     ADD CONSTRAINT fkq2c76cyld8gltdkxod8fosvub FOREIGN KEY (department_id) REFERENCES department(id);
+
+
+--
+-- Name: renewed_academic_vacation_student fkq630ubwk4twmf2y6rh0kui1n8; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_academic_vacation_student
+    ADD CONSTRAINT fkq630ubwk4twmf2y6rh0kui1n8 FOREIGN KEY (student_academic_vacation_id) REFERENCES student_academic_vacation(id);
 
 
 --
@@ -1431,6 +1564,14 @@ ALTER TABLE ONLY student_group
 
 ALTER TABLE ONLY courses_for_groups
     ADD CONSTRAINT fkrwsolvxclmfpwhunt70mrlq7s FOREIGN KEY (student_group_id) REFERENCES student_group(id);
+
+
+--
+-- Name: renewed_expelled_student fksc5pauvj5kxci1w5o4ymvpsa5; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY renewed_expelled_student
+    ADD CONSTRAINT fksc5pauvj5kxci1w5o4ymvpsa5 FOREIGN KEY (student_expel_id) REFERENCES student_expel(id);
 
 
 --
