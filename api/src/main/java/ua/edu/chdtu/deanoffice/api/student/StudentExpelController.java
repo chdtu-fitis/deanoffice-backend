@@ -101,8 +101,10 @@ public class StudentExpelController {
             if (studentExpelService.studentIsNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
                 return ExceptionHandlerAdvice.handleException("Student is not expelled", StudentExpelController.class);
             }
-            Integer renewId = studentExpelService.renew(createRenewedExpelledStudent(renewedExpelledStudentDTO)).getId();
-            URI location = getNewResourceLocation(renewId);
+            Integer id = studentExpelService
+                    .renew(createRenewedExpelledStudent(renewedExpelledStudentDTO))
+                    .getId();
+            URI location = getNewResourceLocation(id);
             return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);

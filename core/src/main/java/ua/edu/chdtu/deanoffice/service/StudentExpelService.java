@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
 import static ua.edu.chdtu.deanoffice.Constants.SUCCESS_REASON_IDS;
+import static ua.edu.chdtu.deanoffice.util.StudentUtil.studentDegreeToActive;
 
 @Service
 public class StudentExpelService {
@@ -66,15 +67,9 @@ public class StudentExpelService {
 
     public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {
         Integer studentDegreeId = renewedExpelledStudent.getStudentExpel().getStudentDegree().getId();
-        studentDegreeToActive(studentDegreeId);
+        studentDegreeToActive(studentDegreeId, studentDegreeRepository);
 
         return renewedExpelledStudentRepository.save(renewedExpelledStudent);
-    }
-
-    private void studentDegreeToActive(Integer studentDegreeId) {
-        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
-        studentDegree.setActive(true);
-        studentDegreeRepository.save(studentDegree);
     }
 
     public StudentExpel getById(Integer studentExpelId) {

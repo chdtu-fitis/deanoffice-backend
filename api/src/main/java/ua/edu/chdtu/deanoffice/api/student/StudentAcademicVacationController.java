@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +17,11 @@ import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.net.URI;
 import java.util.List;
@@ -34,16 +35,19 @@ public class StudentAcademicVacationController {
     private final StudentAcademicVacationService studentAcademicVacationService;
     private final OrderReasonService orderReasonService;
     private final StudentDegreeService studentDegreeService;
+    private final StudentGroupService studentGroupService;
 
     @Autowired
     public StudentAcademicVacationController(
             StudentAcademicVacationService studentAcademicVacationService,
             OrderReasonService orderReasonService,
-            StudentDegreeService studentDegreeService
+            StudentDegreeService studentDegreeService,
+            StudentGroupService studentGroupService
     ) {
         this.studentAcademicVacationService = studentAcademicVacationService;
         this.orderReasonService = orderReasonService;
         this.studentDegreeService = studentDegreeService;
+        this.studentGroupService = studentGroupService;
     }
 
     @JsonView(StudentView.AcademicVacation.class)
@@ -92,11 +96,29 @@ public class StudentAcademicVacationController {
             if (studentAcademicVacationService.inAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
                 return ExceptionHandlerAdvice.handleException("", StudentAcademicVacation.class);
             }
-            Integer id = studentAcademicVacationService.renew(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId()).getId();
+            Integer id = studentAcademicVacationService
+                    .renew(createRenewedAcademicVacationStudent(renewedAcademicVacationStudentDTO))
+                    .getId();
             URI location = getNewResourceLocation(id);
             return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private RenewedAcademicVacationStudent createRenewedAcademicVacationStudent(
+            RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
+    ) {
+        RenewedAcademicVacationStudent renewedAcademicVacationStudent =
+                (RenewedAcademicVacationStudent) Parser.strictParse(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
+
+        StudentAcademicVacation studentAcademicVacation =
+                studentAcademicVacationService.getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId());
+        renewedAcademicVacationStudent.setStudentAcademicVacation(studentAcademicVacation);
+
+        StudentGroup studentGroup = studentGroupService.getById(renewedAcademicVacationStudentDTO.getStudentGroupId());
+        renewedAcademicVacationStudent.setStudentGroup(studentGroup);
+
+        return renewedAcademicVacationStudent;
     }
 }
