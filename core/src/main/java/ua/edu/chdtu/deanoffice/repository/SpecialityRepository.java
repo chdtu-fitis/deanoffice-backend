@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SpecialityRepository extends JpaRepository<Speciality, Integer> {
     List<Speciality> findAllByActiveOrderByName(boolean active);
+    Speciality getSpecialityByName(String name);
+    Speciality getSpecialityByCode(String code);
 }
