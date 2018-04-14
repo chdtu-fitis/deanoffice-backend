@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,16 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.dto.ImportReportDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.service.document.importing.ImportDataService;
 import ua.edu.chdtu.deanoffice.service.document.importing.ImportReport;
 
-import java.io.IOException;
 import java.util.List;
-
-import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 
 @RestController
 @RequestMapping("/students")
@@ -44,7 +41,7 @@ public class ImportController {
 
         try {
             importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
-        } catch (IOException | Docx4JException exception) {
+        } catch (Exception exception) {
             return handleException(exception);
         }
 
@@ -62,5 +59,9 @@ public class ImportController {
         }.getType()));
 
         return importReportDTO;
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentController.class);
     }
 }
