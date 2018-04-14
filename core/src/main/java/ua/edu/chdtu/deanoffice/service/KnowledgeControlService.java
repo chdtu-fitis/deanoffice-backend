@@ -9,10 +9,14 @@ import java.util.List;
 
 @Service
 public class KnowledgeControlService {
-    @Autowired
-    private KnowledgeControlRepository knowledgeControlRepository;
+    private final KnowledgeControlRepository knowledgeControlRepository;
 
-    public List<KnowledgeControl> getAllKnowledgeControls(){
+    @Autowired
+    public KnowledgeControlService(KnowledgeControlRepository knowledgeControlRepository) {
+        this.knowledgeControlRepository = knowledgeControlRepository;
+    }
+
+    public List<KnowledgeControl> getAllKnowledgeControls() {
         return this.knowledgeControlRepository.findAll();
     }
 }

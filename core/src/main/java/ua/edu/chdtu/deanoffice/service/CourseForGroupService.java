@@ -3,9 +3,7 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
-import ua.edu.chdtu.deanoffice.entity.Course;
 
 import java.util.List;
 import java.util.Set;
@@ -36,15 +34,19 @@ public class CourseForGroupService {
         return courseForGroupRepository.findAllByStudentGroupIdAndCourse_Semester(idGroup, semester);
     }
 
-    public List<CourseForGroup> getCourseForGroupBySpecialization(int specialization, int semester){
+    public List<CourseForGroup> getCourseForGroupBySpecialization(int specialization, int semester) {
         return courseForGroupRepository.findAllBySpecialization(specialization, semester);
     }
 
-    public List<CourseForGroup> getCoursesForGroupBySemester(int semester){
+    public List<CourseForGroup> getCoursesForGroupBySemester(int semester) {
         return courseForGroupRepository.findAllBySemester(semester);
     }
 
-    public void addCourseForGroupAndNewChanges(Set<CourseForGroup> newCourses, Set<CourseForGroup> updatedCourses, List<Integer> deleteCoursesIds){
+    public void addCourseForGroupAndNewChanges(
+            Set<CourseForGroup> newCourses,
+            Set<CourseForGroup> updatedCourses,
+            List<Integer> deleteCoursesIds
+    ) {
         courseForGroupRepository.save(newCourses);
         courseForGroupRepository.save(updatedCourses);
         for (Integer courseId : deleteCoursesIds) {

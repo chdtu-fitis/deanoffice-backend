@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class CourseReport {
+class CourseReport {
 
     private static Logger log = LoggerFactory.getLogger(CourseReport.class);
     private String course;
@@ -18,19 +18,19 @@ public class CourseReport {
     private String teacher;
     private String date;
 
-    public CourseReport(String course, String hours, String teacher, String date) {
+    CourseReport(String course, String hours, String teacher, String date) {
         this.course = course;
         this.hours = hours;
         this.teacher = teacher;
         this.date = date;
     }
 
-    public Map<String, String> getDictionary() {
+    Map<String, String> getDictionary() {
         Map<String, String> result = new HashMap<>();
-        result.put("Pred",course);
-        result.put("H",hours);
-        result.put("V",teacher);
-        result.put("D",date);
+        result.put("Pred", course);
+        result.put("H", hours);
+        result.put("V", teacher);
+        result.put("D", date);
         return result;
     }
 }

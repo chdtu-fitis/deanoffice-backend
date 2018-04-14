@@ -24,14 +24,14 @@ public class DiplomaSupplementController extends DocumentResponseController {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
-    @GetMapping(path = "/degrees/{studentDegreeId}/docx")
+    @GetMapping("/degrees/{studentDegreeId}/docx")
     public ResponseEntity<Resource> generateDocxForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {
         File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.DOCX);
         return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_DOCX);
     }
 
-    @GetMapping(path = "/degrees/{studentDegreeId}/pdf")
+    @GetMapping("/degrees/{studentDegreeId}/pdf")
     public ResponseEntity<Resource> generatePdfForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {
         File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.PDF);

@@ -9,15 +9,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {
-		"ua.edu.chdtu.deanoffice"
+        "ua.edu.chdtu.deanoffice"
 })
 @EnableJpaRepositories("ua.edu.chdtu.deanoffice")
 public class Application {
 
-	private static Logger log = LoggerFactory.getLogger(Application.class);
+    private static Logger log = LoggerFactory.getLogger(Application.class);
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-		log.info("Test log");
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+        log.info("Test log");
+    }
 }

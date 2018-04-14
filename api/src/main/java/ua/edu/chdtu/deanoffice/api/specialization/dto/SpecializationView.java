@@ -5,5 +5,6 @@ import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityView;
 
 public class SpecializationView {
     public interface Basic {}
-    public interface WithDegreeAndSpeciality  extends Basic, SpecialityView.Basic, GeneralView.BasicDegree {}
+
+    public interface WithDegreeAndSpeciality extends Basic, SpecialityView.Basic, GeneralView.BasicDegree {}
 }

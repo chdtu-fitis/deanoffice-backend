@@ -21,9 +21,15 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.addRowToTable;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.findTable;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextPlaceholdersInTemplate;
 
 @Service
 public class ReportsCoursesService {
@@ -37,25 +43,30 @@ public class ReportsCoursesService {
     private CourseForGroupService courseForGroupService;
     private DocumentIOService documentIOService;
 
-    public ReportsCoursesService(GradeService gradeService, StudentGroupService groupService, DocumentIOService documentIOService, CourseForGroupService courseForGroupService) {
+    public ReportsCoursesService(
+            GradeService gradeService,
+            StudentGroupService groupService,
+            DocumentIOService documentIOService,
+            CourseForGroupService courseForGroupService
+    ) {
         this.gradeService = gradeService;
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
     }
 
-    public synchronized File prepareReportForGroup(Integer groupId,Integer semestrId) throws Docx4JException, IOException {
+    public synchronized File prepareReportForGroup(Integer groupId, Integer semester) throws Docx4JException, IOException {
         List<CourseReport> courseReports = new ArrayList<>();
         StudentGroup group = groupService.getById(groupId);
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semestrId);
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         Format formatter = new SimpleDateFormat("dd.MM.yyyy");
         courseForGroups.forEach(courseForGroup -> {
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
-                                                courseForGroup.getCourse().getHours().toString(),
-                                                courseForGroup.getTeacher()!= null?courseForGroup.getTeacher().getSurname()+" "
-                                                +courseForGroup.getTeacher().getName().charAt(0)+"."
-                                                +courseForGroup.getTeacher().getPatronimic().charAt(0)+"." : "",
-                                                               courseForGroup.getExamDate() == null ? "" :  formatter.format(courseForGroup.getExamDate())));
+                    courseForGroup.getCourse().getHours().toString(),
+                    courseForGroup.getTeacher() != null ? courseForGroup.getTeacher().getSurname() + " "
+                            + courseForGroup.getTeacher().getName().charAt(0) + "."
+                            + courseForGroup.getTeacher().getPatronimic().charAt(0) + "." : "",
+                    courseForGroup.getExamDate() == null ? "" : formatter.format(courseForGroup.getExamDate())));
         });
         return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, courseReports), LanguageUtil.transliterate(group.getName()) + ".docx", FileFormatEnum.DOCX);
     }
@@ -64,7 +75,7 @@ public class ReportsCoursesService {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         fillTableWithGrades(template, courseReports);
         Map<String, String> commonDict = new HashMap<>();
-        commonDict.put("GroupName","PZ-154");
+        commonDict.put("GroupName", "PZ-154");
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }

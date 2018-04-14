@@ -33,15 +33,14 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitials;
 class ExamReportTemplateFillService {
 
     private static final int STARTING_ROW_INDEX = 7;
-
-    private final DocumentIOService documentIOService;
     private static final Logger log = LoggerFactory.getLogger(ExamReportTemplateFillService.class);
+    private final DocumentIOService documentIOService;
 
     public ExamReportTemplateFillService(DocumentIOService documentIOService) {
         this.documentIOService = documentIOService;
     }
 
-    public WordprocessingMLPackage fillTemplate(String templateName, CourseForGroup courseForGroup)
+    WordprocessingMLPackage fillTemplate(String templateName, CourseForGroup courseForGroup)
             throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         fillTableWithStudentInitials(template, courseForGroup.getStudentGroup());

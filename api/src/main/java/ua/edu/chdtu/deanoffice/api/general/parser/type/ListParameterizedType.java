@@ -14,7 +14,7 @@ public class ListParameterizedType implements ParameterizedType {
 
     @Override
     public Type[] getActualTypeArguments() {
-        return new Type[] {type};
+        return new Type[]{type};
     }
 
     @Override
