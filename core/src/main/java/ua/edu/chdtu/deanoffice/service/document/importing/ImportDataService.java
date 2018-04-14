@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
@@ -10,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xlsx4j.exceptions.Xlsx4jException;
 import org.xlsx4j.org.apache.poi.ss.usermodel.DataFormatter;
 import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
@@ -18,6 +18,7 @@ import org.xlsx4j.sml.Worksheet;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.SpecialityService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -40,14 +41,16 @@ public class ImportDataService {
     private final StudentService studentService;
     private final StudentDegreeService studentDegreeService;
     private final DegreeService degreeService;
+    private final SpecialityService specialityService;
 
     @Autowired
     public ImportDataService(DocumentIOService documentIOService, StudentService studentService,
-                             StudentDegreeService studentDegreeService, DegreeService degreeService) {
+                             StudentDegreeService studentDegreeService, DegreeService degreeService, SpecialityService specialityService) {
         this.documentIOService = documentIOService;
         this.studentService = studentService;
         this.studentDegreeService = studentDegreeService;
         this.degreeService = degreeService;
+        this.specialityService = specialityService;
     }
 
     public ImportReport getStudentsFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
@@ -78,10 +81,8 @@ public class ImportDataService {
         try {
             WorkbookPart workbookPart = xlsxPkg.getWorkbookPart();
             WorksheetPart sheetPart = workbookPart.getWorksheet(0);
-
             Worksheet worksheet = sheetPart.getContents();
             org.xlsx4j.sml.SheetData sheetData = worksheet.getSheetData();
-
             DataFormatter formatter = new DataFormatter();
             SheetData sd = new SheetData();
             List<ImportedData> importedData = new ArrayList<>();
@@ -115,7 +116,7 @@ public class ImportDataService {
             }
 
             return importedData;
-        } catch (Docx4JException | Xlsx4jException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
             return Collections.emptyList();
         }
@@ -124,13 +125,12 @@ public class ImportDataService {
     private Student fetchStudent(ImportedData data) throws NullPointerException {
         String errorMsg = "Failed to fetch data. ";
         requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
-
         Student student = new Student();
-        Date birthDate = null;
         DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
 
         try {
-            birthDate = formatter.parse(data.getBirthday());
+            Date birthDate = formatter.parse(data.getBirthday());
+            student.setBirthDate(birthDate);
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
@@ -145,7 +145,6 @@ public class ImportDataService {
             student = existsStudentList.get(0);
         }
 
-        student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
         student.setPatronimic(data.getMiddleName());
@@ -160,7 +159,6 @@ public class ImportDataService {
 
     private StudentDegree fetchStudentDegree(ImportedData data) throws NullPointerException {
         requireNonNull(data, "Failed to fetch data. Param \"data\" cannot be null!");
-
         DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
         StudentDegree studentDegree = new StudentDegree();
 
@@ -181,17 +179,9 @@ public class ImportDataService {
         studentDegree.setActive(true);
         studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + data.getDocumentNumbers2());
         studentDegree.setPayment(Objects.equals(data.getPersonEducationPaymentTypeName(), "Контракт") ? Payment.CONTRACT : Payment.BUDGET);
-
         DateFormat admissionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
-        final String ADMISSION_REGEXP =
-                "Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
+        final String ADMISSION_REGEXP ="Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
         Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
-
-        try {
-            studentDegree.setAdmissionOrderDate(formatter.parse(data.getEducationDateBegin()));
-        } catch (ParseException e) {
-            log.debug(e.getMessage());
-        }
 
         try {
             Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
@@ -212,11 +202,42 @@ public class ImportDataService {
         return studentDegree;
     }
 
+    private Speciality fetchSpeciality(String specialityString) {
+        final String SPECIALITY_REGEXP = "([\\d.]+)[\\s]([\\w\\W]+)";
+        Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP);
+
+        try {
+            Matcher matcher = specialityPattern.matcher(specialityString);
+
+            if (matcher.matches() && matcher.groupCount() > 1) {
+                String code = matcher.group(1);
+                String name = StringUtils.capitalize(matcher.group(2)).trim();
+                Speciality speciality = getExistsSpeciality(name, code);
+
+                if (speciality == null) {
+                    speciality = new Speciality();
+                    speciality.setName(name);
+                    speciality.setCode(code);
+                }
+
+                return speciality;
+            }
+        } catch (Exception e) {
+            log.debug(e.getMessage());
+        }
+
+        return null;
+    }
+
+    private Speciality getExistsSpeciality(String name, String code) {
+        Speciality existsSpeciality = specialityService.getSpecialityByCode(code);
+        return existsSpeciality == null ? specialityService.getSpecialityByName(name) : existsSpeciality;
+    }
+
     private StudentDegree fetchStudentDegree(ImportedData data, Student student) throws NullPointerException, IllegalArgumentException {
         String errorMsg = "Failed to fetch data. ";
         requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
         requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
-
         StudentDegree studentDegree = fetchStudentDegree(data);
         studentDegree.setStudent(student);
 
@@ -233,11 +254,9 @@ public class ImportDataService {
 
     private ImportReport doImport(List<ImportedData> importedData) throws NullPointerException {
         Objects.requireNonNull(importedData);
-
         ImportReport importReport = new ImportReport();
 
         for (ImportedData data : importedData) {
-
             Student student;
             StudentDegree studentDegree;
 
