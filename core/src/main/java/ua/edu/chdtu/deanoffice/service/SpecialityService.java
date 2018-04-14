@@ -24,4 +24,12 @@ public class SpecialityService {
         Sort sort = new Sort(Sort.Direction.ASC, "name");
         return specialityRepository.findAll(sort);
     }
+
+    public Speciality getSpecialityByName(String name) {
+        return specialityRepository.getSpecialityByName(name);
+    }
+
+    public Speciality getSpecialityByCode(String code) {
+        return specialityRepository.getSpecialityByCode(code);
+    }
 }
