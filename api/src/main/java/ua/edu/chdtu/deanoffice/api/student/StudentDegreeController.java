@@ -104,6 +104,7 @@ public class StudentDegreeController {
         StudentDegree newStudentDegree = (StudentDegree) Parser.strictParse(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
+        newStudentDegree.setSpecialization(newStudentDegree.getStudentGroup().getSpecialization());
         newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
         newStudentDegree.setActive(true);
 
