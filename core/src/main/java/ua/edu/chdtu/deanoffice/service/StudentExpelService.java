@@ -60,9 +60,14 @@ public class StudentExpelService {
         return new Date((currentYear - EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW) + "/01/01");
     }
 
-    public boolean studentIsNotExpelled(int studentExpelId) {
-        StudentExpel studentExpel = studentExpelRepository.findActiveById(studentExpelId);
-        return studentExpel != null;
+    public boolean isNotExpelled(int studentExpelId) {
+        StudentExpel studentExpel = studentExpelRepository.findInactiveById(studentExpelId);
+        return studentExpel == null;
+    }
+
+    public boolean isExpelled(Integer[] studentDegreeIds) {
+        List<StudentExpel> studentExpels = studentExpelRepository.findAllActiveFired(studentDegreeIds);
+        return !studentExpels.isEmpty();
     }
 
     public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {
