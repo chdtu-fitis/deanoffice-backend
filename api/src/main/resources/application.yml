@@ -2,8 +2,8 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/deanoffice2?createDatabaseIfNotExist=true
     driver-class-name: org.postgresql.Driver
-    username: olegnovitskiy
-    password: 123
+    username: postgres
+    password: admin
 #    connection-timeout: 60000
 #    maximum-pool-size: 30
   jpa:
