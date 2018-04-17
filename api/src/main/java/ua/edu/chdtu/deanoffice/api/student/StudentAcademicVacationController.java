@@ -54,6 +54,10 @@ public class StudentAcademicVacationController {
     @PostMapping("")
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
+            if (studentAcademicVacationService.inAcademicVacation(studentAcademicVacationDTO.getStudentDegreeId())) {
+                return handleException("Student already gave academic vacation");
+            }
+
             StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
                     .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
 
@@ -71,8 +75,10 @@ public class StudentAcademicVacationController {
         StudentDegree studentDegree = studentDegreeService.getById(studentAcademicVacationDTO.getStudentDegreeId());
         studentAcademicVacation.setStudentDegree(studentDegree);
 
-        OrderReason orderReason = orderReasonService.getById(studentAcademicVacationDTO.getReasonId());
+        OrderReason orderReason = orderReasonService.getById(studentAcademicVacationDTO.getOrderReasonId());
         studentAcademicVacation.setOrderReason(orderReason);
+
+        studentAcademicVacation.setStudentGroup(studentDegree.getStudentGroup());
 
         return studentAcademicVacation;
     }
@@ -88,13 +94,17 @@ public class StudentAcademicVacationController {
         return ExceptionHandlerAdvice.handleException(exception, StudentAcademicVacationController.class);
     }
 
+    private ResponseEntity handleException(String message) {
+        return ExceptionHandlerAdvice.handleException(message, StudentAcademicVacationController.class);
+    }
+
     @PostMapping("/renewed")
     public ResponseEntity renewAcademicVacation(
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         try {
-            if (studentAcademicVacationService.inAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
-                return ExceptionHandlerAdvice.handleException("", StudentAcademicVacation.class);
+            if (studentAcademicVacationService.notInAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
+                return handleException("Student didn`t give academic vacation");
             }
             Integer id = studentAcademicVacationService
                     .renew(createRenewedAcademicVacationStudent(renewedAcademicVacationStudentDTO))
@@ -109,8 +119,8 @@ public class StudentAcademicVacationController {
     private RenewedAcademicVacationStudent createRenewedAcademicVacationStudent(
             RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
-        RenewedAcademicVacationStudent renewedAcademicVacationStudent =
-                (RenewedAcademicVacationStudent) Parser.strictParse(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
+        RenewedAcademicVacationStudent renewedAcademicVacationStudent = (RenewedAcademicVacationStudent)
+                Parser.strictParse(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
 
         StudentAcademicVacation studentAcademicVacation =
                 studentAcademicVacationService.getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId());

@@ -44,10 +44,16 @@ public class StudentAcademicVacationService {
         return studentAcademicVacationRepository.findAllByFaculty(facultyId);
     }
 
-    public boolean inAcademicVacation(int studentAcademicVacationId) {
+    public boolean notInAcademicVacation(int studentAcademicVacationId) {
         StudentAcademicVacation studentAcademicVacation =
-                studentAcademicVacationRepository.findActiveById(studentAcademicVacationId);
-        return studentAcademicVacation != null;
+                studentAcademicVacationRepository.findInactiveById(studentAcademicVacationId);
+        return studentAcademicVacation == null;
+    }
+
+    public boolean inAcademicVacation(Integer studentDegreeId) {
+        List<StudentAcademicVacation> studentAcademicVacations =
+                studentAcademicVacationRepository.findActiveByStudentDegreeId(studentDegreeId);
+        return studentAcademicVacations.isEmpty();
     }
 
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {

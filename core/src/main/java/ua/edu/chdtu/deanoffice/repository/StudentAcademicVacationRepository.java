@@ -15,6 +15,10 @@ public interface StudentAcademicVacationRepository extends JpaRepository<Student
     List<StudentAcademicVacation> findAllByFaculty(@Param("faculty_id") Integer facultyId);
 
     @Query("select sav from StudentAcademicVacation sav " +
-            "where sav.id = :id and sav.studentDegree.active = true")
-    StudentAcademicVacation findActiveById(@Param("id") Integer id);
+            "where sav.studentDegree.id = :student_degree_id and sav.studentDegree.active = true")
+    List<StudentAcademicVacation> findActiveByStudentDegreeId(@Param("student_degree_id") Integer studentDegreeId);
+
+    @Query("select sav from StudentAcademicVacation sav " +
+            "where sav.id = :id and sav.studentDegree.active = false")
+    StudentAcademicVacation findInactiveById(@Param("id") Integer id);
 }
