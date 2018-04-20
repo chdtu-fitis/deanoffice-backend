@@ -108,7 +108,10 @@ public class StudentAcademicVacationController {
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         try {
-            if (studentUtil.studentDegreeIsActive(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
+            Integer studentDegreeId = this.studentAcademicVacationService
+                    .getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())
+                    .getStudentDegree().getId();
+            if (studentUtil.studentDegreeIsActive(studentDegreeId)) {
                 return handleException("Student didn`t give academic vacation");
             }
             Integer id = studentAcademicVacationService
