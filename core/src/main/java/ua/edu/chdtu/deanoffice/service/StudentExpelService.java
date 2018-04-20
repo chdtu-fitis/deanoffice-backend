@@ -65,9 +65,12 @@ public class StudentExpelService {
         return studentExpel == null;
     }
 
-    public boolean isExpelled(Integer[] studentDegreeIds) {
+    public List<Integer> isExpelled(Integer[] studentDegreeIds) {
         List<StudentExpel> studentExpels = studentExpelRepository.findAllActiveFired(studentDegreeIds);
-        return !studentExpels.isEmpty();
+        return studentExpels.stream()
+                .map(studentExpel -> studentExpel.getStudentDegree().getId())
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {

@@ -55,11 +55,11 @@ public class StudentAcademicVacationController {
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             if (studentAcademicVacationService.inAcademicVacation(studentAcademicVacationDTO.getStudentDegreeId())) {
-                return handleException("Student already gave academic vacation");
+                return handleException("Student is not active");
             }
 
-            StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService
-                    .giveAcademicVacation(createStudentAcademicVacation(studentAcademicVacationDTO));
+            StudentAcademicVacation studentAcademicVacation = createStudentAcademicVacation(studentAcademicVacationDTO);
+            studentAcademicVacation = studentAcademicVacationService.giveAcademicVacation(studentAcademicVacation);
 
             URI location = getNewResourceLocation(studentAcademicVacation.getId());
             return ResponseEntity.created(location).build();

@@ -57,8 +57,13 @@ public class StudentExpelController {
     @PostMapping("")
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
-            if (studentExpelService.isExpelled(studentExpelDTO.getStudentDegreeIds())) {
-                return handleException("Some selected students was expelled");
+            List<Integer> inactiveStudents = studentExpelService.isExpelled(studentExpelDTO.getStudentDegreeIds());
+            boolean hasInactive = !inactiveStudents.isEmpty();
+            if (hasInactive) {
+                String studentIds = inactiveStudents.stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "));
+                return handleException("Student [" + studentIds + "] is not active");
             }
 
             List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO));
