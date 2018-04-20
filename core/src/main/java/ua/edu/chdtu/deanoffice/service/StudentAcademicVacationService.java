@@ -46,18 +46,6 @@ public class StudentAcademicVacationService {
         return studentAcademicVacationRepository.findAllByFaculty(facultyId);
     }
 
-    public boolean notInAcademicVacation(int studentAcademicVacationId) {
-        StudentAcademicVacation studentAcademicVacation =
-                studentAcademicVacationRepository.findInactiveById(studentAcademicVacationId);
-        return studentAcademicVacation == null;
-    }
-
-    public boolean inAcademicVacation(Integer studentDegreeId) {
-        List<StudentAcademicVacation> studentAcademicVacations =
-                studentAcademicVacationRepository.findActiveByStudentDegreeId(studentDegreeId);
-        return studentAcademicVacations.isEmpty();
-    }
-
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);

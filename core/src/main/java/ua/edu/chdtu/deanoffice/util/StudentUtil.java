@@ -35,4 +35,13 @@ public class StudentUtil {
     public int getStudyYear(StudentDegree studentDegree) {
         return getStudyYear(studentDegree.getStudentGroup());
     }
+
+    public boolean studentDegreeIsInactive(int studentDegreeId) {
+        return !studentDegreeIsActive(studentDegreeId);
+    }
+
+    public boolean studentDegreeIsActive(int studentDegreeId) {
+        StudentDegree studentDegree = this.studentDegreeRepository.findOne(studentDegreeId);
+        return studentDegree.isActive();
+    }
 }

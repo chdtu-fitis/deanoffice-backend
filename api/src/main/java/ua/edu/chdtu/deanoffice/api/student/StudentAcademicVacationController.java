@@ -58,7 +58,7 @@ public class StudentAcademicVacationController {
     @PostMapping("")
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
-            if (studentAcademicVacationService.inAcademicVacation(studentAcademicVacationDTO.getStudentDegreeId())) {
+            if (studentUtil.studentDegreeIsInactive(studentAcademicVacationDTO.getStudentDegreeId())) {
                 return handleException("Student is not active");
             }
 
@@ -108,7 +108,7 @@ public class StudentAcademicVacationController {
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         try {
-            if (studentAcademicVacationService.notInAcademicVacation(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
+            if (studentUtil.studentDegreeIsActive(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())) {
                 return handleException("Student didn`t give academic vacation");
             }
             Integer id = studentAcademicVacationService
