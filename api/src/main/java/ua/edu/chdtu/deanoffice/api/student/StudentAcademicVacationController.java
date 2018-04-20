@@ -22,6 +22,7 @@ import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
 import java.net.URI;
 import java.util.List;
@@ -36,18 +37,21 @@ public class StudentAcademicVacationController {
     private final OrderReasonService orderReasonService;
     private final StudentDegreeService studentDegreeService;
     private final StudentGroupService studentGroupService;
+    private final StudentUtil studentUtil;
 
     @Autowired
     public StudentAcademicVacationController(
             StudentAcademicVacationService studentAcademicVacationService,
             OrderReasonService orderReasonService,
             StudentDegreeService studentDegreeService,
-            StudentGroupService studentGroupService
+            StudentGroupService studentGroupService,
+            StudentUtil studentUtil
     ) {
         this.studentAcademicVacationService = studentAcademicVacationService;
         this.orderReasonService = orderReasonService;
         this.studentDegreeService = studentDegreeService;
         this.studentGroupService = studentGroupService;
+        this.studentUtil = studentUtil;
     }
 
     @JsonView(StudentView.AcademicVacation.class)
@@ -79,6 +83,7 @@ public class StudentAcademicVacationController {
         studentAcademicVacation.setOrderReason(orderReason);
 
         studentAcademicVacation.setStudentGroup(studentDegree.getStudentGroup());
+        studentAcademicVacation.setStudyYear(studentUtil.getStudyYear(studentDegree));
 
         return studentAcademicVacation;
     }
@@ -128,6 +133,8 @@ public class StudentAcademicVacationController {
 
         StudentGroup studentGroup = studentGroupService.getById(renewedAcademicVacationStudentDTO.getStudentGroupId());
         renewedAcademicVacationStudent.setStudentGroup(studentGroup);
+
+        renewedAcademicVacationStudent.setStudyYear(studentUtil.getStudyYear(studentGroup));
 
         return renewedAcademicVacationStudent;
     }

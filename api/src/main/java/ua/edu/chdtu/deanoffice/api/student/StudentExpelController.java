@@ -23,6 +23,7 @@ import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
 import java.net.URI;
 import java.util.List;
@@ -38,18 +39,21 @@ public class StudentExpelController {
     private final OrderReasonService orderReasonService;
     private final StudentExpelService studentExpelService;
     private final StudentGroupService studentGroupService;
+    private final StudentUtil studentUtil;
 
     @Autowired
     public StudentExpelController(
             StudentDegreeService studentDegreeService,
             OrderReasonService orderReasonService,
             StudentExpelService studentExpelService,
-            StudentGroupService studentGroupService
+            StudentGroupService studentGroupService,
+            StudentUtil studentUtil
     ) {
         this.studentDegreeService = studentDegreeService;
         this.orderReasonService = orderReasonService;
         this.studentExpelService = studentExpelService;
         this.studentGroupService = studentGroupService;
+        this.studentUtil = studentUtil;
     }
 
 
@@ -97,6 +101,7 @@ public class StudentExpelController {
         studentExpel.setStudentGroup(studentDegree.getStudentGroup());
 
         studentExpel.setOrderReason(studentExpelDTO.getEntityOrderReason());
+        studentExpel.setStudyYear(studentUtil.getStudyYear(studentDegree));
 
         return studentExpel;
     }
@@ -141,6 +146,8 @@ public class StudentExpelController {
 
         StudentGroup studentGroup = studentGroupService.getById(renewedExpelledStudentDTO.getStudentGroupId());
         renewedExpelledStudent.setStudentGroup(studentGroup);
+
+        renewedExpelledStudent.setStudyYear(studentUtil.getStudyYear(studentGroup));
 
         return renewedExpelledStudent;
     }

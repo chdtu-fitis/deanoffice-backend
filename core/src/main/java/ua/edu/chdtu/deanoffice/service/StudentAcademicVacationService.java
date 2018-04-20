@@ -8,26 +8,28 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.RenewedAcademicVacationStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentAcademicVacationRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
 import java.util.List;
-
-import static ua.edu.chdtu.deanoffice.util.StudentUtil.studentDegreeToActive;
 
 @Service
 public class StudentAcademicVacationService {
     private final StudentAcademicVacationRepository studentAcademicVacationRepository;
     private final StudentDegreeRepository studentDegreeRepository;
     private final RenewedAcademicVacationStudentRepository renewedAcademicVacationStudentRepository;
+    private final StudentUtil studentUtil;
 
     @Autowired
     public StudentAcademicVacationService(
             StudentAcademicVacationRepository studentAcademicVacationRepository,
             StudentDegreeRepository studentDegreeRepository,
-            RenewedAcademicVacationStudentRepository renewedAcademicVacationStudentRepository
+            RenewedAcademicVacationStudentRepository renewedAcademicVacationStudentRepository,
+            StudentUtil studentUtil
     ) {
         this.studentAcademicVacationRepository = studentAcademicVacationRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.renewedAcademicVacationStudentRepository = renewedAcademicVacationStudentRepository;
+        this.studentUtil = studentUtil;
     }
 
     public StudentAcademicVacation giveAcademicVacation(StudentAcademicVacation studentAcademicVacation) {
@@ -58,7 +60,7 @@ public class StudentAcademicVacationService {
 
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
-        studentDegreeToActive(studentDegreeId, studentDegreeRepository);
+        studentUtil.studentDegreeToActive(studentDegreeId);
 
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
     }

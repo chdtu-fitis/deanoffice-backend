@@ -11,13 +11,13 @@ import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
 import java.util.List;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
+import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
 import java.util.Date;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
 import static ua.edu.chdtu.deanoffice.Constants.SUCCESS_REASON_IDS;
-import static ua.edu.chdtu.deanoffice.util.StudentUtil.studentDegreeToActive;
 
 @Service
 public class StudentExpelService {
@@ -25,18 +25,21 @@ public class StudentExpelService {
     private final StudentExpelRepository studentExpelRepository;
     private final CurrentYearRepository currentYearRepository;
     private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
+    private final StudentUtil studentUtil;
 
     @Autowired
     public StudentExpelService(
             StudentDegreeRepository studentDegreeRepository,
             StudentExpelRepository studentExpelRepository,
             CurrentYearRepository currentYearRepository,
-            RenewedExpelledStudentRepository renewedExpelledStudentRepository
+            RenewedExpelledStudentRepository renewedExpelledStudentRepository,
+            StudentUtil studentUtil
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
         this.currentYearRepository = currentYearRepository;
         this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
+        this.studentUtil = studentUtil;
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
@@ -75,7 +78,7 @@ public class StudentExpelService {
 
     public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {
         Integer studentDegreeId = renewedExpelledStudent.getStudentExpel().getStudentDegree().getId();
-        studentDegreeToActive(studentDegreeId, studentDegreeRepository);
+        studentUtil.studentDegreeToActive(studentDegreeId);
 
         return renewedExpelledStudentRepository.save(renewedExpelledStudent);
     }
