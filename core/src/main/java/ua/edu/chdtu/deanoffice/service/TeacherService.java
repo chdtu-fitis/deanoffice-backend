@@ -16,6 +16,6 @@ public class TeacherService {
         return teacherRepository.findOne(teacherId);
     }
     public List<Teacher> getTeachers(){
-        return teacherRepository.findAll();
+        return teacherRepository.findAllByOrderBySurname();
     }
 }
