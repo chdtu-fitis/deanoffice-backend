@@ -45,11 +45,7 @@ public class StudentGroup extends NameWithActiveEntity {
         if (studentDegrees.isEmpty()) {
             return new ArrayList<>();
         } else {
-            return studentDegrees.stream().filter(StudentDegree::isActive).map(StudentDegree::getStudent).collect(Collectors.toList());
+            return getStudentDegrees().stream().map(StudentDegree::getStudent).collect(Collectors.toList());
         }
-    }
-
-    public List<StudentDegree> getActiveStudentDegrees() {
-        return studentDegrees.stream().filter(StudentDegree::isActive).collect(Collectors.toList());
     }
 }

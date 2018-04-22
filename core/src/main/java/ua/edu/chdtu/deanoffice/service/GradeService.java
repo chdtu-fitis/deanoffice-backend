@@ -85,7 +85,7 @@ public class GradeService {
         return gradeRepository.save(grades);
     }
 
-    public Grade getGradeForCourse(Integer studentDegreeId, Integer courseId) {
+    public Grade getGradeForStudentAndCourse(Integer studentDegreeId, Integer courseId) {
         return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
     }
 }

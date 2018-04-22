@@ -87,9 +87,9 @@ public class MultiGroupReportTemplateFillService {
         int currentRowIndex = STARTING_ROW_INDEX;
         for (StudentGroup studentGroup :
                 studentGroups) {
-            List<StudentDegree> studentDegrees = studentGroup.getActiveStudentDegrees();
+            List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
             List<Student> students = new ArrayList<>(studentDegrees.stream().filter(studentDegree -> {
-                Grade grade = gradeService.getGradeForCourse(studentDegree.getId(), course.getId());
+                Grade grade = gradeService.getGradeForStudentAndCourse(studentDegree.getId(), course.getId());
                 return grade == null
                         || grade.getPoints() == null || grade.getPoints() < 60
                         || grade.getGrade() == null || grade.getGrade() < 3;

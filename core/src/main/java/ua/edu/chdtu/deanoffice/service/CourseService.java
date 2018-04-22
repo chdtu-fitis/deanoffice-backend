@@ -29,9 +29,4 @@ public class CourseService {
     public Course getById(int id) {
         return courseRepository.findOne(id);
     }
-
-    public Course getById(int id) {
-        return courseRepository.findOne(id);
-    }
-
 }
