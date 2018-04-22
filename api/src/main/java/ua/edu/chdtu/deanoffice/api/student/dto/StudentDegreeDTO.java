@@ -47,7 +47,7 @@ public class StudentDegreeDTO {
     private Payment payment;
     @JsonView(StudentView.Degree.class)
     private NamedDTO degree;
-    @JsonView(StudentView.Degrees.class)
+    @JsonView(StudentView.WithActive.class)
     private boolean active;
     @JsonView(StudentView.DetailAndDegree.class)
     private String studentCardNumber;
