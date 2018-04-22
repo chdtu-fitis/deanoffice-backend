@@ -8,10 +8,10 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +36,9 @@ public class MultiGroupExamReportService {
         this.courseService = courseService;
     }
 
-    public File prepareReport(List<Integer> groupIds, Integer courseId, String format)
+    public File prepareReport(List<Integer> groupIds, Integer courseId, FileFormatEnum format)
             throws IOException, Docx4JException {
-        Course course = courseService.getById(courseId);
+        Course course = courseService.getCourse(courseId);
         List<StudentGroup> groups = new ArrayList<>();
         groupIds.forEach(id -> groups.add(studentGroupService.getById(id)));
 
@@ -49,6 +49,6 @@ public class MultiGroupExamReportService {
         fileName = fileName.substring(0, fileName.length() - 2);
         fileName = LanguageUtil.transliterate(fileName);
         WordprocessingMLPackage filledTemplate = templateFillService.fillTemplate(TEMPLATE, groups, course);
-        return documentIOService.saveDocument(filledTemplate, fileName.toString(), format);
+        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
     }
 }
