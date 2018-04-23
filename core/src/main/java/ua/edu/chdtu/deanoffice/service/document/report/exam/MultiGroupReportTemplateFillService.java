@@ -15,20 +15,18 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.util.comparators.PersonFullNameComparator;
 
 import java.io.IOException;
-import java.text.Collator;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,13 +46,16 @@ public class MultiGroupReportTemplateFillService {
     private CourseForGroupService courseForGroupService;
     private DocumentIOService documentIOService;
     private GradeService gradeService;
+    private CurrentYearService currentYearService;
 
     public MultiGroupReportTemplateFillService(CourseForGroupService courseForGroupService,
                                                DocumentIOService documentIOService,
-                                               GradeService gradeService) {
+                                               GradeService gradeService,
+                                               CurrentYearService currentYearService) {
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
         this.gradeService = gradeService;
+        this.currentYearService = currentYearService;
     }
 
     public WordprocessingMLPackage fillTemplate(String templateName, List<StudentGroup> groups, Course course)
@@ -85,42 +86,37 @@ public class MultiGroupReportTemplateFillService {
         List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
 
         int currentRowIndex = STARTING_ROW_INDEX;
-        for (StudentGroup studentGroup :
-                studentGroups) {
-            List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
-            List<Student> students = new ArrayList<>(studentDegrees.stream().filter(studentDegree -> {
-                Grade grade = gradeService.getGradeForStudentAndCourse(studentDegree.getId(), course.getId());
-                return grade == null
-                        || grade.getPoints() == null || grade.getPoints() < 60
-                        || grade.getGrade() == null || grade.getGrade() < 3;
-            }).map(StudentDegree::getStudent).collect(Collectors.toList()));
-            students.sort(new PersonFullNameComparator());
-            //sortStudentsByInitials(students);
-
-            Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
-            Map<String, String> groupNameReplacement = new HashMap<>();
-            groupNameReplacement.put("StudentInitials", studentGroup.getName());
-            replaceInRow(currentRow, groupNameReplacement);
-            currentRowIndex++;
-
-            for (Student student : students) {
-                currentRow = (Tr) gradeTableRows.get(currentRowIndex);
-                Map<String, String> replacements = new HashMap<>();
-                replacements.put("StudentInitials", student.getInitialsUkr());
-                replacements.put("RecBook", studentGroup.getStudentDegrees().stream().filter(studentDegree ->
-                        studentDegree.getStudent().equals(student)).findFirst().get().getRecordBookNumber());
-                replaceInRow(currentRow, replacements);
-                currentRowIndex++;
-            }
+        for (StudentGroup studentGroup : studentGroups) {
+            currentRowIndex = fillWithStudentsInfo(studentGroup, course, gradeTableRows, currentRowIndex);
         }
         removeUnfilledPlaceholders(template);
     }
 
-    private void sortStudentsByInitials(List<Student> students) {
-        students.sort((o1, o2) -> {
-            Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
-            return ukrainianCollator.compare(o1.getInitialsUkr(), o2.getInitialsUkr());
-        });
+    private int fillWithStudentsInfo(StudentGroup studentGroup, Course course, List<Object> gradeTableRows, int currentRowIndex) {
+        List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
+        List<Student> students = studentDegrees.stream().filter(studentDegree -> {
+            Grade grade = gradeService.getGradeForStudentAndCourse(studentDegree.getId(), course.getId());
+            return grade == null
+                    || grade.getPoints() == null || grade.getPoints() < 60
+                    || grade.getGrade() == null || grade.getGrade() < 3;
+        }).map(StudentDegree::getStudent).sorted(new PersonFullNameComparator()).collect(Collectors.toList());
+
+        Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+        Map<String, String> groupNameReplacement = new HashMap<>();
+        groupNameReplacement.put("StudentInitials", studentGroup.getName());
+        replaceInRow(currentRow, groupNameReplacement);
+        currentRowIndex++;
+
+        for (Student student : students) {
+            currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("StudentInitials", student.getInitialsUkr());
+            replacements.put("RecBook", studentGroup.getStudentDegrees().stream().filter(studentDegree ->
+                    studentDegree.getStudent().equals(student)).findFirst().get().getRecordBookNumber());
+            replaceInRow(currentRow, replacements);
+            currentRowIndex++;
+        }
+        return currentRowIndex;
     }
 
     private void removeUnfilledPlaceholders(WordprocessingMLPackage template) {
@@ -164,21 +160,15 @@ public class MultiGroupReportTemplateFillService {
     }
 
     private String getGroupNames(List<StudentGroup> studentGroups) {
-        String result = "";
-        for (StudentGroup group :
-                studentGroups) {
-            result += group.getName() + (studentGroups.indexOf(group) != studentGroups.size() - 1 ? ", " : "");
+        StringBuilder result = new StringBuilder();
+        for (StudentGroup group : studentGroups) {
+            result.append(group.getName()).append((studentGroups.indexOf(group) != studentGroups.size() - 1 ? ", " : ""));
         }
-        return result;
+        return result.toString();
     }
 
     private String getStudyYear() {
-        Calendar calendar = Calendar.getInstance();
-        int currentYear = calendar.get(Calendar.YEAR);
-        if (calendar.get(Calendar.MONTH) >= 9) {
-            return String.format("%4d-%4d", currentYear, currentYear + 1);
-        } else {
-            return String.format("%4d-%4d", currentYear - 1, currentYear);
-        }
+        int currentYear = currentYearService.get().getCurrYear();
+        return String.format("%4d-%4d", currentYear, currentYear + 1);
     }
 }
