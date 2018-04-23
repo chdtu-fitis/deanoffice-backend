@@ -11,8 +11,6 @@ import javax.persistence.Table;
 @Entity
 @Getter
 @Setter
-@Table(name = "knowledge_control")
 public class KnowledgeControl extends NameWithEngEntity {
-    @Column(name = "has_grade", nullable = false)
-    private boolean hasGrade;
+    private boolean graded;
 }

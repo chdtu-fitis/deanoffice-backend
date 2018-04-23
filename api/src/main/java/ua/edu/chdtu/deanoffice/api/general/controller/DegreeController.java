@@ -1,16 +1,18 @@
-package ua.edu.chdtu.deanoffice.api.general;
+package ua.edu.chdtu.deanoffice.api.general.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.Util.parseToNamedDTO;
+import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+
 
 @RestController
 @RequestMapping("/degrees")
@@ -25,6 +27,6 @@ public class DegreeController {
     @GetMapping("")
     public ResponseEntity getDegrees() {
         List<Degree> degrees = degreeService.getDegrees();
-        return ResponseEntity.ok(parseToNamedDTO(degrees));
+        return ResponseEntity.ok(parse(degrees, NamedDTO.class));
     }
 }

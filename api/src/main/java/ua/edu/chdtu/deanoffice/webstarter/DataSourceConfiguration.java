@@ -41,12 +41,12 @@ public class DataSourceConfiguration implements EnvironmentAware {
         log.debug("Configuring Datasource");
         if (dataSourceProperties.getUrl() == null) {
             log.error("Your database connection pool configuration is incorrect! " +
-                        "The application cannot start. Please check your Spring profile, current profiles are: {}",
+                            "The application cannot start. Please check your Spring profile, current profiles are: {}",
                     Arrays.toString(env.getActiveProfiles()));
 
             throw new ApplicationContextException("Database connection pool is not configured correctly");
         }
-        HikariDataSource config =  (HikariDataSource) DataSourceBuilder
+        return DataSourceBuilder
                 .create(dataSourceProperties.getClassLoader())
                 .type(HikariDataSource.class)
                 .driverClassName(dataSourceProperties.getDriverClassName())
@@ -54,79 +54,6 @@ public class DataSourceConfiguration implements EnvironmentAware {
                 .username(dataSourceProperties.getUsername())
                 .password(dataSourceProperties.getPassword())
                 .build();
-
-/*
-        //MySQL optimizations, see https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-        if ("com.mysql.jdbc.jdbc2.optional.MysqlDataSource".equals(propertyResolver.getProperty("dataSourceClassName"))) {
-            config.addDataSourceProperty("cachePrepStmts", propertyResolver.getProperty("cachePrepStmts", "true"));
-            config.addDataSourceProperty("prepStmtCacheSize", propertyResolver.getProperty("prepStmtCacheSize", "250"));
-            config.addDataSourceProperty("prepStmtCacheSqlLimit", propertyResolver.getProperty("prepStmtCacheSqlLimit", "2048"));
-            config.addDataSourceProperty("useServerPrepStmts", propertyResolver.getProperty("useServerPrepStmts", "true"));
-        }
-*/
-        return config;
     }
 
 }
-
-
-
-    /*
-    @Autowired
-    public DataSource dataSource;
-
-//    public DataSource dataSource(){
-//        return new EmbeddedDatabaseBuilder()
-//                .setType(EmbeddedDatabaseType.)
-//                .setType(EmbeddedDatabaseType.HSQL)
-//                .continueOnError(false)
-//                .setName("springdatatest")
-//                .addScript("db.sql" )
-//                .addScript("db_data.sql")
-//                .build();
-//    }
-
-
-    @Bean
-    public JpaVendorAdapter jpaVendorAdapter() {
-        HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
-        adapter.setDatabase(Database.H2);
-        adapter.setGenerateDdl(true);
-        adapter.setShowSql(true);
-        return adapter;
-    }
-
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("entityManagerFactory");
-
-
-        LocalContainerEntityManagerFactoryBean managerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-        managerFactoryBean.setDataSource(dataSource);
-        managerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter());
-        managerFactoryBean.setPackagesToScan("com.spd.entity");
-        managerFactoryBean.setJpaProperties(getProperties());
-        return managerFactoryBean;
-    }
-
-    @Bean
-    public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
-
-    @Bean
-    public PersistenceExceptionTranslationPostProcessor exceptionTranslation() {
-        return new PersistenceExceptionTranslationPostProcessor();
-    }
-
-    private Properties getProperties() {
-        Properties properties = new Properties();
-        properties.put("hibernate.show_sql", "true");
-        properties.put("hibernate.generate_statistics", "true");
-        properties.put("hibernate.use_sql_comments", "true");
-        properties.put("hibernate.id.new_generator_mappings", "false");
-        properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        return properties;
-    }
-*/
-//}

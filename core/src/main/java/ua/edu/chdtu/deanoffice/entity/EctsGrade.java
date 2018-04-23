@@ -27,30 +27,6 @@ public enum EctsGrade {
         this.upperBound = upperBound;
     }
 
-    public String getNationalGradeUkr(Grade grade) {
-        if (!grade.getCourse().getKnowledgeControl().isHasGrade()) {
-            if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
-                return "Не зараховано";
-            } else {
-                return "Зараховано";
-            }
-        } else {
-            return grade.getEcts().nameUkr;
-        }
-    }
-
-    public String getNationalGradeEng(Grade grade) {
-        if (!grade.getCourse().getKnowledgeControl().isHasGrade()) {
-            if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
-                return "Fail";
-            } else {
-                return "Passed";
-            }
-        } else {
-            return grade.getEcts().nameEng;
-        }
-    }
-
     private static boolean isBetween(int number, int lowerBound, int upperBound) {
         return (number >= lowerBound && number <= upperBound);
     }
@@ -62,5 +38,29 @@ public enum EctsGrade {
             }
         }
         return null;
+    }
+
+    public String getNationalGradeUkr(Grade grade) {
+        if (!grade.getCourse().getKnowledgeControl().isGraded()) {
+            if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
+                return "Не зараховано";
+            } else {
+                return "Зараховано";
+            }
+        } else {
+            return grade.getEcts().nameUkr;
+        }
+    }
+
+    public String getNationalGradeEng(Grade grade) {
+        if (!grade.getCourse().getKnowledgeControl().isGraded()) {
+            if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {
+                return "Fail";
+            } else {
+                return "Passed";
+            }
+        } else {
+            return grade.getEcts().nameEng;
+        }
     }
 }
