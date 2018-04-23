@@ -14,14 +14,9 @@ import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.CourseService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -38,18 +33,21 @@ public class CourseController {
     private CourseService courseService;
     private StudentGroupService studentGroupService;
     private TeacherService teacherService;
+    private CourseNameService courseNameService;
 
     @Autowired
     public CourseController(
             CourseForGroupService courseForGroupService,
             CourseService courseService,
             StudentGroupService studentGroupService,
-            TeacherService teacherService
+            TeacherService teacherService,
+            CourseNameService courseNameService
     ) {
         this.courseForGroupService = courseForGroupService;
         this.courseService = courseService;
         this.studentGroupService = studentGroupService;
         this.teacherService = teacherService;
+        this.courseNameService = courseNameService;
     }
 
     @GetMapping("/courses")
@@ -138,6 +136,12 @@ public class CourseController {
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    @GetMapping("courses/names")
+    public ResponseEntity getCourseNames(){
+        List<CourseName> courseNames = this.courseNameService.getCourseNames();
+        return ResponseEntity.ok(parse(courseNames, NamedDTO.class));
     }
 
     private ResponseEntity handleException(Exception exception) {
