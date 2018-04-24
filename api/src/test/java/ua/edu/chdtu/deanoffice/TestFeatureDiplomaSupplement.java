@@ -272,25 +272,25 @@ public class TestFeatureDiplomaSupplement {
         Assert.assertEquals("Відмінно", grade1.getNationalGradeUkr());
         Assert.assertEquals("Excellent", grade1.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.A, grade1.getEcts());
-        Assert.assertEquals(5, grade1.getGrade());
+        Assert.assertEquals(Integer.valueOf(5), grade1.getGrade());
 
         Grade grade2 = createGrade(createCourse(true), 76);
         Assert.assertEquals("Добре", grade2.getNationalGradeUkr());
         Assert.assertEquals("Good", grade2.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.C, grade2.getEcts());
-        Assert.assertEquals(4, grade2.getGrade());
+        Assert.assertEquals(Integer.valueOf(4), grade2.getGrade());
 
         Grade grade3 = createGrade(createCourse(true), 65);
         Assert.assertEquals("Задовільно", grade3.getNationalGradeUkr());
         Assert.assertEquals("Satisfactory", grade3.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.D, grade3.getEcts());
-        Assert.assertEquals(3, grade3.getGrade());
+        Assert.assertEquals(Integer.valueOf(3), grade3.getGrade());
 
         Grade grade4 = createGrade(createCourse(false), 90);
         Assert.assertEquals("Зараховано", grade4.getNationalGradeUkr());
         Assert.assertEquals("Passed", grade4.getNationalGradeEng());
         Assert.assertEquals(EctsGrade.A, grade4.getEcts());
-        Assert.assertEquals(5, grade4.getGrade());
+        Assert.assertEquals(Integer.valueOf(5), grade4.getGrade());
 
         Grade grade5 = createGrade(createCourse(false), 59);
         Assert.assertEquals("Не зараховано", grade5.getNationalGradeUkr());
