@@ -9,6 +9,8 @@ public class StudentView {
 
     interface SimpleAndDegrees extends GeneralView.Named {}
 
+    interface WithActive {}
+
 
     public interface Simple extends SearchSimpleDegrees, SimpleAndDegrees {}
 
@@ -20,9 +22,9 @@ public class StudentView {
 
     public interface Search extends SearchSimpleDegrees {}
 
-    public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees {}
+    public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees, WithActive {}
 
-    public interface Expel extends Simple, GeneralView.Named {}
+    public interface Expel extends Simple, GeneralView.Named, WithActive {}
 
-    public interface AcademicVacation extends Simple, GeneralView.Named {}
+    public interface AcademicVacation extends Simple, GeneralView.Named, WithActive {}
 }
