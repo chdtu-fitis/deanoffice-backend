@@ -79,8 +79,17 @@ public class StudentExpelService {
     public RenewedExpelledStudent renew(RenewedExpelledStudent renewedExpelledStudent) {
         Integer studentDegreeId = renewedExpelledStudent.getStudentExpel().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
-
+        updateStudentDegree(renewedExpelledStudent);
         return renewedExpelledStudentRepository.save(renewedExpelledStudent);
+    }
+
+    private void updateStudentDegree(RenewedExpelledStudent renewedExpelledStudent) {
+        StudentDegree studentDegree = renewedExpelledStudent.getStudentExpel().getStudentDegree();
+
+        studentDegree.setPayment(renewedExpelledStudent.getPayment());
+        studentDegree.setStudentGroup(renewedExpelledStudent.getStudentGroup());
+
+        studentDegreeRepository.save(studentDegree);
     }
 
     public StudentExpel getById(Integer studentExpelId) {
