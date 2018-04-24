@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Where;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
 import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -44,7 +45,7 @@ public class StudentGroup extends NameWithActiveEntity {
         if (studentDegrees.isEmpty()) {
             return new ArrayList<>();
         } else {
-            return studentDegrees.stream().filter(StudentDegree::isActive).map(StudentDegree::getStudent).collect(Collectors.toList());
+            return getStudentDegrees().stream().map(StudentDegree::getStudent).collect(Collectors.toList());
         }
     }
 }

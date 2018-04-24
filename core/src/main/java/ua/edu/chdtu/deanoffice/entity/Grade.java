@@ -17,8 +17,8 @@ public class Grade extends BaseEntity {
     private Course course;
     @ManyToOne
     private StudentDegree studentDegree;
-    private int grade;
-    private int points;
+    private Integer grade;
+    private Integer points;
     @Column(name = "ects", length = 2)
     @Enumerated(value = EnumType.STRING)
     private EctsGrade ects;

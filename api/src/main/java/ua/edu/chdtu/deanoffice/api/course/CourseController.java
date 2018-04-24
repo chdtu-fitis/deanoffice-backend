@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
@@ -65,10 +66,10 @@ public class CourseController {
     }
 
     @PostMapping("/groups/{groupId}/courses")
-    public ResponseEntity addCoursesForGroup(@RequestBody Map<String, List> body, @PathVariable Integer groupId) {
-        List<CourseForGroupDTO> newCourses = body.get("newCourses");
-        List<CourseForGroupDTO> updatedCourses = body.get("updatedCourses");
-        List<Integer> deleteCoursesIds = body.get("deleteCoursesIds");
+    public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {
+        List<CourseForGroupDTO> newCourses = coursesForGroupHolder.getNewCourses();
+        List<CourseForGroupDTO> updatedCourses = coursesForGroupHolder.getUpdatedCourses();
+        List<Integer> deleteCoursesIds = coursesForGroupHolder.getDeleteCoursesIds();
 
         if (newCourses == null || updatedCourses == null || deleteCoursesIds == null) {
             return ExceptionHandlerAdvice.handleException("Courses must not be null", CourseController.class);

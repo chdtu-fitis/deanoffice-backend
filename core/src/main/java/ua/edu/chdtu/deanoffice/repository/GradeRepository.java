@@ -28,4 +28,6 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     List<Grade> findGradesByCourseAndBySemeseterForStudents(
             @Param("studentIds") List<Integer> studentIds,
             @Param("courseIds") List<Integer> courseIds);
+
+    Grade getByStudentDegreeIdAndCourseId(Integer studentDegreeId, Integer courseId);
 }
