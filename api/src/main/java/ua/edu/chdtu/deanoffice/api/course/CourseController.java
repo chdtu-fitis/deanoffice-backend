@@ -128,11 +128,24 @@ public class CourseController {
     }
 
     @PostMapping("/courses")
-    public ResponseEntity createCourse(@RequestBody Course course) {
+    public ResponseEntity createCourse(@RequestBody CourseDTO courseDTO) {
         try {
-            Course newCourse = this.courseService.createCourse(course);
-            URI location = getNewResourceLocation(newCourse.getId());
-            return ResponseEntity.created(location).build();
+            Course course = (Course) parse(courseDTO, Course.class);
+            if (courseDTO.getCourseName().getId()!=0) {
+                Course newCourse = this.courseService.createCourse(course);
+                URI location = getNewResourceLocation(newCourse.getId());
+                return ResponseEntity.created(location).build();
+            }
+            else {
+                CourseName courseName = new CourseName();
+                courseName.setName(courseDTO.getCourseName().getName());
+                this.courseNameService.saveCourseName(courseName);
+                CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
+                course.setCourseName(newCourseName);
+                this.courseService.createCourse(course);
+                URI location = getNewResourceLocation(course.getId());
+                return ResponseEntity.created(location).build();
+            }
         } catch (Exception exception) {
             return handleException(exception);
         }

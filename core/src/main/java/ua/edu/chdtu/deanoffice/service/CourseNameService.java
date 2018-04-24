@@ -15,4 +15,12 @@ public class CourseNameService {
     public List<CourseName> getCourseNames(){
         return this.courseNameRepository.findAll();
     }
+
+    public void saveCourseName(CourseName courseName){
+        this.courseNameRepository.save(courseName);
+    }
+
+    public CourseName getCourseNameByName(String name){
+        return this.courseNameRepository.findByName(name);
+    }
 }
