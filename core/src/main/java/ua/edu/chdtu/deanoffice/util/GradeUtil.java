@@ -83,9 +83,9 @@ public class GradeUtil {
     }
 
     public static String getEctsGrade(Grade grade) {
-        if (grade.getCourse().getKnowledgeControl().isGraded()) {
+        if (grade.getEcts() != null && grade.getCourse().getKnowledgeControl().isGraded()) {
             return grade.getEcts().toString();
-        } else if (grade.getPoints() >= 60) {
+        } else if (grade.getPoints() != null && grade.getPoints() >= 60) {
             return "P";
         } else {
             return "F";

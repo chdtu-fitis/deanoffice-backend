@@ -44,7 +44,7 @@ public class SupplementTemplateFillService {
         Map<String, String> result = new HashMap<>();
         result.put("Credits", formatCredits(grade.getCourse().getCredits()));
         result.put("Hours", formatHours(grade.getCourse().getHours()));
-        result.put("LocalGrade", String.format("%d", grade.getPoints()));
+        result.put("LocalGrade", grade.getPoints() == null ? "" : String.format("%d", grade.getPoints()));
         result.put("NationalGradeUkr", grade.getNationalGradeUkr());
         result.put("NationalGradeEng", grade.getNationalGradeEng());
         result.put("ECTSGrade", GradeUtil.getEctsGrade(grade));

@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -24,10 +25,16 @@ public class Grade extends BaseEntity {
     private EctsGrade ects;
 
     public String getNationalGradeUkr() {
+        if (ects == null) {
+            return "";
+        }
         return ects.getNationalGradeUkr(this);
     }
 
     public String getNationalGradeEng() {
+        if (ects == null) {
+            return "";
+        }
         return ects.getNationalGradeEng(this);
     }
 }
