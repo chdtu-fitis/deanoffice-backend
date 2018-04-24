@@ -10,15 +10,8 @@ import java.util.List;
 public interface StudentAcademicVacationRepository extends JpaRepository<StudentAcademicVacation, Integer> {
     @Query("select sac from StudentAcademicVacation  sac " +
             "where sac.studentDegree.specialization.faculty.id = :faculty_id " +
+            "and sac.studentDegree.active = false " +
             "order by sac.studentDegree.student.surname, sac.studentDegree.student.name, " +
             "sac.studentDegree.student.patronimic, sac.studentDegree.studentGroup.name")
     List<StudentAcademicVacation> findAllByFaculty(@Param("faculty_id") Integer facultyId);
-
-    @Query("select sav from StudentAcademicVacation sav " +
-            "where sav.studentDegree.id = :student_degree_id and sav.studentDegree.active = true")
-    List<StudentAcademicVacation> findActiveByStudentDegreeId(@Param("student_degree_id") Integer studentDegreeId);
-
-    @Query("select sav from StudentAcademicVacation sav " +
-            "where sav.id = :id and sav.studentDegree.active = false")
-    StudentAcademicVacation findInactiveById(@Param("id") Integer id);
 }

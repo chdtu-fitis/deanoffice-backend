@@ -49,8 +49,17 @@ public class StudentAcademicVacationService {
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
-
+        updateStudentDegree(renewedAcademicVacationStudent);
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
+    }
+
+    private void updateStudentDegree(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
+        StudentDegree studentDegree = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree();
+
+        studentDegree.setStudentGroup(renewedAcademicVacationStudent.getStudentGroup());
+        studentDegree.setPayment(renewedAcademicVacationStudent.getPayment());
+
+        studentDegreeRepository.save(studentDegree);
     }
 
     public StudentAcademicVacation getById(Integer studentAcademicVacationId) {
