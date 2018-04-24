@@ -5,31 +5,6 @@
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-
-SET search_path = public, pg_catalog;
-
---
--- Name: course_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('course_id_seq', 9669, true);
-
-
---
--- Name: course_name_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('course_name_id_seq', 978, true);
-
-
 --
 -- Data for Name: degree; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -8652,62 +8627,6 @@ INSERT INTO courses_for_groups (id, exam_date, course_id, studentgroup_id, teach
 
 
 --
--- Name: courses_for_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('courses_for_groups_id_seq', 7343, true);
-
-
---
--- Data for Name: current_year; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO current_year (id, curr_year) VALUES (1, 2017);
-
-
---
--- Name: current_year_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('current_year_id_seq', 1, true);
-
-
---
--- Name: degree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('degree_id_seq', 3, true);
-
-
---
--- Name: department_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('department_id_seq', 48, true);
-
-
---
--- Name: faculty_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('faculty_id_seq', 10, true);
-
-
---
--- Name: grade_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('grade_id_seq', 90554, true);
-
-
---
--- Name: knowledge_control_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('knowledge_control_id_seq', 9, true);
-
-
---
 -- Data for Name: order_reason; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -8733,15 +8652,6 @@ INSERT INTO order_reason (id, name, active, kind) VALUES (16, 'при успіш
 -- Name: order_reason_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('order_reason_id_seq', 16, true);
-
-
---
--- Name: position_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('position_id_seq', 6, true);
-
 
 --
 -- Data for Name: privilege; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -8751,32 +8661,6 @@ INSERT INTO privilege (id, name, active) VALUES (1, 'без пільг', true);
 INSERT INTO privilege (id, name, active) VALUES (2, 'інвалід', true);
 INSERT INTO privilege (id, name, active) VALUES (3, 'чорнобилець', true);
 INSERT INTO privilege (id, name, active) VALUES (4, 'сирота', true);
-
-
---
--- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('privilege_id_seq', 4, true);
-
-
---
--- Data for Name: schema_version; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-
---
--- Name: speciality_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('speciality_id_seq', 33, true);
-
-
---
--- Name: specialization_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('specialization_id_seq', 51, true);
 
 
 --
@@ -12809,20 +12693,6 @@ INSERT INTO student_academic_vacation (id, application_date, order_date, order_n
 
 
 --
--- Name: student_academic_vacation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('student_academic_vacation_id_seq', 7, true);
-
-
---
--- Name: student_degree_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('student_degree_id_seq', 2304, true);
-
-
---
 -- Data for Name: student_expel; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -14108,37 +13978,3 @@ INSERT INTO student_expel (id, application_date, expel_date, order_date, order_n
 INSERT INTO student_expel (id, application_date, expel_date, order_date, order_number, reason_id, studentdegree_id) VALUES (1280, '1980-01-01', '2017-09-04', '2017-09-08', '397-с', 2, 2161);
 INSERT INTO student_expel (id, application_date, expel_date, order_date, order_number, reason_id, studentdegree_id) VALUES (1281, '1980-01-01', '2017-11-09', '2017-11-20', '493-с', 2, 2302);
 INSERT INTO student_expel (id, application_date, expel_date, order_date, order_number, reason_id, studentdegree_id) VALUES (1282, '1980-01-01', '2017-11-28', '2017-11-29', '502-с', 2, 846);
-
-
---
--- Name: student_expel_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('student_expel_id_seq', 1282, true);
-
-
---
--- Name: student_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('student_group_id_seq', 499, true);
-
-
---
--- Name: student_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('student_id_seq', 1700, true);
-
-
---
--- Name: teacher_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('teacher_id_seq', 574, true);
-
-
---
--- PostgreSQL database dump complete
---
-

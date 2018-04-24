@@ -10,10 +10,15 @@ dependencies {
         exclude group: 'org.slf4j'
     }
     compile(
-            "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
-            "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
             "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}",
     )
+
+    compile('org.springframework.boot:spring-boot-starter-web') {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+
+    compile('org.springframework.boot:spring-boot-starter-undertow')
+
 
 
     testCompile(

@@ -5,17 +5,6 @@
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-
-SET search_path = public, pg_catalog;
-
 --
 -- Data for Name: course_name; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -7949,30 +7938,3 @@ INSERT INTO course (id, credits, hours, hours_per_credit, semester, coursename_i
 INSERT INTO course (id, credits, hours, hours_per_credit, semester, coursename_id, kc_id) VALUES (9667, 5.0, 180, 36, 10, 977, 2);
 INSERT INTO course (id, credits, hours, hours_per_credit, semester, coursename_id, kc_id) VALUES (9668, 5.0, 180, 36, 5, 978, 1);
 INSERT INTO course (id, credits, hours, hours_per_credit, semester, coursename_id, kc_id) VALUES (9669, 5.0, 180, 36, 1, 978, 1);
-
-
---
--- Name: course_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('course_id_seq', 9669, true);
-
-
---
--- Name: course_name_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('course_name_id_seq', 978, true);
-
-
---
--- Name: knowledge_control_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('knowledge_control_id_seq', 9, true);
-
-
---
--- PostgreSQL database dump complete
---
-
