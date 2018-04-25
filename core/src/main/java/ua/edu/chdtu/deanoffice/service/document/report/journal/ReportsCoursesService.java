@@ -72,9 +72,10 @@ public class ReportsCoursesService {
         for(CourseForGroup courseForGroup:courseForGroups){
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
                     courseForGroup.getCourse().getHours().toString(),
-                    courseForGroup.getTeacher().getSurname()+" "
+                    /*courseForGroup.getTeacher().getSurname()+" "
                             +courseForGroup.getTeacher().getName().charAt(0)+"."
-                            +courseForGroup.getTeacher().getPatronimic().charAt(0)+".",
+                            +courseForGroup.getTeacher().getPatronimic().charAt(0)+".",*/
+                    courseForGroup.getTeacher().getInitialsUkr(),
                     courseForGroup.getExamDate() == null ? "" : formatter.format(courseForGroup.getExamDate())));
         }
         return courseReports;
