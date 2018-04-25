@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 @Setter
 public class Course extends BaseEntity {
     @ManyToOne
-    @Cascade(CascadeType.ALL)
     private CourseName courseName;
     private Integer semester;
     @ManyToOne

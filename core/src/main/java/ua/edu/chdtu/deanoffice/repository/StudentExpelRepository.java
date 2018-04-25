@@ -13,6 +13,7 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
             "where se.orderReason.id not in :success_reason_ids and " +
             "se.studentDegree.specialization.faculty.id = :faculty_id " +
             "and se.expelDate > :limit_date " +
+            "and se.studentDegree.active = false " +
             "order by se.studentDegree.student.surname, se.studentDegree.student.name, " +
             "se.studentDegree.student.patronimic, se.studentDegree.studentGroup.name")
     List<StudentExpel> findAllFired(

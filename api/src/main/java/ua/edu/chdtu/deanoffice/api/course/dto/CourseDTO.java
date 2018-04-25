@@ -18,4 +18,8 @@ public class CourseDTO {
     private NamedDTO knowledgeControl;
     @JsonView(CourseForGroupView.Basic.class)
     private Integer hours;
+    @JsonView(CourseForGroupView.Basic.class)
+    private Integer credits;
+    @JsonView(CourseForGroupView.Basic.class)
+    private Integer hoursPerCredit;
 }

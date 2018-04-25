@@ -32,11 +32,8 @@ public class StudentSummary {
     public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
         this.studentDegree = studentDegree;
         this.grades = grades;
-        completeGrades();
-    }
-
-    private static boolean ectsIsSet(Grade grade) {
-        return grade.getEcts() != null;
+        caluclateTotalHours();
+        combineMultipleSemesterCourseGrades();
     }
 
     private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
@@ -51,52 +48,10 @@ public class StudentSummary {
         return studentDegree.getStudentGroup();
     }
 
-    private void completeGrades() {
-        setHours();
-        setCredits();
-        setGrades();
-        setPoints();
-        setEcts();
-        combineMultipleSemesterCourseGrades();
-    }
-
-    private void setCredits() {
-        grades.forEach(gradeSublist ->
-                gradeSublist.forEach(grade ->
-                        grade.getCourse().setCredits(new BigDecimal(grade.getCourse().getHours() / Constants.HOURS_PER_CREDIT))));
-    }
-
-    private void setHours() {
+    private void caluclateTotalHours() {
         grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
-            if (grade.getCourse().getHours() == null) {
-                grade.getCourse().setHours(0);
-            }
-            totalHours += grade.getCourse().getHours();
-        }));
-    }
-
-    private void setGrades() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (grade.getGrade() == 0 && grade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT) {
-                    grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
-                }
-            });
-        });
-    }
-
-    private void setPoints() {
-        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
-            if (grade.getPoints() == 0) {
-                grade.setPoints(GradeUtil.getAveragePointsFromGrade(grade));
-            }
-        }));
-    }
-
-    private void setEcts() {
-        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
-            if (!ectsIsSet(grade)) {
-                grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
+            if (grade.getCourse().getHours() != null) {
+                totalHours += grade.getCourse().getHours();
             }
         }));
     }
@@ -177,8 +132,12 @@ public class StudentSummary {
         Double gradesSum = 0.0;
 
         for (Grade g : grades) {
-            pointsSum += g.getPoints();
-            gradesSum += g.getGrade();
+            if (g.getPoints() != null) {
+                pointsSum += g.getPoints();
+            }
+            if (g.getGrade() != null) {
+                gradesSum += g.getGrade();
+            }
         }
 
         Course newCourse = new Course();
@@ -214,10 +173,9 @@ public class StudentSummary {
     public Double getTotalGrade() {
         int pointSum = 0;
         int pointsCount = 0;
-        for (List<Grade> gradesSublist :
-                grades) {
+        for (List<Grade> gradesSublist : grades) {
             for (Grade g : gradesSublist) {
-                if (g.getCourse().getKnowledgeControl().isGraded() && g.getPoints() > 0) {
+                if (g.getPoints() != null && g.getCourse().getKnowledgeControl().isGraded() && g.getPoints() > 0) {
                     pointSum += g.getPoints();
                     pointsCount++;
                 }
