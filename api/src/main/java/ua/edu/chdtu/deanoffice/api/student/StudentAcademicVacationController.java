@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.student.dto.RenewedAcademicVacationStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentAcademicVacationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
@@ -23,11 +24,11 @@ import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -90,17 +91,13 @@ public class StudentAcademicVacationController {
 
     @JsonView(StudentView.AcademicVacation.class)
     @GetMapping("")
-    public ResponseEntity getAllAcademicVacations() {
-        List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(FACULTY_ID);
+    public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user) {
+        List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId());
         return ResponseEntity.ok(Parser.parse(academicVacations, StudentAcademicVacationDTO.class));
     }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, StudentAcademicVacationController.class);
-    }
-
-    private ResponseEntity handleException(String message) {
-        return ExceptionHandlerAdvice.handleException(message, StudentAcademicVacationController.class);
     }
 
     @PostMapping("/renewed")
@@ -122,6 +119,10 @@ public class StudentAcademicVacationController {
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private ResponseEntity handleException(String message) {
+        return ExceptionHandlerAdvice.handleException(message, StudentAcademicVacationController.class);
     }
 
     private RenewedAcademicVacationStudent createRenewedAcademicVacationStudent(

@@ -9,7 +9,6 @@ import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
-import ua.edu.chdtu.deanoffice.webstarter.Application;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
