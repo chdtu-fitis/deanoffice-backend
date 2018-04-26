@@ -6,8 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
+import ua.edu.chdtu.deanoffice.webstarter.Application;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
 
@@ -24,14 +27,18 @@ public class SpecialityController {
     }
 
     @GetMapping("")
-    public ResponseEntity getAllSpecialities() {
-        List<Speciality> specialities = specialityService.getSpecialityByActive(false);
-        return ResponseEntity.ok(parse(specialities, SpecialityDTO.class));
+    public ResponseEntity getAllSpecialities(@CurrentUser ApplicationUser user) {
+        List<Speciality> specialities = specialityService.getAll(user.getFaculty().getId());
+        return ResponseEntity.ok(mapToSpecialityDTO(specialities));
     }
 
     @GetMapping("/active")
-    public ResponseEntity getActiveSpecialities() {
-        List<Speciality> specialities = specialityService.getSpecialityByActive(true);
-        return ResponseEntity.ok(parse(specialities, SpecialityDTO.class));
+    public ResponseEntity getActiveSpecialities(@CurrentUser ApplicationUser user) {
+        List<Speciality> specialities = specialityService.getAllActive(user.getFaculty().getId());
+        return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+    }
+
+    private List<SpecialityDTO> mapToSpecialityDTO(List<Speciality> source) {
+        return parse(source, SpecialityDTO.class);
     }
 }

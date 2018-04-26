@@ -17,11 +17,11 @@ public class SpecialityService {
         this.specialityRepository = specialityRepository;
     }
 
-    public List<Speciality> getSpecialityByActive(boolean onlyActive) {
-        if (onlyActive) {
-            return specialityRepository.findAllByActiveOrderByName(true);
-        }
-        Sort sort = new Sort(Sort.Direction.ASC, "name");
-        return specialityRepository.findAll(sort);
+    public List<Speciality> getAllActive(int facultyId) {
+        return specialityRepository.findAllActive(facultyId);
+    }
+
+    public List<Speciality> getAll(int facultyId) {
+        return specialityRepository.findAll(facultyId);
     }
 }
