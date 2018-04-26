@@ -8761,6 +8761,11 @@ SELECT pg_catalog.setval('privilege_id_seq', 4, true);
 
 
 --
+-- Data for Name: schema_version; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+--
 -- Name: speciality_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
