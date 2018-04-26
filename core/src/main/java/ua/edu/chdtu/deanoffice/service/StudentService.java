@@ -2,9 +2,12 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 
@@ -12,24 +15,30 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentDegreeRepository studentDegreeRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(
+            StudentRepository studentRepository,
+            StudentDegreeRepository studentDegreeRepository
+    ) {
         this.studentRepository = studentRepository;
+        this.studentDegreeRepository = studentDegreeRepository;
     }
 
     public Student findById(Integer id) {
         return studentRepository.getOne(id);
     }
 
-    public List<Student> searchByFullName(String name, String surname, String patronimic) {
-        return studentRepository.findAllByFullNameUkr(
+    public List<Student> searchByFullName(String name, String surname, String patronimic, int facultyId) {
+        return studentDegreeRepository.findAllByFullNameUkr(
                 toCapitalizedCase(name),
                 toCapitalizedCase(surname),
-                toCapitalizedCase(patronimic)
-        );
+                toCapitalizedCase(patronimic),
+                facultyId
+        ).stream().map(StudentDegree::getStudent).collect(Collectors.toList());
     }
 
-    public Student create(Student student) {
+    public Student save(Student student) {
         student.setName(toCapitalizedCase(student.getName()));
         student.setSurname(toCapitalizedCase(student.getSurname()));
         student.setPatronimic(toCapitalizedCase(student.getPatronimic()));
@@ -39,13 +48,11 @@ public class StudentService {
         return this.studentRepository.save(student);
     }
 
-    public void update(Student student) {
-        studentRepository.save(student);
-    }
-
     public void addPhoto(byte[] photo, int studentId) {
         Student student = studentRepository.getOne(studentId);
         student.setPhoto(photo);
         studentRepository.save(student);
     }
+
+
 }

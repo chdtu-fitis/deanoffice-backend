@@ -95,7 +95,7 @@ public class StudentDegreeController {
         if (newStudent.getId() != 0) {
             newStudent.setId(0);
         }
-        return studentService.create(newStudent);
+        return studentService.save(newStudent);
     }
 
     private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
