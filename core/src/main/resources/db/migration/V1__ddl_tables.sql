@@ -510,7 +510,7 @@ ALTER SEQUENCE renewed_academic_vacation_student_id_seq OWNED BY renewed_academi
 CREATE TABLE renewed_expelled_student (
     id integer NOT NULL,
     academic_certificate_date date NOT NULL,
-    academic_certificate_issued_by character varying(255) NOT NULL,
+    academic_certificate_issued_by timestamp without time zone NOT NULL,
     academic_certificate_number character varying(255) NOT NULL,
     application_date date NOT NULL,
     payment character varying(8) DEFAULT 'BUDGET'::character varying NOT NULL,

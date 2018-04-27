@@ -1,10 +1,17 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.9.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
 group = 'ua.edu.chdtu'
 version = "${appVersin}"
-
-apply plugin: 'java'
-apply plugin: 'eclipse'
-
-sourceCompatibility = 1.8
 
 allprojects {
 	repositories {
@@ -16,6 +23,11 @@ allprojects {
 
 	apply plugin: 'java'
 	apply plugin: 'idea'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 
 	tasks.withType(JavaCompile) {
 		options.encoding = 'UTF-8'
@@ -24,13 +36,3 @@ allprojects {
 		systemProperty "file.encoding", "utf-8"
 	}
 }
-
-subprojects {
-	compileJava.options.encoding = 'UTF-8'
-
-	configurations {
-		provided
-		compile.extendsFrom provided
-	}
-}
-

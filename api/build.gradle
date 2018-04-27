@@ -1,8 +1,8 @@
-apply plugin: 'application'
-mainClassName = 'ua.edu.chdtu.deanoffice.webstarter.Application'
+apply plugin: 'war'
 
 dependencies {
     compile(project(":core"))
+
     compile('org.modelmapper:modelmapper:1.1.0')
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
 
@@ -10,12 +10,21 @@ dependencies {
         exclude group: 'org.slf4j'
     }
     compile(
-            "org.springframework.boot:spring-boot-starter-web:${springBootVersion}",
-            "org.springframework.boot:spring-boot-starter-jetty:${springBootVersion}",
-//	"org.springframework.boot:spring-boot-starter-jersey:${springBootVersion}",
+            "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}",
     )
     compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
     compile("io.jsonwebtoken:jjwt:0.7.0")
+
+    compile('org.springframework.boot:spring-boot-starter-web') {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+
+    compile('org.springframework.boot:spring-boot-starter-undertow')
+
+//	swagger
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
+
 
     testCompile(
             "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
@@ -26,4 +35,7 @@ processResources {
     from 'src/main/resources'
 }
 
-
+war {
+    baseName = 'api'
+    destinationDir = file("$rootDir/build")
+}
