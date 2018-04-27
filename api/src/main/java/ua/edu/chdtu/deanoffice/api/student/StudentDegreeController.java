@@ -116,7 +116,7 @@ public class StudentDegreeController {
 
     private PreviousDiplomaDTO getPreviousDiploma(StudentDegree studentDegree) {
         EducationDocument educationDocument = getPreviousDiplomaType(studentDegree);
-        StudentDegree firstStudentDegree = studentDegreeService.getFirstStudentDegree(studentDegree.getStudent().getId());
+        StudentDegree firstStudentDegree = studentDegreeService.getFirst(studentDegree.getStudent().getId());
         if (firstStudentDegree != null) {
             return new PreviousDiplomaDTO(
                     firstStudentDegree.getPreviousDiplomaDate(),
@@ -187,7 +187,7 @@ public class StudentDegreeController {
 
     @GetMapping("/groups/{group_id}/students")
     public ResponseEntity getStudentsByGroupId(@PathVariable("group_id") Integer groupId) {
-        List<StudentDegree> students = this.studentDegreeService.findStudentsByGroupId(groupId);
+        List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
         return ResponseEntity.ok(parse(students, StudentDegreeFullNameDTO.class));
     }
 }

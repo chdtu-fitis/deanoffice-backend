@@ -12,7 +12,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "where sd.active = :active " +
             "and sd.studentGroup.specialization.faculty.id = :facultyId " +
             "order by sd.student.surname, sd.student.name, sd.student.patronimic, sd.studentGroup.name")
-    List<StudentDegree> findAllByActiveForFacultyId(
+    List<StudentDegree> findAllByActive(
             @Param("active") boolean active,
             @Param("facultyId") Integer facultyId
     );
@@ -25,7 +25,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query("SELECT sd FROM StudentDegree sd " +
             "where sd.student.id = :student_id")
-    List<StudentDegree> findByStudentId(@Param("student_id") Integer studentId);
+    List<StudentDegree> findAllByStudentId(@Param("student_id") Integer studentId);
 
     List<StudentDegree> findStudentDegreeByStudentGroupIdAndActive(
             @Param("groupId") Integer groupId,
