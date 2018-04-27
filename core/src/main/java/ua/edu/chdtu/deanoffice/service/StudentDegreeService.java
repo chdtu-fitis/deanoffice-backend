@@ -6,8 +6,6 @@ import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
-
 @Service
 public class StudentDegreeService {
     private final StudentDegreeRepository studentDegreeRepository;
@@ -20,8 +18,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.getById(id);
     }
 
-    public List<StudentDegree> getAllByActive(boolean active) {
-        return studentDegreeRepository.findAllByActiveForFacultyId(active, FACULTY_ID);
+    public List<StudentDegree> getAllByActive(boolean active, int facultyId) {
+        return studentDegreeRepository.findAllByActiveForFacultyId(active, facultyId);
     }
 
     public StudentDegree save(StudentDegree studentDegree) {

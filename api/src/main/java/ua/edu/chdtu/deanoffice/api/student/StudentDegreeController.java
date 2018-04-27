@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -24,6 +25,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
 import java.util.List;
@@ -50,22 +52,18 @@ public class StudentDegreeController {
 
     @JsonView(StudentView.Simple.class)
     @GetMapping("/students/degrees")
-    public ResponseEntity getActiveStudentsDegree(
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
-    ) {
-        return ResponseEntity.ok(getActiveStudentDegrees(active));
+    public ResponseEntity getActiveStudentsDegree(@CurrentUser ApplicationUser user) {
+        return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
     }
 
     @JsonView(StudentView.Detail.class)
     @GetMapping("/students/degrees/more-detail")
-    public ResponseEntity getActiveStudentsDegree_moreDetail(
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
-    ) {
-        return ResponseEntity.ok(getActiveStudentDegrees(active));
+    public ResponseEntity getActiveStudentsDegree_moreDetail(@CurrentUser ApplicationUser user) {
+        return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
     }
 
-    private List<StudentDegreeDTO> getActiveStudentDegrees(boolean active) {
-        return Parser.parse(studentDegreeService.getAllByActive(active), StudentDegreeDTO.class);
+    private List<StudentDegreeDTO> getActiveStudentDegrees(int facultyId) {
+        return Parser.parse(studentDegreeService.getAllByActive(true, facultyId), StudentDegreeDTO.class);
     }
 
     @JsonView(StudentView.Degree.class)

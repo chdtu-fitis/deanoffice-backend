@@ -124,7 +124,7 @@ public class StudentExpelController {
     @PostMapping("/renewed")
     public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {
-            if (studentExpelService.isNotExpelled(renewedExpelledStudentDTO.getStudentExpelId())) {
+            if (studentUtil.studentDegreeIsActive(renewedExpelledStudentDTO.getStudentExpelId())) {
                 return handleException("Student is not expelled");
             }
             Integer id = studentExpelService
