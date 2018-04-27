@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.student.dto.RenewedExpelledStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -71,7 +71,7 @@ public class StudentExpelController {
             }
 
             List<StudentExpel> studentExpelList = studentExpelService.expelStudents(createStudentExpels(studentExpelDTO));
-            List<StudentExpelDTO> studentExpelDTOs = Parser.parse(studentExpelList, StudentExpelDTO.class);
+            List<StudentExpelDTO> studentExpelDTOs = Mapper.map(studentExpelList, StudentExpelDTO.class);
 
             Object[] ids = studentExpelDTOs.stream().map(StudentExpelDTO::getId).toArray();
             URI location = getNewResourceLocation(ids);
@@ -92,7 +92,7 @@ public class StudentExpelController {
     }
 
     private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, int studentDegreeId) {
-        StudentExpel studentExpel = (StudentExpel) Parser.strictParse(studentExpelDTO, StudentExpel.class);
+        StudentExpel studentExpel = (StudentExpel) Mapper.strictMap(studentExpelDTO, StudentExpel.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
@@ -110,7 +110,7 @@ public class StudentExpelController {
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllExpelledStudents() {
         List<StudentExpel> studentExpels = studentExpelService.getAllExpelledStudents(Constants.FACULTY_ID);
-        return ResponseEntity.ok(Parser.parse(studentExpels, StudentExpelDTO.class));
+        return ResponseEntity.ok(Mapper.map(studentExpels, StudentExpelDTO.class));
     }
 
     private ResponseEntity handleException(Exception exception) {
@@ -139,7 +139,7 @@ public class StudentExpelController {
 
     private RenewedExpelledStudent createRenewedExpelledStudent(RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         RenewedExpelledStudent renewedExpelledStudent =
-                (RenewedExpelledStudent) Parser.strictParse(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
+                (RenewedExpelledStudent) Mapper.strictMap(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
 
         StudentExpel studentExpel = studentExpelService.getById(renewedExpelledStudentDTO.getStudentExpelId());
         renewedExpelledStudent.setStudentExpel(studentExpel);

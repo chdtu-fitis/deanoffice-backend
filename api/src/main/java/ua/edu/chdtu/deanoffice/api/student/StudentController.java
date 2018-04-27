@@ -22,7 +22,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 @RequestMapping("/students")
@@ -43,7 +43,7 @@ public class StudentController {
             @CurrentUser ApplicationUser user
             ) {
         List<Student> foundStudents = studentService.searchByFullName(name, surname, patronimic, user.getFaculty().getId());
-        List<StudentDTO> foundStudentsDTO = parse(foundStudents, StudentDTO.class);
+        List<StudentDTO> foundStudentsDTO = map(foundStudents, StudentDTO.class);
         foundStudentsDTO.forEach(studentDTO -> {
             Student student = foundStudents.get(foundStudentsDTO.indexOf(studentDTO));
             studentDTO.setGroups(getGroupNamesForStudent(student));
@@ -61,7 +61,7 @@ public class StudentController {
     @GetMapping("/{student_id}")
     public ResponseEntity getStudentsById(@PathVariable("student_id") Integer studentId) {
         Student student = studentService.findById(studentId);
-        return ResponseEntity.ok(parse(student, StudentDTO.class));
+        return ResponseEntity.ok(map(student, StudentDTO.class));
     }
 
     @PutMapping("/")

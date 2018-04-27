@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
@@ -31,7 +31,6 @@ import java.net.URI;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 
 @RestController
 public class StudentDegreeController {
@@ -63,7 +62,7 @@ public class StudentDegreeController {
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegrees(int facultyId) {
-        return Parser.parse(studentDegreeService.getAllByActive(true, facultyId), StudentDegreeDTO.class);
+        return Mapper.map(studentDegreeService.getAllByActive(true, facultyId), StudentDegreeDTO.class);
     }
 
     @JsonView(StudentView.Degree.class)
@@ -82,14 +81,14 @@ public class StudentDegreeController {
             StudentDegree studentDegree = createStudentDegree(newStudentDegree, student);
 
             URI location = getNewResourceLocation(studentDegree.getId());
-            return ResponseEntity.created(location).body(Parser.parse(studentDegree, StudentDegreeDTO.class));
+            return ResponseEntity.created(location).body(Mapper.map(studentDegree, StudentDegreeDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
     private Student createStudent(StudentDTO newStudentDTO) {
-        Student newStudent = (Student) Parser.strictParse(newStudentDTO, Student.class);
+        Student newStudent = (Student) Mapper.strictMap(newStudentDTO, Student.class);
         if (newStudent.getId() != 0) {
             newStudent.setId(0);
         }
@@ -97,7 +96,7 @@ public class StudentDegreeController {
     }
 
     private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
-        StudentDegree newStudentDegree = (StudentDegree) Parser.strictParse(newStudentDegreeDTO, StudentDegree.class);
+        StudentDegree newStudentDegree = (StudentDegree) Mapper.strictMap(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setSpecialization(newStudentDegree.getStudentGroup().getSpecialization());
@@ -138,7 +137,7 @@ public class StudentDegreeController {
     @GetMapping("/students/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
         Student student = studentService.findById(studentId);
-        return ResponseEntity.ok(Parser.parse(student, StudentDTO.class));
+        return ResponseEntity.ok(Mapper.map(student, StudentDTO.class));
     }
 
     @JsonView(StudentView.Degrees.class)
@@ -152,7 +151,7 @@ public class StudentDegreeController {
         }
 
         try {
-            List<StudentDegree> studentDegrees = Parser.strictParse(studentDegreesDTO, StudentDegree.class);
+            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTO, StudentDegree.class);
             Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
@@ -188,6 +187,6 @@ public class StudentDegreeController {
     @GetMapping("/groups/{group_id}/students")
     public ResponseEntity getStudentsByGroupId(@PathVariable("group_id") Integer groupId) {
         List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
-        return ResponseEntity.ok(parse(students, StudentDegreeFullNameDTO.class));
+        return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
     }
 }

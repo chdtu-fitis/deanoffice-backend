@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.general.parser;
+package ua.edu.chdtu.deanoffice.api.general.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,11 +11,8 @@ import java.util.Set;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.modelmapper.convention.MatchingStrategies.STRICT;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
-public class ParserTest {
+public class MapperTest {
     private StudentDTO sourceObject = new StudentDTO();
     private Student expectedObject = new Student();
 
@@ -34,10 +31,10 @@ public class ParserTest {
 
     @Test
     public void forObject() {
-        Student actualObject = (Student) parse(sourceObject, Student.class);
+        Student actualObject = (Student) Mapper.map(sourceObject, Student.class);
         assertParser(actualObject, expectedObject);
 
-        actualObject = (Student) strictParse(sourceObject, Student.class);
+        actualObject = (Student) Mapper.strictMap(sourceObject, Student.class);
         assertParser(actualObject, expectedObject);
     }
 
@@ -54,10 +51,10 @@ public class ParserTest {
 
     @Test
     public void forList() {
-        List<Student> actualList = parse(sourceList, Student.class);
+        List<Student> actualList = Mapper.map(sourceList, Student.class);
         assertParser(actualList);
 
-        actualList = strictParse(sourceList, Student.class);
+        actualList = Mapper.strictMap(sourceList, Student.class);
         assertParser(actualList);
     }
 
@@ -74,10 +71,10 @@ public class ParserTest {
 
     @Test
     public void forSet() {
-        Set<Student> actualSet = parse(sourceSet, Student.class);
+        Set<Student> actualSet = Mapper.map(sourceSet, Student.class);
         assertParser(actualSet);
 
-        actualSet = strictParse(sourceSet, Student.class);
+        actualSet = Mapper.strictMap(sourceSet, Student.class);
         assertParser(actualSet);
     }
 

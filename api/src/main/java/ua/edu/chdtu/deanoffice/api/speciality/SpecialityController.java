@@ -13,7 +13,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 @RequestMapping("/specialities")
@@ -38,6 +38,6 @@ public class SpecialityController {
     }
 
     private List<SpecialityDTO> mapToSpecialityDTO(List<Speciality> source) {
-        return parse(source, SpecialityDTO.class);
+        return map(source, SpecialityDTO.class);
     }
 }

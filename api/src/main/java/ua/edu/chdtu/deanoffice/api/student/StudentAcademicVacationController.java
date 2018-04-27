@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.student.dto.RenewedAcademicVacationStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentAcademicVacationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -75,7 +75,7 @@ public class StudentAcademicVacationController {
 
     private StudentAcademicVacation createStudentAcademicVacation(StudentAcademicVacationDTO studentAcademicVacationDTO) {
         StudentAcademicVacation studentAcademicVacation =
-                (StudentAcademicVacation) Parser.strictParse(studentAcademicVacationDTO, StudentAcademicVacation.class);
+                (StudentAcademicVacation) Mapper.strictMap(studentAcademicVacationDTO, StudentAcademicVacation.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentAcademicVacationDTO.getStudentDegreeId());
         studentAcademicVacation.setStudentDegree(studentDegree);
@@ -93,7 +93,7 @@ public class StudentAcademicVacationController {
     @GetMapping("")
     public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user) {
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId());
-        return ResponseEntity.ok(Parser.parse(academicVacations, StudentAcademicVacationDTO.class));
+        return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));
     }
 
     private ResponseEntity handleException(Exception exception) {
@@ -129,7 +129,7 @@ public class StudentAcademicVacationController {
             RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         RenewedAcademicVacationStudent renewedAcademicVacationStudent = (RenewedAcademicVacationStudent)
-                Parser.strictParse(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
+                Mapper.strictMap(renewedAcademicVacationStudentDTO, RenewedAcademicVacationStudent.class);
 
         StudentAcademicVacation studentAcademicVacation =
                 studentAcademicVacationService.getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId());
