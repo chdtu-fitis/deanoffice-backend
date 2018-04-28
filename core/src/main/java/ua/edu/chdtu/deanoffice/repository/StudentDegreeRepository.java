@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import java.util.List;
@@ -33,13 +34,15 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
 
-    @Query("select sd from StudentDegree sd " +
-            "where sd.student.name like %:name% and " +
-            "sd.student.surname like %:surname% and " +
-            "sd.student.patronimic like %:patronimic% " +
+    @Query("select s from StudentDegree sd " +
+            "join sd.student s " +
+            "where s.name like %:name% " +
+            "and s.surname like %:surname% " +
+            "and s.patronimic like %:patronimic% " +
             "and sd.specialization.faculty.id = :faculty_id " +
-            "order by sd.student.name, sd.student.surname, sd.student.patronimic")
-    List<StudentDegree> findAllByFullNameUkr(
+            "group by s " +
+            "order by s.name, s.surname, s.patronimic")
+    List<Student> findAllByFullNameUkr(
             @Param("name") String name,
             @Param("surname") String surname,
             @Param("patronimic") String patronimic,

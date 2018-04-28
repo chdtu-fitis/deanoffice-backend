@@ -35,7 +35,7 @@ public class StudentService {
                 toCapitalizedCase(surname),
                 toCapitalizedCase(patronimic),
                 facultyId
-        ).stream().map(StudentDegree::getStudent).collect(Collectors.toList());
+        );
     }
 
     public Student save(Student student) {

@@ -8,21 +8,21 @@ import ua.edu.chdtu.deanoffice.entity.Speciality;
 import java.util.List;
 
 public interface SpecialityRepository extends JpaRepository<Speciality, Integer> {
-    @Query(value = "" +
+    @Query(value =
             "select s.* from speciality as s " +
             "inner join specialization as sz on s.id = sz.speciality_id " +
             "where sz.faculty_id = :faculty_id and s.active = true " +
             "group by s.id " +
-            "order by s.name, s.code " +
-            "", nativeQuery = true)
+            "order by s.name, s.code",
+            nativeQuery = true)
     List<Speciality> findAllActive(@Param("faculty_id") int facultyId);
 
-    @Query(value = "" +
+    @Query(value =
             "select s.* from speciality as s " +
             "inner join specialization as sz on s.id = sz.speciality_id " +
             "where sz.faculty_id = :faculty_id " +
             "group by s.id " +
-            "order by s.name, s.code " +
-            "", nativeQuery = true)
+            "order by s.name, s.code",
+            nativeQuery = true)
     List<Speciality> findAll(@Param("faculty_id") int facultyId);
 }
