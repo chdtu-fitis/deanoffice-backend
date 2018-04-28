@@ -24,4 +24,8 @@ public class SpecialityService {
         Sort sort = new Sort(Sort.Direction.ASC, "name");
         return specialityRepository.findAll(sort);
     }
+
+    public Speciality getById(Integer specialityId) {
+        return specialityRepository.findOne(specialityId);
+    }
 }

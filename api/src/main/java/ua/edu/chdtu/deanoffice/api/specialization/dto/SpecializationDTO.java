@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.DegreeDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.DepartmentDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class SpecializationDTO {
     @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private DegreeDTO degree;
     private DepartmentDTO department;
+    private NamedDTO faculty;
     private String qualification;
     private String qualificationEng;
     private BigDecimal paymentFulltime;
@@ -38,4 +40,8 @@ public class SpecializationDTO {
     private String applyingKnowledgeAndUnderstandingOutcomesEng;
     private String makingJudgementsOutcomes;
     private String makingJudgementsOutcomesEng;
+
+    private Integer specialityId;
+    private Integer degreeId;
+    private Integer departmentId;
 }
