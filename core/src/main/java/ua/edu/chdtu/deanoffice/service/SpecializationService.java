@@ -23,4 +23,8 @@ public class SpecializationService {
     public Specialization save(Specialization specialization) {
         return specializationRepository.save(specialization);
     }
+
+    public Specialization getById(Integer specializationId) {
+        return specializationRepository.findOne(specializationId);
+    }
 }

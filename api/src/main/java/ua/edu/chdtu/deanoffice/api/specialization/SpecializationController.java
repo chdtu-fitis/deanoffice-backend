@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.specialization;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Department;
@@ -53,6 +55,7 @@ public class SpecializationController {
         this.degreeService = degreeService;
     }
 
+    @JsonView(SpecializationView.Extended.class)
     @GetMapping
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
@@ -62,6 +65,7 @@ public class SpecializationController {
         return ResponseEntity.ok(parse(specializations, SpecializationDTO.class));
     }
 
+    @JsonView(SpecializationView.Extended.class)
     @PostMapping
     public ResponseEntity createSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
@@ -99,6 +103,16 @@ public class SpecializationController {
         return ExceptionHandlerAdvice.handleException(exception, SpecializationController.class);
     }
 
+    @JsonView(SpecializationView.Extended.class)
+    @GetMapping("{specialization_id}")
+    public ResponseEntity getSpecializationById(
+            @PathVariable("specialization_id") Integer specializationId
+    ) {
+        Specialization specialization = specializationService.getById(specializationId);
+        return ResponseEntity.ok(parse(specialization, SpecializationDTO.class));
+    }
+
+    @JsonView(SpecializationView.Extended.class)
     @PutMapping("{specialization_id}")
     public ResponseEntity updateSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
