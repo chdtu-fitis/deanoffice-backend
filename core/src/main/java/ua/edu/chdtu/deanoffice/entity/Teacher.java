@@ -3,8 +3,6 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Person;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
@@ -16,8 +14,6 @@ public class Teacher extends Person {
     private Department department;
     @ManyToOne
     private Position position;
-    @Column(name = "active", nullable = false)
     private boolean active = true;
-    @Column(name = "scientific_degree")
     private String scientificDegree;
 }

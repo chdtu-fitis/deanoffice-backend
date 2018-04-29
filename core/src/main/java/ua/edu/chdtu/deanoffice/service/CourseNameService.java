@@ -9,14 +9,18 @@ import java.util.List;
 
 @Service
 public class CourseNameService {
-    private final CourseNameRepository courseNameRepository;
-
     @Autowired
-    public CourseNameService(CourseNameRepository courseNameRepository) {
-        this.courseNameRepository = courseNameRepository;
+    private CourseNameRepository courseNameRepository;
+
+    public List<CourseName> getCourseNames(){
+        return this.courseNameRepository.findAll();
     }
-    public List<CourseName> getCourseNameById(int idCourseName){
-        List<CourseName> courseNames = courseNameRepository.findCourseNameById(idCourseName);
-        return courseNames;
+
+    public void saveCourseName(CourseName courseName){
+        this.courseNameRepository.save(courseName);
+    }
+
+    public CourseName getCourseNameByName(String name){
+        return this.courseNameRepository.findByName(name);
     }
 }

@@ -9,14 +9,13 @@ import java.util.List;
 
 @Service
 public class TeacherService {
-    private final TeacherRepository teacherRepository;
-
     @Autowired
-    public TeacherService(TeacherRepository teacherRepository) {
-        this.teacherRepository = teacherRepository;
-    }
+    private TeacherRepository teacherRepository;
 
-    public List<Teacher> getTeacherById(int idTeacher) {
-        return teacherRepository.findTeacherById(idTeacher);
+    public Teacher getTeacher(int teacherId) {
+        return teacherRepository.findOne(teacherId);
+    }
+    public List<Teacher> getTeachers(){
+        return teacherRepository.findAllByOrderBySurname();
     }
 }

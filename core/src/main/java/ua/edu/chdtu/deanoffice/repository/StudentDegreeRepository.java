@@ -25,4 +25,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Query("SELECT sd FROM StudentDegree sd " +
             "where sd.student.id = :student_id")
     List<StudentDegree> findByStudentId(@Param("student_id") Integer studentId);
+
+    List<StudentDegree> findStudentDegreeByStudentGroupIdAndActive(@Param("groupId") Integer groupId, @Param("active") boolean active);
 }

@@ -11,52 +11,50 @@ import java.util.Set;
 @Getter
 @Setter
 public class StudentDTO {
-    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
+    @JsonView(StudentView.SearchSimpleDegrees.class)
     private Integer id;
-    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
+    @JsonView(StudentView.SearchSimpleDegrees.class)
     private String name;
-    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
+    @JsonView(StudentView.SearchSimpleDegrees.class)
     private String surname;
-    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
+    @JsonView(StudentView.SearchSimpleDegrees.class)
     private String patronimic;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String nameEng;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String surnameEng;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
+    @JsonView(StudentView.DetailAndDegree.class)
     private String patronimicEng;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Simple.class)
     private String telephone;
-    @JsonView(StudentDegreeViews.Detail.class)
+    @JsonView(StudentView.Detail.class)
     private Sex sex;
-    @JsonView(StudentDegreeViews.SearchSimpleDegrees.class)
+    @JsonView(StudentView.SearchSimpleDegrees.class)
     private Date birthDate;
-    @JsonView(StudentDegreeViews.Detail.class)
+    @JsonView(StudentView.Detail.class)
     private String registrationAddress;
-    @JsonView(StudentDegreeViews.DetailAndDegree.class)
-    private String studentCardNumber;
-    @JsonView(StudentDegreeViews.Detail.class)
+    @JsonView(StudentView.Detail.class)
     private String actualAddress;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String school;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String fatherName;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String fatherPhone;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String fatherInfo;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String motherName;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String motherPhone;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String motherInfo;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String notes;
-    @JsonView(StudentDegreeViews.Personal.class)
+    @JsonView(StudentView.Personal.class)
     private String email;
-    @JsonView(StudentDegreeViews.Search.class)
+    @JsonView(StudentView.Search.class)
     private String groups;
-    @JsonView(StudentDegreeViews.Degrees.class)
+    @JsonView(StudentView.Degrees.class)
     private Set<StudentDegreeDTO> degrees;
 }

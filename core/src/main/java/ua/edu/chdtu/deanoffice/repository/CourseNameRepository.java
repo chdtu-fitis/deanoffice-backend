@@ -11,4 +11,6 @@ public interface CourseNameRepository extends JpaRepository<CourseName, Integer>
     @Query
     List<CourseName> findCourseNameById(@Param("courseId") int courseId);
 
+    CourseName findByName(String name);
+
 }

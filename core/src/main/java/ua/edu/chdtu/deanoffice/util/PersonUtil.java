@@ -9,26 +9,22 @@ import static java.util.Arrays.asList;
 public class PersonUtil {
 
     public static String toCapitalizedCase(String string) {
-        try {
-            if (string == null) {
-                return null;
-            }
-
-            if (string.isEmpty()) {
-                return "";
-            }
-
-            return wordsToCapitalizedCase(string);
-        } catch (Exception exception) {
-            throw exception;
+        if (string == null) {
+            return null;
         }
+
+        if (string.isEmpty()) {
+            return "";
+        }
+
+        return wordsToCapitalizedCase(string);
     }
 
     private static String wordsToCapitalizedCase(String string) {
         List<String> words = asList(string.split("\\s+"));
         return words.stream()
                 .filter(s -> !s.isEmpty())
-                .map(s -> wordToCapitalizedCase(s))
+                .map(PersonUtil::wordToCapitalizedCase)
                 .collect(Collectors.joining(" "));
     }
 

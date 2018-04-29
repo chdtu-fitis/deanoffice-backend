@@ -3,27 +3,37 @@ package ua.edu.chdtu.deanoffice.api.student.dto;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.api.general.OrderReasonDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.entity.OrderReason;
+import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.Date;
 
 @Getter
 @Setter
 public class StudentExpelDTO {
-    private Integer studentDegreeId;
-    private Integer reasonId;
-    @JsonView(StudentDegreeViews.Expel.class)
+    @JsonView(StudentView.Expel.class)
     private Integer id;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private StudentDegreeDTO studentDegree;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private Date expelDate;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private String orderNumber;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Expel.class)
     private Date orderDate;
-    @JsonView(StudentDegreeViews.Simple.class)
-    private OrderReasonDTO reason;
-    @JsonView(StudentDegreeViews.Simple.class)
+    @JsonView(StudentView.Expel.class)
+    private NamedDTO orderReason;
+    @JsonView(StudentView.Expel.class)
     private Date applicationDate;
+
+    private NamedDTO studentGroup;
+    private int studyYear;
+    private Payment payment;
+
+    private Integer[] studentDegreeIds;
+    private Integer orderReasonId;
+
+    private OrderReason entityOrderReason;
 }

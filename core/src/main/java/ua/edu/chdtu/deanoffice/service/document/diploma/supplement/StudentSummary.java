@@ -4,7 +4,14 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.EctsGrade;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
 import java.text.Collator;
@@ -12,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
-
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.*;
 
 @Getter
 public class StudentSummary {
@@ -27,7 +32,12 @@ public class StudentSummary {
     public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
         this.studentDegree = studentDegree;
         this.grades = grades;
-        completeGrades();
+        caluclateTotalHours();
+        combineMultipleSemesterCourseGrades();
+    }
+
+    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
+        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
     }
 
     public Student getStudent() {
@@ -38,66 +48,12 @@ public class StudentSummary {
         return studentDegree.getStudentGroup();
     }
 
-    private static boolean ectsIsSet(Grade grade) {
-        return grade.getEcts() != null;
-    }
-
-    private void completeGrades() {
-        setHours();
-        setCredits();
-        setGrades();
-        setPoints();
-        setEcts();
-        combineMultipleSemesterCourseGrades();
-    }
-
-    private void setCredits() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                grade.getCourse().setCredits(new BigDecimal(grade.getCourse().getHours() / Constants.HOURS_PER_CREDIT));
-            });
-        });
-    }
-
-    private void setHours() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (grade.getCourse().getHours() == null) {
-                    grade.getCourse().setHours(0);
-                }
+    private void caluclateTotalHours() {
+        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
+            if (grade.getCourse().getHours() != null) {
                 totalHours += grade.getCourse().getHours();
-            });
-        });
-    }
-
-    private void setGrades() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (grade.getGrade() == 0 && grade.getCourse().getKnowledgeControl().getId() != Constants.CREDIT) {
-                    grade.setGrade(getGradeFromPoints(grade.getPoints()));
-                }
-            });
-        });
-    }
-
-    private void setPoints() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (grade.getPoints() == 0) {
-                    grade.setPoints(getAveragePointsFromGrade(grade));
-                }
-            });
-        });
-    }
-
-    private void setEcts() {
-        grades.forEach(gradeSublist -> {
-            gradeSublist.forEach(grade -> {
-                if (!ectsIsSet(grade)) {
-                    grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-                }
-            });
-        });
+            }
+        }));
     }
 
     private void combineMultipleSemesterCourseGrades() {
@@ -176,8 +132,12 @@ public class StudentSummary {
         Double gradesSum = 0.0;
 
         for (Grade g : grades) {
-            pointsSum += g.getPoints();
-            gradesSum += g.getGrade();
+            if (g.getPoints() != null) {
+                pointsSum += g.getPoints();
+            }
+            if (g.getGrade() != null) {
+                gradesSum += g.getGrade();
+            }
         }
 
         Course newCourse = new Course();
@@ -186,8 +146,8 @@ public class StudentSummary {
         newCourse.setKnowledgeControl(resultingGrade.getCourse().getKnowledgeControl());
         resultingGrade.setCourse(newCourse);
 
-        if (!resultingGrade.getCourse().getKnowledgeControl().isHasGrade()) {
-            int[] pointsAndGrade = adjustAverageGradeAndPoints(
+        if (!resultingGrade.getCourse().getKnowledgeControl().isGraded()) {
+            int[] pointsAndGrade = GradeUtil.adjustAverageGradeAndPoints(
                     gradesSum / grades.size(),
                     pointsSum / grades.size());
             resultingGrade.setPoints(pointsAndGrade[1]);
@@ -205,10 +165,6 @@ public class StudentSummary {
         return resultingGrade;
     }
 
-    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
-        return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
-    }
-
     public BigDecimal getTotalCredits() {
         return new BigDecimal(getTotalHours() / Constants.HOURS_PER_CREDIT);
     }
@@ -217,10 +173,9 @@ public class StudentSummary {
     public Double getTotalGrade() {
         int pointSum = 0;
         int pointsCount = 0;
-        for (List<Grade> gradesSublist :
-                grades) {
+        for (List<Grade> gradesSublist : grades) {
             for (Grade g : gradesSublist) {
-                if (g.getCourse().getKnowledgeControl().isHasGrade() && g.getPoints() > 0) {
+                if (g.getPoints() != null && g.getCourse().getKnowledgeControl().isGraded() && g.getPoints() > 0) {
                     pointSum += g.getPoints();
                     pointsCount++;
                 }
@@ -238,7 +193,7 @@ public class StudentSummary {
         Course course = new Course();
         grade.setCourse(course);
         KnowledgeControl kc = new KnowledgeControl();
-        kc.setHasGrade(true);
+        kc.setGraded(true);
         course.setKnowledgeControl(kc);
         return grade.getNationalGradeUkr();
     }
@@ -249,12 +204,12 @@ public class StudentSummary {
         Course course = new Course();
         grade.setCourse(course);
         KnowledgeControl kc = new KnowledgeControl();
-        kc.setHasGrade(true);
+        kc.setGraded(true);
         course.setKnowledgeControl(kc);
         return grade.getNationalGradeEng();
     }
 
-    public EctsGrade getTotalEcts() {
+    EctsGrade getTotalEcts() {
         return EctsGrade.getEctsGrade((int) Math.round(getTotalGrade()));
     }
 }
