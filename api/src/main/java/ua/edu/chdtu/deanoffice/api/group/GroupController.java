@@ -16,11 +16,13 @@ import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
 import java.util.List;
@@ -47,8 +49,8 @@ public class GroupController {
 
     @JsonView(StudentGroupView.WithStudents.class)
     @GetMapping("/groups/graduates")
-    public ResponseEntity getGraduateGroups(@RequestParam int degreeId) {
-        List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
+    public ResponseEntity getGraduateGroups(@RequestParam int degreeId, @CurrentUser ApplicationUser user) {
+        List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId, user.getFaculty().getId());
         return ResponseEntity.ok(Parser.parse(groups, StudentGroupShortDTO.class));
     }
 
@@ -63,8 +65,8 @@ public class GroupController {
     }
 
     @GetMapping("courses/{courseId}/groups")
-    public ResponseEntity getGroupsByCourse(@PathVariable int courseId) {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId);
+    public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
         return ResponseEntity.ok(Parser.parse(studentGroups, NamedDTO.class));
     }
 

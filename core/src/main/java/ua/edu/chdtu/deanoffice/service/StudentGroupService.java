@@ -16,29 +16,26 @@ public class StudentGroupService {
 
     private final StudentGroupRepository studentGroupRepository;
     private final CurrentYearRepository currentYearRepository;
-    private final StudentDegreeRepository studentDegreeRepository;
 
     public StudentGroupService(
             StudentGroupRepository studentGroupRepository,
-            CurrentYearRepository currentYearRepository,
-            StudentDegreeRepository studentDegreeRepository
+            CurrentYearRepository currentYearRepository
     ) {
         this.studentGroupRepository = studentGroupRepository;
         this.currentYearRepository = currentYearRepository;
-        this.studentDegreeRepository = studentDegreeRepository;
     }
 
     public StudentGroup getById(Integer studentGroupId) {
         return this.studentGroupRepository.findOne(studentGroupId);
     }
 
-    public List<StudentGroup> getGroupsByCourse(int courseId) {
-        return studentGroupRepository.findAllByCourse(courseId);
+    public List<StudentGroup> getGroupsByCourse(int courseId, int facultyId) {
+        return studentGroupRepository.findAllByCourse(courseId, facultyId);
     }
 
-    public List<StudentGroup> getGraduateGroups(Integer degreeId) {
+    public List<StudentGroup> getGraduateGroups(Integer degreeId, int facultyId) {
         Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return studentGroupRepository.findGraduateByDegree(degreeId, currYear);
+        return studentGroupRepository.findGraduateByDegree(degreeId, currYear, facultyId);
     }
 
     public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year) {
