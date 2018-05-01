@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,11 +80,11 @@ public class GroupController {
     @JsonView(StudentGroupView.AllGroupData.class)
     @PostMapping("/groups")
     public ResponseEntity createGroup(@RequestBody StudentGroupDTO studentGroupDTO) {
-        if (studentGroupDTO.getId() != null) {
-            return handleException("Group`s id must be null");
-        }
-
         try {
+            if (studentGroupDTO.getId() != null) {
+                throwException("Group`s id must be null");
+            }
+
             StudentGroup studentGroup = create(studentGroupDTO);
             studentGroup = studentGroupService.save(studentGroup);
 
@@ -110,14 +111,29 @@ public class GroupController {
         return ExceptionHandlerAdvice.handleException(exception, GroupController.class);
     }
 
-    private ResponseEntity handleException(String message) {
-        return ExceptionHandlerAdvice.handleException(message, GroupController.class);
-    }
-
     @JsonView(StudentGroupView.AllGroupData.class)
     @GetMapping("/groups/{group_id}")
     public ResponseEntity getGroupById(@PathVariable(value = "group_id") Integer groupId) {
         StudentGroup studentGroup = studentGroupService.getById(groupId);
         return ResponseEntity.ok(Parser.parse(studentGroup, StudentGroupDTO.class));
+    }
+
+    @PutMapping("/groups")
+    public ResponseEntity updateGroup(@RequestBody StudentGroupDTO studentGroupDTO) {
+        try {
+            if (studentGroupDTO.getId() == null) {
+                throwException("Group`s id must not be null");
+            } else if (!studentGroupDTO.getId().equals(0)) {
+                throwException("Group`s id must not be null");
+            }
+
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void throwException(String message) throws Exception {
+        throw new Exception(message);
     }
 }
