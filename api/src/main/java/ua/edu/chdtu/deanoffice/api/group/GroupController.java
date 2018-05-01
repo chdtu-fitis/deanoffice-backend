@@ -84,8 +84,9 @@ public class GroupController {
             if (studentGroupDTO.getId() != null) {
                 throwException("Group`s id must be null");
             }
-
             StudentGroup studentGroup = create(studentGroupDTO);
+            studentGroup.setCreationYear(currentYearService.getYear());
+            studentGroup.setActive(true);
             studentGroup = studentGroupService.save(studentGroup);
 
             URI location = getNewResourceLocation(studentGroup.getId());
@@ -95,20 +96,19 @@ public class GroupController {
         }
     }
 
-    private StudentGroup create(StudentGroupDTO studentGroupDTO) {
-        StudentGroup studentGroup = (StudentGroup) Parser.strictParse(studentGroupDTO, StudentGroup.class);
-
-        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecializationId());
-        studentGroup.setSpecialization(specialization);
-
-        studentGroup.setCreationYear(currentYearService.getYear());
-        studentGroup.setActive(true);
-
-        return studentGroup;
+    private void throwException(String message) throws Exception {
+        throw new Exception(message);
     }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, GroupController.class);
+    }
+
+    private StudentGroup create(StudentGroupDTO studentGroupDTO) {
+        StudentGroup studentGroup = (StudentGroup) Parser.strictParse(studentGroupDTO, StudentGroup.class);
+        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecializationId());
+        studentGroup.setSpecialization(specialization);
+        return studentGroup;
     }
 
     @JsonView(StudentGroupView.AllGroupData.class)
@@ -123,17 +123,15 @@ public class GroupController {
         try {
             if (studentGroupDTO.getId() == null) {
                 throwException("Group`s id must not be null");
-            } else if (!studentGroupDTO.getId().equals(0)) {
+            } else if (studentGroupDTO.getId().equals(0)) {
                 throwException("Group`s id must not be null");
             }
+            StudentGroup studentGroup = create(studentGroupDTO);
+            studentGroupService.save(studentGroup);
 
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
-    }
-
-    private void throwException(String message) throws Exception {
-        throw new Exception(message);
     }
 }
