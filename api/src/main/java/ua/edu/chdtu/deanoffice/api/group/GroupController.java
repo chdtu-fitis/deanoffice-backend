@@ -11,8 +11,10 @@ import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
+import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
@@ -24,14 +26,17 @@ import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 public class GroupController {
     private StudentGroupService studentGroupService;
     private StudentExpelService studentExpelService;
+    private StudentAcademicVacationService studentAcademicVacationService;
 
     @Autowired
     public GroupController(
             StudentGroupService studentGroupService,
-            StudentExpelService studentExpelService
+            StudentExpelService studentExpelService,
+            StudentAcademicVacationService studentAcademicVacationService
     ) {
         this.studentGroupService = studentGroupService;
         this.studentExpelService = studentExpelService;
+        this.studentAcademicVacationService = studentAcademicVacationService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
@@ -71,6 +76,16 @@ public class GroupController {
         StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
         int degreeId = studentExpel.getStudentDegree().getDegree().getId();
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, studentExpel.getStudyYear());
+        return ResponseEntity.ok(parse(studentGroups, NamedDTO.class));
+    }
+
+    @GetMapping("/students/degrees/academic-vacation/{student_academic_vacation_id}/renew-groups")
+    public ResponseEntity getGroupsForRenewAcademicVacationStudent(
+            @PathVariable("student_academic_vacation_id") Integer studentAcademicVacationId
+    ) {
+        StudentAcademicVacation studentAcademicVacation = studentAcademicVacationService.getById(studentAcademicVacationId);
+        int degreeId = studentAcademicVacation.getStudentDegree().getDegree().getId();
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, studentAcademicVacation.getStudyYear());
         return ResponseEntity.ok(parse(studentGroups, NamedDTO.class));
     }
 }
