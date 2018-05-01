@@ -88,7 +88,7 @@ public class GroupController {
             studentGroup = studentGroupService.save(studentGroup);
 
             URI location = getNewResourceLocation(studentGroup.getId());
-            return ResponseEntity.created(location).build();
+            return ResponseEntity.created(location).body(studentGroup);
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -112,5 +112,12 @@ public class GroupController {
 
     private ResponseEntity handleException(String message) {
         return ExceptionHandlerAdvice.handleException(message, GroupController.class);
+    }
+
+    @JsonView(StudentGroupView.AllGroupData.class)
+    @GetMapping("/groups/{group_id}")
+    public ResponseEntity getGroupById(@PathVariable(value = "group_id") Integer groupId) {
+        StudentGroup studentGroup = studentGroupService.getById(groupId);
+        return ResponseEntity.ok(Parser.parse(studentGroup, StudentGroupDTO.class));
     }
 }
