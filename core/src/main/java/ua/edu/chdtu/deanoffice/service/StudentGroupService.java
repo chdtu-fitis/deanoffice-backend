@@ -52,4 +52,8 @@ public class StudentGroupService {
         }
         return this.studentGroupRepository.findAllByFaculty(FACULTY_ID);
     }
+
+    public StudentGroup save(StudentGroup studentGroup) {
+        return studentGroupRepository.save(studentGroup);
+    }
 }
