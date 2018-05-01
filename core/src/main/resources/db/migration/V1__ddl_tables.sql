@@ -476,7 +476,9 @@ CREATE TABLE renewed_academic_vacation_student (
     renew_date date,
     study_year integer NOT NULL,
     student_academic_vacation_id integer NOT NULL,
-    student_group_id integer NOT NULL
+    student_group_id integer NOT NULL,
+    order_date date NOT NULL,
+    order_number character varying(15) NOT NULL
 );
 
 
@@ -517,7 +519,9 @@ CREATE TABLE renewed_expelled_student (
     renew_date date,
     study_year integer NOT NULL,
     student_expel_id integer NOT NULL,
-    student_group_id integer NOT NULL
+    student_group_id integer NOT NULL,
+    order_date date NOT NULL,
+    order_number character varying(15) NOT NULL
 );
 
 
