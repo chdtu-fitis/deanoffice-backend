@@ -58,9 +58,10 @@ public class GroupController {
     @JsonView(StudentGroupView.WithStudents.class)
     public ResponseEntity getGroupsByDegreeAndYear(
             @RequestParam Integer degreeId,
-            @RequestParam Integer year
+            @RequestParam Integer year,
+            @CurrentUser ApplicationUser user
     ) {
-        List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year);
+        List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, user.getFaculty().getId());
         return ResponseEntity.ok(Parser.parse(groups, StudentGroupDTO.class));
     }
 

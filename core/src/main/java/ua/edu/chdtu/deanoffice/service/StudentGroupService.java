@@ -1,10 +1,8 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
@@ -34,13 +32,15 @@ public class StudentGroupService {
     }
 
     public List<StudentGroup> getGraduateGroups(Integer degreeId, int facultyId) {
-        Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return studentGroupRepository.findGraduateByDegree(degreeId, currYear, facultyId);
+        return studentGroupRepository.findGraduateByDegree(degreeId, getCurrentYear(), facultyId);
     }
 
-    public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year) {
-        Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, currYear);
+    private int getCurrentYear() {
+        return currentYearRepository.findOne(1).getCurrYear();
+    }
+
+    public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year, int facultyId) {
+        return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, getCurrentYear(), facultyId);
     }
 
     public List<StudentGroup> getAllByActive(boolean onlyActive) {
