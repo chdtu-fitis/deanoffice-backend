@@ -11,7 +11,9 @@ import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
+import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.util.List;
@@ -21,10 +23,15 @@ import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
 @RestController
 public class GroupController {
     private StudentGroupService studentGroupService;
+    private StudentExpelService studentExpelService;
 
     @Autowired
-    public GroupController(StudentGroupService studentGroupService) {
+    public GroupController(
+            StudentGroupService studentGroupService,
+            StudentExpelService studentExpelService
+    ) {
         this.studentGroupService = studentGroupService;
+        this.studentExpelService = studentExpelService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
@@ -57,5 +64,13 @@ public class GroupController {
     ) {
         List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
         return ResponseEntity.ok(parse(studentGroups, StudentGroupDTO.class));
+    }
+
+    @GetMapping("/students/degrees/expels/{student_expel_id}/renew-groups")
+    public ResponseEntity getGroupsForRenewExpelledStudent(@PathVariable("student_expel_id") Integer studentExpelId) {
+        StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
+        int degreeId = studentExpel.getStudentDegree().getDegree().getId();
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, studentExpel.getStudyYear());
+        return ResponseEntity.ok(parse(studentGroups, NamedDTO.class));
     }
 }
