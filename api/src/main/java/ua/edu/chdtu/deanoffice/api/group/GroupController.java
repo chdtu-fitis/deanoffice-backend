@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.api.general.parser.Parser;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
@@ -26,7 +27,6 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
 import java.util.List;
-
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -51,7 +51,7 @@ public class GroupController {
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId, @CurrentUser ApplicationUser user) {
         List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId, user.getFaculty().getId());
-        return ResponseEntity.ok(Parser.parse(groups, StudentGroupShortDTO.class));
+        return ResponseEntity.ok(Mapper.map(groups, StudentGroupShortDTO.class));
     }
 
     @GetMapping("/groups/filter")
@@ -62,13 +62,13 @@ public class GroupController {
             @CurrentUser ApplicationUser user
     ) {
         List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, user.getFaculty().getId());
-        return ResponseEntity.ok(Parser.parse(groups, StudentGroupDTO.class));
+        return ResponseEntity.ok(Mapper.map(groups, StudentGroupDTO.class));
     }
 
     @GetMapping("courses/{courseId}/groups")
     public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
-        return ResponseEntity.ok(Parser.parse(studentGroups, NamedDTO.class));
+        return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
     }
 
     @GetMapping("/groups")
@@ -78,7 +78,7 @@ public class GroupController {
             @CurrentUser ApplicationUser user
     ) {
         List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
-        return ResponseEntity.ok(Parser.parse(studentGroups, StudentGroupDTO.class));
+        return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
     }
 
     @JsonView(StudentGroupView.AllGroupData.class)
@@ -109,7 +109,7 @@ public class GroupController {
     }
 
     private StudentGroup create(StudentGroupDTO studentGroupDTO) {
-        StudentGroup studentGroup = (StudentGroup) Parser.strictParse(studentGroupDTO, StudentGroup.class);
+        StudentGroup studentGroup = (StudentGroup) Mapper.strictMap(studentGroupDTO, StudentGroup.class);
         Specialization specialization = specializationService.getById(studentGroupDTO.getSpecializationId());
         studentGroup.setSpecialization(specialization);
         return studentGroup;

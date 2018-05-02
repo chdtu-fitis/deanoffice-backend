@@ -8,9 +8,6 @@ import ua.edu.chdtu.deanoffice.entity.Course;
 import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Integer> {
-    @Query
-    List<Course> findCourseById(@Param("courseId") int courseId);
-
     @Query("select course from CourseForGroup courseForGroup " +
             "join courseForGroup.course course " +
             "where courseForGroup.studentGroup.id=:groupId")
