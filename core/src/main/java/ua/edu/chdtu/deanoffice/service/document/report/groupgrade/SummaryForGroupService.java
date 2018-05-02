@@ -13,20 +13,23 @@ import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.cloneLastCellInRow;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
 
 @Service
+@Transactional
 public class SummaryForGroupService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
@@ -39,19 +42,19 @@ public class SummaryForGroupService {
     private SummaryForGroupService summaryForGroupService;
 
     @Autowired
-    StudentDegreeService studentDegreeService;
+    private StudentDegreeService studentDegreeService;
 
     @Autowired
-    StudentGroupService studentGroupService;
+    private StudentGroupService studentGroupService;
 
     @Autowired
-    GradeService gradeService;
+    private GradeService gradeService;
 
     SummaryForGroupService() {
 
     }
 
-    public File formDocument(Integer groupId, String format)
+    public File formDocument(Integer groupId, FileFormatEnum format)
             throws Docx4JException, IOException {
         List<StudentSummary> studentsSummaries = new ArrayList<>();
         StudentGroup group = studentGroupService.getById(groupId);
@@ -71,7 +74,7 @@ public class SummaryForGroupService {
 
         WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsSummaries);
         String fileName = LanguageUtil.transliterate(group.getName());
-        return documentIOService.saveDocument(filledTemplate, fileName, format);
+        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
     }
 
 
@@ -82,7 +85,7 @@ public class SummaryForGroupService {
 //        Map<String, String> commonDict = getReplacementsDictionary(studentSummaries);
 //        replaceTextPlaceholdersInTemplate(template, commonDict);
 //        replacePlaceholdersInFooter(template, commonDict);
-        prepareTable(template,studentSummaries);
+        prepareTable(template, studentSummaries);
         return template;
     }
 
@@ -92,12 +95,23 @@ public class SummaryForGroupService {
     }
 
     private void prepareTable(WordprocessingMLPackage template, List<StudentSummary> studentSummaries) {
-        Tbl table = (Tbl) getAllElementsFromObject(template, Tbl.class).get(0);
-        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        studentSummaries.forEach((studentSummary) -> {
-            cloneLastCellInRow(tableRows.get(0));
-        });
+//        Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+////        Object debug=table.getTblGrid().getTblGridChange().getTblGrid().getGridCol();
+//        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+//        studentSummaries.forEach((studentSummary) -> {
+//            cloneLastCellInRow(tableRows.get(0));
+//        });
+        prepareTableStructure(template, studentSummaries);
     }
 
+    private void prepareTableStructure(WordprocessingMLPackage template, List<StudentSummary> studentSummaries) {
+        Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        tableRows.forEach((tableRow) -> {
+            studentSummaries.forEach((studentSummary) -> {
+                cloneLastCellInRow(tableRow);
+            });
+        });
+    }
 
 }

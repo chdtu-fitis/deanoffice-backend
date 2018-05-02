@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.SupplementTemplateFillService;
 import ua.edu.chdtu.deanoffice.service.document.report.groupgrade.SummaryForGroupService;
@@ -42,9 +43,9 @@ public class TestService {
 
     @Test
     public void testNewService() throws IOException, Docx4JException {
-        Object o = studentGroupService.getGroups();
-        o = studentGroupRepository.findAll();
-        o = summaryForGroupService.formDocument(389, "docx");
+//        Object o = studentGroupService.getGroups();
+//       Object o = studentGroupRepository.findAll();
+        summaryForGroupService.formDocument(389, FileFormatEnum.DOCX);
         return;
     }
 

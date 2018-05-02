@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional
 public class GradeService {
     private static final Integer[] KNOWLEDGE_CONTROL_PART1 = {Constants.EXAM, Constants.CREDIT, Constants.DIFFERENTIATED_CREDIT};
     private static final Integer[] KNOWLEDGE_CONTROL_PART2 = {Constants.COURSEWORK, Constants.COURSE_PROJECT};
@@ -35,7 +37,8 @@ public class GradeService {
     }
 
     public List<List<Grade>> getGradesByStudentDegreeId(Integer studentDegreeId) {
-        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
+        StudentDegree studentDegree = studentDegreeRepository.findOne(studentDegreeId);
+        studentDegreeRepository.findOne(studentDegreeId);
         Student student = studentDegree.getStudent();
         List<Course> courses = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId());
         List<List<Grade>> grades = new ArrayList<>();

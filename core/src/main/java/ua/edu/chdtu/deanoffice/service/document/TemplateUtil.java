@@ -13,11 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import javax.xml.bind.JAXBElement;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TemplateUtil {
@@ -151,9 +148,29 @@ public class TemplateUtil {
 //        templateRow.getContent().add(cell);
 //    }
 
-    public static void cloneLastCellInRow(Tr templateRow){
+    public static void cloneLastCellInRow(Tr templateRow) {
         List<Object> cells = templateRow.getContent();
-        templateRow.getContent().add(cells.get(cells.size()-1));
+        JAXBElement<Tc> jaxbElement = (JAXBElement<Tc>) (cells.get(cells.size() - 1));
+        Tc lastCell = null;
+//        try {
+//           lastCell= jaxbElement.getValue();
+//        }
+//        catch (Exception e){
+//            System.out.print("HERE");
+//        }
+//        int cellNumber;
+//        for (cellNumber = cells.size() - 1; cellNumber > 0 && lastCell == null; cellNumber--) {
+//            if (((JAXBElement) cells.get(cellNumber)).getDeclaredType() == Tc.class) {
+//                lastCell = ((JAXBElement<Tc>) cells.get(cellNumber)).getValue();
+//            }
+//        }
+        lastCell=jaxbElement.getValue();
+        TcPr tableCellProperties = lastCell.getTcPr();
+        TblWidth tableWidth = tableCellProperties.getTcW();
+        tableWidth.setType("dxa");
+        tableWidth.setW(BigInteger.valueOf(2));
+        tableWidth.setW(BigInteger.valueOf(10000));
+        templateRow.getContent().add(new JAXBElement<Tc>(jaxbElement.getName(), Tc.class, lastCell));
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {

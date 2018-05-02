@@ -9,8 +9,7 @@ public enum EctsGrade {
     D(4, "Задовільно", "Satisfactory", 64, 73),
     E(5, "Задовільно", "Satisfactory", 60, 63),
     FX(6, "Незадовільно", "Fail", 35, 59),
-    F(7, "Незадовільно", "Fail", 0, 34),
-    P(8,"Зараховано","Satisfactory",0,100);
+    F(7, "Незадовільно", "Fail", 0, 34);
 
     private final int id;
     private final String nameUkr;

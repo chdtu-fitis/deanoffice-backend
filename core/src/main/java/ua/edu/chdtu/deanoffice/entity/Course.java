@@ -6,10 +6,9 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,4 +23,7 @@ public class Course extends BaseEntity {
     private Integer hours;
     private Integer hoursPerCredit;
     private BigDecimal credits;
+
+//    @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY)
+//    private List<CourseForGroup> coursesForGroup;
 }
