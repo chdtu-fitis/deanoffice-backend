@@ -23,7 +23,7 @@ public class KnowledgeControlController {
         this.knowledgeControlService = knowledgeControlService;
     }
 
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity getAllKnowledgeControls() {
         List<KnowledgeControl> knowledgeControlDTOs = this.knowledgeControlService.getAllKnowledgeControls();
         return ResponseEntity.ok(map(knowledgeControlDTOs, KnowledgeControlDTO.class));

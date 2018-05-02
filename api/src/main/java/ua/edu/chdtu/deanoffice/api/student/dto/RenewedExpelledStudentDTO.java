@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student.dto;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;

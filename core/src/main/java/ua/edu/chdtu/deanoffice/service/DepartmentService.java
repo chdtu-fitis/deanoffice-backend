@@ -14,6 +14,7 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
+
     public Department getById(Integer departmentId) {
         return departmentRepository.findOne(departmentId);
     }
