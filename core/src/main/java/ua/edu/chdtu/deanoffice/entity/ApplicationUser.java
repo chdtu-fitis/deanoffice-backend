@@ -10,7 +10,7 @@ import javax.persistence.ManyToOne;
 
 @Entity
 @Getter
-@Setter
+@Setter // Насколько уместный в данном классе сеттер?
 public class ApplicationUser {
 
     @Id
