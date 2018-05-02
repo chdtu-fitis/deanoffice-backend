@@ -138,15 +138,22 @@ public class SpecializationController {
     @DeleteMapping("/{specialization_id}")
     public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") Integer specializationId) {
         Specialization specialization = specializationService.getById(specializationId);
-        if (!specialization.isActive()) {
-            return handleException("Specialization [id = " + specializationId + "] already inactive", HttpStatus.NOT_FOUND);
+        if (specialization == null) {
+            return ExceptionHandlerAdvice.handleException(
+                    "Not found specialization [" + specializationId +"]",
+                    SpecializationController.class,
+                    HttpStatus.NOT_FOUND
+            );
         }
-        specialization.setActive(false);
-        specializationService.save(specialization);
-        return ResponseEntity.noContent().build();
-    }
-
-    private ResponseEntity handleException(String message, HttpStatus httpStatus) {
-        return ExceptionHandlerAdvice.handleException(message, SpecializationController.class, httpStatus);
+        try {
+            if (!specialization.isActive()) {
+                throwException("Specialization [id = " + specializationId + "] already inactive");
+            }
+            specialization.setActive(false);
+            specializationService.save(specialization);
+            return ResponseEntity.noContent().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 }

@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +26,7 @@ import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
 
@@ -136,6 +139,28 @@ public class GroupController {
             studentGroupService.save(studentGroup);
 
             return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @DeleteMapping("/groups/{group_id}")
+    public ResponseEntity deleteGroup(@PathVariable("group_id") Integer groupId) {
+        StudentGroup studentGroup = studentGroupService.getById(groupId);
+        if (studentGroup == null) {
+            return ExceptionHandlerAdvice.handleException(
+                    "Not found group [" + groupId +"]",
+                    GroupController.class,
+                    HttpStatus.NOT_FOUND
+            );
+        }
+        try {
+            if (!studentGroup.isActive()) {
+                throwException("Group [" + groupId +"] already inactive");
+            }
+            studentGroup.setActive(false);
+            studentGroupService.save(studentGroup);
+            return ResponseEntity.noContent().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
