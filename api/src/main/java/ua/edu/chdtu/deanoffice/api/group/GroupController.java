@@ -18,7 +18,6 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
@@ -119,7 +118,7 @@ public class GroupController {
     @GetMapping("/groups/{group_id}")
     public ResponseEntity getGroupById(@PathVariable(value = "group_id") Integer groupId) {
         StudentGroup studentGroup = studentGroupService.getById(groupId);
-        return ResponseEntity.ok(Parser.parse(studentGroup, StudentGroupDTO.class));
+        return ResponseEntity.ok(Mapper.map(studentGroup, StudentGroupDTO.class));
     }
 
     @PutMapping("/groups")
@@ -129,6 +128,9 @@ public class GroupController {
                 throwException("Group`s id must not be null");
             } else if (studentGroupDTO.getId().equals(0)) {
                 throwException("Group`s id must not be null");
+            }
+            if (!studentGroupDTO.isActive()) {
+                throwException("You can not update inactive group");
             }
             StudentGroup studentGroup = create(studentGroupDTO);
             studentGroupService.save(studentGroup);
