@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
 
+
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
@@ -33,7 +34,7 @@ public class SpecializationController {
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
-            ) {
+    ) {
         List<Specialization> specializations = specializationService.getAllByActive(active, user.getFaculty().getId());
         return ResponseEntity.ok(map(specializations, SpecializationDTO.class));
     }

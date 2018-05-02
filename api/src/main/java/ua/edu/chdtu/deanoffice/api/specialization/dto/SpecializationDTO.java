@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 
 import java.math.BigDecimal;
 
@@ -18,7 +19,7 @@ public class SpecializationDTO {
     private boolean active;
 
     @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
-    private NamedDTO speciality;
+    private SpecialityDTO speciality;
     @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private NamedDTO degree;
     @JsonView(SpecializationView.Extend.class)
