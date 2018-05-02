@@ -21,7 +21,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.security.Principal;
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class GroupController {
@@ -36,7 +36,7 @@ public class GroupController {
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId) {
         List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
-        return ResponseEntity.ok(parse(groups, StudentGroupShortDTO.class));
+        return ResponseEntity.ok(map(groups, StudentGroupShortDTO.class));
     }
 
     @GetMapping("/groups/filter")
@@ -46,13 +46,13 @@ public class GroupController {
             @RequestParam Integer year
     ) {
         List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year);
-        return ResponseEntity.ok(parse(groups, StudentGroupDTO.class));
+        return ResponseEntity.ok(map(groups, StudentGroupDTO.class));
     }
 
     @GetMapping("courses/{courseId}/groups")
     public ResponseEntity getGroupsByCourse(@PathVariable int courseId) {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId);
-        return ResponseEntity.ok(parse(studentGroups, NamedDTO.class));
+        return ResponseEntity.ok(map(studentGroups, NamedDTO.class));
     }
 
     @GetMapping("/groups")

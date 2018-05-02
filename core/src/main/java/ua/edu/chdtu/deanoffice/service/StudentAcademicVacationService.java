@@ -43,7 +43,7 @@ public class StudentAcademicVacationService {
     }
 
     public List<StudentAcademicVacation> getAll(Integer facultyId) {
-        return studentAcademicVacationRepository.findAllByFaculty(facultyId);
+        return studentAcademicVacationRepository.findAllInactive(facultyId);
     }
 
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
