@@ -10,16 +10,20 @@ import ua.edu.chdtu.deanoffice.service.TeacherService;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class TeacherController {
+    private final TeacherService teacherService;
+
     @Autowired
-    TeacherService teacherService;
+    public TeacherController(TeacherService teacherService) {
+        this.teacherService = teacherService;
+    }
 
     @GetMapping("/teachers")
     public ResponseEntity getAllTeachers(){
         List<Teacher> teachers = teacherService.getTeachers();
-        return ResponseEntity.ok(parse(teachers, PersonFullNameDTO.class));
+        return ResponseEntity.ok(map(teachers, PersonFullNameDTO.class));
     }
 }
