@@ -7,8 +7,6 @@ import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
-
 @Service
 public class StudentGroupService {
 

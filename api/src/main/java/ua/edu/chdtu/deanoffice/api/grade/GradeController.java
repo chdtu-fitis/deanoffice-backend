@@ -40,7 +40,7 @@ public class GradeController {
         this.courseForGroupService = courseForGroupService;
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity<List<GradeDTO>> putGrades(@RequestBody List<Grade> grades) {
         this.gradeService.insertGrades(grades);
         return ResponseEntity.ok(new ArrayList<>());

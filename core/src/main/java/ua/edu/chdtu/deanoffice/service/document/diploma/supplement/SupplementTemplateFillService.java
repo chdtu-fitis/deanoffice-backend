@@ -115,7 +115,6 @@ public class SupplementTemplateFillService {
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
-//        result.put("RequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("QualificationUkr", TemplateUtil.getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", TemplateUtil.getValueSafely(specialization.getQualificationEng()));

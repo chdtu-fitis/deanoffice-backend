@@ -94,6 +94,4 @@ public class GradePercentageReportService {
         }
         tempTable.getContent().remove(templateRow);
     }
-
-
 }

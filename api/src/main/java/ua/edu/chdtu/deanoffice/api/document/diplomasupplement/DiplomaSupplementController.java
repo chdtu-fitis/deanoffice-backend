@@ -25,7 +25,6 @@ public class DiplomaSupplementController extends DocumentResponseController {
         this.diplomaSupplementService = diplomaSupplementService;
     }
 
-    //@ExceptionHandler({IOException.class, Docx4JException.class})
     @GetMapping("/degrees/{studentDegreeId}/docx")
     public ResponseEntity<Resource> generateDocxForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {

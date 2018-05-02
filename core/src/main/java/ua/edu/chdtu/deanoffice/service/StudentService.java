@@ -2,12 +2,10 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 

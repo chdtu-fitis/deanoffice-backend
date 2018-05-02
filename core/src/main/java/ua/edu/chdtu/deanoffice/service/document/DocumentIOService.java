@@ -75,7 +75,7 @@ public class DocumentIOService {
     }
 
     public String cleanFileName(String fileName) {
-        String result = new String(fileName);
+        String result = fileName;
         result = result.replaceAll(" +", " ");
         result = result.replaceAll("[^a-zA-Z0-9_]+", "");
         return result;

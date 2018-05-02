@@ -9,8 +9,12 @@ import java.util.List;
 
 @Service
 public class CourseNameService {
+    private final CourseNameRepository courseNameRepository;
+
     @Autowired
-    private CourseNameRepository courseNameRepository;
+    public CourseNameService(CourseNameRepository courseNameRepository) {
+        this.courseNameRepository = courseNameRepository;
+    }
 
     public List<CourseName> getCourseNames(){
         return this.courseNameRepository.findAll();

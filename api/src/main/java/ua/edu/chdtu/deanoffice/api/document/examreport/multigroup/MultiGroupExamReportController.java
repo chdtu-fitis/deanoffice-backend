@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.MultiGroupExamReportService;
 
 import java.io.File;
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice.handleException;
 
 @RestController
 @RequestMapping("/documents/examreport/courses/")
@@ -25,7 +26,7 @@ public class MultiGroupExamReportController extends DocumentResponseController {
         this.multiGroupExamReportService = multiGroupExamReportService;
     }
 
-    @GetMapping(path = "{courseId}/docx")
+    @GetMapping("{courseId}/docx")
     public ResponseEntity<Resource> generateDocxForSingleCourse(
             @RequestParam List<Integer> groupIds,
             @PathVariable Integer courseId) {
@@ -33,11 +34,11 @@ public class MultiGroupExamReportController extends DocumentResponseController {
             File examReport = multiGroupExamReportService.prepareReport(groupIds, courseId, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
-            return ExceptionHandlerAdvice.handleException(e, MultiGroupExamReportController.class);
+            return handleException(e, MultiGroupExamReportController.class);
         }
     }
 
-    @PostMapping(path = "{courseId}/pdf")
+    @PostMapping("{courseId}/pdf")
     public ResponseEntity<Resource> generateForSingleCourse(
             @RequestParam List<Integer> groupIds,
             @PathVariable Integer courseId
@@ -46,7 +47,7 @@ public class MultiGroupExamReportController extends DocumentResponseController {
             File examReport = multiGroupExamReportService.prepareReport(groupIds, courseId, FileFormatEnum.PDF);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
-            return ExceptionHandlerAdvice.handleException(e, MultiGroupExamReportController.class);
+            return handleException(e, MultiGroupExamReportController.class);
         }
 
     }

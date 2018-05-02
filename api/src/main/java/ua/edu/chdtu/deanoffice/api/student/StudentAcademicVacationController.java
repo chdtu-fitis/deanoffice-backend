@@ -55,8 +55,8 @@ public class StudentAcademicVacationController {
         this.studentUtil = studentUtil;
     }
 
+    @PostMapping
     @JsonView(StudentView.AcademicVacation.class)
-    @PostMapping("")
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
         try {
             if (studentUtil.studentDegreeIsInactive(studentAcademicVacationDTO.getStudentDegreeId())) {
@@ -89,8 +89,8 @@ public class StudentAcademicVacationController {
         return studentAcademicVacation;
     }
 
+    @GetMapping
     @JsonView(StudentView.AcademicVacation.class)
-    @GetMapping("")
     public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user) {
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId());
         return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));

@@ -9,8 +9,12 @@ import java.util.List;
 
 @Service
 public class TeacherService {
+    private final TeacherRepository teacherRepository;
+
     @Autowired
-    private TeacherRepository teacherRepository;
+    public TeacherService(TeacherRepository teacherRepository) {
+        this.teacherRepository = teacherRepository;
+    }
 
     public Teacher getTeacher(int teacherId) {
         return teacherRepository.findOne(teacherId);

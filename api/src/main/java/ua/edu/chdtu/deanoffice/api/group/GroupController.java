@@ -26,7 +26,6 @@ import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
 
