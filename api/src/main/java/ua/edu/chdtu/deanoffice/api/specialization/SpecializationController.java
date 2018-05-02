@@ -54,7 +54,7 @@ public class SpecializationController {
     }
 
     @GetMapping
-    @JsonView(SpecializationView.Extend.class)
+    @JsonView(SpecializationView.Extended.class)
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
@@ -63,18 +63,19 @@ public class SpecializationController {
         return ResponseEntity.ok(Mapper.map(specializations, SpecializationDTO.class));
     }
 
-    @JsonView(SpecializationView.Extended.class)
     @PostMapping
+    @JsonView(SpecializationView.Extended.class)
     public ResponseEntity createSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
             @CurrentUser ApplicationUser user
     ) {
         try {
             Specialization specialization = create(specializationDTO, user.getFaculty());
+            specialization.setActive(true);
             specialization = specializationService.save(specialization);
 
             URI location = getNewResourceLocation(specialization.getId());
-            return ResponseEntity.created(location).body(specialization);
+            return ResponseEntity.created(location).body(Mapper.map(specialization, SpecializationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -111,19 +112,24 @@ public class SpecializationController {
     }
 
     @JsonView(SpecializationView.Extended.class)
-    @PutMapping("{specialization_id}")
+    @PutMapping
     public ResponseEntity updateSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
-            @PathVariable("specialization_id") Integer specializationId,
             @CurrentUser ApplicationUser user
     ) {
         try {
+            if (!specializationDTO.isActive()) {
+                throwException("You can not update inactive specialization");
+            }
             Specialization specialization = create(specializationDTO, user.getFaculty());
-            specialization.setId(specializationId);
             specializationService.save(specialization);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private void throwException(String message) throws Exception {
+        throw new Exception(message);
     }
 }
