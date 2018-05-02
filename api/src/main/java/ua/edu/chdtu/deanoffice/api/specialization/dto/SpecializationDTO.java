@@ -15,24 +15,25 @@ public class SpecializationDTO {
     private int id;
     @JsonView(SpecializationView.Basic.class)
     private String name;
+    @JsonView(SpecializationView.Extended.class)
     private String nameEng;
+    @JsonView(SpecializationView.Extended.class)
     private boolean active;
-
     @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private SpecialityDTO speciality;
     @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private NamedDTO degree;
-    @JsonView(SpecializationView.Extend.class)
+    @JsonView(SpecializationView.Extended.class)
     private NamedDTO department;
     private String qualification;
     private String qualificationEng;
-    @JsonView(SpecializationView.Extend.class)
+    @JsonView(SpecializationView.Extended.class)
     private BigDecimal paymentFulltime;
-    @JsonView(SpecializationView.Extend.class)
+    @JsonView(SpecializationView.Extended.class)
     private BigDecimal paymentExtramural;
-    @JsonView(SpecializationView.Extend.class)
+    @JsonView(SpecializationView.Extended.class)
     private String educationalProgramHeadName;
-    @JsonView(SpecializationView.Extend.class)
+    @JsonView(SpecializationView.Extended.class)
     private String educationalProgramHeadNameEng;
     private String educationalProgramHeadInfo;
     private String educationalProgramHeadInfoEng;
@@ -42,4 +43,8 @@ public class SpecializationDTO {
     private String applyingKnowledgeAndUnderstandingOutcomesEng;
     private String makingJudgementsOutcomes;
     private String makingJudgementsOutcomesEng;
+
+    private Integer specialityId;
+    private Integer degreeId;
+    private Integer departmentId;
 }

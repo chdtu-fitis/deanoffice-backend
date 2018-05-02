@@ -19,4 +19,12 @@ public class SpecializationService {
     public List<Specialization> getAllByActive(boolean active, int facultyId) {
         return specializationRepository.findAllByActive(active, facultyId);
     }
+
+    public Specialization save(Specialization specialization) {
+        return specializationRepository.save(specialization);
+    }
+
+    public Specialization getById(Integer specializationId) {
+        return specializationRepository.findOne(specializationId);
+    }
 }

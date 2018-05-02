@@ -23,4 +23,8 @@ public class SpecialityService {
     public List<Speciality> getAll(int facultyId) {
         return specialityRepository.findAll(facultyId);
     }
+
+    public Speciality getById(Integer specialityId) {
+        return specialityRepository.findOne(specialityId);
+    }
 }
