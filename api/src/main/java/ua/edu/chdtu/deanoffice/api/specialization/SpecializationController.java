@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.specialization;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
@@ -26,7 +28,8 @@ public class SpecializationController {
         this.specializationService = specializationService;
     }
 
-    @GetMapping("")
+    @GetMapping
+    @JsonView(SpecializationView.Extend.class)
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
