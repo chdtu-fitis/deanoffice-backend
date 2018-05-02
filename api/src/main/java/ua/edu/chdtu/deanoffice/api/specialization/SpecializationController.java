@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
@@ -29,10 +30,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.net.URI;
 import java.util.List;
 
-
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.strictParse;
 
 @RestController
 @RequestMapping("/specializations")
@@ -55,14 +53,14 @@ public class SpecializationController {
         this.degreeService = degreeService;
     }
 
-    @JsonView(SpecializationView.Extended.class)
     @GetMapping
+    @JsonView(SpecializationView.Extend.class)
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
-            ) {
+    ) {
         List<Specialization> specializations = specializationService.getAllByActive(active, user.getFaculty().getId());
-        return ResponseEntity.ok(parse(specializations, SpecializationDTO.class));
+        return ResponseEntity.ok(Mapper.map(specializations, SpecializationDTO.class));
     }
 
     @JsonView(SpecializationView.Extended.class)
@@ -83,7 +81,7 @@ public class SpecializationController {
     }
 
     private Specialization create(SpecializationDTO specializationDTO, Faculty faculty) {
-        Specialization specialization = (Specialization) strictParse(specializationDTO, Specialization.class);
+        Specialization specialization = (Specialization) Mapper.strictMap(specializationDTO, Specialization.class);
 
         Speciality speciality = this.specialityService.getById(specializationDTO.getSpecialityId());
         specialization.setSpeciality(speciality);
@@ -109,7 +107,7 @@ public class SpecializationController {
             @PathVariable("specialization_id") Integer specializationId
     ) {
         Specialization specialization = specializationService.getById(specializationId);
-        return ResponseEntity.ok(parse(specialization, SpecializationDTO.class));
+        return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
     }
 
     @JsonView(SpecializationView.Extended.class)
