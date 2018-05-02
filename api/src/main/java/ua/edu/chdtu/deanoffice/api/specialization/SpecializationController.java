@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.api.specialization;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -131,5 +133,20 @@ public class SpecializationController {
 
     private void throwException(String message) throws Exception {
         throw new Exception(message);
+    }
+
+    @DeleteMapping("/{specialization_id}")
+    public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") Integer specializationId) {
+        Specialization specialization = specializationService.getById(specializationId);
+        if (!specialization.isActive()) {
+            return handleException("Specialization [id = " + specializationId + "] already inactive", HttpStatus.NOT_FOUND);
+        }
+        specialization.setActive(false);
+        specializationService.save(specialization);
+        return ResponseEntity.noContent().build();
+    }
+
+    private ResponseEntity handleException(String message, HttpStatus httpStatus) {
+        return ExceptionHandlerAdvice.handleException(message, SpecializationController.class, httpStatus);
     }
 }
