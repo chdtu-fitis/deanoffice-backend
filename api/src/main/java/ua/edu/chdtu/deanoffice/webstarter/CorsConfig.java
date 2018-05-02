@@ -15,8 +15,8 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
-                        .allowedOrigins("http://localhost:4200")
-//                        .allowedOrigins("http://195.95.232.162")
+                        .allowedOrigins("http://localhost:4200","http://is.chdtu.edu.ua:4200")
+//                        .allowedOrigins("http://is.chdtu.edu.ua:4200")
                         .allowedHeaders("*");
             }
         };
