@@ -1,10 +1,8 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
@@ -16,34 +14,33 @@ public class StudentGroupService {
 
     private final StudentGroupRepository studentGroupRepository;
     private final CurrentYearRepository currentYearRepository;
-    private final StudentDegreeRepository studentDegreeRepository;
 
     public StudentGroupService(
             StudentGroupRepository studentGroupRepository,
-            CurrentYearRepository currentYearRepository,
-            StudentDegreeRepository studentDegreeRepository
+            CurrentYearRepository currentYearRepository
     ) {
         this.studentGroupRepository = studentGroupRepository;
         this.currentYearRepository = currentYearRepository;
-        this.studentDegreeRepository = studentDegreeRepository;
     }
 
     public StudentGroup getById(Integer studentGroupId) {
         return this.studentGroupRepository.findOne(studentGroupId);
     }
 
-    public List<StudentGroup> getGroupsByCourse(int courseId) {
-        return studentGroupRepository.findAllByCourse(courseId);
+    public List<StudentGroup> getGroupsByCourse(int courseId, int facultyId) {
+        return studentGroupRepository.findAllByCourse(courseId, facultyId);
     }
 
-    public List<StudentGroup> getGraduateGroups(Integer degreeId) {
-        Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return studentGroupRepository.findGraduateByDegree(degreeId, currYear);
+    public List<StudentGroup> getGraduateGroups(Integer degreeId, int facultyId) {
+        return studentGroupRepository.findGraduateByDegree(degreeId, getCurrentYear(), facultyId);
     }
 
-    public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year) {
-        Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, currYear);
+    private int getCurrentYear() {
+        return currentYearRepository.findOne(1).getCurrYear();
+    }
+
+    public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year, int facultyId) {
+        return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, getCurrentYear(), facultyId);
     }
 
     public List<StudentGroup> getAllByActive(boolean onlyActive, int facultyId) {
@@ -51,5 +48,9 @@ public class StudentGroupService {
             return this.studentGroupRepository.findAllActiveByFaculty(facultyId);
         }
         return this.studentGroupRepository.findAllByFaculty(facultyId);
+    }
+
+    public StudentGroup save(StudentGroup studentGroup) {
+        return studentGroupRepository.save(studentGroup);
     }
 }
