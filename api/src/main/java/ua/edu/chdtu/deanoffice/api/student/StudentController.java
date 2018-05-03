@@ -64,7 +64,7 @@ public class StudentController {
         return ResponseEntity.ok(map(student, StudentDTO.class));
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity updateStudent(@RequestBody Student student) {
         try {
             studentService.save(student);

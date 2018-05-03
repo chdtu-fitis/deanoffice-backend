@@ -6,7 +6,6 @@ import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.Date;
 

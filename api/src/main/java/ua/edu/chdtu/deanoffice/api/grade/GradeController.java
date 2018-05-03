@@ -2,12 +2,12 @@ package ua.edu.chdtu.deanoffice.api.grade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
-@Controller
+@RestController
 @RequestMapping("/grades")
 public class GradeController {
     private GradeService gradeService;
@@ -40,7 +40,7 @@ public class GradeController {
         this.courseForGroupService = courseForGroupService;
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity<List<GradeDTO>> putGrades(@RequestBody List<Grade> grades) {
         this.gradeService.insertGrades(grades);
         return ResponseEntity.ok(new ArrayList<>());
