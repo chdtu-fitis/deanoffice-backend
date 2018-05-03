@@ -25,7 +25,7 @@ public class SpecialityController {
         this.specialityService = specialityService;
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity getAllSpecialities(@CurrentUser ApplicationUser user) {
         List<Speciality> specialities = specialityService.getAll(user.getFaculty().getId());
         return ResponseEntity.ok(mapToSpecialityDTO(specialities));

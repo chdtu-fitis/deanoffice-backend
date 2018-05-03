@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 
@@ -25,7 +24,7 @@ public class DegreeController {
         this.degreeService = degreeService;
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity getDegrees() {
         List<Degree> degrees = degreeService.getDegrees();
         return ResponseEntity.ok(map(degrees, NamedDTO.class));

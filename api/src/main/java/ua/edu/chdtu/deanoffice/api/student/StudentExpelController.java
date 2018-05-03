@@ -58,7 +58,7 @@ public class StudentExpelController {
 
 
     @JsonView(StudentView.Expel.class)
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
         try {
             List<Integer> inactiveStudents = studentExpelService.isExpelled(studentExpelDTO.getStudentDegreeIds());
@@ -106,7 +106,7 @@ public class StudentExpelController {
         return studentExpel;
     }
 
-    @GetMapping("")
+    @GetMapping
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllExpelledStudents() {
         List<StudentExpel> studentExpels = studentExpelService.getAllExpelledStudents(Constants.FACULTY_ID);
