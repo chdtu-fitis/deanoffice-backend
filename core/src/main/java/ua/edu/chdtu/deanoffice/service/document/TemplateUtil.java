@@ -193,6 +193,11 @@ public class TemplateUtil {
         templateRow.getContent().add(new JAXBElement<Tc>(jaxbElement.getName(), Tc.class, result));
     }
 
+    public static void copyTable(WordprocessingMLPackage template, int tableIndex){
+        Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(tableIndex);
+        template.getMainDocumentPart().addObject(XmlUtils.deepCopy(table));
+    }
+
     private static void fixRow(Tr row) {
         List<Object> cells = row.getContent();
         JAXBElement jaxbElement = (JAXBElement) (cells.get(cells.size() - 1));

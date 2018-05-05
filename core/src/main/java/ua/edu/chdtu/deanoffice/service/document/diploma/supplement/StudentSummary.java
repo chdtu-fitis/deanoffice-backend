@@ -30,7 +30,7 @@ public class StudentSummary {
         combineMultipleSemesterCourseGrades();
     }
 
-    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
+    protected static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
         return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
     }
 
@@ -116,12 +116,11 @@ public class StudentSummary {
             }
         }
         resultingGrade.getCourse().setHours(hoursSum);
-//        resultingGrade.getCourse().setSemester(grades.get(0).getCourse().getSemester());
         resultingGrade.getCourse().setCredits(new BigDecimal(hoursSum / Constants.HOURS_PER_CREDIT));
         return resultingGrade;
     }
 
-    private Grade combineEqualGrades(List<Grade> grades) {
+    protected Grade combineEqualGrades(List<Grade> grades) {
         Grade resultingGrade = new Grade();
         resultingGrade.setCourse(grades.get(0).getCourse());
         resultingGrade.setEcts(grades.get(0).getEcts());

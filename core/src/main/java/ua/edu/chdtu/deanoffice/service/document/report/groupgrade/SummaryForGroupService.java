@@ -16,7 +16,6 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import javax.transaction.Transactional;
@@ -26,7 +25,6 @@ import java.text.Collator;
 import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
-import static ua.edu.chdtu.deanoffice.util.GradeUtil.sortGradesByCourseNameUkr;
 
 @Service
 @Transactional
@@ -34,15 +32,10 @@ public class SummaryForGroupService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesTable.docx";
+    private static final int MAXIMUM_STUDENTS_IN_TABLE = 15;
 
     @Autowired
     private DocumentIOService documentIOService;
-
-    @Autowired
-    private SummaryForGroupService summaryForGroupService;
-
-    @Autowired
-    private StudentDegreeService studentDegreeService;
 
     @Autowired
     private StudentGroupService studentGroupService;
@@ -59,7 +52,6 @@ public class SummaryForGroupService {
         List<StudentSummaryForGroup> studentsSummaries = new ArrayList<>();
         StudentGroup group = studentGroupService.getById(groupId);
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
-        studentDegrees.removeIf(student -> !student.isActive());
         studentDegrees.sort((sd1, sd2) -> {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
             return ukrainianCollator.compare(sd1.getStudent().getSurname(), sd2.getStudent().getSurname());
@@ -70,77 +62,60 @@ public class SummaryForGroupService {
                 }
         );
 
+        List<List<StudentSummaryForGroup>> dividedStudentSummaries = divideStudentSummaries(studentsSummaries);
 
-        WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsSummaries.subList(0, 14));
+        WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
+
+        for (int i = 0; i < dividedStudentSummaries.size() - 1; i++) {
+            copyTable(template, 0);
+        }
+
+        for (int i = 0; i < dividedStudentSummaries.size(); i++) {
+            Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(i);
+            prepareTable(table, dividedStudentSummaries.get(i));
+        }
+
         String fileName = LanguageUtil.transliterate(group.getName());
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
+        return documentIOService.saveDocumentToTemp(template, fileName, format);
     }
 
 
-    public WordprocessingMLPackage fillTemplate(String templateFilepath, List<StudentSummaryForGroup> studentSummaries)
-            throws IOException, Docx4JException {
-        WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
-        fillTableWithGrades(template, studentSummaries);
-//        Map<String, String> commonDict = getReplacementsDictionary(studentSummaries);
-//        replaceTextPlaceholdersInTemplate(template, commonDict);
-//        replacePlaceholdersInFooter(template, commonDict);
-        prepareTable(template, studentSummaries);
-        return template;
+    private List<List<StudentSummaryForGroup>> divideStudentSummaries(List<StudentSummaryForGroup> studentSummaries) {
+        List<List<StudentSummaryForGroup>> result = new ArrayList<>();
+        int partSize = MAXIMUM_STUDENTS_IN_TABLE;
+        for (int i = 0; i < studentSummaries.size(); i += partSize) {
+            result.add(studentSummaries.subList(i,
+                    Math.min(i + partSize, studentSummaries.size())));
+        }
+        return result;
     }
 
-    private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentSummaryForGroup> studentSummaries) {
-
-
-    }
-
-    private void prepareTable(WordprocessingMLPackage template, List<StudentSummaryForGroup> studentSummaries) {
-        Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+    private void prepareTable(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
         prepareTableStructure(table, studentSummaries);
+        fillData(table, studentSummaries);
     }
 
     private void prepareTableStructure(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         SummaryForGroupTableDetails summaryForGroupTableDetails = new SummaryForGroupTableDetails(studentSummaries);
         tableRows.forEach((tableRow) -> {
-//            studentSummaries.forEach((studentSummaryForGroup) -> {
-//                cloneLastCellInRow(tableRow);
-//            });
             for (int i = 0; i < studentSummaries.size() - 1; i++) {
                 cloneLastCellInRow(tableRow);
             }
         });
-//        studentSummaries.get(0).getGrades().forEach((grades)->{
-//
-//        });
-//        List<List<Grade>> gradesForFirstPart = new ArrayList<>(studentSummaries.get(0).getGrades().subList(0, 1));
-//        gradesForFirstPart.forEach(grades -> {
-////            int index = 0;
-////            HashMap dictionary = new HashMap();
-////            dictionary.put("subject-normal", "Test");
-//            grades.forEach((grade) -> {
-////                addRowToTable(table, tableRows.get(3), index, dictionary);
-//                Tr firstGradeRow = tableRows.get(3);
-//                Tr newRow = XmlUtils.deepCopy(firstGradeRow);
-//                table.getContent().add(3, newRow);
-//            });
-//        });
-        int numberOfRowsWithGeneralSubjects = studentSummaries.get(0).getGrades().get(0).size()
-                + studentSummaries.get(0).getGrades().get(1).size()
-                + studentSummaries.get(0).getGrades().get(3).size();
-        int numberOfRowsWithPractices = studentSummaries.get(0).getGrades().get(2).size();
-        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithDiplomaGradePosition(), numberOfRowsWithGeneralSubjects - 1);
-        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithPracticesStarts(), numberOfRowsWithPractices - 1);
-        fillData(table, studentSummaries);
-
-
+        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithDiplomaGradePosition(),
+                summaryForGroupTableDetails.getRowWithGeneralGradesEnds() - summaryForGroupTableDetails.getRowWithDiplomaGradePosition());
+        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithCourseWorksStarts(),
+                summaryForGroupTableDetails.getRowWithCourseWorksEnds() - summaryForGroupTableDetails.getRowWithCourseWorksStarts());
+        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithPracticesStarts(), summaryForGroupTableDetails.getRowWithPracticesEnds()
+                - summaryForGroupTableDetails.getRowWithPracticesStarts());
     }
 
     private void fillData(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         SummaryForGroupTableDetails summaryForGroupTableDetails = new SummaryForGroupTableDetails(studentSummaries);
         List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-        generalGrades.addAll(studentSummaries.get(0).getGrades().get(1));
-        sortGradesByCourseNameUkr(generalGrades);
+        List<Grade> courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
         List<Grade> practices = new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
         List<Grade> diplomaGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
         Tr rowWithStudentNames = tableRows.get(summaryForGroupTableDetails.getRowWithNamesPosition());
@@ -148,7 +123,10 @@ public class SummaryForGroupService {
         Tr rowWithAverageGrade = tableRows.get(summaryForGroupTableDetails.getRowWithAverageGradePosition());
         Tr rowWithDiplomaGrade = tableRows.get(summaryForGroupTableDetails.getRowWithDiplomaGradePosition());
         List<Tr> rowsWithGeneralGrades = new ArrayList<>(
-                tableRows.subList(summaryForGroupTableDetails.getRowWithGeneralGradesStarts(), summaryForGroupTableDetails.getRowWithGeneralGradesEnds()+1)
+                tableRows.subList(summaryForGroupTableDetails.getRowWithGeneralGradesStarts(), summaryForGroupTableDetails.getRowWithGeneralGradesEnds() + 1)
+        );
+        List<Tr> rowsWithCourseWorks = new ArrayList<>(
+                tableRows.subList(summaryForGroupTableDetails.getRowWithCourseWorksStarts(), summaryForGroupTableDetails.getRowWithCourseWorksEnds() + 1)
         );
         List<Tr> rowsWithPractices = new ArrayList<>(
                 tableRows.subList(summaryForGroupTableDetails.getRowWithPracticesStarts(), summaryForGroupTableDetails.getRowWithPracticesEnds() + 1));
@@ -157,25 +135,29 @@ public class SummaryForGroupService {
 
         int cellNumberGradesStartWith = 2;
 
-//        for(int i=0;i<generalGrades.size();i++){
-//            List<Grade> currentGrades=generalGrades.get(i);
-//            Tr currentRow=rowsWithGeneralGrades.get(i);
-//            for()
-//        }
-        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size()+practices.size()+1));
-        replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0)));
-
+        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size() + practices.size() + 1));
+        if (diplomaGrades.size() > 0) {
+            replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0)));
+        }
 
         for (int i = 0; i < generalGrades.size(); i++) {
-            replaceInCell(rowsWithGeneralGrades.get(i), 0, getNumberedDictionary(i));
+            replaceInCell(rowsWithGeneralGrades.get(i), 0, getNumberedDictionary(i+1));
         }
 
         for (int i = 0; i < generalGrades.size(); i++) {
             replaceInCell(rowsWithGeneralGrades.get(i), 1, getCourseDictionary(generalGrades.get(i)));
         }
 
+        for (int i = 0; i < courseWorks.size(); i++) {
+            replaceInCell(rowsWithCourseWorks.get(i), 0, getNumberedDictionary(generalGrades.size() + i+1));
+        }
+
+        for (int i = 0; i < courseWorks.size(); i++) {
+            replaceInCell(rowsWithCourseWorks.get(i), 1, getCourseDictionary(courseWorks.get(i)));
+        }
+
         for (int i = 0; i < practices.size(); i++) {
-            replaceInCell(rowsWithPractices.get(i), 0, getNumberedDictionary(generalGrades.size() + 1));
+            replaceInCell(rowsWithPractices.get(i), 0, getNumberedDictionary(generalGrades.size() + courseWorks.size() + i+1));
         }
 
         for (int i = 0; i < practices.size(); i++) {
@@ -186,16 +168,22 @@ public class SummaryForGroupService {
         for (int studentNumber = 0; studentNumber < studentSummaries.size(); studentNumber++) {
             StudentSummaryForGroup studentSummary = studentSummaries.get(studentNumber);
             generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-            generalGrades.addAll(studentSummaries.get(studentNumber).getGrades().get(1));
+            courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
             practices = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(2));
             diplomaGrades = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(3));
 
             replaceInCell(rowWithStudentNames, cellNumberGradesStartWith + studentNumber, getStudentInitialsDictionary(studentSummary));
 
-            replaceInCell(rowWithDiplomaGrade, cellNumberGradesStartWith+studentNumber, getGradeDictionary(diplomaGrades.get(0)));
+            if (diplomaGrades.size() > 0) {
+                replaceInCell(rowWithDiplomaGrade, cellNumberGradesStartWith + studentNumber, getGradeDictionary(diplomaGrades.get(0)));
+            }
 
             for (int i = 0; i < generalGrades.size(); i++) {
                 replaceInCell(rowsWithGeneralGrades.get(i), cellNumberGradesStartWith + studentNumber, getGradeDictionary(generalGrades.get(i)));
+            }
+
+            for (int i = 0; i < courseWorks.size(); i++) {
+                replaceInCell(rowsWithCourseWorks.get(i), cellNumberGradesStartWith + studentNumber, getGradeDictionary(courseWorks.get(i)));
             }
 
             for (int i = 0; i < practices.size(); i++) {
