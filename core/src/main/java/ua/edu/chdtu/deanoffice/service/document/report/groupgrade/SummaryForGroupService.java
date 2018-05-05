@@ -47,7 +47,7 @@ public class SummaryForGroupService {
 
     }
 
-    public File formDocument(Integer groupId, FileFormatEnum format)
+    public File formDocument(Integer groupId)
             throws Docx4JException, IOException {
         List<StudentSummaryForGroup> studentsSummaries = new ArrayList<>();
         StudentGroup group = studentGroupService.getById(groupId);
@@ -76,7 +76,7 @@ public class SummaryForGroupService {
         }
 
         String fileName = LanguageUtil.transliterate(group.getName());
-        return documentIOService.saveDocumentToTemp(template, fileName, format);
+        return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
     }
 
 
