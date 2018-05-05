@@ -61,7 +61,7 @@ public class StudentController {
         return ResponseEntity.ok(parse(student, StudentDTO.class));
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity updateStudent(@RequestBody Student student) {
         try {
             studentService.update(student);
@@ -72,23 +72,19 @@ public class StudentController {
     }
 
     @PutMapping("/{student_id}/photo")
-    public ResponseEntity uploadPhotoForStudent(@RequestBody byte[] photo, @PathVariable(value = "student_id") int studentId) {
+    public ResponseEntity uploadPhotoForStudent(@RequestBody String photoUrl, @PathVariable(value = "student_id") int studentId) {
         try {
-            studentService.addPhoto(photo, studentId);
+            studentService.addPhoto(photoUrl, studentId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    @GetMapping("/{id}/photo")
-    public ResponseEntity getStudentPhoto(@PathVariable(value = "id") Integer id) {
+    @GetMapping("/{student_id}/photo")
+    public ResponseEntity getStudentPhoto(@PathVariable(value = "student_id") Integer id) {
         Student student = studentService.findById(id);
-        if (student == null) {
-            return ResponseEntity.notFound().eTag("Not found student with id " + id).build();
-        }
-        byte[] photo = student.getPhoto();
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
+        return ResponseEntity.ok().body(student.getPhotoUrl());
     }
 
     private ResponseEntity handleException(Exception exception) {

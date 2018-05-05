@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Person;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -38,8 +37,7 @@ public class Student extends Person {
     private String motherPhone;
     private String motherInfo;
     private String notes;
-    @Type(type = "org.hibernate.type.BinaryType")
-    private byte[] photo;
+    private String photoUrl;
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentDegree> degrees = new HashSet<>();
 }

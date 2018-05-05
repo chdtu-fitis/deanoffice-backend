@@ -43,9 +43,9 @@ public class StudentService {
         studentRepository.save(student);
     }
 
-    public void addPhoto(byte[] photo, int studentId) {
+    public void addPhoto(String photoUrl, int studentId) {
         Student student = studentRepository.getOne(studentId);
-        student.setPhoto(photo);
+        student.setPhotoUrl(photoUrl);
         studentRepository.save(student);
     }
 }

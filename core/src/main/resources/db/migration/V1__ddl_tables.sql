@@ -661,7 +661,7 @@ CREATE TABLE student (
     name_eng character varying(20),
     notes character varying(150),
     patronimic_eng character varying(20),
-    photo bytea,
+    photo_url character varying(250),
     registration_address character varying(100),
     school character varying(100),
     surname_eng character varying(20),
