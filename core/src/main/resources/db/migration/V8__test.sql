@@ -1,1 +1,0 @@
-ALTER TABLE course ALTER COLUMN hours_per_credit DROP NOT NULL;

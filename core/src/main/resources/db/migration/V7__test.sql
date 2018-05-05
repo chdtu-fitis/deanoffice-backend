@@ -1,1 +1,0 @@
-ALTER TABLE course ALTER COLUMN course_name_id DROP NOT NULL;
