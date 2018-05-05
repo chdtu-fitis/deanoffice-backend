@@ -11,10 +11,6 @@ public class SummaryForGroupTableDetails {
 
     private List<StudentSummaryForGroup> studentSummaries;
 
-//    private List<Grade> generalGrades;
-//    private List<Grade> practises;
-//    private List<Grade> diplomaGrades;
-
     private int rowWithNamesPosition = 0;
     private int rowWithTotalGradesPosition = rowWithNamesPosition + 1;
     private int rowWithAverageGradePosition = rowWithTotalGradesPosition + 1;
@@ -32,8 +28,6 @@ public class SummaryForGroupTableDetails {
     public SummaryForGroupTableDetails(List<StudentSummaryForGroup> studentSummaries) {
         this.studentSummaries = studentSummaries;
         List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-//        generalGrades.addAll(studentSummaries.get(0).getGrades().get(1));
-//        generalGrades.addAll(studentSummaries.get(0).getGrades().get(3));
         List<Grade> courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
         List<Grade> practices = new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
         List<Grade> diplomaGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
@@ -44,11 +38,6 @@ public class SummaryForGroupTableDetails {
         rowWithPracticesEnds = rowWithPracticesStarts + practices.size() - 1;
         rowWithHoursPosition = rowWithPracticesEnds + 1;
         rowWithCreditsPosition = rowWithHoursPosition + 1;
-//        generalGrades = new ArrayList<>();
-//        generalGrades.addAll(studentSummaries.get(0).getGrades().get(0));
-//        generalGrades.addAll(studentSummaries.get(0).getGrades().get(1));
-//        practises=new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
-//        diplomaGrades=new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
     }
 
 

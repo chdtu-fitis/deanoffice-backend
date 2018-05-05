@@ -22,6 +22,7 @@ public class CombinedCourse extends Course {
         setCredits(course.getCredits());
     }
 
-    CombinedCourse(){}
+    CombinedCourse() {
+    }
 
 }

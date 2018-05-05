@@ -1,37 +1,18 @@
 package ua.edu.chdtu.deanoffice.service.document.report.groupgrade;
 
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class StudentSummaryForGroup extends StudentSummary {
 
 
     public StudentSummaryForGroup(StudentDegree studentDegree, List<List<Grade>> grades) {
         super(studentDegree, grades);
-    }
-
-    public Map<String, String> getGeneralDictionary() {
-        HashMap<String, String> result = new HashMap<>();
-        result.put("student-name", getStudent().getInitialsUkr());
-        return result;
-    }
-
-
-    public List<Course> getCourses() {
-        List<Course> courses = new ArrayList<>();
-        getGrades().get(0).forEach((grade) -> {
-            courses.add(grade.getCourse());
-        });
-        return courses;
     }
 
     public Double getAverageGrade() {
@@ -52,18 +33,8 @@ public class StudentSummaryForGroup extends StudentSummary {
         }
     }
 
-
     @Override
     protected Grade combineGrades(List<Grade> grades) {
-//        Grade result = super.combineGrades(grades);
-//        CombinedCourse newCourse = new CombinedCourse(result.getCourse());
-//        newCourse.setNumberOfSemesters(grades.size());
-//        newCourse.setStartingSemester(grades.get(0).getCourse().getSemester());
-//        if (newCourse.getSemester() == null) {
-//            newCourse.setSemester(grades.get(0).getCourse().getSemester());
-//        }
-//        result.setCourse((newCourse));
-//        return result;
         if (grades == null || grades.isEmpty()) {
             return null;
         }

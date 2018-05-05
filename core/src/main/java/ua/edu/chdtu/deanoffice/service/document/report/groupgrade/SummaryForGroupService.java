@@ -12,7 +12,6 @@ import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.GradeService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -141,7 +140,7 @@ public class SummaryForGroupService {
         }
 
         for (int i = 0; i < generalGrades.size(); i++) {
-            replaceInCell(rowsWithGeneralGrades.get(i), 0, getNumberedDictionary(i+1));
+            replaceInCell(rowsWithGeneralGrades.get(i), 0, getNumberedDictionary(i + 1));
         }
 
         for (int i = 0; i < generalGrades.size(); i++) {
@@ -149,7 +148,7 @@ public class SummaryForGroupService {
         }
 
         for (int i = 0; i < courseWorks.size(); i++) {
-            replaceInCell(rowsWithCourseWorks.get(i), 0, getNumberedDictionary(generalGrades.size() + i+1));
+            replaceInCell(rowsWithCourseWorks.get(i), 0, getNumberedDictionary(generalGrades.size() + i + 1));
         }
 
         for (int i = 0; i < courseWorks.size(); i++) {
@@ -157,7 +156,7 @@ public class SummaryForGroupService {
         }
 
         for (int i = 0; i < practices.size(); i++) {
-            replaceInCell(rowsWithPractices.get(i), 0, getNumberedDictionary(generalGrades.size() + courseWorks.size() + i+1));
+            replaceInCell(rowsWithPractices.get(i), 0, getNumberedDictionary(generalGrades.size() + courseWorks.size() + i + 1));
         }
 
         for (int i = 0; i < practices.size(); i++) {
@@ -284,11 +283,5 @@ public class SummaryForGroupService {
             Tr newRow = XmlUtils.deepCopy(startRow);
             table.getContent().add(fromIndex, newRow);
         }
-    }
-
-    private HashMap<String, String> getNumberedDictionary(String prefix, int number) {
-        HashMap<String, String> result = new HashMap<>();
-        result.put(prefix, "#" + prefix + "-" + number);
-        return result;
     }
 }
