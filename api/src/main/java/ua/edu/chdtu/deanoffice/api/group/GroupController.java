@@ -44,8 +44,8 @@ public class GroupController {
             CurrentYearService currentYearService
     ) {
         this.studentGroupService = studentGroupService;
-        this.specializationService = specializationService;
         this.currentYearService = currentYearService;
+        this.specializationService = specializationService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)

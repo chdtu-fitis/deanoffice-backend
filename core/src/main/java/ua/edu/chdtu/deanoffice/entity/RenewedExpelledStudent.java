@@ -30,4 +30,7 @@ public class RenewedExpelledStudent extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date academicCertificateDate;
     private String academicCertificateIssuedBy;
+    @Temporal(TemporalType.DATE)
+    private Date expelDate;
+    private String orderNumber;
 }

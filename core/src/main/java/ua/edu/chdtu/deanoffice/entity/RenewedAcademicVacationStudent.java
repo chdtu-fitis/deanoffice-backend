@@ -26,4 +26,7 @@ public class RenewedAcademicVacationStudent extends BaseEntity {
     private Date renewDate;
     @Temporal(TemporalType.DATE)
     private Date applicationDate;
+    @Temporal(TemporalType.DATE)
+    private Date expelDate;
+    private String orderNumber;
 }

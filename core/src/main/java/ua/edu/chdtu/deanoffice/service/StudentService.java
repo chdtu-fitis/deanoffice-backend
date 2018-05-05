@@ -2,12 +2,10 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 
@@ -48,11 +46,9 @@ public class StudentService {
         return this.studentRepository.save(student);
     }
 
-    public void addPhoto(byte[] photo, int studentId) {
+    public void addPhoto(String photoUrl, int studentId) {
         Student student = studentRepository.getOne(studentId);
-        student.setPhoto(photo);
+        student.setPhotoUrl(photoUrl);
         studentRepository.save(student);
     }
-
-
 }
