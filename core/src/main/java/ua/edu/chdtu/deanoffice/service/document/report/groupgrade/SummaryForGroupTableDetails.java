@@ -24,7 +24,6 @@ public class SummaryForGroupTableDetails {
     private int rowWithHoursPosition;
     private int rowWithCreditsPosition;
 
-
     public SummaryForGroupTableDetails(List<StudentSummaryForGroup> studentSummaries) {
         this.studentSummaries = studentSummaries;
         List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
@@ -39,6 +38,5 @@ public class SummaryForGroupTableDetails {
         rowWithHoursPosition = rowWithPracticesEnds + 1;
         rowWithCreditsPosition = rowWithHoursPosition + 1;
     }
-
 
 }
