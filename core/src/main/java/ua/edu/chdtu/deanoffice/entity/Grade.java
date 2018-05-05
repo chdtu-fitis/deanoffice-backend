@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 public class Grade extends BaseEntity {
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Course course;
     @ManyToOne
     private StudentDegree studentDegree;

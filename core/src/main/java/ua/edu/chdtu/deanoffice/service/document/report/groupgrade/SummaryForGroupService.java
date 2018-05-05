@@ -134,7 +134,7 @@ public class SummaryForGroupService {
 
         int cellNumberGradesStartWith = 2;
 
-        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size() + practices.size() + 1));
+        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size() + practices.size()+courseWorks.size() + 1));
         if (diplomaGrades.size() > 0) {
             replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0)));
         }
