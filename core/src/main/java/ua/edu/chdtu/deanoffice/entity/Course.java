@@ -24,6 +24,7 @@ public class Course extends BaseEntity {
     private Integer hoursPerCredit;
     private BigDecimal credits;
 
-//    @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY)
+
+    //    @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY)
 //    private List<CourseForGroup> coursesForGroup;
 }

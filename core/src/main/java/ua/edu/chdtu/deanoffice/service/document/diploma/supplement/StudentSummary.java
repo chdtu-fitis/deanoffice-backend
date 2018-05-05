@@ -4,13 +4,7 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.EctsGrade;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
@@ -85,7 +79,7 @@ public class StudentSummary {
         });
     }
 
-    private Grade combineGrades(List<Grade> grades) {
+    protected Grade combineGrades(List<Grade> grades) {
         if (grades == null || grades.isEmpty()) {
             return null;
         }
@@ -122,12 +116,19 @@ public class StudentSummary {
             }
         }
         resultingGrade.getCourse().setHours(hoursSum);
+//        resultingGrade.getCourse().setSemester(grades.get(0).getCourse().getSemester());
         resultingGrade.getCourse().setCredits(new BigDecimal(hoursSum / Constants.HOURS_PER_CREDIT));
         return resultingGrade;
     }
 
     private Grade combineEqualGrades(List<Grade> grades) {
-        Grade resultingGrade = grades.get(0);
+        Grade resultingGrade = new Grade();
+        resultingGrade.setCourse(grades.get(0).getCourse());
+        resultingGrade.setEcts(grades.get(0).getEcts());
+        resultingGrade.setGrade(grades.get(0).getGrade());
+        resultingGrade.setPoints(grades.get(0).getPoints());
+        resultingGrade.setStudentDegree(grades.get(0).getStudentDegree());
+        resultingGrade.setId(grades.get(0).getId());
         Double pointsSum = 0.0;
         Double gradesSum = 0.0;
 

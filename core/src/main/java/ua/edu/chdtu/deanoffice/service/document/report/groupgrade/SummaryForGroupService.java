@@ -1,11 +1,13 @@
 package ua.edu.chdtu.deanoffice.service.document.report.groupgrade;
 
+import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -14,19 +16,17 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.cloneLastCellInRow;
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import static ua.edu.chdtu.deanoffice.util.GradeUtil.sortGradesByCourseNameUkr;
 
 @Service
 @Transactional
@@ -56,7 +56,7 @@ public class SummaryForGroupService {
 
     public File formDocument(Integer groupId, FileFormatEnum format)
             throws Docx4JException, IOException {
-        List<StudentSummary> studentsSummaries = new ArrayList<>();
+        List<StudentSummaryForGroup> studentsSummaries = new ArrayList<>();
         StudentGroup group = studentGroupService.getById(groupId);
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
         studentDegrees.removeIf(student -> !student.isActive());
@@ -70,15 +70,14 @@ public class SummaryForGroupService {
                 }
         );
 
-//        StudentSummaryForGroup studentSummary = new StudentSummary(studentDegree, grades);
 
-        WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsSummaries);
+        WordprocessingMLPackage filledTemplate = fillTemplate(TEMPLATE, studentsSummaries.subList(0, 14));
         String fileName = LanguageUtil.transliterate(group.getName());
         return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
     }
 
 
-    public WordprocessingMLPackage fillTemplate(String templateFilepath, List<StudentSummary> studentSummaries)
+    public WordprocessingMLPackage fillTemplate(String templateFilepath, List<StudentSummaryForGroup> studentSummaries)
             throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
         fillTableWithGrades(template, studentSummaries);
@@ -89,29 +88,219 @@ public class SummaryForGroupService {
         return template;
     }
 
-    private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentSummary> studentSummaries) {
+    private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentSummaryForGroup> studentSummaries) {
 
 
     }
 
-    private void prepareTable(WordprocessingMLPackage template, List<StudentSummary> studentSummaries) {
-//        Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
-////        Object debug=table.getTblGrid().getTblGridChange().getTblGrid().getGridCol();
-//        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-//        studentSummaries.forEach((studentSummary) -> {
-//            cloneLastCellInRow(tableRows.get(0));
-//        });
-        prepareTableStructure(template, studentSummaries);
-    }
-
-    private void prepareTableStructure(WordprocessingMLPackage template, List<StudentSummary> studentSummaries) {
+    private void prepareTable(WordprocessingMLPackage template, List<StudentSummaryForGroup> studentSummaries) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
-        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        tableRows.forEach((tableRow) -> {
-            studentSummaries.forEach((studentSummary) -> {
-                cloneLastCellInRow(tableRow);
-            });
-        });
+        prepareTableStructure(table, studentSummaries);
     }
 
+    private void prepareTableStructure(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        SummaryForGroupTableDetails summaryForGroupTableDetails = new SummaryForGroupTableDetails(studentSummaries);
+        tableRows.forEach((tableRow) -> {
+//            studentSummaries.forEach((studentSummaryForGroup) -> {
+//                cloneLastCellInRow(tableRow);
+//            });
+            for (int i = 0; i < studentSummaries.size() - 1; i++) {
+                cloneLastCellInRow(tableRow);
+            }
+        });
+//        studentSummaries.get(0).getGrades().forEach((grades)->{
+//
+//        });
+//        List<List<Grade>> gradesForFirstPart = new ArrayList<>(studentSummaries.get(0).getGrades().subList(0, 1));
+//        gradesForFirstPart.forEach(grades -> {
+////            int index = 0;
+////            HashMap dictionary = new HashMap();
+////            dictionary.put("subject-normal", "Test");
+//            grades.forEach((grade) -> {
+////                addRowToTable(table, tableRows.get(3), index, dictionary);
+//                Tr firstGradeRow = tableRows.get(3);
+//                Tr newRow = XmlUtils.deepCopy(firstGradeRow);
+//                table.getContent().add(3, newRow);
+//            });
+//        });
+        int numberOfRowsWithGeneralSubjects = studentSummaries.get(0).getGrades().get(0).size()
+                + studentSummaries.get(0).getGrades().get(1).size()
+                + studentSummaries.get(0).getGrades().get(3).size();
+        int numberOfRowsWithPractices = studentSummaries.get(0).getGrades().get(2).size();
+        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithDiplomaGradePosition(), numberOfRowsWithGeneralSubjects - 1);
+        copyRowNTimes(table, summaryForGroupTableDetails.getRowWithPracticesStarts(), numberOfRowsWithPractices - 1);
+        fillData(table, studentSummaries);
+
+
+    }
+
+    private void fillData(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        SummaryForGroupTableDetails summaryForGroupTableDetails = new SummaryForGroupTableDetails(studentSummaries);
+        List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
+        generalGrades.addAll(studentSummaries.get(0).getGrades().get(1));
+        sortGradesByCourseNameUkr(generalGrades);
+        List<Grade> practices = new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
+        List<Grade> diplomaGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
+        Tr rowWithStudentNames = tableRows.get(summaryForGroupTableDetails.getRowWithNamesPosition());
+        Tr rowWithTotalGrade = tableRows.get(summaryForGroupTableDetails.getRowWithTotalGradesPosition());
+        Tr rowWithAverageGrade = tableRows.get(summaryForGroupTableDetails.getRowWithAverageGradePosition());
+        Tr rowWithDiplomaGrade = tableRows.get(summaryForGroupTableDetails.getRowWithDiplomaGradePosition());
+        List<Tr> rowsWithGeneralGrades = new ArrayList<>(
+                tableRows.subList(summaryForGroupTableDetails.getRowWithGeneralGradesStarts(), summaryForGroupTableDetails.getRowWithGeneralGradesEnds()+1)
+        );
+        List<Tr> rowsWithPractices = new ArrayList<>(
+                tableRows.subList(summaryForGroupTableDetails.getRowWithPracticesStarts(), summaryForGroupTableDetails.getRowWithPracticesEnds() + 1));
+        Tr rowWithHours = tableRows.get(summaryForGroupTableDetails.getRowWithHoursPosition());
+        Tr rowWithCredit = tableRows.get(summaryForGroupTableDetails.getRowWithCreditsPosition());
+
+        int cellNumberGradesStartWith = 2;
+
+//        for(int i=0;i<generalGrades.size();i++){
+//            List<Grade> currentGrades=generalGrades.get(i);
+//            Tr currentRow=rowsWithGeneralGrades.get(i);
+//            for()
+//        }
+        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size()+practices.size()+1));
+        replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0)));
+
+
+        for (int i = 0; i < generalGrades.size(); i++) {
+            replaceInCell(rowsWithGeneralGrades.get(i), 0, getNumberedDictionary(i));
+        }
+
+        for (int i = 0; i < generalGrades.size(); i++) {
+            replaceInCell(rowsWithGeneralGrades.get(i), 1, getCourseDictionary(generalGrades.get(i)));
+        }
+
+        for (int i = 0; i < practices.size(); i++) {
+            replaceInCell(rowsWithPractices.get(i), 0, getNumberedDictionary(generalGrades.size() + 1));
+        }
+
+        for (int i = 0; i < practices.size(); i++) {
+            replaceInCell(rowsWithPractices.get(i), 1, getCourseDictionary(practices.get(i)));
+        }
+
+
+        for (int studentNumber = 0; studentNumber < studentSummaries.size(); studentNumber++) {
+            StudentSummaryForGroup studentSummary = studentSummaries.get(studentNumber);
+            generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
+            generalGrades.addAll(studentSummaries.get(studentNumber).getGrades().get(1));
+            practices = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(2));
+            diplomaGrades = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(3));
+
+            replaceInCell(rowWithStudentNames, cellNumberGradesStartWith + studentNumber, getStudentInitialsDictionary(studentSummary));
+
+            replaceInCell(rowWithDiplomaGrade, cellNumberGradesStartWith+studentNumber, getGradeDictionary(diplomaGrades.get(0)));
+
+            for (int i = 0; i < generalGrades.size(); i++) {
+                replaceInCell(rowsWithGeneralGrades.get(i), cellNumberGradesStartWith + studentNumber, getGradeDictionary(generalGrades.get(i)));
+            }
+
+            for (int i = 0; i < practices.size(); i++) {
+                replaceInCell(rowsWithPractices.get(i), cellNumberGradesStartWith + studentNumber, getGradeDictionary(practices.get(i)));
+            }
+            replaceInCell(rowWithTotalGrade, cellNumberGradesStartWith + studentNumber, getTotalGradeDictionary(studentSummary));
+            replaceInCell(rowWithAverageGrade, cellNumberGradesStartWith + studentNumber, getAverageGradeDictionary(studentSummary));
+            replaceInCell(rowWithHours, cellNumberGradesStartWith + studentNumber, getHoursDictionary(studentSummary));
+            replaceInCell(rowWithCredit, cellNumberGradesStartWith + studentNumber, getCreditsDictionary(studentSummary));
+        }
+
+    }
+
+    private Map<String, String> getCourseDictionary(Grade grade) {
+        Course course = grade.getCourse();
+        HashMap<String, String> result = new HashMap<>();
+        String courseString = course.getCourseName().getName();
+        if (grade.getCourse() instanceof CombinedCourse) {
+            if (((CombinedCourse) grade.getCourse()).getNumberOfSemesters() > 1) {
+                courseString += " (БС)";
+            }
+        }
+
+        if (!grade.getCourse().getKnowledgeControl().isGraded()) {
+            courseString += " (Зал.)";
+        }
+
+        result.put("s", courseString);
+        result.put("p", String.format("%s %d %.1f", getPeriod(grade), course.getHours(), course.getCredits()));
+        return result;
+    }
+
+    private String getPeriod(Grade grade) {
+        int studyYear = grade.getStudentDegree().getStudentGroup().getCreationYear();
+        int numberOfSemesters = 1;
+        Integer semester = 1;
+        if (grade.getCourse() instanceof CombinedCourse) {
+            numberOfSemesters = ((CombinedCourse) grade.getCourse()).getNumberOfSemesters();
+            semester = ((CombinedCourse) grade.getCourse()).getStartingSemester();
+
+        }
+
+        int startingYear = studyYear + semester / 2 - 1;
+        int finishingYear = startingYear + numberOfSemesters / 2 + 1;
+        return startingYear + "-" + finishingYear;
+    }
+
+    private HashMap<String, String> getTotalGradeDictionary(StudentSummaryForGroup studentSummaryForGroup) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("tg", String.format("%.0f", studentSummaryForGroup.getTotalGrade()));
+        return result;
+    }
+
+    private HashMap<String, String> getAverageGradeDictionary(StudentSummaryForGroup studentSummaryForGroup) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("ag", String.format("%.2f", studentSummaryForGroup.getAverageGrade()));
+        return result;
+    }
+
+
+    private HashMap<String, String> getGradeDictionary(Grade grade) {
+        HashMap<String, String> result = new HashMap<>();
+        if (grade.getPoints() != null) {
+            result.put("g", grade.getPoints() + "");
+        } else result.put("g", "");
+
+        return result;
+    }
+
+    private HashMap<String, String> getStudentInitialsDictionary(StudentSummaryForGroup studentSummaryForGroup) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("student-name", studentSummaryForGroup.getStudent().getInitialsUkr());
+        return result;
+    }
+
+    private HashMap<String, String> getNumberedDictionary(int number) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("N", number + "");
+        return result;
+    }
+
+    private HashMap<String, String> getHoursDictionary(StudentSummaryForGroup studentSummaryForGroup) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("h", studentSummaryForGroup.getTotalHours() + "");
+        return result;
+    }
+
+    private HashMap<String, String> getCreditsDictionary(StudentSummaryForGroup studentSummaryForGroup) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("c", String.format("%.1f", studentSummaryForGroup.getTotalCredits()));
+        return result;
+    }
+
+    private void copyRowNTimes(Tbl table, int fromIndex, int n) {
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        Tr startRow = tableRows.get(fromIndex);
+        for (int i = 0; i < n; i++) {
+            Tr newRow = XmlUtils.deepCopy(startRow);
+            table.getContent().add(fromIndex, newRow);
+        }
+    }
+
+    private HashMap<String, String> getNumberedDictionary(String prefix, int number) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put(prefix, "#" + prefix + "-" + number);
+        return result;
+    }
 }

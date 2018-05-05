@@ -144,11 +144,30 @@ public class TemplateUtil {
         replaceValuesInTextPlaceholders(textElements, replacements);
     }
 
+    public static void replaceInCell(Tc tableCell, Map<String, String> replacements) {
+        List<Text> textElements = getTextsFromContentAccessor(tableCell);
+        replaceValuesInTextPlaceholders(textElements, replacements);
+//        for (Object cellText : tableCell.getContent()) {
+//            for (Map.Entry<String, String> entry : replacements.entrySet()) {
+//                String text = (String) cellText;
+//                cellText = text.replace("${" + entry.getKey() + "}", entry.getValue());
+//            }
+//        }
+    }
+
+    public static void replaceInCell(Tr row, int cellIndex, Map<String, String> replacements) {
+        fixRow(row);
+        List<Object> cells = row.getContent();
+        Tc tableCell = ((JAXBElement<Tc>) (cells.get(cellIndex))).getValue();
+        replaceInCell(tableCell, replacements);
+    }
+
 //    public static void addCellToRow(Tc cell, Tr templateRow) {
 //        templateRow.getContent().add(cell);
 //    }
 
     public static void cloneLastCellInRow(Tr templateRow) {
+        fixRow(templateRow);
         List<Object> cells = templateRow.getContent();
         JAXBElement<Tc> jaxbElement = (JAXBElement<Tc>) (cells.get(cells.size() - 1));
         Tc lastCell = null;
@@ -164,13 +183,23 @@ public class TemplateUtil {
 //                lastCell = ((JAXBElement<Tc>) cells.get(cellNumber)).getValue();
 //            }
 //        }
-        lastCell=jaxbElement.getValue();
+        lastCell = jaxbElement.getValue();
         TcPr tableCellProperties = lastCell.getTcPr();
         TblWidth tableWidth = tableCellProperties.getTcW();
-        tableWidth.setType("dxa");
-        tableWidth.setW(BigInteger.valueOf(2));
-        tableWidth.setW(BigInteger.valueOf(10000));
-        templateRow.getContent().add(new JAXBElement<Tc>(jaxbElement.getName(), Tc.class, lastCell));
+//        tableWidth.setType("dxa");
+//        tableWidth.setW(BigInteger.valueOf(2));
+//        tableWidth.setW(BigInteger.valueOf(10000));
+        Tc result = XmlUtils.deepCopy(lastCell);
+        templateRow.getContent().add(new JAXBElement<Tc>(jaxbElement.getName(), Tc.class, result));
+    }
+
+    private static void fixRow(Tr row) {
+        List<Object> cells = row.getContent();
+        JAXBElement jaxbElement = (JAXBElement) (cells.get(cells.size() - 1));
+        if (!(jaxbElement.getValue() instanceof Tc)) {
+            cells.remove(cells.size() - 1);
+            fixRow(row);
+        }
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {

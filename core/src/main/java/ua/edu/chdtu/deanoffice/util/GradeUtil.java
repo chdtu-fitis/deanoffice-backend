@@ -2,6 +2,10 @@ package ua.edu.chdtu.deanoffice.util;
 
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
+import java.text.Collator;
+import java.util.List;
+import java.util.Locale;
+
 public class GradeUtil {
 
     public static int getGradeFromPoints(int points) {
@@ -90,5 +94,12 @@ public class GradeUtil {
         } else {
             return "F";
         }
+    }
+
+    public static void sortGradesByCourseNameUkr(List<Grade> grades) {
+        grades.sort((o1, o2) -> {
+            Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
+            return ukrainianCollator.compare(o1.getCourse().getCourseName().getName(), o2.getCourse().getCourseName().getName());
+        });
     }
 }
