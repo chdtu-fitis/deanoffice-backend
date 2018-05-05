@@ -14,7 +14,7 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     @Query("select course from CourseForGroup courseForGroup " +
             "join courseForGroup.course course " +
             "where courseForGroup.studentGroup.id=:groupId")
-    List<Course> getByGroupId(@Param("groupId") int groupId);
+    List<Course> getByGroupId(@Param("groupId") Integer groupId);
 
     @Query("select course from Course as course " +
             "where course.semester = :semester order by course.courseName.name, course.knowledgeControl.name, course.hours")
