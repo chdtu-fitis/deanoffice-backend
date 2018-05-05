@@ -11,7 +11,7 @@ import ua.edu.chdtu.deanoffice.service.KnowledgeControlService;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 @RequestMapping("/knowledgeControls")
@@ -23,10 +23,10 @@ public class KnowledgeControlController {
         this.knowledgeControlService = knowledgeControlService;
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity getAllKnowledgeControls() {
         List<KnowledgeControl> knowledgeControlDTOs = this.knowledgeControlService.getAllKnowledgeControls();
-        return ResponseEntity.ok(parse(knowledgeControlDTOs, KnowledgeControlDTO.class));
+        return ResponseEntity.ok(map(knowledgeControlDTOs, KnowledgeControlDTO.class));
     }
 
 }

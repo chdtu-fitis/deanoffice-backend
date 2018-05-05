@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.api.student.dto;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;
@@ -21,6 +20,8 @@ public class RenewedExpelledStudentDTO {
     private String academicCertificateNumber;
     private Date academicCertificateDate;
     private String academicCertificateIssuedBy;
+    private Date expelDate;
+    private String orderNumber;
 
     private Integer studentExpelId;
     private Integer studentGroupId;

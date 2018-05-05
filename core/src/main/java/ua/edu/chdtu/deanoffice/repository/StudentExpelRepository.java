@@ -23,10 +23,6 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
     );
 
     @Query("select se from StudentExpel se " +
-            "where se.id = :id and se.studentDegree.active = false ")
-    StudentExpel findInactiveById(@Param("id") Integer studentExpelId);
-
-    @Query("select se from StudentExpel se " +
             "where se.studentDegree.id in :student_degree_ids " +
             "and se.studentDegree.active = false")
     List<StudentExpel> findAllActiveFired(@Param("student_degree_ids") Integer[] studentDegreeIds);

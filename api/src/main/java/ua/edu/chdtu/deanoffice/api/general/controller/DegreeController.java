@@ -11,7 +11,7 @@ import ua.edu.chdtu.deanoffice.service.DegreeService;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 
 @RestController
@@ -24,9 +24,9 @@ public class DegreeController {
         this.degreeService = degreeService;
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity getDegrees() {
         List<Degree> degrees = degreeService.getDegrees();
-        return ResponseEntity.ok(parse(degrees, NamedDTO.class));
+        return ResponseEntity.ok(map(degrees, NamedDTO.class));
     }
 }

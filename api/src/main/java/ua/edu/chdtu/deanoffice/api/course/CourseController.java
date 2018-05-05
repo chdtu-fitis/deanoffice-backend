@@ -15,17 +15,24 @@ import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
+import ua.edu.chdtu.deanoffice.service.CourseService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.TeacherService;
 
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class CourseController {
@@ -53,14 +60,14 @@ public class CourseController {
     @GetMapping("/courses")
     public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") int semester) {
         List<Course> courses = courseService.getCoursesBySemester(semester);
-        return ResponseEntity.ok(parse(courses, CourseDTO.class));
+        return ResponseEntity.ok(map(courses, CourseDTO.class));
     }
 
     @GetMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
         List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
-        return ResponseEntity.ok(parse(coursesForGroup, CourseForGroupDTO.class));
+        return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
     }
 
     @PostMapping("/groups/{groupId}/courses")
@@ -117,20 +124,20 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCourses(@PathVariable int groupId) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
-        return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
+        return ResponseEntity.ok(map(courseForGroups, CourseForGroupDTO.class));
     }
 
     @GetMapping("/specialization/{id}/courses")
     @JsonView(CourseForGroupView.Basic.class)
     public ResponseEntity getCoursesBySpecialization(@PathVariable int id, @RequestParam("semester") int semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(id, semester);
-        return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
+        return ResponseEntity.ok(map(courseForGroups, CourseForGroupDTO.class));
     }
 
     @PostMapping("/courses")
     public ResponseEntity createCourse(@RequestBody CourseDTO courseDTO) {
         try {
-            Course course = (Course) parse(courseDTO, Course.class);
+            Course course = (Course) map(courseDTO, Course.class);
             if (courseDTO.getCourseName().getId()!=0) {
                 Course newCourse = this.courseService.createCourse(course);
                 URI location = getNewResourceLocation(newCourse.getId());
@@ -154,7 +161,7 @@ public class CourseController {
     @GetMapping("courses/names")
     public ResponseEntity getCourseNames(){
         List<CourseName> courseNames = this.courseNameService.getCourseNames();
-        return ResponseEntity.ok(parse(courseNames, NamedDTO.class));
+        return ResponseEntity.ok(map(courseNames, NamedDTO.class));
     }
 
     private ResponseEntity handleException(Exception exception) {
