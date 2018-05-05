@@ -20,13 +20,9 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
-import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
-import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
-import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -37,9 +33,6 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 public class GroupController {
-    private StudentGroupService studentGroupService;
-    private StudentExpelService studentExpelService;
-    private StudentAcademicVacationService studentAcademicVacationService;
     private final StudentGroupService studentGroupService;
     private final SpecializationService specializationService;
     private final CurrentYearService currentYearService;
@@ -47,17 +40,12 @@ public class GroupController {
     @Autowired
     public GroupController(
             StudentGroupService studentGroupService,
-            StudentExpelService studentExpelService,
-            StudentAcademicVacationService studentAcademicVacationService
-            StudentGroupService studentGroupService,
             SpecializationService specializationService,
             CurrentYearService currentYearService
     ) {
         this.studentGroupService = studentGroupService;
-        this.studentExpelService = studentExpelService;
-        this.studentAcademicVacationService = studentAcademicVacationService;
-        this.specializationService = specializationService;
         this.currentYearService = currentYearService;
+        this.specializationService = specializationService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
