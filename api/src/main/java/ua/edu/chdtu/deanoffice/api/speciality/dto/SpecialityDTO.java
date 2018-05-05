@@ -13,6 +13,7 @@ public class SpecialityDTO {
     private String name;
     private String nameEng;
     private boolean active;
+    @JsonView(SpecialityView.Basic.class)
     private String code;
     private String fieldOfStudy;
     private String fieldOfStudyEng;

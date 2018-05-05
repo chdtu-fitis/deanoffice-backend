@@ -16,4 +16,8 @@ public class CurrentYearService {
     public CurrentYear get() {
         return currentYearRepository.getOne(1);
     }
+
+    public int getYear() {
+        return get().getCurrYear();
+    }
 }

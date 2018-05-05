@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
@@ -12,24 +13,30 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentDegreeRepository studentDegreeRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(
+            StudentRepository studentRepository,
+            StudentDegreeRepository studentDegreeRepository
+    ) {
         this.studentRepository = studentRepository;
+        this.studentDegreeRepository = studentDegreeRepository;
     }
 
     public Student findById(Integer id) {
         return studentRepository.getOne(id);
     }
 
-    public List<Student> searchByFullName(String name, String surname, String patronimic) {
-        return studentRepository.findAllByFullNameUkr(
+    public List<Student> searchByFullName(String name, String surname, String patronimic, int facultyId) {
+        return studentDegreeRepository.findAllByFullNameUkr(
                 toCapitalizedCase(name),
                 toCapitalizedCase(surname),
-                toCapitalizedCase(patronimic)
+                toCapitalizedCase(patronimic),
+                facultyId
         );
     }
 
-    public Student create(Student student) {
+    public Student save(Student student) {
         student.setName(toCapitalizedCase(student.getName()));
         student.setSurname(toCapitalizedCase(student.getSurname()));
         student.setPatronimic(toCapitalizedCase(student.getPatronimic()));
@@ -37,10 +44,6 @@ public class StudentService {
         student.setSurnameEng(toCapitalizedCase(student.getSurnameEng()));
         student.setPatronimicEng(toCapitalizedCase(student.getPatronimicEng()));
         return this.studentRepository.save(student);
-    }
-
-    public void update(Student student) {
-        studentRepository.save(student);
     }
 
     public void addPhoto(String photoUrl, int studentId) {
