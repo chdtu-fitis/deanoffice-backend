@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import javax.xml.bind.JAXBElement;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -147,12 +146,6 @@ public class TemplateUtil {
     public static void replaceInCell(Tc tableCell, Map<String, String> replacements) {
         List<Text> textElements = getTextsFromContentAccessor(tableCell);
         replaceValuesInTextPlaceholders(textElements, replacements);
-//        for (Object cellText : tableCell.getContent()) {
-//            for (Map.Entry<String, String> entry : replacements.entrySet()) {
-//                String text = (String) cellText;
-//                cellText = text.replace("${" + entry.getKey() + "}", entry.getValue());
-//            }
-//        }
     }
 
     public static void replaceInCell(Tr row, int cellIndex, Map<String, String> replacements) {
@@ -162,38 +155,17 @@ public class TemplateUtil {
         replaceInCell(tableCell, replacements);
     }
 
-//    public static void addCellToRow(Tc cell, Tr templateRow) {
-//        templateRow.getContent().add(cell);
-//    }
-
     public static void cloneLastCellInRow(Tr templateRow) {
         fixRow(templateRow);
         List<Object> cells = templateRow.getContent();
         JAXBElement<Tc> jaxbElement = (JAXBElement<Tc>) (cells.get(cells.size() - 1));
-        Tc lastCell = null;
-//        try {
-//           lastCell= jaxbElement.getValue();
-//        }
-//        catch (Exception e){
-//            System.out.print("HERE");
-//        }
-//        int cellNumber;
-//        for (cellNumber = cells.size() - 1; cellNumber > 0 && lastCell == null; cellNumber--) {
-//            if (((JAXBElement) cells.get(cellNumber)).getDeclaredType() == Tc.class) {
-//                lastCell = ((JAXBElement<Tc>) cells.get(cellNumber)).getValue();
-//            }
-//        }
+        Tc lastCell;
         lastCell = jaxbElement.getValue();
-        TcPr tableCellProperties = lastCell.getTcPr();
-        TblWidth tableWidth = tableCellProperties.getTcW();
-//        tableWidth.setType("dxa");
-//        tableWidth.setW(BigInteger.valueOf(2));
-//        tableWidth.setW(BigInteger.valueOf(10000));
         Tc result = XmlUtils.deepCopy(lastCell);
         templateRow.getContent().add(new JAXBElement<Tc>(jaxbElement.getName(), Tc.class, result));
     }
 
-    public static void copyTable(WordprocessingMLPackage template, int tableIndex){
+    public static void copyTable(WordprocessingMLPackage template, int tableIndex) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(tableIndex);
         template.getMainDocumentPart().addObject(XmlUtils.deepCopy(table));
     }

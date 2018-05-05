@@ -14,7 +14,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     @Query("select course from CourseForGroup courseForGroup " +
             "join courseForGroup.course course " +
             "where courseForGroup.studentGroup.id=:groupId")
-//    @Query("select course from Course.coursesForGroup where id=:groupId")
     List<Course> getByGroupId(@Param("groupId") int groupId);
 
     @Query("select course from Course as course " +
