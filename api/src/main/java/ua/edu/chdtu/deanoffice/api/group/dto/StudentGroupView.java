@@ -7,5 +7,6 @@ public class StudentGroupView {
     public interface Basic {}
 
     public interface WithStudents extends Basic, GeneralView.PersonFullName {}
+
     public interface AllGroupData extends Basic, SpecializationView.WithDegreeAndSpeciality {}
 }

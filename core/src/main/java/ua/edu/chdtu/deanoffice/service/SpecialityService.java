@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.repository.SpecialityRepository;
@@ -17,11 +16,15 @@ public class SpecialityService {
         this.specialityRepository = specialityRepository;
     }
 
-    public List<Speciality> getSpecialityByActive(boolean onlyActive) {
-        if (onlyActive) {
-            return specialityRepository.findAllByActiveOrderByName(true);
-        }
-        Sort sort = new Sort(Sort.Direction.ASC, "name");
-        return specialityRepository.findAll(sort);
+    public List<Speciality> getAllActive(int facultyId) {
+        return specialityRepository.findAllActive(facultyId);
+    }
+
+    public List<Speciality> getAll(int facultyId) {
+        return specialityRepository.findAll(facultyId);
+    }
+
+    public Speciality getById(Integer specialityId) {
+        return specialityRepository.findOne(specialityId);
     }
 }

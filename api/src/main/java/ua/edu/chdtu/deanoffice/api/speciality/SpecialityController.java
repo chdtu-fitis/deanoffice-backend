@@ -1,19 +1,19 @@
 package ua.edu.chdtu.deanoffice.api.speciality;
 
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.lang.reflect.Type;
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 @RequestMapping("/specialities")
@@ -25,16 +25,19 @@ public class SpecialityController {
         this.specialityService = specialityService;
     }
 
-    @GetMapping("")
-    public ResponseEntity getSpecialities(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
-    ) {
-        List<Speciality> specialities = specialityService.getSpecialityByActive(onlyActive);
-        return ResponseEntity.ok(parseToSpecialityDTO(specialities));
+    @GetMapping
+    public ResponseEntity getAllSpecialities(@CurrentUser ApplicationUser user) {
+        List<Speciality> specialities = specialityService.getAll(user.getFaculty().getId());
+        return ResponseEntity.ok(mapToSpecialityDTO(specialities));
     }
 
-    private List<SpecialityDTO> parseToSpecialityDTO(List<Speciality> specialities) {
-        Type type = new TypeToken<List<SpecialityDTO>>() {}.getType();
-        return new ModelMapper().map(specialities, type);
+    @GetMapping("/active")
+    public ResponseEntity getActiveSpecialities(@CurrentUser ApplicationUser user) {
+        List<Speciality> specialities = specialityService.getAllActive(user.getFaculty().getId());
+        return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+    }
+
+    private List<SpecialityDTO> mapToSpecialityDTO(List<Speciality> source) {
+        return map(source, SpecialityDTO.class);
     }
 }

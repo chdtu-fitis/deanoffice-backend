@@ -44,7 +44,7 @@ public class SupplementTemplateFillService {
         Map<String, String> result = new HashMap<>();
         result.put("Credits", formatCredits(grade.getCourse().getCredits()));
         result.put("Hours", formatHours(grade.getCourse().getHours()));
-        result.put("LocalGrade", String.format("%d", grade.getPoints()));
+        result.put("LocalGrade", grade.getPoints() == null ? "" : String.format("%d", grade.getPoints()));
         result.put("NationalGradeUkr", grade.getNationalGradeUkr());
         result.put("NationalGradeEng", grade.getNationalGradeEng());
         result.put("ECTSGrade", GradeUtil.getEctsGrade(grade));
@@ -115,7 +115,7 @@ public class SupplementTemplateFillService {
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
-        result.put("RequiredCredits", formatCredits(specialization.getRequiredCredits()));
+//        result.put("RequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("QualificationUkr", TemplateUtil.getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", TemplateUtil.getValueSafely(specialization.getQualificationEng()));

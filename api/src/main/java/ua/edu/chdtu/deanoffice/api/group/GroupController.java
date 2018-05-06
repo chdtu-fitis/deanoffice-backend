@@ -1,80 +1,167 @@
 package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
+
 @RestController
-@RequestMapping("/")
 public class GroupController {
-    private StudentGroupService studentGroupService;
+    private final StudentGroupService studentGroupService;
+    private final SpecializationService specializationService;
+    private final CurrentYearService currentYearService;
 
     @Autowired
     public GroupController(
-            StudentGroupService studentGroupService
+            StudentGroupService studentGroupService,
+            SpecializationService specializationService,
+            CurrentYearService currentYearService
     ) {
         this.studentGroupService = studentGroupService;
+        this.currentYearService = currentYearService;
+        this.specializationService = specializationService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
     @GetMapping("/groups/graduates")
-    public ResponseEntity getGraduateGroups(@RequestParam int degreeId) {
-        List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId);
-        return ResponseEntity.ok(parseToStudentGroupShortDTO(groups));
-    }
-
-    private List<StudentGroupDTO> parseToStudentGroupDTO(List<StudentGroup> studentGroupList) {
-        ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudentGroupDTO>>() {
-        }.getType();
-        return modelMapper.map(studentGroupList, listType);
-    }
-
-    private List<StudentGroupShortDTO> parseToStudentGroupShortDTO(List<StudentGroup> studentGroupList) {
-        ModelMapper modelMapper = new ModelMapper();
-        Type listType = new TypeToken<List<StudentGroupShortDTO>>() {
-        }.getType();
-        return modelMapper.map(studentGroupList, listType);
+    public ResponseEntity getGraduateGroups(@RequestParam int degreeId, @CurrentUser ApplicationUser user) {
+        List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId, user.getFaculty().getId());
+        return ResponseEntity.ok(Mapper.map(groups, StudentGroupShortDTO.class));
     }
 
     @GetMapping("/groups/filter")
     @JsonView(StudentGroupView.WithStudents.class)
     public ResponseEntity getGroupsByDegreeAndYear(
             @RequestParam Integer degreeId,
-            @RequestParam Integer year
+            @RequestParam Integer year,
+            @CurrentUser ApplicationUser user
     ) {
-        List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year);
-        return ResponseEntity.ok(parseToStudentGroupDTO(groups));
+        List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, user.getFaculty().getId());
+        return ResponseEntity.ok(Mapper.map(groups, StudentGroupDTO.class));
     }
 
     @GetMapping("courses/{courseId}/groups")
-    @JsonView(StudentGroupView.Basic.class)
-    public ResponseEntity getGroupsByCourse(@PathVariable int courseId) {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId);
-        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+    public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
+        return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
     }
 
     @GetMapping("/groups")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroups(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive
+            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive,
+            @CurrentUser ApplicationUser user
     ) {
-        List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive);
-        return ResponseEntity.ok(parseToStudentGroupDTO(studentGroups));
+        List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
+        return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+    }
+
+    @JsonView(StudentGroupView.AllGroupData.class)
+    @PostMapping("/groups")
+    public ResponseEntity createGroup(@RequestBody StudentGroupDTO studentGroupDTO) {
+        try {
+            if (studentGroupDTO.getId() != null) {
+                throwException("Group`s id must be null");
+            }
+            StudentGroup studentGroup = create(studentGroupDTO);
+            studentGroup.setCreationYear(currentYearService.getYear());
+            studentGroup.setActive(true);
+            studentGroup = studentGroupService.save(studentGroup);
+
+            URI location = getNewResourceLocation(studentGroup.getId());
+            return ResponseEntity.created(location).body(studentGroup);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void throwException(String message) throws Exception {
+        throw new Exception(message);
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, GroupController.class);
+    }
+
+    private StudentGroup create(StudentGroupDTO studentGroupDTO) {
+        StudentGroup studentGroup = (StudentGroup) Mapper.strictMap(studentGroupDTO, StudentGroup.class);
+        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecializationId());
+        studentGroup.setSpecialization(specialization);
+        return studentGroup;
+    }
+
+    @JsonView(StudentGroupView.AllGroupData.class)
+    @GetMapping("/groups/{group_id}")
+    public ResponseEntity getGroupById(@PathVariable(value = "group_id") Integer groupId) {
+        StudentGroup studentGroup = studentGroupService.getById(groupId);
+        return ResponseEntity.ok(Mapper.map(studentGroup, StudentGroupDTO.class));
+    }
+
+    @PutMapping("/groups")
+    public ResponseEntity updateGroup(@RequestBody StudentGroupDTO studentGroupDTO) {
+        try {
+            if (studentGroupDTO.getId() == null) {
+                throwException("Group`s id must not be null");
+            } else if (studentGroupDTO.getId().equals(0)) {
+                throwException("Group`s id must not be null");
+            }
+            if (!studentGroupDTO.isActive()) {
+                throwException("You can not update inactive group");
+            }
+            StudentGroup studentGroup = create(studentGroupDTO);
+            studentGroupService.save(studentGroup);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @DeleteMapping("/groups/{group_id}")
+    public ResponseEntity deleteGroup(@PathVariable("group_id") Integer groupId) {
+        StudentGroup studentGroup = studentGroupService.getById(groupId);
+        if (studentGroup == null) {
+            return ExceptionHandlerAdvice.handleException(
+                    "Not found group [" + groupId +"]",
+                    GroupController.class,
+                    HttpStatus.NOT_FOUND
+            );
+        }
+        try {
+            if (!studentGroup.isActive()) {
+                throwException("Group [" + groupId +"] already inactive");
+            }
+            studentGroup.setActive(false);
+            studentGroupService.save(studentGroup);
+            return ResponseEntity.noContent().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 }

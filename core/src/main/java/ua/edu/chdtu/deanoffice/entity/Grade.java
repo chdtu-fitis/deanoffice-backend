@@ -9,35 +9,32 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 
 @Entity
 @Getter
 @Setter
-@Table(name = "grade")
-//, uniqueConstraints = {
-//@UniqueConstraint(columnNames = {"course_id", "studentdegree_id"})
-//})
 public class Grade extends BaseEntity {
     @ManyToOne
     private Course course;
     @ManyToOne
     private StudentDegree studentDegree;
-    @Column(name = "grade", nullable = false)
-    private int grade;
-    @Column(name = "points", nullable = false)
-    private int points;
+    private Integer grade;
+    private Integer points;
     @Column(name = "ects", length = 2)
     @Enumerated(value = EnumType.STRING)
     private EctsGrade ects;
 
     public String getNationalGradeUkr() {
+        if (ects == null) {
+            return "";
+        }
         return ects.getNationalGradeUkr(this);
     }
 
     public String getNationalGradeEng() {
+        if (ects == null) {
+            return "";
+        }
         return ects.getNationalGradeEng(this);
     }
 }

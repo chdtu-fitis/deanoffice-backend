@@ -10,17 +10,14 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-@Table(name = "courses_for_groups", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"course_id", "studentgroup_id"})
-})
+@Table(name = "courses_for_groups")
 public class CourseForGroup extends BaseEntity {
     @ManyToOne
     private Course course;
     @ManyToOne
-    @JoinColumn(name = "studentgroup_id")
     private StudentGroup studentGroup;
     @ManyToOne
     private Teacher teacher;
-    @Column(name = "exam_date")
+    @Temporal(TemporalType.DATE)
     private Date examDate;
 }

@@ -29,7 +29,7 @@ public enum EducationDocument {
 
     private static boolean checkDocumentExist(EducationDocument document) {
         String eduDoc = document.toString();
-        for (EducationDocument educationDocument: values()) {
+        for (EducationDocument educationDocument : values()) {
             if (eduDoc.toLowerCase().equals(educationDocument.toString().toLowerCase())) {
                 return true;
             }
@@ -43,10 +43,14 @@ public enum EducationDocument {
 
     public static EducationDocument getPreviousDiplomaType(Integer degreeId) {
         switch (degreeId) {
-            case 1: return SECONDARY_SCHOOL_CERTIFICATE;
-            case 2: return JUNIOR_BACHELOR_DIPLOMA;
-            case 3: return BACHELOR_DIPLOMA;
-            default: return SECONDARY_SCHOOL_CERTIFICATE;
+            case 1:
+                return SECONDARY_SCHOOL_CERTIFICATE;
+            case 2:
+                return JUNIOR_BACHELOR_DIPLOMA;
+            case 3:
+                return BACHELOR_DIPLOMA;
+            default:
+                return SECONDARY_SCHOOL_CERTIFICATE;
         }
     }
 

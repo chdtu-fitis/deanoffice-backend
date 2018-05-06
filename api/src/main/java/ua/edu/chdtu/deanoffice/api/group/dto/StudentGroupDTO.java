@@ -21,12 +21,12 @@ public class StudentGroupDTO {
     private boolean active;
     @JsonView(StudentGroupView.AllGroupData.class)
     private int studySemesters;
+    @JsonView(StudentGroupView.Basic.class)
+    private int creationYear;
     @JsonView(StudentGroupView.WithStudents.class)
     private List<StudentDegreeFullNameDTO> studentDegrees;
     @JsonView(StudentGroupView.AllGroupData.class)
     private SpecializationDTO specialization;
-    @JsonView(StudentGroupView.AllGroupData.class)
-    private int creationYear;
     @JsonView(StudentGroupView.AllGroupData.class)
     private TuitionForm tuitionForm;
     @JsonView(StudentGroupView.AllGroupData.class)
@@ -35,4 +35,6 @@ public class StudentGroupDTO {
     private BigDecimal studyYears;
     @JsonView(StudentGroupView.AllGroupData.class)
     private int beginYears;
+
+    private int specializationId;
 }

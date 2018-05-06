@@ -49,7 +49,7 @@ public class DocumentIOService {
     private File saveDocument(Object document, String fileName, FileFormatEnum format)
             throws Docx4JException, FileNotFoundException {
 
-        String filePath = getJavaTempDirectory() + cleanFileName(fileName) + getFileCreationDateAndTime();
+        String filePath = getJavaTempDirectory() + "/" + cleanFileName(fileName) + getFileCreationDateAndTime();
         File documentFile = null;
 
         if (document instanceof WordprocessingMLPackage) {
@@ -69,11 +69,15 @@ public class DocumentIOService {
     }
 
     private String getFileCreationDateAndTime() {
-        DateFormat format = new SimpleDateFormat(" dd-MM-yyyy mm:ss");
-        return format.format(new Date());
+        DateFormat dateFormat = new SimpleDateFormat(" dd-MM-yyyy HH-mm");
+        System.out.println(dateFormat.format(new Date()));
+        return dateFormat.format(new Date());
     }
 
     public String cleanFileName(String fileName) {
-        return fileName.replaceAll("[\\W]*", "");
+        String result = new String(fileName);
+        result = result.replaceAll(" +", " ");
+        result = result.replaceAll("[^a-zA-Z0-9_]+", "");
+        return result;
     }
 }
