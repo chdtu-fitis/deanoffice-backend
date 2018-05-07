@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.api.student.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;
@@ -14,9 +14,11 @@ public class RenewedAcademicVacationStudentDTO {
     private StudentAcademicVacationDTO studentAcademicVacation;
     private int studyYear;
     private Payment payment;
-    private StudentGroupDTO studentGroup;
+    private NamedDTO studentGroup;
     private Date renewDate;
     private Date applicationDate;
+    private Date expelDate;
+    private String orderNumber;
 
     private Integer studentGroupId;
     private Integer studentAcademicVacationId;

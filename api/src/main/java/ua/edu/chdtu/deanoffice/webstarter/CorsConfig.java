@@ -14,10 +14,11 @@ public class CorsConfig {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
-                        .allowedOrigins("http://localhost:4200")
-//                        .allowedOrigins("http://195.95.232.162")
-                        .allowedHeaders("*");
+                registry.addMapping("/**").allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE")
+                        .allowedOrigins("http://localhost:4200","http://is.chdtu.edu.ua:4200")
+//                        .allowedOrigins("*")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

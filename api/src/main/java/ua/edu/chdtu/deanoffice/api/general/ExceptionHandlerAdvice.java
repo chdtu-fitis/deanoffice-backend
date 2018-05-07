@@ -7,6 +7,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * exceptionLocation -- клас, в якому була виловлена помилка (найчастіше контроллер).
+ * Приклад:
+ * try {
+ *      ...
+ *  } catch(Exception exception) {
+ *     return handleException(exception, StudentController.class)
+ * }
+ */
+
 @ControllerAdvice
 public class ExceptionHandlerAdvice {
 

@@ -55,6 +55,8 @@ public class StudentDTO {
     private String email;
     @JsonView(StudentView.Search.class)
     private String groups;
+    @JsonView(StudentView.Personal.class)
+    private String photoUrl;
     @JsonView(StudentView.Degrees.class)
     private Set<StudentDegreeDTO> degrees;
 }

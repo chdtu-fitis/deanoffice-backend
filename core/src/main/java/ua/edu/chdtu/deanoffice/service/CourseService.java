@@ -26,4 +26,7 @@ public class CourseService {
         return this.courseRepository.save(course);
     }
 
+    public Course getById(int id) {
+        return courseRepository.findOne(id);
+    }
 }

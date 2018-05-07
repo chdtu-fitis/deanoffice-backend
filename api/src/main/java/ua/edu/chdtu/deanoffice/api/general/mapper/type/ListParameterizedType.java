@@ -1,14 +1,14 @@
-package ua.edu.chdtu.deanoffice.api.general.parser.type;
+package ua.edu.chdtu.deanoffice.api.general.mapper.type;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Set;
+import java.util.List;
 
-public class SetParameterizedType implements ParameterizedType {
+public class ListParameterizedType implements ParameterizedType {
 
     private Type type;
 
-    public SetParameterizedType(Type type) {
+    public ListParameterizedType(Type type) {
         this.type = type;
     }
 
@@ -19,7 +19,7 @@ public class SetParameterizedType implements ParameterizedType {
 
     @Override
     public Type getRawType() {
-        return Set.class;
+        return List.class;
     }
 
     @Override

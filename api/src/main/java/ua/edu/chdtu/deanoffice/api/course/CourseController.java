@@ -7,18 +7,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.CourseService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
@@ -26,51 +29,52 @@ import ua.edu.chdtu.deanoffice.service.TeacherService;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
-import static ua.edu.chdtu.deanoffice.api.general.parser.Parser.parse;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
-@RequestMapping("/")
 @RestController
 public class CourseController {
     private CourseForGroupService courseForGroupService;
     private CourseService courseService;
     private StudentGroupService studentGroupService;
     private TeacherService teacherService;
+    private CourseNameService courseNameService;
 
     @Autowired
     public CourseController(
             CourseForGroupService courseForGroupService,
             CourseService courseService,
             StudentGroupService studentGroupService,
-            TeacherService teacherService
+            TeacherService teacherService,
+            CourseNameService courseNameService
     ) {
         this.courseForGroupService = courseForGroupService;
         this.courseService = courseService;
         this.studentGroupService = studentGroupService;
         this.teacherService = teacherService;
+        this.courseNameService = courseNameService;
     }
 
     @GetMapping("/courses")
     public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") int semester) {
         List<Course> courses = courseService.getCoursesBySemester(semester);
-        return ResponseEntity.ok(parse(courses, CourseDTO.class));
+        return ResponseEntity.ok(map(courses, CourseDTO.class));
     }
 
     @GetMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
         List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
-        return ResponseEntity.ok(parse(coursesForGroup, CourseForGroupDTO.class));
+        return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
     }
 
     @PostMapping("/groups/{groupId}/courses")
-    public ResponseEntity addCoursesForGroup(@RequestBody Map<String, List> body, @PathVariable Integer groupId) {
-        List<CourseForGroupDTO> newCourses = body.get("newCourses");
-        List<CourseForGroupDTO> updatedCourses = body.get("updatedCourses");
-        List<Integer> deleteCoursesIds = body.get("deleteCoursesIds");
+    public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {
+        List<CourseForGroupDTO> newCourses = coursesForGroupHolder.getNewCourses();
+        List<CourseForGroupDTO> updatedCourses = coursesForGroupHolder.getUpdatedCourses();
+        List<Integer> deleteCoursesIds = coursesForGroupHolder.getDeleteCoursesIds();
 
         if (newCourses == null || updatedCourses == null || deleteCoursesIds == null) {
             return ExceptionHandlerAdvice.handleException("Courses must not be null", CourseController.class);
@@ -120,25 +124,44 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCourses(@PathVariable int groupId) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
-        return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
+        return ResponseEntity.ok(map(courseForGroups, CourseForGroupDTO.class));
     }
 
     @GetMapping("/specialization/{id}/courses")
     @JsonView(CourseForGroupView.Basic.class)
     public ResponseEntity getCoursesBySpecialization(@PathVariable int id, @RequestParam("semester") int semester) {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCourseForGroupBySpecialization(id, semester);
-        return ResponseEntity.ok(parse(courseForGroups, CourseForGroupDTO.class));
+        return ResponseEntity.ok(map(courseForGroups, CourseForGroupDTO.class));
     }
 
     @PostMapping("/courses")
-    public ResponseEntity createCourse(@RequestBody Course course) {
+    public ResponseEntity createCourse(@RequestBody CourseDTO courseDTO) {
         try {
-            Course newCourse = this.courseService.createCourse(course);
-            URI location = getNewResourceLocation(newCourse.getId());
-            return ResponseEntity.created(location).build();
+            Course course = (Course) map(courseDTO, Course.class);
+            if (courseDTO.getCourseName().getId()!=0) {
+                Course newCourse = this.courseService.createCourse(course);
+                URI location = getNewResourceLocation(newCourse.getId());
+                return ResponseEntity.created(location).build();
+            }
+            else {
+                CourseName courseName = new CourseName();
+                courseName.setName(courseDTO.getCourseName().getName());
+                this.courseNameService.saveCourseName(courseName);
+                CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
+                course.setCourseName(newCourseName);
+                this.courseService.createCourse(course);
+                URI location = getNewResourceLocation(course.getId());
+                return ResponseEntity.created(location).build();
+            }
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    @GetMapping("courses/names")
+    public ResponseEntity getCourseNames(){
+        List<CourseName> courseNames = this.courseNameService.getCourseNames();
+        return ResponseEntity.ok(map(courseNames, NamedDTO.class));
     }
 
     private ResponseEntity handleException(Exception exception) {

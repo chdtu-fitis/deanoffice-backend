@@ -19,6 +19,8 @@ public class DocumentResponseController {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(result));
             return ResponseEntity.ok()
                     .header("Content-Disposition", "attachment; filename=" + asciiName)
+                    .header("content-filename",  asciiName)
+                    .header("Access-Control-Expose-Headers",  "content-filename")
                     .contentType(MediaType.parseMediaType(mediaType))
                     .contentLength(result.length())
                     .body(resource);
