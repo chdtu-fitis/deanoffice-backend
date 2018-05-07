@@ -26,7 +26,6 @@ import java.util.*;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
-@Transactional
 public class SummaryForGroupService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
@@ -50,6 +49,17 @@ public class SummaryForGroupService {
             throws Docx4JException, IOException {
         List<StudentSummaryForGroup> studentsSummaries = new ArrayList<>();
         StudentGroup group = studentGroupService.getById(groupId);
+        fillStudentsSummaries(studentsSummaries, group);
+
+        List<List<StudentSummaryForGroup>> dividedStudentSummaries = divideStudentSummaries(studentsSummaries);
+
+        WordprocessingMLPackage template = formTables(dividedStudentSummaries, group);
+
+        String fileName = LanguageUtil.transliterate(group.getName());
+        return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
+    }
+
+    private void fillStudentsSummaries(List<StudentSummaryForGroup> studentsSummaries, StudentGroup group) {
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
         studentDegrees.sort((sd1, sd2) -> {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
@@ -60,10 +70,13 @@ public class SummaryForGroupService {
                     studentsSummaries.add(new StudentSummaryForGroup(studentDegree, grades));
                 }
         );
+    }
 
-        List<List<StudentSummaryForGroup>> dividedStudentSummaries = divideStudentSummaries(studentsSummaries);
-
+    private WordprocessingMLPackage formTables(List<List<StudentSummaryForGroup>> dividedStudentSummaries, StudentGroup studentGroup)
+            throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
+
+        addGroupName(template, studentGroup);
 
         for (int i = 0; i < dividedStudentSummaries.size() - 1; i++) {
             copyTable(template, 0);
@@ -73,9 +86,14 @@ public class SummaryForGroupService {
             Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(i);
             prepareTable(table, dividedStudentSummaries.get(i));
         }
+        replacePlaceholdersWithBlank(template);
+        return template;
+    }
 
-        String fileName = LanguageUtil.transliterate(group.getName());
-        return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
+    private void addGroupName(WordprocessingMLPackage template, StudentGroup studentGroup) {
+        replaceValuesInTextPlaceholders(Arrays.asList(getTextsFromContentAccessor(template.getMainDocumentPart()).get(0)),
+                getGroupNameDictionary(studentGroup));
+        template.getMainDocumentPart().getContent().get(0);
     }
 
 
@@ -134,7 +152,7 @@ public class SummaryForGroupService {
 
         int cellNumberGradesStartWith = 2;
 
-        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size() + practices.size()+courseWorks.size() + 1));
+        replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size() + practices.size() + courseWorks.size() + 1));
         if (diplomaGrades.size() > 0) {
             replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0)));
         }
@@ -218,16 +236,24 @@ public class SummaryForGroupService {
     private String getPeriod(Grade grade) {
         int studyYear = grade.getStudentDegree().getStudentGroup().getCreationYear();
         int numberOfSemesters = 1;
-        Integer semester = 1;
+        Integer semester = grade.getCourse().getSemester();
         if (grade.getCourse() instanceof CombinedCourse) {
             numberOfSemesters = ((CombinedCourse) grade.getCourse()).getNumberOfSemesters();
-            semester = ((CombinedCourse) grade.getCourse()).getStartingSemester();
-
         }
 
-        int startingYear = studyYear + semester / 2 - 1;
-        int finishingYear = startingYear + numberOfSemesters / 2 + 1;
+        int finishingSemester = semester + numberOfSemesters - 1;
+        int startingYear = studyYear + (semester - 1) / 2;
+        int finishingYear = studyYear + (finishingSemester / 2);
+        if (finishingSemester % 2 != 0) {
+            finishingYear++;
+        }
         return startingYear + "-" + finishingYear;
+    }
+
+    private HashMap<String, String> getGroupNameDictionary(StudentGroup studentGroup) {
+        HashMap<String, String> result = new HashMap<>();
+        result.put("Group-name", studentGroup.getName());
+        return result;
     }
 
     private HashMap<String, String> getTotalGradeDictionary(StudentSummaryForGroup studentSummaryForGroup) {

@@ -45,7 +45,7 @@ public class TemplateUtil {
         replaceValuesInTextPlaceholders(placeholders, placeholdersValues);
     }
 
-    private static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
+    public static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
         for (Text text : placeholders) {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
@@ -59,7 +59,7 @@ public class TemplateUtil {
         return getTextsFromContentAccessor(template.getMainDocumentPart());
     }
 
-    private static List<Text> getTextsFromContentAccessor(ContentAccessor contentAccessor) {
+    public static List<Text> getTextsFromContentAccessor(ContentAccessor contentAccessor) {
         List<Object> texts = getAllElementsFromObject(contentAccessor, Text.class);
         List<Object> placeholders = new ArrayList<>();
         for (int i = 0; i < texts.size(); i++) {
@@ -88,6 +88,13 @@ public class TemplateUtil {
             if (placeholders.contains(text.getValue())) {
                 text.setValue("");
             }
+        }
+    }
+
+    public static void replacePlaceholdersWithBlank(WordprocessingMLPackage template) {
+        List<Text> texts = getTextsContainingPlaceholders(template);
+        for (Text text : texts) {
+            text.setValue("");
         }
     }
 
@@ -155,6 +162,15 @@ public class TemplateUtil {
         replaceInCell(tableCell, replacements);
     }
 
+    private static void fixRow(Tr row) {
+        List<Object> cells = row.getContent();
+        JAXBElement jaxbElement = (JAXBElement) (cells.get(cells.size() - 1));
+        if (!(jaxbElement.getValue() instanceof Tc)) {
+            cells.remove(cells.size() - 1);
+            fixRow(row);
+        }
+    }
+
     public static void cloneLastCellInRow(Tr templateRow) {
         fixRow(templateRow);
         List<Object> cells = templateRow.getContent();
@@ -170,14 +186,6 @@ public class TemplateUtil {
         template.getMainDocumentPart().addObject(XmlUtils.deepCopy(table));
     }
 
-    private static void fixRow(Tr row) {
-        List<Object> cells = row.getContent();
-        JAXBElement jaxbElement = (JAXBElement) (cells.get(cells.size() - 1));
-        if (!(jaxbElement.getValue() instanceof Tc)) {
-            cells.remove(cells.size() - 1);
-            fixRow(row);
-        }
-    }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {
         return StringUtils.isEmpty(value) ? ifNullOrEmpty : value;

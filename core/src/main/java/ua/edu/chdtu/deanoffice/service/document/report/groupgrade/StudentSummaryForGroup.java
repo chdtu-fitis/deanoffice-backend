@@ -46,29 +46,7 @@ public class StudentSummaryForGroup extends StudentSummary {
         if (grades.size() == 1) {
             return grades.get(0);
         } else {
-            List<Grade> examsGrades = getGradesByKnowledgeControlType(grades, Constants.EXAM);
-            switch (examsGrades.size()) {
-                case 1:
-                    resultingGrade = examsGrades.get(0);
-                    break;
-                case 0:
-                    List<Grade> differentiatedCreditGrades = getGradesByKnowledgeControlType(grades, Constants.DIFFERENTIATED_CREDIT);
-                    switch (differentiatedCreditGrades.size()) {
-                        case 0:
-                            resultingGrade = combineEqualGrades(grades);
-                            break;
-                        case 1:
-                            resultingGrade = differentiatedCreditGrades.get(0);
-                            break;
-                        default:
-                            resultingGrade = combineEqualGrades(differentiatedCreditGrades);
-                            break;
-                    }
-                    break;
-                default:
-                    resultingGrade = combineEqualGrades(examsGrades);
-                    break;
-            }
+            resultingGrade = combineGradeWithRightStrategy(grades);
         }
         CombinedCourse newCourse = new CombinedCourse(resultingGrade.getCourse());
         newCourse.setNumberOfSemesters(grades.size());
@@ -79,6 +57,34 @@ public class StudentSummaryForGroup extends StudentSummary {
         newCourse.setHours(hoursSum);
         newCourse.setCredits(new BigDecimal(hoursSum / Constants.HOURS_PER_CREDIT));
         resultingGrade.setCourse(newCourse);
+        return resultingGrade;
+    }
+
+    private Grade combineGradeWithRightStrategy(List<Grade> grades) {
+        Grade resultingGrade;
+        List<Grade> examsGrades = getGradesByKnowledgeControlType(grades, Constants.EXAM);
+        switch (examsGrades.size()) {
+            case 1:
+                resultingGrade = examsGrades.get(0);
+                break;
+            case 0:
+                List<Grade> differentiatedCreditGrades = getGradesByKnowledgeControlType(grades, Constants.DIFFERENTIATED_CREDIT);
+                switch (differentiatedCreditGrades.size()) {
+                    case 0:
+                        resultingGrade = combineEqualGrades(grades);
+                        break;
+                    case 1:
+                        resultingGrade = differentiatedCreditGrades.get(0);
+                        break;
+                    default:
+                        resultingGrade = combineEqualGrades(differentiatedCreditGrades);
+                        break;
+                }
+                break;
+            default:
+                resultingGrade = combineEqualGrades(examsGrades);
+                break;
+        }
         return resultingGrade;
     }
 }
