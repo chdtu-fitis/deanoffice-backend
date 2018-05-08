@@ -89,8 +89,10 @@ public class SpecializationController {
         Speciality speciality = this.specialityService.getById(specializationDTO.getSpecialityId());
         specialization.setSpeciality(speciality);
 
-        Department department = departmentService.getById(specializationDTO.getDepartmentId());
-        specialization.setDepartment(department);
+        if (specializationDTO.getDepartmentId() != null && specializationDTO.getDepartmentId() != 0) {
+            Department department = departmentService.getById(specializationDTO.getDepartmentId());
+            specialization.setDepartment(department);
+        }
 
         Degree degree = degreeService.getById(specializationDTO.getDegreeId());
         specialization.setDegree(degree);
