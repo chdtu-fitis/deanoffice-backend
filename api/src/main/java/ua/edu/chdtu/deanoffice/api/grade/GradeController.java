@@ -2,12 +2,7 @@ package ua.edu.chdtu.deanoffice.api.grade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -46,10 +41,10 @@ public class GradeController {
         return ResponseEntity.ok(new ArrayList<>());
     }
 
-    @GetMapping("/{groupId}/{semester}")
+    @GetMapping("/{groupId}")
     public ResponseEntity<List<GradeDTO>> getGrades(
             @PathVariable Integer groupId,
-            @PathVariable Integer semester) {
+            @RequestParam(value = "semester") Integer semester) {
         List<Grade> grades = this.gradeService.getGradesForStudents(getStudentsIdsByGroupId(groupId),
                 getCoursesIdsByGroupIdAndSemester(groupId, semester));
         return ResponseEntity.ok(map(grades, GradeDTO.class));
