@@ -77,7 +77,7 @@ public class SpecializationController {
             specialization = specializationService.save(specialization);
 
             URI location = getNewResourceLocation(specialization.getId());
-            return ResponseEntity.created(location).body(Mapper.map(specialization, SpecializationDTO.class));
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
