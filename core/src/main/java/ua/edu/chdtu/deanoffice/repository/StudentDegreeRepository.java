@@ -36,7 +36,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("active") boolean active
     );
 
-
     @Query("select s from StudentDegree sd " +
             "join sd.student s " +
             "where s.name like %:name% " +
