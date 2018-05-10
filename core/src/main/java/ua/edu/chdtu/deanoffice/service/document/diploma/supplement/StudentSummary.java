@@ -36,7 +36,7 @@ public class StudentSummary {
         combineMultipleSemesterCourseGrades();
     }
 
-    private static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
+    protected static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
         return grades.stream().filter(grade -> grade.getCourse().getKnowledgeControl().getId() == kcId).collect(Collectors.toList());
     }
 
@@ -85,7 +85,7 @@ public class StudentSummary {
         });
     }
 
-    private Grade combineGrades(List<Grade> grades) {
+    protected Grade combineGrades(List<Grade> grades) {
         if (grades == null || grades.isEmpty()) {
             return null;
         }
@@ -126,8 +126,14 @@ public class StudentSummary {
         return resultingGrade;
     }
 
-    private Grade combineEqualGrades(List<Grade> grades) {
-        Grade resultingGrade = grades.get(0);
+    protected Grade combineEqualGrades(List<Grade> grades) {
+        Grade resultingGrade = new Grade();
+        resultingGrade.setCourse(grades.get(0).getCourse());
+        resultingGrade.setEcts(grades.get(0).getEcts());
+        resultingGrade.setGrade(grades.get(0).getGrade());
+        resultingGrade.setPoints(grades.get(0).getPoints());
+        resultingGrade.setStudentDegree(grades.get(0).getStudentDegree());
+        resultingGrade.setId(grades.get(0).getId());
         Double pointsSum = 0.0;
         Double gradesSum = 0.0;
 
