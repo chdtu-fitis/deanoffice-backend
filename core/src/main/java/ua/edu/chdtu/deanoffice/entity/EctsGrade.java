@@ -44,6 +44,11 @@ public enum EctsGrade {
         return null;
     }
 
+    public static Integer getGrade(Integer points) {
+        if(points == null) return null;
+        return getEctsGrade(points).getGrade();
+    }
+
     public String getNationalGradeUkr(Grade grade) {
         if (!grade.getCourse().getKnowledgeControl().isGraded()) {
             if (grade.getEcts().equals(F) || grade.getEcts().equals(FX)) {

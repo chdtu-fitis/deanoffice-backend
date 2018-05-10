@@ -66,7 +66,7 @@ public class GradeService {
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
         grades.forEach(grade->{
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-            grade.setGrade(EctsGrade.getEctsGrade(grade.getPoints()).getGrade());
+            grade.setGrade(EctsGrade.getGrade(grade.getPoints()));
         });
         return grades;
     }
