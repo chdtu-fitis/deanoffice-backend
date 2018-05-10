@@ -14,4 +14,8 @@ public interface SpecializationRepository extends JpaRepository<Specialization, 
             "and s.faculty.id = :faculty_id " +
             "order by s.name, s.degree.id")
     List<Specialization> findAllByActive(@Param("active") boolean active, @Param("faculty_id") int facultyId);
+
+    @Query("select s from Specialization s " +
+            "where s.id in :specialization_ids")
+    List<Specialization> findAllByIds(@Param("specialization_ids") Integer[] specializationIds);
 }
