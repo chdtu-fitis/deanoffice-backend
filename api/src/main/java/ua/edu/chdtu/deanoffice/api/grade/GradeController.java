@@ -6,8 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -16,7 +19,6 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,15 +43,19 @@ public class GradeController {
     }
 
     @PutMapping
-    public ResponseEntity<List<GradeDTO>> putGrades(@RequestBody List<Grade> grades) {
-        this.gradeService.insertGrades(grades);
-        return ResponseEntity.ok(new ArrayList<>());
+    public ResponseEntity putGrades(@RequestBody List<Grade> grades) {
+        try {
+            this.gradeService.insertGrades(gradeService.setGradeAndEcts(grades));
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception, GradeController.class);
+        }
     }
 
-    @GetMapping("/{groupId}/{semester}")
-    public ResponseEntity<List<GradeDTO>> getGrades(
+    @GetMapping("/{groupId}")
+    public ResponseEntity getGrades(
             @PathVariable Integer groupId,
-            @PathVariable Integer semester) {
+            @RequestParam(value = "semester") Integer semester) {
         List<Grade> grades = this.gradeService.getGradesForStudents(getStudentsIdsByGroupId(groupId),
                 getCoursesIdsByGroupIdAndSemester(groupId, semester));
         return ResponseEntity.ok(map(grades, GradeDTO.class));

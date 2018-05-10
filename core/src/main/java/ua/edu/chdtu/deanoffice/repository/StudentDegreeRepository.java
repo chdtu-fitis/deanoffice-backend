@@ -28,9 +28,9 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "where sd.student.id = :student_id")
     List<StudentDegree> findAllByStudentId(@Param("student_id") Integer studentId);
 
-    @Query("SELECT sd FROM StudentDegree sd " +
+    @Query("select sd from StudentDegree sd join sd.student s " +
             "where sd.studentGroup.id = :groupId and sd.active = :active " +
-            "order by sd.student.surname, sd.student.name, sd.student.patronimic")
+            "order by s.surname, s.name, s.patronimic")
     List<StudentDegree> findStudentDegreeByStudentGroupIdAndActive(
             @Param("groupId") Integer groupId,
             @Param("active") boolean active
