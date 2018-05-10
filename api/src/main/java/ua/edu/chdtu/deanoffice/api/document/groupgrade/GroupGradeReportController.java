@@ -22,7 +22,7 @@ public class GroupGradeReportController extends DocumentResponseController {
     @Autowired
     private SummaryForGroupService summaryForGroupService;
 
-    @GetMapping("/groups/{group_id}/")
+    @GetMapping("/groups/{group_id}")
     public ResponseEntity<Resource> generateForGroup(
             @PathVariable("group_id") Integer groupId
     ) throws IOException, Docx4JException {
