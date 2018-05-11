@@ -25,7 +25,7 @@ public class DocumentIOService {
     }
 
     public WordprocessingMLPackage loadTemplate(String name) throws Docx4JException {
-        InputStream inputStream = getClass().getResourceAsStream(name);
+        InputStream inputStream = getClass().getResourceAsStream("/"+name);
         return WordprocessingMLPackage.load(inputStream);
     }
 
