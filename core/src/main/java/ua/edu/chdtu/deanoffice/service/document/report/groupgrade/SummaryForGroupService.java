@@ -23,12 +23,12 @@ import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
 public class SummaryForGroupService {
 
-    private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesTable.docx";
     private static final int MAXIMUM_STUDENTS_IN_TABLE = 15;
 

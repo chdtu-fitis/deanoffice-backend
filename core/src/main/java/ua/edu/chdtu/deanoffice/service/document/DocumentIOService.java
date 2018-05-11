@@ -20,13 +20,15 @@ import java.util.Date;
 @Service
 public class DocumentIOService {
 
-    private String getJavaTempDirectory() {
-        return System.getProperty("java.io.tmpdir");
-    }
+    public static final String TEMPLATES_PATH = "/docs/templates/";
 
     public WordprocessingMLPackage loadTemplate(String name) throws Docx4JException {
         InputStream inputStream = getClass().getResourceAsStream(name);
         return WordprocessingMLPackage.load(inputStream);
+    }
+
+    private String getJavaTempDirectory() {
+        return System.getProperty("java.io.tmpdir");
     }
 
     public SpreadsheetMLPackage loadSpreadsheetDocument(String name) throws IOException, Docx4JException {
