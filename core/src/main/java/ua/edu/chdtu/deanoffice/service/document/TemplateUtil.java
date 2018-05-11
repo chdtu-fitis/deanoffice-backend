@@ -11,6 +11,7 @@ import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
+import org.docx4j.wml.Tc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -52,7 +53,7 @@ public class TemplateUtil {
         replaceValuesInTextPlaceholders(placeholders, placeholdersValues);
     }
 
-    private static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
+    public static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
         for (Text text : placeholders) {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
@@ -66,7 +67,7 @@ public class TemplateUtil {
         return getTextsFromContentAccessor(template.getMainDocumentPart());
     }
 
-    private static List<Text> getTextsFromContentAccessor(ContentAccessor contentAccessor) {
+    public static List<Text> getTextsFromContentAccessor(ContentAccessor contentAccessor) {
         List<Object> texts = getAllElementsFromObject(contentAccessor, Text.class);
         List<Object> placeholders = new ArrayList<>();
         for (int i = 0; i < texts.size(); i++) {
@@ -95,6 +96,13 @@ public class TemplateUtil {
             if (placeholders.contains(text.getValue())) {
                 text.setValue("");
             }
+        }
+    }
+
+    public static void replacePlaceholdersWithBlank(WordprocessingMLPackage template) {
+        List<Text> texts = getTextsContainingPlaceholders(template);
+        for (Text text : texts) {
+            text.setValue("");
         }
     }
 
@@ -149,6 +157,43 @@ public class TemplateUtil {
         List<Text> textElements = getTextsFromContentAccessor(tableRow);
         replaceValuesInTextPlaceholders(textElements, replacements);
     }
+
+    public static void replaceInCell(Tc tableCell, Map<String, String> replacements) {
+        List<Text> textElements = getTextsFromContentAccessor(tableCell);
+        replaceValuesInTextPlaceholders(textElements, replacements);
+    }
+
+    public static void replaceInCell(Tr row, int cellIndex, Map<String, String> replacements) {
+        fixRow(row);
+        List<Object> cells = row.getContent();
+        Tc tableCell = ((JAXBElement<Tc>) (cells.get(cellIndex))).getValue();
+        replaceInCell(tableCell, replacements);
+    }
+
+    private static void fixRow(Tr row) {
+        List<Object> cells = row.getContent();
+        JAXBElement jaxbElement = (JAXBElement) (cells.get(cells.size() - 1));
+        if (!(jaxbElement.getValue() instanceof Tc)) {
+            cells.remove(cells.size() - 1);
+            fixRow(row);
+        }
+    }
+
+    public static void cloneLastCellInRow(Tr templateRow) {
+        fixRow(templateRow);
+        List<Object> cells = templateRow.getContent();
+        JAXBElement<Tc> jaxbElement = (JAXBElement<Tc>) (cells.get(cells.size() - 1));
+        Tc lastCell;
+        lastCell = jaxbElement.getValue();
+        Tc result = XmlUtils.deepCopy(lastCell);
+        templateRow.getContent().add(new JAXBElement<Tc>(jaxbElement.getName(), Tc.class, result));
+    }
+
+    public static void copyTable(WordprocessingMLPackage template, int tableIndex) {
+        Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(tableIndex);
+        template.getMainDocumentPart().addObject(XmlUtils.deepCopy(table));
+    }
+
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {
         return StringUtils.isEmpty(value) ? ifNullOrEmpty : value;
