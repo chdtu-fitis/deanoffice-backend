@@ -23,6 +23,7 @@ import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
@@ -30,8 +31,12 @@ import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+
+import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -77,7 +82,7 @@ public class SpecializationController {
             specialization = specializationService.save(specialization);
 
             URI location = getNewResourceLocation(specialization.getId());
-            return ResponseEntity.created(location).body(Mapper.map(specialization, SpecializationDTO.class));
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -89,8 +94,10 @@ public class SpecializationController {
         Speciality speciality = this.specialityService.getById(specializationDTO.getSpecialityId());
         specialization.setSpeciality(speciality);
 
-        Department department = departmentService.getById(specializationDTO.getDepartmentId());
-        specialization.setDepartment(department);
+        if (specializationDTO.getDepartmentId() != null && specializationDTO.getDepartmentId() != 0) {
+            Department department = departmentService.getById(specializationDTO.getDepartmentId());
+            specialization.setDepartment(department);
+        }
 
         Degree degree = degreeService.getById(specializationDTO.getDegreeId());
         specialization.setDegree(degree);
@@ -104,11 +111,8 @@ public class SpecializationController {
         return ExceptionHandlerAdvice.handleException(exception, SpecializationController.class);
     }
 
-    @JsonView(SpecializationView.Extended.class)
     @GetMapping("{specialization_id}")
-    public ResponseEntity getSpecializationById(
-            @PathVariable("specialization_id") Integer specializationId
-    ) {
+    public ResponseEntity getSpecializationById(@PathVariable("specialization_id") Integer specializationId) {
         Specialization specialization = specializationService.getById(specializationId);
         return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
     }
@@ -135,25 +139,42 @@ public class SpecializationController {
         throw new Exception(message);
     }
 
-    @DeleteMapping("/{specialization_id}")
-    public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") Integer specializationId) {
-        Specialization specialization = specializationService.getById(specializationId);
-        if (specialization == null) {
+    @DeleteMapping("/{specialization_ids}")
+    public ResponseEntity deleteSpecialization(@PathVariable("specialization_ids") Integer[] specializationIds) {
+        List<Specialization> specializations = specializationService.getByIds(specializationIds);
+        if (specializations.size() != specializationIds.length) {
             return ExceptionHandlerAdvice.handleException(
-                    "Not found specialization [" + specializationId +"]",
+                    "Not found specialization " + Arrays.toString(findNouFoundSpecializations(specializations, asList(specializationIds))),
                     SpecializationController.class,
                     HttpStatus.NOT_FOUND
             );
         }
         try {
-            if (!specialization.isActive()) {
-                throwException("Specialization [id = " + specializationId + "] already inactive");
+            if (hasInactiveSpecializations(specializations)) {
+                throwException("Specialization " + Arrays.toString(findInactiveSpecialization(specializations).toArray()) + " already inactive");
             }
-            specialization.setActive(false);
-            specializationService.save(specialization);
+            specializationService.delete(specializations);
             return ResponseEntity.noContent().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private Integer[] findNouFoundSpecializations(List<Specialization> found, List<Integer> initial) {
+        List<Integer> foundIds = found.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return (Integer[]) initial.stream().filter(integer -> findNouFoundSpecialization(integer, foundIds)).toArray();
+    }
+
+    private boolean findNouFoundSpecialization(Integer initialId, List<Integer> foundIds) {
+        foundIds = foundIds.stream().filter(integer -> integer.equals(initialId)).collect(Collectors.toList());
+        return foundIds.size() == 0;
+    }
+
+    private boolean hasInactiveSpecializations(List<Specialization> specializations) {
+        return findInactiveSpecialization(specializations).size() != 0;
+    }
+
+    private List<Specialization> findInactiveSpecialization(List<Specialization> specializations) {
+        return specializations.stream().filter(specialization -> !specialization.isActive()).collect(Collectors.toList());
     }
 }
