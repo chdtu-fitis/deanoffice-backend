@@ -184,8 +184,8 @@ public class SummaryForGroupService {
 
         for (int studentNumber = 0; studentNumber < studentSummaries.size(); studentNumber++) {
             StudentSummaryForGroup studentSummary = studentSummaries.get(studentNumber);
-            generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-            courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
+            generalGrades = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(0));
+            courseWorks = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(1));
             practices = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(2));
             diplomaGrades = new ArrayList<>(studentSummaries.get(studentNumber).getGrades().get(3));
 
