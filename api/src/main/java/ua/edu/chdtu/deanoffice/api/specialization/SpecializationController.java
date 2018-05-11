@@ -111,11 +111,8 @@ public class SpecializationController {
         return ExceptionHandlerAdvice.handleException(exception, SpecializationController.class);
     }
 
-    @JsonView(SpecializationView.Extended.class)
     @GetMapping("{specialization_id}")
-    public ResponseEntity getSpecializationById(
-            @PathVariable("specialization_id") Integer specializationId
-    ) {
+    public ResponseEntity getSpecializationById(@PathVariable("specialization_id") Integer specializationId) {
         Specialization specialization = specializationService.getById(specializationId);
         return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
     }
