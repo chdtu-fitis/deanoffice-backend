@@ -24,8 +24,9 @@ public class DocumentIOService {
         return System.getProperty("java.io.tmpdir");
     }
 
-    public WordprocessingMLPackage loadTemplate(String name) throws IOException, Docx4JException {
-        return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFile()));
+    public WordprocessingMLPackage loadTemplate(String name) throws Docx4JException {
+        InputStream inputStream = getClass().getResourceAsStream("/"+name);
+        return WordprocessingMLPackage.load(inputStream);
     }
 
     public SpreadsheetMLPackage loadSpreadsheetDocument(String name) throws IOException, Docx4JException {
