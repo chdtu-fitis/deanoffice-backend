@@ -42,10 +42,7 @@ public class StudentGroupService {
     public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year, int facultyId) {
         return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, getCurrentYear(), facultyId);
     }
-    public List<StudentGroup> getGroupsByYear( int year) {
-        Integer currYear = currentYearRepository.findOne(1).getCurrYear();
-        return studentGroupRepository.findGroupsByYear(year, currYear);
-    }
+
 
     public List<StudentGroup> getAllByActive(boolean onlyActive, int facultyId) {
         if (onlyActive) {

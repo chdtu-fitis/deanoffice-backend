@@ -48,10 +48,11 @@ public class ReportsCoursesService {
 
     public synchronized File prepareReportForGroup(Integer groupId,Integer semesterId) throws Docx4JException, IOException {
         StudentGroup group = groupService.getById(groupId);
+        System.out.println("okkkkkk");
         return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE, prepareGroup(groupId,semesterId),group.getName()), LanguageUtil.transliterate(group.getName())+".docx", FileFormatEnum.DOCX);
     }
-    public synchronized File prepareReportForYear(Integer year,Integer semesterId) throws Docx4JException, IOException {
-        List<StudentGroup> studentGroups = groupService.getGroupsByYear(year);
+    public synchronized File prepareReportForYear(Integer degreeId,Integer year,Integer semesterId, Integer facultyId) throws Docx4JException, IOException {
+        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYear(degreeId,year,facultyId);
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
         for(StudentGroup groups:studentGroups){
             List<CourseReport> courseReports = prepareGroup(groups.getId(),(int)semesterId);
@@ -74,6 +75,7 @@ public class ReportsCoursesService {
                     courseForGroup.getCourse().getHours().toString(),
                     courseForGroup.getTeacher() == null ? "": courseForGroup.getTeacher().getInitialsUkr(),
                     courseForGroup.getExamDate() == null ? "" : formatter.format(courseForGroup.getExamDate())));
+            System.out.println("_______");
         }
         return courseReports;
     }

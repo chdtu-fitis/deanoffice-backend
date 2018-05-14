@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.diplomasupplement.DiplomaSupplementController;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.document.report.journal.ReportsCoursesService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,13 +23,13 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/documents/coursereport")
-public class ReportsJournalContoller {
+public class ReportsJournalController {
 
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementController.class);
 
     private ReportsCoursesService reportsCoursesService;
 
-    public ReportsJournalContoller(ReportsCoursesService reportsCoursesService) {
+    public ReportsJournalController(ReportsCoursesService reportsCoursesService) {
         this.reportsCoursesService = reportsCoursesService;
     }
 
@@ -41,9 +43,10 @@ public class ReportsJournalContoller {
         File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semesterId);
         return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
-    @RequestMapping(method = RequestMethod.GET, path = "/year/{yearId}/{semesterId}")
-    public ResponseEntity<Resource> generateForYear(@PathVariable Integer yearId,@PathVariable Integer semesterId) throws IOException, Docx4JException {
-        File groupDiplomaSupplements = reportsCoursesService.prepareReportForYear(yearId, semesterId);
+    @RequestMapping(method = RequestMethod.GET, path = "/year/{degreeId}/{yearId}/{semesterId}")
+    public ResponseEntity<Resource> generateForYear(@PathVariable Integer degreeId, @PathVariable Integer yearId,@PathVariable Integer semesterId,@CurrentUser ApplicationUser user) throws IOException, Docx4JException {
+
+        File groupDiplomaSupplements = reportsCoursesService.prepareReportForYear(degreeId,yearId, semesterId,user.getFaculty().getId());
         return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName());
     }
 
