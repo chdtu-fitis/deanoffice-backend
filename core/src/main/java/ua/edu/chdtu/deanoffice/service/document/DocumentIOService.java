@@ -23,7 +23,7 @@ public class DocumentIOService {
     public static final String TEMPLATES_PATH = "/docs/templates/";
 
     public WordprocessingMLPackage loadTemplate(String name) throws Docx4JException {
-        InputStream inputStream = getClass().getResourceAsStream("/"+name);
+        InputStream inputStream = getClass().getResourceAsStream(name);
         return WordprocessingMLPackage.load(inputStream);
     }
 
