@@ -30,9 +30,9 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegree);
     }
 
-    public StudentDegree getFirst(Integer studentId) {
-        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findAllByStudentId(studentId);
-        return (studentDegrees.isEmpty()) ? null : studentDegrees.get(0);
+    public StudentDegree getFirstStudentDegree(Integer studentId) {
+        List<StudentDegree> studentDegreeList = this.studentDegreeRepository.findAllByStudentId(studentId);
+        return (studentDegreeList.isEmpty()) ? null : studentDegreeList.get(0);
     }
 
     public List<StudentDegree> getAllByGroupId(Integer groupId) {
