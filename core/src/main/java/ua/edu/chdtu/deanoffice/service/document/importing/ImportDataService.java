@@ -139,7 +139,7 @@ public class ImportDataService {
             throw new IllegalArgumentException(errorMsg + "Param \"student\" is empty!");
         }
 
-        List<Student> existsStudentList = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName());
+        List<Student> existsStudentList = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName(),1);
 
         if (existsStudentList.size() > 0) {
             student = existsStudentList.get(0);
@@ -164,7 +164,7 @@ public class ImportDataService {
 
         for (DegreeEnum degreeEnum : DegreeEnum.values()) {
             if (degreeEnum.getNameUkr().equals(data.getQualificationGroupName())) {
-                studentDegree.setDegree(degreeService.getDegreeById(degreeEnum.getId()));
+                studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
                 break;
             }
         }
@@ -242,11 +242,11 @@ public class ImportDataService {
         studentDegree.setStudent(student);
 
         if (student.getId() > 0) {
-            for (StudentDegree sDegree : studentDegreeService.getStudentDegree(student.getId())) {
-                if (studentDegree.getAdmissionOrderDate() != null && studentDegree.getAdmissionOrderDate() == sDegree.getAdmissionOrderDate()) {
-                    return sDegree;
-                }
-            }
+//            for (StudentDegree sDegree : studentDegreeService.getStudentDegree(student.getId())) {
+//                if (studentDegree.getAdmissionOrderDate() != null && studentDegree.getAdmissionOrderDate() == sDegree.getAdmissionOrderDate()) {
+//                    return sDegree;
+//                }
+//            }
         }
 
         return studentDegree;
