@@ -32,7 +32,10 @@ public class ReportsCoursesService {
 
     private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "PredmJourn.docx";
+    private static final String FILE_NAME= "jurnal_vidom_bakalavr_";
+    private static final String KURS= "_kurs";
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
+
 
     private StudentGroupService groupService;
     private CourseForGroupService courseForGroupService;
@@ -72,7 +75,7 @@ public class ReportsCoursesService {
             }
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,
-                                           "jurnal_vidom_bakalavr_"+year+"_kurs"+".docx", FileFormatEnum.DOCX);
+                                           FILE_NAME+year+KURS+".docx", FileFormatEnum.DOCX);
     }
 
     private List<CourseReport> prepareGroup(Integer groupId,Integer semesterId) {
