@@ -9,6 +9,12 @@ university DEANOFFICE project for improving student's software development knowl
 
 In order to work with IDEA Lombok plugin should be installed.
 
+**Run backend**
+In console in backend project root folder run:
+gradle :api:aasemble
+After that the application file api.war is created in build folder. Change folder to build and run:
+java -jar api.war
+
 **Authorization:**
 
 To have information about user who make request in a controller use next annotation @CurrentUser with ApplicationUser class as a parameter.
