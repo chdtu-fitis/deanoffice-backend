@@ -68,7 +68,7 @@ public class StudentDegreeController {
     @JsonView(StudentView.Degree.class)
     @PostMapping("/students/degrees")
     public ResponseEntity createNewStudentDegree(
-            @RequestBody() StudentDegreeDTO newStudentDegree,
+            @RequestBody StudentDegreeDTO newStudentDegree,
             @RequestParam(value = "new_student", defaultValue = "false", required = false) boolean newStudent
     ) {
         try {
