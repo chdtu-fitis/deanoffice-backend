@@ -3,6 +3,9 @@ package ua.edu.chdtu.deanoffice.util;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
 import java.text.Collator;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,23 +70,36 @@ public class GradeUtil {
     public static int[] adjustAverageGradeAndPoints(double averageGrade, double averagePoints) {
         int[] result = new int[2];
         if (Math.abs(averageGrade - 3.5) < 0.001 || Math.abs(averageGrade - 4.5) < 0.001) {
-            result[1] = (int) Math.round(averagePoints);
+            result[1] = (int) roundPoints(averagePoints);
             result[0] = GradeUtil.getGradeFromPoints(result[1]);
         } else {
-            if (GradeUtil.getGradeFromPoints((int) Math.round(averagePoints)) == Math.round(averageGrade)) {
+            if (GradeUtil.getGradeFromPoints((int) roundPoints(averagePoints)) == Math.round(averageGrade)) {
                 result[0] = (int) Math.round(averageGrade);
-                result[1] = (int) Math.round(averagePoints);
+                result[1] = (int) roundPoints(averagePoints);
             }
-            if (GradeUtil.getGradeFromPoints((int) Math.round(averagePoints)) > Math.round(averageGrade)) {
+            if (GradeUtil.getGradeFromPoints((int) roundPoints(averagePoints)) > Math.round(averageGrade)) {
                 result[0] = (int) Math.round(averageGrade);
                 result[1] = GradeUtil.getMaxPointsFromGrade((int) Math.round(averageGrade));
             }
-            if (GradeUtil.getGradeFromPoints((int) Math.round(averagePoints)) < Math.round(averageGrade)) {
+            if (GradeUtil.getGradeFromPoints((int) roundPoints(averagePoints)) < Math.round(averageGrade)) {
                 result[0] = (int) Math.round(averageGrade);
                 result[1] = GradeUtil.getMinPointsFromGrade((int) Math.round(averageGrade));
             }
         }
         return result;
+    }
+
+    private static long roundPoints(double points) {
+        NumberFormat format = DecimalFormat.getInstance();
+        DecimalFormatSymbols symbols = ((DecimalFormat) format).getDecimalFormatSymbols();
+        char separator = symbols.getDecimalSeparator();
+
+        double decimalPart = Double.parseDouble("0." + String.format("%.5f", points).split(String.valueOf(separator))[1]);
+        double precision = 0.001;
+        if (Math.abs(decimalPart - 0.5) < precision) {
+            points += precision;
+        }
+        return Math.round(points);
     }
 
     public static String getEctsGrade(Grade grade) {
