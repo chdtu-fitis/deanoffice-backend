@@ -35,4 +35,8 @@ public class SpecialityService {
     public Speciality getSpecialityByCode(String code) {
         return specialityRepository.getSpecialityByCode(code);
     }
+
+    public Speciality save(Speciality speciality) {
+        return specialityRepository.save(speciality);
+    }
 }

@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 
 @Service
@@ -19,5 +20,9 @@ public class FacultyService {
             return;
         else
             throw new Exception("403");
+    }
+
+    public Faculty getByName(String name) {
+        return facultyRepository.findByName(name);
     }
 }

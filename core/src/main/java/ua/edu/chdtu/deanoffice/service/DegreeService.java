@@ -21,4 +21,8 @@ public class DegreeService {
     public Degree getById(Integer degreeId) {
         return degreeRepository.findOne(degreeId);
     }
+
+    public Degree getByName(String degreeName) {
+        return degreeRepository.findByName(degreeName);
+    }
 }

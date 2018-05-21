@@ -28,6 +28,11 @@ public class SpecializationService {
         return specializationRepository.findOne(specializationId);
     }
 
+    public Specialization getByNameAndDegreeAndSpeciality(String name, Integer degreeId, Integer specialityId) {
+        List<Specialization> specializations = specializationRepository.findByNameAndDegreeAndSpeciality(name, degreeId, specialityId);
+        return specializations == null? null : specializations.get(0);
+    }
+
     public List<Specialization> getByIds(Integer[] specializationIds) {
         return specializationRepository.findAllByIds(specializationIds);
     }

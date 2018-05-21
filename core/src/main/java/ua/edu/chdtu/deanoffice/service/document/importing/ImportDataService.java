@@ -17,10 +17,7 @@ import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Worksheet;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
-import ua.edu.chdtu.deanoffice.service.DegreeService;
-import ua.edu.chdtu.deanoffice.service.SpecialityService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 
 import java.io.IOException;
@@ -41,24 +38,25 @@ public class ImportDataService {
     private final StudentService studentService;
     private final StudentDegreeService studentDegreeService;
     private final DegreeService degreeService;
+    private final FacultyService facultyService;
     private final SpecialityService specialityService;
+    private final SpecializationService specializationService;
 
     @Autowired
-    public ImportDataService(DocumentIOService documentIOService, StudentService studentService,
-                             StudentDegreeService studentDegreeService, DegreeService degreeService, SpecialityService specialityService) {
+    public ImportDataService(DocumentIOService documentIOService, StudentService studentService, StudentDegreeService studentDegreeService,
+                             DegreeService degreeService, SpecialityService specialityService, SpecializationService specializationService,
+                             FacultyService facultyService) {
         this.documentIOService = documentIOService;
         this.studentService = studentService;
         this.studentDegreeService = studentDegreeService;
         this.degreeService = degreeService;
         this.specialityService = specialityService;
+        this.specializationService = specializationService;
+        this.facultyService = facultyService;
     }
 
     public ImportReport getStudentsFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
         return getStudents(xlsxInputStream);
-    }
-
-    public ImportReport getStudentsFromFile(String fileName) throws IOException, Docx4JException {
-        return getStudents(fileName);
     }
 
     private ImportReport getStudents(Object source) throws IOException, Docx4JException {
@@ -127,24 +125,24 @@ public class ImportDataService {
         requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
         Student student = new Student();
         DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
-
+        Date birthDate = null;
         try {
-            Date birthDate = formatter.parse(data.getBirthday());
-            student.setBirthDate(birthDate);
+            birthDate = formatter.parse(data.getBirthday());
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
 
-        if (Strings.isNullOrEmpty(data.getFirstName()) || Strings.isNullOrEmpty(data.getLastName()) || data.getBirthday() == null) {
+        if (Strings.isNullOrEmpty(data.getFirstName()) || Strings.isNullOrEmpty(data.getLastName()) || birthDate == null) {
             throw new IllegalArgumentException(errorMsg + "Param \"student\" is empty!");
         }
 
-        List<Student> existsStudentList = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName(),1);
+        List<Student> existsStudentList = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName());
 
         if (existsStudentList.size() > 0) {
             student = existsStudentList.get(0);
         }
 
+        student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
         student.setPatronimic(data.getMiddleName());
@@ -162,15 +160,19 @@ public class ImportDataService {
         DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
         StudentDegree studentDegree = new StudentDegree();
 
+        Specialization specialization = fetchSpecialization(data.getFullSpecialityName(),data.getFullSpecializationName(), data.getProgramName(),
+                                                            data.getQualificationGroupName(), data.getFacultyName());
+        studentDegree.setSpecialization(specialization);
+
         for (DegreeEnum degreeEnum : DegreeEnum.values()) {
-            if (degreeEnum.getNameUkr().equals(data.getQualificationGroupName())) {
+            if (degreeEnum.getNameUkr().toLowerCase().equals(data.getQualificationGroupName().toLowerCase())) {
                 studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
                 break;
             }
         }
 
         for (EducationDocument eduDocument : EducationDocument.values()) {
-            if (eduDocument.getNameUkr().equals(data.getPersonDocumentType())) {
+            if (eduDocument.getNameUkr().toLowerCase().equals(data.getPersonDocumentType().toLowerCase())) {
                 studentDegree.setPreviousDiplomaType(eduDocument);
                 break;
             }
@@ -202,25 +204,35 @@ public class ImportDataService {
         return studentDegree;
     }
 
-    private Speciality fetchSpeciality(String specialityString) {
-        final String SPECIALITY_REGEXP = "([\\d.]+)[\\s]([\\w\\W]+)";
-        Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP);
-
+    private Specialization fetchSpecialization(String specialityString, String specializationString, String programString, String degreeName, String facultyName) {
+        final String SPECIALITY_REGEXP_OLD = "([\\d.]+)[\\s]([\\w\\W]+)";
+        final String SPECIALITY_REGEXP_NEW = "([\\d\\d\\d])[\\s]([\\w\\W]+)";
+        final String SPECIALIZATION_REGEXP = "([\\d+.\\d+])[\\s]([\\w\\W]+)";
+        Pattern specialityPattern;
         try {
+            if (specialityString.matches(SPECIALITY_REGEXP_OLD)) {
+                specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
+            } else {
+                specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
+            }
             Matcher matcher = specialityPattern.matcher(specialityString);
 
             if (matcher.matches() && matcher.groupCount() > 1) {
                 String code = matcher.group(1);
                 String name = StringUtils.capitalize(matcher.group(2)).trim();
-                Speciality speciality = getExistsSpeciality(name, code);
-
-                if (speciality == null) {
-                    speciality = new Speciality();
-                    speciality.setName(name);
-                    speciality.setCode(code);
-                }
-
-                return speciality;
+                String specializationName;
+                if (!Strings.isNullOrEmpty(programString))
+                    specializationName = programString;
+                else
+                    if (!Strings.isNullOrEmpty(specializationString)) {
+                        Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
+                        Matcher spMatcher = specializationPattern.matcher(specializationString);
+                        specializationName = spMatcher.group(1);
+                    }
+                    else
+                        specializationName = "";
+                Specialization specialization = getExistingOrSavedSpecialization(name, code, specializationName , degreeName, facultyName);
+                return specialization;
             }
         } catch (Exception e) {
             log.debug(e.getMessage());
@@ -229,9 +241,32 @@ public class ImportDataService {
         return null;
     }
 
-    private Speciality getExistsSpeciality(String name, String code) {
-        Speciality existsSpeciality = specialityService.getSpecialityByCode(code);
-        return existsSpeciality == null ? specialityService.getSpecialityByName(name) : existsSpeciality;
+    private Specialization getExistingOrSavedSpecialization(String specialityName, String specialityCode, String specializationName, String degreeName, String facultyName) {
+        Degree degree = degreeService.getByName(degreeName);
+        Speciality existingSpeciality = specialityService.getSpecialityByCode(specialityCode);
+        if (existingSpeciality == null) {
+            Speciality newSpeciality = new Speciality();
+            newSpeciality.setName(specialityName);
+            newSpeciality.setCode(specialityCode);
+            newSpeciality.setActive(true);
+            existingSpeciality = specialityService.save(newSpeciality);
+        }
+        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specializationName, degree.getId(), existingSpeciality.getId());
+        if (existingSpecialization == null) {
+            existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specialityName, degree.getId(), existingSpeciality.getId());
+        }
+        if (existingSpecialization == null) {
+            if (specialityCode.matches("\\d.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
+                Specialization specialization = new Specialization();
+                specialization.setName(specializationName);
+                specialization.setSpeciality(existingSpeciality);
+                specialization.setDegree(degree);
+                specialization.setFaculty(facultyService.getByName(facultyName));
+                specialization.setActive(true);
+                existingSpecialization = specializationService.save(specialization);
+            }
+        }
+        return existingSpecialization;
     }
 
     private StudentDegree fetchStudentDegree(ImportedData data, Student student) throws NullPointerException, IllegalArgumentException {
@@ -242,11 +277,11 @@ public class ImportDataService {
         studentDegree.setStudent(student);
 
         if (student.getId() > 0) {
-//            for (StudentDegree sDegree : studentDegreeService.getStudentDegree(student.getId())) {
-//                if (studentDegree.getAdmissionOrderDate() != null && studentDegree.getAdmissionOrderDate() == sDegree.getAdmissionOrderDate()) {
-//                    return sDegree;
-//                }
-//            }
+            for (StudentDegree sDegree : studentDegreeService.getAllActiveByStudent(student.getId())) {
+                if (studentDegree.getAdmissionOrderDate() != null && studentDegree.getAdmissionOrderDate() == sDegree.getAdmissionOrderDate()) {
+                    return sDegree;
+                }
+            }
         }
 
         return studentDegree;
@@ -264,18 +299,18 @@ public class ImportDataService {
                 student = fetchStudent(data);
             } catch (Exception e) {
                 log.error(e.getMessage());
-                importReport.fail(fetchStudentDegree(data));
+//                importReport.fail(fetchStudentDegree(data));
                 continue;
             }
 
             try {
                 studentDegree = fetchStudentDegree(data, student);
-                student = studentDegree.getStudent();
+//                student = studentDegree.getStudent();
 
-                if (Strings.isNullOrEmpty(student.getName()) || Strings.isNullOrEmpty(student.getSurname()) || student.getBirthDate() == null) {
-                    importReport.fail(studentDegree);
-                    continue;
-                }
+//                if (Strings.isNullOrEmpty(student.getName()) || Strings.isNullOrEmpty(student.getSurname()) || student.getBirthDate() == null) {
+//                    importReport.fail(studentDegree);
+//                    continue;
+//                }
 
                 if (studentDegree.getStudent().getId() > 0) {
                     importReport.update(studentDegree);
