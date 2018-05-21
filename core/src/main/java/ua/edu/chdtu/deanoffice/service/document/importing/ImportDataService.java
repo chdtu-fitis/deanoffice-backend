@@ -19,6 +19,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -146,13 +147,33 @@ public class ImportDataService {
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
         student.setPatronimic(data.getMiddleName());
-        student.setNameEng(ObjectUtils.firstNonNull(student.getNameEng(), data.getFirstNameEn()));
-        student.setSurnameEng(ObjectUtils.firstNonNull(student.getSurnameEng(), data.getLastNameEn()));
-        student.setPatronimicEng(ObjectUtils.firstNonNull(student.getPatronimicEng(), data.getMiddleNameEn()));
+        student.setNameEng(StringUtil.firstNotNullNotEmpty(data.getFirstNameEn(),student.getNameEng()));
+        student.setSurnameEng(StringUtil.firstNotNullNotEmpty(data.getLastNameEn(), student.getSurnameEng()));
+        student.setPatronimicEng(StringUtil.firstNotNullNotEmpty(data.getMiddleNameEn(), student.getPatronimicEng()));
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
-        student.setSchool(ObjectUtils.firstNonNull(student.getSchool(), data.getDocumentIssued()));
+        student.setSchool(StringUtil.firstNotNullNotEmpty(data.getDocumentIssued(),student.getSchool()));
 
         return student;
+    }
+
+    private StudentDegree fetchStudentDegree(ImportedData data, Student student) throws NullPointerException, IllegalArgumentException {
+        String errorMsg = "Failed to fetch data. ";
+        requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
+        requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
+        StudentDegree studentDegree = fetchStudentDegree(data);
+        studentDegree.setStudent(student);
+
+        StudentDegree existingStudentDegree = null;
+        if (student.getId() > 0) {
+            for (StudentDegree sDegree : studentDegreeService.getAllActiveByStudent(student.getId())) {
+                if (studentDegree.getSpecialization().getId() == sDegree.getSpecialization().getId()) {
+                    existingStudentDegree = sDegree;
+                    break;
+                }
+            }
+        }
+//degrees merge needed
+        return existingStudentDegree == null? studentDegree : existingStudentDegree;
     }
 
     private StudentDegree fetchStudentDegree(ImportedData data) throws NullPointerException {
@@ -163,13 +184,13 @@ public class ImportDataService {
         Specialization specialization = fetchSpecialization(data.getFullSpecialityName(),data.getFullSpecializationName(), data.getProgramName(),
                                                             data.getQualificationGroupName(), data.getFacultyName());
         studentDegree.setSpecialization(specialization);
-
-        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
-            if (degreeEnum.getNameUkr().toLowerCase().equals(data.getQualificationGroupName().toLowerCase())) {
-                studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
-                break;
-            }
-        }
+        studentDegree.setDegree(specialization.getDegree());
+//        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
+//            if (degreeEnum.getNameUkr().toLowerCase().equals(data.getQualificationGroupName().toLowerCase())) {
+//                studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
+//                break;
+//            }
+//        }
 
         for (EducationDocument eduDocument : EducationDocument.values()) {
             if (eduDocument.getNameUkr().toLowerCase().equals(data.getPersonDocumentType().toLowerCase())) {
@@ -269,24 +290,6 @@ public class ImportDataService {
         return existingSpecialization;
     }
 
-    private StudentDegree fetchStudentDegree(ImportedData data, Student student) throws NullPointerException, IllegalArgumentException {
-        String errorMsg = "Failed to fetch data. ";
-        requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
-        requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
-        StudentDegree studentDegree = fetchStudentDegree(data);
-        studentDegree.setStudent(student);
-
-        if (student.getId() > 0) {
-            for (StudentDegree sDegree : studentDegreeService.getAllActiveByStudent(student.getId())) {
-                if (studentDegree.getAdmissionOrderDate() != null && studentDegree.getAdmissionOrderDate() == sDegree.getAdmissionOrderDate()) {
-                    return sDegree;
-                }
-            }
-        }
-
-        return studentDegree;
-    }
-
     private ImportReport doImport(List<ImportedData> importedData) throws NullPointerException {
         Objects.requireNonNull(importedData);
         ImportReport importReport = new ImportReport();
@@ -312,7 +315,7 @@ public class ImportDataService {
 //                    continue;
 //                }
 
-                if (studentDegree.getStudent().getId() > 0) {
+                if (studentDegree.getId() > 0) {
                     importReport.update(studentDegree);
                 } else {
                     importReport.insert(studentDegree);
