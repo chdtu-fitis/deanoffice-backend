@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.api.document.diplomasupplement;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,6 @@ public class DiplomaSupplementController extends DocumentResponseController {
         this.facultyService = facultyService;
     }
 
-    //@ExceptionHandler({IOException.class, Docx4JException.class})
     @GetMapping("/degrees/{studentDegreeId}/docx")
     public ResponseEntity<Resource> generateDocxForStudent(@PathVariable Integer studentDegreeId,
                                                            @CurrentUser ApplicationUser user)
@@ -46,7 +44,6 @@ public class DiplomaSupplementController extends DocumentResponseController {
         }
     }
 
-    @ExceptionHandler({IOException.class, Docx4JException.class})
     @GetMapping("/degrees/{studentDegreeId}/pdf")
     public ResponseEntity<Resource> generatePdfForStudent(@PathVariable Integer studentDegreeId)
             throws IOException, Docx4JException {

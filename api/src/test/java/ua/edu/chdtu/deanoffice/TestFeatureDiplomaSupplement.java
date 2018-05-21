@@ -9,7 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.Degree;
+import ua.edu.chdtu.deanoffice.entity.EctsGrade;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
+import ua.edu.chdtu.deanoffice.entity.Speciality;
+import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
@@ -30,7 +42,11 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.util.GradeUtil.adjustAverageGradeAndPoints;
 
@@ -199,6 +215,21 @@ public class TestFeatureDiplomaSupplement {
         int[] actualResult2 = adjustAverageGradeAndPoints(4.5, 83);
         Assert.assertEquals(expectedResult2[0], actualResult2[0], 0.01);
         Assert.assertEquals(expectedResult2[1], actualResult2[1], 0.01);
+
+        double[] expectedResult3 = {4, 81};
+        int[] actualResult3 = adjustAverageGradeAndPoints(4, 80.50000000001);
+        Assert.assertEquals(expectedResult3[0], actualResult3[0], 0.01);
+        Assert.assertEquals(expectedResult3[1], actualResult3[1], 0.01);
+
+        double[] expectedResult4 = {4, 81};
+        int[] actualResult4 = adjustAverageGradeAndPoints(4, 80.49999999999);
+        Assert.assertEquals(expectedResult4[0], actualResult4[0], 0.01);
+        Assert.assertEquals(expectedResult4[1], actualResult4[1], 0.01);
+
+        double[] expectedResult5 = {4, 81};
+        int[] actualResult5 = adjustAverageGradeAndPoints(4, 80.50000000000);
+        Assert.assertEquals(expectedResult5[0], actualResult5[0], 0.01);
+        Assert.assertEquals(expectedResult5[1], actualResult5[1], 0.01);
     }
 
     private static Grade createGrade(Course course, int points) {
@@ -214,6 +245,7 @@ public class TestFeatureDiplomaSupplement {
         Course course = new Course();
         KnowledgeControl kc = new KnowledgeControl();
         course.setHours(90);
+        course.setHoursPerCredit(30);
         kc.setGraded(knowledgeControlHasGrade);
         if (knowledgeControlHasGrade) {
             kc.setName("іспит");
