@@ -21,14 +21,19 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+
+import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -143,25 +148,42 @@ public class GroupController {
         }
     }
 
-    @DeleteMapping("/groups/{group_id}")
-    public ResponseEntity deleteGroup(@PathVariable("group_id") Integer groupId) {
-        StudentGroup studentGroup = studentGroupService.getById(groupId);
-        if (studentGroup == null) {
+    @DeleteMapping("/groups/{group_ids}")
+    public ResponseEntity deleteGroup(@PathVariable("group_ids") Integer[] groupIds) {
+        List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
+        if (studentGroups.size() != groupIds.length) {
             return ExceptionHandlerAdvice.handleException(
-                    "Not found group [" + groupId +"]",
+                    "Not found groups " + Arrays.toString(findNouFoundStudentGroups(studentGroups, asList(groupIds))),
                     GroupController.class,
                     HttpStatus.NOT_FOUND
             );
         }
         try {
-            if (!studentGroup.isActive()) {
-                throwException("Group [" + groupId +"] already inactive");
+            if (hasInactiveStudentGroup(studentGroups)) {
+                throwException("Groups " + Arrays.toString(findInactiveStudentGroup(studentGroups).toArray()) + " already inactive");
             }
-            studentGroup.setActive(false);
-            studentGroupService.save(studentGroup);
+            studentGroupService.delete(studentGroups);
             return ResponseEntity.noContent().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private Integer[] findNouFoundStudentGroups(List<StudentGroup> found, List<Integer> initial) {
+        List<Integer> foundIds = found.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return (Integer[]) initial.stream().filter(integer -> findNouFoundStudentGroup(integer, foundIds)).toArray();
+    }
+
+    private boolean findNouFoundStudentGroup(Integer initialId, List<Integer> foundIds) {
+        foundIds = foundIds.stream().filter(integer -> integer.equals(initialId)).collect(Collectors.toList());
+        return foundIds.size() == 0;
+    }
+
+    private boolean hasInactiveStudentGroup(List<StudentGroup> studentGroups) {
+        return findInactiveStudentGroup(studentGroups).size() != 0;
+    }
+
+    private List<StudentGroup> findInactiveStudentGroup(List<StudentGroup> studentGroups) {
+        return studentGroups.stream().filter(studentGroup -> !studentGroup.isActive()).collect(Collectors.toList());
     }
 }
