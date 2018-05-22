@@ -13,6 +13,12 @@ public interface FacultyRepository extends JpaRepository<Faculty, Integer> {
             "WHERE sd.id = :studentDegreeId", nativeQuery = true)
     Integer findIdByStudent(@Param("studentDegreeId") Integer studentDegreeId);
 
+    @Query(value = "select f.id from student_group sg " +
+            "inner join specialization s ON s.id = sg.specialization_id " +
+            "inner join faculty f ON f.id = s.faculty_id " +
+            "WHERE sg.id = :studentGroupId", nativeQuery = true)
+    Integer findIdByGroup(@Param("studentGroupId") Integer studentGroupId);
+
     @Query("select f from Faculty f where upper(f.name)=upper(':name')")
     Faculty findByName(@Param("name") String name);
 }
