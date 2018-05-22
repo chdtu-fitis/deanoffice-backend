@@ -8,6 +8,7 @@ import lombok.Setter;
 public class GradeDTO {
     private Integer id;
     private Integer points;
+    private Boolean onTime;
     private Integer courseId;
     private Integer studentDegreeId;
 }
