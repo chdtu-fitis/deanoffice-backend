@@ -18,7 +18,7 @@ public class CombinedCourse extends Course {
         setSemester(course.getSemester());
         setKnowledgeControl(course.getKnowledgeControl());
         setHours(course.getHours());
-        setHoursPerCredit(course.getHours());
+        setHoursPerCredit(course.getHoursPerCredit());
         setCredits(course.getCredits());
     }
 

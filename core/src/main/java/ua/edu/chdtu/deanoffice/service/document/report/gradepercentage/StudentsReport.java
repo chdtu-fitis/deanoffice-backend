@@ -47,34 +47,37 @@ public class StudentsReport {
         double eSum = 0;
 
         for (Grade grade : grades) {
-            switch (grade.getGrade()) {
-                case 3: {
-                    satisfactory++;
-                    if (EctsGrade.getEctsGrade(grade.getPoints()).equals(EctsGrade.D)) {
-                        dSum++;
-                    } else {
-                        eSum++;
+            if (grade.getGrade() != null) {
+                switch (grade.getGrade()) {
+                    case 3: {
+                        satisfactory++;
+                        if (grade.getPoints() != null && EctsGrade.getEctsGrade(grade.getPoints()).equals(EctsGrade.D)) {
+                            dSum++;
+                        } else {
+                            eSum++;
+                        }
+                        break;
                     }
-                    break;
-                }
-                case 4: {
-                    good++;
-                    if (EctsGrade.getEctsGrade(grade.getPoints()).equals(EctsGrade.B)) {
-                        bSum++;
-                    } else {
-                        cSum++;
+                    case 4: {
+                        good++;
+                        if (grade.getPoints() != null && EctsGrade.getEctsGrade(grade.getPoints()).equals(EctsGrade.B)) {
+                            bSum++;
+                        } else {
+                            cSum++;
+                        }
+                        break;
                     }
-                    break;
+                    case 5: {
+                        excellent++;
+                        aSum++;
+                        break;
+                    }
+                    default: {
+                        badGrades++;
+                    }
                 }
-                case 5: {
-                    excellent++;
-                    aSum++;
-                    break;
-                }
-                default: {
-                    badGrades++;
-
-                }
+            } else {
+                badGrades++;
             }
         }
 
