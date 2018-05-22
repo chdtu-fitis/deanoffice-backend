@@ -53,4 +53,8 @@ public class CourseForGroupService {
             courseForGroupRepository.delete(courseId);
         }
     }
+
+    public void save(CourseForGroup courseForGroup){
+        this.courseForGroupRepository.save(courseForGroup);
+    }
 }

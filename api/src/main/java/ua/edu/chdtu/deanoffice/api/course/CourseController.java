@@ -3,12 +3,7 @@ package ua.edu.chdtu.deanoffice.api.course;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
@@ -20,11 +15,7 @@ import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.CourseNameService;
-import ua.edu.chdtu.deanoffice.service.CourseService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -40,6 +31,7 @@ public class CourseController {
     private CourseService courseService;
     private StudentGroupService studentGroupService;
     private TeacherService teacherService;
+    private GradeService gradeService;
     private CourseNameService courseNameService;
 
     @Autowired
@@ -48,13 +40,15 @@ public class CourseController {
             CourseService courseService,
             StudentGroupService studentGroupService,
             TeacherService teacherService,
-            CourseNameService courseNameService
+            CourseNameService courseNameService,
+            GradeService gradeService
     ) {
         this.courseForGroupService = courseForGroupService;
         this.courseService = courseService;
         this.studentGroupService = studentGroupService;
         this.teacherService = teacherService;
         this.courseNameService = courseNameService;
+        this.gradeService = gradeService;
     }
 
     @GetMapping("/courses")
@@ -68,6 +62,20 @@ public class CourseController {
     public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
         List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
+    }
+
+    @PutMapping("/groups/{groupId}/courses")
+    @JsonView(CourseForGroupView.Course.class)
+    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupDTO courseForGroupDTO) {
+        CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseForGroupDTO.getCourse().getId());
+        if (courseForGroup != null) {
+
+            courseForGroupService.save((CourseForGroup) map(courseForGroup, CourseForGroupDTO.class));
+            return ResponseEntity.ok(map(courseForGroup, CourseForGroupDTO.class));
+        }
+
+        return ResponseEntity.ok(map(courseForGroup, CourseForGroupDTO.class));
+
     }
 
     @PostMapping("/groups/{groupId}/courses")
