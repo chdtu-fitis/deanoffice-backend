@@ -141,16 +141,16 @@ public class StudentSummary {
             }
         }
 
-        double averageGrade = gradesSum / grades.size();
-        double averagePoints = pointsSum / grades.size();
+        double averageGrade = gradesSum / (double) grades.size();
+        double averagePoints = pointsSum / (double) grades.size();
 
         if (resultingGrade.getCourse().getKnowledgeControl().isGraded()) {
             int[] gradeAndPoints = GradeUtil.adjustAverageGradeAndPoints(averageGrade, averagePoints);
             resultingGrade.setGrade(gradeAndPoints[0]);
             resultingGrade.setPoints(gradeAndPoints[1]);
         } else {
-            resultingGrade.setGrade((int) averageGrade);
-            resultingGrade.setPoints((int) averagePoints);
+            resultingGrade.setGrade((int) GradeUtil.roundPoints(averageGrade));
+            resultingGrade.setPoints((int) GradeUtil.roundPoints(averagePoints));
             if (resultingGrade.getPoints() >= 60) {
                 resultingGrade.setEcts(EctsGrade.getEctsGrade(resultingGrade.getPoints()));
             } else {
