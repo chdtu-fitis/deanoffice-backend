@@ -48,4 +48,8 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             @Param("curr_year") Integer currYear,
             @Param("faculty_id") int facultyId
     );
+
+    @Query("select sg from StudentGroup sg " +
+            "where sg.id in :group_ids")
+    List<StudentGroup> findAllByIds(@Param("group_ids") Integer[] groupIds);
 }

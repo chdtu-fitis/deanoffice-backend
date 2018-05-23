@@ -53,4 +53,13 @@ public class StudentGroupService {
     public StudentGroup save(StudentGroup studentGroup) {
         return studentGroupRepository.save(studentGroup);
     }
+
+    public List<StudentGroup> getByIds(Integer[] groupIds) {
+        return studentGroupRepository.findAllByIds(groupIds);
+    }
+
+    public void delete(List<StudentGroup> studentGroups) {
+        studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
+        studentGroupRepository.save(studentGroups);
+    }
 }

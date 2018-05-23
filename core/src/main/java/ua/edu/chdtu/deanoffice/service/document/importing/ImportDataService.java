@@ -151,7 +151,7 @@ public class ImportDataService {
         student.setSurnameEng(StringUtil.firstNotNullNotEmpty(data.getLastNameEn(), student.getSurnameEng()));
         student.setPatronimicEng(StringUtil.firstNotNullNotEmpty(data.getMiddleNameEn(), student.getPatronimicEng()));
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
-        student.setSchool(StringUtil.firstNotNullNotEmpty(data.getDocumentIssued(),student.getSchool()));
+        student.setSchool(StringUtil.firstNotNullNotEmpty(data.getDocumentIssued2(),student.getSchool()));
 
         return student;
     }
