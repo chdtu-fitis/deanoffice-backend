@@ -131,10 +131,10 @@ public class SummaryForGroupService {
     private void fillData(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         SummaryForGroupTableDetails summaryForGroupTableDetails = new SummaryForGroupTableDetails(studentSummaries);
-        List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-        List<Grade> courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
-        List<Grade> practices = new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
-        List<Grade> diplomaGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
+        List<Grade> generalGrades = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(0));
+        List<Grade> courseWorks = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(1));
+        List<Grade> practices = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(2));
+        List<Grade> diplomaGrades = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(3));
         Tr rowWithStudentNames = tableRows.get(summaryForGroupTableDetails.getRowWithNamesPosition());
         Tr rowWithTotalGrade = tableRows.get(summaryForGroupTableDetails.getRowWithTotalGradesPosition());
         Tr rowWithAverageGrade = tableRows.get(summaryForGroupTableDetails.getRowWithAverageGradePosition());
