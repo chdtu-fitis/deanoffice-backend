@@ -49,6 +49,9 @@ public class StudentSummaryForGroup extends StudentSummary {
             resultingGrade = combineGradeWithRightStrategy(grades);
         }
         CombinedCourse newCourse = new CombinedCourse(resultingGrade.getCourse());
+        if (resultingGrade.getCourse() instanceof CombinedCourse) {
+            newCourse.setCombined(((CombinedCourse) resultingGrade.getCourse()).isCombined());
+        }
         newCourse.setNumberOfSemesters(grades.size());
         newCourse.setStartingSemester(grades.get(0).getCourse().getSemester());
         if (newCourse.getSemester() == null) {
@@ -86,5 +89,15 @@ public class StudentSummaryForGroup extends StudentSummary {
                 break;
         }
         return resultingGrade;
+    }
+
+    @Override
+    protected Grade combineEqualGrades(List<Grade> grades) {
+        Grade result = super.combineEqualGrades(grades);
+        CombinedCourse newCourse = new CombinedCourse(result.getCourse());
+        newCourse.setCombined(true);
+        result.setCourse(newCourse);
+        return result;
+
     }
 }
