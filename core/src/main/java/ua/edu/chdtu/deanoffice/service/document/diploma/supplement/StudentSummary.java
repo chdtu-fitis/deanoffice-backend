@@ -25,12 +25,14 @@ public class StudentSummary {
 
     private StudentDegree studentDegree;
     private List<List<Grade>> grades;
-    private Integer totalHours = 0;
+    private Integer totalHours;
+    private BigDecimal totalCredits;
 
     public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
         this.studentDegree = studentDegree;
         this.grades = grades;
         calculateTotalHours();
+        calculateTotalCredits();
         combineMultipleSemesterCourseGrades();
     }
 
@@ -47,6 +49,7 @@ public class StudentSummary {
     }
 
     private void calculateTotalHours() {
+        totalHours = 0;
         grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
             if (grade.getCourse().getHours() != null) {
                 totalHours += grade.getCourse().getHours();
@@ -160,8 +163,13 @@ public class StudentSummary {
         return resultingGrade;
     }
 
-    public BigDecimal getTotalCredits() {
-        return new BigDecimal(getTotalHours() / Constants.HOURS_PER_CREDIT);
+    private void calculateTotalCredits() {
+        totalCredits = new BigDecimal(0);
+        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
+            if (grade.getCourse().getCredits() != null) {
+                totalCredits = totalCredits.add(grade.getCourse().getCredits());
+            }
+        }));
     }
 
     public Double getTotalGrade() {
@@ -206,6 +214,6 @@ public class StudentSummary {
     }
 
     EctsGrade getTotalEcts() {
-        return EctsGrade.getEctsGrade((int) Math.round(getTotalGrade()));
+        return EctsGrade.getEctsGrade((int) GradeUtil.roundPoints(getTotalGrade()));
     }
 }
