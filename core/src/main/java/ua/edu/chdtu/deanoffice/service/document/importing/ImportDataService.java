@@ -161,6 +161,8 @@ public class ImportDataService {
         requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
         requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
         StudentDegree studentDegree = fetchStudentDegree(data);
+        if (studentDegree == null)
+            return null;
         studentDegree.setStudent(student);
 
         StudentDegree existingStudentDegree = null;
@@ -183,6 +185,8 @@ public class ImportDataService {
 
         Specialization specialization = fetchSpecialization(data.getFullSpecialityName(),data.getFullSpecializationName(), data.getProgramName(),
                                                             data.getQualificationGroupName(), data.getFacultyName());
+        if (specialization == null)
+            return null;
         studentDegree.setSpecialization(specialization);
         studentDegree.setDegree(specialization.getDegree());
 //        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
@@ -314,7 +318,8 @@ public class ImportDataService {
 //                    importReport.fail(studentDegree);
 //                    continue;
 //                }
-
+                if (studentDegree == null && student.getId() == 0)
+                    importReport.fail(student);
                 if (studentDegree.getId() > 0) {
                     importReport.update(studentDegree);
                 } else {
