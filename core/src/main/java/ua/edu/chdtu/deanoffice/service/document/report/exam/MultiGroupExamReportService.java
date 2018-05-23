@@ -16,9 +16,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+
 @Service
 public class MultiGroupExamReportService {
-    private static final String TEMPLATES_PATH = "docs/templates/";
+
     private static final String TEMPLATE = TEMPLATES_PATH + "MultiGroupExamReport.docx";
 
     private DocumentIOService documentIOService;

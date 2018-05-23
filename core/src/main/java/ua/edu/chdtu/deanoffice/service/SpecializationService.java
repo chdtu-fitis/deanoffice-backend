@@ -27,4 +27,18 @@ public class SpecializationService {
     public Specialization getById(Integer specializationId) {
         return specializationRepository.findOne(specializationId);
     }
+
+    public Specialization getByNameAndDegreeAndSpeciality(String name, Integer degreeId, Integer specialityId) {
+        List<Specialization> specializations = specializationRepository.findByNameAndDegreeAndSpeciality(name, degreeId, specialityId);
+        return specializations.size() == 0 ? null : specializations.get(0);
+    }
+
+    public List<Specialization> getByIds(Integer[] specializationIds) {
+        return specializationRepository.findAllByIds(specializationIds);
+    }
+
+    public void delete(List<Specialization> specializations) {
+        specializations.forEach(specialization -> specialization.setActive(false));
+        specializationRepository.save(specializations);
+    }
 }

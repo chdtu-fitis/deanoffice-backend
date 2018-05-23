@@ -25,4 +25,10 @@ public interface SpecialityRepository extends JpaRepository<Speciality, Integer>
             "order by s.name, s.code",
             nativeQuery = true)
     List<Speciality> findAll(@Param("faculty_id") int facultyId);
+
+    List<Speciality> findAllByActiveOrderByName(boolean active);
+
+    Speciality getSpecialityByName(String name);
+
+    Speciality getSpecialityByCode(String code);
 }

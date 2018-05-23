@@ -2,10 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
@@ -64,6 +61,14 @@ public class GradeService {
         return gradeRepository.getByStudentIdAndCoursesAndKCTypes(student.getId(),
                 courseIds,
                 knowledgeControlTypes);
+    }
+
+    public List<Grade> setGradeAndEcts(List<Grade> grades) {
+        grades.forEach(grade->{
+            grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
+            grade.setGrade(EctsGrade.getGrade(grade.getPoints()));
+        });
+        return grades;
     }
 
     public List<Grade> getAllDifferentiatedGrades(Integer studentDegreeId) {

@@ -27,4 +27,16 @@ public class SpecialityService {
     public Speciality getById(Integer specialityId) {
         return specialityRepository.findOne(specialityId);
     }
+
+    public Speciality getSpecialityByName(String name) {
+        return specialityRepository.getSpecialityByName(name);
+    }
+
+    public Speciality getSpecialityByCode(String code) {
+        return specialityRepository.getSpecialityByCode(code);
+    }
+
+    public Speciality save(Speciality speciality) {
+        return specialityRepository.save(speciality);
+    }
 }

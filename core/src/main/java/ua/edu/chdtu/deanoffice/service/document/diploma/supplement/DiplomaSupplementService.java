@@ -15,10 +15,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+
 @Service
 public class DiplomaSupplementService {
 
-    private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "DiplomaSupplement.docx";
 
     private final GradeService gradeService;

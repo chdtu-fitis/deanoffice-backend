@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+
 
 @Service
 public class GradePercentageReportService {
 
-    private static final String TEMPLATES_PATH = "docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesPercentage.docx";
     private static final Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 

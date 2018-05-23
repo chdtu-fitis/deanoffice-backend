@@ -38,4 +38,8 @@ public class StudentDegreeService {
     public List<StudentDegree> getAllByGroupId(Integer groupId) {
         return this.studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
     }
+
+    public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
+        return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
+    }
 }
