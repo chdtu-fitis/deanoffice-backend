@@ -47,8 +47,8 @@ public class CourseController {
         this.gradeService = gradeService;
     }
 
-    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup oldCourseForGroup, CourseForGroup newCourseForGroup) {
-        List<Grade> grades = gradeService.getGradesByCourse(oldCourse);
+    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup oldCourseForGroup, CourseForGroup newCourseForGroup, int groupId) {
+        List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
         courseForGroupService.deleteCourseForGroup(oldCourseForGroup);
         gradeService.saveGradesByCourse(newCourse, grades);
         newCourseForGroup.setCourse(newCourse);
@@ -82,11 +82,11 @@ public class CourseController {
             oldCourseForGroup.setStudentGroup(group);
             newCourseForGroup.setStudentGroup(group);
             if (course != null) {
-                CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, newCourse, oldCourseForGroup, newCourseForGroup);
+                CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, newCourse, oldCourseForGroup, newCourseForGroup, groupId);
                 return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
             }
             Course createdNewCourse = courseService.createCourse(newCourse);
-            CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, createdNewCourse, oldCourseForGroup, newCourseForGroup);
+            CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, createdNewCourse, oldCourseForGroup, newCourseForGroup, groupId);
             return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);

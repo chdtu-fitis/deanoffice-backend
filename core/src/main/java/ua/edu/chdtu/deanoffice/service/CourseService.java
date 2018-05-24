@@ -1,5 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -28,5 +30,9 @@ public class CourseService {
 
     public Course getById(int id) {
         return courseRepository.findOne(id);
+    }
+
+    public Course getByCourse(Course course){
+        return courseRepository.findOne(course.getId());
     }
 }

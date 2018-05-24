@@ -94,8 +94,8 @@ public class GradeService {
         return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
     }
 
-    public List<Grade> getGradesByCourse(Course course){
-        return gradeRepository.findByCourse(course);
+    public List<Grade> getGradesByCourseAndGroup(int courseId, int groupId){
+        return gradeRepository.findByCourseAndGroup(courseId, groupId);
     }
 
     public void saveGradesByCourse(Course  course, List<Grade> grades){
