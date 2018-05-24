@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.student.dto;
 
 import ua.edu.chdtu.deanoffice.api.general.dto.GeneralView;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 
 public class StudentView {
     interface DetailAndDegree {}
@@ -16,7 +17,7 @@ public class StudentView {
 
     public interface Detail extends Simple, DetailAndDegree {}
 
-    public interface Degree extends Simple, DetailAndDegree {}
+    public interface Degree extends Simple, DetailAndDegree, SpecializationView.WithDegreeAndSpeciality {}
 
     public interface Personal extends Detail {}
 

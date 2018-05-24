@@ -20,8 +20,6 @@ public class StudentDegree extends BaseEntity {
     private Student student;
     @ManyToOne
     private StudentGroup studentGroup;
-    @ManyToOne
-    private Degree degree;
     @ManyToOne(fetch = FetchType.LAZY)
     private Specialization specialization;
     private String recordBookNumber;
