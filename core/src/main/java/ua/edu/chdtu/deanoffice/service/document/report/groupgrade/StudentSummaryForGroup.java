@@ -58,7 +58,7 @@ public class StudentSummaryForGroup extends StudentSummary {
             newCourse.setSemester(grades.get(0).getCourse().getSemester());
         }
         newCourse.setHours(hoursSum);
-        newCourse.setCredits(new BigDecimal(hoursSum / newCourse.getHoursPerCredit()));
+        newCourse.setCredits(new BigDecimal((double) hoursSum / newCourse.getHoursPerCredit()));
         resultingGrade.setCourse(newCourse);
         return resultingGrade;
     }
