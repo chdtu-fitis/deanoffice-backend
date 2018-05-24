@@ -8,8 +8,7 @@ public class CoursesForGroupHolder {
     private List<CourseForGroupDTO> newCourses;
     private List<CourseForGroupDTO> updatedCourses;
     private List<Integer> deleteCoursesIds;
-    private CourseForGroupDTO  oldCourse;
-    private CourseForGroupDTO newCourse;
+
 
     CoursesForGroupHolder(){}
 
@@ -25,11 +24,5 @@ public class CoursesForGroupHolder {
         return deleteCoursesIds;
     }
 
-    public CourseForGroupDTO getOldCourse() {
-        return oldCourse;
-    }
 
-    public CourseForGroupDTO getNewCourse() {
-        return newCourse;
-    }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
 import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
@@ -71,7 +72,7 @@ public class CourseController {
 
     @PutMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CoursesForGroupHolder coursesForGroupHolder) {
+    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
             Course course = courseService.getCourse(coursesForGroupHolder.getNewCourse().getCourse().getId());
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class);
