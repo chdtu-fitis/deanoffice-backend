@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
@@ -46,7 +47,7 @@ public class StudentDegreeDTO {
     @JsonView(StudentView.SimpleAndDegrees.class)
     private Payment payment;
     @JsonView(StudentView.Degree.class)
-    private NamedDTO degree;
+    private SpecializationDTO specialization;
     @JsonView(StudentView.WithActive.class)
     private boolean active;
     @JsonView(StudentView.DetailAndDegree.class)

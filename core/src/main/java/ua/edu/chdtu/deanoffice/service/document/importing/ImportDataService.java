@@ -187,7 +187,6 @@ public class ImportDataService {
         if (specialization == null)
             return null;
         studentDegree.setSpecialization(specialization);
-        studentDegree.setDegree(specialization.getDegree());
 //        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
 //            if (degreeEnum.getNameUkr().toLowerCase().equals(data.getQualificationGroupName().toLowerCase())) {
 //                studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
