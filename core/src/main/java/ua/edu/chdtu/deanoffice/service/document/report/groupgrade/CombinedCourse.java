@@ -12,6 +12,8 @@ public class CombinedCourse extends Course {
 
     private int startingSemester;
 
+    private boolean combined=false;
+
 
     CombinedCourse(Course course) {
         setCourseName(course.getCourseName());

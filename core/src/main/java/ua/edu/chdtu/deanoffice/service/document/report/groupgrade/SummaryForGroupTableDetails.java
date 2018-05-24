@@ -26,10 +26,10 @@ public class SummaryForGroupTableDetails {
 
     public SummaryForGroupTableDetails(List<StudentSummaryForGroup> studentSummaries) {
         this.studentSummaries = studentSummaries;
-        List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-        List<Grade> courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
-        List<Grade> practices = new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
-        List<Grade> diplomaGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
+        List<Grade> generalGrades = new ArrayList<>(getListWithMaxNumberOfGrades(0));
+        List<Grade> courseWorks = new ArrayList<>(getListWithMaxNumberOfGrades(1));
+        List<Grade> practices = new ArrayList<>(getListWithMaxNumberOfGrades(2));
+        List<Grade> diplomaGrades = new ArrayList<>(getListWithMaxNumberOfGrades(3));
         rowWithGeneralGradesEnds = rowWithGeneralGradesStarts + generalGrades.size() - 1;
         rowWithCourseWorksStarts = rowWithGeneralGradesEnds + 2;
         rowWithCourseWorksEnds = rowWithCourseWorksStarts + courseWorks.size() - 1;
@@ -37,6 +37,20 @@ public class SummaryForGroupTableDetails {
         rowWithPracticesEnds = rowWithPracticesStarts + practices.size() - 1;
         rowWithHoursPosition = rowWithPracticesEnds + 1;
         rowWithCreditsPosition = rowWithHoursPosition + 1;
+    }
+
+    public List<Grade> getListWithMaxNumberOfGrades(int gradesIndex) {
+        int maxNumber = 0;
+        List<Grade> result = null;
+        if (studentSummaries != null && studentSummaries.size() > 0) {
+            for (StudentSummaryForGroup studentSummary : studentSummaries) {
+                if (studentSummary.getGrades().get(gradesIndex).size() > maxNumber) {
+                    maxNumber = studentSummary.getGrades().get(gradesIndex).size();
+                    result = studentSummary.getGrades().get(gradesIndex);
+                }
+            }
+        }
+        return result;
     }
 
 }
