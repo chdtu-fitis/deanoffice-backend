@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
@@ -102,7 +101,7 @@ public class ImportDataService {
                     if (r.getR() == 1) {
                         sd.assignHeader(cellValue, c.getR());
                     } else {
-                        sd.setCellData(c.getR(), cellValue);
+                        sd.setCellData(c.getR(), cellValue.trim());
                     }
                 }
 
@@ -268,6 +267,7 @@ public class ImportDataService {
 
     private Specialization getExistingOrSavedSpecialization(String specialityName, String specialityCode, String specializationName, String degreeName, String facultyName) {
         Degree degree = degreeService.getByName(degreeName);
+        Faculty faculty = facultyService.getByName(facultyName);
         Speciality existingSpeciality = specialityService.getSpecialityByCode(specialityCode);
         if (existingSpeciality == null) {
             Speciality newSpeciality = new Speciality();
@@ -276,21 +276,22 @@ public class ImportDataService {
             newSpeciality.setActive(true);
             existingSpeciality = specialityService.save(newSpeciality);
         }
-        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specializationName, degree.getId(), existingSpeciality.getId());
+        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specializationName, degree.getId(), existingSpeciality.getId(), faculty.getId());
         if (existingSpecialization == null) {
-            existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specialityName, degree.getId(), existingSpeciality.getId());
+            existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specialityName, degree.getId(), existingSpeciality.getId(), faculty.getId());
         }
         if (existingSpecialization == null) {
-            if (specialityCode.matches("\\d.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
+            if (specialityCode.matches("\\d\\.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
                 Specialization specialization = new Specialization();
                 specialization.setName(specializationName);
                 specialization.setSpeciality(existingSpeciality);
                 specialization.setDegree(degree);
-                specialization.setFaculty(facultyService.getByName(facultyName));
+                specialization.setFaculty(faculty);
                 specialization.setActive(true);
                 existingSpecialization = specializationService.save(specialization);
             }
         }
+
         return existingSpecialization;
     }
 
