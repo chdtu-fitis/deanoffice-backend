@@ -10,11 +10,7 @@ import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.CourseName;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
@@ -66,15 +62,17 @@ public class CourseController {
 
     @PutMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupDTO courseForGroupDTO) {
-        CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseForGroupDTO.getCourse().getId());
-        if (courseForGroup != null) {
-
-            courseForGroupService.save((CourseForGroup) map(courseForGroup, CourseForGroupDTO.class));
+    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CoursesForGroupHolder coursesForGroupHolder) {
+        Course course = courseService.getCourse(coursesForGroupHolder.getNewCourse().getCourse().getId());
+        if (course != null) {
+            List<Grade> grades = gradeService.getGradesByCourse((Course)map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class));
+            courseForGroupService.deleteCourseForGroups( (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class));
             return ResponseEntity.ok(map(courseForGroup, CourseForGroupDTO.class));
         }
 
         return ResponseEntity.ok(map(courseForGroup, CourseForGroupDTO.class));
+        System.out.println(gradeService.getGradesByCourse((Course)map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class)));
+        return ResponseEntity.ok(gradeService.getGradesByCourse((Course)map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class)));
 
     }
 

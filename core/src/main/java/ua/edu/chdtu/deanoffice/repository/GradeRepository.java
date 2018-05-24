@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
 import java.util.List;
@@ -30,4 +31,8 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             @Param("courseIds") List<Integer> courseIds);
 
     Grade getByStudentDegreeIdAndCourseId(Integer studentDegreeId, Integer courseId);
+
+    List<Grade> findByCourse(Course course);
+
+    void saveByCourse(Course course);
 }

@@ -93,4 +93,13 @@ public class GradeService {
     public Grade getGradeForStudentAndCourse(Integer studentDegreeId, Integer courseId) {
         return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
     }
+
+    public List<Grade> getGradesByCourse(Course course){
+        return gradeRepository.findByCourse(course);
+    }
+
+    public void saveGradesByCourse(Course  course){
+        gradeRepository.saveByCourse(course);
+    }
+
 }
