@@ -19,6 +19,7 @@ public class RenewedAcademicVacationStudentDTO {
     private Date applicationDate;
     private Date expelDate;
     private String orderNumber;
+    private Date orderDate;
 
     private Integer studentGroupId;
     private Integer studentAcademicVacationId;
