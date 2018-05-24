@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
@@ -173,7 +174,16 @@ public class ImportDataService {
                 }
             }
         }
-//degrees merge needed
+        if(existingStudentDegree != null && studentDegree != null) {
+            existingStudentDegree.setAdmissionOrderNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getAdmissionOrderNumber(), existingStudentDegree.getAdmissionOrderNumber()));
+            existingStudentDegree.setAdmissionOrderDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionOrderDate(), existingStudentDegree.getAdmissionOrderDate()));
+            existingStudentDegree.setPayment(ObjectUtils.firstNonNull(studentDegree.getPayment(), existingStudentDegree.getPayment()));
+            existingStudentDegree.setPreviousDiplomaNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getPreviousDiplomaNumber(), existingStudentDegree.getPreviousDiplomaNumber()));
+            existingStudentDegree.setPreviousDiplomaDate(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaDate(), existingStudentDegree.getPreviousDiplomaDate()));
+            existingStudentDegree.setPreviousDiplomaType(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaType(), existingStudentDegree.getPreviousDiplomaType()));
+            existingStudentDegree.setSupplementNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getSupplementNumber(), existingStudentDegree.getSupplementNumber()));
+        }
+
         return existingStudentDegree == null? studentDegree : existingStudentDegree;
     }
 
