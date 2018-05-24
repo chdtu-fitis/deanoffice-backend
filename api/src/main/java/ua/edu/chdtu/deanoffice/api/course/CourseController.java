@@ -30,7 +30,6 @@ public class CourseController {
     private TeacherService teacherService;
     private GradeService gradeService;
     private CourseNameService courseNameService;
-
     @Autowired
     public CourseController(
             CourseForGroupService courseForGroupService,
@@ -79,6 +78,9 @@ public class CourseController {
             Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse().getCourse(), Course.class);
             CourseForGroup oldCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class);
             CourseForGroup newCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getNewCourse(), CourseForGroup.class);
+            StudentGroup group =  studentGroupService.getById(groupId);
+            oldCourseForGroup.setStudentGroup(group);
+            newCourseForGroup.setStudentGroup(group);
             if (course != null) {
                 CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, newCourse, oldCourseForGroup, newCourseForGroup);
                 return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
