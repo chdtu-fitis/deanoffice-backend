@@ -99,7 +99,10 @@ public class GradeService {
     }
 
     public void saveGradesByCourse(Course  course, List<Grade> grades){
-        gradeRepository.saveByCourse(course, grades);
+        for (Grade grade: grades){
+            grade.setCourse(course);
+            gradeRepository.save(grade);
+        }
     }
 
 }

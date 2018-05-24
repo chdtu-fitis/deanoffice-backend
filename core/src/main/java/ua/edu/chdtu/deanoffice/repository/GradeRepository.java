@@ -34,5 +34,4 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     List<Grade> findByCourse(Course course);
 
-    void saveByCourse(Course course, List<Grade> grades);
 }
