@@ -65,9 +65,14 @@ public class CourseController {
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CoursesForGroupHolder coursesForGroupHolder) {
         Course course = courseService.getCourse(coursesForGroupHolder.getNewCourse().getCourse().getId());
         if (course != null) {
-            List<Grade> grades = gradeService.getGradesByCourse((Course)map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class));
-            courseForGroupService.deleteCourseForGroups( (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class));
-            return ResponseEntity.ok(map(courseForGroup, CourseForGroupDTO.class));
+            Course newCourse = (Course)map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class);
+            List<Grade> grades = gradeService.getGradesByCourse(newCourse);
+            courseForGroupService.deleteCourseForGroup( (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class));
+            gradeService.saveGradesByCourse(newCourse, grades);
+            CourseForGroup newCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getNewCourse(), CourseForGroup.class);
+            newCourseForGroup.setCourse(newCourse);
+            courseForGroupService.save(newCourseForGroup);
+            return ResponseEntity.ok(map(newCourseForGroup, CourseForGroupDTO.class));
         }
 
         return ResponseEntity.ok(map(courseForGroup, CourseForGroupDTO.class));

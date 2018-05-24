@@ -59,7 +59,7 @@ public class CourseForGroupService {
     }
 
 
-    public void deleteCourseForGroups(CourseForGroup courseForGroup){
+    public void deleteCourseForGroup(CourseForGroup courseForGroup){
         courseForGroupRepository.delete(courseForGroup);
     }
 }

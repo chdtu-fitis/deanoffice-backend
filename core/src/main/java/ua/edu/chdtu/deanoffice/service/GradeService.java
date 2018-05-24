@@ -98,8 +98,8 @@ public class GradeService {
         return gradeRepository.findByCourse(course);
     }
 
-    public void saveGradesByCourse(Course  course){
-        gradeRepository.saveByCourse(course);
+    public void saveGradesByCourse(Course  course, List<Grade> grades){
+        gradeRepository.saveByCourse(course, grades);
     }
 
 }
