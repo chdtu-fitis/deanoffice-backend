@@ -16,9 +16,11 @@ public class CourseService {
         this.courseRepository = courseRepository;
     }
 
-    public Course getCourse(int courseId) {
-        return courseRepository.findOne(courseId);
+    public Course getCourse(Course course) {
+        return courseRepository.findOne(course.getSemester(), course.getKnowledgeControl().getId(), course.getCourseName().getId(),
+                course.getHours(), course.getCredits());
     }
+
 
     public List<Course> getCoursesBySemester(int semester) {
         return courseRepository.findAllBySemester(semester);

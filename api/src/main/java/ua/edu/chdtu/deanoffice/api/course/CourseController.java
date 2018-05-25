@@ -73,9 +73,9 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
-            Course course = courseService.getCourse(coursesForGroupHolder.getNewCourse().getCourse().getId());
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class);
             Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse().getCourse(), Course.class);
+            Course course = courseService.getCourse(newCourse);
             CourseForGroup oldCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class);
             CourseForGroup newCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getNewCourse(), CourseForGroup.class);
             StudentGroup group =  studentGroupService.getById(groupId);
@@ -110,7 +110,7 @@ public class CourseController {
             for (CourseForGroupDTO newCourseForGroup : newCourses) {
                 CourseForGroup courseForGroup = new CourseForGroup();
 
-                Course course = courseService.getCourse(newCourseForGroup.getCourse().getId());
+                Course course = courseService.getById(newCourseForGroup.getCourse().getId());
                 courseForGroup.setCourse(course);
 
                 StudentGroup studentGroup = studentGroupService.getById(groupId);
