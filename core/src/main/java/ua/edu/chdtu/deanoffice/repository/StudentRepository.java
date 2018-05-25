@@ -14,6 +14,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             "and s.surname like %:surname% " +
             "and s.patronimic like %:patronimic% " +
             "and sd.specialization.faculty.id = :faculty_id " +
+            "group by s.id " +
             "order by s.name, s.surname, s.patronimic")
     List<Student> findAllByFullNameUkr(
             @Param("name") String name,
