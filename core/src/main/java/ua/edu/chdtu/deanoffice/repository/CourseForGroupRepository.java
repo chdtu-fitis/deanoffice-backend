@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.List;
 
@@ -27,5 +28,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
     List<CourseForGroup> findAllByStudentGroupIdAndCourse_Semester(@Param("groupId") int groupId, @Param("semester") int semester);
 
     CourseForGroup findByStudentGroupIdAndCourseId(@Param("studentGroupId") int groupId, @Param("courseId") int courseId);
+
+    int countByStudentGroup(StudentGroup studentGroup);
 
 }

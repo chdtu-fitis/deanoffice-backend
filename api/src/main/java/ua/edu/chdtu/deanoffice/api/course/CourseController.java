@@ -81,6 +81,9 @@ public class CourseController {
             StudentGroup group =  studentGroupService.getById(groupId);
             oldCourseForGroup.setStudentGroup(group);
             newCourseForGroup.setStudentGroup(group);
+            if (courseForGroupService.countByGroup(group)==1){
+                courseForGroupService.save(newCourseForGroup);
+            }
             if (course != null) {
                 CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, newCourse, oldCourseForGroup, newCourseForGroup, groupId);
                 return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
