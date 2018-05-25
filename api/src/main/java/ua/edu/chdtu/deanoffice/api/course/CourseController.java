@@ -67,7 +67,7 @@ public class CourseController {
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
-            Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse(), Course.class);
+            int oldCourseId = coursesForGroupHolder.getOldCourseId();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             StudentGroup group =  studentGroupService.getById(groupId);
             if (courseForGroupService.countByGroup(group)==1){
@@ -82,7 +82,7 @@ public class CourseController {
             }
             courseForGroup.setCourse(newCourse);
             courseForGroupService.save(courseForGroup);
-            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
+            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
             gradeService.saveGradesByCourse(newCourse, grades);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (Exception e) {
