@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -35,12 +36,8 @@ public class SpecializationDTO {
     private String educationalProgramHeadNameEng;
     private String educationalProgramHeadInfo;
     private String educationalProgramHeadInfoEng;
-    private String knowledgeAndUnderstandingOutcomes;
-    private String knowledgeAndUnderstandingOutcomesEng;
-    private String applyingKnowledgeAndUnderstandingOutcomes;
-    private String applyingKnowledgeAndUnderstandingOutcomesEng;
-    private String makingJudgementsOutcomes;
-    private String makingJudgementsOutcomesEng;
+    private String certificateNumber;
+    private Date certificateDate;
 
     private Integer specialityId;
     private Integer degreeId;

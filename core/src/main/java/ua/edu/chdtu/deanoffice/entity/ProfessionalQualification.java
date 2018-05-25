@@ -11,9 +11,6 @@ import javax.persistence.Entity;
 @Setter
 @Entity(name = "professional_qualification")
 public class ProfessionalQualification extends NameWithEngEntity {
-
     @Column(name = "code", nullable = false)
     private String code;
-
-
 }
