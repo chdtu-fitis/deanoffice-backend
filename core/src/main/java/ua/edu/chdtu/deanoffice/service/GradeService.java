@@ -92,4 +92,8 @@ public class GradeService {
     public Grade getGradeForStudentAndCourse(Integer studentDegreeId, Integer courseId) {
         return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
     }
+
+    public List<Grade> getGradesByStudentsIdsAndCourseId(Integer courseId, List<Integer> studentsDegreeIds) {
+        return gradeRepository.getGradesByStudentsIdsAndCourseId(courseId, studentsDegreeIds);
+    }
 }

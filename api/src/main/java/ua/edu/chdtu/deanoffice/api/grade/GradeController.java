@@ -52,6 +52,15 @@ public class GradeController {
         }
     }
 
+    @GetMapping("/{groupId}/{courseId}")
+    public ResponseEntity getGradesByGroupIdAndCourseId(
+            @PathVariable Integer groupId,
+            @PathVariable Integer courseId) {
+        List<Grade> grades = this.gradeService.getGradesByStudentsIdsAndCourseId(courseId,
+                getStudentsIdsByGroupId(groupId));
+        return ResponseEntity.ok(map(grades, GradeDTO.class));
+    }
+
     @GetMapping("/{groupId}")
     public ResponseEntity getGrades(
             @PathVariable Integer groupId,
