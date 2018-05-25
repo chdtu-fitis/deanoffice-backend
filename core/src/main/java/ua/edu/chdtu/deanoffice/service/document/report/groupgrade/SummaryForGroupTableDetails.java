@@ -50,6 +50,9 @@ public class SummaryForGroupTableDetails {
                 }
             }
         }
+        if (result == null) {
+            result = new ArrayList<Grade>();
+        }
         return result;
     }
 
