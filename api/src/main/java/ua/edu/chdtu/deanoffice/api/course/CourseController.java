@@ -72,7 +72,7 @@ public class CourseController {
             StudentGroup group =  studentGroupService.getById(groupId);
             if (courseForGroupService.countByGroup(group)==1){
                 courseService.createOrUpdateCourse(newCourse);
-                return ResponseEntity.ok().build(); //.status(HttpStatus.CREATED);
+                return new ResponseEntity(HttpStatus.CREATED);
             }
             CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
             if (courseFromDb != null) {
@@ -84,7 +84,7 @@ public class CourseController {
             courseForGroupService.save(courseForGroup);
             List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
             gradeService.saveGradesByCourse(newCourse, grades);
-            return ResponseEntity.ok().build(); //.status(HttpStatus.CREATED);
+            return new ResponseEntity(HttpStatus.CREATED);
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
         }
