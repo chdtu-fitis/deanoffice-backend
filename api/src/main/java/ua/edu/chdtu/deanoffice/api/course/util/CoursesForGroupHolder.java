@@ -9,6 +9,7 @@ public class CoursesForGroupHolder {
     private List<CourseForGroupDTO> updatedCourses;
     private List<Integer> deleteCoursesIds;
 
+
     CoursesForGroupHolder(){}
 
     public List<CourseForGroupDTO> getNewCourses() {
@@ -22,5 +23,6 @@ public class CoursesForGroupHolder {
     public List<Integer> getDeleteCoursesIds() {
         return deleteCoursesIds;
     }
+
 
 }

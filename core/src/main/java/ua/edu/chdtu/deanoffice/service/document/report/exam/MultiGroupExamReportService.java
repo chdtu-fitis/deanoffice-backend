@@ -40,7 +40,7 @@ public class MultiGroupExamReportService {
 
     public File prepareReport(List<Integer> groupIds, Integer courseId, FileFormatEnum format)
             throws IOException, Docx4JException {
-        Course course = courseService.getCourse(courseId);
+        Course course = courseService.getById(courseId);
         List<StudentGroup> groups = new ArrayList<>();
         groupIds.forEach(id -> groups.add(studentGroupService.getById(id)));
 
