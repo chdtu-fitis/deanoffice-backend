@@ -31,6 +31,5 @@ public class AcquiredCompetencies extends BaseEntity {
     @ManyToOne
     private Specialization specialization;
     @Column(nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date year;
+    private Integer year;
 }

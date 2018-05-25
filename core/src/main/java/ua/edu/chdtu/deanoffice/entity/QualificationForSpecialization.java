@@ -29,6 +29,5 @@ public class QualificationForSpecialization extends BaseEntity {
     @JoinColumn(nullable = false, name = "professional_qualification_id")
     private ProfessionalQualification professionalQualification;
     @Column(nullable = false, name = "year")
-    @Temporal(TemporalType.DATE)
-    private Date year;
+    private Integer year;
 }
