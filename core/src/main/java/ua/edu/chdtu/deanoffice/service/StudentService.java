@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.util.List;
@@ -13,14 +12,9 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    private final StudentDegreeRepository studentDegreeRepository;
 
-    public StudentService(
-            StudentRepository studentRepository,
-            StudentDegreeRepository studentDegreeRepository
-    ) {
+    public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
-        this.studentDegreeRepository = studentDegreeRepository;
     }
 
     public Student findById(Integer id) {

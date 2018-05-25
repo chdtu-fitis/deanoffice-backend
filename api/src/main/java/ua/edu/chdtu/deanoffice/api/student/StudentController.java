@@ -16,11 +16,12 @@ import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -55,12 +56,8 @@ public class StudentController {
     private String getGroupNamesForStudent(Student student) {
         return student.getDegrees().stream()
                 .map(StudentDegree::getStudentGroup)
-                .map(studentGroup -> {
-                    if (studentGroup == null) {
-                        return "";
-                    }
-                    return studentGroup.getName();
-                })
+                .filter(Objects::nonNull)
+                .map(NameEntity::getName)
                 .collect(Collectors.joining(", "));
     }
 
