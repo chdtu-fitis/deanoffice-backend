@@ -119,64 +119,8 @@ public class SupplementTemplateFillService {
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("QualificationUkr", TemplateUtil.getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", TemplateUtil.getValueSafely(specialization.getQualificationEng()));
-        StudentGroup group = studentSummary.getStudentGroup();
-        result.put("TrainingDurationYears", String.format("%1d", group.getStudyYears().intValue()));
-        switch ((int) Math.round(group.getStudyYears().doubleValue())) {
-            case 0:
-                result.put("TrainingDurationYears", " ");
-                result.put("DurationLabelYears", " ");
-                result.put("DurationLabelYearsEng", " ");
-                break;
-            case 1:
-                result.put("DurationLabelYears", "рік");
-                result.put("DurationLabelYearsEng", "year");
-                break;
-            case 2:
-                result.put("DurationLabelYears", "роки");
-                result.put("DurationLabelYearsEng", "years");
-                break;
-            case 3:
-                result.put("DurationLabelYears", "роки");
-                result.put("DurationLabelYearsEng", "years");
-                break;
-            case 4:
-                result.put("DurationLabelYears", "роки");
-                result.put("DurationLabelYearsEng", "years");
-                break;
-            default:
-                result.put("DurationLabelYears", "років");
-                result.put("DurationLabelYearsEng", "years");
-                break;
-        }
 
-        result.put("TrainingDurationMonths", getMonthsFromYears(group.getStudyYears()));
-        switch (Math.round(Integer.parseInt(result.get("TrainingDurationMonths")))) {
-            case 0:
-                result.put("TrainingDurationMonths", " ");
-                result.put("DurationLabelMonths", " ");
-                result.put("DurationLabelMonthsEng", " ");
-                break;
-            case 1:
-                result.put("DurationLabelMoths", "місяць");
-                result.put("DurationLabelMonthsEng", "month");
-                break;
-            case 2:
-                result.put("DurationLabelMoths", "місяці");
-                result.put("DurationLabelMonthsEng", "months");
-                break;
-            case 3:
-                result.put("DurationLabelMoths", "місяці");
-                result.put("DurationLabelMonthsEng", "months");
-                break;
-            case 4:
-                result.put("DurationLabelMoths", "місяці");
-                result.put("DurationLabelMonthsEng", "months");
-                break;
-            default:
-                result.put("DurationLabelMonths", "місяців");
-                result.put("DurationLabelMonthsEng", "months");
-                break;
-        }
+
         result.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfStudy()));
         result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfStudyEng()));
         result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
@@ -188,12 +132,10 @@ public class SupplementTemplateFillService {
         result.put("ProfessionalStatus", TemplateUtil.getValueSafely(degree.getProfessionalStatus()));
         result.put("ProfessionalStatusEng", TemplateUtil.getValueSafely(degree.getProfessionalStatusEng()));
 
-        result.put("KnowledgeAndUnderstanding", TemplateUtil.getValueSafely(specialization.getKnowledgeAndUnderstandingOutcomes()));
-        result.put("KnowledgeAndUnderstandingEng", TemplateUtil.getValueSafely(specialization.getKnowledgeAndUnderstandingOutcomesEng()));
-        result.put("ApplyingKnowledgeAndUnderstanding", TemplateUtil.getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomes()));
-        result.put("ApplyingKnowledgeAndUnderstandingEng", TemplateUtil.getValueSafely(specialization.getApplyingKnowledgeAndUnderstandingOutcomesEng()));
-        result.put("MakingJudgements", TemplateUtil.getValueSafely(specialization.getMakingJudgementsOutcomes()));
-        result.put("MakingJudgementsEng", TemplateUtil.getValueSafely(specialization.getMakingJudgementsOutcomesEng()));
+        StudentGroup group = studentSummary.getStudentGroup();
+        result.put("TrainingDuration", getTrainingDuration(group));
+        result.put("TrainingDurationEng", getTrainingDurationEng(group));
+
         result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
         result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
         result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
@@ -221,6 +163,74 @@ public class SupplementTemplateFillService {
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
+    }
+
+    private static String getTrainingDuration(StudentGroup studentGroup) {
+        StringBuilder result = new StringBuilder();
+        if (studentGroup.getStudyYears().intValue() >= 1) {
+            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+            result.append(" ");
+            switch (studentGroup.getStudyYears().intValue()) {
+                case 1:
+                    result.append("рік");
+                    break;
+                case 2:
+                    result.append("роки");
+                    break;
+                case 3:
+                    result.append("роки");
+                    break;
+                case 4:
+                    result.append("роки");
+                    break;
+                default:
+                    result.append("років");
+                    break;
+            }
+        }
+
+        Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
+        if (monthsOfStudying != 0) {
+            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+            result.append(" ");
+            switch (studentGroup.getStudyYears().intValue()) {
+                case 1:
+                    result.append("місяць");
+                    break;
+                case 2:
+                    result.append("місяці");
+                    break;
+                case 3:
+                    result.append("місяці");
+                    break;
+                case 4:
+                    result.append("місяці");
+                    break;
+                default:
+                    result.append("місяців");
+                    break;
+            }
+        }
+
+        return result.toString();
+    }
+
+    private static String getTrainingDurationEng(StudentGroup studentGroup) {
+        StringBuilder result = new StringBuilder();
+        if (studentGroup.getStudyYears().intValue() >= 1) {
+            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+            result.append(" ");
+            result.append(studentGroup.getStudyYears().intValue() == 1 ? "year" : "years");
+        }
+
+        Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
+        if (monthsOfStudying != 0) {
+            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+            result.append(" ");
+            result.append(Math.round(monthsOfStudying) == 1 ? "month" : "months");
+        }
+
+        return result.toString();
     }
 
     private static String formatCredits(BigDecimal credits) {
@@ -253,10 +263,10 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private static String getMonthsFromYears(BigDecimal years) {
+    private static Double getMonthsFromYears(BigDecimal years) {
         int intPart = years.intValue();
         int monthsPerYear = 12;
-        return String.format("%d", Math.round((years.doubleValue() - intPart) * monthsPerYear));
+        return ((years.doubleValue() - intPart) * monthsPerYear);
     }
 
     private Map<String, String> getReplacementsDictionary(StudentSummary studentSummary) {

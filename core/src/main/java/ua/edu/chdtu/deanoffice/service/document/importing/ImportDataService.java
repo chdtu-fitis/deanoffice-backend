@@ -102,7 +102,7 @@ public class ImportDataService {
                     if (r.getR() == 1) {
                         sd.assignHeader(cellValue, c.getR());
                     } else {
-                        sd.setCellData(c.getR(), cellValue);
+                        sd.setCellData(c.getR(), cellValue.trim());
                     }
                 }
 
@@ -174,7 +174,16 @@ public class ImportDataService {
                 }
             }
         }
-//degrees merge needed
+        if(existingStudentDegree != null && studentDegree != null) {
+            existingStudentDegree.setAdmissionOrderNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getAdmissionOrderNumber(), existingStudentDegree.getAdmissionOrderNumber()));
+            existingStudentDegree.setAdmissionOrderDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionOrderDate(), existingStudentDegree.getAdmissionOrderDate()));
+            existingStudentDegree.setPayment(ObjectUtils.firstNonNull(studentDegree.getPayment(), existingStudentDegree.getPayment()));
+            existingStudentDegree.setPreviousDiplomaNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getPreviousDiplomaNumber(), existingStudentDegree.getPreviousDiplomaNumber()));
+            existingStudentDegree.setPreviousDiplomaDate(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaDate(), existingStudentDegree.getPreviousDiplomaDate()));
+            existingStudentDegree.setPreviousDiplomaType(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaType(), existingStudentDegree.getPreviousDiplomaType()));
+            existingStudentDegree.setSupplementNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getSupplementNumber(), existingStudentDegree.getSupplementNumber()));
+        }
+
         return existingStudentDegree == null? studentDegree : existingStudentDegree;
     }
 
@@ -267,6 +276,7 @@ public class ImportDataService {
 
     private Specialization getExistingOrSavedSpecialization(String specialityName, String specialityCode, String specializationName, String degreeName, String facultyName) {
         Degree degree = degreeService.getByName(degreeName);
+        Faculty faculty = facultyService.getByName(facultyName);
         Speciality existingSpeciality = specialityService.getSpecialityByCode(specialityCode);
         if (existingSpeciality == null) {
             Speciality newSpeciality = new Speciality();
@@ -275,21 +285,22 @@ public class ImportDataService {
             newSpeciality.setActive(true);
             existingSpeciality = specialityService.save(newSpeciality);
         }
-        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specializationName, degree.getId(), existingSpeciality.getId());
+        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specializationName, degree.getId(), existingSpeciality.getId(), faculty.getId());
         if (existingSpecialization == null) {
-            existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specialityName, degree.getId(), existingSpeciality.getId());
+            existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specialityName, degree.getId(), existingSpeciality.getId(), faculty.getId());
         }
         if (existingSpecialization == null) {
-            if (specialityCode.matches("\\d.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
+            if (specialityCode.matches("\\d\\.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
                 Specialization specialization = new Specialization();
                 specialization.setName(specializationName);
                 specialization.setSpeciality(existingSpeciality);
                 specialization.setDegree(degree);
-                specialization.setFaculty(facultyService.getByName(facultyName));
+                specialization.setFaculty(faculty);
                 specialization.setActive(true);
                 existingSpecialization = specializationService.save(specialization);
             }
         }
+
         return existingSpecialization;
     }
 

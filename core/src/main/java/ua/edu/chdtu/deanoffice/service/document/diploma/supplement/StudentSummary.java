@@ -116,7 +116,7 @@ public class StudentSummary {
             }
         }
         resultingGrade.getCourse().setHours(hoursSum);
-        resultingGrade.getCourse().setCredits(new BigDecimal(hoursSum / resultingGrade.getCourse().getHoursPerCredit()));
+        resultingGrade.getCourse().setCredits(new BigDecimal((double) hoursSum / resultingGrade.getCourse().getHoursPerCredit()));
         return resultingGrade;
     }
 
