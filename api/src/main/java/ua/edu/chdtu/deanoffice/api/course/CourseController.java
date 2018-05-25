@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.course;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
@@ -67,32 +68,32 @@ public class CourseController {
         try {
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class);
             Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse().getCourse(), Course.class);
-            Course course = courseService.getCourse(newCourse);
-            CourseForGroup oldCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class);
-            CourseForGroup newCourseForGroup = (CourseForGroup) map(coursesForGroupHolder.getNewCourse(), CourseForGroup.class);
+            Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             StudentGroup group =  studentGroupService.getById(groupId);
-            oldCourseForGroup.setStudentGroup(group);
-            newCourseForGroup.setStudentGroup(group);
             if (courseForGroupService.countByGroup(group)==1){
                 courseService.createOrUpdateCourse(newCourse);
+                return ResponseEntity.ok().build(); //.status(HttpStatus.CREATED);
             }
-            if (course != null) {
-                CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, newCourse, oldCourseForGroup, newCourseForGroup, groupId);
-                return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
+           //!!!!!!! CourseForGroup courseForGroup = (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class);
+            if (courseFromDb != null) {
+                newCourse = courseFromDb;
+            } else {
+                newCourse = courseService.createOrUpdateCourse(newCourse);
             }
-            Course createdNewCourse = courseService.createOrUpdateCourse(newCourse);
-            CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, createdNewCourse, oldCourseForGroup, newCourseForGroup, groupId);
-            return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
+            courseForGroup.setCourse(newCourse);
+            courseForGroupService.save(courseForGroup);
+            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
+            gradeService.saveGradesByCourse(newCourse, grades);
+            return ResponseEntity.ok().build(); //.status(HttpStatus.CREATED);
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
         }
     }
 
-    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup oldCourseForGroup, CourseForGroup newCourseForGroup, int groupId) {
-        List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
-        courseForGroupService.deleteCourseForGroup(oldCourseForGroup);
-        gradeService.saveGradesByCourse(newCourse, grades);
-        newCourseForGroup.setCourse(newCourse);
+    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup courseForGroup, int groupId) {
+
+
+
         courseForGroupService.save(newCourseForGroup);
         return newCourseForGroup;
     }

@@ -16,7 +16,7 @@ public class CourseService {
         this.courseRepository = courseRepository;
     }
 
-    public Course getCourse(Course course) {
+    public Course getCourseByAllAttributes(Course course) {
         return courseRepository.findOne(course.getSemester(), course.getKnowledgeControl().getId(), course.getCourseName().getId(),
                 course.getHours(), course.getCredits());
     }

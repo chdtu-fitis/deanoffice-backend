@@ -59,11 +59,6 @@ public class CourseForGroupService {
         this.courseForGroupRepository.save(courseForGroup);
     }
 
-
-    public void deleteCourseForGroup(CourseForGroup courseForGroup){
-        courseForGroupRepository.delete(courseForGroup);
-    }
-
     public int countByGroup(StudentGroup group){
         return courseForGroupRepository.countByStudentGroup(group);
     }
