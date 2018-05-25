@@ -66,15 +66,15 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
-            Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse().getCourse(), Course.class);
-            Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse().getCourse(), Course.class);
+            Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
+            Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse(), Course.class);
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             StudentGroup group =  studentGroupService.getById(groupId);
             if (courseForGroupService.countByGroup(group)==1){
                 courseService.createOrUpdateCourse(newCourse);
                 return ResponseEntity.ok().build(); //.status(HttpStatus.CREATED);
             }
-           //!!!!!!! CourseForGroup courseForGroup = (CourseForGroup) map(coursesForGroupHolder.getOldCourse(), CourseForGroup.class);
+            CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
             if (courseFromDb != null) {
                 newCourse = courseFromDb;
             } else {
@@ -90,13 +90,6 @@ public class CourseController {
         }
     }
 
-    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup courseForGroup, int groupId) {
-
-
-
-        courseForGroupService.save(newCourseForGroup);
-        return newCourseForGroup;
-    }
 
     @PostMapping("/groups/{groupId}/courses")
     public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {

@@ -1,18 +1,24 @@
 package ua.edu.chdtu.deanoffice.api.course.util;
 
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 
 import java.util.List;
 
 public class CourseForGroupUpdateHolder {
-    private CourseForGroupDTO  oldCourse;
-    private CourseForGroupDTO newCourse;
+    private CourseDTO oldCourse;
+    private CourseDTO newCourse;
+    private int courseForGroupId;
 
-    public CourseForGroupDTO getOldCourse() {
+    public int getCourseForGroupId() {
+        return courseForGroupId;
+    }
+
+    public CourseDTO getOldCourse() {
         return oldCourse;
     }
 
-    public CourseForGroupDTO getNewCourse() {
+    public CourseDTO getNewCourse() {
         return newCourse;
     }
 }
