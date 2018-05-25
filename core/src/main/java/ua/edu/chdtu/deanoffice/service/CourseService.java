@@ -26,7 +26,7 @@ public class CourseService {
         return courseRepository.findAllBySemester(semester);
     }
 
-    public Course createCourse(Course course) {
+    public Course createOrUpdateCourse(Course course) {
         return this.courseRepository.save(course);
     }
 

@@ -47,14 +47,6 @@ public class CourseController {
         this.gradeService = gradeService;
     }
 
-    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup oldCourseForGroup, CourseForGroup newCourseForGroup, int groupId) {
-        List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
-        courseForGroupService.deleteCourseForGroup(oldCourseForGroup);
-        gradeService.saveGradesByCourse(newCourse, grades);
-        newCourseForGroup.setCourse(newCourse);
-        courseForGroupService.save(newCourseForGroup);
-        return newCourseForGroup;
-    }
 
     @GetMapping("/courses")
     public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") int semester) {
@@ -82,18 +74,27 @@ public class CourseController {
             oldCourseForGroup.setStudentGroup(group);
             newCourseForGroup.setStudentGroup(group);
             if (courseForGroupService.countByGroup(group)==1){
-                courseForGroupService.save(newCourseForGroup);
+                courseService.createOrUpdateCourse(newCourse);
             }
             if (course != null) {
                 CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, newCourse, oldCourseForGroup, newCourseForGroup, groupId);
                 return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
             }
-            Course createdNewCourse = courseService.createCourse(newCourse);
+            Course createdNewCourse = courseService.createOrUpdateCourse(newCourse);
             CourseForGroup updatedCourseForGroup = updateCourses(oldCourse, createdNewCourse, oldCourseForGroup, newCourseForGroup, groupId);
             return ResponseEntity.ok((CourseForGroupDTO) map(updatedCourseForGroup, CourseForGroupDTO.class));
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
         }
+    }
+
+    private CourseForGroup updateCourses(Course oldCourse, Course newCourse, CourseForGroup oldCourseForGroup, CourseForGroup newCourseForGroup, int groupId) {
+        List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
+        courseForGroupService.deleteCourseForGroup(oldCourseForGroup);
+        gradeService.saveGradesByCourse(newCourse, grades);
+        newCourseForGroup.setCourse(newCourse);
+        courseForGroupService.save(newCourseForGroup);
+        return newCourseForGroup;
     }
 
     @PostMapping("/groups/{groupId}/courses")
@@ -165,7 +166,7 @@ public class CourseController {
         try {
             Course course = (Course) map(courseDTO, Course.class);
             if (courseDTO.getCourseName().getId() != 0) {
-                Course newCourse = this.courseService.createCourse(course);
+                Course newCourse = this.courseService.createOrUpdateCourse(course);
                 URI location = getNewResourceLocation(newCourse.getId());
                 return ResponseEntity.created(location).build();
             } else {
@@ -174,7 +175,7 @@ public class CourseController {
                 this.courseNameService.saveCourseName(courseName);
                 CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
                 course.setCourseName(newCourseName);
-                this.courseService.createCourse(course);
+                this.courseService.createOrUpdateCourse(course);
                 URI location = getNewResourceLocation(course.getId());
                 return ResponseEntity.created(location).build();
             }
