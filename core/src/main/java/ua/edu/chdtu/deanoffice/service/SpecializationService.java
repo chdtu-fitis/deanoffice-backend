@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.repository.AcquiredCompetenciesRepository;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 
 import java.util.List;

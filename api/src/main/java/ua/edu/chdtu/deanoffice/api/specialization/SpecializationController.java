@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.specialization;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.service.AcquiredCompetenciesService;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
@@ -46,18 +48,21 @@ public class SpecializationController {
     private final SpecialityService specialityService;
     private final DepartmentService departmentService;
     private final DegreeService degreeService;
+    private final AcquiredCompetenciesService acquiredCompetenciesService;
 
     @Autowired
     public SpecializationController(
             SpecializationService specializationService,
             SpecialityService specialityService,
             DepartmentService departmentService,
-            DegreeService degreeService
+            DegreeService degreeService,
+            AcquiredCompetenciesService acquiredCompetenciesService
     ) {
         this.specializationService = specializationService;
         this.specialityService = specialityService;
         this.departmentService = departmentService;
         this.degreeService = degreeService;
+        this.acquiredCompetenciesService = acquiredCompetenciesService;
     }
 
     @GetMapping
@@ -115,6 +120,21 @@ public class SpecializationController {
     public ResponseEntity getSpecializationById(@PathVariable("specialization_id") Integer specializationId) {
         Specialization specialization = specializationService.getById(specializationId);
         return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
+    }
+
+    @GetMapping("{specialization_id}/competencies")
+    public ResponseEntity getCompetenciesForSpecialization(@PathVariable("specialization_id") int specializationId) {
+        String competencies = acquiredCompetenciesService.getCompetenciesForSpecialization(specializationId);
+        return ResponseEntity.ok(new StringValue(competencies));
+    }
+
+    @Getter
+    class StringValue {
+        String value;
+
+        StringValue(String value) {
+            this.value = value;
+        }
     }
 
     @JsonView(SpecializationView.Extended.class)
