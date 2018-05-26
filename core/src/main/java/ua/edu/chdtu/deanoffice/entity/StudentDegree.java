@@ -44,6 +44,7 @@ public class StudentDegree extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private EducationDocument previousDiplomaType = EducationDocument.SECONDARY_SCHOOL_CERTIFICATE;
     private String previousDiplomaNumber;
+    private String previousDiplomaissuedBy;
     @Temporal(TemporalType.DATE)
     private Date previousDiplomaDate;
     @Enumerated(value = EnumType.STRING)
