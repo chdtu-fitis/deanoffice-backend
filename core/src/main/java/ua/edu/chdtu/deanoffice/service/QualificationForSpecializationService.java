@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 import ua.edu.chdtu.deanoffice.repository.QualificationForSpecializationRepository;
 
+import java.util.List;
+
 @Service
 public class QualificationForSpecializationService {
     private QualificationForSpecializationRepository qualificationForSpecializationRepository;
@@ -12,7 +14,7 @@ public class QualificationForSpecializationService {
         this.qualificationForSpecializationRepository = qualificationForSpecializationRepository;
     }
 
-    public QualificationForSpecialization findBySpecializationIdAndYear(Integer specializationId, Integer year) {
-        return qualificationForSpecializationRepository.findBySpecializationIdAndYear(specializationId, year);
+    public List<QualificationForSpecialization> findAllBySpecializationIdAndYear(Integer specializationId, Integer year) {
+        return qualificationForSpecializationRepository.findAllBySpecializationIdAndYear(specializationId, year);
     }
 }

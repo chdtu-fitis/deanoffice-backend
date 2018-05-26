@@ -10,16 +10,17 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
+import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,18 +28,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 public class SupplementTemplateFillService {
 
-    private static final int FIRST_SECTION_ROW_INDEX = 2;
-    private static final int TEMPLATE_ROW_INDEX = 1;
     private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
     private final DocumentIOService documentIOService;
+    private QualificationForSpecializationService qualificationForSpecializationService;
 
-    private SupplementTemplateFillService(DocumentIOService documentIOService) {
+    public SupplementTemplateFillService(DocumentIOService documentIOService,
+                                         QualificationForSpecializationService qualificationForSpecializationService) {
         this.documentIOService = documentIOService;
+        this.qualificationForSpecializationService = qualificationForSpecializationService;
     }
 
     private static Map<String, String> getGradeDictionary(Grade grade) {
@@ -82,9 +85,9 @@ public class SupplementTemplateFillService {
         result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
         result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), "По-батькові"));
 
-        DateFormat dateOfBirthFormat = new SimpleDateFormat("dd.MM.yyyy");
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         result.put("BirthDate", studentSummary.getStudent().getBirthDate() != null
-                ? dateOfBirthFormat.format(studentSummary.getStudent().getBirthDate())
+                ? simpleDateFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
 
         TuitionForm tuitionForm = studentSummary.getStudentGroup().getTuitionForm();
@@ -128,6 +131,10 @@ public class SupplementTemplateFillService {
         result.put("QualificationUkr", TemplateUtil.getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", TemplateUtil.getValueSafely(specialization.getQualificationEng()));
 
+        result.put("CertificateNum", specialization.getCertificateNumber());
+        result.put("CertificateDate", specialization.getCertificateDate() != null
+                ? simpleDateFormat.format(specialization.getCertificateDate())
+                : "CertificateDate");
 
         result.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfStudy()));
         result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfStudyEng()));
@@ -149,7 +156,6 @@ public class SupplementTemplateFillService {
         result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
         result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
-        DateFormat diplomaDateFormat = dateOfBirthFormat;
         StudentDegree studentDegree = studentSummary.getStudentDegree();
         result.put("ThesisNameUkr", TemplateUtil.getValueSafely(studentDegree.getThesisName()));
         result.put("ThesisNameEng", TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()));
@@ -166,10 +172,10 @@ public class SupplementTemplateFillService {
 
         result.put("SupplNumber", TemplateUtil.getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
         result.put("SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
-                : diplomaDateFormat.format(studentDegree.getSupplementDate()));
+                : simpleDateFormat.format(studentDegree.getSupplementDate()));
         result.put("DiplNumber", TemplateUtil.getValueSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
-                : diplomaDateFormat.format(studentDegree.getDiplomaDate()));
+                : simpleDateFormat.format(studentDegree.getDiplomaDate()));
         return result;
     }
 
@@ -285,9 +291,10 @@ public class SupplementTemplateFillService {
     }
 
     WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
-            throws IOException, Docx4JException {
+            throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
         fillTableWithGrades(template, studentSummary);
+        fillProfessionalQualificationsTable(template, studentSummary);
         Map<String, String> commonDict = getReplacementsDictionary(studentSummary);
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
         TemplateUtil.replacePlaceholdersInFooter(template, commonDict);
@@ -295,33 +302,70 @@ public class SupplementTemplateFillService {
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        List<Object> tables = TemplateUtil.getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
-        String tableWithGradesKey = "#CourseNum";
-        Tbl tempTable = TemplateUtil.findTable(tables, tableWithGradesKey);
-        if (tempTable == null) {
-            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
+        int firstSectionRowIndex = 2;
+        int templateRowIndex = 1;
+        Tbl tableWithGrades = TemplateUtil.findTable(template, "#Number");
+        if (tableWithGrades == null) {
             return;
         }
-        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
-        if (gradeTableRows.size() < TEMPLATE_ROW_INDEX + 1) {
+        List<Tr> gradeTableRows = TemplateUtil.getAllRowsFromTable(tableWithGrades);
+        if (gradeTableRows.size() < templateRowIndex + 1) {
             log.warn("Incorrect table with grades is ignored.");
             return;
         }
-        Tr templateRow = (Tr) gradeTableRows.get(1);
-        int rowToAddIndex = FIRST_SECTION_ROW_INDEX;
+        Tr templateRow = gradeTableRows.get(templateRowIndex);
+        int rowToAddIndex = firstSectionRowIndex;
         int gradeNumber = 1;
 
         for (List<Grade> gradesSection : studentSummary.getGrades()) {
             for (Grade grade : gradesSection) {
                 Map<String, String> replacements = SupplementTemplateFillService.getGradeDictionary(grade);
-                replacements.put("CourseNum", String.format("%2d", gradeNumber++));
-                TemplateUtil.addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+                replacements.put("Number", String.format("%2d", gradeNumber++));
+                TemplateUtil.addRowToTable(tableWithGrades, templateRow, rowToAddIndex, replacements);
                 rowToAddIndex++;
             }
             //Need to skip header of the next section
             rowToAddIndex++;
         }
-        tempTable.getContent().remove(templateRow);
+        tableWithGrades.getContent().remove(templateRow);
+    }
+
+    private void fillProfessionalQualificationsTable(WordprocessingMLPackage template, StudentSummary studentSummary) {
+        int templateRowIndex = 0;
+
+        List<ProfessionalQualification> professionalQualifications = getProfessionalQualifications(studentSummary);
+        if (professionalQualifications == null) {
+            return;
+        }
+
+        Tbl professionalQualificationsTable = TemplateUtil.findTable(template, "SpecCode");
+        if (professionalQualificationsTable == null) {
+            return;
+        }
+        List<Tr> tableRows = TemplateUtil.getAllRowsFromTable(professionalQualificationsTable);
+
+        Tr templateRow = tableRows.get(templateRowIndex);
+        int rowToAddIndex = templateRowIndex + 1;
+
+        for (ProfessionalQualification qualification : professionalQualifications) {
+            Map<String, String> replacements = SupplementTemplateFillService.getProfessionalQualificationDictionary(qualification);
+            TemplateUtil.addRowToTable(professionalQualificationsTable, templateRow, rowToAddIndex, replacements);
+            rowToAddIndex++;
+        }
+        professionalQualificationsTable.getContent().remove(templateRow);
+    }
+
+    private List<ProfessionalQualification> getProfessionalQualifications(StudentSummary studentSummary) {
+        StudentGroup studentGroup = studentSummary.getStudentGroup();
+        List<QualificationForSpecialization> qualificationsForSpecialization = qualificationForSpecializationService
+                .findAllBySpecializationIdAndYear(studentGroup.getSpecialization().getId(), studentGroup.getCreationYear());
+        List<ProfessionalQualification> professionalQualifications = qualificationsForSpecialization
+                .stream().map(QualificationForSpecialization::getProfessionalQualification).collect(Collectors.toList());
+        if (professionalQualifications.isEmpty()) {
+            log.debug("There are no qualifications for this group");
+            return null;
+        }
+        return professionalQualifications;
     }
 
 }

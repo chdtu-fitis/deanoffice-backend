@@ -81,11 +81,8 @@ public class ReportsCoursesService {
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, List<CourseReport> courseReports) {
-        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
-        String tableWithGradesKey = "#Pred";
-        Tbl tempTable = findTable(tables, tableWithGradesKey);
+        Tbl tempTable = findTable(template, "#Pred");
         if (tempTable == null) {
-            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
         List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);

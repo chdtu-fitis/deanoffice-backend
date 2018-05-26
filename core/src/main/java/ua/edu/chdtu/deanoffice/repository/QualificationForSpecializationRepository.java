@@ -4,9 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 
+import java.util.List;
+
 @Repository
 public interface QualificationForSpecializationRepository extends JpaRepository<QualificationForSpecialization, Integer> {
 
-    QualificationForSpecialization findBySpecializationIdAndYear(Integer specializationId, Integer year);
+    List<QualificationForSpecialization> findAllBySpecializationIdAndYear(Integer specializationId, Integer year);
 
 }

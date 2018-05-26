@@ -17,6 +17,8 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.PersonFullNameComparator;
 
 import java.io.IOException;
@@ -27,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.findTable;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replacePlaceholdersWithBlank;
@@ -70,11 +71,8 @@ public class MultiGroupReportTemplateFillService extends ExamReportBaseService {
     }
 
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, List<StudentGroup> studentGroups, Course course) {
-        List<Object> tables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
-        String tableWithGradesKey = "№";
-        Tbl tempTable = findTable(tables, tableWithGradesKey);
+        Tbl tempTable = TemplateUtil.findTable(template, "№");
         if (tempTable == null) {
-            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
         List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);

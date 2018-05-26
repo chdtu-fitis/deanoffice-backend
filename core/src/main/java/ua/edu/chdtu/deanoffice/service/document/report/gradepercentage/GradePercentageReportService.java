@@ -76,11 +76,8 @@ public class GradePercentageReportService {
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentsReport> studentsReports) {
-        List<Object> tables = TemplateUtil.getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
-        String tableWithGradesKey = "№";
-        Tbl tempTable = TemplateUtil.findTable(tables, tableWithGradesKey);
+        Tbl tempTable = TemplateUtil.findTable(template, "№");
         if (tempTable == null) {
-            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
         List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
