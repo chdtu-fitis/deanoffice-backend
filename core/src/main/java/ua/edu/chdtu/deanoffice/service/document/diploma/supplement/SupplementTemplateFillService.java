@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -64,6 +65,14 @@ public class SupplementTemplateFillService {
         return result;
     }
 
+    private static Map<String, String> getProfessionalQualificationDictionary(ProfessionalQualification qualification) {
+        Map<String, String> result = new HashMap<>();
+        result.put("ProfCode", qualification.getCode());
+        result.put("ProfName", qualification.getName());
+        result.put("ProfNameEng", qualification.getNameEng());
+        return result;
+    }
+
     private static Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
 
@@ -115,7 +124,6 @@ public class SupplementTemplateFillService {
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
-//        result.put("RequiredCredits", formatCredits(specialization.getRequiredCredits()));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("QualificationUkr", TemplateUtil.getValueSafely(specialization.getQualification()));
         result.put("QualificationEng", TemplateUtil.getValueSafely(specialization.getQualificationEng()));
