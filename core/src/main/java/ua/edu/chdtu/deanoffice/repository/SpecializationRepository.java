@@ -24,6 +24,6 @@ public interface SpecializationRepository extends JpaRepository<Specialization, 
             "and s.degree.id = :degree_id " +
             "and s.speciality.id = :speciality_id " +
             "and s.faculty.id = :faculty_id")
-    List<Specialization> findByNameAndDegreeAndSpeciality(@Param("name")String name, @Param("degree_id") Integer degreeId,
-                                                          @Param("speciality_id") Integer specialityId, @Param("faculty_id") Integer facultyId);
+    List<Specialization> findByNameAndDegreeAndSpecialityAndFaculty(@Param("name")String name, @Param("degree_id") Integer degreeId,
+                                                                    @Param("speciality_id") Integer specialityId, @Param("faculty_id") Integer facultyId);
 }

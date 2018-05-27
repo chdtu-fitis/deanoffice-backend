@@ -197,12 +197,6 @@ public class ImportDataService {
         if (specialization == null)
             return null;
         studentDegree.setSpecialization(specialization);
-//        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
-//            if (degreeEnum.getNameUkr().toLowerCase().equals(data.getQualificationGroupName().toLowerCase())) {
-//                studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
-//                break;
-//            }
-//        }
 
         for (EducationDocument eduDocument : EducationDocument.values()) {
             if (eduDocument.getNameUkr().toLowerCase().equals(data.getPersonDocumentType().toLowerCase())) {
@@ -220,10 +214,14 @@ public class ImportDataService {
 
         try {
             Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
-            studentDegree.setAdmissionOrderNumber(matcher.matches() && matcher.groupCount() > 0 ? matcher.group(1) : null);
-            Date admissionOrderDate = matcher.matches() && matcher.groupCount() > 1 ? admissionDateFormatter.parse(matcher.group(2)) : null;
-            studentDegree.setAdmissionOrderDate(admissionOrderDate);
+            if (matcher.find()) {
+                studentDegree.setAdmissionOrderNumber(matcher.groupCount() > 0 ? matcher.group(1) : null);
+                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionDateFormatter.parse(matcher.group(2)) : null;
+                studentDegree.setAdmissionOrderDate(admissionOrderDate);
+            }
         } catch (ParseException e) {
+            log.debug(e.getMessage());
+        } catch (IllegalStateException e) {
             log.debug(e.getMessage());
         }
 
