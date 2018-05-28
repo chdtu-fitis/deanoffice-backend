@@ -44,9 +44,15 @@ public enum EctsGrade {
         return null;
     }
 
-    public static Integer getGrade(Integer points) {
+    public static Integer getGrade(Integer points, boolean graded) {
+        if(!graded) return getGraded(points);
         if(points == null) return null;
         return getEctsGrade(points).getGrade();
+    }
+
+    private static Integer getGraded(Integer points) {
+        if(points == null) return 0;
+        return points >= 60 ? 1 : 0;
     }
 
     public String getNationalGradeUkr(Grade grade) {
