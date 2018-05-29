@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -52,5 +54,11 @@ public class Specialization extends NameWithEngAndActiveEntity {
         educationalProgramHeadNameEng = "";
         educationalProgramHeadInfo = "";
         educationalProgramHeadInfoEng = "";
+        certificateNumber = "";
+        try {
+            certificateDate = new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1980");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

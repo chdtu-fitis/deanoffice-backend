@@ -31,7 +31,7 @@ public class SpecializationService {
     }
 
     public Specialization getByNameAndDegreeAndSpecialityAndFaculty(String name, Integer degreeId, Integer specialityId, Integer facultyId) {
-        List<Specialization> specializations = specializationRepository.findByNameAndDegreeAndSpeciality(name, degreeId, specialityId, facultyId);
+        List<Specialization> specializations = specializationRepository.findByNameAndDegreeAndSpecialityAndFaculty(name, degreeId, specialityId, facultyId);
         return specializations.size() == 0 ? null : specializations.get(0);
     }
 

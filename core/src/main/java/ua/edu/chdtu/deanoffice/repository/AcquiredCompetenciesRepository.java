@@ -13,4 +13,6 @@ public interface AcquiredCompetenciesRepository extends JpaRepository<AcquiredCo
             "where ac.specialization.id =  :specialization_id " +
             "order by ac.year desc")
     List<AcquiredCompetencies> findLastCompetenciesForSpecialization(@Param("specialization_id") int specializationId);
+
+    AcquiredCompetencies findBySpecializationIdAndYear(Integer specializationId, Integer year);
 }

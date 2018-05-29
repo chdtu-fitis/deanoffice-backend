@@ -17,7 +17,6 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
-import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
@@ -91,7 +90,7 @@ public class SummaryForGroupService {
     }
 
     private void addGroupName(WordprocessingMLPackage template, StudentGroup studentGroup) {
-        replaceValuesInTextPlaceholders(Arrays.asList(getTextsFromContentAccessor(template.getMainDocumentPart()).get(0)),
+        replaceValuesInTextPlaceholders(Arrays.asList(getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart()).get(0)),
                 getGroupNameDictionary(studentGroup));
         template.getMainDocumentPart().getContent().get(0);
     }

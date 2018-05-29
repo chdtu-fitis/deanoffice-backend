@@ -24,11 +24,14 @@ public class GradeService {
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
     private final StudentDegreeRepository studentDegreeRepository;
+    private CourseService courseService;
 
-    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, StudentDegreeRepository studentDegreeRepository) {
+    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
+                        StudentDegreeRepository studentDegreeRepository, CourseService courseService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
         this.studentDegreeRepository = studentDegreeRepository;
+        this.courseService = courseService;
     }
 
     public List<List<Grade>> getGradesByStudentDegreeId(Integer studentDegreeId) {
@@ -63,9 +66,10 @@ public class GradeService {
     }
 
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
-        grades.forEach(grade->{
+        grades.forEach(grade -> {
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-            grade.setGrade(EctsGrade.getGrade(grade.getPoints()));
+            Course course = courseService.getById(grade.getCourse().getId());
+            grade.setGrade(EctsGrade.getGrade(grade.getPoints(), course.getKnowledgeControl().isGraded()));
         });
         return grades;
     }
@@ -92,4 +96,16 @@ public class GradeService {
     public Grade getGradeForStudentAndCourse(Integer studentDegreeId, Integer courseId) {
         return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
     }
+
+    public List<Grade> getGradesByCourseAndGroup(int courseId, int groupId) {
+        return gradeRepository.findByCourseAndGroup(courseId, groupId);
+    }
+
+    public void saveGradesByCourse(Course course, List<Grade> grades) {
+        for (Grade grade : grades) {
+            grade.setCourse(course);
+            gradeRepository.save(grade);
+        }
+    }
+
 }

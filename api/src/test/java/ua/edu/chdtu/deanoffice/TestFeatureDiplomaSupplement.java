@@ -261,7 +261,6 @@ public class TestFeatureDiplomaSupplement {
         StudentDegree studentDegree = new StudentDegree();
         studentDegree.setStudent(student);
         studentDegree.setStudentGroup(studentGroup);
-        studentDegree.setDegree(studentGroup.getSpecialization().getDegree());
         studentDegree.setSpecialization(studentGroup.getSpecialization());
         studentDegree.setStudent(student);
         studentDegree.setStudentGroup(studentGroup);

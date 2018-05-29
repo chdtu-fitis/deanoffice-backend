@@ -24,4 +24,8 @@ public class AcquiredCompetenciesService {
         }
         return acquiredCompetencies.get(0);
     }
+
+    public AcquiredCompetencies findBySpecializationIdAndYear(Integer specializationId, Integer year) {
+        return acquiredCompetenciesRepository.findBySpecializationIdAndYear(specializationId, year);
+    }
 }

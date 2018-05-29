@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
@@ -52,5 +53,13 @@ public class CourseForGroupService {
         for (Integer courseId : deleteCoursesIds) {
             courseForGroupRepository.delete(courseId);
         }
+    }
+
+    public void save(CourseForGroup courseForGroup){
+        this.courseForGroupRepository.save(courseForGroup);
+    }
+
+    public int countByGroup(StudentGroup group){
+        return courseForGroupRepository.countByStudentGroup(group);
     }
 }

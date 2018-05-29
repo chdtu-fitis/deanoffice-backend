@@ -2,29 +2,18 @@ package ua.edu.chdtu.deanoffice.api.course;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
 import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.CourseName;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.CourseNameService;
-import ua.edu.chdtu.deanoffice.service.CourseService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -40,22 +29,25 @@ public class CourseController {
     private CourseService courseService;
     private StudentGroupService studentGroupService;
     private TeacherService teacherService;
+    private GradeService gradeService;
     private CourseNameService courseNameService;
-
     @Autowired
     public CourseController(
             CourseForGroupService courseForGroupService,
             CourseService courseService,
             StudentGroupService studentGroupService,
             TeacherService teacherService,
-            CourseNameService courseNameService
+            CourseNameService courseNameService,
+            GradeService gradeService
     ) {
         this.courseForGroupService = courseForGroupService;
         this.courseService = courseService;
         this.studentGroupService = studentGroupService;
         this.teacherService = teacherService;
         this.courseNameService = courseNameService;
+        this.gradeService = gradeService;
     }
+
 
     @GetMapping("/courses")
     public ResponseEntity getCoursesBySemester(@RequestParam(value = "semester") int semester) {
@@ -69,6 +61,35 @@ public class CourseController {
         List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
     }
+
+    @PutMapping("/groups/{groupId}/courses")
+    @JsonView(CourseForGroupView.Course.class)
+    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
+        try {
+            Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
+            Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse(), Course.class);
+            Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
+            StudentGroup group =  studentGroupService.getById(groupId);
+            if (courseForGroupService.countByGroup(group)==1){
+                courseService.createOrUpdateCourse(newCourse);
+                return new ResponseEntity(HttpStatus.CREATED);
+            }
+            CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
+            if (courseFromDb != null) {
+                newCourse = courseFromDb;
+            } else {
+                newCourse = courseService.createOrUpdateCourse(newCourse);
+            }
+            courseForGroup.setCourse(newCourse);
+            courseForGroupService.save(courseForGroup);
+            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
+            gradeService.saveGradesByCourse(newCourse, grades);
+            return new ResponseEntity(HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
+        }
+    }
+
 
     @PostMapping("/groups/{groupId}/courses")
     public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {
@@ -87,7 +108,7 @@ public class CourseController {
             for (CourseForGroupDTO newCourseForGroup : newCourses) {
                 CourseForGroup courseForGroup = new CourseForGroup();
 
-                Course course = courseService.getCourse(newCourseForGroup.getCourse().getId());
+                Course course = courseService.getById(newCourseForGroup.getCourse().getId());
                 courseForGroup.setCourse(course);
 
                 StudentGroup studentGroup = studentGroupService.getById(groupId);
@@ -138,18 +159,17 @@ public class CourseController {
     public ResponseEntity createCourse(@RequestBody CourseDTO courseDTO) {
         try {
             Course course = (Course) map(courseDTO, Course.class);
-            if (courseDTO.getCourseName().getId()!=0) {
-                Course newCourse = this.courseService.createCourse(course);
+            if (courseDTO.getCourseName().getId() != 0) {
+                Course newCourse = this.courseService.createOrUpdateCourse(course);
                 URI location = getNewResourceLocation(newCourse.getId());
                 return ResponseEntity.created(location).build();
-            }
-            else {
+            } else {
                 CourseName courseName = new CourseName();
                 courseName.setName(courseDTO.getCourseName().getName());
                 this.courseNameService.saveCourseName(courseName);
                 CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
                 course.setCourseName(newCourseName);
-                this.courseService.createCourse(course);
+                this.courseService.createOrUpdateCourse(course);
                 URI location = getNewResourceLocation(course.getId());
                 return ResponseEntity.created(location).build();
             }
@@ -159,7 +179,7 @@ public class CourseController {
     }
 
     @GetMapping("courses/names")
-    public ResponseEntity getCourseNames(){
+    public ResponseEntity getCourseNames() {
         List<CourseName> courseNames = this.courseNameService.getCourseNames();
         return ResponseEntity.ok(map(courseNames, NamedDTO.class));
     }

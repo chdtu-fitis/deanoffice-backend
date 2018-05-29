@@ -1,5 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -14,19 +16,25 @@ public class CourseService {
         this.courseRepository = courseRepository;
     }
 
-    public Course getCourse(int courseId) {
-        return courseRepository.findOne(courseId);
+    public Course getCourseByAllAttributes(Course course) {
+        return courseRepository.findOne(course.getSemester(), course.getKnowledgeControl().getId(), course.getCourseName().getId(),
+                course.getHours(), course.getCredits());
     }
+
 
     public List<Course> getCoursesBySemester(int semester) {
         return courseRepository.findAllBySemester(semester);
     }
 
-    public Course createCourse(Course course) {
+    public Course createOrUpdateCourse(Course course) {
         return this.courseRepository.save(course);
     }
 
     public Course getById(int id) {
         return courseRepository.findOne(id);
+    }
+
+    public Course getByCourse(Course course){
+        return courseRepository.findOne(course.getId());
     }
 }
