@@ -16,15 +16,7 @@ public class AcquiredCompetenciesService {
         this.acquiredCompetenciesRepository = acquiredCompetenciesRepository;
     }
 
-    public String getCompetenciesForSpecialization(int specializationId) {
-        AcquiredCompetencies acquiredCompetencies = getAcquiredCompetencies(specializationId);
-        if (acquiredCompetencies == null) {
-            return null;
-        }
-        return acquiredCompetencies.getCompetencies();
-    }
-
-    private AcquiredCompetencies getAcquiredCompetencies(int specializationId) {
+    public AcquiredCompetencies getAcquiredCompetencies(int specializationId) {
         List<AcquiredCompetencies> acquiredCompetencies =
                 acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
         if (acquiredCompetencies.isEmpty()) {
