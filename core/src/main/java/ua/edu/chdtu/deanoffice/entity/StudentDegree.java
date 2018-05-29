@@ -27,6 +27,8 @@ public class StudentDegree extends BaseEntity {
     private String admissionOrderNumber;
     @Temporal(TemporalType.DATE)
     private Date admissionOrderDate;
+    @Temporal(TemporalType.DATE)
+    private Date admissionDate;
     private String contractNumber;
     @Temporal(TemporalType.DATE)
     private Date contractDate;
