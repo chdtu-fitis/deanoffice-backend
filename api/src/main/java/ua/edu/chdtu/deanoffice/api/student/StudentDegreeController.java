@@ -156,6 +156,7 @@ public class StudentDegreeController {
             studentDegrees.forEach(studentDegree -> {
                 Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
+                studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
                 studentDegree.setStudent(student);
             });
 
