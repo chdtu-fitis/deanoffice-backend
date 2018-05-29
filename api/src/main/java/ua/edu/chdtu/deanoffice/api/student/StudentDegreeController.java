@@ -100,12 +100,11 @@ public class StudentDegreeController {
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setSpecialization(newStudentDegree.getStudentGroup().getSpecialization());
-        newStudentDegree.setDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree());
         newStudentDegree.setActive(true);
 
         PreviousDiplomaDTO previousDiplomaDTO = getPreviousDiploma(newStudentDegree);
         newStudentDegree.setPreviousDiplomaType(previousDiplomaDTO.getType());
-        boolean degreeIsNotBachelor = newStudentDegree.getDegree().getId() != 1;
+        boolean degreeIsNotBachelor = newStudentDegree.getSpecialization().getDegree().getId() != 1;
         if (degreeIsNotBachelor) {
             newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
             newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
@@ -130,7 +129,7 @@ public class StudentDegreeController {
         if (EducationDocument.isExist(studentDegree.getPreviousDiplomaType())) {
             return studentDegree.getPreviousDiplomaType();
         }
-        return EducationDocument.getPreviousDiplomaType(studentDegree.getDegree().getId());
+        return EducationDocument.getPreviousDiplomaType(studentDegree.getSpecialization().getDegree().getId());
     }
 
     @JsonView(StudentView.Degrees.class)

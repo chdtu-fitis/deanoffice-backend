@@ -20,8 +20,6 @@ public class StudentDegree extends BaseEntity {
     private Student student;
     @ManyToOne
     private StudentGroup studentGroup;
-    @ManyToOne
-    private Degree degree;
     @ManyToOne(fetch = FetchType.LAZY)
     private Specialization specialization;
     private String recordBookNumber;
@@ -29,6 +27,8 @@ public class StudentDegree extends BaseEntity {
     private String admissionOrderNumber;
     @Temporal(TemporalType.DATE)
     private Date admissionOrderDate;
+    @Temporal(TemporalType.DATE)
+    private Date admissionDate;
     private String contractNumber;
     @Temporal(TemporalType.DATE)
     private Date contractDate;
@@ -46,6 +46,7 @@ public class StudentDegree extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private EducationDocument previousDiplomaType = EducationDocument.SECONDARY_SCHOOL_CERTIFICATE;
     private String previousDiplomaNumber;
+    private String previousDiplomaIssuedBy;
     @Temporal(TemporalType.DATE)
     private Date previousDiplomaDate;
     @Enumerated(value = EnumType.STRING)

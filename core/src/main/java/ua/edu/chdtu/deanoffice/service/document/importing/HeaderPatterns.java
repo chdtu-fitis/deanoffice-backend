@@ -16,7 +16,7 @@ final class HeaderPatterns {
     static final String QUALIFICATION_GROUP_NAME = "%1-qualificationGroupName%";
     static final String BASE_QUALIFICATION_NAME = "%1-baseQualificationName%";
     static final String EDUCATION_FORM_NAME = "%1-educationFormName%";
-    static final String PAYMENT_TYPE_NAME = "1-personEducationPaymentTypeName%";
+    static final String PAYMENT_TYPE_NAME = "%1-personEducationPaymentTypeName%";
     static final String FULL_SPECIALITY_NAME = "%1-fullSpecialityName%";
     static final String FULL_SPECIALIZATION_NAME = "%1-fullSpecializationName%";
     static final String PROGRAM_NAME = "%1-programName%";

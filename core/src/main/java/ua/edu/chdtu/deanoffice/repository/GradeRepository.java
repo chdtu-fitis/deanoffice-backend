@@ -12,12 +12,12 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     @Query("Select grade From Grade grade" +
             " Join grade.course course" +
-            " Where grade.studentDegree.student.id = :studentId" +
+            " Where grade.studentDegree.id = :studentDegreeId" +
             " and course.knowledgeControl.id in (:KnowledgeControlIds)" +
             " and course.id in (:courseIds)" +
             " Order by course.courseName.name")
-    List<Grade> getByStudentIdAndCoursesAndKCTypes(
-            @Param("studentId") Integer studentId,
+    List<Grade> getByStudentDegreeIdAndCoursesAndKCTypes(
+            @Param("studentDegreeId") Integer studentDegreeId,
             @Param("courseIds") List<Integer> courseIds,
             @Param("KnowledgeControlIds") List<Integer> knowledgeControlsIds
     );

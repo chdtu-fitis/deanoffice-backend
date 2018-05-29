@@ -148,12 +148,9 @@ public class TestFeatureDiplomaSupplement {
         courseName1.setName("Багатосеместровий курс 1");
         courseName1.setNameEng("Multiple Semester course 1");
 
-        Course course11 = createCourse(courseName1, true);
-        course11.setHours(60);
-        Course course12 = createCourse(courseName1, true);
-        course12.setHours(60);
-        Course course13 = createCourse(courseName1, false);
-        course13.setHours(30);
+        Course course11 = createCourse(courseName1, 60, true);
+        Course course12 = createCourse(courseName1, 60, true);
+        Course course13 = createCourse(courseName1, 30, false);
 
         Grade grade11 = createGrade(course11, studentDegree, 89);
         Grade grade12 = createGrade(course12, studentDegree, 75);
@@ -162,29 +159,28 @@ public class TestFeatureDiplomaSupplement {
         CourseName courseName12 = new CourseName();
         courseName12.setName("Курс 2");
         courseName12.setNameEng("Course 2");
-        Course course121 = createCourse(courseName12, true);
-        course121.setHours(90);
+        Course course121 = createCourse(courseName12, 90, true);
         Grade grade121 = createGrade(course121, 75);
         grades.get(0).addAll(Arrays.asList(grade11, grade12, grade13, grade121));
 
         CourseName courseName2 = new CourseName();
         courseName2.setName("Курсова робота 1");
         courseName2.setNameEng("Course work 1");
-        Course course2 = createCourse(courseName2, true);
+        Course course2 = createCourse(courseName2, 90, true);
         Grade grade2 = createGrade(course2, 84);
         grades.get(1).add(grade2);
 
         CourseName courseName3 = new CourseName();
         courseName3.setName("Практика 1");
         courseName3.setNameEng("Practice 1");
-        Course course3 = createCourse(courseName3, true);
+        Course course3 = createCourse(courseName3, 90, true);
         Grade grade3 = createGrade(course3, 90);
         grades.get(2).add(grade3);
 
         CourseName courseName4 = new CourseName();
         courseName4.setName("Дипломна робота 1");
         courseName4.setNameEng("Diploma work 1");
-        Course course4 = createCourse(courseName4, true);
+        Course course4 = createCourse(courseName4, 90, true);
         Grade grade4 = createGrade(course4, 90);
         grades.get(3).add(grade4);
 
@@ -244,7 +240,6 @@ public class TestFeatureDiplomaSupplement {
     private static Course createCourse(boolean knowledgeControlHasGrade) {
         Course course = new Course();
         KnowledgeControl kc = new KnowledgeControl();
-        course.setHours(90);
         course.setHoursPerCredit(30);
         kc.setGraded(knowledgeControlHasGrade);
         if (knowledgeControlHasGrade) {
@@ -266,7 +261,6 @@ public class TestFeatureDiplomaSupplement {
         StudentDegree studentDegree = new StudentDegree();
         studentDegree.setStudent(student);
         studentDegree.setStudentGroup(studentGroup);
-        studentDegree.setDegree(studentGroup.getSpecialization().getDegree());
         studentDegree.setSpecialization(studentGroup.getSpecialization());
         studentDegree.setStudent(student);
         studentDegree.setStudentGroup(studentGroup);
@@ -292,8 +286,10 @@ public class TestFeatureDiplomaSupplement {
         Assert.assertEquals(EctsGrade.C, EctsGrade.getEctsGrade(78));
     }
 
-    private static Course createCourse(CourseName courseName, boolean knowledgeControlHasGrade) {
+    private static Course createCourse(CourseName courseName, int hours, boolean knowledgeControlHasGrade) {
         Course c = createCourse(knowledgeControlHasGrade);
+        c.setHours(hours);
+        c.setCredits(new BigDecimal(hours/c.getHoursPerCredit()));
         c.setCourseName(courseName);
         return c;
     }

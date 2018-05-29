@@ -20,6 +20,7 @@ public class Grade extends BaseEntity {
     private StudentDegree studentDegree;
     private Integer grade;
     private Integer points;
+    private Boolean onTime;
     @Column(name = "ects", length = 2)
     @Enumerated(value = EnumType.STRING)
     private EctsGrade ects;

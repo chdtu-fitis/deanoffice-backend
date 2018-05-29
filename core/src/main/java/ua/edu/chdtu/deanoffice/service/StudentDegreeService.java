@@ -22,14 +22,6 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAllByActive(active, facultyId);
     }
 
-    public StudentDegree save(StudentDegree studentDegree) {
-        return this.studentDegreeRepository.save(studentDegree);
-    }
-
-    public void update(List<StudentDegree> studentDegree) {
-        studentDegreeRepository.save(studentDegree);
-    }
-
     public StudentDegree getFirst(Integer studentId) {
         List<StudentDegree> studentDegrees = this.studentDegreeRepository.findAllByStudentId(studentId);
         return (studentDegrees.isEmpty()) ? null : studentDegrees.get(0);
@@ -41,5 +33,13 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
+    }
+
+    public StudentDegree save(StudentDegree studentDegree) {
+        return this.studentDegreeRepository.save(studentDegree);
+    }
+
+    public void update(List<StudentDegree> studentDegree) {
+        studentDegreeRepository.save(studentDegree);
     }
 }

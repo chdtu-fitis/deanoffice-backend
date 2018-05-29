@@ -19,5 +19,11 @@ public interface SpecializationRepository extends JpaRepository<Specialization, 
             "where s.id in :specialization_ids")
     List<Specialization> findAllByIds(@Param("specialization_ids") Integer[] specializationIds);
 
-    List<Specialization> findByNameAndDegreeAndSpeciality(@Param("name")String name, @Param("degree_id") Integer degreeId, @Param("speciality_id") Integer specialityId);
+    @Query("select s from Specialization s " +
+            "where upper(s.name) = upper(:name) " +
+            "and s.degree.id = :degree_id " +
+            "and s.speciality.id = :speciality_id " +
+            "and s.faculty.id = :faculty_id")
+    List<Specialization> findByNameAndDegreeAndSpecialityAndFaculty(@Param("name")String name, @Param("degree_id") Integer degreeId,
+                                                                    @Param("speciality_id") Integer specialityId, @Param("faculty_id") Integer facultyId);
 }
