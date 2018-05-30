@@ -1,18 +1,16 @@
 package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
-import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 
@@ -33,14 +31,15 @@ public class ExamReportService {
         this.examReportTemplateFillService = examReportTemplateFillService;
     }
 
-    public File createGroupStatement(Integer groupId, Integer courseId, FileFormatEnum format)
-            throws IOException, Docx4JException {
-        CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(groupId, courseId);
-        StudentGroup group = courseForGroup.getStudentGroup();
-        Course course = courseForGroup.getCourse();
+    public File createGroupStatement(Integer groupId, List<Integer> courseIds, FileFormatEnum format)
+            throws Exception {
+        if (courseIds.size() > 0) {
+            List<CourseForGroup> coursesForGroups = new ArrayList<>();
+            courseIds.forEach(courseId -> coursesForGroups.add(courseForGroupService.getCourseForGroup(groupId, courseId)));
 
-        String fileName = LanguageUtil.transliterate(group.getName() + "_" + course.getCourseName().getNameEng());
-        WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, courseForGroup);
-        return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
+            String fileName = LanguageUtil.transliterate(coursesForGroups.get(0).getStudentGroup().getName());
+            WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, coursesForGroups);
+            return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
+        } else throw new Exception();
     }
 }
