@@ -47,6 +47,24 @@ class ExamReportTemplateFillService extends ExamReportBaseService {
         return template;
     }
 
+    WordprocessingMLPackage fillTemplate(String templateName, List<CourseForGroup> coursesForGroups)
+            throws IOException, Docx4JException {
+        WordprocessingMLPackage reportsDocument = fillTemplate(templateName, coursesForGroups.get(0));
+        coursesForGroups.remove(0);
+        if (coursesForGroups.size() > 0) {
+            coursesForGroups.forEach(courseForGroup -> {
+                TemplateUtil.addPageBreak(reportsDocument);
+                try {
+                    reportsDocument.getMainDocumentPart().getContent()
+                            .addAll(fillTemplate(templateName, courseForGroup).getMainDocumentPart().getContent());
+                } catch (IOException | Docx4JException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return reportsDocument;
+    }
+
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
         Tbl tempTable = TemplateUtil.findTable(template, "№");
         if (tempTable == null) {
