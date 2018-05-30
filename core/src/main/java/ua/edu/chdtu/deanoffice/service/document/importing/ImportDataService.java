@@ -177,6 +177,7 @@ public class ImportDataService {
         if(existingStudentDegree != null && studentDegree != null) {
             existingStudentDegree.setAdmissionOrderNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getAdmissionOrderNumber(), existingStudentDegree.getAdmissionOrderNumber()));
             existingStudentDegree.setAdmissionOrderDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionOrderDate(), existingStudentDegree.getAdmissionOrderDate()));
+            existingStudentDegree.setAdmissionDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionDate(), existingStudentDegree.getAdmissionDate()));
             existingStudentDegree.setPayment(ObjectUtils.firstNonNull(studentDegree.getPayment(), existingStudentDegree.getPayment()));
             existingStudentDegree.setPreviousDiplomaNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getPreviousDiplomaNumber(), existingStudentDegree.getPreviousDiplomaNumber()));
             existingStudentDegree.setPreviousDiplomaDate(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaDate(), existingStudentDegree.getPreviousDiplomaDate()));
@@ -232,6 +233,13 @@ public class ImportDataService {
         } catch (IllegalStateException e) {
             log.debug(e.getMessage());
         }
+        try {
+            Date admissionDate = new SimpleDateFormat("dd.MM.yyyy h:mm").parse(data.getEducationDateBegin());
+            studentDegree.setAdmissionDate(admissionDate);
+        }catch (ParseException e) {
+            log.debug(e.getMessage());
+        }
+        studentDegree.setSupplementNumber(data.getEducationId());
 
         return studentDegree;
     }
