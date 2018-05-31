@@ -217,7 +217,7 @@ public class ImportDataService {
 
         studentDegree.setActive(true);
         studentDegree.setPayment(Objects.equals(data.getPersonEducationPaymentTypeName(), "Контракт") ? Payment.CONTRACT : Payment.BUDGET);
-        DateFormat admissionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+        DateFormat admissionOrderDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
         final String ADMISSION_REGEXP ="Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
         Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
 
@@ -225,7 +225,7 @@ public class ImportDataService {
             Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
             if (matcher.find()) {
                 studentDegree.setAdmissionOrderNumber(matcher.groupCount() > 0 ? matcher.group(1) : null);
-                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionDateFormatter.parse(matcher.group(2)) : null;
+                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionOrderDateFormatter.parse(matcher.group(2)) : null;
                 studentDegree.setAdmissionOrderDate(admissionOrderDate);
             }
         } catch (ParseException e) {
@@ -234,7 +234,7 @@ public class ImportDataService {
             log.debug(e.getMessage());
         }
         try {
-            Date admissionDate = new SimpleDateFormat("dd.MM.yyyy h:mm").parse(data.getEducationDateBegin());
+            Date admissionDate = new SimpleDateFormat("M/dd/yy H:mm").parse(data.getEducationDateBegin());
             studentDegree.setAdmissionDate(admissionDate);
         }catch (ParseException e) {
             log.debug(e.getMessage());
@@ -245,7 +245,7 @@ public class ImportDataService {
     }
 
     private Specialization fetchSpecialization(String specialityString, String specializationString, String programString, String degreeName, String facultyName) {
-        final String SPECIALITY_REGEXP_OLD = "([\\d.]+)[\\s]([\\w\\W]+)";
+        final String SPECIALITY_REGEXP_OLD = "([\\d\\.]+)[\\s]([\\w\\W]+)";
         final String SPECIALITY_REGEXP_NEW = "([\\d\\d\\d])[\\s]([\\w\\W]+)";
         final String SPECIALIZATION_REGEXP = "([\\d+.\\d+])[\\s]([\\w\\W]+)";
         Pattern specialityPattern;
