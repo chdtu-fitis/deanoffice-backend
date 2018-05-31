@@ -7,7 +7,11 @@ import org.docx4j.openpackaging.parts.JaxbXmlPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
+import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
+import org.docx4j.wml.ObjectFactory;
+import org.docx4j.wml.P;
+import org.docx4j.wml.STBrType;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Text;
@@ -28,6 +32,8 @@ public class TemplateUtil {
 
     private static final Logger log = LoggerFactory.getLogger(TemplateUtil.class);
     private static final String PLACEHOLDER_PREFIX = "#";
+
+    private static ObjectFactory factory = new ObjectFactory();
 
     public static List<Object> getAllElementsFromObject(Object obj, Class<?> toSearch) {
         List<Object> result = new ArrayList<>();
@@ -211,6 +217,23 @@ public class TemplateUtil {
         template.getMainDocumentPart().addObject(XmlUtils.deepCopy(table));
     }
 
+    public static void addPageBreak(WordprocessingMLPackage document) {
+        Br breakObject = createPageBreak();
+        P paragraph = createParagraph();
+        paragraph.getContent().add(breakObject);
+
+        document.getMainDocumentPart().addObject(paragraph);
+    }
+
+    public static Br createPageBreak() {
+        Br breakObject = new Br();
+        breakObject.setType(STBrType.PAGE);
+        return breakObject;
+    }
+
+    public static P createParagraph() {
+        return factory.createP();
+    }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {
         return StringUtils.isEmpty(value) ? ifNullOrEmpty : value;

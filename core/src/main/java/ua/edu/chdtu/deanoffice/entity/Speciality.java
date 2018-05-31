@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 @Entity
 public class Speciality extends NameWithEngAndActiveEntity {
     private String code;
+    private String fieldOfStudyCode;
     private String fieldOfStudy;
     private String fieldOfStudyEng;
 }
