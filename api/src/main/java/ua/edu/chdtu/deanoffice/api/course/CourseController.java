@@ -77,7 +77,18 @@ public class CourseController {
             CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
             if (courseFromDb != null) {
                 newCourse = courseFromDb;
-            } else {
+            }
+            else {
+                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+                CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
+                if (courseNameFromDB != null){
+                    newCourse.setCourseName(courseNameFromDB);
+                }
+                else {
+                    CourseName newCourseName = new CourseName();
+                    newCourseName.setName(courseName.getName());
+                    newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
+                }
                 newCourse = courseService.createOrUpdateCourse(newCourse);
             }
             courseForGroup.setCourse(newCourse);
