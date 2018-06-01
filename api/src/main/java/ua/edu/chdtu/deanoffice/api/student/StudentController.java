@@ -15,10 +15,13 @@ import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -36,8 +39,8 @@ public class StudentController {
     @JsonView(StudentView.Search.class)
     @GetMapping("/search")
     public List searchStudentByFullName(
-            @RequestParam(value = "name", defaultValue = "", required = false) String name,
             @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
+            @RequestParam(value = "name", defaultValue = "", required = false) String name,
             @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic,
             @CurrentUser ApplicationUser user
             ) {
@@ -52,7 +55,9 @@ public class StudentController {
 
     private String getGroupNamesForStudent(Student student) {
         return student.getDegrees().stream()
-                .map(studentDegree -> studentDegree.getStudentGroup().getName())
+                .map(StudentDegree::getStudentGroup)
+                .filter(Objects::nonNull)
+                .map(NameEntity::getName)
                 .collect(Collectors.joining(", "));
     }
 

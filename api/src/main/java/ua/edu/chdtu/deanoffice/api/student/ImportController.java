@@ -40,6 +40,7 @@ public class ImportController {
 
         try {
             importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
+            importDataService.saveImport(importReport);
         } catch (Exception exception) {
             return handleException(exception);
         }

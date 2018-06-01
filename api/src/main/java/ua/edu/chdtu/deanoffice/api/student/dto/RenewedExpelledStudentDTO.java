@@ -22,6 +22,7 @@ public class RenewedExpelledStudentDTO {
     private String academicCertificateIssuedBy;
     private Date expelDate;
     private String orderNumber;
+    private Date orderDate;
 
     private Integer studentExpelId;
     private Integer studentGroupId;

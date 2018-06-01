@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -15,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.util.List;
 
 @RestController
 @RequestMapping("/documents/exam-report")
@@ -28,14 +30,14 @@ public class ExamReportController extends DocumentResponseController {
         this.facultyService = facultyService;
     }
 
-    @GetMapping("/groups/{groupId}/courses/{courseId}/docx")
+    @GetMapping("/groups/{groupId}/docx")
     public ResponseEntity<Resource> generateDocxForSingleCourse(
             @PathVariable Integer groupId,
-            @PathVariable Integer courseId,
+            @RequestParam List<Integer> courseIds,
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File examReport = examReportService.createGroupStatement(groupId, courseId, FileFormatEnum.DOCX);
+            File examReport = examReportService.createGroupStatement(groupId, courseIds, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
@@ -43,14 +45,14 @@ public class ExamReportController extends DocumentResponseController {
 
     }
 
-    @GetMapping("/groups/{groupId}/courses/{courseId}/pdf")
+    @GetMapping("/groups/{groupId}/pdf")
     public ResponseEntity<Resource> generateForSingleCourse(
             @PathVariable Integer groupId,
-            @PathVariable Integer courseId,
+            @PathVariable List<Integer> courseIds,
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File examReport = examReportService.createGroupStatement(groupId, courseId, FileFormatEnum.PDF);
+            File examReport = examReportService.createGroupStatement(groupId, courseIds, FileFormatEnum.PDF);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
             return handleException(e);

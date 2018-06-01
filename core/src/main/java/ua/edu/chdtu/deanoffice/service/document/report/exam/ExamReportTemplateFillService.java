@@ -7,19 +7,15 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
 import java.io.IOException;
 import java.text.Collator;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,16 +23,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitials;
-
 @Service
-class ExamReportTemplateFillService {
+class ExamReportTemplateFillService extends ExamReportBaseService {
 
     private static final int STARTING_ROW_INDEX = 7;
     private static final Logger log = LoggerFactory.getLogger(ExamReportTemplateFillService.class);
     private final DocumentIOService documentIOService;
 
-    public ExamReportTemplateFillService(DocumentIOService documentIOService) {
+    public ExamReportTemplateFillService(DocumentIOService documentIOService,
+                                         CurrentYearService currentYearService) {
+        super(currentYearService);
         this.documentIOService = documentIOService;
     }
 
@@ -51,12 +47,27 @@ class ExamReportTemplateFillService {
         return template;
     }
 
+    WordprocessingMLPackage fillTemplate(String templateName, List<CourseForGroup> coursesForGroups)
+            throws IOException, Docx4JException {
+        WordprocessingMLPackage reportsDocument = fillTemplate(templateName, coursesForGroups.get(0));
+        coursesForGroups.remove(0);
+        if (coursesForGroups.size() > 0) {
+            coursesForGroups.forEach(courseForGroup -> {
+                TemplateUtil.addPageBreak(reportsDocument);
+                try {
+                    reportsDocument.getMainDocumentPart().getContent()
+                            .addAll(fillTemplate(templateName, courseForGroup).getMainDocumentPart().getContent());
+                } catch (IOException | Docx4JException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return reportsDocument;
+    }
+
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
-        List<Object> tables = TemplateUtil.getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
-        String tableWithGradesKey = "№";
-        Tbl tempTable = TemplateUtil.findTable(tables, tableWithGradesKey);
+        Tbl tempTable = TemplateUtil.findTable(template, "№");
         if (tempTable == null) {
-            log.warn("Couldn't find table that contains: " + tableWithGradesKey);
             return;
         }
         List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
@@ -88,50 +99,5 @@ class ExamReportTemplateFillService {
         placeholdersToRemove.add("#StudentInitials");
         placeholdersToRemove.add("#RecBook");
         TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
-    }
-
-    private Map<String, String> getCourseInfoReplacements(CourseForGroup courseForGroup) {
-        Course course = courseForGroup.getCourse();
-        Map<String, String> result = new HashMap<>();
-        result.put("CourseName", course.getCourseName().getName());
-        result.put("Hours", String.format("%d", course.getHours()));
-
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        if (courseForGroup.getExamDate() != null) {
-            result.put("ExamDate", dateFormat.format(courseForGroup.getExamDate()));
-        } else {
-            result.put("ExamDate", "");
-        }
-        result.put("Course", String.format("%d", Calendar.getInstance().get(Calendar.YEAR) - courseForGroup.getStudentGroup().getCreationYear()));
-        result.put("KCType", course.getKnowledgeControl().getName());
-        result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
-        result.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
-        result.put("Semester", String.format("%d-й", courseForGroup.getCourse().getSemester()));
-
-        return result;
-    }
-
-    private Map<String, String> getGroupInfoReplacements(CourseForGroup courseForGroup) {
-        Map<String, String> result = new HashMap<>();
-        StudentGroup studentGroup = courseForGroup.getStudentGroup();
-        result.put("GroupName", studentGroup.getName());
-        Speciality speciality = studentGroup.getSpecialization().getSpeciality();
-        result.put("Specialization", speciality.getCode() + " " + speciality.getName());
-        result.put("FacultyAbbr", studentGroup.getSpecialization().getDepartment().getFaculty().getAbbr());
-        result.put("DeanInitials", makeInitials(studentGroup.getSpecialization().getDepartment().getFaculty().getDean()));
-        result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
-        result.put("StudyYear", getStudyYear());
-
-        return result;
-    }
-
-    private String getStudyYear() {
-        Calendar calendar = Calendar.getInstance();
-        int currentYear = calendar.get(Calendar.YEAR);
-        if (calendar.get(Calendar.MONTH) >= 9) {
-            return String.format("%4d-%4d", currentYear, currentYear + 1);
-        } else {
-            return String.format("%4d-%4d", currentYear - 1, currentYear);
-        }
     }
 }

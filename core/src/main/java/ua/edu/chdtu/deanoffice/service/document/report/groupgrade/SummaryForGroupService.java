@@ -17,7 +17,6 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
-import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
@@ -84,14 +83,14 @@ public class SummaryForGroupService {
 
         for (int i = 0; i < dividedStudentSummaries.size(); i++) {
             Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(i);
-            prepareTable(table, dividedStudentSummaries.get(i));
+            prepareTable(table, dividedStudentSummaries.get(i), studentGroup);
         }
         replacePlaceholdersWithBlank(template);
         return template;
     }
 
     private void addGroupName(WordprocessingMLPackage template, StudentGroup studentGroup) {
-        replaceValuesInTextPlaceholders(Arrays.asList(getTextsFromContentAccessor(template.getMainDocumentPart()).get(0)),
+        replaceValuesInTextPlaceholders(Arrays.asList(getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart()).get(0)),
                 getGroupNameDictionary(studentGroup));
         template.getMainDocumentPart().getContent().get(0);
     }
@@ -107,9 +106,9 @@ public class SummaryForGroupService {
         return result;
     }
 
-    private void prepareTable(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
+    private void prepareTable(Tbl table, List<StudentSummaryForGroup> studentSummaries, StudentGroup studentGroup) {
         prepareTableStructure(table, studentSummaries);
-        fillData(table, studentSummaries);
+        fillData(table, studentSummaries, studentGroup);
     }
 
     private void prepareTableStructure(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
@@ -128,13 +127,13 @@ public class SummaryForGroupService {
                 - summaryForGroupTableDetails.getRowWithPracticesStarts());
     }
 
-    private void fillData(Tbl table, List<StudentSummaryForGroup> studentSummaries) {
+    private void fillData(Tbl table, List<StudentSummaryForGroup> studentSummaries, StudentGroup studentGroup) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         SummaryForGroupTableDetails summaryForGroupTableDetails = new SummaryForGroupTableDetails(studentSummaries);
-        List<Grade> generalGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(0));
-        List<Grade> courseWorks = new ArrayList<>(studentSummaries.get(0).getGrades().get(1));
-        List<Grade> practices = new ArrayList<>(studentSummaries.get(0).getGrades().get(2));
-        List<Grade> diplomaGrades = new ArrayList<>(studentSummaries.get(0).getGrades().get(3));
+        List<Grade> generalGrades = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(0));
+        List<Grade> courseWorks = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(1));
+        List<Grade> practices = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(2));
+        List<Grade> diplomaGrades = new ArrayList<>(summaryForGroupTableDetails.getListWithMaxNumberOfGrades(3));
         Tr rowWithStudentNames = tableRows.get(summaryForGroupTableDetails.getRowWithNamesPosition());
         Tr rowWithTotalGrade = tableRows.get(summaryForGroupTableDetails.getRowWithTotalGradesPosition());
         Tr rowWithAverageGrade = tableRows.get(summaryForGroupTableDetails.getRowWithAverageGradePosition());
@@ -154,7 +153,7 @@ public class SummaryForGroupService {
 
         replaceInCell(rowWithDiplomaGrade, 0, getNumberedDictionary(generalGrades.size() + practices.size() + courseWorks.size() + 1));
         if (diplomaGrades.size() > 0) {
-            replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0)));
+            replaceInCell(rowWithDiplomaGrade, 1, getCourseDictionary(diplomaGrades.get(0), studentGroup));
         }
 
         for (int i = 0; i < generalGrades.size(); i++) {
@@ -162,7 +161,7 @@ public class SummaryForGroupService {
         }
 
         for (int i = 0; i < generalGrades.size(); i++) {
-            replaceInCell(rowsWithGeneralGrades.get(i), 1, getCourseDictionary(generalGrades.get(i)));
+            replaceInCell(rowsWithGeneralGrades.get(i), 1, getCourseDictionary(generalGrades.get(i), studentGroup));
         }
 
         for (int i = 0; i < courseWorks.size(); i++) {
@@ -170,7 +169,7 @@ public class SummaryForGroupService {
         }
 
         for (int i = 0; i < courseWorks.size(); i++) {
-            replaceInCell(rowsWithCourseWorks.get(i), 1, getCourseDictionary(courseWorks.get(i)));
+            replaceInCell(rowsWithCourseWorks.get(i), 1, getCourseDictionary(courseWorks.get(i), studentGroup));
         }
 
         for (int i = 0; i < practices.size(); i++) {
@@ -178,7 +177,7 @@ public class SummaryForGroupService {
         }
 
         for (int i = 0; i < practices.size(); i++) {
-            replaceInCell(rowsWithPractices.get(i), 1, getCourseDictionary(practices.get(i)));
+            replaceInCell(rowsWithPractices.get(i), 1, getCourseDictionary(practices.get(i), studentGroup));
         }
 
 
@@ -214,12 +213,12 @@ public class SummaryForGroupService {
 
     }
 
-    private Map<String, String> getCourseDictionary(Grade grade) {
+    private Map<String, String> getCourseDictionary(Grade grade, StudentGroup studentGroup) {
         Course course = grade.getCourse();
         HashMap<String, String> result = new HashMap<>();
         String courseString = course.getCourseName().getName();
         if (grade.getCourse() instanceof CombinedCourse) {
-            if (((CombinedCourse) grade.getCourse()).getNumberOfSemesters() > 1) {
+            if (((CombinedCourse) grade.getCourse()).getNumberOfSemesters() > 1&&((CombinedCourse) grade.getCourse()).isCombined()) {
                 courseString += " (БС)";
             }
         }
@@ -229,25 +228,25 @@ public class SummaryForGroupService {
         }
 
         result.put("s", courseString);
-        result.put("p", String.format("%s %d %.1f", getPeriod(grade), course.getHours(), course.getCredits()));
+        result.put("p", String.format("%s %d %.1f", getPeriod(grade, studentGroup), course.getHours(), course.getCredits()));
         return result;
     }
 
-    private String getPeriod(Grade grade) {
-        int studyYear = grade.getStudentDegree().getStudentGroup().getCreationYear();
-        int numberOfSemesters = 1;
-        Integer semester = grade.getCourse().getSemester();
-        if (grade.getCourse() instanceof CombinedCourse) {
-            numberOfSemesters = ((CombinedCourse) grade.getCourse()).getNumberOfSemesters();
-        }
+    private String getPeriod(Grade grade, StudentGroup studentGroup) {
+            int studyYear = studentGroup.getCreationYear();
+            int numberOfSemesters = 1;
+            Integer semester = grade.getCourse().getSemester();
+            if (grade.getCourse() instanceof CombinedCourse) {
+                numberOfSemesters = ((CombinedCourse) grade.getCourse()).getNumberOfSemesters();
+            }
 
-        int finishingSemester = semester + numberOfSemesters - 1;
-        int startingYear = studyYear + (semester - 1) / 2;
-        int finishingYear = studyYear + (finishingSemester / 2);
-        if (finishingSemester % 2 != 0) {
-            finishingYear++;
-        }
-        return startingYear + "-" + finishingYear;
+            int finishingSemester = semester + numberOfSemesters - 1;
+            int startingYear = studyYear + (semester - 1) / 2;
+            int finishingYear = studyYear + (finishingSemester / 2);
+            if (finishingSemester % 2 != 0) {
+                finishingYear++;
+            }
+            return startingYear + "-" + finishingYear;
     }
 
     private HashMap<String, String> getGroupNameDictionary(StudentGroup studentGroup) {

@@ -24,16 +24,18 @@ public class GradeService {
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
     private final StudentDegreeRepository studentDegreeRepository;
+    private CourseService courseService;
 
-    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, StudentDegreeRepository studentDegreeRepository) {
+    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
+                        StudentDegreeRepository studentDegreeRepository, CourseService courseService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
         this.studentDegreeRepository = studentDegreeRepository;
+        this.courseService = courseService;
     }
 
     public List<List<Grade>> getGradesByStudentDegreeId(Integer studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
-        Student student = studentDegree.getStudent();
         List<Course> courses = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId());
         List<List<Grade>> grades = new ArrayList<>();
 
@@ -47,26 +49,27 @@ public class GradeService {
 
         List<Integer> courseIds = courses.stream().map(BaseEntity::getId).collect(Collectors.toList());
 
-        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
-        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
-        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART3)));
-        grades.add(getGrades(student, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART4)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART3)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART4)));
 
         return grades;
     }
 
-    private List<Grade> getGrades(Student student,
+    private List<Grade> getGrades(StudentDegree studentDegree,
                                   List<Integer> courseIds,
                                   List<Integer> knowledgeControlTypes) {
-        return gradeRepository.getByStudentIdAndCoursesAndKCTypes(student.getId(),
+        return gradeRepository.getByStudentDegreeIdAndCoursesAndKCTypes(studentDegree.getId(),
                 courseIds,
                 knowledgeControlTypes);
     }
 
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
-        grades.forEach(grade->{
+        grades.forEach(grade -> {
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-            grade.setGrade(EctsGrade.getGrade(grade.getPoints()));
+            Course course = courseService.getById(grade.getCourse().getId());
+            grade.setGrade(EctsGrade.getGrade(grade.getPoints(), course.getKnowledgeControl().isGraded()));
         });
         return grades;
     }
@@ -78,7 +81,7 @@ public class GradeService {
                 Constants.ATTESTATION, Constants.INTERNSHIP, Constants.STATE_EXAM);
         List<Integer> courseIds = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId())
                 .stream().map(BaseEntity::getId).collect(Collectors.toList());
-        return new ArrayList<>(getGrades(student, courseIds, knowledgeControlTypes));
+        return new ArrayList<>(getGrades(studentDegree, courseIds, knowledgeControlTypes));
     }
 
     public List<Grade> getGradesForStudents(List<Integer> studentsIds, List<Integer> courseIds) {
@@ -94,12 +97,12 @@ public class GradeService {
         return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
     }
 
-    public List<Grade> getGradesByCourseAndGroup(int courseId, int groupId){
+    public List<Grade> getGradesByCourseAndGroup(int courseId, int groupId) {
         return gradeRepository.findByCourseAndGroup(courseId, groupId);
     }
 
-    public void saveGradesByCourse(Course  course, List<Grade> grades){
-        for (Grade grade: grades){
+    public void saveGradesByCourse(Course course, List<Grade> grades) {
+        for (Grade grade : grades) {
             grade.setCourse(course);
             gradeRepository.save(grade);
         }

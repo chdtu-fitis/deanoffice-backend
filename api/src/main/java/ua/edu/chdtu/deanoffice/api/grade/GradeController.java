@@ -70,4 +70,12 @@ public class GradeController {
         List<CourseForGroup> courses = this.courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
         return courses.stream().map(course -> course.getCourse().getId()).collect(Collectors.toList());
     }
+
+    @GetMapping("/{groupId}/{courseId}")
+    public ResponseEntity getGradesByGroupIdAndCourseId(
+            @PathVariable Integer groupId,
+            @PathVariable Integer courseId) {
+        List<Grade> grades = this.gradeService.getGradesByCourseAndGroup(courseId, groupId);
+        return ResponseEntity.ok(map(grades, GradeDTO.class));
+    }
 }

@@ -25,12 +25,14 @@ public class StudentSummary {
 
     private StudentDegree studentDegree;
     private List<List<Grade>> grades;
-    private Integer totalHours = 0;
+    private Integer totalHours;
+    private BigDecimal totalCredits;
 
     public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
         this.studentDegree = studentDegree;
         this.grades = grades;
         calculateTotalHours();
+        calculateTotalCredits();
         combineMultipleSemesterCourseGrades();
     }
 
@@ -47,6 +49,7 @@ public class StudentSummary {
     }
 
     private void calculateTotalHours() {
+        totalHours = 0;
         grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
             if (grade.getCourse().getHours() != null) {
                 totalHours += grade.getCourse().getHours();
@@ -113,7 +116,7 @@ public class StudentSummary {
             }
         }
         resultingGrade.getCourse().setHours(hoursSum);
-        resultingGrade.getCourse().setCredits(new BigDecimal(hoursSum / resultingGrade.getCourse().getHoursPerCredit()));
+        resultingGrade.getCourse().setCredits(new BigDecimal((double) hoursSum / resultingGrade.getCourse().getHoursPerCredit()));
         return resultingGrade;
     }
 
@@ -141,16 +144,16 @@ public class StudentSummary {
             }
         }
 
-        double averageGrade = gradesSum / grades.size();
-        double averagePoints = pointsSum / grades.size();
+        double averageGrade = gradesSum / (double) grades.size();
+        double averagePoints = pointsSum / (double) grades.size();
 
         if (resultingGrade.getCourse().getKnowledgeControl().isGraded()) {
             int[] gradeAndPoints = GradeUtil.adjustAverageGradeAndPoints(averageGrade, averagePoints);
             resultingGrade.setGrade(gradeAndPoints[0]);
             resultingGrade.setPoints(gradeAndPoints[1]);
         } else {
-            resultingGrade.setGrade((int) averageGrade);
-            resultingGrade.setPoints((int) averagePoints);
+            resultingGrade.setGrade((int) GradeUtil.roundPoints(averageGrade));
+            resultingGrade.setPoints((int) GradeUtil.roundPoints(averagePoints));
             if (resultingGrade.getPoints() >= 60) {
                 resultingGrade.setEcts(EctsGrade.getEctsGrade(resultingGrade.getPoints()));
             } else {
@@ -160,8 +163,13 @@ public class StudentSummary {
         return resultingGrade;
     }
 
-    public BigDecimal getTotalCredits() {
-        return new BigDecimal(getTotalHours() / Constants.HOURS_PER_CREDIT);
+    private void calculateTotalCredits() {
+        totalCredits = new BigDecimal(0);
+        grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
+            if (grade.getCourse().getCredits() != null) {
+                totalCredits = totalCredits.add(grade.getCourse().getCredits());
+            }
+        }));
     }
 
     public Double getTotalGrade() {
@@ -206,6 +214,6 @@ public class StudentSummary {
     }
 
     EctsGrade getTotalEcts() {
-        return EctsGrade.getEctsGrade((int) Math.round(getTotalGrade()));
+        return EctsGrade.getEctsGrade((int) GradeUtil.roundPoints(getTotalGrade()));
     }
 }

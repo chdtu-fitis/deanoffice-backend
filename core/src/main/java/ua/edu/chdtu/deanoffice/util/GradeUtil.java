@@ -89,7 +89,7 @@ public class GradeUtil {
         return result;
     }
 
-    private static long roundPoints(double points) {
+    public static long roundPoints(double points) {
         NumberFormat format = DecimalFormat.getInstance();
         DecimalFormatSymbols symbols = ((DecimalFormat) format).getDecimalFormatSymbols();
         char separator = symbols.getDecimalSeparator();

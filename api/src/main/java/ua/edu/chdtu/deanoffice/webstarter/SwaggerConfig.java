@@ -1,7 +1,9 @@
 package ua.edu.chdtu.deanoffice.webstarter;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
@@ -19,13 +21,15 @@ import java.util.List;
 public class SwaggerConfig {
 
     private static final String AUTHENTICATION_HEADER = "Authorization";
-
+    @Value("${swagger.host}")
+    private String host;
 
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .securitySchemes(Collections.singletonList(authToken()))
                 .securityContexts(Collections.singletonList(securityContext()))
+                .host(host)
                 .select()
                 .build();
     }

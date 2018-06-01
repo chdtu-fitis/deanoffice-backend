@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
@@ -12,13 +13,12 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentDegreeDTO {
-    private Integer studentGroupId;
-    @JsonView(StudentView.SimpleAndDegrees.class)
-    private NamedDTO studentGroup;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private Integer id;
     @JsonView(StudentView.Simple.class)
     private StudentDTO student;
+    @JsonView(StudentView.SimpleAndDegrees.class)
+    private NamedDTO studentGroup;
     @JsonView(StudentView.DetailAndDegree.class)
     private String recordBookNumber;
     @JsonView(StudentView.DetailAndDegree.class)
@@ -45,10 +45,27 @@ public class StudentDegreeDTO {
     private Date previousDiplomaDate;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private Payment payment;
-    @JsonView(StudentView.Degree.class)
-    private NamedDTO degree;
+    @JsonView(StudentView.WithSpecilization.class)
+    private SpecializationDTO specialization;
     @JsonView(StudentView.WithActive.class)
     private boolean active;
     @JsonView(StudentView.DetailAndDegree.class)
     private String studentCardNumber;
+    @JsonView(StudentView.Degrees.class)
+    private Date admissionOrderDate;
+    @JsonView(StudentView.Degrees.class)
+    private String admissionOrderNumber;
+    @JsonView(StudentView.Degrees.class)
+    private Date contractDate;
+    @JsonView(StudentView.Degrees.class)
+    private String contractNumber;
+    @JsonView(StudentView.Degrees.class)
+    private String previousDiplomaIssuedBy;
+    @JsonView(StudentView.Degrees.class)
+    private Date admissionDate;
+
+    @JsonView(StudentView.Degrees.class)
+    private Integer studentGroupId;
+    @JsonView(StudentView.Degrees.class)
+    private Integer specializationId;
 }

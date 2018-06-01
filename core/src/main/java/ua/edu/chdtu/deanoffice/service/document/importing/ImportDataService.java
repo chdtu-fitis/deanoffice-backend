@@ -102,7 +102,7 @@ public class ImportDataService {
                     if (r.getR() == 1) {
                         sd.assignHeader(cellValue, c.getR());
                     } else {
-                        sd.setCellData(c.getR(), cellValue);
+                        sd.setCellData(c.getR(), cellValue.trim());
                     }
                 }
 
@@ -151,7 +151,7 @@ public class ImportDataService {
         student.setSurnameEng(StringUtil.firstNotNullNotEmpty(data.getLastNameEn(), student.getSurnameEng()));
         student.setPatronimicEng(StringUtil.firstNotNullNotEmpty(data.getMiddleNameEn(), student.getPatronimicEng()));
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
-        student.setSchool(StringUtil.firstNotNullNotEmpty(data.getDocumentIssued(),student.getSchool()));
+        student.setSchool(StringUtil.firstNotNullNotEmpty(data.getDocumentIssued2(),student.getSchool()));
 
         return student;
     }
@@ -161,6 +161,8 @@ public class ImportDataService {
         requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
         requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
         StudentDegree studentDegree = fetchStudentDegree(data);
+        if (studentDegree == null)
+            return null;
         studentDegree.setStudent(student);
 
         StudentDegree existingStudentDegree = null;
@@ -172,7 +174,18 @@ public class ImportDataService {
                 }
             }
         }
-//degrees merge needed
+        if(existingStudentDegree != null && studentDegree != null) {
+            existingStudentDegree.setAdmissionOrderNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getAdmissionOrderNumber(), existingStudentDegree.getAdmissionOrderNumber()));
+            existingStudentDegree.setAdmissionOrderDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionOrderDate(), existingStudentDegree.getAdmissionOrderDate()));
+            existingStudentDegree.setAdmissionDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionDate(), existingStudentDegree.getAdmissionDate()));
+            existingStudentDegree.setPayment(ObjectUtils.firstNonNull(studentDegree.getPayment(), existingStudentDegree.getPayment()));
+            existingStudentDegree.setPreviousDiplomaNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getPreviousDiplomaNumber(), existingStudentDegree.getPreviousDiplomaNumber()));
+            existingStudentDegree.setPreviousDiplomaDate(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaDate(), existingStudentDegree.getPreviousDiplomaDate()));
+            existingStudentDegree.setPreviousDiplomaType(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaType(), existingStudentDegree.getPreviousDiplomaType()));
+            existingStudentDegree.setPreviousDiplomaIssuedBy(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaIssuedBy(), existingStudentDegree.getPreviousDiplomaIssuedBy()));
+            existingStudentDegree.setSupplementNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getSupplementNumber(), existingStudentDegree.getSupplementNumber()));
+        }
+
         return existingStudentDegree == null? studentDegree : existingStudentDegree;
     }
 
@@ -183,14 +196,9 @@ public class ImportDataService {
 
         Specialization specialization = fetchSpecialization(data.getFullSpecialityName(),data.getFullSpecializationName(), data.getProgramName(),
                                                             data.getQualificationGroupName(), data.getFacultyName());
+        if (specialization == null)
+            return null;
         studentDegree.setSpecialization(specialization);
-        studentDegree.setDegree(specialization.getDegree());
-//        for (DegreeEnum degreeEnum : DegreeEnum.values()) {
-//            if (degreeEnum.getNameUkr().toLowerCase().equals(data.getQualificationGroupName().toLowerCase())) {
-//                studentDegree.setDegree(degreeService.getById(degreeEnum.getId()));
-//                break;
-//            }
-//        }
 
         for (EducationDocument eduDocument : EducationDocument.values()) {
             if (eduDocument.getNameUkr().toLowerCase().equals(data.getPersonDocumentType().toLowerCase())) {
@@ -198,35 +206,46 @@ public class ImportDataService {
                 break;
             }
         }
-
-        studentDegree.setActive(true);
-        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + data.getDocumentNumbers2());
-        studentDegree.setPayment(Objects.equals(data.getPersonEducationPaymentTypeName(), "Контракт") ? Payment.CONTRACT : Payment.BUDGET);
-        DateFormat admissionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
-        final String ADMISSION_REGEXP ="Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
-        Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
-
-        try {
-            Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
-            studentDegree.setAdmissionOrderNumber(matcher.matches() && matcher.groupCount() > 0 ? matcher.group(1) : null);
-            Date admissionOrderDate = matcher.matches() && matcher.groupCount() > 1 ? admissionDateFormatter.parse(matcher.group(2)) : null;
-            studentDegree.setAdmissionOrderDate(admissionOrderDate);
-        } catch (ParseException e) {
-            log.debug(e.getMessage());
-        }
-
         try {
             Date prevDiplomaDate = formatter.parse(data.getDocumentDateGet2());
             studentDegree.setPreviousDiplomaDate(prevDiplomaDate);
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
+        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
+        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
+
+        studentDegree.setActive(true);
+        studentDegree.setPayment(Objects.equals(data.getPersonEducationPaymentTypeName(), "Контракт") ? Payment.CONTRACT : Payment.BUDGET);
+        DateFormat admissionOrderDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+        final String ADMISSION_REGEXP ="Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
+        Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
+
+        try {
+            Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
+            if (matcher.find()) {
+                studentDegree.setAdmissionOrderNumber(matcher.groupCount() > 0 ? matcher.group(1) : null);
+                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionOrderDateFormatter.parse(matcher.group(2)) : null;
+                studentDegree.setAdmissionOrderDate(admissionOrderDate);
+            }
+        } catch (ParseException e) {
+            log.debug(e.getMessage());
+        } catch (IllegalStateException e) {
+            log.debug(e.getMessage());
+        }
+        try {
+            Date admissionDate = new SimpleDateFormat("M/dd/yy H:mm").parse(data.getEducationDateBegin());
+            studentDegree.setAdmissionDate(admissionDate);
+        }catch (ParseException e) {
+            log.debug(e.getMessage());
+        }
+        studentDegree.setSupplementNumber(data.getEducationId());
 
         return studentDegree;
     }
 
     private Specialization fetchSpecialization(String specialityString, String specializationString, String programString, String degreeName, String facultyName) {
-        final String SPECIALITY_REGEXP_OLD = "([\\d.]+)[\\s]([\\w\\W]+)";
+        final String SPECIALITY_REGEXP_OLD = "([\\d\\.]+)[\\s]([\\w\\W]+)";
         final String SPECIALITY_REGEXP_NEW = "([\\d\\d\\d])[\\s]([\\w\\W]+)";
         final String SPECIALIZATION_REGEXP = "([\\d+.\\d+])[\\s]([\\w\\W]+)";
         Pattern specialityPattern;
@@ -264,6 +283,7 @@ public class ImportDataService {
 
     private Specialization getExistingOrSavedSpecialization(String specialityName, String specialityCode, String specializationName, String degreeName, String facultyName) {
         Degree degree = degreeService.getByName(degreeName);
+        Faculty faculty = facultyService.getByName(facultyName);
         Speciality existingSpeciality = specialityService.getSpecialityByCode(specialityCode);
         if (existingSpeciality == null) {
             Speciality newSpeciality = new Speciality();
@@ -272,21 +292,22 @@ public class ImportDataService {
             newSpeciality.setActive(true);
             existingSpeciality = specialityService.save(newSpeciality);
         }
-        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specializationName, degree.getId(), existingSpeciality.getId());
+        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specializationName, degree.getId(), existingSpeciality.getId(), faculty.getId());
         if (existingSpecialization == null) {
-            existingSpecialization = specializationService.getByNameAndDegreeAndSpeciality(specialityName, degree.getId(), existingSpeciality.getId());
+            existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specialityName, degree.getId(), existingSpeciality.getId(), faculty.getId());
         }
         if (existingSpecialization == null) {
-            if (specialityCode.matches("\\d.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
+            if (specialityCode.matches("\\d\\.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
                 Specialization specialization = new Specialization();
                 specialization.setName(specializationName);
                 specialization.setSpeciality(existingSpeciality);
                 specialization.setDegree(degree);
-                specialization.setFaculty(facultyService.getByName(facultyName));
+                specialization.setFaculty(faculty);
                 specialization.setActive(true);
                 existingSpecialization = specializationService.save(specialization);
             }
         }
+
         return existingSpecialization;
     }
 
@@ -314,7 +335,8 @@ public class ImportDataService {
 //                    importReport.fail(studentDegree);
 //                    continue;
 //                }
-
+                if (studentDegree == null && student.getId() == 0)
+                    importReport.fail(student);
                 if (studentDegree.getId() > 0) {
                     importReport.update(studentDegree);
                 } else {
@@ -326,5 +348,21 @@ public class ImportDataService {
         }
 
         return importReport;
+    }
+
+    public void saveImport(ImportReport importReport){
+        List<StudentDegree> sdInsert = importReport.getInsertData();
+        for (StudentDegree sd: sdInsert) {
+            Student st = sd.getStudent();
+            if (st.getId() == 0)
+                studentService.save(st);
+            studentDegreeService.save(sd);
+        }
+
+        List<StudentDegree> sdUpdate = importReport.getUpdateData();
+        studentDegreeService.update(sdUpdate);
+        for (Student student: importReport.getFailData()){
+            studentService.save(student);
+        }
     }
 }

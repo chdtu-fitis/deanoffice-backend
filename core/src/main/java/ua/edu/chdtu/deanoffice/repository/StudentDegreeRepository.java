@@ -10,8 +10,8 @@ import java.util.List;
 public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer> {
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.active = :active " +
-            "and sd.studentGroup.specialization.faculty.id = :facultyId " +
-            "order by sd.student.surname, sd.student.name, sd.student.patronimic, sd.studentGroup.name")
+            "and sd.specialization.faculty.id = :facultyId " +
+            "order by sd.student.surname, sd.student.name, sd.student.patronimic, sd.specialization.name")
     List<StudentDegree> findAllByActive(
             @Param("active") boolean active,
             @Param("facultyId") Integer facultyId

@@ -73,7 +73,7 @@ class SheetData {
                 headerData.setFullSpecialityName(columnName);
                 break;
             case HeaderPatterns.FULL_SPECIALIZATION_NAME:
-                headerData.setFullSpecialityName(columnName);
+                headerData.setFullSpecializationName(columnName);
                 break;
             case HeaderPatterns.PROGRAM_NAME:
                 headerData.setProgramName(columnName);

@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import lombok.Getter;
 import lombok.Setter;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 public class ImportReport {
     private List<StudentDegree> insertData;
     private List<StudentDegree> updateData;
-    private List<StudentDegree> failData;
+    private List<Student> failData;
 
     public ImportReport() {
         insertData = new ArrayList<>();
@@ -28,8 +29,8 @@ public class ImportReport {
         updateData.add(studentDegree);
     }
 
-    public void fail(StudentDegree studentDegree) {
-        failData.add(studentDegree);
+    public void fail(Student student) {
+        failData.add(student);
     }
 
     public void clear() {
