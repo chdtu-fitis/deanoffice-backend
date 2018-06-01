@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class CourseDTO {
@@ -19,7 +21,7 @@ public class CourseDTO {
     @JsonView(CourseForGroupView.Basic.class)
     private Integer hours;
     @JsonView(CourseForGroupView.Basic.class)
-    private Integer credits;
+    private BigDecimal credits;
     @JsonView(CourseForGroupView.Basic.class)
     private Integer hoursPerCredit;
 }
