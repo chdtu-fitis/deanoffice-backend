@@ -12,18 +12,19 @@ public class StudentView {
 
     interface WithActive {}
 
+    interface WithSpecilization extends SpecializationView.WithDegreeAndSpeciality {}
 
     public interface Simple extends SearchSimpleDegrees, SimpleAndDegrees {}
 
     public interface Detail extends Simple, DetailAndDegree {}
 
-    public interface Degree extends Simple, DetailAndDegree, SpecializationView.WithDegreeAndSpeciality {}
+    public interface Degree extends Simple, DetailAndDegree, WithSpecilization {}
 
     public interface Personal extends Detail {}
 
     public interface Search extends SearchSimpleDegrees {}
 
-    public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees, WithActive {}
+    public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees, WithActive, WithSpecilization {}
 
     public interface Expel extends Simple, GeneralView.Named, WithActive {}
 

@@ -67,27 +67,45 @@ public class CourseController {
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
-            Course oldCourse = (Course) map(coursesForGroupHolder.getOldCourse(), Course.class);
+            int oldCourseId = coursesForGroupHolder.getOldCourseId();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             StudentGroup group =  studentGroupService.getById(groupId);
             if (courseForGroupService.countByGroup(group)==1){
+                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+                newCourse = updateCourseName(courseName, newCourse);
                 courseService.createOrUpdateCourse(newCourse);
                 return new ResponseEntity(HttpStatus.CREATED);
             }
             CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
             if (courseFromDb != null) {
                 newCourse = courseFromDb;
-            } else {
+            }
+            else {
+                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+                newCourse = updateCourseName(courseName, newCourse);
                 newCourse = courseService.createOrUpdateCourse(newCourse);
             }
             courseForGroup.setCourse(newCourse);
             courseForGroupService.save(courseForGroup);
-            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourse.getId(), groupId);
+            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
             gradeService.saveGradesByCourse(newCourse, grades);
             return new ResponseEntity(HttpStatus.CREATED);
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
         }
+    }
+
+    private Course updateCourseName(CourseName courseName, Course newCourse){
+        CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
+        if (courseNameFromDB != null){
+            newCourse.setCourseName(courseNameFromDB);
+        }
+        else {
+            CourseName newCourseName = new CourseName();
+            newCourseName.setName(courseName.getName());
+            newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
+        }
+        return newCourse;
     }
 
 
