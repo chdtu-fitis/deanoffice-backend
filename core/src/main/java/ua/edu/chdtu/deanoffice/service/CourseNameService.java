@@ -16,8 +16,8 @@ public class CourseNameService {
         return this.courseNameRepository.findAll();
     }
 
-    public void saveCourseName(CourseName courseName){
-        this.courseNameRepository.save(courseName);
+    public CourseName saveCourseName(CourseName courseName){
+        return this.courseNameRepository.save(courseName);
     }
 
     public CourseName getCourseNameByName(String name){
