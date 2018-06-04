@@ -18,18 +18,10 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-@Table(name = "acquired_competencies", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"specialization_id", "year"})
-})
 public class AcquiredCompetencies extends BaseEntity {
-
-    @Column(name = "competencies", nullable = false)
     private String competencies;
-    @Column(name = "competencies_eng", nullable = false)
     private String competenciesEng;
-    @JoinColumn(nullable = false)
     @ManyToOne
     private Specialization specialization;
-    @Column(nullable = false)
     private Integer year;
 }
