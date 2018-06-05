@@ -71,7 +71,6 @@ public class SpecializationController {
     }
 
     @PostMapping
-    @JsonView(SpecializationView.Extended.class)
     public ResponseEntity createSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
             @CurrentUser ApplicationUser user
@@ -117,7 +116,6 @@ public class SpecializationController {
         return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
     }
 
-    @JsonView(SpecializationView.Extended.class)
     @PutMapping
     public ResponseEntity updateSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
@@ -139,42 +137,24 @@ public class SpecializationController {
         throw new Exception(message);
     }
 
-    @DeleteMapping("/{specialization_ids}")
-    public ResponseEntity deleteSpecialization(@PathVariable("specialization_ids") Integer[] specializationIds) {
-        List<Specialization> specializations = specializationService.getByIds(specializationIds);
-        if (specializations.size() != specializationIds.length) {
+    @DeleteMapping("/{specialization_id}")
+    public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") Integer specializationId) {
+        Specialization specialization = specializationService.getById(specializationId);
+        if (specialization == null) {
             return ExceptionHandlerAdvice.handleException(
-                    "Not found specialization " + Arrays.toString(findNouFoundSpecializations(specializations, asList(specializationIds))),
+                    "Not found specialization [" + specializationId +"]",
                     SpecializationController.class,
                     HttpStatus.NOT_FOUND
             );
         }
         try {
-            if (hasInactiveSpecializations(specializations)) {
-                throwException("Specialization " + Arrays.toString(findInactiveSpecialization(specializations).toArray()) + " already inactive");
+            if (!specialization.isActive()) {
+                throwException("Specialization [id = " + specializationId + "] already inactive");
             }
-            specializationService.delete(specializations);
+            specializationService.delete(specializationId);
             return ResponseEntity.noContent().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
-    }
-
-    private Integer[] findNouFoundSpecializations(List<Specialization> found, List<Integer> initial) {
-        List<Integer> foundIds = found.stream().map(BaseEntity::getId).collect(Collectors.toList());
-        return (Integer[]) initial.stream().filter(integer -> findNouFoundSpecialization(integer, foundIds)).toArray();
-    }
-
-    private boolean findNouFoundSpecialization(Integer initialId, List<Integer> foundIds) {
-        foundIds = foundIds.stream().filter(integer -> integer.equals(initialId)).collect(Collectors.toList());
-        return foundIds.size() == 0;
-    }
-
-    private boolean hasInactiveSpecializations(List<Specialization> specializations) {
-        return findInactiveSpecialization(specializations).size() != 0;
-    }
-
-    private List<Specialization> findInactiveSpecialization(List<Specialization> specializations) {
-        return specializations.stream().filter(specialization -> !specialization.isActive()).collect(Collectors.toList());
     }
 }

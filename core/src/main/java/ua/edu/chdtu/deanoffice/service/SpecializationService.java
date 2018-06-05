@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.repository.AcquiredCompetenciesRepository;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 
 import java.util.List;
@@ -33,12 +35,9 @@ public class SpecializationService {
         return specializations.size() == 0 ? null : specializations.get(0);
     }
 
-    public List<Specialization> getByIds(Integer[] specializationIds) {
-        return specializationRepository.findAllByIds(specializationIds);
-    }
-
-    public void delete(List<Specialization> specializations) {
-        specializations.forEach(specialization -> specialization.setActive(false));
-        specializationRepository.save(specializations);
+    public void delete(Integer specializationId) {
+        Specialization specialization = getById(specializationId);
+        specialization.setActive(false);
+        specializationRepository.save(specialization);
     }
 }

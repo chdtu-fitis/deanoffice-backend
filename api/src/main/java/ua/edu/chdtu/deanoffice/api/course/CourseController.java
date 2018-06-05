@@ -71,6 +71,8 @@ public class CourseController {
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             StudentGroup group =  studentGroupService.getById(groupId);
             if (courseForGroupService.countByGroup(group)==1){
+                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+                newCourse = updateCourseName(courseName, newCourse);
                 courseService.createOrUpdateCourse(newCourse);
                 return new ResponseEntity(HttpStatus.CREATED);
             }
@@ -80,15 +82,7 @@ public class CourseController {
             }
             else {
                 CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
-                CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
-                if (courseNameFromDB != null){
-                    newCourse.setCourseName(courseNameFromDB);
-                }
-                else {
-                    CourseName newCourseName = new CourseName();
-                    newCourseName.setName(courseName.getName());
-                    newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
-                }
+                newCourse = updateCourseName(courseName, newCourse);
                 newCourse = courseService.createOrUpdateCourse(newCourse);
             }
             courseForGroup.setCourse(newCourse);
@@ -99,6 +93,19 @@ public class CourseController {
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
         }
+    }
+
+    private Course updateCourseName(CourseName courseName, Course newCourse){
+        CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
+        if (courseNameFromDB != null){
+            newCourse.setCourseName(courseNameFromDB);
+        }
+        else {
+            CourseName newCourseName = new CourseName();
+            newCourseName.setName(courseName.getName());
+            newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
+        }
+        return newCourse;
     }
 
 
