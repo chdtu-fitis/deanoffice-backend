@@ -35,12 +35,9 @@ public class SpecializationService {
         return specializations.size() == 0 ? null : specializations.get(0);
     }
 
-    public List<Specialization> getByIds(Integer[] specializationIds) {
-        return specializationRepository.findAllByIds(specializationIds);
-    }
-
-    public void delete(List<Specialization> specializations) {
-        specializations.forEach(specialization -> specialization.setActive(false));
-        specializationRepository.save(specializations);
+    public void delete(Integer specializationId) {
+        Specialization specialization = getById(specializationId);
+        specialization.setActive(false);
+        specializationRepository.save(specialization);
     }
 }
