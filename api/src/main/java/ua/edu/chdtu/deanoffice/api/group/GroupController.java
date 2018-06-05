@@ -20,10 +20,12 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -41,16 +43,19 @@ public class GroupController {
     private final StudentGroupService studentGroupService;
     private final SpecializationService specializationService;
     private final CurrentYearService currentYearService;
+    private final StudentDegreeService studentDegreeService;
 
     @Autowired
     public GroupController(
             StudentGroupService studentGroupService,
             SpecializationService specializationService,
-            CurrentYearService currentYearService
+            CurrentYearService currentYearService,
+            StudentDegreeService studentDegreeService
     ) {
         this.studentGroupService = studentGroupService;
         this.currentYearService = currentYearService;
         this.specializationService = specializationService;
+        this.studentDegreeService = studentDegreeService;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
@@ -116,7 +121,7 @@ public class GroupController {
 
     private StudentGroup create(StudentGroupDTO studentGroupDTO) {
         StudentGroup studentGroup = (StudentGroup) Mapper.strictMap(studentGroupDTO, StudentGroup.class);
-        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecializationId());
+        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecialization().getId());
         studentGroup.setSpecialization(specialization);
         return studentGroup;
     }
@@ -140,6 +145,8 @@ public class GroupController {
                 throwException("You can not update inactive group");
             }
             StudentGroup studentGroup = create(studentGroupDTO);
+            List<StudentDegree> studentDegrees = studentDegreeService.getAllByGroupId(studentGroup.getId());
+            studentGroup.setStudentDegrees(studentDegrees);
             studentGroupService.save(studentGroup);
 
             return ResponseEntity.ok().build();
