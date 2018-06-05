@@ -108,4 +108,8 @@ public class GradeService {
         }
     }
 
+    public void deleteGradeById(Integer gradeId) {
+        gradeRepository.delete(gradeId);
+    }
+
 }
