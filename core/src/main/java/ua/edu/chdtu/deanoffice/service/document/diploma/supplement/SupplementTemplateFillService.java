@@ -378,13 +378,13 @@ public class SupplementTemplateFillService {
         if (professionalQualifications == null) {
             return;
         }
+        Tbl professionalQualificationsTable = TemplateUtil.findTable(template, "ProfCode");
+        Text tablePlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
+                .stream().filter(text -> "#ProfCode".equals(text.getValue().trim())).findFirst().get();
 
-        Tbl professionalQualificationsTable = TemplateUtil.findTable(template, "SpecCode");
-        if (professionalQualificationsTable == null) {
-            return;
-        }
+               professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);
+
         List<Tr> tableRows = TemplateUtil.getAllRowsFromTable(professionalQualificationsTable);
-
         Tr templateRow = tableRows.get(templateRowIndex);
         int rowToAddIndex = templateRowIndex + 1;
 

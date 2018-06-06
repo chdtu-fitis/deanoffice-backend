@@ -11,12 +11,12 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
-import org.docx4j.wml.R;
 import org.docx4j.wml.STBrType;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
+import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -61,7 +61,7 @@ public class TemplateUtil {
     }
 
     public static List<Tr> getAllRowsFromTable(Tbl table) {
-        return getAllElementsFromObject(table, Tr.class).stream().map(o -> (Tr) o).collect(Collectors.toList());
+        return table.getContent().stream().map(o -> (Tr) o).collect(Collectors.toList());
     }
 
     public static Tbl findTable(WordprocessingMLPackage document, String key) {
@@ -79,6 +79,18 @@ public class TemplateUtil {
         }
         log.warn("Could not find table with key {}", templateKey);
         return null;
+    }
+
+    public static Object findParentNode(Child child, Class<?> nodeClass) {
+        Object result = child.getParent();
+        while (!result.getClass().equals(nodeClass)) {
+            if (result instanceof Child) {
+                result = ((Child) result).getParent();
+            } else {
+                break;
+            }
+        }
+        return result;
     }
 
     public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
@@ -123,7 +135,7 @@ public class TemplateUtil {
         return placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
     }
 
-    private static List<Text> getAllTextsFromObject(Object object) {
+    public static List<Text> getAllTextsFromObject(Object object) {
         return getAllElementsFromObject(object, Text.class).stream().map(o -> (Text) o).collect(Collectors.toList());
     }
 
@@ -242,11 +254,7 @@ public class TemplateUtil {
         return factory.createP();
     }
 
-    public static R createR(){
-        return factory.createR();
-    }
-
-    public static Text createText(String value){
+    public static Text createText(String value) {
         Text text = factory.createText();
         text.setValue(value);
         return text;
