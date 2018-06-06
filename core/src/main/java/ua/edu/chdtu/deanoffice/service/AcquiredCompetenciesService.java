@@ -16,9 +16,12 @@ public class AcquiredCompetenciesService {
         this.acquiredCompetenciesRepository = acquiredCompetenciesRepository;
     }
 
+    public List<AcquiredCompetencies> getAllForSpecialization(int specializationId) {
+        return acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
+    }
+
     public AcquiredCompetencies getAcquiredCompetencies(int specializationId) {
-        List<AcquiredCompetencies> acquiredCompetencies =
-                acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
+        List<AcquiredCompetencies> acquiredCompetencies = getAllForSpecialization(specializationId);
         if (acquiredCompetencies.isEmpty()) {
             return new AcquiredCompetencies();
         }
@@ -26,13 +29,15 @@ public class AcquiredCompetenciesService {
         return acquiredCompetencies.get(0);
     }
 
-    public AcquiredCompetencies findBySpecializationIdAndYear(Integer specializationId, Integer year) {
-        return acquiredCompetenciesRepository.findBySpecializationIdAndYear(specializationId, year);
-    }
-
     public void updateCompetenciesUkr(Integer acquiredCompetenciesId, String competencies) {
         AcquiredCompetencies acquiredCompetencies = this.getById(acquiredCompetenciesId);
         acquiredCompetencies.setCompetencies(competencies);
+        this.acquiredCompetenciesRepository.save(acquiredCompetencies);
+    }
+
+    public void updateCompetenciesEng(Integer acquiredCompetenciesId, String competenciesEng) {
+        AcquiredCompetencies acquiredCompetencies = this.getById(acquiredCompetenciesId);
+        acquiredCompetencies.setCompetenciesEng(competenciesEng);
         this.acquiredCompetenciesRepository.save(acquiredCompetencies);
     }
 
