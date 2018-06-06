@@ -59,7 +59,7 @@ public class AcquiredCompetenciesController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.OPTIONS, path = "/specializations/{specialization_id}/competencies")
+    @RequestMapping(method = RequestMethod.HEAD, path = "/specializations/{specialization_id}/competencies")
     public ResponseEntity isExist(@PathVariable("specialization_id") int specializationId) {
         List<AcquiredCompetencies> acquiredCompetencies = acquiredCompetenciesService.getAllForSpecialization(specializationId);
         if (acquiredCompetencies.isEmpty()) {
