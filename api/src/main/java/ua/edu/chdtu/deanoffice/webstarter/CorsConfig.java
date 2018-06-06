@@ -14,7 +14,7 @@ public class CorsConfig {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE")
+                registry.addMapping("/**").allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedOrigins("http://localhost:4200","http://is.chdtu.edu.ua:4200")
 //                        .allowedOrigins("*")
                         .allowedHeaders("*")

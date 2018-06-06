@@ -59,6 +59,15 @@ public class AcquiredCompetenciesController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.OPTIONS, path = "/specializations/{specialization_id}/competencies")
+    public ResponseEntity isExist(@PathVariable("specialization_id") int specializationId) {
+        List<AcquiredCompetencies> acquiredCompetencies = acquiredCompetenciesService.getAllForSpecialization(specializationId);
+        if (acquiredCompetencies.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/specializations/{specialization_id}/competencies/eng")
     @JsonView(SpecializationView.AcquiredCompetenciesEng.class)
     public ResponseEntity getCompetenciesEngForSpecialization(@PathVariable("specialization_id") int specializationId) {
