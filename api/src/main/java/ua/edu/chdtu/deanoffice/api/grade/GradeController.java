@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
@@ -77,5 +78,15 @@ public class GradeController {
             @PathVariable Integer courseId) {
         List<Grade> grades = this.gradeService.getGradesByCourseAndGroup(courseId, groupId);
         return ResponseEntity.ok(map(grades, GradeDTO.class));
+    }
+
+    @DeleteMapping
+    public ResponseEntity deleteGrades(@RequestParam(value = "gradeId") Integer gradeId) {
+        try {
+            this.gradeService.deleteGradeById(gradeId);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception, GradeController.class);
+        }
     }
 }
