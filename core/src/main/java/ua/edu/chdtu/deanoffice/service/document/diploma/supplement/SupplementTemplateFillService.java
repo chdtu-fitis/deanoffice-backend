@@ -29,6 +29,7 @@ import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -183,6 +184,8 @@ public class SupplementTemplateFillService {
         result.put("DiplNumber", TemplateUtil.getValueSafely(studentDegree.getDiplomaNumber(), "МСС № НОМЕРДИП"));
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : simpleDateFormat.format(studentDegree.getDiplomaDate()));
+
+        result.put("CurrentYear", String.format("%4d", Calendar.getInstance().get(Calendar.YEAR)));
         return result;
     }
 
@@ -382,7 +385,7 @@ public class SupplementTemplateFillService {
         Text tablePlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
                 .stream().filter(text -> "#ProfCode".equals(text.getValue().trim())).findFirst().get();
 
-               professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);
+        professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);
 
         List<Tr> tableRows = TemplateUtil.getAllRowsFromTable(professionalQualificationsTable);
         Tr templateRow = tableRows.get(templateRowIndex);
