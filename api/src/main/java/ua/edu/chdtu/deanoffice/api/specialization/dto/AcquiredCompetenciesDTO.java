@@ -13,6 +13,8 @@ public class AcquiredCompetenciesDTO {
     @JsonView(SpecializationView.AcquiredCompetenciesUkr.class)
     private String competencies;
     private String competenciesEng;
-    private NamedDTO specialization;
+    //private NamedDTO specialization;
     private Integer year;
+
+    private Integer specializationId;
 }

@@ -81,7 +81,18 @@ public class SpecializationController {
             specialization = specializationService.save(specialization);
 
             URI location = getNewResourceLocation(specialization.getId());
-            return ResponseEntity.created(location).build();
+
+            class Id {
+                private int id;
+                private Id(int id) {
+                    this.id = id;
+                }
+
+                public int getId() {
+                    return id;
+                }
+            }
+            return ResponseEntity.created(location).body(new Id(specialization.getId()));
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -142,7 +153,7 @@ public class SpecializationController {
         Specialization specialization = specializationService.getById(specializationId);
         if (specialization == null) {
             return ExceptionHandlerAdvice.handleException(
-                    "Not found specialization [" + specializationId +"]",
+                    "Not found specialization [" + specializationId + "]",
                     SpecializationController.class,
                     HttpStatus.NOT_FOUND
             );

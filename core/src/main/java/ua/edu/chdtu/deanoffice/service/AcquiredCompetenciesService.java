@@ -39,4 +39,8 @@ public class AcquiredCompetenciesService {
     private AcquiredCompetencies getById(Integer acquiredCompetenciesId) {
         return this.acquiredCompetenciesRepository.findOne(acquiredCompetenciesId);
     }
+
+    public void create(AcquiredCompetencies acquiredCompetencies) {
+        this.acquiredCompetenciesRepository.save(acquiredCompetencies);
+    }
 }

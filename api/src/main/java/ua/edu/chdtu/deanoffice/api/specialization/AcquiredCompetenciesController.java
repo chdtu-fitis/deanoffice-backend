@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,16 +14,26 @@ import ua.edu.chdtu.deanoffice.api.specialization.dto.AcquiredCompetenciesDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.service.AcquiredCompetenciesService;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 
+import java.net.URI;
+
+
+import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class AcquiredCompetenciesController {
     private final AcquiredCompetenciesService acquiredCompetenciesService;
+    private final CurrentYearService currentYearService;
 
     @Autowired
-    public AcquiredCompetenciesController(AcquiredCompetenciesService acquiredCompetenciesService) {
+    public AcquiredCompetenciesController(
+            AcquiredCompetenciesService acquiredCompetenciesService,
+            CurrentYearService currentYearService
+    ) {
         this.acquiredCompetenciesService = acquiredCompetenciesService;
+        this.currentYearService = currentYearService;
     }
 
     @GetMapping("/specializations/{specialization_id}/competencies/ukr")
@@ -40,6 +51,19 @@ public class AcquiredCompetenciesController {
         try {
             acquiredCompetenciesService.updateCompetenciesUkr(acquiredCompetenciesId, competencies);
             return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception, AcquiredCompetenciesController.class);
+        }
+    }
+
+    @PostMapping("/acquired-competencies")
+    public ResponseEntity create(@RequestBody AcquiredCompetenciesDTO acquiredCompetenciesDTO) {
+        try {
+            AcquiredCompetencies acquiredCompetencies = (AcquiredCompetencies) map(acquiredCompetenciesDTO, AcquiredCompetencies.class);
+            acquiredCompetencies.setYear(currentYearService.getYear());
+            this.acquiredCompetenciesService.create(acquiredCompetencies);
+            URI location = getNewResourceLocation(acquiredCompetencies.getId());
+            return ResponseEntity.created(location).build();
         } catch (Exception exception) {
             return ExceptionHandlerAdvice.handleException(exception, AcquiredCompetenciesController.class);
         }
