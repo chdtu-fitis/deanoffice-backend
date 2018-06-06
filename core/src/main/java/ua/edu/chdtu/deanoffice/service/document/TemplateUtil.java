@@ -11,6 +11,7 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 import org.docx4j.wml.STBrType;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
@@ -231,8 +232,24 @@ public class TemplateUtil {
         return breakObject;
     }
 
+    public static Br createLineBreak() {
+        Br breakObject = new Br();
+        breakObject.setType(STBrType.TEXT_WRAPPING);
+        return breakObject;
+    }
+
     public static P createParagraph() {
         return factory.createP();
+    }
+
+    public static R createR(){
+        return factory.createR();
+    }
+
+    public static Text createText(String value){
+        Text text = factory.createText();
+        text.setValue(value);
+        return text;
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {
