@@ -9,10 +9,11 @@ import java.util.List;
 
 public interface AcquiredCompetenciesRepository extends JpaRepository<AcquiredCompetencies, Integer> {
 
-    @Query("select ac from AcquiredCompetencies ac " +
-            "where ac.specialization.id =  :specialization_id " +
-            "order by ac.year desc")
-    List<AcquiredCompetencies> findLastCompetenciesForSpecialization(@Param("specialization_id") int specializationId);
+    @Query(value = "select ac.* from acquired_competencies as ac " +
+            "where ac.specialization_id = :specialization_id " +
+            "order by ac.year desc " +
+            "limit 1", nativeQuery = true)
+    AcquiredCompetencies findLastCompetenciesForSpecialization(@Param("specialization_id") int specializationId);
 
     AcquiredCompetencies findBySpecializationIdAndYear(Integer specializationId, Integer year);
 }
