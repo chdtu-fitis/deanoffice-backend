@@ -23,6 +23,10 @@ public class AcquiredCompetenciesService {
         return acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
     }
 
+    public AcquiredCompetencies findBySpecializationIdAndYear(Integer specializationId, Integer year) {
+        return acquiredCompetenciesRepository.findBySpecializationIdAndYear(specializationId, year);
+    }
+
     public void updateCompetenciesUkr(Integer acquiredCompetenciesId, String competencies) {
         AcquiredCompetencies acquiredCompetencies = this.getById(acquiredCompetenciesId);
         acquiredCompetencies.setCompetencies(competencies);
