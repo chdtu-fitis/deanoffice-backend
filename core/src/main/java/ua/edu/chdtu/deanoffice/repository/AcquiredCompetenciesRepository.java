@@ -5,8 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 
-import java.util.List;
-
 public interface AcquiredCompetenciesRepository extends JpaRepository<AcquiredCompetencies, Integer> {
 
     @Query(value = "select ac.* from acquired_competencies as ac " +
