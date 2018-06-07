@@ -138,7 +138,6 @@ public class PersonalStatementService {
             currentIndex++;
         }
         table.getContent().remove(currentIndex);
-//        table.getContent().remove(2);
     }
 
     private void fillRowByGrade(Tr row, Grade grade) {
