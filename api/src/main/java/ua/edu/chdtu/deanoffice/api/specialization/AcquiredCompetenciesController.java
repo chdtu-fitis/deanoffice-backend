@@ -10,16 +10,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.AcquiredCompetenciesDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.service.AcquiredCompetenciesService;
-import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 
 import java.net.URI;
-import java.util.List;
 
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
@@ -28,21 +27,18 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 @RestController
 public class AcquiredCompetenciesController {
     private final AcquiredCompetenciesService acquiredCompetenciesService;
-    private final CurrentYearService currentYearService;
 
     @Autowired
-    public AcquiredCompetenciesController(
-            AcquiredCompetenciesService acquiredCompetenciesService,
-            CurrentYearService currentYearService
-    ) {
+    public AcquiredCompetenciesController(AcquiredCompetenciesService acquiredCompetenciesService) {
         this.acquiredCompetenciesService = acquiredCompetenciesService;
-        this.currentYearService = currentYearService;
     }
 
     @RequestMapping(method = RequestMethod.HEAD, path = "/specializations/{specialization_id}/competencies")
-    public ResponseEntity isExist(@PathVariable("specialization_id") int specializationId) {
-        AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getAcquiredCompetencies(specializationId);
-        if (acquiredCompetencies == null) {
+    public ResponseEntity isExist(
+            @PathVariable("specialization_id") int specializationId,
+            @RequestParam(value = "for-current-year", required = false, defaultValue = "false") boolean forCurrentYear
+    ) {
+        if (acquiredCompetenciesService.isNotExist(specializationId, forCurrentYear)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok().build();
@@ -55,7 +51,7 @@ public class AcquiredCompetenciesController {
     }
 
     private AcquiredCompetenciesDTO getAcquiredCompetenciesDTO(int specializationId) {
-        AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getAcquiredCompetencies(specializationId);
+        AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getLastAcquiredCompetencies(specializationId);
         if (acquiredCompetencies == null) {
             return new AcquiredCompetenciesDTO();
         }
@@ -98,7 +94,6 @@ public class AcquiredCompetenciesController {
     public ResponseEntity create(@RequestBody AcquiredCompetenciesDTO acquiredCompetenciesDTO) {
         try {
             AcquiredCompetencies acquiredCompetencies = (AcquiredCompetencies) map(acquiredCompetenciesDTO, AcquiredCompetencies.class);
-            acquiredCompetencies.setYear(currentYearService.getYear());
             this.acquiredCompetenciesService.create(acquiredCompetencies);
             URI location = getNewResourceLocation(acquiredCompetencies.getId());
             return ResponseEntity.created(location).build();
