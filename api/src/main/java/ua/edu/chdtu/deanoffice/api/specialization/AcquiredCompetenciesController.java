@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.specialization;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -92,6 +93,14 @@ public class AcquiredCompetenciesController {
 
     @PostMapping("/acquired-competencies")
     public ResponseEntity create(@RequestBody AcquiredCompetenciesDTO acquiredCompetenciesDTO) {
+        if (!acquiredCompetenciesService.isNotExist(acquiredCompetenciesDTO.getSpecializationId(), true)) {
+            return ExceptionHandlerAdvice.handleException(
+                    "You can't create two and more competencies for one year",
+                    AcquiredCompetenciesController.class,
+                    HttpStatus.UNPROCESSABLE_ENTITY
+            );
+        }
+
         try {
             AcquiredCompetencies acquiredCompetencies = (AcquiredCompetencies) map(acquiredCompetenciesDTO, AcquiredCompetencies.class);
             this.acquiredCompetenciesService.create(acquiredCompetencies);
