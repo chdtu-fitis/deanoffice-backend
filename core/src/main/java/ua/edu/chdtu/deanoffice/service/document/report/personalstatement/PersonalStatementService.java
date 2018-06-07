@@ -10,10 +10,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -22,7 +19,6 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,19 +54,24 @@ public class PersonalStatementService {
     @Autowired
     private CourseForGroupService courseForGroupService;
 
-//    @Autowired
-//    private CourseService courseService;
-
     public File formDocument(Integer year, List<Integer> groupIds)
             throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
         YearGrades yearGrades = new YearGrades(getGradeMap(year, groupIds, SemesterType.FIRST), getGradeMap(year, groupIds, SemesterType.SECOND));
         generateTables(template, yearGrades);
-        String fileName = transliterate("test");
-        return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
+        return documentIOService.saveDocumentToTemp(template, transliterate(generateFileName(groupIds)), FileFormatEnum.DOCX);
     }
 
-    private Map<Student, List<Grade>> getGradeMap(Integer year, List<Integer> groupIds, SemesterType semesterType) {
+    private String generateFileName(List<Integer> groupIds) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("PersonalStatement_");
+        groupIds.forEach(groupId -> {
+            stringBuilder.append(studentGroupService.getById(groupId).getName()).append("_");
+        });
+        return stringBuilder.toString();
+    }
+
+    private Map<StudentDegree, List<Grade>> getGradeMap(Integer year, List<Integer> groupIds, SemesterType semesterType) {
         List<Integer> studentDegreeIds =
                 groupIds.stream().map(groupId -> studentDegreeService.getAllByGroupId(groupId)).
                         collect(Collectors.toList()).stream().flatMap(Collection::stream).collect(Collectors.toList())
@@ -85,19 +86,21 @@ public class PersonalStatementService {
                 .stream().map(BaseEntity::getId)
                 .collect(Collectors.toList());
 
-        return gradeService.getGradeMapForStudents(studentDegreeIds, courseIds);
+        if (courseIds.size() > 0) {
+            return gradeService.getGradeMapForStudents(studentDegreeIds, courseIds);
+        } else return new HashMap<>();
     }
 
 
     private void generateTables(WordprocessingMLPackage template, YearGrades yearGrades) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
-//        List<Student>students=new ArrayList<>(yearGrades.getGradeMapForFirstSemester().keySet());
-//        students.sort(new StudentDegreeFullNameComparator());
-        for (Student student : yearGrades.getGradeMapForFirstSemester().keySet()) {
+        List<StudentDegree> studentDegrees = new ArrayList<>(yearGrades.getGradeMapForFirstSemester().keySet());
+        studentDegrees.sort(new GroupStudentDegreeComparator());
+        for (StudentDegree studentDegree : studentDegrees) {
             Tbl table = XmlUtils.deepCopy(templateTable);
-            fillFirstRow(table, student);
-            formFirstSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(student));
-            formSecondSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(student));
+            fillFirstRow(table, studentDegree.getStudent());
+            formFirstSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree));
+            formSecondSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree));
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
@@ -146,7 +149,6 @@ public class PersonalStatementService {
     private Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
         result.put("subj", grade.getCourse().getCourseName().getName());
-//        String hoursFieldValue=
         result.put("h", resolveHoursField(grade));
         result.put("c", grade.getCourse().getCredits().toString());
         String gradeFieldValue = "";
@@ -218,7 +220,6 @@ public class PersonalStatementService {
 
     @Getter
     private enum SemesterType {
-
         FIRST(1),
         SECOND(2);
 
@@ -233,7 +234,7 @@ public class PersonalStatementService {
     @Setter
     @AllArgsConstructor
     private class YearGrades {
-        private Map<Student, List<Grade>> gradeMapForFirstSemester;
-        private Map<Student, List<Grade>> gradeMapForSecondSemester;
+        private Map<StudentDegree, List<Grade>> gradeMapForFirstSemester;
+        private Map<StudentDegree, List<Grade>> gradeMapForSecondSemester;
     }
 }
