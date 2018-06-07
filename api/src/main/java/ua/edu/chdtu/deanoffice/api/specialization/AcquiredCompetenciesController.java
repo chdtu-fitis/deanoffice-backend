@@ -39,11 +39,27 @@ public class AcquiredCompetenciesController {
         this.currentYearService = currentYearService;
     }
 
+    @RequestMapping(method = RequestMethod.HEAD, path = "/specializations/{specialization_id}/competencies")
+    public ResponseEntity isExist(@PathVariable("specialization_id") int specializationId) {
+        AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getAcquiredCompetencies(specializationId);
+        if (acquiredCompetencies == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/specializations/{specialization_id}/competencies/ukr")
     @JsonView(SpecializationView.AcquiredCompetenciesUkr.class)
     public ResponseEntity getCompetenciesUkrForSpecialization(@PathVariable("specialization_id") int specializationId) {
+        return ResponseEntity.ok(getAcquiredCompetenciesDTO(specializationId));
+    }
+
+    private AcquiredCompetenciesDTO getAcquiredCompetenciesDTO(int specializationId) {
         AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getAcquiredCompetencies(specializationId);
-        return ResponseEntity.ok(map(acquiredCompetencies, AcquiredCompetenciesDTO.class));
+        if (acquiredCompetencies == null) {
+            return new AcquiredCompetenciesDTO();
+        }
+        return (AcquiredCompetenciesDTO) map(acquiredCompetencies, AcquiredCompetenciesDTO.class);
     }
 
     @PutMapping("/acquired-competencies/{acquired-competencies-id}/ukr")
@@ -59,20 +75,10 @@ public class AcquiredCompetenciesController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.HEAD, path = "/specializations/{specialization_id}/competencies")
-    public ResponseEntity isExist(@PathVariable("specialization_id") int specializationId) {
-        List<AcquiredCompetencies> acquiredCompetencies = acquiredCompetenciesService.getAllForSpecialization(specializationId);
-        if (acquiredCompetencies.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/specializations/{specialization_id}/competencies/eng")
     @JsonView(SpecializationView.AcquiredCompetenciesEng.class)
     public ResponseEntity getCompetenciesEngForSpecialization(@PathVariable("specialization_id") int specializationId) {
-        AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getAcquiredCompetencies(specializationId);
-        return ResponseEntity.ok(map(acquiredCompetencies, AcquiredCompetenciesDTO.class));
+        return ResponseEntity.ok(getAcquiredCompetenciesDTO(specializationId));
     }
 
     @PutMapping("/acquired-competencies/{acquired-competencies-id}/eng")
