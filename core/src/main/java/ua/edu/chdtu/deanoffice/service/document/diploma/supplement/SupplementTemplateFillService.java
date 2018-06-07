@@ -5,9 +5,11 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.ContentAccessor;
+import org.docx4j.wml.R;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
+import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlaceholdersFromContentAccessor;
 
 
 @Service
@@ -326,6 +330,7 @@ public class SupplementTemplateFillService {
             replacements.put("TrainingDirectionTypeEng", "Training Direction");
             replacements.put("TrainingDirectionTypeInText", "напряму підготовки");
             replacements.put("TrainingDirectionTypeInTextEng", "direction of preparation");
+
             Set<String> placeholdersToRemove = new HashSet<>();
             placeholdersToRemove.add("OptionalSpecialization");
             placeholdersToRemove.add("OptionalSpecializationEng");
@@ -336,6 +341,7 @@ public class SupplementTemplateFillService {
             placeholdersToRemove.add("QO");
             placeholdersToRemove.add("QC");
             TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
+
         } else {
             replacements.put("TrainingDirectionType", "спеціальність");
             replacements.put("TrainingDirectionTypeEng", "Speciality");
@@ -347,8 +353,63 @@ public class SupplementTemplateFillService {
             replacements.put("ЛЗ", "»");
             replacements.put("QO", "\"");
             replacements.put("QC", "\"");
+
+            insertSpecializationPlaceholders(template);
         }
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements, false);
+    }
+
+    private void insertSpecializationPlaceholders(WordprocessingMLPackage template) {
+        List<Text> placeholders = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart());
+        Text trainingDirectionTypeEngPlaceholder = placeholders.stream()
+                .filter(text -> text.getValue().contains("TrainingDirectionTypeEng")).findFirst().get();
+        ContentAccessor parentR = (ContentAccessor) trainingDirectionTypeEngPlaceholder.getParent();
+        ContentAccessor parentP = (ContentAccessor) ((Child) parentR).getParent();
+
+        Text trainingDirectionTypePlaceholder = placeholders.stream()
+                .filter(text -> text.getValue().endsWith("TrainingDirectionType")).findFirst().get();
+
+        R r1 = XmlUtils.deepCopy((R) trainingDirectionTypePlaceholder.getParent());
+        r1.getContent().clear();
+        r1.getContent().add(TemplateUtil.createLineBreak());
+        Text newSpecializationName = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
+        newSpecializationName.setValue("освітня програма");
+        r1.getContent().add(newSpecializationName);
+        parentP.getContent().add(r1);
+
+        R r2 = XmlUtils.deepCopy((R) trainingDirectionTypeEngPlaceholder.getParent());
+        r2.getContent().clear();
+        Text space = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
+        space.setValue(" / ");
+        space.setSpace("preserve");
+        r2.getContent().add(space);
+
+        Text newSpecializationNameEng = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
+        newSpecializationNameEng.setValue("Educational program");
+        r2.getContent().add(newSpecializationNameEng);
+        parentP.getContent().add(r2);
+
+        Text specialityEngPlaceholder = placeholders.stream()
+                .filter(text -> text.getValue().contains("SpecialityEng")).findFirst().get();
+        ContentAccessor specialityPlaceholderR = (ContentAccessor) specialityEngPlaceholder.getParent();
+        ContentAccessor specialityPlaceholderP = (ContentAccessor) ((Child) specialityPlaceholderR).getParent();
+
+        R r3 = XmlUtils.deepCopy((R) trainingDirectionTypePlaceholder.getParent());
+        r3.getContent().clear();
+        r3.getContent().add(TemplateUtil.createLineBreak());
+        Text newSpecializationPlaceholderUkr = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
+        newSpecializationPlaceholderUkr.setValue("#SpecializationUkr");
+        r3.getContent().add(newSpecializationPlaceholderUkr);
+        specialityPlaceholderP.getContent().add(r3);
+
+        R r4 = XmlUtils.deepCopy((R) trainingDirectionTypeEngPlaceholder.getParent());
+        r4.getContent().clear();
+        r4.getContent().add(space);
+
+        Text newSpecializationPlaceholderEng = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
+        newSpecializationPlaceholderEng.setValue("#SpecializationEng");
+        r4.getContent().add(newSpecializationPlaceholderEng);
+        specialityPlaceholderP.getContent().add(r4);
     }
 
     private boolean hasDirectionOfTraining(StudentDegree studentDegree) {
@@ -373,7 +434,7 @@ public class SupplementTemplateFillService {
         if (table == null) {
             return;
         }
-        Text textWithAcquiredCompetenciesPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(table)
+        Text textWithAcquiredCompetenciesPlaceholder = getTextsPlaceholdersFromContentAccessor(table)
                 .stream().filter(text -> placeholder.equals(text.getValue().trim())).findFirst().get();
         Object parent = textWithAcquiredCompetenciesPlaceholder.getParent();
 
@@ -431,7 +492,7 @@ public class SupplementTemplateFillService {
         if (professionalQualificationsTable == null) {
             return;
         }
-        Text tablePlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
+        Text tablePlaceholder = getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
                 .stream().filter(text -> "#ProfCode".equals(text.getValue().trim())).findFirst().get();
 
         professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);

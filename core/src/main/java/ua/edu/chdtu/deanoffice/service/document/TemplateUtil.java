@@ -11,6 +11,8 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
+import org.docx4j.wml.RPr;
 import org.docx4j.wml.STBrType;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
@@ -275,6 +277,14 @@ public class TemplateUtil {
         Text text = factory.createText();
         text.setValue(value);
         return text;
+    }
+
+    public static R createR(){
+        return factory.createR();
+    }
+
+    public static RPr createRPr(){
+        return factory.createRPr();
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {
