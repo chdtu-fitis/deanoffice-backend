@@ -93,19 +93,36 @@ public class TemplateUtil {
         return result;
     }
 
-    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
+    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template,
+                                                         Map<String, String> placeholdersValues,
+                                                         Boolean replaceEmptyWithBlank) {
+        List<Text> placeholders = getTextsContainingPlaceholders(template);
+        replaceValuesInTextPlaceholders(placeholders, placeholdersValues, replaceEmptyWithBlank);
+    }
+
+    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template,
+                                                         Map<String, String> placeholdersValues) {
         List<Text> placeholders = getTextsContainingPlaceholders(template);
         replaceValuesInTextPlaceholders(placeholders, placeholdersValues);
     }
 
-    public static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
+    public static void replaceValuesInTextPlaceholders(List<Text> placeholders,
+                                                       Map<String, String> replacements,
+                                                       Boolean replaceEmpty) {
         for (Text text : placeholders) {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
                 log.debug("{} is empty", text.getValue());
             }
-            text.setValue(getValueSafely(replacement));
+            if (replaceEmpty || !StringUtils.isEmpty(replacement)) {
+                text.setValue(getValueSafely(replacement));
+            }
         }
+    }
+
+    public static void replaceValuesInTextPlaceholders(List<Text> placeholders,
+                                                       Map<String, String> replacements) {
+        replaceValuesInTextPlaceholders(placeholders, replacements, true);
     }
 
     private static List<Text> getTextsContainingPlaceholders(WordprocessingMLPackage template) {
