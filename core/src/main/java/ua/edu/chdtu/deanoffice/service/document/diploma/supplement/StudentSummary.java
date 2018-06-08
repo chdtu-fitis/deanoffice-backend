@@ -151,6 +151,7 @@ public class StudentSummary {
             int[] gradeAndPoints = GradeUtil.adjustAverageGradeAndPoints(averageGrade, averagePoints);
             resultingGrade.setGrade(gradeAndPoints[0]);
             resultingGrade.setPoints(gradeAndPoints[1]);
+            resultingGrade.setEcts(EctsGrade.getEctsGrade(resultingGrade.getPoints()));
         } else {
             resultingGrade.setGrade((int) GradeUtil.roundPoints(averageGrade));
             resultingGrade.setPoints((int) GradeUtil.roundPoints(averagePoints));
