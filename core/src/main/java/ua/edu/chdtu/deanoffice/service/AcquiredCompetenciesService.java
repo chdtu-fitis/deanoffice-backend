@@ -8,13 +8,18 @@ import ua.edu.chdtu.deanoffice.repository.AcquiredCompetenciesRepository;
 @Service
 public class AcquiredCompetenciesService {
     private final AcquiredCompetenciesRepository acquiredCompetenciesRepository;
+    private final CurrentYearService currentYearService;
 
     @Autowired
-    public AcquiredCompetenciesService(AcquiredCompetenciesRepository acquiredCompetenciesRepository) {
+    public AcquiredCompetenciesService(
+            AcquiredCompetenciesRepository acquiredCompetenciesRepository,
+            CurrentYearService currentYearService
+    ) {
         this.acquiredCompetenciesRepository = acquiredCompetenciesRepository;
+        this.currentYearService = currentYearService;
     }
 
-    public AcquiredCompetencies getAcquiredCompetencies(int specializationId) {
+    public AcquiredCompetencies getLastAcquiredCompetencies(int specializationId) {
         return acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
     }
 
@@ -39,6 +44,18 @@ public class AcquiredCompetenciesService {
     }
 
     public void create(AcquiredCompetencies acquiredCompetencies) {
+        acquiredCompetencies.setYear(currentYearService.getYear());
         this.acquiredCompetenciesRepository.save(acquiredCompetencies);
+    }
+
+    public boolean isNotExist(int specializationId, boolean forCurrentYear) {
+        AcquiredCompetencies acquiredCompetencies;
+        if (forCurrentYear) {
+            int currentYear = currentYearService.getYear();
+            acquiredCompetencies = acquiredCompetenciesRepository.findBySpecializationIdAndYear(specializationId, currentYear);
+        } else {
+            acquiredCompetencies = getLastAcquiredCompetencies(specializationId);
+        }
+        return acquiredCompetencies == null;
     }
 }
