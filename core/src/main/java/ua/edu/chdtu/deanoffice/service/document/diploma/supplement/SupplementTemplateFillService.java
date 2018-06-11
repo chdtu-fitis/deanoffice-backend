@@ -193,6 +193,18 @@ public class SupplementTemplateFillService {
                 : simpleDateFormat.format(studentDegree.getDiplomaDate()));
 
         result.put("CurrentYear", String.format("%4d", Calendar.getInstance().get(Calendar.YEAR)));
+
+        result.put("PreviousDiplomaName", studentDegree.getPreviousDiplomaType().getNameUkr());
+        result.put("PreviousDiplomaNameEng", studentDegree.getPreviousDiplomaType().getNameEng());
+        result.put("PreviousDiplomaOrigin", studentDegree.getPreviousDiplomaIssuedBy());
+//        result.put("PreviousDiplomaOriginEng", studentDegree.getPreviousDiplomaIssuedByEng());
+        result.put("PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber());
+        if (studentDegree.getPreviousDiplomaDate() != null) {
+            result.put("PreviousDiplomaDate", simpleDateFormat.format(studentDegree.getPreviousDiplomaDate()) + " р.");
+            DateFormat englishDateFormat = SimpleDateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH);
+            result.put("PreviousDiplomaDateEng", englishDateFormat.format(studentDegree.getPreviousDiplomaNumber()));
+        }
+
         return result;
     }
 
