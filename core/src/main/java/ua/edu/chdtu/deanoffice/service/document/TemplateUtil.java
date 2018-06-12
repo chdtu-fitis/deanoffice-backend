@@ -11,11 +11,14 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
+import org.docx4j.wml.RPr;
 import org.docx4j.wml.STBrType;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
+import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -60,7 +63,7 @@ public class TemplateUtil {
     }
 
     public static List<Tr> getAllRowsFromTable(Tbl table) {
-        return getAllElementsFromObject(table, Tr.class).stream().map(o -> (Tr) o).collect(Collectors.toList());
+        return table.getContent().stream().map(o -> (Tr) o).collect(Collectors.toList());
     }
 
     public static Tbl findTable(WordprocessingMLPackage document, String key) {
@@ -80,19 +83,48 @@ public class TemplateUtil {
         return null;
     }
 
-    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template, Map<String, String> placeholdersValues) {
+    public static Object findParentNode(Child child, Class<?> nodeClass) {
+        Object result = child.getParent();
+        while (!result.getClass().equals(nodeClass)) {
+            if (result instanceof Child) {
+                result = ((Child) result).getParent();
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template,
+                                                         Map<String, String> placeholdersValues,
+                                                         Boolean replaceEmptyWithBlank) {
+        List<Text> placeholders = getTextsContainingPlaceholders(template);
+        replaceValuesInTextPlaceholders(placeholders, placeholdersValues, replaceEmptyWithBlank);
+    }
+
+    public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template,
+                                                         Map<String, String> placeholdersValues) {
         List<Text> placeholders = getTextsContainingPlaceholders(template);
         replaceValuesInTextPlaceholders(placeholders, placeholdersValues);
     }
 
-    public static void replaceValuesInTextPlaceholders(List<Text> placeholders, Map<String, String> replacements) {
+    public static void replaceValuesInTextPlaceholders(List<Text> placeholders,
+                                                       Map<String, String> replacements,
+                                                       Boolean replaceEmpty) {
         for (Text text : placeholders) {
             String replacement = replacements.get(text.getValue().trim().replaceFirst(PLACEHOLDER_PREFIX, ""));
             if (StringUtils.isEmpty(replacement)) {
                 log.debug("{} is empty", text.getValue());
             }
-            text.setValue(getValueSafely(replacement));
+            if (replaceEmpty || !StringUtils.isEmpty(replacement)) {
+                text.setValue(getValueSafely(replacement));
+            }
         }
+    }
+
+    public static void replaceValuesInTextPlaceholders(List<Text> placeholders,
+                                                       Map<String, String> replacements) {
+        replaceValuesInTextPlaceholders(placeholders, replacements, true);
     }
 
     private static List<Text> getTextsContainingPlaceholders(WordprocessingMLPackage template) {
@@ -122,7 +154,7 @@ public class TemplateUtil {
         return placeholders.stream().map(o -> (Text) o).collect(Collectors.toList());
     }
 
-    private static List<Text> getAllTextsFromObject(Object object) {
+    public static List<Text> getAllTextsFromObject(Object object) {
         return getAllElementsFromObject(object, Text.class).stream().map(o -> (Text) o).collect(Collectors.toList());
     }
 
@@ -231,8 +263,28 @@ public class TemplateUtil {
         return breakObject;
     }
 
+    public static Br createLineBreak() {
+        Br breakObject = new Br();
+        breakObject.setType(STBrType.TEXT_WRAPPING);
+        return breakObject;
+    }
+
     public static P createParagraph() {
         return factory.createP();
+    }
+
+    public static Text createText(String value) {
+        Text text = factory.createText();
+        text.setValue(value);
+        return text;
+    }
+
+    public static R createR(){
+        return factory.createR();
+    }
+
+    public static RPr createRPr(){
+        return factory.createRPr();
     }
 
     public static String getValueSafely(String value, String ifNullOrEmpty) {

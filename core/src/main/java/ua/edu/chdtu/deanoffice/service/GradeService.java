@@ -11,7 +11,10 @@ import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 
 @Service
@@ -89,6 +92,11 @@ public class GradeService {
         return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentsIds, courseIds);
     }
 
+    public Map<StudentDegree, List<Grade>>getGradeMapForStudents(List<Integer> studentDegreeIds, List<Integer> courseIds){
+        return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream().collect(
+                Collectors.groupingBy(Grade::getStudentDegree,toList()));
+    }
+
     public List<Grade> insertGrades(List<Grade> grades) {
         return gradeRepository.save(grades);
     }
@@ -106,6 +114,10 @@ public class GradeService {
             grade.setCourse(course);
             gradeRepository.save(grade);
         }
+    }
+
+    public void deleteGradeById(Integer gradeId) {
+        gradeRepository.delete(gradeId);
     }
 
 }
