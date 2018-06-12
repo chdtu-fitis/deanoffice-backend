@@ -31,9 +31,22 @@ public class StudentSummary {
     public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
         this.studentDegree = studentDegree;
         this.grades = grades;
+        removeUnwantedGrades();
         calculateTotalHours();
         calculateTotalCredits();
         combineMultipleSemesterCourseGrades();
+    }
+
+    private void removeUnwantedGrades() {
+        for (List<Grade> gradesSublist : grades) {
+            List<Grade> gradesToRemove = new ArrayList<>();
+            for (Grade grade : gradesSublist) {
+                if (grade.getPoints() == null || grade.getPoints() < 60) {
+                    gradesToRemove.add(grade);
+                }
+            }
+            gradesToRemove.forEach(gradesSublist::remove);
+        }
     }
 
     protected static List<Grade> getGradesByKnowledgeControlType(List<Grade> grades, Integer kcId) {
