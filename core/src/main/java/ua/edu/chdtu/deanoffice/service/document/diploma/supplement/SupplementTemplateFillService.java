@@ -34,11 +34,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlaceholdersFromContentAccessor;
@@ -340,31 +338,9 @@ public class SupplementTemplateFillService {
         if (hasDirectionOfTraining(studentSummary.getStudentDegree())) {
             replacements.put("TrainingDirectionType", "напрям підготовки");
             replacements.put("TrainingDirectionTypeEng", "Training Direction");
-            replacements.put("TrainingDirectionTypeInText", "напряму підготовки");
-            replacements.put("TrainingDirectionTypeInTextEng", "direction of preparation");
-
-            Set<String> placeholdersToRemove = new HashSet<>();
-            placeholdersToRemove.add("OptionalSpecialization");
-            placeholdersToRemove.add("OptionalSpecializationEng");
-            placeholdersToRemove.add("Specialization");
-            placeholdersToRemove.add("SpecializationEng");
-            placeholdersToRemove.add("ЛВ");
-            placeholdersToRemove.add("ЛЗ");
-            placeholdersToRemove.add("QO");
-            placeholdersToRemove.add("QC");
-            TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
-
         } else {
             replacements.put("TrainingDirectionType", "спеціальність");
             replacements.put("TrainingDirectionTypeEng", "Speciality");
-            replacements.put("TrainingDirectionTypeInText", "спеціальності");
-            replacements.put("TrainingDirectionTypeInTextEng", "speciality");
-            replacements.put("OptionalSpecialization", "освітньої програми");
-            replacements.put("OptionalSpecializationEng", "educational program");
-            replacements.put("ЛВ", "«");
-            replacements.put("ЛЗ", "»");
-            replacements.put("QO", "\"");
-            replacements.put("QC", "\"");
 
             insertSpecializationPlaceholders(template);
         }
