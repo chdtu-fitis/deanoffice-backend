@@ -140,7 +140,26 @@ public class ImportDataService {
         List<Student> existsStudentList = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName());
 
         if (existsStudentList.size() > 0) {
-            student = existsStudentList.get(0);
+            DateFormat simpleFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            if (existsStudentList.size() == 1){
+                Student tempStudent = existsStudentList.get(0);
+                if (tempStudent.getBirthDate() == null)
+                    student = tempStudent;
+                else
+                    if (simpleFormatter.format(birthDate).equals(simpleFormatter.format(tempStudent.getBirthDate())))
+                        student = tempStudent;
+            } else {
+                for (Student tempStudent: existsStudentList) {
+                    if (tempStudent.getBirthDate() == null) {
+                        student = tempStudent;
+                        continue;
+                    }
+                    if (simpleFormatter.format(birthDate).equals(simpleFormatter.format(tempStudent.getBirthDate()))) {
+                        student = tempStudent;
+                        break;
+                    }
+                }
+            }
         }
 
         student.setBirthDate(birthDate);
@@ -351,6 +370,9 @@ public class ImportDataService {
     }
 
     public void saveImport(ImportReport importReport){
+        List<StudentDegree> sdUpdate = importReport.getUpdateData();
+        studentDegreeService.update(sdUpdate);
+
         List<StudentDegree> sdInsert = importReport.getInsertData();
         for (StudentDegree sd: sdInsert) {
             Student st = sd.getStudent();
@@ -359,8 +381,6 @@ public class ImportDataService {
             studentDegreeService.save(sd);
         }
 
-        List<StudentDegree> sdUpdate = importReport.getUpdateData();
-        studentDegreeService.update(sdUpdate);
         for (Student student: importReport.getFailData()){
             studentService.save(student);
         }

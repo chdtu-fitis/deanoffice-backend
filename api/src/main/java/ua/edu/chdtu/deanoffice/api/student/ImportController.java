@@ -29,24 +29,24 @@ public class ImportController {
         this.importDataService = importDataService;
     }
 
-    @JsonView(StudentView.Degree.class)
-    @PostMapping("/import")
-    public ResponseEntity importStudents(@RequestParam("file") MultipartFile uploadfile) {
-        if (uploadfile.isEmpty()) {
-            ResponseEntity.ok().body("No file selected");
-        }
-
-        ImportReport importReport;
-
-        try {
-            importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
-            importDataService.saveImport(importReport);
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-
-        return ResponseEntity.ok(parseToImportReportDTO(importReport));
-    }
+//    @JsonView(StudentView.Degree.class)
+//    @PostMapping("/import")
+//    public ResponseEntity importStudents(@RequestParam("file") MultipartFile uploadfile) {
+//        if (uploadfile.isEmpty()) {
+//            ResponseEntity.ok().body("No file selected");
+//        }
+//
+//        ImportReport importReport;
+//
+//        try {
+//            importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
+//            importDataService.saveImport(importReport);
+//        } catch (Exception exception) {
+//            return handleException(exception);
+//        }
+//
+//        return ResponseEntity.ok(parseToImportReportDTO(importReport));
+//    }
 
     private ImportReportDTO parseToImportReportDTO(ImportReport importReport) {
         ModelMapper modelMapper = new ModelMapper();

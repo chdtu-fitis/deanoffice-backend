@@ -32,5 +32,5 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             @Param("name") String name,
             @Param("surname") String surname,
             @Param("patronimic") String patronimic
-    );
+            );
 }
