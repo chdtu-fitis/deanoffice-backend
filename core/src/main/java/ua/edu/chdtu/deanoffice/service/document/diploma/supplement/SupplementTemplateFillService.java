@@ -61,7 +61,6 @@ public class SupplementTemplateFillService {
     private static Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
         result.put("Credits", formatCredits(grade.getCourse().getCredits()));
-        result.put("Hours", formatHours(grade.getCourse().getHours()));
         result.put("LocalGrade", grade.getPoints() == null ? "" : String.format("%d", grade.getPoints()));
         result.put("NationalGradeUkr", grade.getNationalGradeUkr());
         result.put("NationalGradeEng", grade.getNationalGradeEng());
