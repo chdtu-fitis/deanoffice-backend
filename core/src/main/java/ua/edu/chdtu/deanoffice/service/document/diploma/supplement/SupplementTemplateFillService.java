@@ -405,9 +405,8 @@ public class SupplementTemplateFillService {
     }
 
     private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        AcquiredCompetencies competencies = acquiredCompetenciesService.findBySpecializationIdAndYear(
-                studentSummary.getStudentGroup().getSpecialization().getId(),
-                studentSummary.getStudentGroup().getCreationYear());
+        AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
+                studentSummary.getStudentGroup().getSpecialization().getId());
         if (competencies != null) {
             fillCompetenciesTable(template, competencies, "#AcquiredCompetencies");
             fillCompetenciesTable(template, competencies, "#AcquiredCompetenciesEng");
