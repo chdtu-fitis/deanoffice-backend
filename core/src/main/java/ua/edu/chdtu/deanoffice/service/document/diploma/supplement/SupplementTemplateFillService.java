@@ -5,6 +5,7 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.ContentAccessor;
+import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
@@ -422,19 +423,25 @@ public class SupplementTemplateFillService {
         }
         Text textWithAcquiredCompetenciesPlaceholder = getTextsPlaceholdersFromContentAccessor(table)
                 .stream().filter(text -> placeholder.equals(text.getValue().trim())).findFirst().get();
-        Object parent = textWithAcquiredCompetenciesPlaceholder.getParent();
-
-        template.getMainDocumentPart().getContent().remove(textWithAcquiredCompetenciesPlaceholder);
+        R parentContainer = (R) textWithAcquiredCompetenciesPlaceholder.getParent();
+        P parentParagraph = (P) TemplateUtil.findParentNode(textWithAcquiredCompetenciesPlaceholder, P.class);
+        ContentAccessor paragraphsParent = (ContentAccessor) parentParagraph.getParent();
 
         String competenciesString = placeholder.equals("#AcquiredCompetencies")
                 ? competencies.getCompetencies()
                 : competencies.getCompetenciesEng();
 
         for (String item : competenciesString.split(competencySeparator)) {
+            P newParagraph = XmlUtils.deepCopy(parentParagraph);
+            newParagraph.getContent().clear();
+
+            R container = XmlUtils.deepCopy(parentContainer);
+            container.getContent().clear();
             Text competency = XmlUtils.deepCopy(textWithAcquiredCompetenciesPlaceholder);
             competency.setValue(item + endOfTheSentence);
-            ((ContentAccessor) parent).getContent().add(competency);
-            ((ContentAccessor) parent).getContent().add(TemplateUtil.createLineBreak());
+            container.getContent().add(competency);
+            newParagraph.getContent().add(container);
+            paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
         }
     }
 
