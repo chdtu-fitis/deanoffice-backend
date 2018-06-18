@@ -499,7 +499,7 @@ public class SupplementTemplateFillService {
     private List<ProfessionalQualification> getProfessionalQualifications(StudentSummary studentSummary) {
         StudentGroup studentGroup = studentSummary.getStudentGroup();
         List<QualificationForSpecialization> qualificationsForSpecialization = qualificationForSpecializationService
-                .findAllBySpecializationIdAndYear(studentGroup.getSpecialization().getId(), studentGroup.getCreationYear());
+                .findAllBySpecializationIdAndYear(studentGroup.getSpecialization().getId());
         List<ProfessionalQualification> professionalQualifications = qualificationsForSpecialization
                 .stream().map(QualificationForSpecialization::getProfessionalQualification).collect(Collectors.toList());
         if (professionalQualifications.isEmpty()) {
