@@ -14,7 +14,7 @@ public class QualificationForSpecializationService {
         this.qualificationForSpecializationRepository = qualificationForSpecializationRepository;
     }
 
-    public List<QualificationForSpecialization> findAllBySpecializationIdAndYear(Integer specializationId, Integer year) {
-        return qualificationForSpecializationRepository.findAllBySpecializationIdAndYear(specializationId, year);
+    public List<QualificationForSpecialization> findAllBySpecializationIdAndYear(Integer specializationId) {
+        return qualificationForSpecializationRepository.findAllBySpecializationIdAndYear(specializationId);
     }
 }
