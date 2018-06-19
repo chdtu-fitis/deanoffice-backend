@@ -275,7 +275,7 @@ public class SupplementTemplateFillService {
     }
 
     private static String formatCredits(BigDecimal credits) {
-        if (credits == null || credits.equals(new BigDecimal(0))) {
+        if (credits == null || credits.doubleValue() == BigDecimal.ZERO.doubleValue()) {
             return "-";
         } else {
             String formattedCredits = String.format("%.1f", credits);
@@ -287,16 +287,8 @@ public class SupplementTemplateFillService {
         }
     }
 
-    private static String formatHours(int hours) {
-        if (hours == 0) {
-            return "-";
-        } else {
-            return String.format("%d", hours);
-        }
-    }
-
     private static BigDecimal countCreditsSum(List<Grade> grades) {
-        BigDecimal result = new BigDecimal(0);
+        BigDecimal result = new BigDecimal(0.0);
         for (Grade g :
                 grades) {
             result = result.add(g.getCourse().getCredits());
