@@ -24,6 +24,7 @@ import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.service.AcquiredCompetenciesService;
 import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -42,11 +43,11 @@ import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlaceholdersFromContentAccessor;
 
-
 @Service
 public class SupplementTemplateFillService {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
+    private static final int FOREIGN_STUDENTS_FACULTY_ID = 8;
     private final DocumentIOService documentIOService;
     private QualificationForSpecializationService qualificationForSpecializationService;
     private AcquiredCompetenciesService acquiredCompetenciesService;
@@ -154,8 +155,21 @@ public class SupplementTemplateFillService {
         result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfStudyEng()));
         result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
         result.put("QualificationLevelEng", TemplateUtil.getValueSafely(degree.getQualificationLevelDescriptionEng()));
-        result.put("AdmissionRequirements", TemplateUtil.getValueSafely(degree.getAdmissionRequirements()));
-        result.put("AdmissionRequirementsEng", TemplateUtil.getValueSafely(degree.getAdmissionRequirementsEng()));
+
+        String admissionRequirementsPlaceholder = "AdmissionRequirements";
+        String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
+        if (studentSummary.getStudentDegree().getStudentGroup().getSpecialization().getDepartment().getFaculty().getId()
+                == FOREIGN_STUDENTS_FACULTY_ID) {
+            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
+            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
+        } else if (studentSummary.getStudentGroup().getTuitionTerm().equals(TuitionTerm.SHORTENED)) {
+            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionShortenedRequirements()));
+            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionShortenedRequirementsEng()));
+        } else {
+            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionRequirements()));
+            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionRequirementsEng()));
+        }
+
         result.put("FurtherStudyAccess", TemplateUtil.getValueSafely(degree.getFurtherStudyAccess()));
         result.put("FurtherStudyAccessEng", TemplateUtil.getValueSafely(degree.getFurtherStudyAccessEng()));
         result.put("ProfessionalStatus", TemplateUtil.getValueSafely(degree.getProfessionalStatus()));
@@ -195,7 +209,7 @@ public class SupplementTemplateFillService {
         result.put("PreviousDiplomaName", studentDegree.getPreviousDiplomaType().getNameUkr());
         result.put("PreviousDiplomaNameEng", studentDegree.getPreviousDiplomaType().getNameEng());
         result.put("PreviousDiplomaOrigin", studentDegree.getPreviousDiplomaIssuedBy());
-//        result.put("PreviousDiplomaOriginEng", studentDegree.getPreviousDiplomaIssuedByEng());
+        result.put("PreviousDiplomaOriginEng", studentDegree.getPreviousDiplomaIssuedByEng());
         result.put("PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber());
         if (studentDegree.getPreviousDiplomaDate() != null) {
             result.put("PreviousDiplomaDate", simpleDateFormat.format(studentDegree.getPreviousDiplomaDate()) + " р.");
