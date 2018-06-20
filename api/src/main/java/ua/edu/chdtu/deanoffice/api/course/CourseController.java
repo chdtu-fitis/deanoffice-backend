@@ -69,27 +69,23 @@ public class CourseController {
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
             int oldCourseId = coursesForGroupHolder.getOldCourseId();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
-            StudentGroup group =  studentGroupService.getById(groupId);
-            if (courseForGroupService.countByGroup(group)==1){
-                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
-                newCourse = updateCourseName(courseName, newCourse);
-                courseService.createOrUpdateCourse(newCourse);
-                return new ResponseEntity(HttpStatus.CREATED);
-            }
-            CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
             if (courseFromDb != null) {
                 newCourse = courseFromDb;
-            }
-            else {
+                CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
+                updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId);
+            } else {
                 CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
                 newCourse = updateCourseName(courseName, newCourse);
-                newCourse = courseService.createOrUpdateCourse(newCourse);
+                if (courseForGroupService.hasSoleCourse(oldCourseId)){
+                    courseService.createOrUpdateCourse(newCourse);
+                } else {
+                    newCourse.setId(0);
+                    newCourse = courseService.createOrUpdateCourse(newCourse);
+                    CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
+                    updateCourseInCoursesForGroupsAndGrade(courseForGroup, newCourse, oldCourseId, groupId);
+                }
             }
-            courseForGroup.setCourse(newCourse);
-            courseForGroupService.save(courseForGroup);
-            List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
-            gradeService.saveGradesByCourse(newCourse, grades);
-            return new ResponseEntity(HttpStatus.CREATED);
+            return ResponseEntity.ok(map(newCourse, CourseDTO.class));
         } catch (Exception e) {
             return ExceptionHandlerAdvice.handleException("Backend error", CourseController.class);
         }
@@ -108,6 +104,12 @@ public class CourseController {
         return newCourse;
     }
 
+    private void updateCourseInCoursesForGroupsAndGrade(CourseForGroup courseForGroup, Course newCourse, int oldCourseId, int groupId) {
+        courseForGroup.setCourse(newCourse);
+        courseForGroupService.save(courseForGroup);
+        List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
+        gradeService.saveGradesByCourse(newCourse, grades);
+    }
 
     @PostMapping("/groups/{groupId}/courses")
     public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {

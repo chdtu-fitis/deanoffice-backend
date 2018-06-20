@@ -18,9 +18,8 @@ public class CourseService {
 
     public Course getCourseByAllAttributes(Course course) {
         return courseRepository.findOne(course.getSemester(), course.getKnowledgeControl().getId(), course.getCourseName().getId(),
-                course.getHours(), course.getCredits(), course.getHoursPerCredit());
+                course.getHours(), course.getHoursPerCredit());
     }
-
 
     public List<Course> getCoursesBySemester(int semester) {
         return courseRepository.findAllBySemester(semester);

@@ -28,9 +28,9 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     @Query("select c from Course as c where " +
             "c.semester = :semester and c.knowledgeControl.id = :kc_id " +
             "and c.courseName.id = :course_name_id and c.hours = :hours " +
-            "and c.credits = :credits and c.hoursPerCredit = :hours_per_credit")
+            "and c.hoursPerCredit = :hours_per_credit")
     Course findOne(@Param("semester") int semester, @Param("kc_id") int kcId,
                    @Param("course_name_id") int courseNameId,
-                   @Param("hours") int hours, @Param("credits") BigDecimal credits,
+                   @Param("hours") int hours,
                    @Param("hours_per_credit") int hoursPerCredit);
 }

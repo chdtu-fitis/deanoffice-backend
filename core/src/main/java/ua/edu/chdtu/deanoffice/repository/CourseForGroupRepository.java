@@ -29,6 +29,6 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
 
     CourseForGroup findByStudentGroupIdAndCourseId(@Param("studentGroupId") int groupId, @Param("courseId") int courseId);
 
-    int countByStudentGroup(StudentGroup studentGroup);
+    int countByCourseId(Integer courseId);
 
 }

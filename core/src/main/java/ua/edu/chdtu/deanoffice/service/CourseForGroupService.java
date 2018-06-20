@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
@@ -59,7 +58,11 @@ public class CourseForGroupService {
         this.courseForGroupRepository.save(courseForGroup);
     }
 
-    public int countByGroup(StudentGroup group){
-        return courseForGroupRepository.countByStudentGroup(group);
+    public boolean hasSoleCourse(int courseId){
+        int count = courseForGroupRepository.countByCourseId(courseId);
+        if (count == 1)
+            return true;
+        else
+            return false;
     }
 }
