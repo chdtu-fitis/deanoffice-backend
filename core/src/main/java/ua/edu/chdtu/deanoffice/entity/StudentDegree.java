@@ -34,7 +34,7 @@ public class StudentDegree extends BaseEntity {
     private EducationDocument previousDiplomaType = EducationDocument.SECONDARY_SCHOOL_CERTIFICATE;
     private String previousDiplomaNumber;
     private String previousDiplomaIssuedBy;
-//    private String previousDiplomaIssuedByEng;
+    private String previousDiplomaIssuedByEng;
     @Temporal(TemporalType.DATE)
     private Date protocolDate;
     private String protocolNumber;
