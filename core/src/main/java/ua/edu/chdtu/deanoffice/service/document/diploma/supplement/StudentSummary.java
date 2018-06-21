@@ -37,6 +37,9 @@ public class StudentSummary {
         combineMultipleSemesterCourseGrades();
     }
 
+    protected StudentSummary() {
+    }
+
     private void removeUnwantedGrades() {
         for (List<Grade> gradesSublist : grades) {
             List<Grade> gradesToRemove = new ArrayList<>();
@@ -61,7 +64,7 @@ public class StudentSummary {
         return studentDegree.getStudentGroup();
     }
 
-    private void calculateTotalHours() {
+    protected void calculateTotalHours() {
         totalHours = 0;
         grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
             if (grade.getCourse().getHours() != null) {
@@ -70,7 +73,7 @@ public class StudentSummary {
         }));
     }
 
-    private void combineMultipleSemesterCourseGrades() {
+    protected void combineMultipleSemesterCourseGrades() {
         List<List<Grade>> gradesToCombine = new ArrayList<>();
         GradeUtil.sortGradesByCourseNameUkr(this.grades.get(0));
         this.grades.get(0).forEach(grade -> {
@@ -177,7 +180,7 @@ public class StudentSummary {
         return resultingGrade;
     }
 
-    private void calculateTotalCredits() {
+    protected void calculateTotalCredits() {
         totalCredits = new BigDecimal(0);
         grades.forEach(gradeSublist -> gradeSublist.forEach(grade -> {
             if (grade.getCourse().getCredits() != null) {
@@ -229,5 +232,13 @@ public class StudentSummary {
 
     EctsGrade getTotalEcts() {
         return EctsGrade.getEctsGrade((int) GradeUtil.roundPoints(getTotalGrade()));
+    }
+
+    protected void setStudentDegree(StudentDegree studentDegree) {
+        this.studentDegree = studentDegree;
+    }
+
+    protected void setGrades(List<List<Grade>> grades) {
+        this.grades = grades;
     }
 }

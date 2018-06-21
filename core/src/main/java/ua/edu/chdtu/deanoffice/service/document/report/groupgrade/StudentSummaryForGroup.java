@@ -12,7 +12,11 @@ public class StudentSummaryForGroup extends StudentSummary {
 
 
     public StudentSummaryForGroup(StudentDegree studentDegree, List<List<Grade>> grades) {
-        super(studentDegree, grades);
+        setStudentDegree(studentDegree);
+        setGrades(grades);
+        calculateTotalHours();
+        calculateTotalCredits();
+        combineMultipleSemesterCourseGrades();
     }
 
     public Double getAverageGrade() {
