@@ -106,6 +106,7 @@ public class SupplementTemplateFillService {
         result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
         result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
         result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), "По-батькові"));
+        result.put("PatronimicEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimicEng().toUpperCase(), "Patronimic"));
 
         DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         result.put("BirthDate", studentSummary.getStudent().getBirthDate() != null
@@ -356,20 +357,17 @@ public class SupplementTemplateFillService {
         Map<String, String> commonDict = getReplacementsDictionary(studentSummary);
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
         TemplateUtil.replacePlaceholdersInFooter(template, commonDict);
+
         return template;
     }
 
     private void prepareTrainingDirectionPlaceholders(WordprocessingMLPackage template, StudentSummary studentSummary) {
         Map<String, String> replacements = new HashMap<>();
-        if (hasDirectionOfTraining(studentSummary.getStudentDegree())) {
-            replacements.put("TrainingDirectionType", "напрям підготовки");
-            replacements.put("TrainingDirectionTypeEng", "Training Direction");
-        } else {
-            replacements.put("TrainingDirectionType", "спеціальність");
-            replacements.put("TrainingDirectionTypeEng", "Speciality");
-
+        if (!hasDirectionOfTraining(studentSummary.getStudentDegree())) {
             insertSpecializationPlaceholders(template);
         }
+        replacements.put("TrainingDirectionType", "спеціальність");
+        replacements.put("TrainingDirectionTypeEng", "Speciality");
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements, false);
     }
 
