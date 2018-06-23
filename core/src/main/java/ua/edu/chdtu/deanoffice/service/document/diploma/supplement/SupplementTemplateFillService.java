@@ -35,6 +35,7 @@ import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -94,6 +95,12 @@ public class SupplementTemplateFillService {
     private Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
 
+        StudentDegree studentDegree = studentSummary.getStudentDegree();
+        Specialization specialization = studentSummary.getStudentGroup().getSpecialization();
+        Speciality speciality = specialization.getSpeciality();
+        Degree degree = specialization.getDegree();
+        StudentGroup group = studentSummary.getStudentGroup();
+
         result.put("SurnameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
         result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname").toUpperCase());
         result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
@@ -127,9 +134,6 @@ public class SupplementTemplateFillService {
         result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
         result.put("ModeOfStudyEngAblativeCase", modeOfStudyEng.toLowerCase());
 
-        Specialization specialization = studentSummary.getStudentGroup().getSpecialization();
-        Speciality speciality = specialization.getSpeciality();
-        Degree degree = specialization.getDegree();
         result.put("SpecializationUkr", TemplateUtil.getValueSafely(specialization.getName()));
         result.put("SpecializationEng", TemplateUtil.getValueSafely(specialization.getNameEng()));
         result.put("SpecialityUkr", TemplateUtil.getValueSafely(speciality.getName()));
@@ -144,8 +148,6 @@ public class SupplementTemplateFillService {
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
 
-        StudentGroup group = studentSummary.getStudentGroup();
-
         result.put("CertificateNum", specialization.getCertificateNumber());
         result.put("CertificateDate", specialization.getCertificateDate() != null
                 ? simpleDateFormat.format(specialization.getCertificateDate())
@@ -158,7 +160,7 @@ public class SupplementTemplateFillService {
 
         String admissionRequirementsPlaceholder = "AdmissionRequirements";
         String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
-        if (studentSummary.getStudentDegree().getStudentGroup().getSpecialization().getDepartment().getFaculty().getId()
+        if (studentDegree.getStudentGroup().getSpecialization().getDepartment().getFaculty().getId()
                 == FOREIGN_STUDENTS_FACULTY_ID) {
             result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
             result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
@@ -177,13 +179,14 @@ public class SupplementTemplateFillService {
 
         result.put("TrainingDuration", getTrainingDuration(group));
         result.put("TrainingDurationEng", getTrainingDurationEng(group));
+        result.put("TrainingStart", formatDateSafely(simpleDateFormat, studentDegree.getAdmissionDate()));
+        result.put("TrainingEnd", formatDateSafely(simpleDateFormat, studentDegree.getDiplomaDate()));
 
         result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
         result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
         result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
         result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
-        StudentDegree studentDegree = studentSummary.getStudentDegree();
         result.put("ThesisNameUkr", TemplateUtil.getValueSafely(studentDegree.getThesisName()));
         result.put("ThesisNameEng", TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()));
         result.put("ProtocolNumber", TemplateUtil.getValueSafely(studentDegree.getProtocolNumber()));
@@ -298,6 +301,23 @@ public class SupplementTemplateFillService {
             } else {
                 return formattedCredits;
             }
+        }
+    }
+
+    private static String formatDateSafely(DateFormat format, Date date) {
+        if (date == null) {
+            return "";
+        } else {
+            return format.format(date);
+        }
+    }
+
+    private static String formatDateSafely(String format, Date date) {
+        if (date == null) {
+            return "";
+        } else {
+            DateFormat dateFormat = new SimpleDateFormat(format);
+            return dateFormat.format(date);
         }
     }
 
