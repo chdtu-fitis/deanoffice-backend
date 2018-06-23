@@ -160,7 +160,7 @@ public class SupplementTemplateFillService {
 
         String admissionRequirementsPlaceholder = "AdmissionRequirements";
         String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
-        if (studentDegree.getStudentGroup().getSpecialization().getDepartment().getFaculty().getId()
+        if (studentDegree.getStudentGroup().getSpecialization().getFaculty().getId()
                 == FOREIGN_STUDENTS_FACULTY_ID) {
             result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
             result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
