@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
@@ -496,6 +497,18 @@ public class SupplementTemplateFillService {
             rowToAddIndex++;
         }
         tableWithGrades.getContent().remove(templateRow);
+
+        if (tableWithGrades.getContent().size() < 50) {
+            R run = TemplateUtil.createR();
+            Br pageBreak = TemplateUtil.createPageBreak();
+            run.getContent().add(pageBreak);
+
+            Text pageBreakPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart())
+                    .stream().filter(text -> "#PossiblePageBreak".equals(text.getValue().trim())).findFirst().get();
+            P parentParagraph = (P) TemplateUtil.findParentNode(pageBreakPlaceholder, P.class);
+            parentParagraph.getContent().add(run);
+            template.getMainDocumentPart().getContent().remove(pageBreakPlaceholder);
+        }
     }
 
     private void fillProfessionalQualificationsTable(WordprocessingMLPackage template, StudentSummary studentSummary) {
