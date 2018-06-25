@@ -5,10 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.dto.ImportReportDTO;
@@ -29,24 +26,30 @@ public class ImportController {
         this.importDataService = importDataService;
     }
 
-//    @JsonView(StudentView.Degree.class)
-//    @PostMapping("/import")
+    @JsonView(StudentView.Degree.class)
+    @PostMapping("/import")
 //    public ResponseEntity importStudents(@RequestParam("file") MultipartFile uploadfile) {
-//        if (uploadfile.isEmpty()) {
-//            ResponseEntity.ok().body("No file selected");
-//        }
-//
-//        ImportReport importReport;
-//
-//        try {
-//            importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
-//            importDataService.saveImport(importReport);
-//        } catch (Exception exception) {
-//            return handleException(exception);
-//        }
-//
+    public @ResponseBody
+    String importStudents(@RequestParam("file") MultipartFile uploadfile) {
+        if (uploadfile.isEmpty()) {
+            ResponseEntity.ok().body("No file selected");
+        }
+
+        ImportReport importReport = null;
+
+        try {
+            importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
+            importDataService.saveImport(importReport);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            //return handleException(exception);
+        }
+        if (importReport == null)
+            return "import report is not created";
+        else
+            return "insert: "+importReport.getInsertData().size()+" update: "+importReport.getUpdateData().size()+" fail: "+importReport.getFailData().size();
 //        return ResponseEntity.ok(parseToImportReportDTO(importReport));
-//    }
+    }
 
     private ImportReportDTO parseToImportReportDTO(ImportReport importReport) {
         ModelMapper modelMapper = new ModelMapper();

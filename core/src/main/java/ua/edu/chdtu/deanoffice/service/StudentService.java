@@ -25,10 +25,10 @@ public class StudentService {
     }
 
     public List<Student> searchByFullName(String name, String surname, String patronimic) {
-        return studentRepository.findAllByFullNameUkr(
-                toCapitalizedCase(name),
-                toCapitalizedCase(surname),
-                toCapitalizedCase(patronimic)
+        return studentRepository.findAllByFullNameUkr(name,surname,patronimic
+//                toCapitalizedCase(name),
+//                toCapitalizedCase(surname),
+//                toCapitalizedCase(patronimic)
         );
     }
 
