@@ -22,7 +22,7 @@ public class GradeService {
     private static final Integer[] KNOWLEDGE_CONTROL_PART1 = {Constants.EXAM, Constants.CREDIT, Constants.DIFFERENTIATED_CREDIT};
     private static final Integer[] KNOWLEDGE_CONTROL_PART2 = {Constants.COURSEWORK, Constants.COURSE_PROJECT};
     private static final Integer[] KNOWLEDGE_CONTROL_PART3 = {Constants.INTERNSHIP, Constants.NON_GRADED_INTERNSHIP};
-    private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {Constants.ATTESTATION};
+    private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {Constants.ATTESTATION, Constants.STATE_EXAM};
 
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;

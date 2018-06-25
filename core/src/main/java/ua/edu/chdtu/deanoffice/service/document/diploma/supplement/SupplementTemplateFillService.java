@@ -143,9 +143,9 @@ public class SupplementTemplateFillService {
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
         result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
         result.put("DEGREEENG", TemplateUtil.getValueSafely(degree.getNameEng()).toUpperCase());
-        result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))));
-        result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
+        result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
+        result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
 
