@@ -200,12 +200,11 @@ public class StudentSummary {
                 }
             }
         }
-        try {
+        if (pointsCount != 0) {
             return (pointSum * 1.0) / pointsCount;
-        } catch (Exception e) {
+        } else {
             return 0.0;
         }
-
     }
 
     public String getTotalNationalGradeUkr() {

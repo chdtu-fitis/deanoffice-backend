@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Br;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
@@ -143,9 +144,9 @@ public class SupplementTemplateFillService {
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
         result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
         result.put("DEGREEENG", TemplateUtil.getValueSafely(degree.getNameEng()).toUpperCase());
-        result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))));
-        result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))
+        result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
+        result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
         result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
 
@@ -496,6 +497,18 @@ public class SupplementTemplateFillService {
             rowToAddIndex++;
         }
         tableWithGrades.getContent().remove(templateRow);
+
+        if (tableWithGrades.getContent().size() < 50) {
+            R run = TemplateUtil.createR();
+            Br pageBreak = TemplateUtil.createPageBreak();
+            run.getContent().add(pageBreak);
+
+            Text pageBreakPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart())
+                    .stream().filter(text -> "#PossiblePageBreak".equals(text.getValue().trim())).findFirst().get();
+            P parentParagraph = (P) TemplateUtil.findParentNode(pageBreakPlaceholder, P.class);
+            parentParagraph.getContent().add(run);
+            template.getMainDocumentPart().getContent().remove(pageBreakPlaceholder);
+        }
     }
 
     private void fillProfessionalQualificationsTable(WordprocessingMLPackage template, StudentSummary studentSummary) {
