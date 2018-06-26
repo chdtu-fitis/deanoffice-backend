@@ -31,10 +31,20 @@ public class StudentSummary {
     public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades) {
         this.studentDegree = studentDegree;
         this.grades = grades;
+        removeUnnecessaryAttestation();
         removeUnwantedGrades();
         calculateTotalHours();
         calculateTotalCredits();
         combineMultipleSemesterCourseGrades();
+    }
+
+    private void removeUnnecessaryAttestation() {
+        List<Grade> stateExams = getGradesByKnowledgeControlType(this.grades.get(3), Constants.STATE_EXAM);
+        List<Grade> attestation = getGradesByKnowledgeControlType(this.grades.get(3), Constants.ATTESTATION);
+
+        if (!stateExams.isEmpty() && !attestation.isEmpty()) {
+            this.grades.get(3).removeAll(stateExams);
+        }
     }
 
     protected StudentSummary() {
