@@ -15,6 +15,7 @@ import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -60,6 +61,159 @@ public class SupplementTemplateFillService {
         this.documentIOService = documentIOService;
         this.qualificationForSpecializationService = qualificationForSpecializationService;
         this.acquiredCompetenciesService = acquiredCompetenciesService;
+    }
+
+    WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
+            throws Docx4JException {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
+
+        prepareTrainingDirectionPlaceholders(template, studentSummary);
+
+
+        fillAcquiredCompetencies(template, studentSummary);
+        fillTableWithGrades(template, studentSummary);
+        fillProfessionalQualificationsTable(template, studentSummary);
+
+        Map<String, String> commonDict = getReplacementsDictionary(studentSummary);
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+        TemplateUtil.replacePlaceholdersInFooter(template, commonDict);
+
+        return template;
+    }
+
+    private void prepareTrainingDirectionPlaceholders(WordprocessingMLPackage template, StudentSummary studentSummary) {
+        Map<String, String> replacements = new HashMap<>();
+        if (!hasDirectionOfTraining(studentSummary.getStudentDegree())) {
+            insertSpecializationPlaceholders(template);
+        }
+        replacements.put("TrainingDirectionType", "спеціальність");
+        replacements.put("TrainingDirectionTypeEng", "Speciality");
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements, false);
+    }
+
+    private Map<String, String> getCertificationType(StudentSummary studentSummary) {
+        Map<String, String> result = new HashMap<>();
+
+        String certificationName = "";
+        String certificationNameEng = "";
+
+        if (!StudentSummary.getGradesByKnowledgeControlType(studentSummary.getGrades().get(3), Constants.ATTESTATION).isEmpty()) {
+            String degreeName = "";
+            String degreeNameEng = "";
+            switch (studentSummary.getStudentGroup().getSpecialization().getDegree().getId()) {
+                case 1: {
+                    degreeName = "бакалавра";
+                    degreeNameEng = "bachelor's";
+                    break;
+                }
+                case 2: {
+                    degreeName = "спеціаліста";
+                    degreeNameEng = "specialists's";
+                    break;
+                }
+
+                case 3: {
+                    degreeName = "магістра";
+                    degreeNameEng = "master's";
+                    break;
+                }
+
+            }
+            certificationName += "Кваліфікаційна робота " + degreeName + " на тему:";
+            certificationNameEng += "Qualification work of a " + degreeNameEng + " degree on a subject:";
+        } else {
+            certificationName = "Державний іспит.";
+            certificationNameEng = "State exam.";
+        }
+        result.put("CertificationName", certificationName);
+        result.put("CertificationNameEng", certificationNameEng);
+
+        return result;
+    }
+
+    private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
+        AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
+                studentSummary.getStudentGroup().getSpecialization().getId());
+        if (competencies != null) {
+            fillCompetenciesTable(template, competencies, "#AcquiredCompetencies");
+            fillCompetenciesTable(template, competencies, "#AcquiredCompetenciesEng");
+        }
+    }
+
+    private void fillTableWithGrades(WordprocessingMLPackage template, StudentSummary studentSummary) {
+        int firstSectionRowIndex = 2;
+        int templateRowIndex = 1;
+        Tbl tableWithGrades = TemplateUtil.findTable(template, "#Number");
+        if (tableWithGrades == null) {
+            return;
+        }
+        List<Tr> gradeTableRows = TemplateUtil.getAllRowsFromTable(tableWithGrades);
+        if (gradeTableRows.size() < templateRowIndex + 1) {
+            log.warn("Incorrect table with grades is ignored.");
+            return;
+        }
+        Tr templateRow = gradeTableRows.get(templateRowIndex);
+        int rowToAddIndex = firstSectionRowIndex;
+        int gradeNumber = 1;
+
+        for (List<Grade> gradesSection : studentSummary.getGrades()) {
+            for (Grade grade : gradesSection) {
+                Map<String, String> replacements = SupplementTemplateFillService.getGradeDictionary(grade);
+                replacements.put("Number", String.format("%2d", gradeNumber++));
+                TemplateUtil.addRowToTable(tableWithGrades, templateRow, rowToAddIndex, replacements);
+                rowToAddIndex++;
+            }
+            //Need to skip header of the next section
+            rowToAddIndex++;
+        }
+        tableWithGrades.getContent().remove(templateRow);
+
+        if (tableWithGrades.getContent().size() < 50) {
+            R run = TemplateUtil.createR();
+            Br pageBreak = TemplateUtil.createPageBreak();
+            run.getContent().add(pageBreak);
+
+            Text pageBreakPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart())
+                    .stream().filter(text -> "#PossiblePageBreak".equals(text.getValue().trim())).findFirst().get();
+            P parentParagraph = (P) TemplateUtil.findParentNode(pageBreakPlaceholder, P.class);
+            parentParagraph.getContent().add(run);
+            template.getMainDocumentPart().getContent().remove(pageBreakPlaceholder);
+        }
+    }
+
+    private void fillProfessionalQualificationsTable(WordprocessingMLPackage template, StudentSummary studentSummary) {
+        int templateRowIndex = 0;
+
+        List<ProfessionalQualification> professionalQualifications = getProfessionalQualifications(studentSummary);
+        if (professionalQualifications == null) {
+            return;
+        }
+        Tbl professionalQualificationsTable = TemplateUtil.findTable(template, "ProfCode");
+        if (professionalQualificationsTable == null) {
+            return;
+        }
+        Text tablePlaceholder = getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
+                .stream().filter(text -> "#ProfCode".equals(text.getValue().trim())).findFirst().get();
+
+        professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);
+
+        List<Tr> tableRows = TemplateUtil.getAllRowsFromTable(professionalQualificationsTable);
+        Tr templateRow = tableRows.get(templateRowIndex);
+        int rowToAddIndex = templateRowIndex + 1;
+
+        for (ProfessionalQualification qualification : professionalQualifications) {
+            Map<String, String> replacements = SupplementTemplateFillService.getProfessionalQualificationDictionary(qualification);
+            TemplateUtil.addRowToTable(professionalQualificationsTable, templateRow, rowToAddIndex, replacements);
+            rowToAddIndex++;
+        }
+        professionalQualificationsTable.getContent().remove(templateRow);
+    }
+
+    private Map<String, String> getReplacementsDictionary(StudentSummary studentSummary) {
+        Map<String, String> result = new HashMap<>();
+        result.putAll(getStudentInfoDictionary(studentSummary));
+        result.putAll(getTotalDictionary(studentSummary));
+        return result;
     }
 
     private static Map<String, String> getGradeDictionary(Grade grade) {
@@ -189,8 +343,11 @@ public class SupplementTemplateFillService {
         result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
         result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
-        result.put("ThesisNameUkr", TemplateUtil.getValueSafely(studentDegree.getThesisName()));
-        result.put("ThesisNameEng", TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()));
+        result.putAll(getCertificationType(studentSummary));
+        if (!result.get("CertificationName").equals("Державний іспит.")) {
+            result.put("ThesisNameUkr", "«" + TemplateUtil.getValueSafely(studentDegree.getThesisName()) + "»");
+            result.put("ThesisNameEng", "\"" + TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()) + "\"");
+        }
         result.put("ProtocolNumber", TemplateUtil.getValueSafely(studentDegree.getProtocolNumber()));
         result.put("PreviousDiplomaNumber", TemplateUtil.getValueSafely(studentDegree.getPreviousDiplomaNumber()));
 
@@ -338,40 +495,6 @@ public class SupplementTemplateFillService {
         return ((years.doubleValue() - intPart) * monthsPerYear);
     }
 
-    private Map<String, String> getReplacementsDictionary(StudentSummary studentSummary) {
-        Map<String, String> result = new HashMap<>();
-        result.putAll(getStudentInfoDictionary(studentSummary));
-        result.putAll(getTotalDictionary(studentSummary));
-        return result;
-    }
-
-    WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
-            throws Docx4JException {
-        WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
-
-        prepareTrainingDirectionPlaceholders(template, studentSummary);
-
-        fillAcquiredCompetencies(template, studentSummary);
-        fillTableWithGrades(template, studentSummary);
-        fillProfessionalQualificationsTable(template, studentSummary);
-
-        Map<String, String> commonDict = getReplacementsDictionary(studentSummary);
-        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
-        TemplateUtil.replacePlaceholdersInFooter(template, commonDict);
-
-        return template;
-    }
-
-    private void prepareTrainingDirectionPlaceholders(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        Map<String, String> replacements = new HashMap<>();
-        if (!hasDirectionOfTraining(studentSummary.getStudentDegree())) {
-            insertSpecializationPlaceholders(template);
-        }
-        replacements.put("TrainingDirectionType", "спеціальність");
-        replacements.put("TrainingDirectionTypeEng", "Speciality");
-        TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements, false);
-    }
-
     private void insertSpecializationPlaceholders(WordprocessingMLPackage template) {
         List<Text> placeholders = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart());
         Text trainingDirectionTypeEngPlaceholder = placeholders.stream()
@@ -429,15 +552,6 @@ public class SupplementTemplateFillService {
         return Strings.isNullOrEmpty(studentDegree.getStudentGroup().getSpecialization().getName());
     }
 
-    private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
-                studentSummary.getStudentGroup().getSpecialization().getId());
-        if (competencies != null) {
-            fillCompetenciesTable(template, competencies, "#AcquiredCompetencies");
-            fillCompetenciesTable(template, competencies, "#AcquiredCompetenciesEng");
-        }
-    }
-
     private void fillCompetenciesTable(WordprocessingMLPackage template, AcquiredCompetencies competencies, String placeholder) {
         String competencySeparator = "\\.";
         String endOfTheSentence = ".";
@@ -468,75 +582,6 @@ public class SupplementTemplateFillService {
             newParagraph.getContent().add(container);
             paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
         }
-    }
-
-    private void fillTableWithGrades(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        int firstSectionRowIndex = 2;
-        int templateRowIndex = 1;
-        Tbl tableWithGrades = TemplateUtil.findTable(template, "#Number");
-        if (tableWithGrades == null) {
-            return;
-        }
-        List<Tr> gradeTableRows = TemplateUtil.getAllRowsFromTable(tableWithGrades);
-        if (gradeTableRows.size() < templateRowIndex + 1) {
-            log.warn("Incorrect table with grades is ignored.");
-            return;
-        }
-        Tr templateRow = gradeTableRows.get(templateRowIndex);
-        int rowToAddIndex = firstSectionRowIndex;
-        int gradeNumber = 1;
-
-        for (List<Grade> gradesSection : studentSummary.getGrades()) {
-            for (Grade grade : gradesSection) {
-                Map<String, String> replacements = SupplementTemplateFillService.getGradeDictionary(grade);
-                replacements.put("Number", String.format("%2d", gradeNumber++));
-                TemplateUtil.addRowToTable(tableWithGrades, templateRow, rowToAddIndex, replacements);
-                rowToAddIndex++;
-            }
-            //Need to skip header of the next section
-            rowToAddIndex++;
-        }
-        tableWithGrades.getContent().remove(templateRow);
-
-        if (tableWithGrades.getContent().size() < 50) {
-            R run = TemplateUtil.createR();
-            Br pageBreak = TemplateUtil.createPageBreak();
-            run.getContent().add(pageBreak);
-
-            Text pageBreakPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart())
-                    .stream().filter(text -> "#PossiblePageBreak".equals(text.getValue().trim())).findFirst().get();
-            P parentParagraph = (P) TemplateUtil.findParentNode(pageBreakPlaceholder, P.class);
-            parentParagraph.getContent().add(run);
-            template.getMainDocumentPart().getContent().remove(pageBreakPlaceholder);
-        }
-    }
-
-    private void fillProfessionalQualificationsTable(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        int templateRowIndex = 0;
-
-        List<ProfessionalQualification> professionalQualifications = getProfessionalQualifications(studentSummary);
-        if (professionalQualifications == null) {
-            return;
-        }
-        Tbl professionalQualificationsTable = TemplateUtil.findTable(template, "ProfCode");
-        if (professionalQualificationsTable == null) {
-            return;
-        }
-        Text tablePlaceholder = getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
-                .stream().filter(text -> "#ProfCode".equals(text.getValue().trim())).findFirst().get();
-
-        professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);
-
-        List<Tr> tableRows = TemplateUtil.getAllRowsFromTable(professionalQualificationsTable);
-        Tr templateRow = tableRows.get(templateRowIndex);
-        int rowToAddIndex = templateRowIndex + 1;
-
-        for (ProfessionalQualification qualification : professionalQualifications) {
-            Map<String, String> replacements = SupplementTemplateFillService.getProfessionalQualificationDictionary(qualification);
-            TemplateUtil.addRowToTable(professionalQualificationsTable, templateRow, rowToAddIndex, replacements);
-            rowToAddIndex++;
-        }
-        professionalQualificationsTable.getContent().remove(templateRow);
     }
 
     private List<ProfessionalQualification> getProfessionalQualifications(StudentSummary studentSummary) {
