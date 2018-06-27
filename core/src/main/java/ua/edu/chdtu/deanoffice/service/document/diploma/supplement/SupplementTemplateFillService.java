@@ -95,7 +95,15 @@ public class SupplementTemplateFillService {
         String certificationName = "";
         String certificationNameEng = "";
 
-        if (studentSummary.getGrades().get(3).stream().anyMatch(grade -> grade.getCourse().getCourseName().getName().contains("обота"))) {
+        if (studentSummary.getGrades().get(3).stream().allMatch(grade -> {
+            String courseNameUkr = grade.getCourse().getCourseName().getName();
+            return (!Strings.isNullOrEmpty(courseNameUkr)
+                    && (courseNameUkr.contains("іспит") || courseNameUkr.contains("екзамен")));
+        })
+                ) {
+            certificationName = "Державний іспит.";
+            certificationNameEng = "State exam.";
+        } else {
             String degreeName = "";
             String degreeNameEng = "";
             switch (studentSummary.getStudentGroup().getSpecialization().getDegree().getId()) {
@@ -119,9 +127,6 @@ public class SupplementTemplateFillService {
             }
             certificationName += "Кваліфікаційна робота " + degreeName + " на тему:";
             certificationNameEng += "Qualification work of a " + degreeNameEng + " degree on a subject:";
-        } else {
-            certificationName = "Державний іспит.";
-            certificationNameEng = "State exam.";
         }
         result.put("CertificationName", certificationName);
         result.put("CertificationNameEng", certificationNameEng);
