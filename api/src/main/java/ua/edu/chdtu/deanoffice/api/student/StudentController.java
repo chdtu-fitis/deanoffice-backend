@@ -71,6 +71,9 @@ public class StudentController {
     @PutMapping
     public ResponseEntity updateStudent(@RequestBody Student student) {
         try {
+            if (student.getId() == 0) {
+                ExceptionHandlerAdvice.handleException("Student`s id must not be null", StudentController.class);
+            }
             studentService.save(student);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
