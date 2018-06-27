@@ -15,7 +15,6 @@ import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -69,7 +68,6 @@ public class SupplementTemplateFillService {
 
         prepareTrainingDirectionPlaceholders(template, studentSummary);
 
-
         fillAcquiredCompetencies(template, studentSummary);
         fillTableWithGrades(template, studentSummary);
         fillProfessionalQualificationsTable(template, studentSummary);
@@ -97,7 +95,7 @@ public class SupplementTemplateFillService {
         String certificationName = "";
         String certificationNameEng = "";
 
-        if (!StudentSummary.getGradesByKnowledgeControlType(studentSummary.getGrades().get(3), Constants.ATTESTATION).isEmpty()) {
+        if (studentSummary.getGrades().get(3).stream().anyMatch(grade -> grade.getCourse().getCourseName().getName().contains("обота"))) {
             String degreeName = "";
             String degreeNameEng = "";
             switch (studentSummary.getStudentGroup().getSpecialization().getDegree().getId()) {
