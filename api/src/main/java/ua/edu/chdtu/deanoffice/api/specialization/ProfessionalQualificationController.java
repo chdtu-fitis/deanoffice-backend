@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
 import ua.edu.chdtu.deanoffice.service.ProfessionalQualificationService;
 import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
@@ -35,5 +37,18 @@ public class ProfessionalQualificationController {
     public ResponseEntity getQualifications() {
         List<ProfessionalQualification> professionalQualifications = professionalQualificationService.getAll();
         return ResponseEntity.ok(professionalQualifications);
+    }
+
+    @PostMapping("/specializations/{specialization-id}/professional-qualifications/{qualification-id}")
+    public ResponseEntity setQualificationForSpecialization(
+        @PathVariable("specialization-id") int specializationId,
+        @PathVariable("qualification-id") int qualificationId
+    ) {
+        try {
+            qualificationForSpecializationService.create(specializationId, qualificationId);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);
+        }
     }
 }
