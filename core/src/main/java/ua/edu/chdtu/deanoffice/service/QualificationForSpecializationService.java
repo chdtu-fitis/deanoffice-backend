@@ -20,8 +20,11 @@ public class QualificationForSpecializationService {
     }
 
     public ProfessionalQualification getLastQualification(int specializationsId) {
-        return qualificationForSpecializationRepository
-                .getLastQualificationBySpecializationId(specializationsId)
-                .getProfessionalQualification();
+        QualificationForSpecialization qualificationForSpecialization = qualificationForSpecializationRepository
+                .getLastQualificationBySpecializationId(specializationsId);
+        if (qualificationForSpecialization == null) {
+            return null;
+        }
+        return qualificationForSpecialization.getProfessionalQualification();
     }
 }
