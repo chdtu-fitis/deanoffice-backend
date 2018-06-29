@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
 import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 import ua.edu.chdtu.deanoffice.repository.QualificationForSpecializationRepository;
 
@@ -16,5 +17,11 @@ public class QualificationForSpecializationService {
 
     public List<QualificationForSpecialization> findAllBySpecializationIdAndYear(Integer specializationId) {
         return qualificationForSpecializationRepository.findAllBySpecializationIdAndYear(specializationId);
+    }
+
+    public ProfessionalQualification getLastQualification(int specializationsId) {
+        return qualificationForSpecializationRepository
+                .getLastQualificationBySpecializationId(specializationsId)
+                .getProfessionalQualification();
     }
 }
