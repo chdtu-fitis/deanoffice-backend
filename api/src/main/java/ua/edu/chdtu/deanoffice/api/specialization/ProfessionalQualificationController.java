@@ -5,13 +5,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
 import ua.edu.chdtu.deanoffice.service.ProfessionalQualificationService;
 import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
 
+import javax.swing.plaf.UIResource;
+import java.net.URI;
 import java.util.List;
+
+
+import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 public class ProfessionalQualificationController {
@@ -47,6 +54,26 @@ public class ProfessionalQualificationController {
         try {
             qualificationForSpecializationService.create(specializationId, qualificationId);
             return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);
+        }
+    }
+
+    @PostMapping("/professional-qualifications")
+    public ResponseEntity create(
+            @RequestBody ProfessionalQualification body,
+            @RequestParam(value = "and-set", required = false, defaultValue = "false") boolean andSet,
+            @RequestParam(value = "specialization-id", required = false) int specializationId
+    ) {
+        try {
+            ProfessionalQualification professionalQualification = professionalQualificationService.create(body);
+
+            if (andSet) {
+                setQualificationForSpecialization(specializationId, professionalQualification.getId());
+            }
+
+            URI location = getNewResourceLocation(professionalQualification.getId());
+            return ResponseEntity.created(location).body(professionalQualification);
         } catch (Exception exception) {
             return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);
         }
