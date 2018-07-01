@@ -26,6 +26,7 @@ public class StudentDegree extends BaseEntity {
     private String diplomaNumber;
     @Temporal(TemporalType.DATE)
     private Date diplomaDate;
+    private boolean diplomaWithHonours;
     @Enumerated(value = EnumType.STRING)
     private Payment payment = Payment.BUDGET;
     @Temporal(TemporalType.DATE)
