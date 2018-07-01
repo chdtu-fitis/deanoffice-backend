@@ -369,6 +369,10 @@ public class SupplementTemplateFillService {
         result.put("DiplDate", studentDegree.getDiplomaDate() == null ? "ДАТА ДИПЛ"
                 : simpleDateFormat.format(studentDegree.getDiplomaDate()));
 
+        if (studentDegree.isDiplomaWithHonours()) {
+            result.put("DiplomaHonours", "З ВІДЗНАКОЮ");
+        }
+
         result.put("CurrentYear", String.format("%4d", Calendar.getInstance().get(Calendar.YEAR)));
 
         result.put("PreviousDiplomaName", studentDegree.getPreviousDiplomaType().getNameUkr());
