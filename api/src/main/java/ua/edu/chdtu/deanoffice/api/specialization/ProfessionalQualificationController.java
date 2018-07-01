@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.QualificationEventsDTO;
 import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
 import ua.edu.chdtu.deanoffice.service.ProfessionalQualificationService;
 import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
@@ -32,10 +33,11 @@ public class ProfessionalQualificationController {
         this.professionalQualificationService = professionalQualificationService;
     }
 
-    @GetMapping("/specializations/{specialization-id}/professional-qualification")
-    public ResponseEntity getProfessionalQualificationForSpecialization(@PathVariable("specialization-id") int specializationsId) {
-        ProfessionalQualification professionalQualification = qualificationForSpecializationService.getLastQualification(specializationsId);
-        return ResponseEntity.ok(professionalQualification);
+    @GetMapping("/specializations/{specialization-id}/professional-qualifications")
+    public ResponseEntity getQualificationsForSpecialization(@PathVariable("specialization-id") int specializationsId) {
+        List<ProfessionalQualification> professionalQualifications = professionalQualificationService
+                .getAllBySpecializationAndYear(specializationsId);
+        return ResponseEntity.ok(professionalQualifications);
     }
 
     @GetMapping("/professional-qualifications")
@@ -44,13 +46,13 @@ public class ProfessionalQualificationController {
         return ResponseEntity.ok(professionalQualifications);
     }
 
-    @PostMapping("/specializations/{specialization-id}/professional-qualifications/{qualification-id}")
+    @PostMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity setQualificationForSpecialization(
         @PathVariable("specialization-id") int specializationId,
-        @PathVariable("qualification-id") int qualificationId
+        @RequestBody QualificationEventsDTO events
     ) {
         try {
-            qualificationForSpecializationService.create(specializationId, qualificationId);
+            qualificationForSpecializationService.createAll(specializationId, events.getSelected());
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);

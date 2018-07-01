@@ -6,7 +6,12 @@ import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.repository.QualificationForSpecializationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+
+import static java.util.Arrays.asList;
 
 @Service
 public class QualificationForSpecializationService {
@@ -25,28 +30,28 @@ public class QualificationForSpecializationService {
         return qualificationForSpecializationRepository.findAllBySpecializationIdAndYear(specializationId);
     }
 
-    public ProfessionalQualification getLastQualification(int specializationsId) {
-        QualificationForSpecialization qualificationForSpecialization = qualificationForSpecializationRepository
-                .getLastQualificationBySpecializationId(specializationsId);
-        if (qualificationForSpecialization == null) {
-            return null;
-        }
-        return qualificationForSpecialization.getProfessionalQualification();
-    }
-
-    public void create(int specializationId, int qualificationId) {
-        QualificationForSpecialization qualificationForSpecialization = new QualificationForSpecialization();
+    public void createAll(int specializationId, List<Integer> selected) {
+        QualificationForSpecialization baseQualificationForSpecialization = new QualificationForSpecialization();
 
         Specialization specialization = new Specialization();
         specialization.setId(specializationId);
-        qualificationForSpecialization.setSpecialization(specialization);
+        baseQualificationForSpecialization.setSpecialization(specialization);
 
+        baseQualificationForSpecialization.setYear(currentYearService.getYear());
+
+        List<QualificationForSpecialization> qualificationForSpecializations = selected.stream()
+                .map(qualificationId -> create(baseQualificationForSpecialization, qualificationId))
+                .collect(Collectors.toList());
+        this.qualificationForSpecializationRepository.save(qualificationForSpecializations);
+    }
+
+    public QualificationForSpecialization create(
+            QualificationForSpecialization baseQualificationForSpecialization, int qualificationId
+    ) {
+        QualificationForSpecialization qualificationForSpecialization = baseQualificationForSpecialization.clone();
         ProfessionalQualification professionalQualification = new ProfessionalQualification();
         professionalQualification.setId(qualificationId);
         qualificationForSpecialization.setProfessionalQualification(professionalQualification);
-
-        qualificationForSpecialization.setYear(currentYearService.getYear());
-
-        this.qualificationForSpecializationRepository.save(qualificationForSpecialization);
+        return qualificationForSpecialization;
     }
 }

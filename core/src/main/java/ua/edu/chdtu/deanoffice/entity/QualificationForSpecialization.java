@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.util.Prototype;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,8 +21,7 @@ import java.util.Date;
 @Table(name = "qualifications_for_specializations", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"professional_qualification_id", "specialization_id", "year"})
 })
-public class QualificationForSpecialization extends BaseEntity {
-
+public class QualificationForSpecialization extends BaseEntity implements Prototype<QualificationForSpecialization> {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Specialization specialization;
@@ -30,4 +30,14 @@ public class QualificationForSpecialization extends BaseEntity {
     private ProfessionalQualification professionalQualification;
     @Column(nullable = false, name = "year")
     private Integer year;
+
+    @Override
+    public QualificationForSpecialization clone() {
+        QualificationForSpecialization qualificationForSpecialization = new QualificationForSpecialization();
+        qualificationForSpecialization.setSpecialization(specialization);
+        qualificationForSpecialization.setYear(year);
+        qualificationForSpecialization.setProfessionalQualification(professionalQualification);
+        qualificationForSpecialization.setId(getId());
+        return qualificationForSpecialization;
+    }
 }

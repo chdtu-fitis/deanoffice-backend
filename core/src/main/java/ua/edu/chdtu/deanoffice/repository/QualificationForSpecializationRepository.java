@@ -21,11 +21,4 @@ public interface QualificationForSpecializationRepository extends JpaRepository<
             " order by year desc" +
             " limit 1)", nativeQuery = true)
     List<QualificationForSpecialization> findAllBySpecializationIdAndYear(@Param("specializationId") Integer specializationId);
-
-    @Query(value = "select qfs.* from qualifications_for_specializations as qfs " +
-            "inner join professional_qualification q on qfs.professional_qualification_id = q.id " +
-            "where qfs.specialization_id = :specialization_id " +
-            "order by qfs.year desc " +
-            "limit 1", nativeQuery = true)
-    QualificationForSpecialization getLastQualificationBySpecializationId(@Param("specialization_id") int specializationsId);
 }
