@@ -81,7 +81,7 @@ public class SupplementTemplateFillService {
 
     private void prepareTrainingDirectionPlaceholders(WordprocessingMLPackage template, StudentSummary studentSummary) {
         Map<String, String> replacements = new HashMap<>();
-        if (!hasDirectionOfTraining(studentSummary.getStudentDegree())) {
+        if (hasDirectionOfTraining(studentSummary.getStudentDegree())) {
             insertSpecializationPlaceholders(template);
         }
         replacements.put("TrainingDirectionType", "спеціальність");
@@ -557,7 +557,10 @@ public class SupplementTemplateFillService {
     }
 
     private boolean hasDirectionOfTraining(StudentDegree studentDegree) {
-        return Strings.isNullOrEmpty(studentDegree.getStudentGroup().getSpecialization().getName());
+        if (!Strings.isNullOrEmpty(studentDegree.getStudentGroup().getSpecialization().getName()))
+            if (!studentDegree.getStudentGroup().getSpecialization().getSpeciality().getCode().contains("."))
+                return true;
+        return false;
     }
 
     private void fillCompetenciesTable(WordprocessingMLPackage template, AcquiredCompetencies competencies, String placeholder) {
