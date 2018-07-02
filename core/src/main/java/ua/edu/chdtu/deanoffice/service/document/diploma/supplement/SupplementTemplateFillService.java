@@ -371,6 +371,7 @@ public class SupplementTemplateFillService {
 
         if (studentDegree.isDiplomaWithHonours()) {
             result.put("DiplomaHonours", "З ВІДЗНАКОЮ");
+            result.put("DiplomaHonoursEng", "WITH HONOURS");
         }
 
         result.put("CurrentYear", String.format("%4d", Calendar.getInstance().get(Calendar.YEAR)));
