@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.repository.QualificationForSpecializationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,11 +62,20 @@ public class QualificationForSpecializationService {
     }
 
     private boolean isCurrentYear(List<QualificationForSpecialization> qualificationForSpecializations) {
-        int currentYear = currentYearService.getYear();
-        List<Boolean> isCurrentYear = qualificationForSpecializations.stream()
-                .map(QualificationForSpecialization::getYear)
-                .map(year -> year == currentYear)
-                .collect(Collectors.toList());
-        return isCurrentYear.stream().reduce((aBoolean, aBoolean2) -> aBoolean && aBoolean2).get();
+        if (!qualificationForSpecializations.isEmpty()) {
+            int currentYear = currentYearService.getYear();
+            List<Boolean> isCurrentYear = qualificationForSpecializations.stream()
+                    .map(QualificationForSpecialization::getYear)
+                    .map(year -> year == currentYear)
+                    .collect(Collectors.toList());
+            return isCurrentYear.stream().reduce((aBoolean, aBoolean2) -> aBoolean && aBoolean2).get();
+        }
+        return true;
+    }
+
+    public boolean canEdit(int specializationsId) {
+        List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationRepository
+                .findAllBySpecializationIdAndYear(specializationsId);
+        return isCurrentYear(qualificationForSpecializations);
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.QualificationEventsDTO;
@@ -35,7 +37,16 @@ public class ProfessionalQualificationController {
         this.professionalQualificationService = professionalQualificationService;
     }
 
-    @GetMapping("/specializations/{specialization-id}/professional-qualifications")
+    @RequestMapping(method = RequestMethod.HEAD, value = "/specializations/{specialization-id}/professional-qualifications")
+    public ResponseEntity canEdit(@PathVariable("specialization-id") int specializationsId) {
+        if (qualificationForSpecializationService.canEdit(specializationsId)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+
+        @GetMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity getQualificationsForSpecialization(@PathVariable("specialization-id") int specializationsId) {
         List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationService
                 .findAllBySpecializationIdAndYear(specializationsId);
@@ -54,8 +65,12 @@ public class ProfessionalQualificationController {
         @RequestBody QualificationEventsDTO events
     ) {
         try {
-            qualificationForSpecializationService.createAll(specializationId, events.getSelected());
-            qualificationForSpecializationService.deleteAll(events.getDeleted());
+            if (!events.getSelected().isEmpty()) {
+                qualificationForSpecializationService.createAll(specializationId, events.getSelected());
+            }
+            if (!events.getDeleted().isEmpty()) {
+                qualificationForSpecializationService.deleteAll(events.getDeleted());
+            }
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);
