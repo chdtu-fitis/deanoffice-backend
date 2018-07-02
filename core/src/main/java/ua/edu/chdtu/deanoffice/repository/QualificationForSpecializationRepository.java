@@ -21,4 +21,8 @@ public interface QualificationForSpecializationRepository extends JpaRepository<
             " order by year desc" +
             " limit 1)", nativeQuery = true)
     List<QualificationForSpecialization> findAllBySpecializationIdAndYear(@Param("specializationId") Integer specializationId);
+
+    @Query("select qfs from QualificationForSpecialization qfs " +
+            "where qfs.id in :ids")
+    List<QualificationForSpecialization> findAllByIds(@Param("ids") List<Integer> deleted);
 }

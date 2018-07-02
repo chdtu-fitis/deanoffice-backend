@@ -6,12 +6,8 @@ import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.repository.QualificationForSpecializationRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-
-import static java.util.Arrays.asList;
 
 @Service
 public class QualificationForSpecializationService {
@@ -53,5 +49,23 @@ public class QualificationForSpecializationService {
         professionalQualification.setId(qualificationId);
         qualificationForSpecialization.setProfessionalQualification(professionalQualification);
         return qualificationForSpecialization;
+    }
+
+    public void deleteAll(List<Integer> deleted) throws Exception {
+        List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationRepository.findAllByIds(deleted);
+        if (isCurrentYear(qualificationForSpecializations)) {
+            qualificationForSpecializationRepository.delete(qualificationForSpecializations);
+        } else {
+            throw new Exception("You can delete qualification for specialization only for current year (" + currentYearService.get() + ")");
+        }
+    }
+
+    private boolean isCurrentYear(List<QualificationForSpecialization> qualificationForSpecializations) {
+        int currentYear = currentYearService.getYear();
+        List<Boolean> isCurrentYear = qualificationForSpecializations.stream()
+                .map(QualificationForSpecialization::getYear)
+                .map(year -> year == currentYear)
+                .collect(Collectors.toList());
+        return isCurrentYear.stream().reduce((aBoolean, aBoolean2) -> aBoolean && aBoolean2).get();
     }
 }
