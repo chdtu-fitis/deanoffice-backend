@@ -24,7 +24,7 @@ public class ProfessionalQualificationService {
     }
 
     public List<ProfessionalQualification> getAll() {
-        return professionalQualificationRepository.findAll();
+        return professionalQualificationRepository.findAllByOrderByName();
     }
 
     public ProfessionalQualification create(ProfessionalQualification body) {

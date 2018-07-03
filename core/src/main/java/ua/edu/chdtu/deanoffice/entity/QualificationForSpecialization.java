@@ -7,10 +7,12 @@ import ua.edu.chdtu.deanoffice.util.Prototype;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Getter
 @Setter
 @Entity
+@Table(name="qualifications_for_specializations")
 public class QualificationForSpecialization extends BaseEntity implements Prototype<QualificationForSpecialization> {
     @ManyToOne
     private Specialization specialization;
