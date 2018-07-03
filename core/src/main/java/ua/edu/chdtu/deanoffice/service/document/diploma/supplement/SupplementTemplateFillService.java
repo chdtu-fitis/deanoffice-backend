@@ -416,9 +416,10 @@ public class SupplementTemplateFillService {
 
         Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
         if (monthsOfStudying != 0) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
             result.append(" ");
-            switch (studentGroup.getStudyYears().intValue()) {
+            result.append(String.format("%1d", monthsOfStudying.intValue()));
+            result.append(" ");
+            switch (monthsOfStudying.intValue()) {
                 case 1:
                     result.append("місяць");
                     break;
@@ -450,7 +451,8 @@ public class SupplementTemplateFillService {
 
         Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
         if (monthsOfStudying != 0) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+            result.append(" ");
+            result.append(String.format("%1d", monthsOfStudying.intValue()));
             result.append(" ");
             result.append(Math.round(monthsOfStudying) == 1 ? "month" : "months");
         }
