@@ -383,7 +383,7 @@ public class SupplementTemplateFillService {
         result.put("PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber());
         if (studentDegree.getPreviousDiplomaDate() != null) {
             result.put("PreviousDiplomaDate", simpleDateFormat.format(studentDegree.getPreviousDiplomaDate()) + " р.");
-            DateFormat englishDateFormat = SimpleDateFormat.getDateInstance(DateFormat.DEFAULT, Locale.ENGLISH);
+            DateFormat englishDateFormat = SimpleDateFormat.getDateInstance(DateFormat.LONG, Locale.ENGLISH);
             result.put("PreviousDiplomaDateEng", englishDateFormat.format(studentDegree.getPreviousDiplomaDate()));
         }
 
