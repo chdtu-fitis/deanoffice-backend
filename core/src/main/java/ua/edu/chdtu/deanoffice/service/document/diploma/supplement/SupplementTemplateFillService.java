@@ -81,7 +81,7 @@ public class SupplementTemplateFillService {
 
     private void prepareTrainingDirectionPlaceholders(WordprocessingMLPackage template, StudentSummary studentSummary) {
         Map<String, String> replacements = new HashMap<>();
-        if (!hasDirectionOfTraining(studentSummary.getStudentDegree())) {
+        if (hasDirectionOfTraining(studentSummary.getStudentDegree())) {
             insertSpecializationPlaceholders(template);
         }
         replacements.put("TrainingDirectionType", "спеціальність");
@@ -371,6 +371,7 @@ public class SupplementTemplateFillService {
 
         if (studentDegree.isDiplomaWithHonours()) {
             result.put("DiplomaHonours", "З ВІДЗНАКОЮ");
+            result.put("DiplomaHonoursEng", "WITH HONOURS");
         }
 
         result.put("CurrentYear", String.format("%4d", Calendar.getInstance().get(Calendar.YEAR)));
@@ -415,9 +416,10 @@ public class SupplementTemplateFillService {
 
         Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
         if (monthsOfStudying != 0) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
             result.append(" ");
-            switch (studentGroup.getStudyYears().intValue()) {
+            result.append(String.format("%1d", monthsOfStudying.intValue()));
+            result.append(" ");
+            switch (monthsOfStudying.intValue()) {
                 case 1:
                     result.append("місяць");
                     break;
@@ -449,7 +451,8 @@ public class SupplementTemplateFillService {
 
         Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
         if (monthsOfStudying != 0) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+            result.append(" ");
+            result.append(String.format("%1d", monthsOfStudying.intValue()));
             result.append(" ");
             result.append(Math.round(monthsOfStudying) == 1 ? "month" : "months");
         }
@@ -556,7 +559,10 @@ public class SupplementTemplateFillService {
     }
 
     private boolean hasDirectionOfTraining(StudentDegree studentDegree) {
-        return Strings.isNullOrEmpty(studentDegree.getStudentGroup().getSpecialization().getName());
+        if (!Strings.isNullOrEmpty(studentDegree.getStudentGroup().getSpecialization().getName()))
+            if (!studentDegree.getStudentGroup().getSpecialization().getSpeciality().getCode().contains("."))
+                return true;
+        return false;
     }
 
     private void fillCompetenciesTable(WordprocessingMLPackage template, AcquiredCompetencies competencies, String placeholder) {
