@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
 import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
 
 import java.util.List;
@@ -21,4 +22,7 @@ public interface QualificationForSpecializationRepository extends JpaRepository<
             " limit 1)", nativeQuery = true)
     List<QualificationForSpecialization> findAllBySpecializationIdAndYear(@Param("specializationId") Integer specializationId);
 
+    @Query("select qfs from QualificationForSpecialization qfs " +
+            "where qfs.id in :ids")
+    List<QualificationForSpecialization> findAllByIds(@Param("ids") List<Integer> deleted);
 }
