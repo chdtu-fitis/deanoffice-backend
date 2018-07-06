@@ -1,7 +1,7 @@
 package ua.edu.chdtu.deanoffice.entity;
 
 public enum EducationDocument {
-    SECONDARY_SCHOOL_CERTIFICATE(1, "Атестат про повну середню освіту", "Certificate of Full Secondary Education"),
+    SECONDARY_SCHOOL_CERTIFICATE(1, "Атестат про повну загальну середню освіту", "Certificate of Full Secondary Education"),
     JUNIOR_BACHELOR_DIPLOMA(2, "Диплом молодшого спеціаліста", "Junior Specialist diploma"),
     BACHELOR_DIPLOMA(3, "Диплом бакалавра", "Bachelor diploma"),
     MASTER_DIPLOMA(4, "Диплом магістра", "Master diploma"),
