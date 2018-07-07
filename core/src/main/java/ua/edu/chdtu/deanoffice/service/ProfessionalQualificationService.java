@@ -11,16 +11,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProfessionalQualificationService {
-    private final QualificationForSpecializationService qualificationForSpecializationService;
     private ProfessionalQualificationRepository professionalQualificationRepository;
 
     @Autowired
     public ProfessionalQualificationService(
-            ProfessionalQualificationRepository professionalQualificationRepository,
-            QualificationForSpecializationService qualificationForSpecializationService
+            ProfessionalQualificationRepository professionalQualificationRepository
     ) {
         this.professionalQualificationRepository = professionalQualificationRepository;
-        this.qualificationForSpecializationService = qualificationForSpecializationService;
     }
 
     public List<ProfessionalQualification> getAll() {
@@ -29,11 +26,5 @@ public class ProfessionalQualificationService {
 
     public ProfessionalQualification create(ProfessionalQualification body) {
         return professionalQualificationRepository.save(body);
-    }
-
-    public List<ProfessionalQualification> getAllBySpecializationAndYear(int specializationsId) {
-        return qualificationForSpecializationService.findAllBySpecializationIdAndYear(specializationsId).stream()
-                .map(QualificationForSpecialization::getProfessionalQualification)
-                .collect(Collectors.toList());
     }
 }

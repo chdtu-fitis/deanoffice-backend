@@ -46,7 +46,7 @@ public class ProfessionalQualificationController {
     }
 
 
-        @GetMapping("/specializations/{specialization-id}/professional-qualifications")
+    @GetMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity getQualificationsForSpecialization(@PathVariable("specialization-id") int specializationsId) {
         List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationService
                 .findAllBySpecializationIdAndYear(specializationsId);
