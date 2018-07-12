@@ -12,4 +12,6 @@ public class StudentDegreeFullNameDTO {
     private int id;
     @JsonView(StudentGroupView.WithStudents.class)
     private PersonFullNameDTO student;
+    @JsonView(StudentGroupView.WithStudents.class)
+    private String recordBookNumber;
 }
