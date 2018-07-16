@@ -18,14 +18,14 @@ import java.io.File;
 import java.io.IOException;
 
 @Controller
-@RequestMapping("/documents/academic/reference")
-public class AcademicReferenceController extends DocumentResponseController {
+@RequestMapping("/documents/academic-certificate")
+public class AcademicCertificateController extends DocumentResponseController {
 
     private AcademicReferenceService academicReferenceService;
 
     private FacultyService facultyService;
 
-    public AcademicReferenceController(AcademicReferenceService academicReferenceService, FacultyService facultyService) {
+    public AcademicCertificateController(AcademicReferenceService academicReferenceService, FacultyService facultyService) {
         this.academicReferenceService = academicReferenceService;
         this.facultyService = facultyService;
     }
@@ -43,6 +43,6 @@ public class AcademicReferenceController extends DocumentResponseController {
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, AcademicReferenceController.class);
+        return ExceptionHandlerAdvice.handleException(exception, AcademicCertificateController.class);
     }
 }
