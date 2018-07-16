@@ -15,7 +15,7 @@ import java.io.File;
 import java.util.Arrays;
 
 @RestController
-@RequestMapping("/documents/personalstatement")
+@RequestMapping("/documents/personal-file-grades-statement")
 public class PersonalStatementController extends DocumentResponseController {
 
     private PersonalStatementService personalStatementService;
