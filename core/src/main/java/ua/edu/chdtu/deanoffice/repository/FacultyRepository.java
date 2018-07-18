@@ -19,7 +19,7 @@ public interface FacultyRepository extends JpaRepository<Faculty, Integer> {
             "inner join specialization s ON s.id = sg.specialization_id " +
             "inner join faculty f ON f.id = s.faculty_id " +
             "WHERE se.id = :studentExpelId", nativeQuery = true)
-    Integer findIdByStudentExpel(@Param("studentDegreeId") Integer studentExpelId);
+    Integer findIdByStudentExpel(@Param("studentExpelId") Integer studentExpelId);
 
     @Query(value = "select f.id from student_group sg " +
             "inner join specialization s ON s.id = sg.specialization_id " +

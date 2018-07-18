@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.GradeService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -44,12 +45,13 @@ public class AcademicReferenceService {
     private GradeService gradeService;
 
     @Autowired
-    private StudentDegreeService studentDegreeService;
+    private StudentExpelService studentExpelService;
 
-    public File formDocument(int studentDegreeId) throws Docx4JException, IOException {
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+    public File formDocument(int studentExpelId) throws Docx4JException, IOException {
+        StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
+        StudentDegree studentDegree = studentExpel.getStudentDegree();
         Student student = studentDegree.getStudent();
-        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegreeId);
+        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentExpelId);
         StudentSummaryForAcademicReference studentSummary = new StudentSummaryForAcademicReference(studentDegree, grades);
         WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE, studentSummary);
         String fileName = transliterate(student.getName() + " " + student.getSurname());
