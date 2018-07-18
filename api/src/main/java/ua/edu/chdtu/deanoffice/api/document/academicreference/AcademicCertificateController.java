@@ -30,7 +30,7 @@ public class AcademicCertificateController extends DocumentResponseController {
         this.facultyService = facultyService;
     }
 
-    @GetMapping("/degrees/{studentDegreeId}")
+    @GetMapping("/{studentDegreeId}")
     public ResponseEntity<Resource> generateDocumentForStudent(@PathVariable Integer studentDegreeId,
                                                                @CurrentUser ApplicationUser user) throws IOException, Docx4JException {
         try {
