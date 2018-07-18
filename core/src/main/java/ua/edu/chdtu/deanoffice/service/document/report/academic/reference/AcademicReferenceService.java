@@ -28,7 +28,7 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 @Service
 public class AcademicReferenceService {
 
-    private static final String TEMPLATE = TEMPLATES_PATH + "AcademicReference.docx";
+    private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
 
     private static final int INDEX_OF_TABLE_WITH_GRADES = 10;
 
@@ -83,9 +83,13 @@ public class AcademicReferenceService {
         String code = studentDegree.getSpecialization().getSpeciality().getCode();
         result.put("specialityUkr", studentDegree.getSpecialization().getSpeciality().getName() + " – " + code);
         result.put("specialityEng", studentDegree.getSpecialization().getSpeciality().getNameEng() + " – " + code);
-        result.put("educationalProgramUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
-        result.put("educationalProgramEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
+        result.put("individualNumber",studentDegree.getSupplementNumber());
+        result.put("dean", studentDegree.getSpecialization().getDepartment().getFaculty().getDean());
+        result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
+        result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
+        result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
+        result.put("programHeadInfoEng", studentDegree.getSpecialization().getEducationalProgramHeadInfoEng());
         return result;
     }
 
