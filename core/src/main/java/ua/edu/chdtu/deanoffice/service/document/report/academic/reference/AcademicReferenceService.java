@@ -132,7 +132,7 @@ public class AcademicReferenceService {
             semesterDisplay = "ІI";
         }
         String ukrainianPart = coursePart + " курс" + " " + semesterDisplay + " семестр";
-        String englishPart = coursePart + " course" + " " + semesterDisplay + " semester";
+        String englishPart = coursePart + " year" + " " + semesterDisplay + " semester";
         result.put("n", ukrainianPart + DOCUMENT_DELIMITER + englishPart);
         return result;
     }
@@ -140,7 +140,7 @@ public class AcademicReferenceService {
     private Map<String, String> getCourseDictionary(Grade grade) {
         HashMap<String, String> result = new HashMap<>();
         result.put("s", grade.getCourse().getCourseName().getName() + DOCUMENT_DELIMITER + grade.getCourse().getCourseName().getNameEng());
-        result.put("c", grade.getCourse().getCredits().toString()+" ("+grade.getCourse().getHours()+"h/r)");
+        result.put("c", grade.getCourse().getCredits().toString()+" ("+grade.getCourse().getHours()+"г/h)");
         result.put("g", getGradeDisplay(grade));
         return result;
     }
@@ -150,7 +150,7 @@ public class AcademicReferenceService {
         result += grade.getPoints() + DOCUMENT_DELIMITER;
         result += grade.getEcts() + DOCUMENT_DELIMITER;
         result += grade.getEcts().getNationalGradeUkr(grade) + DOCUMENT_DELIMITER;
-        result += grade.getEcts().getNationalGradeEng(grade) + DOCUMENT_DELIMITER;
+        result += grade.getEcts().getNationalGradeEng(grade);
         return result;
     }
 
