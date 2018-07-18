@@ -17,6 +17,11 @@ public class FacultyService {
         compareFacultyIds(facultyId, realFacultyId);
     }
 
+    public void checkStudentExpel(Integer studentExpelId, Integer facultyId) throws Exception {
+        Integer realFacultyId = facultyRepository.findIdByStudentExpel(studentExpelId);
+        compareFacultyIds(facultyId, realFacultyId);
+    }
+
     public void checkGroup(Integer studentGroupId, Integer facultyId) throws Exception {
         Integer realFacultyId = facultyRepository.findIdByGroup(studentGroupId);
         compareFacultyIds(facultyId, realFacultyId);

@@ -30,12 +30,12 @@ public class AcademicCertificateController extends DocumentResponseController {
         this.facultyService = facultyService;
     }
 
-    @GetMapping("/{studentDegreeId}")
-    public ResponseEntity<Resource> generateDocumentForStudent(@PathVariable Integer studentDegreeId,
+    @GetMapping("/{studentExpelId}")
+    public ResponseEntity<Resource> generateDocumentForStudent(@PathVariable Integer studentExpelId,
                                                                @CurrentUser ApplicationUser user) throws IOException, Docx4JException {
         try {
-            facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
-            File academicReferenceReport = academicReferenceService.formDocument(studentDegreeId);
+            facultyService.checkStudentExpel(studentExpelId, user.getFaculty().getId());
+            File academicReferenceReport = academicReferenceService.formDocument(studentExpelId);
             return buildDocumentResponseEntity(academicReferenceReport, academicReferenceReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
