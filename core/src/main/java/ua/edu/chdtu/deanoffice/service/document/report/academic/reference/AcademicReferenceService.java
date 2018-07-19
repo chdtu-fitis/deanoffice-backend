@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,23 +52,23 @@ public class AcademicReferenceService {
         StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
         StudentDegree studentDegree = studentExpel.getStudentDegree();
         Student student = studentDegree.getStudent();
-        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentExpelId);
+        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
         StudentSummaryForAcademicReference studentSummary = new StudentSummaryForAcademicReference(studentDegree, grades);
-        WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE, studentSummary);
+        WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE, studentSummary, studentExpel);
         String fileName = transliterate(student.getName() + " " + student.getSurname());
         return documentIOService.saveDocumentToTemp(resultTemplate, fileName, FileFormatEnum.DOCX);
     }
 
-    private WordprocessingMLPackage formDocument(String templateFilepath, StudentSummaryForAcademicReference studentSummary)
+    private WordprocessingMLPackage formDocument(String templateFilepath, StudentSummaryForAcademicReference studentSummary, StudentExpel studentExpel)
             throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
         prepareTable(template, studentSummary);
-        replaceTextPlaceholdersInTemplate(template, getStudentInfoDictionary(studentSummary));
+        replaceTextPlaceholdersInTemplate(template, getStudentInfoDictionary(studentSummary, studentExpel));
         return template;
     }
 
 
-    private HashMap<String, String> getStudentInfoDictionary(StudentSummaryForAcademicReference studentSummary) {
+    private HashMap<String, String> getStudentInfoDictionary(StudentSummaryForAcademicReference studentSummary, StudentExpel studentExpel) {
         HashMap<String, String> result = new HashMap();
         StudentDegree studentDegree = studentSummary.getStudentDegree();
         Student student = studentDegree.getStudent();
@@ -79,7 +80,6 @@ public class AcademicReferenceService {
             studentNameEng = student.getNameEng() + " " + student.getSurnameEng();
         }
         result.put("studentNameEng", studentNameEng);
-        result.put("startLearning", formatDate(studentDegree.getAdmissionDate()));
         result.put("facultyNameUkr", studentDegree.getSpecialization().getDepartment().getFaculty().getName());
         result.put("facultyNameEng", studentDegree.getSpecialization().getDepartment().getFaculty().getNameEng());
         String code = studentDegree.getSpecialization().getSpeciality().getCode();
@@ -87,11 +87,18 @@ public class AcademicReferenceService {
         result.put("specialityEng", studentDegree.getSpecialization().getSpeciality().getNameEng() + " – " + code);
         result.put("birthDate", formatDate(student.getBirthDate()));
         result.put("individualNumber",studentDegree.getSupplementNumber());
-        result.put("dean", studentDegree.getSpecialization().getDepartment().getFaculty().getDean());
+        result.put("dean", PersonUtil.makeInitials(studentDegree.getSpecialization().getDepartment().getFaculty().getDean()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
         result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
         result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
         result.put("programHeadInfoEng", studentDegree.getSpecialization().getEducationalProgramHeadInfoEng());
+
+        result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
+        result.put("endStudy", formatDate(studentExpel.getExpelDate()));
+        result.put("expelReasonUkr", studentExpel.getOrderReason().getName());
+        result.put("orderUkr", studentExpel.getOrderNumber()+" від "+formatDate(studentExpel.getOrderDate()));
+        result.put("orderEng", studentExpel.getOrderNumber()+", "+formatDate(studentExpel.getOrderDate()));
+        result.put("today", formatDate(new Date()));
         return result;
     }
 
