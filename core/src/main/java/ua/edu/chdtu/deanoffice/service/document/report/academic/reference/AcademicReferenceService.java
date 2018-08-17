@@ -90,6 +90,7 @@ public class AcademicReferenceService {
         result.put("birthDate", formatDate(student.getBirthDate()));
         result.put("individualNumber",studentDegree.getSupplementNumber());
         result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDean()));
+        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDeanEng()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
         result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
         result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
@@ -98,6 +99,7 @@ public class AcademicReferenceService {
         result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
         result.put("endStudy", formatDate(studentExpel.getExpelDate()));
         result.put("expelReasonUkr", studentExpel.getOrderReason().getName());
+        result.put("expelReasonEng", studentExpel.getOrderReason().getNameEng());
         result.put("orderUkr", " від "+formatDate(studentExpel.getOrderDate())+" № "+studentExpel.getOrderNumber());
         result.put("orderEng", formatDate(studentExpel.getOrderDate())+", № "+studentExpel.getOrderNumber());
         result.put("today", formatDate(new Date()));

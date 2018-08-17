@@ -11,4 +11,5 @@ import javax.persistence.Entity;
 public class Faculty extends NameWithEngAndActiveEntity {
     private String abbr;
     private String dean;
+    private String deanEng;
 }
