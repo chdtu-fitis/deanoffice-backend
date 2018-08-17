@@ -13,7 +13,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitials;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
 
 
 public class ExamReportBaseService {
@@ -56,7 +56,7 @@ public class ExamReportBaseService {
         Speciality speciality = studentGroup.getSpecialization().getSpeciality();
         result.put("Specialization", speciality.getCode() + " " + speciality.getName());
         result.put("FacultyAbbr", studentGroup.getSpecialization().getDepartment().getFaculty().getAbbr());
-        result.put("DeanInitials", makeInitials(studentGroup.getSpecialization().getDepartment().getFaculty().getDean()));
+        result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getDepartment().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 

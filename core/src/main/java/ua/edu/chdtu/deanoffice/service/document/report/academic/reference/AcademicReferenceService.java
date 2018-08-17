@@ -77,17 +77,19 @@ public class AcademicReferenceService {
         if (student.getNameEng() == null || student.getSurnameEng() == null) {
             studentNameEng = transliterate(student.getName() + " " + student.getSurname());
         } else {
-            studentNameEng = student.getNameEng() + " " + student.getSurnameEng();
+            studentNameEng = student.getSurnameEng() + " " + student.getNameEng();
         }
         result.put("studentNameEng", studentNameEng);
         result.put("facultyNameUkr", studentDegree.getSpecialization().getDepartment().getFaculty().getName());
         result.put("facultyNameEng", studentDegree.getSpecialization().getDepartment().getFaculty().getNameEng());
         String code = studentDegree.getSpecialization().getSpeciality().getCode();
-        result.put("specialityUkr", studentDegree.getSpecialization().getSpeciality().getName() + " – " + code);
-        result.put("specialityEng", studentDegree.getSpecialization().getSpeciality().getNameEng() + " – " + code);
+        result.put("specialityUkr", code + " " + studentDegree.getSpecialization().getSpeciality().getName());
+        result.put("specialityEng", code + " " + studentDegree.getSpecialization().getSpeciality().getNameEng());
+        result.put("educationalProgramUkr", studentDegree.getSpecialization().getName());
+        result.put("educationalProgramEng", studentDegree.getSpecialization().getNameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
         result.put("individualNumber",studentDegree.getSupplementNumber());
-        result.put("dean", PersonUtil.makeInitials(studentDegree.getSpecialization().getDepartment().getFaculty().getDean()));
+        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDean()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
         result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
         result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
@@ -96,8 +98,8 @@ public class AcademicReferenceService {
         result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
         result.put("endStudy", formatDate(studentExpel.getExpelDate()));
         result.put("expelReasonUkr", studentExpel.getOrderReason().getName());
-        result.put("orderUkr", studentExpel.getOrderNumber()+" від "+formatDate(studentExpel.getOrderDate()));
-        result.put("orderEng", studentExpel.getOrderNumber()+", "+formatDate(studentExpel.getOrderDate()));
+        result.put("orderUkr", " від "+formatDate(studentExpel.getOrderDate())+" № "+studentExpel.getOrderNumber());
+        result.put("orderEng", formatDate(studentExpel.getOrderDate())+", № "+studentExpel.getOrderNumber());
         result.put("today", formatDate(new Date()));
         return result;
     }
@@ -149,7 +151,7 @@ public class AcademicReferenceService {
     private Map<String, String> getCourseDictionary(Grade grade) {
         HashMap<String, String> result = new HashMap<>();
         result.put("s", grade.getCourse().getCourseName().getName() + DOCUMENT_DELIMITER + grade.getCourse().getCourseName().getNameEng());
-        result.put("c", grade.getCourse().getCredits().toString()+" ("+grade.getCourse().getHours()+"г/h)");
+        result.put("c", grade.getCourse().getCredits().toString());
         result.put("g", getGradeDisplay(grade));
         return result;
     }

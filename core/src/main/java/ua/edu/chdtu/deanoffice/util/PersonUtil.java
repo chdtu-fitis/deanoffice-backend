@@ -32,10 +32,10 @@ public class PersonUtil {
         return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
     }
 
-    public static String makeInitials(String fullName) {
+    public static String makeInitialsSurnameLast(String fullName) {
         List<String> fullNameParts = Arrays.asList(fullName.split(" "));
-        return fullNameParts.get(0) + " "
-                + fullNameParts.get(1).substring(0, 1).toUpperCase() + ". "
-                + fullNameParts.get(2).substring(0, 1).toUpperCase() + ".";
+        return fullNameParts.get(1).substring(0, 1).toUpperCase() + "."
+                + fullNameParts.get(2).substring(0, 1).toUpperCase() + ". "
+                + fullNameParts.get(0);
     }
 }
