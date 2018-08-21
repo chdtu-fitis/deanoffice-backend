@@ -80,8 +80,8 @@ public class AcademicReferenceService {
             studentNameEng = student.getSurnameEng() + " " + student.getNameEng();
         }
         result.put("studentNameEng", studentNameEng);
-        result.put("facultyNameUkr", studentDegree.getSpecialization().getDepartment().getFaculty().getName());
-        result.put("facultyNameEng", studentDegree.getSpecialization().getDepartment().getFaculty().getNameEng());
+        result.put("facultyNameUkr", studentDegree.getSpecialization().getFaculty().getName());
+        result.put("facultyNameEng", studentDegree.getSpecialization().getFaculty().getNameEng());
         String code = studentDegree.getSpecialization().getSpeciality().getCode();
         result.put("specialityUkr", code + " " + studentDegree.getSpecialization().getSpeciality().getName());
         result.put("specialityEng", code + " " + studentDegree.getSpecialization().getSpeciality().getNameEng());
@@ -89,8 +89,8 @@ public class AcademicReferenceService {
         result.put("educationalProgramEng", studentDegree.getSpecialization().getNameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
         result.put("individualNumber",studentDegree.getSupplementNumber());
-        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDean()));
-        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDeanEng()));
+        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
+        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
         result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
         result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
