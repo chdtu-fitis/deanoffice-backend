@@ -31,10 +31,9 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 public class AcademicReferenceService {
 
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
-
     private static final int INDEX_OF_TABLE_WITH_GRADES = 10;
-
     private static final String DOCUMENT_DELIMITER = "/";
+    private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
     @Autowired
     private DocumentIOService documentIOService;
@@ -122,7 +121,7 @@ public class AcademicReferenceService {
             replaceInRow(newRowWithSignature, getSignatureDictionary(currentSemester));
             table.getContent().add(currentRow, newRowWithSignature);
             currentRow++;
-            for (Grade grade : semesterDetails.getGrades().get(0)) {
+            for (Grade grade : semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX)) {
                 Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
                 replaceInRow(newRowWithCourse, getCourseDictionary(grade));
                 table.getContent().add(currentRow, newRowWithCourse);
@@ -130,8 +129,56 @@ public class AcademicReferenceService {
             }
             currentSemester++;
         }
+        List<List<Grade>> coursePapersAndInternships = getCoursePapersAndInternships(studentSummary);
+        if (coursePapersAndInternships.get(0).size() > 0) {
+            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
+            Map<String,String> replacements = new HashMap<String,String>();
+            replacements.put("n","Курсові роботи (проекти) / Term Papers (Projects)");
+            replaceInRow(newRowWithSignature, replacements);
+            table.getContent().add(currentRow, newRowWithSignature);
+            currentRow++;
+            for (Grade grade : coursePapersAndInternships.get(0)) {
+                Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
+                replaceInRow(newRowWithCourse, getCourseDictionary(grade));
+                table.getContent().add(currentRow, newRowWithCourse);
+                currentRow++;
+            }
+        }
+        if (coursePapersAndInternships.get(1).size() > 0) {
+            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
+            Map<String,String> replacements = new HashMap<String,String>();
+            replacements.put("n","Практики / Internships");
+            replaceInRow(newRowWithSignature, replacements);
+            table.getContent().add(currentRow, newRowWithSignature);
+            currentRow++;
+            for (Grade grade : coursePapersAndInternships.get(1)) {
+                Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
+                replaceInRow(newRowWithCourse, getCourseDictionary(grade));
+                table.getContent().add(currentRow, newRowWithCourse);
+                currentRow++;
+            }
+        }
         table.getContent().remove(1);
         table.getContent().remove(table.getContent().size()-1);
+    }
+
+    private List<List<Grade>> getCoursePapersAndInternships(StudentSummaryForAcademicReference studentSummary) {
+        List<List<Grade>> coursePapersAndInternships = new ArrayList<List<Grade>>();
+        coursePapersAndInternships.add(new ArrayList<>());
+        coursePapersAndInternships.add(new ArrayList<>());
+        for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
+            if (semesterDetails.getGrades().get(COURSE_PAPERS_INDEX).size()>0) {
+                for (Grade grade : semesterDetails.getGrades().get(COURSE_PAPERS_INDEX)) {
+                    coursePapersAndInternships.get(0).add(grade);
+                }
+            }
+            if (semesterDetails.getGrades().get(INTERNSHIPS_INDEX).size()>0) {
+                for (Grade grade : semesterDetails.getGrades().get(INTERNSHIPS_INDEX)) {
+                    coursePapersAndInternships.get(1).add(grade);
+                }
+            }
+        }
+        return coursePapersAndInternships;
     }
 
     private Map<String, String> getSignatureDictionary(int semester) {
