@@ -117,49 +117,36 @@ public class AcademicReferenceService {
         int currentSemester = 1;
         int currentRow = 2;
         for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
-            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
-            replaceInRow(newRowWithSignature, getSignatureDictionary(currentSemester));
-            table.getContent().add(currentRow, newRowWithSignature);
-            currentRow++;
-            for (Grade grade : semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX)) {
-                Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
-                replaceInRow(newRowWithCourse, getCourseDictionary(grade));
-                table.getContent().add(currentRow, newRowWithCourse);
-                currentRow++;
-            }
+            currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, getSignatureDictionary(currentSemester), semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX));
             currentSemester++;
         }
         List<List<Grade>> coursePapersAndInternships = getCoursePapersAndInternships(studentSummary);
         if (coursePapersAndInternships.get(0).size() > 0) {
-            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
             Map<String,String> replacements = new HashMap<String,String>();
             replacements.put("n","Курсові роботи (проекти) / Term Papers (Projects)");
-            replaceInRow(newRowWithSignature, replacements);
-            table.getContent().add(currentRow, newRowWithSignature);
-            currentRow++;
-            for (Grade grade : coursePapersAndInternships.get(0)) {
-                Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
-                replaceInRow(newRowWithCourse, getCourseDictionary(grade));
-                table.getContent().add(currentRow, newRowWithCourse);
-                currentRow++;
-            }
+            currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(0));
         }
         if (coursePapersAndInternships.get(1).size() > 0) {
-            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
             Map<String,String> replacements = new HashMap<String,String>();
             replacements.put("n","Практики / Internships");
-            replaceInRow(newRowWithSignature, replacements);
-            table.getContent().add(currentRow, newRowWithSignature);
-            currentRow++;
-            for (Grade grade : coursePapersAndInternships.get(1)) {
-                Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
-                replaceInRow(newRowWithCourse, getCourseDictionary(grade));
-                table.getContent().add(currentRow, newRowWithCourse);
-                currentRow++;
-            }
+            insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(1));
         }
         table.getContent().remove(1);
         table.getContent().remove(table.getContent().size()-1);
+    }
+
+    private int insertOneKcSortRows(Tbl table, Tr rowWithSignature, Tr rowWithCourse, int currentRow, Map<String,String> header, List<Grade> gradeSet) {
+        Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
+        replaceInRow(newRowWithSignature, header);
+        table.getContent().add(currentRow, newRowWithSignature);
+        currentRow++;
+        for (Grade grade : gradeSet) {
+            Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
+            replaceInRow(newRowWithCourse, getCourseDictionary(grade));
+            table.getContent().add(currentRow, newRowWithCourse);
+            currentRow++;
+        }
+        return currentRow;
     }
 
     private List<List<Grade>> getCoursePapersAndInternships(StudentSummaryForAcademicReference studentSummary) {
