@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.document.diplomasupplement;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +55,6 @@ public class DiplomaSupplementController extends DocumentResponseController {
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, DiplomaSupplementController.class);
+        return ExceptionHandlerAdvice.handleException(exception, DiplomaSupplementController.class, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

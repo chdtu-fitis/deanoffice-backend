@@ -32,6 +32,11 @@ public class ExceptionHandlerAdvice {
         return handleException(exception.getMessage(), exceptionLocation, DEFAULT_RESPONSE_STATUS);
     }
 
+    public static ResponseEntity handleException(Exception exception, Class exceptionLocation, HttpStatus responseStatus) {
+        getLogger(exceptionLocation).error("ERROR", exception);
+        return ResponseEntity.status(responseStatus).body(exception.getMessage());
+    }
+
     public static ResponseEntity handleException(String message, Class exceptionLocation) {
         return handleException(message, exceptionLocation, DEFAULT_RESPONSE_STATUS);
     }
