@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -37,8 +38,8 @@ public class DiplomaSupplementController extends DocumentResponseController {
             facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
             File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_DOCX);
-        } catch (Exception exception) {
-            return handleException(exception);
+        } catch (Exception e) {
+            return ExceptionHandlerAdvice.handleException(e, DiplomaSupplementController.class, ExceptionToHttpCodeMapUtil.map(e));
         }
     }
 
@@ -50,7 +51,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
             File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.PDF);
             return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
-            return handleException(e);
+            return ExceptionHandlerAdvice.handleException(e, DiplomaSupplementController.class, ExceptionToHttpCodeMapUtil.map(e));
         }
     }
 

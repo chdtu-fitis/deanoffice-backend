@@ -2,6 +2,8 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
+import ua.edu.chdtu.deanoffice.exception.PageNotFoundException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 
 @Service
@@ -30,11 +32,11 @@ public class FacultyService {
 
     private void compareFacultyIds(Integer facultyId, Integer realFacultyId) throws Exception {
         if (realFacultyId == null) {
-            throw new Exception("404");
+            throw new PageNotFoundException("Факультет не знайдено");
         } else if (realFacultyId.equals(facultyId)) {
             return;
         } else {
-            throw new Exception("403");
+            throw new UnauthorizedFacultyDataException("Доступ до інформації даного факультету Вам заборонений");
         }
     }
 
