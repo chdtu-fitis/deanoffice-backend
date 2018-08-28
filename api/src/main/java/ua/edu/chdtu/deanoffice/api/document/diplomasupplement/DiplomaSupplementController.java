@@ -39,7 +39,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
             File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
-            return ExceptionHandlerAdvice.handleException(e, DiplomaSupplementController.class, ExceptionToHttpCodeMapUtil.map(e));
+            return handleException(e);
         }
     }
 
@@ -51,11 +51,11 @@ public class DiplomaSupplementController extends DocumentResponseController {
             File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.PDF);
             return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
-            return ExceptionHandlerAdvice.handleException(e, DiplomaSupplementController.class, ExceptionToHttpCodeMapUtil.map(e));
+            return handleException(e);
         }
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, DiplomaSupplementController.class, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ExceptionHandlerAdvice.handleException(exception, DiplomaSupplementController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

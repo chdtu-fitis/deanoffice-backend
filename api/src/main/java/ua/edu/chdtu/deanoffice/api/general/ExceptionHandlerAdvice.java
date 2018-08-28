@@ -35,7 +35,7 @@ public class ExceptionHandlerAdvice {
     }
 
     public static ResponseEntity handleException(Exception exception, Class exceptionLocation, HttpStatus responseStatus) {
-        if (isReportableException(exception))
+        if (isStackTraceReported(exception))
             getLogger(exceptionLocation).error("ERROR", exception);
         return ResponseEntity.status(responseStatus).body(exception.getMessage());
     }
@@ -44,7 +44,7 @@ public class ExceptionHandlerAdvice {
         return handleException(message, exceptionLocation, DEFAULT_RESPONSE_STATUS);
     }
 
-    private static boolean isReportableException(Exception e) {
+    private static boolean isStackTraceReported(Exception e) {
         if (e instanceof PageNotFoundException || e instanceof UnauthorizedFacultyDataException)
             return false;
         else
