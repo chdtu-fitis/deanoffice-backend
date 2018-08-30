@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
@@ -52,13 +53,21 @@ public class StudentDegreeController {
     @JsonView(StudentView.Simple.class)
     @GetMapping("/students/degrees")
     public ResponseEntity getActiveStudentsDegree(@CurrentUser ApplicationUser user) {
-        return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        try {
+            return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @JsonView(StudentView.Detail.class)
     @GetMapping("/students/degrees/more-detail")
     public ResponseEntity getActiveStudentsDegree_moreDetail(@CurrentUser ApplicationUser user) {
-        return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        try {
+            return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegrees(int facultyId) {
@@ -135,8 +144,12 @@ public class StudentDegreeController {
     @JsonView(StudentView.Degrees.class)
     @GetMapping("/students/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
-        Student student = studentService.findById(studentId);
-        return ResponseEntity.ok(Mapper.map(student, StudentDTO.class));
+        try {
+            Student student = studentService.findById(studentId);
+            return ResponseEntity.ok(Mapper.map(student, StudentDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @JsonView(StudentView.Degrees.class)
@@ -146,7 +159,7 @@ public class StudentDegreeController {
             @RequestBody List<StudentDegreeDTO> studentDegreesDTO
     ) {
         if (checkId(studentDegreesDTO)) {
-            return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id not must be null");
+            return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id не може бути null");
         }
 
         try {
@@ -180,13 +193,17 @@ public class StudentDegreeController {
         return this.studentGroupService.getById(groupId);
     }
 
-    private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, StudentDegreeController.class);
-    }
-
     @GetMapping("/groups/{group_id}/students")
     public ResponseEntity getStudentsByGroupId(@PathVariable("group_id") Integer groupId) {
-        List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
-        return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
+        try {
+            List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
+            return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentDegreeController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

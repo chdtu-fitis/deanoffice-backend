@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -49,7 +50,7 @@ public class GradeController {
             this.gradeService.insertGrades(gradeService.setGradeAndEcts(grades));
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
-            return ExceptionHandlerAdvice.handleException(exception, GradeController.class);
+            return handleException(exception);
         }
     }
 
@@ -57,9 +58,13 @@ public class GradeController {
     public ResponseEntity getGrades(
             @PathVariable Integer groupId,
             @RequestParam(value = "semester") Integer semester) {
-        List<Grade> grades = this.gradeService.getGradesForStudents(getStudentsIdsByGroupId(groupId),
-                getCoursesIdsByGroupIdAndSemester(groupId, semester));
-        return ResponseEntity.ok(map(grades, GradeDTO.class));
+        try {
+            List<Grade> grades = this.gradeService.getGradesForStudents(getStudentsIdsByGroupId(groupId),
+                    getCoursesIdsByGroupIdAndSemester(groupId, semester));
+            return ResponseEntity.ok(map(grades, GradeDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
@@ -76,8 +81,12 @@ public class GradeController {
     public ResponseEntity getGradesByGroupIdAndCourseId(
             @PathVariable Integer groupId,
             @PathVariable Integer courseId) {
-        List<Grade> grades = this.gradeService.getGradesByCourseAndGroup(courseId, groupId);
-        return ResponseEntity.ok(map(grades, GradeDTO.class));
+        try {
+            List<Grade> grades = this.gradeService.getGradesByCourseAndGroup(courseId, groupId);
+            return ResponseEntity.ok(map(grades, GradeDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @DeleteMapping
@@ -86,7 +95,11 @@ public class GradeController {
             this.gradeService.deleteGradeById(gradeId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
-            return ExceptionHandlerAdvice.handleException(exception, GradeController.class);
+            return handleException(exception);
         }
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, GradeController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

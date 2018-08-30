@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
@@ -61,8 +62,12 @@ public class GroupController {
     @JsonView(StudentGroupView.WithStudents.class)
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId, @CurrentUser ApplicationUser user) {
-        List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId, user.getFaculty().getId());
-        return ResponseEntity.ok(Mapper.map(groups, StudentGroupShortDTO.class));
+        try {
+            List<StudentGroup> groups = studentGroupService.getGraduateGroups(degreeId, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(groups, StudentGroupShortDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @GetMapping("/groups/filter")
@@ -72,14 +77,22 @@ public class GroupController {
             @RequestParam Integer year,
             @CurrentUser ApplicationUser user
     ) {
-        List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, user.getFaculty().getId());
-        return ResponseEntity.ok(Mapper.map(groups, StudentGroupDTO.class));
+        try {
+            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(groups, StudentGroupDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @GetMapping("courses/{courseId}/groups")
     public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
-        return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @GetMapping("/groups")
@@ -88,8 +101,12 @@ public class GroupController {
             @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive,
             @CurrentUser ApplicationUser user
     ) {
-        List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
-        return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @JsonView(StudentGroupView.AllGroupData.class)
@@ -115,10 +132,6 @@ public class GroupController {
         throw new Exception(message);
     }
 
-    private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, GroupController.class);
-    }
-
     private StudentGroup create(StudentGroupDTO studentGroupDTO) {
         StudentGroup studentGroup = (StudentGroup) Mapper.strictMap(studentGroupDTO, StudentGroup.class);
         Specialization specialization = specializationService.getById(studentGroupDTO.getSpecialization().getId());
@@ -129,8 +142,12 @@ public class GroupController {
     @JsonView(StudentGroupView.AllGroupData.class)
     @GetMapping("/groups/{group_id}")
     public ResponseEntity getGroupById(@PathVariable(value = "group_id") Integer groupId) {
-        StudentGroup studentGroup = studentGroupService.getById(groupId);
-        return ResponseEntity.ok(Mapper.map(studentGroup, StudentGroupDTO.class));
+        try {
+            StudentGroup studentGroup = studentGroupService.getById(groupId);
+            return ResponseEntity.ok(Mapper.map(studentGroup, StudentGroupDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @PutMapping("/groups")
@@ -192,5 +209,9 @@ public class GroupController {
 
     private List<StudentGroup> findInactiveStudentGroup(List<StudentGroup> studentGroups) {
         return studentGroups.stream().filter(studentGroup -> !studentGroup.isActive()).collect(Collectors.toList());
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, GroupController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

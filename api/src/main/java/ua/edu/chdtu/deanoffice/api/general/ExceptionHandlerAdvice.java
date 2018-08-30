@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.PageNotFoundException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 
@@ -45,7 +46,9 @@ public class ExceptionHandlerAdvice {
     }
 
     private static boolean isStackTraceReported(Exception e) {
-        if (e instanceof PageNotFoundException || e instanceof UnauthorizedFacultyDataException)
+        if (e instanceof PageNotFoundException
+                || e instanceof UnauthorizedFacultyDataException
+                || e instanceof OperationCannotBePerformedException)
             return false;
         else
             return true;

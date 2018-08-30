@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.api.specialization;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
@@ -23,7 +23,7 @@ import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
@@ -31,12 +31,8 @@ import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-
-import static java.util.Arrays.asList;
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
@@ -66,8 +62,12 @@ public class SpecializationController {
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
     ) {
-        List<Specialization> specializations = specializationService.getAllByActive(active, user.getFaculty().getId());
-        return ResponseEntity.ok(Mapper.map(specializations, SpecializationDTO.class));
+        try{
+            List<Specialization> specializations = specializationService.getAllByActive(active, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(specializations, SpecializationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @PostMapping
@@ -100,31 +100,26 @@ public class SpecializationController {
 
     private Specialization create(SpecializationDTO specializationDTO, Faculty faculty) {
         Specialization specialization = (Specialization) Mapper.strictMap(specializationDTO, Specialization.class);
-
         Speciality speciality = this.specialityService.getById(specializationDTO.getSpecialityId());
         specialization.setSpeciality(speciality);
-
         if (specializationDTO.getDepartmentId() != null && specializationDTO.getDepartmentId() != 0) {
             Department department = departmentService.getById(specializationDTO.getDepartmentId());
             specialization.setDepartment(department);
         }
-
         Degree degree = degreeService.getById(specializationDTO.getDegreeId());
         specialization.setDegree(degree);
-
         specialization.setFaculty(faculty);
-
         return specialization;
-    }
-
-    private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, SpecializationController.class);
     }
 
     @GetMapping("{specialization_id}")
     public ResponseEntity getSpecializationById(@PathVariable("specialization_id") Integer specializationId) {
-        Specialization specialization = specializationService.getById(specializationId);
-        return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
+        try {
+            Specialization specialization = specializationService.getById(specializationId);
+            return ResponseEntity.ok(Mapper.map(specialization, SpecializationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @PutMapping
@@ -134,7 +129,9 @@ public class SpecializationController {
     ) {
         try {
             if (!specializationDTO.isActive()) {
-                throwException("You can not update inactive specialization");
+                return handleException(
+                        new OperationCannotBePerformedException("Не можна змінювати неактивну освітню програму")
+                );
             }
             Specialization specialization = create(specializationDTO, user.getFaculty());
             specializationService.save(specialization);
@@ -144,28 +141,28 @@ public class SpecializationController {
         }
     }
 
-    private void throwException(String message) throws Exception {
-        throw new Exception(message);
-    }
-
     @DeleteMapping("/{specialization_id}")
     public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") Integer specializationId) {
-        Specialization specialization = specializationService.getById(specializationId);
-        if (specialization == null) {
-            return ExceptionHandlerAdvice.handleException(
-                    "Not found specialization [" + specializationId + "]",
-                    SpecializationController.class,
-                    HttpStatus.NOT_FOUND
-            );
-        }
         try {
+            Specialization specialization = specializationService.getById(specializationId);
+            if (specialization == null) {
+                return handleException(
+                        new OperationCannotBePerformedException("Освітню програму [" + specializationId + "] не знайдено")
+                );
+            }
             if (!specialization.isActive()) {
-                throwException("Specialization [id = " + specializationId + "] already inactive");
+                return handleException(
+                        new OperationCannotBePerformedException("Освітня програма [" + specializationId + "] не активна в даний час")
+                );
             }
             specializationService.delete(specializationId);
             return ResponseEntity.noContent().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, SpecializationController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

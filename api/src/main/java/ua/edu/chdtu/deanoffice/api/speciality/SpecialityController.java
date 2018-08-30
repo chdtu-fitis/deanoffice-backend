@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
@@ -27,17 +29,29 @@ public class SpecialityController {
 
     @GetMapping
     public ResponseEntity getAllSpecialities(@CurrentUser ApplicationUser user) {
-        List<Speciality> specialities = specialityService.getAll(user.getFaculty().getId());
-        return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+        try {
+            List<Speciality> specialities = specialityService.getAll(user.getFaculty().getId());
+            return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @GetMapping("/active")
     public ResponseEntity getActiveSpecialities(@CurrentUser ApplicationUser user) {
-        List<Speciality> specialities = specialityService.getAllActive(user.getFaculty().getId());
-        return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+        try {
+            List<Speciality> specialities = specialityService.getAllActive(user.getFaculty().getId());
+            return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     private List<SpecialityDTO> mapToSpecialityDTO(List<Speciality> source) {
         return map(source, SpecialityDTO.class);
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, SpecialityController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }
