@@ -24,6 +24,7 @@ import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.exception.PageNotFoundException;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -176,10 +177,8 @@ public class GroupController {
     public ResponseEntity deleteGroup(@PathVariable("group_ids") Integer[] groupIds) {
         List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
         if (studentGroups.size() != groupIds.length) {
-            return ExceptionHandlerAdvice.handleException(
-                    "Not found groups " + Arrays.toString(findNouFoundStudentGroups(studentGroups, asList(groupIds))),
-                    GroupController.class,
-                    HttpStatus.NOT_FOUND
+            return handleException(
+                new PageNotFoundException("Not found groups " + Arrays.toString(findNouFoundStudentGroups(studentGroups, asList(groupIds))))
             );
         }
         try {
