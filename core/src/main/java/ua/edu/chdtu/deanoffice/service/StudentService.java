@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,21 +25,17 @@ public class StudentService {
         return studentRepository.getOne(id);
     }
 
-    public List<Student> searchByFullName(String name, String surname, String patronimic) {
-        return studentRepository.findAllByFullNameUkr(name,surname,patronimic
-//                toCapitalizedCase(name),
-//                toCapitalizedCase(surname),
-//                toCapitalizedCase(patronimic)
-        );
-    }
-
-    public List<Student> searchByFullName(String name, String surname, String patronimic, int facultyId) {
+    public List<Student> searchByFullName(String name, String surname, String patronymic, int facultyId) {
          return studentRepository.findAllByFullNameUkr(
                 toCapitalizedCase(name),
                 toCapitalizedCase(surname),
-                toCapitalizedCase(patronimic),
+                toCapitalizedCase(patronymic),
                 facultyId
         );
+    }
+
+    public List<Student> searchByFullNameAndBirthDate(String name, String surname, String patronymic, Date birthDate ){
+        return studentRepository.findByFullNameUkrAndBirthDate(name, surname, patronymic, birthDate);
     }
 
     public Student save(Student student) {

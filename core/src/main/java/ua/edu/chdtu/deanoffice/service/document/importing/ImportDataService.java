@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import com.google.common.base.Strings;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
@@ -19,7 +18,6 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
-import ua.edu.chdtu.deanoffice.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,7 +96,7 @@ public class ImportDataService {
                     } catch (Exception e) {
                         log.debug(e.getMessage());
                     }
-
+//                  для чого тут else ?
                     if (r.getR() == 1) {
                         sd.assignHeader(cellValue, c.getR());
                     } else {
@@ -121,213 +119,197 @@ public class ImportDataService {
         }
     }
 
-    private Student fetchStudent(ImportedData data) throws NullPointerException {
-        String errorMsg = "Failed to fetch data. ";
-        requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
+    private Student getStudentFromImportedData(ImportedData data)  {
+//        String errorMsg = "Failed to fetch data. ";
+//        requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
         Student student = new Student();
-        DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
-        Date birthDate = null;
-        try {
-            birthDate = formatter.parse(data.getBirthday());
-        } catch (ParseException e) {
-            log.debug(e.getMessage());
-        }
-
-        if (Strings.isNullOrEmpty(data.getFirstName()) || Strings.isNullOrEmpty(data.getLastName()) || birthDate == null) {
-            throw new IllegalArgumentException(errorMsg + "Param \"student\" is empty!");
-        }
-
-        List<Student> existsStudentList = studentService.searchByFullName(data.getFirstName(), data.getLastName(), data.getMiddleName());
-
-        if (existsStudentList.size() > 0) {
-            DateFormat simpleFormatter = new SimpleDateFormat("yyyy-MM-dd");
-            if (existsStudentList.size() == 1){
-                Student tempStudent = existsStudentList.get(0);
-                if (tempStudent.getBirthDate() == null)
-                    student = tempStudent;
-                else
-                    if (simpleFormatter.format(birthDate).equals(simpleFormatter.format(tempStudent.getBirthDate())))
-                        student = tempStudent;
-            } else {
-                for (Student tempStudent: existsStudentList) {
-                    if (tempStudent.getBirthDate() == null) {
-                        student = tempStudent;
-                        continue;
-                    }
-                    if (simpleFormatter.format(birthDate).equals(simpleFormatter.format(tempStudent.getBirthDate()))) {
-                        student = tempStudent;
-                        break;
-                    }
-                }
-            }
-        }
-
+        Date birthDate=formatFileBirthdayDateToDbBirthdayDate(data.getBirthday());
         student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
         student.setPatronimic(data.getMiddleName());
-        student.setNameEng(StringUtil.firstNotNullNotEmpty(data.getFirstNameEn(),student.getNameEng()));
-        student.setSurnameEng(StringUtil.firstNotNullNotEmpty(data.getLastNameEn(), student.getSurnameEng()));
-        student.setPatronimicEng(StringUtil.firstNotNullNotEmpty(data.getMiddleNameEn(), student.getPatronimicEng()));
+        student.setNameEng(data.getFirstNameEn());
+        student.setSurnameEng(data.getLastNameEn());
+        student.setPatronimicEng(data.getMiddleNameEn());
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
-        student.setSchool(StringUtil.firstNotNullNotEmpty(data.getDocumentIssued2(),student.getSchool()));
-
+        student.setSchool(data.getDocumentIssued2());
         return student;
     }
 
-    private StudentDegree fetchStudentDegree(ImportedData data, Student student) throws NullPointerException, IllegalArgumentException {
-        String errorMsg = "Failed to fetch data. ";
-        requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
-        requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
-        StudentDegree studentDegree = fetchStudentDegree(data);
-        if (studentDegree == null)
-            return null;
-        studentDegree.setStudent(student);
+//    private StudentDegree fetchStudentDegreeFromFile(ImportedData data) throws NullPointerException {
+//        requireNonNull(data, "Failed to fetch data. Param \"data\" cannot be null!");
+//        DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
+//        StudentDegree studentDegree = new StudentDegree();
+//        Specialization specialization = fetchSpecialization(data.getFullSpecialityName(),data.getFullSpecializationName(), data.getProgramName(),
+//                                                            data.getQualificationGroupName(), data.getFacultyName());
+//        if (specialization == null)
+//            return null;
+//        studentDegree.setSpecialization(specialization);
+//
+//        for (EducationDocument eduDocument : EducationDocument.values()) {
+//            if (eduDocument.getNameUkr().toLowerCase().equals(data.getPersonDocumentType().toLowerCase())) {
+//                studentDegree.setPreviousDiplomaType(eduDocument);
+//                break;
+//            }
+//        }
+//        try {
+//            Date prevDiplomaDate = formatter.parse(data.getDocumentDateGet2());
+//            studentDegree.setPreviousDiplomaDate(prevDiplomaDate);
+//        } catch (ParseException e) {
+//            log.debug(e.getMessage());
+//        }
+//        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
+//        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
+//
+//        studentDegree.setActive(true);
+//        studentDegree.setPayment(Objects.equals(data.getPersonEducationPaymentTypeName(), "Контракт") ? Payment.CONTRACT : Payment.BUDGET);
+//        DateFormat admissionOrderDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+//        final String ADMISSION_REGEXP ="Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
+//        Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
+//
+//        try {
+//            Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
+//            if (matcher.find()) {
+//                studentDegree.setAdmissionOrderNumber(matcher.groupCount() > 0 ? matcher.group(1) : null);
+//                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionOrderDateFormatter.parse(matcher.group(2)) : null;
+//                studentDegree.setAdmissionOrderDate(admissionOrderDate);
+//            }
+//        } catch (ParseException e) {
+//            log.debug(e.getMessage());
+//        } catch (IllegalStateException e) {
+//            log.debug(e.getMessage());
+//        }
+//        try {
+//            Date admissionDate = new SimpleDateFormat("M/dd/yy H:mm").parse(data.getEducationDateBegin());
+//            studentDegree.setAdmissionDate(admissionDate);
+//        }catch (ParseException e) {
+//            log.debug(e.getMessage());
+//        }
+//        studentDegree.setSupplementNumber(data.getEducationId());
+//
+//        return studentDegree;
+//    }
+//
+//    private Specialization fetchSpecialization(String specialityString, String specializationString, String programString, String degreeName, String facultyName) {
+//        final String SPECIALITY_REGEXP_OLD = "([\\d\\.]+)[\\s]([\\w\\W]+)";
+//        final String SPECIALITY_REGEXP_NEW = "([\\d\\d\\d])[\\s]([\\w\\W]+)";
+//        final String SPECIALIZATION_REGEXP = "([\\d+.\\d+])[\\s]([\\w\\W]+)";
+//        Pattern specialityPattern;
+//        try {
+//            if (specialityString.matches(SPECIALITY_REGEXP_OLD)) {
+//                specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
+//            } else {
+//                specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
+//            }
+//            Matcher matcher = specialityPattern.matcher(specialityString);
+//
+//            if (matcher.matches() && matcher.groupCount() > 1) {
+//                String code = matcher.group(1);
+//                String name = StringUtils.capitalize(matcher.group(2)).trim();
+//                String specializationName;
+//                if (!Strings.isNullOrEmpty(programString))
+//                    specializationName = programString;
+//                else
+//                    if (!Strings.isNullOrEmpty(specializationString)) {
+//                        Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
+//                        Matcher spMatcher = specializationPattern.matcher(specializationString);
+//                        specializationName = spMatcher.group(1);
+//                    }
+//                    else
+//                        specializationName = "";
+//                Specialization specialization = getExistingOrSavedSpecialization(name, code, specializationName , degreeName, facultyName);
+//                return specialization;
+//            }
+//        } catch (Exception e) {
+//            log.debug(e.getMessage());
+//        }
+//
+//        return null;
+//    }
 
-        StudentDegree existingStudentDegree = null;
-        if (student.getId() > 0) {
-            for (StudentDegree sDegree : studentDegreeService.getAllActiveByStudent(student.getId())) {
-                if (studentDegree.getSpecialization().getId() == sDegree.getSpecialization().getId()) {
-                    existingStudentDegree = sDegree;
-                    break;
-                }
-            }
-        }
-        if(existingStudentDegree != null && studentDegree != null) {
-            existingStudentDegree.setAdmissionOrderNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getAdmissionOrderNumber(), existingStudentDegree.getAdmissionOrderNumber()));
-            existingStudentDegree.setAdmissionOrderDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionOrderDate(), existingStudentDegree.getAdmissionOrderDate()));
-            existingStudentDegree.setAdmissionDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionDate(), existingStudentDegree.getAdmissionDate()));
-            existingStudentDegree.setPayment(ObjectUtils.firstNonNull(studentDegree.getPayment(), existingStudentDegree.getPayment()));
-            existingStudentDegree.setPreviousDiplomaNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getPreviousDiplomaNumber(), existingStudentDegree.getPreviousDiplomaNumber()));
-            existingStudentDegree.setPreviousDiplomaDate(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaDate(), existingStudentDegree.getPreviousDiplomaDate()));
-            existingStudentDegree.setPreviousDiplomaType(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaType(), existingStudentDegree.getPreviousDiplomaType()));
-            existingStudentDegree.setPreviousDiplomaIssuedBy(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaIssuedBy(), existingStudentDegree.getPreviousDiplomaIssuedBy()));
-            existingStudentDegree.setSupplementNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getSupplementNumber(), existingStudentDegree.getSupplementNumber()));
-        }
+//    private Specialization getExistingOrSavedSpecialization(String specialityName, String specialityCode, String specializationName, String degreeName, String facultyName) {
+//        Degree degree = degreeService.getByName(degreeName);
+//        Faculty faculty = facultyService.getByName(facultyName);
+//        Speciality existingSpeciality = specialityService.getSpecialityByCode(specialityCode);
+//        if (existingSpeciality == null) {
+//            Speciality newSpeciality = new Speciality();
+//            newSpeciality.setName(specialityName);
+//            newSpeciality.setCode(specialityCode);
+//            newSpeciality.setActive(true);
+//            existingSpeciality = specialityService.save(newSpeciality);
+//        }
+//        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specializationName, degree.getId(), existingSpeciality.getId(), faculty.getId());
+//        if (existingSpecialization == null) {
+//            existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specialityName, degree.getId(), existingSpeciality.getId(), faculty.getId());
+//        }
+//        if (existingSpecialization == null) {
+//            if (specialityCode.matches("\\d\\.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
+//                Specialization specialization = new Specialization();
+//                specialization.setName(specializationName);
+//                specialization.setSpeciality(existingSpeciality);
+//                specialization.setDegree(degree);
+//                specialization.setFaculty(faculty);
+//                specialization.setActive(true);
+////                existingSpecialization = specializationService.save(specialization);
+//            }
+//        }
+//
+//        return existingSpecialization;
+//    }
 
-        return existingStudentDegree == null? studentDegree : existingStudentDegree;
-    }
-
-    private StudentDegree fetchStudentDegree(ImportedData data) throws NullPointerException {
-        requireNonNull(data, "Failed to fetch data. Param \"data\" cannot be null!");
-        DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
-        StudentDegree studentDegree = new StudentDegree();
-
-        Specialization specialization = fetchSpecialization(data.getFullSpecialityName(),data.getFullSpecializationName(), data.getProgramName(),
-                                                            data.getQualificationGroupName(), data.getFacultyName());
-        if (specialization == null)
-            return null;
-        studentDegree.setSpecialization(specialization);
-
-        for (EducationDocument eduDocument : EducationDocument.values()) {
-            if (eduDocument.getNameUkr().toLowerCase().equals(data.getPersonDocumentType().toLowerCase())) {
-                studentDegree.setPreviousDiplomaType(eduDocument);
-                break;
-            }
-        }
-        try {
-            Date prevDiplomaDate = formatter.parse(data.getDocumentDateGet2());
-            studentDegree.setPreviousDiplomaDate(prevDiplomaDate);
-        } catch (ParseException e) {
-            log.debug(e.getMessage());
-        }
-        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
-        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
-
-        studentDegree.setActive(true);
-        studentDegree.setPayment(Objects.equals(data.getPersonEducationPaymentTypeName(), "Контракт") ? Payment.CONTRACT : Payment.BUDGET);
-        DateFormat admissionOrderDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
-        final String ADMISSION_REGEXP ="Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
-        Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
-
-        try {
-            Matcher matcher = admissionPattern.matcher(data.getRefillInfo());
-            if (matcher.find()) {
-                studentDegree.setAdmissionOrderNumber(matcher.groupCount() > 0 ? matcher.group(1) : null);
-                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionOrderDateFormatter.parse(matcher.group(2)) : null;
-                studentDegree.setAdmissionOrderDate(admissionOrderDate);
-            }
-        } catch (ParseException e) {
-            log.debug(e.getMessage());
-        } catch (IllegalStateException e) {
-            log.debug(e.getMessage());
-        }
-        try {
-            Date admissionDate = new SimpleDateFormat("M/dd/yy H:mm").parse(data.getEducationDateBegin());
-            studentDegree.setAdmissionDate(admissionDate);
-        }catch (ParseException e) {
-            log.debug(e.getMessage());
-        }
-        studentDegree.setSupplementNumber(data.getEducationId());
-
-        return studentDegree;
-    }
-
-    private Specialization fetchSpecialization(String specialityString, String specializationString, String programString, String degreeName, String facultyName) {
+    private Speciality getSpecialityFromImportedData(ImportedData data) {
+        Speciality speciality = new Speciality();
+        String specialityNameWithCode = data.getFullSpecialityName();
+        String specialityCode="";
+        String specialityName="";
         final String SPECIALITY_REGEXP_OLD = "([\\d\\.]+)[\\s]([\\w\\W]+)";
         final String SPECIALITY_REGEXP_NEW = "([\\d\\d\\d])[\\s]([\\w\\W]+)";
-        final String SPECIALIZATION_REGEXP = "([\\d+.\\d+])[\\s]([\\w\\W]+)";
         Pattern specialityPattern;
-        try {
-            if (specialityString.matches(SPECIALITY_REGEXP_OLD)) {
+            if (specialityNameWithCode.matches(SPECIALITY_REGEXP_OLD)) {
                 specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
             } else {
                 specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
             }
-            Matcher matcher = specialityPattern.matcher(specialityString);
-
+            Matcher matcher = specialityPattern.matcher(specialityNameWithCode);
             if (matcher.matches() && matcher.groupCount() > 1) {
-                String code = matcher.group(1);
-                String name = StringUtils.capitalize(matcher.group(2)).trim();
-                String specializationName;
-                if (!Strings.isNullOrEmpty(programString))
-                    specializationName = programString;
-                else
-                    if (!Strings.isNullOrEmpty(specializationString)) {
-                        Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
-                        Matcher spMatcher = specializationPattern.matcher(specializationString);
-                        specializationName = spMatcher.group(1);
-                    }
-                    else
-                        specializationName = "";
-                Specialization specialization = getExistingOrSavedSpecialization(name, code, specializationName , degreeName, facultyName);
-                return specialization;
+                specialityCode = matcher.group(1);
+                specialityName = StringUtils.capitalize(matcher.group(2)).trim();
             }
-        } catch (Exception e) {
-            log.debug(e.getMessage());
-        }
-
-        return null;
+            speciality.setCode(specialityCode);
+            speciality.setName(specialityName);
+            return speciality;
     }
 
-    private Specialization getExistingOrSavedSpecialization(String specialityName, String specialityCode, String specializationName, String degreeName, String facultyName) {
-        Degree degree = degreeService.getByName(degreeName);
-        Faculty faculty = facultyService.getByName(facultyName);
-        Speciality existingSpeciality = specialityService.getSpecialityByCode(specialityCode);
-        if (existingSpeciality == null) {
-            Speciality newSpeciality = new Speciality();
-            newSpeciality.setName(specialityName);
-            newSpeciality.setCode(specialityCode);
-            newSpeciality.setActive(true);
-            existingSpeciality = specialityService.save(newSpeciality);
-        }
-        Specialization existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specializationName, degree.getId(), existingSpeciality.getId(), faculty.getId());
-        if (existingSpecialization == null) {
-            existingSpecialization = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(specialityName, degree.getId(), existingSpeciality.getId(), faculty.getId());
-        }
-        if (existingSpecialization == null) {
-            if (specialityCode.matches("\\d\\.\\d+") || (specialityCode.matches("\\d\\d\\d") && !Strings.isNullOrEmpty(specializationName))) {
-                Specialization specialization = new Specialization();
-                specialization.setName(specializationName);
-                specialization.setSpeciality(existingSpeciality);
-                specialization.setDegree(degree);
-                specialization.setFaculty(faculty);
-                specialization.setActive(true);
-                existingSpecialization = specializationService.save(specialization);
-            }
-        }
+    private Specialization getSpecializationFromImportedData(ImportedData data){
+        Specialization specialization = new Specialization();
+        specialization.setSpeciality(getSpecialityFromImportedData(data));
+        final String SPECIALIZATION_REGEXP = "([\\d+.\\d+])[\\s]([\\w\\W]+)";
+//                String specializationName;
+//                if (!Strings.isNullOrEmpty(programString))
+//                    specializationName = programString;
+//                else
+//                    if (!Strings.isNullOrEmpty(specializationString)) {
+//                        Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
+//                        Matcher spMatcher = specializationPattern.matcher(specializationString);
+//                        specializationName = spMatcher.group(1);
+//                    }
+//                    else
+//                        specializationName = "";
+//                Specialization specialization = getExistingOrSavedSpecialization(name, code, specializationName , degreeName, facultyName);
+//                return specialization;
+//            }
+        data.getFullSpecializationName();
+        specialization.set data.getProgramName();
+        specialization.setQualification(data.getQualificationGroupName());
+        data.getFacultyName();
+    }
 
-        return existingSpecialization;
+    private StudentDegree getStudentDegreeFromImportedData(ImportedData data){
+        Student student = getStudentFromImportedData(data);
+        StudentDegree studentDegree = new StudentDegree();
+        studentDegree.setStudent(student);
+
+        return studentDegree;
     }
 
     private ImportReport doImport(List<ImportedData> importedData) throws NullPointerException {
@@ -335,54 +317,109 @@ public class ImportDataService {
         ImportReport importReport = new ImportReport();
 
         for (ImportedData data : importedData) {
-            Student student;
-            StudentDegree studentDegree;
-
+            Student student  = getStudentFromImportedData(data);
+//            StudentDegree studentDegree = fetchStudentDegreeFromFile(data);
+            StudentDegree studentDegree =getStudentDegreeFromImportedData(data);
+//TODO one method with check student and specialization == degree;
+        if (isStudentAppropriate(student)) {
             try {
-                student = fetchStudent(data);
+//                studentDegree = fetchStudentDegreeFromFile(data);
             } catch (Exception e) {
                 log.error(e.getMessage());
-//                importReport.fail(fetchStudentDegree(data));
-                continue;
             }
-
-            try {
-                studentDegree = fetchStudentDegree(data, student);
+        }
+        else {
+//            importReport.addIncompleteStudentDegrees(studentDegree);
+        }
+    }
+//            try {
+//                studentDegree = fetchStudentDegreeFromFile(data, student);
 //                student = studentDegree.getStudent();
 
 //                if (Strings.isNullOrEmpty(student.getName()) || Strings.isNullOrEmpty(student.getSurname()) || student.getBirthDate() == null) {
 //                    importReport.fail(studentDegree);
 //                    continue;
-//                }
-                if (studentDegree == null && student.getId() == 0)
-                    importReport.fail(student);
-                if (studentDegree.getId() > 0) {
-                    importReport.update(studentDegree);
-                } else {
-                    importReport.insert(studentDegree);
-                }
-            } catch (IllegalArgumentException | NullPointerException e) {
-                log.error(e.getMessage());
-            }
-        }
+//                }3
 
+                //student відсутній в бд - відповідно відсутнє і studentdegree
+//                if (studentDegree == null && student.getId() == 0) {
+//                    importReport.fail(student);
+//                } else {
+//                    if (studentDegree.getId() > 0) {
+//                        importReport.update(studentDegree);
+//                    } else {
+//                        importReport.insert(studentDegree);
+//                    }
+//                }
+//            } catch (IllegalArgumentException | NullPointerException e) {
+//                log.error(e.getMessage());
+//            }
         return importReport;
     }
 
-    public void saveImport(ImportReport importReport){
-        List<StudentDegree> sdUpdate = importReport.getUpdateData();
-        studentDegreeService.update(sdUpdate);
-
-        List<StudentDegree> sdInsert = importReport.getInsertData();
-        for (StudentDegree sd: sdInsert) {
-            Student st = sd.getStudent();
-            if (st.getId() == 0)
-                studentService.save(st);
-            studentDegreeService.save(sd);
-        }
-
-        for (Student student: importReport.getFailData()){
-            studentService.save(student);
-        }
+    public Date formatFileBirthdayDateToDbBirthdayDate(String fileDate){
+        try {
+            DateFormat dbDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
+            return dbDateFormatter.parse(dbDateFormatter.format(formatter.parse(fileDate)));
+            } catch (ParseException e) {
+                log.debug(e.getMessage());
+            }
+            return null;
     }
-}
+
+    private boolean isStudentAppropriate(Student student){
+        return (!student.getName().equals("")&&!student.getSurname().equals("")&&student.getBirthDate()!=null);
+    }
+
+//    public void saveImport(ImportReport importReport){
+//        List<StudentDegree> sdUpdate = importReport.getUpdateData();
+//        studentDegreeService.update(sdUpdate);
+//
+//        List<StudentDegree> sdInsert = importReport.getInsertData();
+//        for (StudentDegree sd: sdInsert) {
+//            Student st = sd.getStudent();
+//            if (st.getId() == 0)
+//                studentService.save(st);
+//            studentDegreeService.save(sd);
+//        }
+//
+//        for (Student student: importReport.getFailData()){
+//            studentService.save(student);
+//        }
+    }
+
+
+//    private StudentDegree fetchStudentDegreeFromFile(ImportedData data, Student student) throws NullPointerException, IllegalArgumentException {
+//        String errorMsg = "Failed to fetch data. ";
+//        requireNonNull(data, errorMsg + "Param \"data\" cannot be null!");
+//        requireNonNull(student, errorMsg + "Param \"student\" cannot be null!");
+//        StudentDegree studentDegree = fetchStudentDegreeFromFile(data);
+//        if (studentDegree == null)
+//            return null;
+//        studentDegree.setStudent(student);
+//
+//        StudentDegree existingStudentDegree = null;
+//        if (student.getId() > 0) {
+//            for (StudentDegree sDegree : studentDegreeService.getAllActiveByStudent(student.getId())) {
+//                if (studentDegree.getSpecialization().getId() == sDegree.getSpecialization().getId()) {
+//                    existingStudentDegree = sDegree;
+//                    break;
+//                }
+//            }
+//        }
+//        if(existingStudentDegree != null && studentDegree != null) {
+//            existingStudentDegree.setAdmissionOrderNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getAdmissionOrderNumber(), existingStudentDegree.getAdmissionOrderNumber()));
+//            existingStudentDegree.setAdmissionOrderDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionOrderDate(), existingStudentDegree.getAdmissionOrderDate()));
+//            existingStudentDegree.setAdmissionDate(ObjectUtils.firstNonNull(studentDegree.getAdmissionDate(), existingStudentDegree.getAdmissionDate()));
+//            existingStudentDegree.setPayment(ObjectUtils.firstNonNull(studentDegree.getPayment(), existingStudentDegree.getPayment()));
+//            existingStudentDegree.setPreviousDiplomaNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getPreviousDiplomaNumber(), existingStudentDegree.getPreviousDiplomaNumber()));
+//            existingStudentDegree.setPreviousDiplomaDate(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaDate(), existingStudentDegree.getPreviousDiplomaDate()));
+//            existingStudentDegree.setPreviousDiplomaType(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaType(), existingStudentDegree.getPreviousDiplomaType()));
+//            existingStudentDegree.setPreviousDiplomaIssuedBy(ObjectUtils.firstNonNull(studentDegree.getPreviousDiplomaIssuedBy(), existingStudentDegree.getPreviousDiplomaIssuedBy()));
+//            existingStudentDegree.setSupplementNumber(StringUtil.firstNotNullNotEmpty(studentDegree.getSupplementNumber(), existingStudentDegree.getSupplementNumber()));
+//        }
+//
+//        return existingStudentDegree == null? studentDegree : existingStudentDegree;
+//    }
+//}
