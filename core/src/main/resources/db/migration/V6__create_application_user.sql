@@ -22,7 +22,7 @@ ALTER TABLE ONLY application_user
     ADD CONSTRAINT application_user_pkey PRIMARY KEY (id);
 
 
-ALTER TABLE ONLY application_user ALTER COLUMN id SET DEFAULT nextval('application_user__id_seq'::regclass);
+ALTER TABLE ONLY application_user ALTER COLUMN id SET DEFAULT nextval('application_user_id_seq'::regclass);
 
 create unique index application_user_id_uindex
 	on application_user (id)
