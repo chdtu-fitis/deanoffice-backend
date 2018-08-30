@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +23,7 @@ import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
-import ua.edu.chdtu.deanoffice.exception.PageNotFoundException;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -178,7 +177,7 @@ public class GroupController {
         List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
         if (studentGroups.size() != groupIds.length) {
             return handleException(
-                new PageNotFoundException("Not found groups " + Arrays.toString(findNouFoundStudentGroups(studentGroups, asList(groupIds))))
+                new NotFoundException("Not found groups " + Arrays.toString(findNouFoundStudentGroups(studentGroups, asList(groupIds))))
             );
         }
         try {
