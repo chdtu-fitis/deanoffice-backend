@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.api.document.groupgrade.GroupGradeReportController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -36,10 +38,8 @@ public class PercentageReportController extends DocumentResponseController {
             File groupReport = gradePercentageReportService.prepareReportForGroup(groupId, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(groupReport, groupReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
-            e.printStackTrace();
             return handleException(e);
         }
-
     }
 
     @GetMapping("/groups/{groupId}/pdf")
@@ -55,6 +55,6 @@ public class PercentageReportController extends DocumentResponseController {
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, PercentageReportController.class);
+        return ExceptionHandlerAdvice.handleException(exception, PercentageReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

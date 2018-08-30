@@ -4,6 +4,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +31,6 @@ public class DocumentResponseController {
     }
 
     private static ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, DocumentResponseController.class);
+        return ExceptionHandlerAdvice.handleException(exception, DocumentResponseController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

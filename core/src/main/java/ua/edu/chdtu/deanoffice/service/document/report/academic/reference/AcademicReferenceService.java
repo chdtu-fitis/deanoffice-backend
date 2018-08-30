@@ -31,10 +31,9 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 public class AcademicReferenceService {
 
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
-
     private static final int INDEX_OF_TABLE_WITH_GRADES = 10;
-
     private static final String DOCUMENT_DELIMITER = "/";
+    private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
     @Autowired
     private DocumentIOService documentIOService;
@@ -80,8 +79,8 @@ public class AcademicReferenceService {
             studentNameEng = student.getSurnameEng() + " " + student.getNameEng();
         }
         result.put("studentNameEng", studentNameEng);
-        result.put("facultyNameUkr", studentDegree.getSpecialization().getDepartment().getFaculty().getName());
-        result.put("facultyNameEng", studentDegree.getSpecialization().getDepartment().getFaculty().getNameEng());
+        result.put("facultyNameUkr", studentDegree.getSpecialization().getFaculty().getName());
+        result.put("facultyNameEng", studentDegree.getSpecialization().getFaculty().getNameEng());
         String code = studentDegree.getSpecialization().getSpeciality().getCode();
         result.put("specialityUkr", code + " " + studentDegree.getSpecialization().getSpeciality().getName());
         result.put("specialityEng", code + " " + studentDegree.getSpecialization().getSpeciality().getNameEng());
@@ -89,8 +88,8 @@ public class AcademicReferenceService {
         result.put("educationalProgramEng", studentDegree.getSpecialization().getNameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
         result.put("individualNumber",studentDegree.getSupplementNumber());
-        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDean()));
-        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getDepartment().getFaculty().getDeanEng()));
+        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
+        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
         result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
         result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
@@ -118,20 +117,55 @@ public class AcademicReferenceService {
         int currentSemester = 1;
         int currentRow = 2;
         for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
-            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
-            replaceInRow(newRowWithSignature, getSignatureDictionary(currentSemester));
-            table.getContent().add(currentRow, newRowWithSignature);
-            currentRow++;
-            for (Grade grade : semesterDetails.getGrades().get(0)) {
-                Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
-                replaceInRow(newRowWithCourse, getCourseDictionary(grade));
-                table.getContent().add(currentRow, newRowWithCourse);
-                currentRow++;
-            }
+            currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, getSignatureDictionary(currentSemester), semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX));
             currentSemester++;
+        }
+        List<List<Grade>> coursePapersAndInternships = getCoursePapersAndInternships(studentSummary);
+        if (coursePapersAndInternships.get(0).size() > 0) {
+            Map<String,String> replacements = new HashMap<String,String>();
+            replacements.put("n","Курсові роботи (проекти) / Term Papers (Projects)");
+            currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(0));
+        }
+        if (coursePapersAndInternships.get(1).size() > 0) {
+            Map<String,String> replacements = new HashMap<String,String>();
+            replacements.put("n","Практики / Internships");
+            insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(1));
         }
         table.getContent().remove(1);
         table.getContent().remove(table.getContent().size()-1);
+    }
+
+    private int insertOneKcSortRows(Tbl table, Tr rowWithSignature, Tr rowWithCourse, int currentRow, Map<String,String> header, List<Grade> gradeSet) {
+        Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
+        replaceInRow(newRowWithSignature, header);
+        table.getContent().add(currentRow, newRowWithSignature);
+        currentRow++;
+        for (Grade grade : gradeSet) {
+            Tr newRowWithCourse = XmlUtils.deepCopy(rowWithCourse);
+            replaceInRow(newRowWithCourse, getCourseDictionary(grade));
+            table.getContent().add(currentRow, newRowWithCourse);
+            currentRow++;
+        }
+        return currentRow;
+    }
+
+    private List<List<Grade>> getCoursePapersAndInternships(StudentSummaryForAcademicReference studentSummary) {
+        List<List<Grade>> coursePapersAndInternships = new ArrayList<List<Grade>>();
+        coursePapersAndInternships.add(new ArrayList<>());
+        coursePapersAndInternships.add(new ArrayList<>());
+        for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
+            if (semesterDetails.getGrades().get(COURSE_PAPERS_INDEX).size()>0) {
+                for (Grade grade : semesterDetails.getGrades().get(COURSE_PAPERS_INDEX)) {
+                    coursePapersAndInternships.get(0).add(grade);
+                }
+            }
+            if (semesterDetails.getGrades().get(INTERNSHIPS_INDEX).size()>0) {
+                for (Grade grade : semesterDetails.getGrades().get(INTERNSHIPS_INDEX)) {
+                    coursePapersAndInternships.get(1).add(grade);
+                }
+            }
+        }
+        return coursePapersAndInternships;
     }
 
     private Map<String, String> getSignatureDictionary(int semester) {

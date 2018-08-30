@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.api.document.diplomasupplement.DiplomaSupplementController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -42,7 +44,6 @@ public class ExamReportController extends DocumentResponseController {
         } catch (Exception e) {
             return handleException(e);
         }
-
     }
 
     @GetMapping("/groups/{groupId}/pdf")
@@ -60,6 +61,6 @@ public class ExamReportController extends DocumentResponseController {
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, ExamReportController.class);
+        return ExceptionHandlerAdvice.handleException(exception, ExamReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

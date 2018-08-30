@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.api.document.diplomasupplement.DiplomaSupplementController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -41,7 +43,7 @@ public class MultiGroupExamReportController extends DocumentResponseController {
             File examReport = multiGroupExamReportService.prepareReport(groupIds, courseId, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
-            return ExceptionHandlerAdvice.handleException(e, MultiGroupExamReportController.class);
+            return handleException(e);
         }
     }
 
@@ -55,7 +57,7 @@ public class MultiGroupExamReportController extends DocumentResponseController {
             File examReport = multiGroupExamReportService.prepareReport(groupIds, courseId, FileFormatEnum.PDF);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
-            return ExceptionHandlerAdvice.handleException(e, MultiGroupExamReportController.class);
+            return handleException(e);
         }
 
     }
@@ -66,5 +68,9 @@ public class MultiGroupExamReportController extends DocumentResponseController {
         for (Integer groupId : groupIds) {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
         }
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, MultiGroupExamReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

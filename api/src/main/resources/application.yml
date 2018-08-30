@@ -18,3 +18,4 @@ flyway.baseline-on-migrate: true
 
 server.port: 8080
 swagger.host: localhost:8080
+
