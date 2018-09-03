@@ -93,8 +93,9 @@ public class GradeService {
     }
 
     public Map<StudentDegree, List<Grade>>getGradeMapForStudents(List<Integer> studentDegreeIds, List<Integer> courseIds){
-        return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream().collect(
-                Collectors.groupingBy(Grade::getStudentDegree,toList()));
+        return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream()
+                .sorted((g1,g2) -> new Integer(g1.getCourse().getKnowledgeControl().getId()).compareTo(g2.getCourse().getKnowledgeControl().getId()))
+                .collect(Collectors.groupingBy(Grade::getStudentDegree,toList()));
     }
 
     public List<Grade> insertGrades(List<Grade> grades) {

@@ -33,24 +33,17 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
 public class PersonalStatementService {
-
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "PersonalStatement.docx";
-
     @Autowired
     private GradeService gradeService;
-
     @Autowired
     private StudentDegreeService studentDegreeService;
-
     @Autowired
     private StudentGroupService studentGroupService;
-
     @Autowired
     private CourseRepository courseRepository;
-
     @Autowired
     private DocumentIOService documentIOService;
-
     @Autowired
     private CourseForGroupService courseForGroupService;
 
@@ -91,7 +84,6 @@ public class PersonalStatementService {
         } else return new HashMap<>();
     }
 
-
     private void generateTables(WordprocessingMLPackage template, YearGrades yearGrades) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
         List<StudentDegree> studentDegrees = new ArrayList<>(yearGrades.getGradeMapForFirstSemester().keySet());
@@ -100,7 +92,7 @@ public class PersonalStatementService {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, studentDegree.getStudent());
             formFirstSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree));
-            formSecondSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree));
+            formSecondSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree));
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
@@ -122,7 +114,6 @@ public class PersonalStatementService {
             currentIndex++;
         }
         table.getContent().remove(currentIndex);
-        table.getContent().remove(2);
         table.getContent().remove(1);
     }
 
@@ -131,7 +122,7 @@ public class PersonalStatementService {
         int currentIndex = tableRows.size() - 1;
         Tr rowToCopy = tableRows.get(currentIndex);
         fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0));
-        for (Grade grade : grades.subList(0, grades.size() - 2)) {
+        for (Grade grade : grades.subList(1, grades.size())) {
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
             fillRowByGrade(newRow, grade);
             table.getContent().add(currentIndex, newRow);
@@ -143,7 +134,6 @@ public class PersonalStatementService {
     private void fillRowByGrade(Tr row, Grade grade) {
         replaceInRow(row, getGradeDictionary(grade));
     }
-
 
     private Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
@@ -201,7 +191,6 @@ public class PersonalStatementService {
             case 9:
                 result = practiceSignature;
                 break;
-
         }
         return result;
     }
@@ -211,7 +200,6 @@ public class PersonalStatementService {
         result.put("stud", student.getFullNameUkr());
         return result;
     }
-
 
     private Integer getSemesterByYearForGroup(Integer year, StudentGroup studentGroup) {
         return (year - studentGroup.getCreationYear()) * 2 + 1;
