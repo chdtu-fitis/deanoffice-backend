@@ -12,7 +12,7 @@ public class ExceptionToHttpCodeMapUtil {
         if (e instanceof UnauthorizedFacultyDataException)
             return HttpStatus.UNAUTHORIZED;
         if (e instanceof OperationCannotBePerformedException)
-            return HttpStatus.SERVICE_UNAVAILABLE;
+            return HttpStatus.UNPROCESSABLE_ENTITY;
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 }
