@@ -1,0 +1,1 @@
+ALTER TABLE renewed_expelled_student ALTER COLUMN academic_certificate_issued_by TYPE character varying(120);
