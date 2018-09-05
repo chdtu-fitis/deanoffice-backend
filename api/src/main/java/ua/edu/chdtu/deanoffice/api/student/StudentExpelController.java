@@ -123,7 +123,8 @@ public class StudentExpelController {
     @PostMapping("/renewed")
     public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {
-            if (studentUtil.studentDegreeIsActive(renewedExpelledStudentDTO.getStudentExpelId())) {
+            StudentExpel studentExpel = studentExpelService.getById(renewedExpelledStudentDTO.getStudentExpelId());
+            if (studentUtil.studentDegreeIsActive(studentExpel.getStudentDegree().getId())) {
                 return handleException(new OperationCannotBePerformedException("Даний студент не може буи поновлений, тому що він не відрахований"));
             }
             Integer id = studentExpelService
