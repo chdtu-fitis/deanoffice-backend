@@ -1,29 +1,24 @@
-package ua.edu.chdtu.deanoffice.api.student;
+package ua.edu.chdtu.deanoffice.api.student.syncronization.edebo;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.student.dto.ImportReportDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.student.StudentController;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.service.document.importing.ImportDataService;
+import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSynchronizationServiceImpl;
 import ua.edu.chdtu.deanoffice.service.document.importing.ImportReport;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/students")
-public class ImportController {
-    private final ImportDataService importDataService;
+public class SyncronizationController {
+    private final EdeboStudentDataSynchronizationServiceImpl edeboDataSynchronizationServiceImpl;
 
     @Autowired
-    public ImportController(ImportDataService importDataService) {
-        this.importDataService = importDataService;
+    public SyncronizationController(EdeboStudentDataSynchronizationServiceImpl edeboDataSynchronizationServiceImpl) {
+        this.edeboDataSynchronizationServiceImpl = edeboDataSynchronizationServiceImpl;
     }
 
     @JsonView(StudentView.Degree.class)
@@ -37,7 +32,7 @@ public class ImportController {
         ImportReport importReport = null;
 
         try {
-            importReport = importDataService.getStudentsFromStream(uploadfile.getInputStream());
+            importReport = edeboDataSynchronizationServiceImpl.getStudentDegreesFromStream(uploadfile.getInputStream());
 //            importDataService.saveImport(importReport);
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -51,9 +46,9 @@ public class ImportController {
         return null;
     }
 
-//    private ImportReportDTO parseToImportReportDTO(ImportReport importReport) {
+//    private SyncronizationReportDTO parseToImportReportDTO(ImportReport importReport) {
 //        ModelMapper modelMapper = new ModelMapper();
-//        ImportReportDTO importReportDTO = new ImportReportDTO();
+//        SyncronizationReportDTO importReportDTO = new SyncronizationReportDTO();
 //        importReportDTO.setInsertData(modelMapper.map(importReport.getInsertData(), new TypeToken<List<StudentDegreeDTO>>() {
 //        }.getType()));
 //        importReportDTO.setUpdateData(modelMapper.map(importReport.getUpdateData(), new TypeToken<List<StudentDegreeDTO>>() {

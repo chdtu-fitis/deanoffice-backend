@@ -11,6 +11,8 @@ import java.util.List;
 
 @Getter
 @Setter
+
+//Should be renamed to EdboDataSynchronizationReport
 public class ImportReport {
     private List<StudentDegree> matchedStudentDegrees;
     private List<List<StudentDegree>> unmatchedStudentDegrees;
@@ -19,7 +21,7 @@ public class ImportReport {
     private List<StudentDegree> incompleteStudentDegrees;
     private List<StudentDegree> absentInFileStudentDegrees;
 
-    public ImportReport() {
+    protected ImportReport() {
         matchedStudentDegrees = new ArrayList<>();
         unmatchedStudentDegrees = new ArrayList<>();
         noSuchStudentAndStudentDegrees = new ArrayList<>();

@@ -34,8 +34,14 @@ public class StudentService {
         );
     }
 
-    public List<Student> searchByFullNameAndBirthDate(String name, String surname, String patronymic, Date birthDate ){
-        return studentRepository.findByFullNameUkrAndBirthDate(name, surname, patronymic, birthDate);
+    public Student searchByFullNameAndBirthDate(String name, String surname, String patronymic, Date birthDate ){
+        List<Student> studentsList = studentRepository.findByFullNameUkrAndBirthDate(name, surname, patronymic, birthDate);
+        if (studentsList.size()==0){
+            return null;
+        }
+        else {
+            return studentsList.get(0);
+        }
     }
 
     public Student save(Student student) {
