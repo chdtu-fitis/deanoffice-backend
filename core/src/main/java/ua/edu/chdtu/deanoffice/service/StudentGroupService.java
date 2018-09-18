@@ -43,7 +43,6 @@ public class StudentGroupService {
         return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, getCurrentYear(), facultyId);
     }
 
-
     public List<StudentGroup> getAllByActive(boolean onlyActive, int facultyId) {
         if (onlyActive) {
             return this.studentGroupRepository.findAllActiveByFaculty(facultyId);

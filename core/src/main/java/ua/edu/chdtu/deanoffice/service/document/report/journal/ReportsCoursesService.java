@@ -36,7 +36,6 @@ public class ReportsCoursesService {
     private static final String KURS= "_kurs";
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
-
     private StudentGroupService groupService;
     private CourseForGroupService courseForGroupService;
     private DocumentIOService documentIOService;
@@ -90,8 +89,6 @@ public class ReportsCoursesService {
         return courseReports;
     }
 
-
-
     private WordprocessingMLPackage fillTemplate(String templateName, List<CourseReport> courseReports, String groupName) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         fillTableWithGrades(template, courseReports);
@@ -116,7 +113,4 @@ public class ReportsCoursesService {
         }
         tempTable.getContent().remove(templateRow);
     }
-
-
-
 }
