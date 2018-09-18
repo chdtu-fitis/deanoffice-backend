@@ -30,7 +30,7 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 @Service
 public class ReportsCoursesService {
 
-    private static final String TEMPLATES_PATH = "docs/templates/";
+    private static final String TEMPLATES_PATH = "/docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "PredmJourn.docx";
     private static final String FILE_NAME= "jurnal_vidom_bakalavr_";
     private static final String KURS= "_kurs";
