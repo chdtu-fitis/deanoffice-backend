@@ -6,6 +6,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
@@ -20,7 +21,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/documents/course-report")
-public class ReportsJournalController {
+public class ReportsJournalController extends DocumentResponseController {
     private ReportsCoursesService reportsCoursesService;
     private FacultyService facultyService;
 
@@ -29,10 +30,10 @@ public class ReportsJournalController {
         this.facultyService = facultyService;
     }
 
-    @GetMapping("/groups/{group_id}/{semester}")
+    @GetMapping("/groups/{groupId}")
     public ResponseEntity<Resource> generateForGroup(
-            @PathVariable("group_id") Integer groupId,
-            @PathVariable Integer semester,
+            @PathVariable Integer groupId,
+            @RequestParam("semester") Integer semester,
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
@@ -47,14 +48,16 @@ public class ReportsJournalController {
     public ResponseEntity<Resource> generateForYear(@PathVariable Integer yearId,
                                                     @PathVariable Integer degreeId,
                                                     @RequestParam("semester") int semester,
-                                                    @CurrentUser ApplicationUser user) throws IOException, Docx4JException {
-
-        File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId,yearId, semester,user.getFaculty().getId());
-        return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(),MEDIA_TYPE_DOCX);
+                                                    @CurrentUser ApplicationUser user)  {
+        try {
+            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId,yearId, semester,user.getFaculty().getId());
+            return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(),MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
     private static ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, ReportsJournalController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
-
 }
