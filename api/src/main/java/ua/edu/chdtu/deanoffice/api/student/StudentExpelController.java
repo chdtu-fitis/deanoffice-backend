@@ -125,7 +125,7 @@ public class StudentExpelController {
         try {
             StudentExpel studentExpel = studentExpelService.getById(renewedExpelledStudentDTO.getStudentExpelId());
             if (studentUtil.studentDegreeIsActive(studentExpel.getStudentDegree().getId())) {
-                return handleException(new OperationCannotBePerformedException("Даний студент не може буи поновлений, тому що він не відрахований"));
+                return handleException(new OperationCannotBePerformedException("Даний студент не може бути поновлений, тому що він не відрахований"));
             }
             Integer id = studentExpelService
                     .renew(createRenewedExpelledStudent(renewedExpelledStudentDTO))
