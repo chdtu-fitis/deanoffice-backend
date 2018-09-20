@@ -5,7 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
-import java.util.List;
+import java.io.InputStream;
 
 public interface EdeboStudentDataSyncronizationService {
 
@@ -19,7 +19,7 @@ public interface EdeboStudentDataSyncronizationService {
 
     StudentDegree getStudentDegreeFromData(ImportedData data);
 
-    ImportReport getImportReport(List<ImportedData> importedData);
+    EdeboDataSyncronizationReport getSyncronizationReport(InputStream xlsxInputStream);
 
     void addStudentDegreeToSyncronizationReport(StudentDegree studentDegree);
 

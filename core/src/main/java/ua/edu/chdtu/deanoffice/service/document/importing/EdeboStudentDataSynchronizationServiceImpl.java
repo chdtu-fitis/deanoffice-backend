@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.weaver.patterns.PatternNode;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
@@ -17,7 +16,6 @@ import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Worksheet;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
-import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 
@@ -61,11 +59,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         this.facultyService = facultyService;
     }
 
-    public ImportReport getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
+    private List<ImportedData> getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
         return getStudentDegrees(xlsxInputStream);
     }
 
-    private ImportReport getStudentDegrees(Object source) throws IOException, Docx4JException {
+    private List<ImportedData> getStudentDegrees(Object source) throws IOException, Docx4JException {
         requireNonNull(source);
         SpreadsheetMLPackage xlsxPkg;
 
@@ -74,14 +72,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         } else {
             xlsxPkg = documentIOService.loadSpreadsheetDocument((InputStream) source);
         }
-
-        List<ImportedData> importedData = getImportedDataFromXlsxPkg(xlsxPkg);
-        return getImportReport(importedData);
+        return getImportedDataFromXlsxPkg(xlsxPkg);
     }
 
     private List<ImportedData> getImportedDataFromXlsxPkg(SpreadsheetMLPackage xlsxPkg) throws NullPointerException {
         requireNonNull(xlsxPkg, "Failed to import data. Param \"xlsxPkg\" cannot be null!");
-
         try {
             WorkbookPart workbookPart = xlsxPkg.getWorkbookPart();
             WorksheetPart sheetPart = workbookPart.getWorksheet(0);
@@ -94,10 +89,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
 
             for (Row r : sheetData.getRow()) {
                 log.debug("importing row: " + r.getR());
-
                 for (Cell c : r.getC()) {
                     cellValue = "";
-
                     try {
                         cellValue = formatter.formatCellValue(c);
                     } catch (Exception e) {
@@ -109,11 +102,9 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                         sd.setCellData(c.getR(), cellValue.trim());
                     }
                 }
-
                 if (r.getR() == 1) {
                     continue;
                 }
-
                 importedData.add(sd.getStudentData());
                 sd.cleanStudentData();
             }
@@ -124,18 +115,27 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
     }
 
-
     @Override
-    public ImportReport getImportReport(List<ImportedData> importedData) throws NullPointerException {
-        Objects.requireNonNull(importedData);
-        ImportReport importReport = new ImportReport();
-        for (ImportedData data : importedData) {
-            if (isCriticalDataAvailable(data)) {
-                Student student = getStudentFromData(data);
-                StudentDegree studentDegree = getStudentDegreeFromData(data);
+    public EdeboDataSyncronizationReport getSyncronizationReport(InputStream xlsxInputStream) throws NullPointerException {
+        try {
+            List<ImportedData> importedData = getStudentDegreesFromStream(xlsxInputStream);
+            Objects.requireNonNull(importedData);
+            EdeboDataSyncronizationReport edeboDataSyncronizationReport = new EdeboDataSyncronizationReport();
+            for (ImportedData data : importedData) {
+                if (isCriticalDataAvailable(data)) {
+                    Student student = getStudentFromData(data);
+                    StudentDegree studentDegree = getStudentDegreeFromData(data);
+                    studentDegree.setStudent(student);
+                    addStudentDegreeToSyncronizationReport(studentDegree);
+                }
             }
+            return edeboDataSyncronizationReport;
+        } catch (Docx4JException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return importReport;
+        return null;
     }
 
     @Override
@@ -155,11 +155,9 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 return false;
             }
         }
-
         if (Strings.isNullOrEmpty(specialityName)) {
             return false;
         }
-
         Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
         Matcher specialityMatcher = specialityPattern.matcher(specialityName);
         if (specialityMatcher.matches() && Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(qualificationName)) {
@@ -225,27 +223,53 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Specialization specialization = new Specialization();
         specialization.setSpeciality(getSpecialityFromData(data));
         Faculty faculty = new Faculty();
-        StudentGroup studentGroup = new StudentGroup();
         String fullSpecializationName = data.getFullSpecializationName();
         if (!Strings.isNullOrEmpty(fullSpecializationName)) {
             Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
             Matcher spMatcher = specializationPattern.matcher(fullSpecializationName);
-            if(spMatcher.matches() && spMatcher.groupCount()>1) {
+            if (spMatcher.matches() && spMatcher.groupCount() > 1) {
                 specialization.setCode(spMatcher.group(0));
                 specialization.setName(spMatcher.group(1));
             }
         }
         specialization.setNameEng(data.getProgramNameEn());
-        specialization.setQualification(data.getQualificationGroupName());
-        specialization.setQualificationEng(data.getBaseQualificationName());
+        specialization.setDegree(getDegreeFromFileByName(data.getQualificationGroupName()));
+//        specialization.set(data.getQualificationGroupName());
+//        specialization.set(data.getBaseQualificationName());
         faculty.setName(data.getFacultyName());
         specialization.setFaculty(faculty);
-        studentGroup.setTuitionForm(getTuitionFormFromFile(data.getEducationFormName()));
         return specialization;
+    }
+
+    private Degree getDegreeFromFileByName(String degreeName) {
+        DegreeEnum degreeEnum = DegreeEnum.BACHELOR;
+        degreeName = degreeName.toUpperCase();
+        switch (degreeName) {
+            case "Бакалавр":
+                degreeEnum = DegreeEnum.BACHELOR;
+                break;
+            case "Магістр":
+                degreeEnum = DegreeEnum.MASTER;
+                break;
+            case "Спеціаліст":
+                degreeEnum = DegreeEnum.SPECIALIST;
+                break;
+        }
+        return new Degree(degreeEnum.getId(), degreeEnum.getNameUkr());
+    }
+
+    private EducationDocument getEducationDocumentByName(String educationDocumentName){
+//    EducationDocument educationDocument =EducationDocument.SECONDARY_SCHOOL_CERTIFICATE;
+//    educationDocumentName = educationDocumentName.toUpperCase();
+//    switch (educationDocumentName){
+//        case
+//    }
+        return null;
     }
 
     @Override
     public StudentDegree getStudentDegreeFromData(ImportedData data) {
+        StudentGroup studentGroup = new StudentGroup();
         Student student = getStudentFromData(data);
         Specialization specialization = getSpecializationFromData(data); //getSpeciality inside
         StudentDegree studentDegree = new StudentDegree();
@@ -254,6 +278,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         studentDegree.setSupplementNumber(data.getEducationId());
         studentDegree.setAdmissionDate(formatFileBirthdayDateToDbBirthdayDate(data.getEducationDateBegin()));
         studentDegree.setPreviousDiplomaType(getEducationDocumentFromData(data.getBaseQualificationName()));
+        studentGroup.setTuitionForm(getTuitionFormFromFile(data.getEducationFormName()));
+        studentDegree.setStudentGroup(studentGroup);
+        Specialization s = new Specialization();
+//        studentDegree.setPreviousDiplomaType(Ed);
         return studentDegree;
     }
 

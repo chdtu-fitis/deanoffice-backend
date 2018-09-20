@@ -8,45 +8,45 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.StudentController;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSynchronizationServiceImpl;
-import ua.edu.chdtu.deanoffice.service.document.importing.ImportReport;
+import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSyncronizationService;
+import ua.edu.chdtu.deanoffice.service.document.importing.EdeboDataSyncronizationReport;
 
 @RestController
 @RequestMapping("/students")
 public class SyncronizationController {
-    private final EdeboStudentDataSynchronizationServiceImpl edeboDataSynchronizationServiceImpl;
+    private EdeboStudentDataSyncronizationService edeboDataSynchronizationService;
 
     @Autowired
-    public SyncronizationController(EdeboStudentDataSynchronizationServiceImpl edeboDataSynchronizationServiceImpl) {
-        this.edeboDataSynchronizationServiceImpl = edeboDataSynchronizationServiceImpl;
+    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService) {
+        this.edeboDataSynchronizationService = edeboDataSynchronizationService;
     }
 
     @JsonView(StudentView.Degree.class)
-    @PostMapping("/import")
-//    public ResponseEntity importStudents(@RequestParam("file") MultipartFile uploadfile) {
-    public @ResponseBody String importStudents(@RequestParam("file") MultipartFile uploadfile) {
+    @PostMapping("/edebo-synchronization")
+//    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile) {
+    public @ResponseBody String studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile) {
         if (uploadfile.isEmpty()) {
             ResponseEntity.ok().body("No file selected");
         }
 
-        ImportReport importReport = null;
+        EdeboDataSyncronizationReport edeboDataSyncronizationReport = null;
 
         try {
-            importReport = edeboDataSynchronizationServiceImpl.getStudentDegreesFromStream(uploadfile.getInputStream());
-//            importDataService.saveImport(importReport);
+            edeboDataSyncronizationReport = edeboDataSynchronizationService.getSyncronizationReport(uploadfile.getInputStream());
+//            importDataService.saveImport(edeboDataSyncronizationReport);
         } catch (Exception exception) {
             exception.printStackTrace();
             //return handleException(exception);
         }
-        if (importReport == null)
+        if (edeboDataSyncronizationReport == null)
             return "import report is not created";
 //        else
-//            return "insert: "+importReport.getInsertData().size()+" update: "+importReport.getUpdateData().size()+" fail: "+importReport.getFailData().size();
-//        return ResponseEntity.ok(parseToImportReportDTO(importReport));
+//            return "insert: "+edeboDataSyncronizationReport.getInsertData().size()+" update: "+edeboDataSyncronizationReport.getUpdateData().size()+" fail: "+edeboDataSyncronizationReport.getFailData().size();
+//        return ResponseEntity.ok(parseToImportReportDTO(edeboDataSyncronizationReport));
         return null;
     }
 
-//    private SyncronizationReportDTO parseToImportReportDTO(ImportReport importReport) {
+//    private SyncronizationReportDTO parseToImportReportDTO(EdeboDataSyncronizationReport importReport) {
 //        ModelMapper modelMapper = new ModelMapper();
 //        SyncronizationReportDTO importReportDTO = new SyncronizationReportDTO();
 //        importReportDTO.setInsertData(modelMapper.map(importReport.getInsertData(), new TypeToken<List<StudentDegreeDTO>>() {

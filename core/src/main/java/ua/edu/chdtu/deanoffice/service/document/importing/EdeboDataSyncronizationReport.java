@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
-
 //Should be renamed to EdboDataSynchronizationReport
-public class ImportReport {
+public class EdeboDataSyncronizationReport {
     private List<StudentDegree> matchedStudentDegrees;
     private List<List<StudentDegree>> unmatchedStudentDegrees;
     private List<StudentDegree> noSuchStudentAndStudentDegrees;
@@ -21,7 +19,7 @@ public class ImportReport {
     private List<StudentDegree> incompleteStudentDegrees;
     private List<StudentDegree> absentInFileStudentDegrees;
 
-    protected ImportReport() {
+    protected EdeboDataSyncronizationReport() {
         matchedStudentDegrees = new ArrayList<>();
         unmatchedStudentDegrees = new ArrayList<>();
         noSuchStudentAndStudentDegrees = new ArrayList<>();
