@@ -32,7 +32,7 @@ public class SyncronizationController {
         EdeboDataSyncronizationReport edeboDataSyncronizationReport = null;
 
         try {
-            edeboDataSyncronizationReport = edeboDataSynchronizationService.getSyncronizationReport(uploadfile.getInputStream());
+            edeboDataSyncronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
 //            importDataService.saveImport(edeboDataSyncronizationReport);
         } catch (Exception exception) {
             exception.printStackTrace();

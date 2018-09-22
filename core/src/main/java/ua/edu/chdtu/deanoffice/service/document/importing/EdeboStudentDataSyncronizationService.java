@@ -9,7 +9,7 @@ import java.io.InputStream;
 
 public interface EdeboStudentDataSyncronizationService {
 
-    boolean isCriticalDataAvailable(ImportedData data);
+    boolean isCriticalDataAvailable(StudentDegree studentDegree);
 
     Student getStudentFromData(ImportedData data);
 
@@ -19,9 +19,9 @@ public interface EdeboStudentDataSyncronizationService {
 
     StudentDegree getStudentDegreeFromData(ImportedData data);
 
-    EdeboDataSyncronizationReport getSyncronizationReport(InputStream xlsxInputStream);
+    EdeboDataSyncronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream);
 
-    void addStudentDegreeToSyncronizationReport(StudentDegree studentDegree);
+    void addSynchronizationReportForImportedData(ImportedData importedData,EdeboDataSyncronizationReport edeboDataSyncronizationReport);
 
     boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb);
 }

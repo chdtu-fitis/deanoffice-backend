@@ -116,18 +116,14 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboDataSyncronizationReport getSyncronizationReport(InputStream xlsxInputStream) throws NullPointerException {
+    public EdeboDataSyncronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream) throws NullPointerException {
         try {
             List<ImportedData> importedData = getStudentDegreesFromStream(xlsxInputStream);
             Objects.requireNonNull(importedData);
             EdeboDataSyncronizationReport edeboDataSyncronizationReport = new EdeboDataSyncronizationReport();
             for (ImportedData data : importedData) {
-                if (isCriticalDataAvailable(data)) {
-                    Student student = getStudentFromData(data);
-                    StudentDegree studentDegree = getStudentDegreeFromData(data);
-                    studentDegree.setStudent(student);
-                    addStudentDegreeToSyncronizationReport(studentDegree);
-                }
+                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport);
+//                }
             }
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
@@ -139,25 +135,33 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public boolean isCriticalDataAvailable(ImportedData data) throws RuntimeException {
+    public boolean isCriticalDataAvailable(StudentDegree studentDegree) throws RuntimeException {
         List<String> necessaryNotEmptyStudentDegreeData = new ArrayList<>();
-        String specializationName = data.getFullSpecializationName();
-        String specialityName = data.getFullSpecialityName();
-        String qualificationName = data.getProgramName();
-        necessaryNotEmptyStudentDegreeData.add(data.getLastName());
-        necessaryNotEmptyStudentDegreeData.add(data.getFirstName());
-        necessaryNotEmptyStudentDegreeData.add(data.getMiddleName());
-        necessaryNotEmptyStudentDegreeData.add(data.getBirthday());
-        necessaryNotEmptyStudentDegreeData.add(data.getQualificationGroupName());
-        necessaryNotEmptyStudentDegreeData.add(data.getFacultyName());
+        Specialization specialization = studentDegree.getSpecialization();
+        Student student = studentDegree.getStudent();
+        String specialityName = specialization.getSpeciality().getName();
+        necessaryNotEmptyStudentDegreeData.add(student.getSurname());
+        necessaryNotEmptyStudentDegreeData.add(student.getName());
+        necessaryNotEmptyStudentDegreeData.add(student.getPatronimic());
+        necessaryNotEmptyStudentDegreeData.add(specialization.getDegree().getName());
+        necessaryNotEmptyStudentDegreeData.add(specialization.getFaculty().getName());
         for (String s : necessaryNotEmptyStudentDegreeData) {
             if (Strings.isNullOrEmpty(s)) {
                 return false;
             }
         }
-        if (Strings.isNullOrEmpty(specialityName)) {
+        if (student.getBirthDate() == null || Strings.isNullOrEmpty(specialityName) ||
+                studentDegree.getSpecialization().getDegree() == null) {
             return false;
         }
+        return true;
+
+    }
+
+    private boolean isSpecializationPatternMatch(ImportedData importedData) {
+        String specialityName = importedData.getFullSpecialityName();
+        String specializationName = importedData.getFullSpecializationName();
+        String qualificationName = importedData.getProgramName();
         Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
         Matcher specialityMatcher = specialityPattern.matcher(specialityName);
         if (specialityMatcher.matches() && Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(qualificationName)) {
@@ -171,12 +175,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
                 specialityMatcher = specialityPattern.matcher(specialityName);
                 if (specialityMatcher.matches() &&
-                        Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(qualificationName)) {
+                        Strings.isNullOrEmpty(specializationName) && Strings.isNullOrEmpty(qualificationName)) {
                     return true;
                 }
             }
         }
-
         return false;
     }
 
@@ -192,7 +195,6 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         student.setSurnameEng(data.getLastNameEn());
         student.setPatronimicEng(data.getMiddleNameEn());
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
-        student.setSchool(data.getDocumentIssued2());
         return student;
     }
 
@@ -232,78 +234,57 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 specialization.setName(spMatcher.group(1));
             }
         }
-        specialization.setNameEng(data.getProgramNameEn());
-        specialization.setDegree(getDegreeFromFileByName(data.getQualificationGroupName()));
-//        specialization.set(data.getQualificationGroupName());
-//        specialization.set(data.getBaseQualificationName());
+        //TODO add message to list for front;
+        specialization.setDegree(DegreeEnum.getDegreeFromEnumByName(data.getQualificationGroupName()));
         faculty.setName(data.getFacultyName());
         specialization.setFaculty(faculty);
         return specialization;
     }
 
-    private Degree getDegreeFromFileByName(String degreeName) {
-        DegreeEnum degreeEnum = DegreeEnum.BACHELOR;
-        degreeName = degreeName.toUpperCase();
-        switch (degreeName) {
-            case "Бакалавр":
-                degreeEnum = DegreeEnum.BACHELOR;
-                break;
-            case "Магістр":
-                degreeEnum = DegreeEnum.MASTER;
-                break;
-            case "Спеціаліст":
-                degreeEnum = DegreeEnum.SPECIALIST;
-                break;
-        }
-        return new Degree(degreeEnum.getId(), degreeEnum.getNameUkr());
-    }
-
-    private EducationDocument getEducationDocumentByName(String educationDocumentName){
-//    EducationDocument educationDocument =EducationDocument.SECONDARY_SCHOOL_CERTIFICATE;
-//    educationDocumentName = educationDocumentName.toUpperCase();
-//    switch (educationDocumentName){
-//        case
-//    }
-        return null;
-    }
-
     @Override
     public StudentDegree getStudentDegreeFromData(ImportedData data) {
-        StudentGroup studentGroup = new StudentGroup();
         Student student = getStudentFromData(data);
         Specialization specialization = getSpecializationFromData(data); //getSpeciality inside
         StudentDegree studentDegree = new StudentDegree();
+        studentDegree.setActive(true);
         studentDegree.setStudent(student);
         studentDegree.setSpecialization(specialization);
         studentDegree.setSupplementNumber(data.getEducationId());
+
+        //can be null; need to check
+        studentDegree.setPreviousDiplomaDate(formatFileBirthdayDateToDbBirthdayDate(data.getDocumentDateGet2()));
+        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
+        studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
+        studentDegree.setDiplomaNumber(data.getDocumentSeries2() + " " + data.getDocumentNumbers2());
         studentDegree.setAdmissionDate(formatFileBirthdayDateToDbBirthdayDate(data.getEducationDateBegin()));
-        studentDegree.setPreviousDiplomaType(getEducationDocumentFromData(data.getBaseQualificationName()));
-        studentGroup.setTuitionForm(getTuitionFormFromFile(data.getEducationFormName()));
-        studentDegree.setStudentGroup(studentGroup);
-        Specialization s = new Specialization();
-//        studentDegree.setPreviousDiplomaType(Ed);
+        studentDegree.setPreviousDiplomaType(EducationDocument.getEducationDocumentByName(data.getPersonDocumentTypeName()));
         return studentDegree;
     }
 
     @Override
-    public void addStudentDegreeToSyncronizationReport(StudentDegree studentDegree) {
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboDataSyncronizationReport edeboDataSyncronizationReport) {
+        StudentDegree studentDegreeFromData;
+        if (isSpecializationPatternMatch(importedData)) {
+            studentDegreeFromData = getStudentDegreeFromData(importedData);
+            if (!isCriticalDataAvailable(studentDegreeFromData)) {
+                edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
+                return;
+            }
+        } else {
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
+            return;
+        }
+        StudentDegree studentDegreeFromDb = null;
+        // db calls;
+        if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb)) {
+            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(studentDegreeFromData);
+        }
 
     }
 
     @Override
-    public boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb) {
+    public boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromData, StudentDegree studentDegreeFromDb) {
         return false;
-    }
-
-    private EducationDocument getEducationDocumentFromData(String baseQualification) {
-        switch (baseQualification) {
-            case "Бакалавр":
-                return EducationDocument.BACHELOR_DIPLOMA;
-            case "Магістр":
-                return EducationDocument.MASTER_DIPLOMA;
-            default:
-                return null;
-        }
     }
 
     private Date formatFileBirthdayDateToDbBirthdayDate(String fileDate) {

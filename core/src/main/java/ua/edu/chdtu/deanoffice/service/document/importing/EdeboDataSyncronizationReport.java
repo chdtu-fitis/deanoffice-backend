@@ -1,8 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import lombok.Getter;
-import lombok.Setter;
-import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import javax.annotation.PostConstruct;
@@ -12,60 +10,53 @@ import java.util.List;
 @Getter
 //Should be renamed to EdboDataSynchronizationReport
 public class EdeboDataSyncronizationReport {
-    private List<StudentDegree> matchedStudentDegrees;
-    private List<List<StudentDegree>> unmatchedStudentDegrees;
-    private List<StudentDegree> noSuchStudentAndStudentDegrees;
-    private List<StudentDegree> noSuchStudentDegrees;
-    private List<StudentDegree> incompleteStudentDegrees;
-    private List<StudentDegree> absentInFileStudentDegrees;
+    private List<StudentDegree> synchronizedStudentDegreesGreen;
+    private List<List<StudentDegree>> unmatchedSecondaryDataStudentDegreesBlue;
+    private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
+    private List<ImportedData> missingPrimaryDataRed;
+    private List<StudentDegree> absentInFileStudentDegreesYellow;
 
     protected EdeboDataSyncronizationReport() {
-        matchedStudentDegrees = new ArrayList<>();
-        unmatchedStudentDegrees = new ArrayList<>();
-        noSuchStudentAndStudentDegrees = new ArrayList<>();
-        noSuchStudentDegrees = new ArrayList<>();
-        incompleteStudentDegrees = new ArrayList<>();
-        absentInFileStudentDegrees = new ArrayList<>();
+        synchronizedStudentDegreesGreen = new ArrayList<>();
+        unmatchedSecondaryDataStudentDegreesBlue = new ArrayList<>();
+        noSuchStudentOrSuchStudentDegreeInDbOrange = new ArrayList<>();
+        missingPrimaryDataRed = new ArrayList<>();
+        absentInFileStudentDegreesYellow = new ArrayList<>();
     }
 
     @PostConstruct
-    private void initUnmatchedStudentDegreesList (){
-        unmatchedStudentDegrees.add(new ArrayList<>());
-        unmatchedStudentDegrees.add(new ArrayList<>());
+    private void initUnmatchedSecondaryDataStudentDegreesList(){
+        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
+        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
     }
 
-    public void addSyncohronizedDegrees(StudentDegree studentDegree) {
-        matchedStudentDegrees.add(studentDegree);
+    public void addSyncohronizedDegreeGreen(StudentDegree studentDegree) {
+        synchronizedStudentDegreesGreen.add(studentDegree);
     }
 
-    public void addUnmatchedStudentDegrees(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDB){
-        unmatchedStudentDegrees.get(0).add(studentDegreeFromFile);
-        unmatchedStudentDegrees.get(1).add(studentDegreeFromDB);
+    public void addUnmatchedSecondaryDataStudentDegreeBlue(StudentDegree studentDegreeFromData, StudentDegree studentDegreeFromDb){
+        unmatchedSecondaryDataStudentDegreesBlue.get(0).add(studentDegreeFromData);
+        unmatchedSecondaryDataStudentDegreesBlue.get(1).add(studentDegreeFromDb);
     }
 
-    public void addNoSuchStudentAndStudentDegrees(StudentDegree studentDegreeFromFile){
-        noSuchStudentAndStudentDegrees.add(studentDegreeFromFile);
+    public void addNoSuchStudentOrStudentDegreeInDbOrange(StudentDegree studentDegreeFromData){
+        noSuchStudentOrSuchStudentDegreeInDbOrange.add(studentDegreeFromData);
     }
 
-    public void addNoSuchStudentDegrees(StudentDegree studentDegreeFromFile){
-        noSuchStudentDegrees.add(studentDegreeFromFile);
+    public void addMissingPrimaryDataRed(ImportedData importedData){
+        missingPrimaryDataRed.add(importedData);
     }
 
-    public void addIncompleteStudentDegrees(StudentDegree studentDegreeFromFile){
-        incompleteStudentDegrees.add(studentDegreeFromFile);
-    }
-
-    public void absentInFileStudentDegrees(List<StudentDegree> studentDegreesFromDB){
-        absentInFileStudentDegrees.addAll(studentDegreesFromDB);
+    public void addAbsentInFileStudentDegreeYellow(List<StudentDegree> studentDegreesFromDB){
+        absentInFileStudentDegreesYellow.addAll(studentDegreesFromDB);
     }
 
     public void clear() {
-        matchedStudentDegrees.clear();
-        unmatchedStudentDegrees.clear();
-        noSuchStudentAndStudentDegrees.clear();
-        noSuchStudentDegrees.clear();
-        incompleteStudentDegrees.clear();
-        absentInFileStudentDegrees.clear();
+        synchronizedStudentDegreesGreen.clear();
+        unmatchedSecondaryDataStudentDegreesBlue.clear();
+        noSuchStudentOrSuchStudentDegreeInDbOrange.clear();
+        missingPrimaryDataRed.clear();
+        absentInFileStudentDegreesYellow.clear();
     }
 
 
