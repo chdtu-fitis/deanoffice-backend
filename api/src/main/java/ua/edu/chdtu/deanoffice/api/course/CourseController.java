@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.course;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +67,53 @@ public class CourseController {
         try {
             List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
             return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/courses/other-semester")
+    public ResponseEntity getCoursesFromOtherGroupAndSemester(
+            @RequestParam("semester") int semester,
+            @RequestParam("coursesKeys") int[] coursesKeys) {
+        try {
+            // Отримуємо всі курси за потрібний семестр
+            List<Course> coursesBySemester = courseService.getCoursesBySemester(semester);
+            // Отримуємо всі курси, що були передані для обробки
+            List<Course> inCourse = new ArrayList<>();
+            for (int coursesKey : coursesKeys) {
+                Course t = courseService.getById(coursesKey);
+                if (t != null) inCourse.add(t);
+            }
+            // Шукаємо за параметром CourseName схожі курси за потрібний семестр, якщо
+            // знаходимо, то додаємо їх до списку existCourseForSemester. Пошук по ключу імені курса
+            List<Course> existCourseForSemester = new ArrayList<>();
+            coursesBySemester.forEach(course -> {
+                for (int i = inCourse.size() - 1; i >= 0; i--) {
+                    if (course.getCourseName().getId() == inCourse.get(i).getId()) {
+                        existCourseForSemester.add(course);
+                        inCourse.remove(i);
+                    }
+                }
+            });
+            // Для всіх курсів, для яких не було знайдено схожий курс за потрібний семестр
+            // виконуємо створення такого курсу за потрібний семестр. Всі дані, які були
+            // у вхідного курса копіюються до нового курсу
+            List<Course> createdCourses = new ArrayList<>();
+            inCourse.forEach(course -> {
+                Course t = new Course();
+                t.setSemester(semester);
+                t.setCourseName(course.getCourseName());
+                t.setCredits(course.getCredits());
+                t.setHours(course.getHours());
+                t.setHoursPerCredit(course.getHoursPerCredit());
+                t.setKnowledgeControl(course.getKnowledgeControl());
+                Course createdCourse = courseService.createOrUpdateCourse(t);
+                if (createdCourse != null) createdCourses.add(createdCourse);
+            });
+            // Виконуємо зливання двох списків
+            existCourseForSemester.addAll(createdCourses);
+            return ResponseEntity.ok(map(existCourseForSemester, CourseDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
