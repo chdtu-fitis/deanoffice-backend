@@ -1,14 +1,17 @@
 package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Getter
-//Should be renamed to EdboDataSynchronizationReport
 public class EdeboDataSyncronizationReport {
     private List<StudentDegree> synchronizedStudentDegreesGreen;
     private List<List<StudentDegree>> unmatchedSecondaryDataStudentDegreesBlue;
@@ -16,18 +19,14 @@ public class EdeboDataSyncronizationReport {
     private List<ImportedData> missingPrimaryDataRed;
     private List<StudentDegree> absentInFileStudentDegreesYellow;
 
-    protected EdeboDataSyncronizationReport() {
+    public EdeboDataSyncronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
         unmatchedSecondaryDataStudentDegreesBlue = new ArrayList<>();
+        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
+        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
         noSuchStudentOrSuchStudentDegreeInDbOrange = new ArrayList<>();
         missingPrimaryDataRed = new ArrayList<>();
         absentInFileStudentDegreesYellow = new ArrayList<>();
-    }
-
-    @PostConstruct
-    private void initUnmatchedSecondaryDataStudentDegreesList(){
-        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
-        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
     }
 
     public void addSyncohronizedDegreeGreen(StudentDegree studentDegree) {

@@ -38,4 +38,13 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("groupId") Integer groupId,
             @Param("active") boolean active
     );
+
+    @Query("SELECT sd from StudentDegree sd " +
+            "where sd.active = :active " +
+            "and sd.student.id = :studentId and sd.specialization.id = :specializationId ")
+    StudentDegree findByStudentIdAndSpecialityId(
+            @Param("active") boolean active,
+            @Param("studentId") Integer studentId,
+            @Param("specializationId") Integer specializationId
+    );
 }

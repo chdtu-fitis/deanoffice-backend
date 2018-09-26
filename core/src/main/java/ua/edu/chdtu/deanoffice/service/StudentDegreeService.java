@@ -35,6 +35,10 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
     }
 
+    public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){
+        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
+    }
+
     public StudentDegree save(StudentDegree studentDegree) {
         return this.studentDegreeRepository.save(studentDegree);
     }

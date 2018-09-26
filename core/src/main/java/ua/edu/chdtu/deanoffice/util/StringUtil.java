@@ -12,4 +12,10 @@ public class StringUtil {
             return null;
         return "";
     }
+
+    public static String replaceSingleQuotes(String string) {
+        string = string.replace("’", "'");
+        string = string.replace("`", "'");
+        return string;
+    }
 }

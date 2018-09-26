@@ -18,9 +18,12 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,9 +37,9 @@ import static java.util.Objects.requireNonNull;
 
 @Service
 public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
-    private static final String SPECIALIZATION_REGEXP = "([\\d]+)\\.[\\d]+\\s([\\w\\W])+";
-    private static final String SPECIALITY_REGEXP_OLD = "([\\d]\\.[\\d]+)\\s([\\w\\W])+";
-    private static final String SPECIALITY_REGEXP_NEW = "([\\d]{3})\\s([\\w\\W]+)";
+    private static final String SPECIALIZATION_REGEXP = "([\\d]+)\\.[\\d]+\\s([\\w\\W]+)";
+    private static final String SPECIALITY_REGEXP_OLD = "([\\d]\\.[\\d]+)\\s([\\w\\W]+)";
+    private static final String SPECIALITY_REGEXP_NEW = "([\\d]{3})\\s([\\w\\W+])";
     private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
     private final DocumentIOService documentIOService;
     private final StudentService studentService;
@@ -60,10 +63,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     private List<ImportedData> getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
-        return getStudentDegrees(xlsxInputStream);
+        return getEdeboStudentDegreesInfo(xlsxInputStream);
     }
 
-    private List<ImportedData> getStudentDegrees(Object source) throws IOException, Docx4JException {
+    private List<ImportedData> getEdeboStudentDegreesInfo(Object source) throws IOException, Docx4JException {
         requireNonNull(source);
         SpreadsheetMLPackage xlsxPkg;
 
@@ -92,7 +95,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 for (Cell c : r.getC()) {
                     cellValue = "";
                     try {
-                        cellValue = formatter.formatCellValue(c);
+                        cellValue=StringUtil.replaceSingleQuotes(formatter.formatCellValue(c));
                     } catch (Exception e) {
                         log.debug(e.getMessage());
                     }
@@ -213,7 +216,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Matcher matcher = specialityPattern.matcher(specialityNameWithCode);
         if (matcher.matches() && matcher.groupCount() > 1) {
             specialityCode = matcher.group(1).trim();
-            specialityName = StringUtils.capitalize(matcher.group(2)).trim();
+            specialityName = matcher.group(2).trim();
         }
         speciality.setCode(specialityCode);
         speciality.setName(specialityName);
@@ -223,6 +226,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     @Override
     public Specialization getSpecializationFromData(ImportedData data) {
         Specialization specialization = new Specialization();
+        specialization.setName("");
+        specialization.setCode("");
         specialization.setSpeciality(getSpecialityFromData(data));
         Faculty faculty = new Faculty();
         String fullSpecializationName = data.getFullSpecializationName();
@@ -267,23 +272,67 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         if (isSpecializationPatternMatch(importedData)) {
             studentDegreeFromData = getStudentDegreeFromData(importedData);
             if (!isCriticalDataAvailable(studentDegreeFromData)) {
+                String message = "Недостатньо інформації для синхронізації";
                 edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
                 return;
             }
         } else {
+            String message = "Неправильна спеціалізація";
             edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
             return;
         }
-        StudentDegree studentDegreeFromDb = null;
-        // db calls;
-        if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb)) {
-            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(studentDegreeFromData);
+
+        Specialization specializationFromData = studentDegreeFromData.getSpecialization();
+        Faculty facultyFromDb = facultyService.getByName(specializationFromData.getFaculty().getName());
+        if (facultyFromDb==null){
+            String message = "Даний факультет відсутній";
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
+            return;
         }
 
+        Speciality specialityFromDb = specialityService.findSpecialityByCodeAndName(specializationFromData.getSpeciality().getCode(),
+                specializationFromData.getSpeciality().getName());
+        if (specialityFromDb==null){
+            String message = "Дана спеціальність відсутня";
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
+            return;
+        }
+        Student studentFromData = studentDegreeFromData.getStudent();
+        Student studentFromDB = studentService.searchByFullNameAndBirthDate(
+                studentFromData.getName(),
+                studentFromData.getSurname(),
+                studentFromData.getPatronimic(),
+                studentFromData.getBirthDate()
+        );
+        Specialization specializationFromDB = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(
+                specializationFromData.getName(),
+                specializationFromData.getDegree().getId(),
+                specialityFromDb.getId(),
+                facultyFromDb.getId());
+        if (specializationFromDB==null){
+            String message = "Дана спеціалізація відсутня";
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(importedData);
+            return;
+        }
+        if (studentFromDB==null){
+            edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
+            return;
+        }
+        StudentDegree studentDegreeFromDb = studentDegreeService.getByStudentIdAndSpecializationId(true,studentFromDB.getId(), specializationFromDB.getId());
+
+        if (studentDegreeFromDb == null){
+            edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
+        }
+
+        if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb)) {
+            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(studentDegreeFromData);
+        } else {
+            edeboDataSyncronizationReport.addUnmatchedSecondaryDataStudentDegreeBlue(studentDegreeFromData,studentDegreeFromDb);
+        }
     }
 
-    @Override
-    public boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromData, StudentDegree studentDegreeFromDb) {
+
+    public boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb) {
         return false;
     }
 
