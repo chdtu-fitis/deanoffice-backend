@@ -27,7 +27,7 @@ public class StudentGroupDTO {
     private List<StudentDegreeFullNameDTO> studentDegrees;
     @JsonView(StudentGroupView.AllGroupData.class)
     private SpecializationDTO specialization;
-    @JsonView(StudentGroupView.AllGroupData.class)
+    @JsonView(StudentGroupView.Basic.class)
     private TuitionForm tuitionForm;
     @JsonView(StudentGroupView.AllGroupData.class)
     private TuitionTerm tuitionTerm;
