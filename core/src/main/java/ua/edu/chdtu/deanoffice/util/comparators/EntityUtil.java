@@ -11,7 +11,15 @@ public class EntityUtil {
                 try {
                     Method method1 = object1.getClass().getMethod("get" + field.substring(0, 1).toUpperCase() + field.substring(1));
                     Method method2 = object2.getClass().getMethod("get" + field.substring(0, 1).toUpperCase() + field.substring(1));
-                    if (!(method1.invoke(object1).equals(method2.invoke(object2))))
+                    Object result1 = method1.invoke(object1);
+                    Object result2 = method2.invoke(object2);
+                    if (result1 == null && (result2 == null || (result2 instanceof String && result2.equals(""))))
+                        continue;
+                    if (result2 == null && (result1 == null || (result1 instanceof String && result1.equals(""))))
+                        continue;
+                    if (result1 == null || result2 == null)
+                        return false;
+                    if (!(result1.equals(result2)))
                         return false;
                 } catch (NoSuchMethodException e) {
                     e.printStackTrace();
