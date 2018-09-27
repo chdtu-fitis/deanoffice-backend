@@ -202,7 +202,7 @@ public class PersonalStatementService {
     }
 
     private Integer getSemesterByYearForGroup(Integer year, StudentGroup studentGroup) {
-        return (year - studentGroup.getCreationYear()) * 2 + 1;
+        return (year - studentGroup.getCreationYear() + studentGroup.getBeginYears() - 1) * 2 + 1;
     }
 
     @Getter
