@@ -38,7 +38,7 @@ public class ExamReportBaseService {
             result.put("ExamDate", "");
         }
 
-        result.put("Course", String.format("%d", Calendar.getInstance().get(Calendar.YEAR) - courseForGroup.getStudentGroup().getCreationYear()));
+        result.put("Course", String.format("%d", currentYearService.get().getCurrYear() - courseForGroup.getStudentGroup().getCreationYear() + 1));
         result.put("KCType", course.getKnowledgeControl().getName());
         if (courseForGroup.getTeacher() != null) {
             result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
@@ -55,8 +55,8 @@ public class ExamReportBaseService {
         result.put("GroupName", studentGroup.getName());
         Speciality speciality = studentGroup.getSpecialization().getSpeciality();
         result.put("Specialization", speciality.getCode() + " " + speciality.getName());
-        result.put("FacultyAbbr", studentGroup.getSpecialization().getDepartment().getFaculty().getAbbr());
-        result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getDepartment().getFaculty().getDean()));
+        result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
+        result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 
