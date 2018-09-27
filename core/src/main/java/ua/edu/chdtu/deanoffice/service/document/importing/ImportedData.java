@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-class ImportedData {
+public class ImportedData {
     private String firstName;
     private String lastName;
     private String middleName;

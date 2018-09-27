@@ -1,23 +1,31 @@
 package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.document.importing.predto.StudentDegreePrimaryDataBean;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * SD - StudentDegree
+ * This class is created for containing and processing data from import and it contains
+ * different lists.
+ * Green - for fully synchronized SD;
+ * Blue - secondary data (secondary data means one, that is not used for entity identification) doesn't match;
+ * Orange - there is no student in db -> no such SD for this student at all, or there is some SD with
+ * particular student, but not with the imported data;
+ * Red - missing key values in data, or the program can't cast date / specialization patterns doesn't match;
+ * Yellow - SD that are present in db, but aren't in imported data
+ */
+// add yellow case
 @Getter
 public class EdeboDataSyncronizationReport {
-    private List<StudentDegree> synchronizedStudentDegreesGreen;
+    private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
     private List<List<StudentDegree>> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
-    private List<ImportedData> missingPrimaryDataRed;
-    private List<StudentDegree> absentInFileStudentDegreesYellow;
+    private List<StudentDegreePrimaryDataBean> missingPrimaryDataRed;
+    private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
 
     public EdeboDataSyncronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
@@ -29,25 +37,25 @@ public class EdeboDataSyncronizationReport {
         absentInFileStudentDegreesYellow = new ArrayList<>();
     }
 
-    public void addSyncohronizedDegreeGreen(StudentDegree studentDegree) {
-        synchronizedStudentDegreesGreen.add(studentDegree);
+    public void addSyncohronizedDegreeGreen(StudentDegreePrimaryDataBean bean) {
+        synchronizedStudentDegreesGreen.add(bean);
     }
 
-    public void addUnmatchedSecondaryDataStudentDegreeBlue(StudentDegree studentDegreeFromData, StudentDegree studentDegreeFromDb){
+    public void addUnmatchedSecondaryDataStudentDegreeBlue(StudentDegree studentDegreeFromData, StudentDegree studentDegreeFromDb) {
         unmatchedSecondaryDataStudentDegreesBlue.get(0).add(studentDegreeFromData);
         unmatchedSecondaryDataStudentDegreesBlue.get(1).add(studentDegreeFromDb);
     }
 
-    public void addNoSuchStudentOrStudentDegreeInDbOrange(StudentDegree studentDegreeFromData){
+    public void addNoSuchStudentOrStudentDegreeInDbOrange(StudentDegree studentDegreeFromData) {
         noSuchStudentOrSuchStudentDegreeInDbOrange.add(studentDegreeFromData);
     }
 
-    public void addMissingPrimaryDataRed(ImportedData importedData){
-        missingPrimaryDataRed.add(importedData);
+    public void addMissingPrimaryDataRed(StudentDegreePrimaryDataBean bean ) {
+        missingPrimaryDataRed.add(bean);
     }
 
-    public void addAbsentInFileStudentDegreeYellow(List<StudentDegree> studentDegreesFromDB){
-        absentInFileStudentDegreesYellow.addAll(studentDegreesFromDB);
+    public void addAbsentInFileStudentDegreeYellow(StudentDegreePrimaryDataBean bean) {
+        absentInFileStudentDegreesYellow.add(bean);
     }
 
     public void clear() {
@@ -57,6 +65,32 @@ public class EdeboDataSyncronizationReport {
         missingPrimaryDataRed.clear();
         absentInFileStudentDegreesYellow.clear();
     }
+
+//    public StudentDegreePrimaryDataDto getKeyValuesStudentDegreeForFront(StudentDegree sdData){
+//        Student stud = sdData.getStudent();
+//        Specialization specialization = sdData.getSpecialization();
+//        Speciality speciality = sdData.getSpecialization().getSpeciality();
+//        return new StudentDegreePrimaryDataDto(stud.getSurname(), stud.getName(),
+//                stud.getPatronimic(), stud.getBirthDate(), sdData.getSpecialization().getDegree().getName(), speciality.getName(),
+//                (specialization.getCode().equals("")) ? specialization.getName() : specialization.getCode() + " " + specialization.getName() );
+//    }
+//
+//    public StudentDegreePrimaryDataBean getKeyValuesImportedData(ImportedData importedData){
+//        return new StudentDegreePrimaryDataBean(importedData.getLastName(),importedData.getFirstName(),importedData.getMiddleName(),
+//                importedData.getBirthday(),importedData.getQualificationGroupName(),importedData.getFullSpecialityName(),
+//                importedData.getFullSpecializationName(),importedData.getProgramName());
+//    }
+//
+//    public FullDbDataCrossedStudentDegreeDto getFullDbDataCrossedStudentDegreeForFront(StudentDegree sdData){
+//        Student stud = sdData.getStudent();
+//        Specialization specialization = sdData.getSpecialization();
+//        Speciality speciality = sdData.getSpecialization().getSpeciality();
+//        return new FullDbDataCrossedStudentDegreeDto(stud.getSurname(), stud.getName(),
+//                stud.getPatronimic(), stud.getBirthDate(), sdData.getSpecialization().getDegree().getName(), speciality.getName(),
+//                (specialization.getCode().equals("")) ? specialization.getName() : specialization.getCode() + " " + specialization.getName(),
+//                sdData.getDiplomaNumber(),sdData.getPayment(),sdData.getPreviousDiplomaDate(), sdData.getPreviousDiplomaType(), sdData.getSupplementNumber(),
+//                sdData.getAdmissionDate(),stud.getSurnameEng(),stud.getNameEng(),stud.getPatronimicEng());
+//    }
 
 
 }

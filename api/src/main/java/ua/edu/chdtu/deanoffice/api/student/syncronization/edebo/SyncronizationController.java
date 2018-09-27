@@ -22,7 +22,7 @@ public class SyncronizationController {
     }
 
     @JsonView(StudentView.Degree.class)
-    @PostMapping("/edebo-synchronization")
+    @GetMapping("/edebo-synchronization")
 //    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile) {
     public @ResponseBody String studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile) {
         if (uploadfile.isEmpty()) {
