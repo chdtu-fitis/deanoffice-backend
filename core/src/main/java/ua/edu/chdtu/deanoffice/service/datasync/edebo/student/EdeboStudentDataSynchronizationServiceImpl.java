@@ -165,27 +165,32 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         String specialityName = importedData.getFullSpecialityName();
         String specializationName = importedData.getFullSpecializationName();
         String programName = importedData.getProgramName();
-        Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
+        Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
         Matcher specialityMatcher = specialityPattern.matcher(specialityName);
-        if (specialityMatcher.matches() && Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(programName)) {
+        if (specialityMatcher.matches()) {
             return true;
         } else {
-            Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
-            Matcher specializationMatcher = specializationPattern.matcher(specializationName);
-            if (specialityMatcher.matches() && specializationMatcher.matches() && !Strings.isNullOrEmpty(programName)) {
-                return true;
-            } else {
-                specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
-                specialityMatcher = specialityPattern.matcher(specialityName);
-                if (specialityMatcher.matches() &&
-                        Strings.isNullOrEmpty(specializationName) && Strings.isNullOrEmpty(programName)) {
+            specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
+            specialityMatcher = specialityPattern.matcher(specialityName);
+            if (specialityMatcher.matches()) {
+                Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
+                Matcher specializationMatcher = specializationPattern.matcher(specializationName);
+                if (specializationMatcher.matches()) {
                     return true;
+                } else {
+                    if (Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(programName)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
+            } else {
+                return false;
             }
         }
-        return false;
     }
-
+//&& Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(programName)
+        //Strings.isNullOrEmpty(specializationName) && Strings.isNullOrEmpty(programName)
     @Override
     public Student getStudentFromData(ImportedData data) {
         Student student = new Student();
