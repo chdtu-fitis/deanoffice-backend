@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 import lombok.Getter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.UnmatchedSecondaryDataStudentDegreeBlueBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.List;
 @Getter
 public class EdeboStudentDataSyncronizationReport {
     private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
-    private List<List<StudentDegree>> unmatchedSecondaryDataStudentDegreesBlue;
+    private List<UnmatchedSecondaryDataStudentDegreeBlueBean> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
     private List<StudentDegreePrimaryDataBean> missingPrimaryDataRed;
     private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
@@ -30,8 +31,6 @@ public class EdeboStudentDataSyncronizationReport {
     public EdeboStudentDataSyncronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
         unmatchedSecondaryDataStudentDegreesBlue = new ArrayList<>();
-        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
-        unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
         noSuchStudentOrSuchStudentDegreeInDbOrange = new ArrayList<>();
         missingPrimaryDataRed = new ArrayList<>();
         absentInFileStudentDegreesYellow = new ArrayList<>();
@@ -42,8 +41,7 @@ public class EdeboStudentDataSyncronizationReport {
     }
 
     public void addUnmatchedSecondaryDataStudentDegreeBlue(StudentDegree studentDegreeFromData, StudentDegree studentDegreeFromDb) {
-        unmatchedSecondaryDataStudentDegreesBlue.get(0).add(studentDegreeFromData);
-        unmatchedSecondaryDataStudentDegreesBlue.get(1).add(studentDegreeFromDb);
+        unmatchedSecondaryDataStudentDegreesBlue.add(new UnmatchedSecondaryDataStudentDegreeBlueBean(studentDegreeFromData, studentDegreeFromDb));
     }
 
     public void addNoSuchStudentOrStudentDegreeInDbOrange(StudentDegree studentDegreeFromData) {
