@@ -21,14 +21,14 @@ import java.util.List;
  */
 // add yellow case
 @Getter
-public class EdeboStudentDataSyncronizationReport {
+public class EdeboStudentDataSynchronizationReport {
     private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
     private List<UnmatchedSecondaryDataStudentDegreeBlueBean> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
     private List<StudentDegreePrimaryDataBean> missingPrimaryDataRed;
     private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
 
-    public EdeboStudentDataSyncronizationReport() {
+    public EdeboStudentDataSynchronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
         unmatchedSecondaryDataStudentDegreesBlue = new ArrayList<>();
         noSuchStudentOrSuchStudentDegreeInDbOrange = new ArrayList<>();

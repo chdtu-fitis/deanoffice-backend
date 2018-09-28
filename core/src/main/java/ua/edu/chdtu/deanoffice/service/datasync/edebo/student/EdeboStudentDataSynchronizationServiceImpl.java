@@ -69,9 +69,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     private List<ImportedData> getEdeboStudentDegreesInfo(Object source) throws IOException, Docx4JException {
-        requireNonNull(source);
         SpreadsheetMLPackage xlsxPkg;
-
         if (source instanceof String) {
             xlsxPkg = documentIOService.loadSpreadsheetDocument((String) source);
         } else {
@@ -80,8 +78,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         return getImportedDataFromXlsxPkg(xlsxPkg);
     }
 
-    private List<ImportedData> getImportedDataFromXlsxPkg(SpreadsheetMLPackage xlsxPkg) throws NullPointerException {
-        requireNonNull(xlsxPkg, "Failed to import data. Param \"xlsxPkg\" cannot be null!");
+    private List<ImportedData> getImportedDataFromXlsxPkg(SpreadsheetMLPackage xlsxPkg) {
         try {
             WorkbookPart workbookPart = xlsxPkg.getWorkbookPart();
             WorksheetPart sheetPart = workbookPart.getWorksheet(0);
@@ -121,21 +118,26 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboStudentDataSyncronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream) throws NullPointerException {
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream) throws Exception {
+        if (xlsxInputStream == null)
+            throw new Exception("Помилка читання файлу");
         try {
             List<ImportedData> importedData = getStudentDegreesFromStream(xlsxInputStream);
             Objects.requireNonNull(importedData);
-            EdeboStudentDataSyncronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSyncronizationReport();
+            EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
                 addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport);
             }
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
             e.printStackTrace();
+            throw new Exception("Помилка обробки файлу");
         } catch (IOException e) {
             e.printStackTrace();
+            throw new Exception("Помилка читання файлу");
+        } finally {
+            xlsxInputStream.close();
         }
-        return null;
     }
 
     @Override
@@ -193,7 +195,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     @Override
     public Student getStudentFromData(ImportedData data) {
         Student student = new Student();
-        Date birthDate = formatFileBirthdayDateToDbBirthdayDate(data.getBirthday());
+        Date birthDate = parseDate(data.getBirthday());
         student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
@@ -262,22 +264,21 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         studentDegree.setActive(true);
         studentDegree.setStudent(student);
         studentDegree.setSpecialization(specialization);
-        studentDegree.setSupplementNumber(data.getEducationId());
 
-        //can be null; need to check
-        studentDegree.setPreviousDiplomaDate(formatFileBirthdayDateToDbBirthdayDate(data.getDocumentDateGet2()));
-        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
+        studentDegree.setSupplementNumber(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
+        studentDegree.setPreviousDiplomaDate(parseDate(data.getDocumentDateGet2()));
+        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
         studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
-        studentDegree.setAdmissionDate(formatFileBirthdayDateToDbBirthdayDate(data.getEducationDateBegin()));
         studentDegree.setPreviousDiplomaType(EducationDocument.getEducationDocumentByName(data.getPersonDocumentTypeName()));
-        Map<String,Object> admissionOrderNumberAndDate = getadmissionOrderNumberAndDate(data.getRefillInfo());
+        studentDegree.setAdmissionDate(parseDate(data.getEducationDateBegin()));
+        Map<String,Object> admissionOrderNumberAndDate = getAdmissionOrderNumberAndDate(data.getRefillInfo());
         studentDegree.setAdmissionOrderNumber((String)admissionOrderNumberAndDate.get("admissionOrderNumber"));
         studentDegree.setAdmissionOrderDate((Date)admissionOrderNumberAndDate.get("admissionOrderDate"));
         return studentDegree;
     }
 
-    public Map<String,Object> getadmissionOrderNumberAndDate(String refillInfo) {
+    public Map<String,Object> getAdmissionOrderNumberAndDate(String refillInfo) {
         Map<String,Object> admissionOrderNumberAndDate = new HashMap<>();
         DateFormat admissionOrderDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
         Pattern admissionPattern = Pattern.compile(ADMISSION_REGEXP);
@@ -298,7 +299,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSyncronizationReport edeboDataSyncronizationReport) {
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport) {
         StudentDegree studentDegreeFromData;
         if (isSpecializationPatternMatch(importedData)) {
             studentDegreeFromData = getStudentDegreeFromData(importedData);
@@ -370,11 +371,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
     }
 
-    private Date formatFileBirthdayDateToDbBirthdayDate(String fileDate) {
+    private Date parseDate(String fileDate) {
         try {
-            DateFormat dbDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
             DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
-            return dbDateFormatter.parse(dbDateFormatter.format(formatter.parse(fileDate)));
+            return formatter.parse(fileDate);
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
