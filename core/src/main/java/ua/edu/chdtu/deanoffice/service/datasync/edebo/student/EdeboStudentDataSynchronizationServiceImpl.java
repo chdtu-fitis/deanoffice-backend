@@ -189,8 +189,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             }
         }
     }
-//&& Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(programName)
-        //Strings.isNullOrEmpty(specializationName) && Strings.isNullOrEmpty(programName)
+
     @Override
     public Student getStudentFromData(ImportedData data) {
         Student student = new Student();
@@ -233,19 +232,21 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Specialization specialization = new Specialization();
         specialization.setName("");
         specialization.setCode("");
-        specialization.setSpeciality(getSpecialityFromData(data));
+        Speciality speciality = getSpecialityFromData(data);
+        specialization.setSpeciality(speciality);
         Faculty faculty = new Faculty();
         String specializationName = data.getFullSpecializationName();
-        if (!Strings.isNullOrEmpty(specializationName)) {
-            Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
-            Matcher spMatcher = specializationPattern.matcher(specializationName);
-            if (spMatcher.matches() && spMatcher.groupCount() > 1) {
-                specialization.setCode(spMatcher.group(1));
-                specialization.setName(spMatcher.group(2));
+        if ((speciality.getCode()+" "+speciality.getName()).matches(SPECIALITY_REGEXP_NEW)) {
+            if (!Strings.isNullOrEmpty(specializationName)) {
+                Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
+                Matcher spMatcher = specializationPattern.matcher(specializationName);
+                if (spMatcher.matches() && spMatcher.groupCount() > 1) {
+                    specialization.setCode(spMatcher.group(1));
+                    specialization.setName(spMatcher.group(2));
+                }
+            } else {
+                specialization.setName(data.getProgramName());
             }
-        }
-        else {
-            specialization.setName(data.getProgramName());
         }
         specialization.setDegree(DegreeEnum.getDegreeFromEnumByName(data.getQualificationGroupName()));
         faculty.setName(data.getFacultyName());
@@ -379,5 +380,4 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
         return null;
     }
-
 }
