@@ -16,6 +16,6 @@ public class StringUtil {
     public static String replaceSingleQuotes(String string) {
         string = string.replace("’", "'");
         string = string.replace("`", "'");
-        return string;
+        return string.trim();
     }
 }
