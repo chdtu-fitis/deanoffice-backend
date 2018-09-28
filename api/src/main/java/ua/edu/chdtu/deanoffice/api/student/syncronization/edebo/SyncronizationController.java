@@ -8,8 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.StudentController;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
+import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSyncronizationReport;
 import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSyncronizationService;
-import ua.edu.chdtu.deanoffice.service.document.importing.EdeboDataSyncronizationReport;
 
 @RestController
 @RequestMapping("/students")
@@ -29,7 +29,7 @@ public class SyncronizationController {
             ResponseEntity.ok().body("No file selected");
         }
 
-        EdeboDataSyncronizationReport edeboDataSyncronizationReport = null;
+        EdeboStudentDataSyncronizationReport edeboDataSyncronizationReport = null;
 
         try {
             edeboDataSyncronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
@@ -46,7 +46,7 @@ public class SyncronizationController {
         return null;
     }
 
-//    private SyncronizationReportDTO parseToImportReportDTO(EdeboDataSyncronizationReport importReport) {
+//    private SyncronizationReportDTO parseToImportReportDTO(EdeboStudentDataSyncronizationReport importReport) {
 //        ModelMapper modelMapper = new ModelMapper();
 //        SyncronizationReportDTO importReportDTO = new SyncronizationReportDTO();
 //        importReportDTO.setInsertData(modelMapper.map(importReport.getInsertData(), new TypeToken<List<StudentDegreeDTO>>() {

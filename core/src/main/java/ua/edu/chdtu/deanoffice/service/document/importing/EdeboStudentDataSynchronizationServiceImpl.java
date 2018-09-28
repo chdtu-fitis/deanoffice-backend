@@ -17,7 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
-import ua.edu.chdtu.deanoffice.service.document.importing.predto.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.document.importing.beans.StudentDegreePrimaryDataBean;
 import ua.edu.chdtu.deanoffice.util.StringUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.EntityUtil;
 
@@ -121,11 +121,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboDataSyncronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream) throws NullPointerException {
+    public EdeboStudentDataSyncronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream) throws NullPointerException {
         try {
             List<ImportedData> importedData = getStudentDegreesFromStream(xlsxInputStream);
             Objects.requireNonNull(importedData);
-            EdeboDataSyncronizationReport edeboDataSyncronizationReport = new EdeboDataSyncronizationReport();
+            EdeboStudentDataSyncronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSyncronizationReport();
             for (ImportedData data : importedData) {
                 addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport);
             }
@@ -292,7 +292,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboDataSyncronizationReport edeboDataSyncronizationReport) {
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSyncronizationReport edeboDataSyncronizationReport) {
         StudentDegree studentDegreeFromData;
         if (isSpecializationPatternMatch(importedData)) {
             studentDegreeFromData = getStudentDegreeFromData(importedData);

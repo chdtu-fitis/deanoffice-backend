@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.importing.predto;
+package ua.edu.chdtu.deanoffice.service.document.importing.beans;
 
 import lombok.Getter;
 import lombok.Setter;

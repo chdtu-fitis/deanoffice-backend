@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.service.document.importing;
 
 import lombok.Getter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.document.importing.predto.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.document.importing.beans.StudentDegreePrimaryDataBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +20,14 @@ import java.util.List;
  */
 // add yellow case
 @Getter
-public class EdeboDataSyncronizationReport {
+public class EdeboStudentDataSyncronizationReport {
     private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
     private List<List<StudentDegree>> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
     private List<StudentDegreePrimaryDataBean> missingPrimaryDataRed;
     private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
 
-    public EdeboDataSyncronizationReport() {
+    public EdeboStudentDataSyncronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
         unmatchedSecondaryDataStudentDegreesBlue = new ArrayList<>();
         unmatchedSecondaryDataStudentDegreesBlue.add(new ArrayList<>());
