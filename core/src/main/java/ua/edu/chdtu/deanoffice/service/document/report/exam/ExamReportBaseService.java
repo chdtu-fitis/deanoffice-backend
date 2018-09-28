@@ -54,7 +54,8 @@ public class ExamReportBaseService {
         StudentGroup studentGroup = courseForGroup.getStudentGroup();
         result.put("GroupName", studentGroup.getName());
         Speciality speciality = studentGroup.getSpecialization().getSpeciality();
-        result.put("Specialization", speciality.getCode() + " " + speciality.getName());
+        result.put("Speciality", speciality.getCode() + " " + speciality.getName());
+        result.put("Specialization", studentGroup.getSpecialization().getName());
         result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
         result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
