@@ -1,8 +1,8 @@
-package ua.edu.chdtu.deanoffice.service.document.importing;
+package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import lombok.Getter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.document.importing.beans.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
 
 import java.util.ArrayList;
 import java.util.List;

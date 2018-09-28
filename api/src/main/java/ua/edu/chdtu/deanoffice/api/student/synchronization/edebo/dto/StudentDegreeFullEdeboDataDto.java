@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.student.syncronization.edebo.dto;
+package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.importing;
+package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;

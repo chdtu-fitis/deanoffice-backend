@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.student.syncronization.edebo;
+package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.StudentController;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSyncronizationReport;
-import ua.edu.chdtu.deanoffice.service.document.importing.EdeboStudentDataSyncronizationService;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationReport;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationService;
 
 @RestController
 @RequestMapping("/students")

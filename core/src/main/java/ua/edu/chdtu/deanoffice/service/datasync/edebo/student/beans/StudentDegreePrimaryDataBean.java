@@ -1,11 +1,11 @@
-package ua.edu.chdtu.deanoffice.service.document.importing.beans;
+package ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans;
 
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.document.importing.ImportedData;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.ImportedData;
 
 import java.text.SimpleDateFormat;
 

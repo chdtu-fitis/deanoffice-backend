@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.importing;
+package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import com.google.common.base.Strings;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -16,8 +16,8 @@ import org.xlsx4j.sml.Worksheet;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
-import ua.edu.chdtu.deanoffice.service.document.importing.beans.StudentDegreePrimaryDataBean;
 import ua.edu.chdtu.deanoffice.util.StringUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.EntityUtil;
 
