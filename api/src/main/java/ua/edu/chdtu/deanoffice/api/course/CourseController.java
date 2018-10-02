@@ -17,10 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -75,32 +72,40 @@ public class CourseController {
     @GetMapping("/courses/other-semester")
     public ResponseEntity getCoursesFromOtherGroupAndSemester(
             @RequestParam("semester") int semester,
-            @RequestParam("coursesKeys") int[] coursesKeys) {
+            @RequestParam("coursesIds") int[] coursesIds) {
         try {
-            // Отримуємо всі курси за потрібний семестр
-            List<Course> coursesBySemester = courseService.getCoursesBySemester(semester);
             // Отримуємо всі курси, що були передані для обробки
-            List<Course> inCourse = new ArrayList<>();
-            for (int coursesKey : coursesKeys) {
-                Course t = courseService.getById(coursesKey);
-                if (t != null) inCourse.add(t);
-            }
+            List<Course> inCourses = new ArrayList<>();
+            Arrays.stream(coursesIds).forEach(courseKey -> {
+                Course t = courseService.getById(courseKey);
+                if (t != null) inCourses.add(t);
+            });
             // Шукаємо за параметром CourseName схожі курси за потрібний семестр, якщо
-            // знаходимо, то додаємо їх до списку existCourseForSemester. Пошук по ключу імені курса
-            List<Course> existCourseForSemester = new ArrayList<>();
-            coursesBySemester.forEach(course -> {
-                for (int i = inCourse.size() - 1; i >= 0; i--) {
-                    if (course.getCourseName().getId() == inCourse.get(i).getId()) {
-                        existCourseForSemester.add(course);
-                        inCourse.remove(i);
-                    }
+            // знаходимо, то додаємо їх до списку existCoursesForSemester. Пошук по ключу імені курса
+            List<Course> existCoursesForSemester = new ArrayList<>();
+            List<Course> mustBeCreatedCourses = new ArrayList<>();
+            inCourses.forEach(item -> {
+                Course course = new Course();
+                course.setSemester(semester);
+                course.setCourseName(item.getCourseName());
+                course.setCredits(item.getCredits());
+                course.setHours(item.getHours());
+                course.setHoursPerCredit(item.getHoursPerCredit());
+                course.setKnowledgeControl(item.getKnowledgeControl());
+
+                Course foundInDBCourse = courseService.getCourseByAllAttributes(course);
+
+                if (foundInDBCourse == null) {
+                    mustBeCreatedCourses.add(item);
+                } else {
+                    existCoursesForSemester.add(foundInDBCourse);
                 }
             });
             // Для всіх курсів, для яких не було знайдено схожий курс за потрібний семестр
             // виконуємо створення такого курсу за потрібний семестр. Всі дані, які були
             // у вхідного курса копіюються до нового курсу
             List<Course> createdCourses = new ArrayList<>();
-            inCourse.forEach(course -> {
+            mustBeCreatedCourses.forEach(course -> {
                 Course t = new Course();
                 t.setSemester(semester);
                 t.setCourseName(course.getCourseName());
@@ -112,8 +117,8 @@ public class CourseController {
                 if (createdCourse != null) createdCourses.add(createdCourse);
             });
             // Виконуємо зливання двох списків
-            existCourseForSemester.addAll(createdCourses);
-            return ResponseEntity.ok(map(existCourseForSemester, CourseDTO.class));
+            existCoursesForSemester.addAll(createdCourses);
+            return ResponseEntity.ok(map(existCoursesForSemester, CourseDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
