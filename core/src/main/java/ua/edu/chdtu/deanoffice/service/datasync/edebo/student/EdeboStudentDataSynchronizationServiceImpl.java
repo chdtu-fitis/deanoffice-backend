@@ -338,6 +338,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             String message = "Дана спеціалізація відсутня";
             edeboDataSyncronizationReport.addMissingPrimaryDataRed(new StudentDegreePrimaryDataBean(importedData));
             return;
+        } else {
+            studentDegreeFromData.setSpecialization(specializationFromDB);
         }
 
         Student studentFromData = studentDegreeFromData.getStudent();
