@@ -30,6 +30,7 @@ public class ReportsJournalController extends DocumentResponseController {
         this.facultyService = facultyService;
     }
 
+
     @GetMapping("/groups/{groupId}")
     public ResponseEntity<Resource> generateForGroup(
             @PathVariable Integer groupId,
