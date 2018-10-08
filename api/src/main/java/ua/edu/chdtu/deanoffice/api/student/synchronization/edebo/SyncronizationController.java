@@ -1,22 +1,16 @@
 package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityView;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.AllListsDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSecondaryDataStudentDegreeBlueDTO;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationService;
-
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -38,31 +32,18 @@ public class SyncronizationController {
         }
 
         EdeboStudentDataSynchronizationReport edeboDataSynchronizationReport = null;
-
         try {
+            AllListsDTO allListsDTO = new AllListsDTO();
             edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
-            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = Mapper.map(edeboDataSynchronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange(), StudentDegreeFullEdeboDataDto.class);
-            return ResponseEntity.ok(noSuchStudentDegreeInDbOrangeDTOs);
+            List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(), UnmatchedSecondaryDataStudentDegreeBlueDTO.class);
+            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = map(edeboDataSynchronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange(), StudentDegreeFullEdeboDataDto.class);
+            allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(noSuchStudentDegreeInDbOrangeDTOs);
+            allListsDTO.setUnmatchedSecondaryDataStudentDegreesBlue(unmatchedSecondaryDataStudentDegreesBlueDTOs);
+            return ResponseEntity.ok(allListsDTO);
         } catch (Exception exception) {
             return handleException(exception);
         }
-//        else
-//            return "insert: "+edeboDataSyncronizationReport.getInsertData().size()+" update: "+edeboDataSyncronizationReport.getUpdateData().size()+" fail: "+edeboDataSyncronizationReport.getFailData().size();
-//        return ResponseEntity.ok(parseToImportReportDTO(edeboDataSyncronizationReport));
     }
-
-//    private SyncronizationReportDTO parseToImportReportDTO(EdeboStudentDataSynchronizationReport importReport) {
-//        ModelMapper modelMapper = new ModelMapper();
-//        SyncronizationReportDTO importReportDTO = new SyncronizationReportDTO();
-//        importReportDTO.setInsertData(modelMapper.map(importReport.getInsertData(), new TypeToken<List<StudentDegreeDTO>>() {
-//        }.getType()));
-//        importReportDTO.setUpdateData(modelMapper.map(importReport.getUpdateData(), new TypeToken<List<StudentDegreeDTO>>() {
-//        }.getType()));
-//        importReportDTO.setFailData(modelMapper.map(importReport.getFailData(), new TypeToken<List<StudentDegreeDTO>>() {
-//        }.getType()));
-//
-//        return importReportDTO;
-//    }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, SyncronizationController.class);
