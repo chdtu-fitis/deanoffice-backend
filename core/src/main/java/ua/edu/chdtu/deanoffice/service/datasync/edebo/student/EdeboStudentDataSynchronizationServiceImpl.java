@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.util.StringUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.EntityUtil;
@@ -305,12 +306,12 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             studentDegreeFromData = getStudentDegreeFromData(importedData);
             if (!isCriticalDataAvailable(studentDegreeFromData)) {
                 String message = "Недостатньо інформації для синхронізації";
-                edeboDataSyncronizationReport.addMissingPrimaryDataRed(new StudentDegreePrimaryDataBean(importedData));
+                edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
                 return;
             }
         } else {
             String message = "Неправильна спеціалізація";
-            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new StudentDegreePrimaryDataBean(importedData));
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
 
@@ -318,7 +319,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Faculty facultyFromDb = facultyService.getByName(specializationFromData.getFaculty().getName());
         if (facultyFromDb == null){
             String message = "Даний факультет відсутній";
-            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new StudentDegreePrimaryDataBean(importedData));
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
 
@@ -326,7 +327,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 specializationFromData.getSpeciality().getName());
         if (specialityFromDb == null){
             String message = "Дана спеціальність відсутня";
-            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new StudentDegreePrimaryDataBean(importedData));
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
         Specialization specializationFromDB = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(
@@ -336,7 +337,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 facultyFromDb.getId());
         if (specializationFromDB == null){
             String message = "Дана спеціалізація відсутня";
-            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new StudentDegreePrimaryDataBean(importedData));
+            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
 

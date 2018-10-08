@@ -4,6 +4,7 @@ import lombok.Getter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.UnmatchedSecondaryDataStudentDegreeBlueBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class EdeboStudentDataSynchronizationReport {
     private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
     private List<UnmatchedSecondaryDataStudentDegreeBlueBean> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
-    private List<StudentDegreePrimaryDataBean> missingPrimaryDataRed;
+    private List<MissingPrimaryDataRedMessageBean> missingPrimaryDataRed;
     private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
 
     public EdeboStudentDataSynchronizationReport() {
@@ -48,7 +49,7 @@ public class EdeboStudentDataSynchronizationReport {
         noSuchStudentOrSuchStudentDegreeInDbOrange.add(studentDegreeFromData);
     }
 
-    public void addMissingPrimaryDataRed(StudentDegreePrimaryDataBean bean ) {
+    public void addMissingPrimaryDataRed(MissingPrimaryDataRedMessageBean bean ) {
         missingPrimaryDataRed.add(bean);
     }
 
