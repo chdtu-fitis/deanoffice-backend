@@ -7,17 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.AllListsDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityView;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.MissingPrimaryDataRedDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSecondaryDataStudentDegreeBlueDTO;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationService;
-
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -40,9 +36,15 @@ public class SyncronizationController {
 
         EdeboStudentDataSynchronizationReport edeboDataSynchronizationReport = null;
         try {
+            AllListsDTO allListsDTO = new AllListsDTO();
             edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
+            List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(), UnmatchedSecondaryDataStudentDegreeBlueDTO.class);
+            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = map(edeboDataSynchronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange(), StudentDegreeFullEdeboDataDto.class);
+            allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(noSuchStudentDegreeInDbOrangeDTOs);
+            allListsDTO.setUnmatchedSecondaryDataStudentDegreesBlue(unmatchedSecondaryDataStudentDegreesBlueDTOs);
             List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen = Mapper.map(edeboDataSynchronizationReport.getSynchronizedStudentDegreesGreen(), StudentDegreePrimaryEdeboDataDTO.class);
-            return ResponseEntity.ok(synchronizedStudentDegreesGreen);
+            allListsDTO.setSynchronizedStudentDegreesGreen(synchronizedStudentDegreesGreen);
+            return ResponseEntity.ok(allListsDTO);
         } catch (Exception exception) {
             return handleException(exception);
         }

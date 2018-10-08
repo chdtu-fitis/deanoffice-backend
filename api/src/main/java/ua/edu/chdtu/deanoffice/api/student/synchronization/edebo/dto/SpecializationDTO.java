@@ -12,5 +12,5 @@ public class SpecializationDTO {
     private String name;
     private NamedDTO faculty;
     private NamedDTO degree;
-    private SpecialityDTO speciality;
+    private SpecialityBasicDTO speciality;
 }

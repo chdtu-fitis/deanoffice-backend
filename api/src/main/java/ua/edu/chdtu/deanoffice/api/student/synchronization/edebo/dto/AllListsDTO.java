@@ -11,6 +11,6 @@ public class AllListsDTO {
     List<MissingPrimaryDataRedDTO> missingPrimaryDataRed;
     List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen;
     List<StudentDegreePrimaryEdeboDataDTO> absentInFileStudentDegreesYellow;
-    List<StudentDegreeFullEdeboDataDto> unmatchedSecondaryDataStudentDegreesBlue;
+    List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlue;
     List<StudentDegreeFullEdeboDataDto> noSuchStudentOrSuchStudentDegreeInDbOrange;
 }
