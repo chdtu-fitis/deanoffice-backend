@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityView;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.MissingPrimaryDataRedDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
@@ -38,31 +39,14 @@ public class SyncronizationController {
         }
 
         EdeboStudentDataSynchronizationReport edeboDataSynchronizationReport = null;
-
         try {
             edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
-            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = Mapper.map(edeboDataSynchronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange(), StudentDegreeFullEdeboDataDto.class);
-            return ResponseEntity.ok(noSuchStudentDegreeInDbOrangeDTOs);
+            List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen = Mapper.map(edeboDataSynchronizationReport.getSynchronizedStudentDegreesGreen(), StudentDegreePrimaryEdeboDataDTO.class);
+            return ResponseEntity.ok(synchronizedStudentDegreesGreen);
         } catch (Exception exception) {
             return handleException(exception);
         }
-//        else
-//            return "insert: "+edeboDataSyncronizationReport.getInsertData().size()+" update: "+edeboDataSyncronizationReport.getUpdateData().size()+" fail: "+edeboDataSyncronizationReport.getFailData().size();
-//        return ResponseEntity.ok(parseToImportReportDTO(edeboDataSyncronizationReport));
     }
-
-//    private SyncronizationReportDTO parseToImportReportDTO(EdeboStudentDataSynchronizationReport importReport) {
-//        ModelMapper modelMapper = new ModelMapper();
-//        SyncronizationReportDTO importReportDTO = new SyncronizationReportDTO();
-//        importReportDTO.setInsertData(modelMapper.map(importReport.getInsertData(), new TypeToken<List<StudentDegreeDTO>>() {
-//        }.getType()));
-//        importReportDTO.setUpdateData(modelMapper.map(importReport.getUpdateData(), new TypeToken<List<StudentDegreeDTO>>() {
-//        }.getType()));
-//        importReportDTO.setFailData(modelMapper.map(importReport.getFailData(), new TypeToken<List<StudentDegreeDTO>>() {
-//        }.getType()));
-//
-//        return importReportDTO;
-//    }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, SyncronizationController.class);

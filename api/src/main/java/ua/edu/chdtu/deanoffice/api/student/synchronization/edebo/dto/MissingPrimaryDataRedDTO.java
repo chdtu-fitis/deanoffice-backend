@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MissingPrimaryDataRedDTO {
-    StudentDegreePrimaryEdeboDataDTO primaryData;
+    StudentDegreePrimaryEdeboDataDTO studentDegreePrimaryData;
     String message;
 }

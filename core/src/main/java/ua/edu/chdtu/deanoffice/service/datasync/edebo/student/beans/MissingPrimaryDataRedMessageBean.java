@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public class MissingPrimaryDataRedMessageBean {
-    private StudentDegreePrimaryDataBean studentDegreePrimaryDataBean;
+    private StudentDegreePrimaryDataBean studentDegreePrimaryData;
     private String message;
 
     public MissingPrimaryDataRedMessageBean(){}
-    public MissingPrimaryDataRedMessageBean(String message, StudentDegreePrimaryDataBean studentDegreePrimaryDataBean){
+    public MissingPrimaryDataRedMessageBean(String message, StudentDegreePrimaryDataBean studentDegreePrimaryData){
         this.message = message;
-        this.studentDegreePrimaryDataBean = studentDegreePrimaryDataBean;
+        this.studentDegreePrimaryData = studentDegreePrimaryData;
     }
 }
