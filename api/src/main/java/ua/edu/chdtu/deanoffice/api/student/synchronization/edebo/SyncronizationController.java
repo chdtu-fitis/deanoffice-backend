@@ -43,7 +43,7 @@ public class SyncronizationController {
         EdeboStudentDataSynchronizationReport edeboDataSynchronizationReport = null;
         try {
             AllListsDTO allListsDTO = new AllListsDTO();
-            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
+            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(), user.getFaculty().getId());
             List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(
                     edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(),
                     UnmatchedSecondaryDataStudentDegreeBlueDTO.class
