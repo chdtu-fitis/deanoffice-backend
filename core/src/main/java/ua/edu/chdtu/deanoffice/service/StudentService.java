@@ -44,6 +44,16 @@ public class StudentService {
         }
     }
 
+    public Student searchByNameAndSurnameAndBirthDate(String name, String surname, Date birthDate ){
+        List<Student> studentsList = studentRepository.findByUkrNameAndSurnameAndBirthDate(name, surname, birthDate);
+        if (studentsList.size()==0){
+            return null;
+        }
+        else {
+            return studentsList.get(0);
+        }
+    }
+
     public Student save(Student student) {
         student.setName(toCapitalizedCase(student.getName()));
         student.setSurname(toCapitalizedCase(student.getSurname()));

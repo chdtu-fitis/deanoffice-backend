@@ -46,4 +46,14 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             @Param("patronimic") String patronimic,
             @Param("birthDate") Date birthDate
     );
+
+    @Query("select s from Student s " +
+            "where s.name = :name " +
+            "and s.surname = :surname " +
+            "and s.birthDate = :birthDate")
+    List<Student> findByUkrNameAndSurnameAndBirthDate(
+            @Param("name") String name,
+            @Param("surname") String surname,
+            @Param("birthDate") Date birthDate
+    );
 }

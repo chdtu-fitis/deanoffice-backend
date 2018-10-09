@@ -42,7 +42,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "previousDiplomaNumber", "previousDiplomaDate",
             "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate","admissionOrderNumber","admissionOrderDate"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
-            "surnameEng", "nameEng", "patronimicEng"};
+            "surnameEng", "nameEng"};
     private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
     private final DocumentIOService documentIOService;
     private final StudentService studentService;
@@ -149,7 +149,6 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         String specialityName = specialization.getSpeciality().getName();
         necessaryNotEmptyStudentDegreeData.add(student.getSurname());
         necessaryNotEmptyStudentDegreeData.add(student.getName());
-        necessaryNotEmptyStudentDegreeData.add(student.getPatronimic());
         necessaryNotEmptyStudentDegreeData.add(specialization.getDegree().getName());
         necessaryNotEmptyStudentDegreeData.add(specialization.getFaculty().getName());
         for (String s : necessaryNotEmptyStudentDegreeData) {
@@ -200,10 +199,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
-        student.setPatronimic(data.getMiddleName());
         student.setNameEng(data.getFirstNameEn());
         student.setSurnameEng(data.getLastNameEn());
-        student.setPatronimicEng(data.getMiddleNameEn());
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
         return student;
     }
@@ -344,10 +341,9 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
 
         Student studentFromData = studentDegreeFromData.getStudent();
-        Student studentFromDB = studentService.searchByFullNameAndBirthDate(
+        Student studentFromDB = studentService.searchByNameAndSurnameAndBirthDate(
                 studentFromData.getName(),
                 studentFromData.getSurname(),
-                studentFromData.getPatronimic(),
                 studentFromData.getBirthDate()
         );
 
