@@ -60,38 +60,14 @@ public class SyncronizationController {
                     edeboDataSynchronizationReport.getMissingPrimaryDataRed(),
                     MissingPrimaryDataRedDTO.class
             );
-            int facultyIdCurrentUser = user.getFaculty().getId();
-            allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(getAllStudentsWithNoSuchStudentDegreeInDBForCurrentUser(facultyIdCurrentUser,noSuchStudentDegreeInDbOrangeDTOs));
-            allListsDTO.setUnmatchedSecondaryDataStudentDegreesBlue(getAllStudentsWithUnmatchedSecondaryDataStudentDegreessForCurrentUser(facultyIdCurrentUser,unmatchedSecondaryDataStudentDegreesBlueDTOs));
+            allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(noSuchStudentDegreeInDbOrangeDTOs);
+            allListsDTO.setUnmatchedSecondaryDataStudentDegreesBlue(unmatchedSecondaryDataStudentDegreesBlueDTOs);
             allListsDTO.setSynchronizedStudentDegreesGreen(synchronizedStudentDegreesGreen);
             allListsDTO.setMissingPrimaryDataRed(missingPrimaryDataRed);
             return ResponseEntity.ok(allListsDTO);
         } catch (Exception exception) {
             return handleException(exception);
         }
-    }
-
-    private List<StudentDegreeFullEdeboDataDto> getAllStudentsWithNoSuchStudentDegreeInDBForCurrentUser(int idUserFaculty, List<StudentDegreeFullEdeboDataDto> orangeList){
-        List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrange = new ArrayList();
-        for(StudentDegreeFullEdeboDataDto student: orangeList){
-            int idStudentFaculty = student.getSpecialization().getFaculty().getId();
-            if (idUserFaculty == idStudentFaculty){
-                noSuchStudentDegreeInDbOrange.add(student);
-            }
-        }
-        return noSuchStudentDegreeInDbOrange;
-    }
-
-    private List<UnmatchedSecondaryDataStudentDegreeBlueDTO> getAllStudentsWithUnmatchedSecondaryDataStudentDegreessForCurrentUser(int idUserFaculty, List<UnmatchedSecondaryDataStudentDegreeBlueDTO> blueList){
-        List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlue = new ArrayList();
-        for(UnmatchedSecondaryDataStudentDegreeBlueDTO student: blueList){
-            int idStudentFacultyFromData = student.getStudentDegreeFromData().getSpecialization().getFaculty().getId();
-            int idStudentFacultyFromDb = student.getStudentDegreeFromDb().getSpecialization().getFaculty().getId();
-            if ((idUserFaculty == idStudentFacultyFromData) && (idUserFaculty == idStudentFacultyFromDb)){
-                unmatchedSecondaryDataStudentDegreesBlue.add(student);
-            }
-        }
-        return unmatchedSecondaryDataStudentDegreesBlue;
     }
 
     private ResponseEntity handleException(Exception exception) {
