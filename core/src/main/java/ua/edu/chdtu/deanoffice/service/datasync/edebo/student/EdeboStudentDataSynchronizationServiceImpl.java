@@ -199,8 +199,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
+        student.setPatronimic(data.getMiddleName());
         student.setNameEng(data.getFirstNameEn());
         student.setSurnameEng(data.getLastNameEn());
+        student.setPatronimicEng(data.getMiddleNameEn());
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
         return student;
     }
@@ -344,9 +346,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
 
         Student studentFromData = studentDegreeFromData.getStudent();
-        Student studentFromDB = studentService.searchByNameAndSurnameAndBirthDate(
+        Student studentFromDB = studentService.searchByFullNameAndBirthDate(
                 studentFromData.getName(),
                 studentFromData.getSurname(),
+                studentFromData.getPatronimic(),
                 studentFromData.getBirthDate()
         );
 
