@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 
 import java.net.URI;
@@ -70,55 +71,79 @@ public class CourseController {
     }
 
     @GetMapping("/courses/other-semester")
-    public ResponseEntity getCoursesFromOtherGroupAndSemester(
+    public ResponseEntity getCourseForGroupsFromOtherGroupAndSemester(
             @RequestParam("semester") int semester,
-            @RequestParam("coursesIds") int[] coursesIds) {
+            @RequestParam("course_for_group_ids") int[] courseForGroupIds,
+            @RequestParam("group_ids") int groupIds) {
         try {
-            // Отримуємо всі курси, що були передані для обробки
-            List<Course> inCourses = new ArrayList<>();
-            Arrays.stream(coursesIds).forEach(courseKey -> {
-                Course t = courseService.getById(courseKey);
-                if (t != null) inCourses.add(t);
+            // Отримуємо групу, що була передана для обробки
+            StudentGroup currentStudentGroup = studentGroupService.getById(groupIds);
+            if (currentStudentGroup == null) {
+                String exceptionMessage = "Група не була знайдена в базі даних";
+                throw new OperationCannotBePerformedException(exceptionMessage);
+            }
+            // Отримуємо всі курси для груп, що були передані для обробки
+            List<CourseForGroup> inCoursesForGroups = new ArrayList<>();
+            Arrays.stream(courseForGroupIds).forEach(courseKey -> {
+                CourseForGroup t = courseForGroupService.getCourseForGroup(courseKey);
+                if (t != null) inCoursesForGroups.add(t);
             });
-            // Шукаємо за параметром CourseName схожі курси за потрібний семестр, якщо
-            // знаходимо, то додаємо їх до списку existCoursesForSemester. Пошук по ключу імені курса
-            List<Course> existCoursesForSemester = new ArrayList<>();
+            // Шукаємо за всіма параметрами той же курс за потрібний семестр, якщо
+            // знаходимо, то додаємо їх до списку existCoursesAndTeacherForSemester.
+            Map<Course, Teacher> existCoursesAndTeacherForSemester = new HashMap<>();
             List<Course> mustBeCreatedCourses = new ArrayList<>();
-            inCourses.forEach(item -> {
+
+            inCoursesForGroups.forEach(item -> {
+                Course courseFromCourseForGroup = item.getCourse();
                 Course course = new Course();
                 course.setSemester(semester);
-                course.setCourseName(item.getCourseName());
-                course.setCredits(item.getCredits());
-                course.setHours(item.getHours());
-                course.setHoursPerCredit(item.getHoursPerCredit());
-                course.setKnowledgeControl(item.getKnowledgeControl());
+                course.setCourseName(courseFromCourseForGroup.getCourseName());
+                course.setCredits(courseFromCourseForGroup.getCredits());
+                course.setHours(courseFromCourseForGroup.getHours());
+                course.setHoursPerCredit(courseFromCourseForGroup.getHoursPerCredit());
+                course.setKnowledgeControl(courseFromCourseForGroup.getKnowledgeControl());
 
                 Course foundInDBCourse = courseService.getCourseByAllAttributes(course);
 
                 if (foundInDBCourse == null) {
-                    mustBeCreatedCourses.add(item);
+                    mustBeCreatedCourses.add(courseFromCourseForGroup);
                 } else {
-                    existCoursesForSemester.add(foundInDBCourse);
+                    existCoursesAndTeacherForSemester.put(foundInDBCourse, item.getTeacher());
                 }
             });
-            // Для всіх курсів, для яких не було знайдено схожий курс за потрібний семестр
-            // виконуємо створення такого курсу за потрібний семестр. Всі дані, які були
-            // у вхідного курса копіюються до нового курсу
             List<Course> createdCourses = new ArrayList<>();
+            // Для всіх курсів, які не були знайдені виконуємо їх створення та збереження до бази даних
             mustBeCreatedCourses.forEach(course -> {
-                Course t = new Course();
-                t.setSemester(semester);
-                t.setCourseName(course.getCourseName());
-                t.setCredits(course.getCredits());
-                t.setHours(course.getHours());
-                t.setHoursPerCredit(course.getHoursPerCredit());
-                t.setKnowledgeControl(course.getKnowledgeControl());
-                Course createdCourse = courseService.createOrUpdateCourse(t);
+                Course tempCourse = new Course();
+                tempCourse.setSemester(semester);
+                tempCourse.setCourseName(course.getCourseName());
+                tempCourse.setCredits(course.getCredits());
+                tempCourse.setHours(course.getHours());
+                tempCourse.setHoursPerCredit(course.getHoursPerCredit());
+                tempCourse.setKnowledgeControl(course.getKnowledgeControl());
+                Course createdCourse = courseService.createOrUpdateCourse(tempCourse);
                 if (createdCourse != null) createdCourses.add(createdCourse);
             });
-            // Виконуємо зливання двох списків
-            existCoursesForSemester.addAll(createdCourses);
-            return ResponseEntity.ok(map(existCoursesForSemester, CourseDTO.class));
+            List<CourseForGroup> createdCourseForGroups = new ArrayList<>(createdCourses.size() + existCoursesAndTeacherForSemester.size());
+            // Для кожного стовореного курсу виконуємо створення CourseForGroup
+            createdCourses.forEach(course -> {
+                CourseForGroup courseForGroup = new CourseForGroup();
+                courseForGroup.setCourse(course);
+                courseForGroup.setStudentGroup(currentStudentGroup);
+                courseForGroup.setExamDate(null);
+                courseForGroup.setTeacher(null);
+                createdCourseForGroups.add(courseForGroup);
+            });
+            // Для існуючих курсів виконуємо створення CourseForGroup в якого ми встановлюємо викладача на того, який був переданий
+            existCoursesAndTeacherForSemester.forEach((course, teacher) -> {
+                CourseForGroup courseForGroup = new CourseForGroup();
+                courseForGroup.setCourse(course);
+                courseForGroup.setStudentGroup(currentStudentGroup);
+                courseForGroup.setExamDate(null);
+                courseForGroup.setTeacher(teacher);
+                createdCourseForGroups.add(courseForGroup);
+            });
+            return ResponseEntity.ok(map(createdCourseForGroups, CourseForGroupDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
