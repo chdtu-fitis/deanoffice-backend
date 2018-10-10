@@ -74,7 +74,7 @@ public class CourseController {
     public ResponseEntity getCourseForGroupsFromOtherGroupAndSemester(
             @RequestParam("semester") int semester,
             @RequestParam("course_for_group_ids") int[] courseForGroupIds,
-            @RequestParam("group_ids") int groupIds) {
+            @RequestParam("group_id") int groupIds) {
         try {
             // Отримуємо групу, що була передана для обробки
             StudentGroup currentStudentGroup = studentGroupService.getById(groupIds);
