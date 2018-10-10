@@ -19,9 +19,9 @@ public interface EdeboStudentDataSyncronizationService {
 
     StudentDegree getStudentDegreeFromData(ImportedData data);
 
-    EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, int facultyId) throws Exception;
+    EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName) throws Exception;
 
-    void addSynchronizationReportForImportedData(ImportedData importedData,EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, int facultyId);
+    void addSynchronizationReportForImportedData(ImportedData importedData,EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName);
 
     boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb);
 }

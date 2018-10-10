@@ -119,7 +119,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, int facultyId) throws Exception {
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName) throws Exception {
         if (xlsxInputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
@@ -127,7 +127,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
-                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyId);
+                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName);
             }
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
@@ -299,7 +299,9 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, int facultyId) {
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName) {
+        if (!(facultyName.toUpperCase().equals(importedData.getFacultyName().toUpperCase())))
+            return;
         StudentDegree studentDegreeFromData;
         if (isSpecializationPatternMatch(importedData)) {
             studentDegreeFromData = getStudentDegreeFromData(importedData);
@@ -321,9 +323,6 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
-
-        if (facultyId != facultyFromDb.getId())
-            return;
 
         Speciality specialityFromDb = specialityService.findSpecialityByCodeAndName(specializationFromData.getSpeciality().getCode(),
                 specializationFromData.getSpeciality().getName());
