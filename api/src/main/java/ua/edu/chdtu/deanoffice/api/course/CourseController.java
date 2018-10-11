@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.*;
 
@@ -91,62 +92,61 @@ public class CourseController {
             // Шукаємо за всіма параметрами той же курс за потрібний семестр, якщо
             // знаходимо, то додаємо їх до списку existCoursesAndTeacherForSemester.
             Map<Course, Teacher> existCoursesAndTeacherForSemester = new HashMap<>();
-            List<Course> mustBeCreatedCourses = new ArrayList<>();
+            Map<Course, Teacher> mustBeCreatedCoursesAndTeacher = new HashMap<>();
 
             inCoursesForGroups.forEach(item -> {
                 Course courseFromCourseForGroup = item.getCourse();
-                Course course = new Course();
-                course.setSemester(semester);
-                course.setCourseName(courseFromCourseForGroup.getCourseName());
-                course.setCredits(courseFromCourseForGroup.getCredits());
-                course.setHours(courseFromCourseForGroup.getHours());
-                course.setHoursPerCredit(courseFromCourseForGroup.getHoursPerCredit());
-                course.setKnowledgeControl(courseFromCourseForGroup.getKnowledgeControl());
-
+                Course course = courseFabric(semester,
+                        courseFromCourseForGroup.getCourseName(),
+                        courseFromCourseForGroup.getCredits(),
+                        courseFromCourseForGroup.getHours(),
+                        courseFromCourseForGroup.getHoursPerCredit(),
+                        courseFromCourseForGroup.getKnowledgeControl());
                 Course foundInDBCourse = courseService.getCourseByAllAttributes(course);
 
                 if (foundInDBCourse == null) {
-                    mustBeCreatedCourses.add(courseFromCourseForGroup);
+                    mustBeCreatedCoursesAndTeacher.put(courseFromCourseForGroup, item.getTeacher());
                 } else {
                     existCoursesAndTeacherForSemester.put(foundInDBCourse, item.getTeacher());
                 }
             });
-            List<Course> createdCourses = new ArrayList<>();
+            List<CourseForGroup> createdCourseForGroups = new ArrayList<>(mustBeCreatedCoursesAndTeacher.size() + existCoursesAndTeacherForSemester.size());
             // Для всіх курсів, які не були знайдені виконуємо їх створення та збереження до бази даних
-            mustBeCreatedCourses.forEach(course -> {
-                Course tempCourse = new Course();
-                tempCourse.setSemester(semester);
-                tempCourse.setCourseName(course.getCourseName());
-                tempCourse.setCredits(course.getCredits());
-                tempCourse.setHours(course.getHours());
-                tempCourse.setHoursPerCredit(course.getHoursPerCredit());
-                tempCourse.setKnowledgeControl(course.getKnowledgeControl());
+            mustBeCreatedCoursesAndTeacher.forEach((course, teacher) -> {
+                Course tempCourse = courseFabric(semester, course.getCourseName(), course.getCredits(), course.getHours(), course.getHoursPerCredit(), course.getKnowledgeControl());
                 Course createdCourse = courseService.createOrUpdateCourse(tempCourse);
-                if (createdCourse != null) createdCourses.add(createdCourse);
-            });
-            List<CourseForGroup> createdCourseForGroups = new ArrayList<>(createdCourses.size() + existCoursesAndTeacherForSemester.size());
-            // Для кожного стовореного курсу виконуємо створення CourseForGroup
-            createdCourses.forEach(course -> {
-                CourseForGroup courseForGroup = new CourseForGroup();
-                courseForGroup.setCourse(course);
-                courseForGroup.setStudentGroup(currentStudentGroup);
-                courseForGroup.setExamDate(null);
-                courseForGroup.setTeacher(null);
-                createdCourseForGroups.add(courseForGroup);
+                if (createdCourse != null) {
+                    createdCourseForGroups.add(courseForGroupFabric(createdCourse, currentStudentGroup, null, teacher));
+                }
             });
             // Для існуючих курсів виконуємо створення CourseForGroup в якого ми встановлюємо викладача на того, який був переданий
             existCoursesAndTeacherForSemester.forEach((course, teacher) -> {
-                CourseForGroup courseForGroup = new CourseForGroup();
-                courseForGroup.setCourse(course);
-                courseForGroup.setStudentGroup(currentStudentGroup);
-                courseForGroup.setExamDate(null);
-                courseForGroup.setTeacher(teacher);
-                createdCourseForGroups.add(courseForGroup);
+                createdCourseForGroups.add(courseForGroupFabric(course, currentStudentGroup, null, teacher));
             });
             return ResponseEntity.ok(map(createdCourseForGroups, CourseForGroupDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
+    }
+
+    private CourseForGroup courseForGroupFabric(Course course, StudentGroup studentGroup, Date date, Teacher teacher) {
+        CourseForGroup courseForGroup = new CourseForGroup();
+        courseForGroup.setCourse(course);
+        courseForGroup.setStudentGroup(studentGroup);
+        courseForGroup.setExamDate(date);
+        courseForGroup.setTeacher(teacher);
+        return courseForGroup;
+    }
+
+    private Course courseFabric(Integer semester, CourseName courseName, BigDecimal credits, Integer hours, Integer hoursPerCredit, KnowledgeControl knowledgeControl) {
+        Course course = new Course();
+        course.setSemester(semester);
+        course.setCourseName(courseName);
+        course.setCredits(credits);
+        course.setHours(hours);
+        course.setHoursPerCredit(hoursPerCredit);
+        course.setKnowledgeControl(knowledgeControl);
+        return course;
     }
 
     @PutMapping("/groups/{groupId}/courses")
