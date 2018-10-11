@@ -7,14 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.AllListsDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.*;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSecondaryDataStudentDegreeBlueDTO;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationService;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.MissingPrimaryDataRedDTO;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
+
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -29,8 +28,8 @@ public class SyncronizationController {
         this.edeboDataSynchronizationService = edeboDataSynchronizationService;
     }
 
-    @PostMapping("/edebo-synchronization")
-    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile) {
+    @PostMapping("/edebo-synchronization/read")
+    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile, @CurrentUser ApplicationUser user) {
         if (uploadfile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Файл не було надіслано");
         }
@@ -38,7 +37,7 @@ public class SyncronizationController {
         EdeboStudentDataSynchronizationReport edeboDataSynchronizationReport = null;
         try {
             AllListsDTO allListsDTO = new AllListsDTO();
-            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream());
+            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(),user.getFaculty().getName());
             List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(
                     edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(),
                     UnmatchedSecondaryDataStudentDegreeBlueDTO.class
@@ -63,6 +62,12 @@ public class SyncronizationController {
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    @PostMapping("/edebo-synchronization/save")
+    public ResponseEntity studentSaveChanges(@RequestBody TwoListDTO[] twoListDTO){
+
+        return ResponseEntity.ok(200);
     }
 
     private ResponseEntity handleException(Exception exception) {

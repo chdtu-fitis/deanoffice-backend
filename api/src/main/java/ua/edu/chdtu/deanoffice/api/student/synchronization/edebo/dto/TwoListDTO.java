@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public  class  TwoListDTO {
-    private StudentDegreeFullEdeboDataDto[] changedSecondaryData;
-    private StudentDegreeFullEdeboDataDto[] newStudents;
+    private StudentDegreeFullEdeboDataDto[] updateSecondaryData;
+    private StudentDegreeFullEdeboDataDto[] createNewStudents;
 }
