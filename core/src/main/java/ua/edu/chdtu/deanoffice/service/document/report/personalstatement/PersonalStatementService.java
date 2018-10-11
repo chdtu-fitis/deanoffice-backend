@@ -122,15 +122,22 @@ public class PersonalStatementService {
     private void formSecondSemesterInTable(Tbl table, List<Grade> grades) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         int currentIndex = tableRows.size() - 1;
-        Tr rowToCopy = tableRows.get(currentIndex);
-        fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0));
-        for (Grade grade : grades.subList(1, grades.size())) {
-            Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            fillRowByGrade(newRow, grade);
-            table.getContent().add(currentIndex, newRow);
-            currentIndex++;
+        if (grades != null && grades.size() > 0) {
+            Tr rowToCopy = tableRows.get(currentIndex);
+            fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0));
+            for (Grade grade : grades.subList(1, grades.size())) {
+                Tr newRow = XmlUtils.deepCopy(rowToCopy);
+                fillRowByGrade(newRow, grade);
+                table.getContent().add(currentIndex, newRow);
+                currentIndex++;
+            }
+            table.getContent().remove(currentIndex);
         }
-        table.getContent().remove(currentIndex);
+        else {
+            table.getContent().remove(currentIndex);
+            table.getContent().remove(currentIndex-1);
+        }
+
     }
 
     private void fillRowByGrade(Tr row, Grade grade) {
