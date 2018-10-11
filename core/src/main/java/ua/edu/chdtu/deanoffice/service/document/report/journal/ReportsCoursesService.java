@@ -47,7 +47,7 @@ public class ReportsCoursesService {
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
-        formatter = new SimpleDateFormat("yyyy.MM.dd");
+        formatter = new SimpleDateFormat("dd.MM.yyyy");
     }
 
     public synchronized File prepareReportForGroup(Integer groupId, Integer semesterId) throws Docx4JException, IOException {
