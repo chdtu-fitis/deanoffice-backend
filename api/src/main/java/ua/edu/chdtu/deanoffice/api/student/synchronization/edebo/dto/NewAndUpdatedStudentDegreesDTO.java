@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public  class  TwoListDTO {
+public  class NewAndUpdatedStudentDegreesDTO {
     private StudentDegreeFullEdeboDataDto[] studentDegreesForUpdate;
     private StudentDegreeFullEdeboDataDto[] newStudentDegrees;
 }

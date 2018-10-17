@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,8 +69,8 @@ public class SyncronizationController {
     }
 
     @PostMapping("/edebo-synchronization/save")
-    public ResponseEntity studentSaveChanges(@RequestBody TwoListDTO[] twoListDTO){
-        updateSecondaryData(twoListDTO[0].getStudentDegreesForUpdate());
+    public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO){
+        updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
         return ResponseEntity.ok(200);
     }
 
