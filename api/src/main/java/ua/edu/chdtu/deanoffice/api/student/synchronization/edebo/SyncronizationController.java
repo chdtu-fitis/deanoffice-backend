@@ -38,7 +38,7 @@ public class SyncronizationController {
         this.studentDegreeService = studentDegreeService;
     }
 
-    @PostMapping("/edebo-synchronization")
+    @PostMapping("/edebo-synchronization/process-file")
     public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile,
                                                        @CurrentUser ApplicationUser user,
                                                        @RequestParam(required=false) String degree, @RequestParam(required=false) String speciality) {
