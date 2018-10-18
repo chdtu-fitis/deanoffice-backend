@@ -71,6 +71,7 @@ public class ReportsCoursesService {
                 wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE,
                                                                         courseReports,
                                                                         groups.getName()).getMainDocumentPart().getContent());
+
             }
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,
@@ -84,7 +85,7 @@ public class ReportsCoursesService {
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
                     courseForGroup.getCourse().getHours().toString(),
                     courseForGroup.getTeacher() == null ? "": courseForGroup.getTeacher().getInitialsUkr(),
-                    courseForGroup.getExamDate() == null ? "" : formatter.format(courseForGroup.getExamDate())));
+                    fillFieldDate(courseForGroup)));
         }
         return courseReports;
     }
@@ -112,5 +113,20 @@ public class ReportsCoursesService {
             rowToAddIndex++;
         }
         tempTable.getContent().remove(templateRow);
+    }
+
+    private String fillFieldDate(CourseForGroup courseForGroup){
+        if(courseForGroup.getExamDate() == null){
+            switch (courseForGroup.getCourse().getKnowledgeControl().getId()){
+                case 3:
+                    return "КР";
+                case 4:
+                    return "КП";
+                default:
+                    return "";
+            }
+        } else {
+            return formatter.format(courseForGroup.getExamDate());
+        }
     }
 }
