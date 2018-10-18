@@ -42,21 +42,21 @@ public class StudentDegreeService {
 
     public String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
         String message = "";
-        message += ObjectUtil.isEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getDiplomaDate()) ? "Дата диплома" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaDate()) ? "Попередня дата диплома" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaNumber()) ? "Попередній номер диплома" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaIssuedBy()) ? "Попередній диплом виданий" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getAdmissionDate()) ? "Дата вступу" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getProtocolDate()) ? "Дата протокола" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getSupplementDate()) ? "Дата додатка" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою" : "";
-        message += ObjectUtil.isEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою" : "";
+        message += ObjectUtil.isEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getDiplomaDate()) ? "Дата диплома. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaDate()) ? "Попередня дата диплома. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaNumber()) ? "Попередній номер диплома. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaIssuedBy()) ? "Попередній диплом виданий. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getAdmissionDate()) ? "Дата вступу. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getProtocolDate()) ? "Дата протокола. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getSupplementDate()) ? "Дата додатка. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
+        message += ObjectUtil.isEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
         return message;
     }
 

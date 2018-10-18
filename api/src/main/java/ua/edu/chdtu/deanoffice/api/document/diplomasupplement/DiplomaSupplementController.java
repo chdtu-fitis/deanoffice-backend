@@ -16,6 +16,9 @@ import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupple
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -64,7 +67,18 @@ public class DiplomaSupplementController extends DocumentResponseController {
         try {
             facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
             Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduates(user.getFaculty().getId(), degreeId);
-            return ResponseEntity.ok(200);
+            List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<StudentDataCheckDto>();
+            for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
+                StudentDegree studentDegree = entry.getKey();
+                StudentDataCheckDto studentDataCheckDto = new StudentDataCheckDto();
+                studentDataCheckDto.setSurname(studentDegree.getStudent().getSurname());
+                studentDataCheckDto.setName(studentDegree.getStudent().getName());
+                studentDataCheckDto.setPatronimic(studentDegree.getStudent().getPatronimic());
+                studentDataCheckDto.setGroupName(studentDegree.getStudentGroup().getName());
+                studentDataCheckDto.setMessage(entry.getValue());
+                studentDataCheckDtoList.add(studentDataCheckDto);
+            }
+            return ResponseEntity.ok(studentDataCheckDtoList);
         } catch (Exception e) {
             return handleException(e);
         }
