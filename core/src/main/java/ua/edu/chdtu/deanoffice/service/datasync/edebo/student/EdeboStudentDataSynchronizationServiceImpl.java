@@ -119,7 +119,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName) throws Exception {
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, Map<String,String> selectionParams) throws Exception {
         if (xlsxInputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
@@ -127,7 +127,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
-                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName);
+                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, selectionParams);
             }
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
@@ -299,8 +299,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName) {
-        if (!(facultyName.toUpperCase().equals(importedData.getFacultyName().toUpperCase())))
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, Map<String, String> selectionParams) {
+        if (!(selectionParams.get("faculty").toUpperCase().equals(importedData.getFacultyName().toUpperCase()))
+                ||!(selectionParams.get("degree").toUpperCase().equals(importedData.getQualificationGroupName().toUpperCase()))
+                ||!(selectionParams.get("speciality").toUpperCase().equals(importedData.getFullSpecialityName().toUpperCase()))
+                )
             return;
         StudentDegree studentDegreeFromData;
         if (isSpecializationPatternMatch(importedData)) {
