@@ -301,8 +301,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     @Override
     public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, Map<String, String> selectionParams) {
         if (!(selectionParams.get("faculty").toUpperCase().equals(importedData.getFacultyName().toUpperCase()))
-                ||!(selectionParams.get("degree").toUpperCase().equals(importedData.getQualificationGroupName().toUpperCase()))
-                ||!(selectionParams.get("speciality").toUpperCase().equals(importedData.getFullSpecialityName().toUpperCase()))
+                || !(selectionParams.get("degree")==null || selectionParams.get("degree").toUpperCase().equals(importedData.getQualificationGroupName().toUpperCase()))
+                || !(selectionParams.get("speciality")==null || selectionParams.get("speciality").toUpperCase().equals(importedData.getFullSpecialityName().toUpperCase()))
                 )
             return;
         StudentDegree studentDegreeFromData;

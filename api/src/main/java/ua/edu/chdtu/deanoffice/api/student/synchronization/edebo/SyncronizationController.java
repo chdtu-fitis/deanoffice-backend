@@ -37,7 +37,9 @@ public class SyncronizationController {
     }
 
     @PostMapping("/edebo-synchronization")
-    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile, @CurrentUser ApplicationUser user, @RequestParam String degree, @RequestParam String speciality) {
+    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile,
+                                                       @CurrentUser ApplicationUser user,
+                                                       @RequestParam(required=false) String degree, @RequestParam(required=false) String speciality) {
         if (uploadfile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Файл не було надіслано");
         }
