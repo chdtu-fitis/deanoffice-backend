@@ -98,7 +98,7 @@ public class SyncronizationController {
         }
         List<StudentDegree> studentDegreesWithNewData = new ArrayList<>();
         for(StudentDegreeFullEdeboDataDto studentDegree: studentDegreesForUpdate){
-            if ((Integer) studentDegree.getId() == null){
+            if (studentDegree.getId() == 0){
                 continue;
             }
             StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
