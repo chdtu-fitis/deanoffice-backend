@@ -9,8 +9,11 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.*;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -25,11 +28,13 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 public class SyncronizationController {
     private EdeboStudentDataSyncronizationService edeboDataSynchronizationService;
     private final StudentDegreeService studentDegreeService;
+    private final StudentService studentService;
 
     @Autowired
-    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService, StudentDegreeService studentDegreeService) {
+    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService, StudentDegreeService studentDegreeService,StudentService studentService) {
         this.edeboDataSynchronizationService = edeboDataSynchronizationService;
         this.studentDegreeService = studentDegreeService;
+        this.studentService = studentService;
     }
 
     @PostMapping("/edebo-synchronization/process-file")
@@ -71,6 +76,7 @@ public class SyncronizationController {
     @PostMapping("/edebo-synchronization/save")
     public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO){
         updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
+        createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
         return ResponseEntity.ok(200);
     }
 
@@ -90,6 +96,19 @@ public class SyncronizationController {
         studentDegreeService.update(studentDegreesWithNewData);
     }
 
+    private void createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO){
+        if(newStudentDTO.length==0){
+            return;
+        }
+        for(StudentDegreeFullEdeboDataDto studentDTO: newStudentDTO){
+            StudentDegree studentDegree = (StudentDegree) map(studentDTO,StudentDegree.class);
+            if (studentDegree.getStudent().getId()==0) {
+                Student student = studentService.save(studentDegree.getStudent());
+                studentDegree.setStudent(student);
+            }
+            studentDegreeService.save(studentDegree);
+        }
+    }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, SyncronizationController.class);
