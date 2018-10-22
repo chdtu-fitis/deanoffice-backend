@@ -114,6 +114,7 @@ public class SyncronizationController {
         }
         for(StudentDegreeFullEdeboDataDto studentDTO: newStudentDTO){
             StudentDegree studentDegree = (StudentDegree) map(studentDTO,StudentDegree.class);
+            studentDegree.setActive(true);
             if (studentDegree.getStudent().getId()==0) {
                 Student student = studentService.save(studentDegree.getStudent());
                 studentDegree.setStudent(student);
