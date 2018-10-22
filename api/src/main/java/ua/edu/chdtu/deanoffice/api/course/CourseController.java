@@ -75,11 +75,7 @@ public class CourseController {
             @RequestParam int[] courseForGroupIds) {
         try {
             // Отримуємо всі курси для груп, що були передані для обробки
-            List<CourseForGroup> inCoursesForGroups = new ArrayList<>();
-            Arrays.stream(courseForGroupIds).forEach(courseKey -> {
-                CourseForGroup t = courseForGroupService.getCourseForGroup(courseKey);
-                if (t != null) inCoursesForGroups.add(t);
-            });
+            List<CourseForGroup> inCoursesForGroups = courseForGroupService.getCoursesForGroups(courseForGroupIds);
             // Шукаємо за всіма параметрами той же курс за потрібний семестр, якщо
             // знаходимо, то додаємо їх до списку existCoursesAndTeacherForSemester.
             Map<Course, Teacher> existCoursesAndTeacherForSemester = new HashMap<>();
