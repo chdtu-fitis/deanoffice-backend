@@ -31,4 +31,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
 
     int countByCourseId(Integer courseId);
 
+    @Query("SELECT cfg FROM CourseForGroup AS cfg " +
+            "WHERE cfg.id IN (:ids)")
+    List<CourseForGroup> findByIds(@Param("ids") int[] ids);
 }
