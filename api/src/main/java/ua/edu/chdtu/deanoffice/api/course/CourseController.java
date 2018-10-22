@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.course;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +17,6 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 
 import java.math.BigDecimal;
-import java.net.URI;
 import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
@@ -73,16 +71,9 @@ public class CourseController {
 
     @GetMapping("/courses/other-semester")
     public ResponseEntity getCourseForGroupsFromOtherGroupAndSemester(
-            @RequestParam("semester") int semester,
-            @RequestParam("course_for_group_ids") int[] courseForGroupIds,
-            @RequestParam("group_id") int groupIds) {
+            @RequestParam int semester,
+            @RequestParam int[] courseForGroupIds) {
         try {
-            // Отримуємо групу, що була передана для обробки
-            StudentGroup currentStudentGroup = studentGroupService.getById(groupIds);
-            if (currentStudentGroup == null) {
-                String exceptionMessage = "Група не була знайдена в базі даних";
-                throw new OperationCannotBePerformedException(exceptionMessage);
-            }
             // Отримуємо всі курси для груп, що були передані для обробки
             List<CourseForGroup> inCoursesForGroups = new ArrayList<>();
             Arrays.stream(courseForGroupIds).forEach(courseKey -> {
@@ -96,9 +87,8 @@ public class CourseController {
 
             inCoursesForGroups.forEach(item -> {
                 Course courseFromCourseForGroup = item.getCourse();
-                Course course = courseFabric(semester,
+                Course course = createCourse(semester,
                         courseFromCourseForGroup.getCourseName(),
-                        courseFromCourseForGroup.getCredits(),
                         courseFromCourseForGroup.getHours(),
                         courseFromCourseForGroup.getHoursPerCredit(),
                         courseFromCourseForGroup.getKnowledgeControl());
@@ -113,15 +103,15 @@ public class CourseController {
             List<CourseForGroup> createdCourseForGroups = new ArrayList<>(mustBeCreatedCoursesAndTeacher.size() + existCoursesAndTeacherForSemester.size());
             // Для всіх курсів, які не були знайдені виконуємо їх створення та збереження до бази даних
             mustBeCreatedCoursesAndTeacher.forEach((course, teacher) -> {
-                Course tempCourse = courseFabric(semester, course.getCourseName(), course.getCredits(), course.getHours(), course.getHoursPerCredit(), course.getKnowledgeControl());
+                Course tempCourse = createCourse(semester, course.getCourseName(), course.getHours(), course.getHoursPerCredit(), course.getKnowledgeControl());
                 Course createdCourse = courseService.createOrUpdateCourse(tempCourse);
                 if (createdCourse != null) {
-                    createdCourseForGroups.add(courseForGroupFabric(createdCourse, currentStudentGroup, null, teacher));
+                    createdCourseForGroups.add(createCourseForGroup(createdCourse, null, null, teacher));
                 }
             });
             // Для існуючих курсів виконуємо створення CourseForGroup в якого ми встановлюємо викладача на того, який був переданий
             existCoursesAndTeacherForSemester.forEach((course, teacher) -> {
-                createdCourseForGroups.add(courseForGroupFabric(course, currentStudentGroup, null, teacher));
+                createdCourseForGroups.add(createCourseForGroup(course, null, null, teacher));
             });
             return ResponseEntity.ok(map(createdCourseForGroups, CourseForGroupDTO.class));
         } catch (Exception e) {
@@ -129,7 +119,7 @@ public class CourseController {
         }
     }
 
-    private CourseForGroup courseForGroupFabric(Course course, StudentGroup studentGroup, Date date, Teacher teacher) {
+    private CourseForGroup createCourseForGroup(Course course, StudentGroup studentGroup, Date date, Teacher teacher) {
         CourseForGroup courseForGroup = new CourseForGroup();
         courseForGroup.setCourse(course);
         courseForGroup.setStudentGroup(studentGroup);
@@ -138,10 +128,11 @@ public class CourseController {
         return courseForGroup;
     }
 
-    private Course courseFabric(Integer semester, CourseName courseName, BigDecimal credits, Integer hours, Integer hoursPerCredit, KnowledgeControl knowledgeControl) {
+    private Course createCourse(Integer semester, CourseName courseName, Integer hours, Integer hoursPerCredit, KnowledgeControl knowledgeControl) {
         Course course = new Course();
         course.setSemester(semester);
         course.setCourseName(courseName);
+        BigDecimal credits = BigDecimal.valueOf(hours).divide(BigDecimal.valueOf(hoursPerCredit), 2, BigDecimal.ROUND_HALF_UP);
         course.setCredits(credits);
         course.setHours(hours);
         course.setHoursPerCredit(hoursPerCredit);
