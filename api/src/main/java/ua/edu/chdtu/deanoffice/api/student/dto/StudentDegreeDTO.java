@@ -62,10 +62,15 @@ public class StudentDegreeDTO {
     @JsonView(StudentView.Degrees.class)
     private String previousDiplomaIssuedBy;
     @JsonView(StudentView.Degrees.class)
+    private String previousDiplomaIssuedByEng;
+    @JsonView(StudentView.Degrees.class)
     private Date admissionDate;
 
     @JsonView(StudentView.Degrees.class)
     private Integer studentGroupId;
     @JsonView(StudentView.Degrees.class)
     private Integer specializationId;
+
+    @JsonView(StudentView.Degrees.class)
+    private boolean diplomaWithHonours;
 }
