@@ -23,6 +23,7 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
@@ -155,19 +156,20 @@ public class StudentDegreeController {
     @JsonView(StudentView.Degrees.class)
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
-            @PathVariable(value = "id") Integer studentId,
-            @RequestBody List<StudentDegreeDTO> studentDegreesDTO
+            @PathVariable("id") Integer studentId,
+            @RequestBody List<StudentDegreeDTO> studentDegreesDTOs
     ) {
-        if (checkId(studentDegreesDTO)) {
-            return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id не може бути null");
+        if (isAnyStudentDegreeNotHaveId(studentDegreesDTOs)) {
+            String exceptionMessage = "Отримано недостатню кількість даних для оновлення. Зверністься до адміністратора";
+            handleException(new OperationCannotBePerformedException(exceptionMessage));
         }
 
         try {
-            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTO, StudentDegree.class);
+            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
             Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
-                Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
+                Integer groupId = studentDegreesDTOs.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
                 studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
                 studentDegree.setStudent(student);
@@ -180,13 +182,11 @@ public class StudentDegreeController {
         }
     }
 
-    private boolean checkId(List<StudentDegreeDTO> studentDegreeDTOs) {
-        for (StudentDegreeDTO sd : studentDegreeDTOs) {
-            if (sd.getId() == null) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isAnyStudentDegreeNotHaveId(List<StudentDegreeDTO> studentDegreeDTOs) {
+        return studentDegreeDTOs.stream()
+                .filter((studentDegreeDTO) -> studentDegreeDTO.getId() == null)
+                .findAny()
+                .isPresent();
     }
 
     private StudentGroup getStudentGroup(Integer groupId) {
