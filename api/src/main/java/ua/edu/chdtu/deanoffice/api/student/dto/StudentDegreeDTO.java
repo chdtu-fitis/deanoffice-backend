@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -73,4 +74,6 @@ public class StudentDegreeDTO {
 
     @JsonView(StudentView.Degrees.class)
     private boolean diplomaWithHonours;
+    @JsonView(StudentView.Degree.class)
+    private Set<StudentPreviousUniversityDTO> studentPreviousUniversities;
 }
