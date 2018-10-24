@@ -47,4 +47,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("studentId") Integer studentId,
             @Param("specializationId") Integer specializationId
     );
+
+    @Query("SELECT sd from StudentDegree sd " +
+            "where sd.id not in :ids and sd.active = true")
+    List<StudentDegree> findAllStudentDegreesNotInImportedData(@Param("ids") List<Integer> absentIdsInImportedData);
 }

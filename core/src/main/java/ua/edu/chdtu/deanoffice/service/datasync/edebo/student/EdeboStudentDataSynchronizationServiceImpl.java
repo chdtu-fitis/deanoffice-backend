@@ -129,6 +129,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             for (ImportedData data : importedData) {
                 addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName);
             }
+            getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, facultyName);
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
             e.printStackTrace();
@@ -336,13 +337,18 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 specializationFromData.getDegree().getId(),
                 specialityFromDb.getId(),
                 facultyFromDb.getId());
-        if (specializationFromDB == null){
-            String message = "Дана спеціалізація відсутня";
-            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
-            return;
-        } else {
+        if (specializationFromDB == null && specialityFromDb.getCode().length() == 3){
+            Specialization onlySpecialization = specializationService.getBySpecialityId(specialityFromDb.getId());
+            if (onlySpecialization != null){
+                specializationFromDB = onlySpecialization;
+            } else {
+                String message = "Дана спеціалізація відсутня";
+                edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
+                return;
+            }
+        } //else {
             studentDegreeFromData.setSpecialization(specializationFromDB);
-        }
+        //}
 
         Student studentFromData = studentDegreeFromData.getStudent();
         Student studentFromDB = studentService.searchByFullNameAndBirthDate(
@@ -364,15 +370,41 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
 
         if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb)) {
-            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(new StudentDegreePrimaryDataBean(studentDegreeFromData));
+            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(new StudentDegreePrimaryDataBean(studentDegreeFromDb));
         } else {
             edeboDataSyncronizationReport.addUnmatchedSecondaryDataStudentDegreeBlue(studentDegreeFromData,studentDegreeFromDb);
+        }
+        if (importedData == null){
+
         }
     }
 
     public boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb) {
         return (EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile, studentDegreeFromDb, SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE) &&
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
+    }
+
+    private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName){
+        List<Integer> idNotForAbsentInFileStudentDegrees = new ArrayList<>();
+        edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen().stream().forEach(studentDegree ->
+                idNotForAbsentInFileStudentDegrees.add(studentDegree.getId()));
+        edeboDataSyncronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue().stream().forEach(studentDegree ->
+            idNotForAbsentInFileStudentDegrees.add(studentDegree.getStudentDegreeFromDb().getId()));
+
+        studentDegreeService.getAllStudentDegreesNotInImportedData(idNotForAbsentInFileStudentDegrees).stream().
+                filter(studentDegree -> studentDegree.getSpecialization().getFaculty().getName() == facultyName).
+                forEach(studentDegree -> {
+                    if (studentDegree.getStudent().getBirthDate()==null){
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                    try {
+                        Date d = sdf.parse("12.10.1998");
+                        studentDegree.getStudent().setBirthDate(d);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+                edeboDataSyncronizationReport.addAbsentInFileStudentDegreeYellow(new StudentDegreePrimaryDataBean(studentDegree));
+        });
     }
 
     private Date parseDate(String fileDate) {

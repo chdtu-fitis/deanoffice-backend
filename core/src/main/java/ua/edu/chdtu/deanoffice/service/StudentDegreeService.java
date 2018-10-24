@@ -39,6 +39,10 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
     }
 
+    public List<StudentDegree> getAllStudentDegreesNotInImportedData(List<Integer> absentIdsInImportedData){
+        return this.studentDegreeRepository.findAllStudentDegreesNotInImportedData(absentIdsInImportedData);
+    }
+
     public StudentDegree save(StudentDegree studentDegree) {
         return this.studentDegreeRepository.save(studentDegree);
     }

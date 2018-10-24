@@ -58,10 +58,14 @@ public class SyncronizationController {
                     edeboDataSynchronizationReport.getMissingPrimaryDataRed(),
                     MissingPrimaryDataRedDTO.class
             );
+            List<StudentDegreePrimaryEdeboDataDTO> absentInFileStudentDegreesYellow = map(
+                    edeboDataSynchronizationReport.getAbsentInFileStudentDegreesYellow(),
+                    StudentDegreePrimaryEdeboDataDTO.class);
             allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(noSuchStudentDegreeInDbOrangeDTOs);
             allListsDTO.setUnmatchedSecondaryDataStudentDegreesBlue(unmatchedSecondaryDataStudentDegreesBlueDTOs);
             allListsDTO.setSynchronizedStudentDegreesGreen(synchronizedStudentDegreesGreen);
             allListsDTO.setMissingPrimaryDataRed(missingPrimaryDataRed);
+            allListsDTO.setAbsentInFileStudentDegreesYellow(absentInFileStudentDegreesYellow);
             return ResponseEntity.ok(allListsDTO);
         } catch (Exception exception) {
             return handleException(exception);

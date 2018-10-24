@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 @Getter
 @Setter
 public class StudentDegreePrimaryDataBean {
+    private Integer id;
     private String lastName;
     private String firstName;
     private String middleName;
@@ -24,6 +25,7 @@ public class StudentDegreePrimaryDataBean {
     public StudentDegreePrimaryDataBean(StudentDegree studentDegree){
         Student s = studentDegree.getStudent();
         Specialization sp = studentDegree.getSpecialization();
+        this.id = studentDegree.getId();
         this.lastName=studentDegree.getStudent().getSurname();
         this.firstName=s.getName();
         this.middleName=s.getPatronimic();
