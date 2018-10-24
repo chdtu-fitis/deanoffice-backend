@@ -3,7 +3,7 @@ CREATE TABLE student_previous_university (
     student_degree_id integer NOT NULL,
     university_name character varying(150) NOT NULL,
     study_start_date date NOT NULL,
-    study_end_date integer NOT NULL,
+    study_end_date date NOT NULL,
     academic_certificate_number character varying(15),
     academic_certificate_date date
 );
