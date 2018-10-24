@@ -119,7 +119,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName) throws Exception {
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName, int facultyId) throws Exception {
         if (xlsxInputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
@@ -127,7 +127,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
-                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName);
+                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName, facultyId);
             }
             getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, facultyName);
             return edeboDataSyncronizationReport;
@@ -181,11 +181,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 if (specializationMatcher.matches()) {
                     return true;
                 } else {
-                    if (Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(programName)) {
-                        return true;
-                    } else {
+                    if (!Strings.isNullOrEmpty(specializationName)) {
                         return false;
-                    }
+                    } else
+                        return true;
                 }
             } else {
                 return false;
@@ -300,7 +299,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName) {
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName, int facultyId) {
         if (!(facultyName.toUpperCase().equals(importedData.getFacultyName().toUpperCase())))
             return;
         StudentDegree studentDegreeFromData;
@@ -337,10 +336,12 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 specializationFromData.getDegree().getId(),
                 specialityFromDb.getId(),
                 facultyFromDb.getId());
-        if (specializationFromDB == null && specialityFromDb.getCode().length() == 3){
-            Specialization onlySpecialization = specializationService.getBySpecialityId(specialityFromDb.getId());
-            if (onlySpecialization != null){
-                specializationFromDB = onlySpecialization;
+        if (specializationFromDB == null){
+            Specialization soleSpecialization = null;
+            if (specialityFromDb.getCode().length() == 3)
+                soleSpecialization = specializationService.getForSpecialityIfSole(specialityFromDb.getId(),facultyId);
+            if (soleSpecialization != null){
+                specializationFromDB = soleSpecialization;
             } else {
                 String message = "Дана спеціалізація відсутня";
                 edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
