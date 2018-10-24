@@ -119,7 +119,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName, int facultyId) throws Exception {
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName, int facultyId, Map<String,String> selectionParams) throws Exception {
         if (xlsxInputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
@@ -127,7 +127,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
-                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName, facultyId);
+                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyName, facultyId, selectionParams);
             }
             getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, facultyName);
             return edeboDataSyncronizationReport;
@@ -299,8 +299,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName, int facultyId) {
-        if (!(facultyName.toUpperCase().equals(importedData.getFacultyName().toUpperCase())))
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName, int facultyId, Map<String, String> selectionParams) {
+        if (!(selectionParams.get("faculty").toUpperCase().equals(importedData.getFacultyName().toUpperCase()))
+                || !(selectionParams.get("degree")==null || selectionParams.get("degree").toUpperCase().equals(importedData.getQualificationGroupName().toUpperCase()))
+                || !(selectionParams.get("speciality")==null || selectionParams.get("speciality").toUpperCase().equals(importedData.getFullSpecialityName().toUpperCase()))
+                )
             return;
         StudentDegree studentDegreeFromData;
         if (isSpecializationPatternMatch(importedData)) {
@@ -347,9 +350,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
                 return;
             }
-        } //else {
-            studentDegreeFromData.setSpecialization(specializationFromDB);
-        //}
+        }
+        studentDegreeFromData.setSpecialization(specializationFromDB);
 
         Student studentFromData = studentDegreeFromData.getStudent();
         Student studentFromDB = studentService.searchByFullNameAndBirthDate(
@@ -374,9 +376,6 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(new StudentDegreePrimaryDataBean(studentDegreeFromDb));
         } else {
             edeboDataSyncronizationReport.addUnmatchedSecondaryDataStudentDegreeBlue(studentDegreeFromData,studentDegreeFromDb);
-        }
-        if (importedData == null){
-
         }
     }
 

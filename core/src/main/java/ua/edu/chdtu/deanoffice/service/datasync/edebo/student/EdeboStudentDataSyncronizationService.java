@@ -6,6 +6,8 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public interface EdeboStudentDataSyncronizationService {
 
@@ -19,9 +21,9 @@ public interface EdeboStudentDataSyncronizationService {
 
     StudentDegree getStudentDegreeFromData(ImportedData data);
 
-    EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName, int facultyId) throws Exception;
+    EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, String facultyName, int facultyId, Map<String, String> selectionParams) throws Exception;
 
-    void addSynchronizationReportForImportedData(ImportedData importedData,EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName, int facultyId);
+    void addSynchronizationReportForImportedData(ImportedData importedData,EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, String facultyName, int facultyId, Map<String, String> selectionParams);
 
     boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb);
 }

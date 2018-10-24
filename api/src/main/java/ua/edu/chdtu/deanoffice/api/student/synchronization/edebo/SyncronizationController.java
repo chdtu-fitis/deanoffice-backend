@@ -8,15 +8,23 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.*;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSecondaryDataStudentDegreeBlueDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSyncronizationService;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.MissingPrimaryDataRedDTO;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
@@ -25,15 +33,19 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 public class SyncronizationController {
     private EdeboStudentDataSyncronizationService edeboDataSynchronizationService;
     private final StudentDegreeService studentDegreeService;
+    private final StudentService studentService;
 
     @Autowired
-    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService, StudentDegreeService studentDegreeService) {
+    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService, StudentDegreeService studentDegreeService,StudentService studentService) {
         this.edeboDataSynchronizationService = edeboDataSynchronizationService;
         this.studentDegreeService = studentDegreeService;
+        this.studentService = studentService;
     }
 
     @PostMapping("/edebo-synchronization/process-file")
-    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile, @CurrentUser ApplicationUser user) {
+    public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile,
+                                                       @CurrentUser ApplicationUser user,
+                                                       @RequestParam(required=false) String degree, @RequestParam(required=false) String speciality) {
         if (uploadfile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Файл не було надіслано");
         }
@@ -41,7 +53,11 @@ public class SyncronizationController {
         EdeboStudentDataSynchronizationReport edeboDataSynchronizationReport = null;
         try {
             AllListsDTO allListsDTO = new AllListsDTO();
-            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(), user.getFaculty().getName(), user.getFaculty().getId());
+            Map<String, String> selectionParams = new HashMap<>();
+            selectionParams.put("faculty", user.getFaculty().getName());
+            selectionParams.put("degree", degree);
+            selectionParams.put("speciality", speciality);
+            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(), user.getFaculty().getName(), user.getFaculty().getId(), selectionParams);
             List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(
                     edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(),
                     UnmatchedSecondaryDataStudentDegreeBlueDTO.class
@@ -75,6 +91,7 @@ public class SyncronizationController {
     @PostMapping("/edebo-synchronization/save")
     public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO){
         updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
+        createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
         return ResponseEntity.ok(200);
     }
 
@@ -84,7 +101,7 @@ public class SyncronizationController {
         }
         List<StudentDegree> studentDegreesWithNewData = new ArrayList<>();
         for(StudentDegreeFullEdeboDataDto studentDegree: studentDegreesForUpdate){
-            if ((Integer) studentDegree.getId() == null){
+            if (studentDegree.getId() == 0){
                 continue;
             }
             StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
@@ -94,6 +111,20 @@ public class SyncronizationController {
         studentDegreeService.update(studentDegreesWithNewData);
     }
 
+    private void createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO){
+        if(newStudentDTO.length==0){
+            return;
+        }
+        for(StudentDegreeFullEdeboDataDto studentDTO: newStudentDTO){
+            StudentDegree studentDegree = (StudentDegree) map(studentDTO,StudentDegree.class);
+            studentDegree.setActive(true);
+            if (studentDegree.getStudent().getId()==0) {
+                Student student = studentService.save(studentDegree.getStudent());
+                studentDegree.setStudent(student);
+            }
+            studentDegreeService.save(studentDegree);
+        }
+    }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, SyncronizationController.class);
