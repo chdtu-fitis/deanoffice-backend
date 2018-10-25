@@ -169,6 +169,7 @@ public class StudentDegreeController {
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
                 studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
                 studentDegree.setStudent(student);
+                studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
             });
 
             studentDegreeService.update(studentDegrees);

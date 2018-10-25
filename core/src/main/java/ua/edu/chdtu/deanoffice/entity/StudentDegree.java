@@ -6,7 +6,6 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -53,6 +52,6 @@ public class StudentDegree extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date admissionDate;
 
-    @OneToMany(mappedBy = "studentDegree", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Set<StudentPreviousUniversity> studentPreviousUniversities;
 }
