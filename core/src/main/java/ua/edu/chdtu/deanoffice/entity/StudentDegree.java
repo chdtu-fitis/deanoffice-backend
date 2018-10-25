@@ -52,6 +52,6 @@ public class StudentDegree extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date admissionDate;
 
-    @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentPreviousUniversity> studentPreviousUniversities;
 }
