@@ -13,12 +13,11 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 
-import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -68,6 +67,73 @@ public class CourseController {
         } catch (Exception e) {
             return handleException(e);
         }
+    }
+
+    @GetMapping("/courses/other-semester")
+    public ResponseEntity getCourseForGroupsFromOtherGroupAndSemester(
+            @RequestParam int semester,
+            @RequestParam int[] courseForGroupIds) {
+        try {
+            // Отримуємо всі курси для груп, що були передані для обробки
+            List<CourseForGroup> inCoursesForGroups = courseForGroupService.getCoursesForGroups(courseForGroupIds);
+            // Шукаємо за всіма параметрами той же курс за потрібний семестр, якщо
+            // знаходимо, то додаємо їх до списку existCoursesAndTeacherForSemester.
+            Map<Course, Teacher> existCoursesAndTeacherForSemester = new HashMap<>();
+            Map<Course, Teacher> mustBeCreatedCoursesAndTeacher = new HashMap<>();
+
+            inCoursesForGroups.forEach(item -> {
+                Course courseFromCourseForGroup = item.getCourse();
+                Course course = createCourse(semester,
+                        courseFromCourseForGroup.getCourseName(),
+                        courseFromCourseForGroup.getHours(),
+                        courseFromCourseForGroup.getHoursPerCredit(),
+                        courseFromCourseForGroup.getKnowledgeControl());
+                Course foundInDBCourse = courseService.getCourseByAllAttributes(course);
+
+                if (foundInDBCourse == null) {
+                    mustBeCreatedCoursesAndTeacher.put(courseFromCourseForGroup, item.getTeacher());
+                } else {
+                    existCoursesAndTeacherForSemester.put(foundInDBCourse, item.getTeacher());
+                }
+            });
+            List<CourseForGroup> createdCourseForGroups = new ArrayList<>(mustBeCreatedCoursesAndTeacher.size() + existCoursesAndTeacherForSemester.size());
+            // Для всіх курсів, які не були знайдені виконуємо їх створення та збереження до бази даних
+            mustBeCreatedCoursesAndTeacher.forEach((course, teacher) -> {
+                Course tempCourse = createCourse(semester, course.getCourseName(), course.getHours(), course.getHoursPerCredit(), course.getKnowledgeControl());
+                Course createdCourse = courseService.createOrUpdateCourse(tempCourse);
+                if (createdCourse != null) {
+                    createdCourseForGroups.add(createCourseForGroup(createdCourse, null, null, teacher));
+                }
+            });
+            // Для існуючих курсів виконуємо створення CourseForGroup в якого ми встановлюємо викладача на того, який був переданий
+            existCoursesAndTeacherForSemester.forEach((course, teacher) -> {
+                createdCourseForGroups.add(createCourseForGroup(course, null, null, teacher));
+            });
+            return ResponseEntity.ok(map(createdCourseForGroups, CourseForGroupDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    private CourseForGroup createCourseForGroup(Course course, StudentGroup studentGroup, Date date, Teacher teacher) {
+        CourseForGroup courseForGroup = new CourseForGroup();
+        courseForGroup.setCourse(course);
+        courseForGroup.setStudentGroup(studentGroup);
+        courseForGroup.setExamDate(date);
+        courseForGroup.setTeacher(teacher);
+        return courseForGroup;
+    }
+
+    private Course createCourse(Integer semester, CourseName courseName, Integer hours, Integer hoursPerCredit, KnowledgeControl knowledgeControl) {
+        Course course = new Course();
+        course.setSemester(semester);
+        course.setCourseName(courseName);
+        BigDecimal credits = BigDecimal.valueOf(hours).divide(BigDecimal.valueOf(hoursPerCredit), 2, BigDecimal.ROUND_HALF_UP);
+        course.setCredits(credits);
+        course.setHours(hours);
+        course.setHoursPerCredit(hoursPerCredit);
+        course.setKnowledgeControl(knowledgeControl);
+        return course;
     }
 
     @PutMapping("/groups/{groupId}/courses")

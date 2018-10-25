@@ -28,14 +28,14 @@ public class PersonalStatementController extends DocumentResponseController {
     }
 
     @GetMapping(path = "/{year}/docx")
-    public ResponseEntity<Resource> getPersonalStatement(@RequestParam Integer[] groupIds,
+    public ResponseEntity<Resource> getPersonalStatement(@RequestParam Integer[] studentDegreeIds,
                                                          @PathVariable Integer year,
                                                          @CurrentUser ApplicationUser user) {
         try {
-            for (Integer groupId : groupIds) {
-                facultyService.checkGroup(groupId, user.getFaculty().getId());
+            for (Integer studentDegreeId : studentDegreeIds) {
+                facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
             }
-            File result = personalStatementService.formDocument(year, Arrays.asList(groupIds));
+            File result = personalStatementService.formDocument(year, Arrays.asList(studentDegreeIds));
             return buildDocumentResponseEntity(result, result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);

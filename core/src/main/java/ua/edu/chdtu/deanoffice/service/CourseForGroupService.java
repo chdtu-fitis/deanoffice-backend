@@ -22,6 +22,10 @@ public class CourseForGroupService {
         return courseForGroupRepository.findOne(id);
     }
 
+    public List<CourseForGroup> getCoursesForGroups(int[] ids) {
+        return courseForGroupRepository.findByIds(ids);
+    }
+
     public List<CourseForGroup> getCoursesForOneGroup(int idGroup) {
         return courseForGroupRepository.findAllByStudentGroupId(idGroup);
     }

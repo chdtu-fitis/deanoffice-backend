@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -35,53 +36,54 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 public class PersonalStatementService {
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "PersonalStatement.docx";
     @Autowired
+    private StudentDegreeRepository studentDegreeRepository;
+    @Autowired
+    private CourseRepository courseRepository;
+    @Autowired
     private GradeService gradeService;
     @Autowired
     private StudentDegreeService studentDegreeService;
     @Autowired
     private StudentGroupService studentGroupService;
     @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
     private DocumentIOService documentIOService;
     @Autowired
     private CourseForGroupService courseForGroupService;
 
-    public File formDocument(Integer year, List<Integer> groupIds)
+    public File formDocument(Integer year, List<Integer> studentDegreeIds)
             throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
-        YearGrades yearGrades = new YearGrades(getGradeMap(year, groupIds, SemesterType.FIRST), getGradeMap(year, groupIds, SemesterType.SECOND));
+        YearGrades yearGrades = new YearGrades(getGradeMap(year, studentDegreeIds, SemesterType.FIRST), getGradeMap(year, studentDegreeIds, SemesterType.SECOND));
         generateTables(template, yearGrades);
-        return documentIOService.saveDocumentToTemp(template, transliterate(generateFileName(groupIds)), FileFormatEnum.DOCX);
+        Set<StudentGroup> groups = yearGrades.getGradeMapForFirstSemester().keySet().stream().map(sd -> sd.getStudentGroup()).collect(Collectors.toSet());
+        return documentIOService.saveDocumentToTemp(template, transliterate(generateFileName(groups)), FileFormatEnum.DOCX);
     }
 
-    private String generateFileName(List<Integer> groupIds) {
+    private String generateFileName(Set<StudentGroup> groups) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("PersonalStatement_");
-        groupIds.forEach(groupId -> {
-            stringBuilder.append(studentGroupService.getById(groupId).getName()).append("_");
+        stringBuilder.append("PersonalFile_");
+        groups.forEach(groupId -> {
+            stringBuilder.append(groupId.getName()).append("_");
         });
         return stringBuilder.toString();
     }
 
-    private Map<StudentDegree, List<Grade>> getGradeMap(Integer year, List<Integer> groupIds, SemesterType semesterType) {
-        List<Integer> studentDegreeIds =
-                groupIds.stream().map(groupId -> studentDegreeService.getAllByGroupId(groupId)).
-                        collect(Collectors.toList()).stream().flatMap(Collection::stream).collect(Collectors.toList())
-                        .stream().map(BaseEntity::getId).sorted().collect(Collectors.toList());
-
-        List<Integer> courseIds = groupIds.stream().map(groupId ->
-                courseRepository.getByGroupIdAndSemester(groupId,
-                        getSemesterByYearForGroup(year, studentGroupService.getById(groupId)) + semesterType.getNumber() - 1))
-                .collect(Collectors.toList())
-                .stream().flatMap(Collection::stream)
-                .collect(Collectors.toList())
-                .stream().map(BaseEntity::getId)
-                .collect(Collectors.toList());
-
-        if (courseIds.size() > 0) {
-            return gradeService.getGradeMapForStudents(studentDegreeIds, courseIds);
-        } else return new HashMap<>();
+    private Map<StudentDegree, List<Grade>> getGradeMap(Integer year, List<Integer> studentDegreeIds, SemesterType semesterType) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(studentDegreeIds);
+        Map<StudentGroup, List<StudentDegree>> groupsWithStudents = studentDegrees.stream().collect(Collectors.groupingBy(sd -> sd.getStudentGroup()));
+        Map<StudentGroup, List<Integer>> groupsWithStudentIds = groupsWithStudents.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> entry.getValue().stream().map(BaseEntity::getId).collect(Collectors.toList())
+        ));
+        Set<StudentGroup> groups = groupsWithStudents.keySet();
+        Map<StudentGroup, List<Integer>> courseIdsForGroups = groups.stream().collect(Collectors.toMap(
+                group -> group,
+                group -> courseRepository.getByGroupIdAndSemester(group.getId(),getSemesterByYearForGroup(year, group) + semesterType.getNumber() - 1)
+                        .stream()
+                        .map(BaseEntity::getId)
+                        .collect(Collectors.toList())
+        ));
+        return gradeService.getGradeMapForStudents(groupsWithStudentIds, courseIdsForGroups);
     }
 
     private void generateTables(WordprocessingMLPackage template, YearGrades yearGrades) {
@@ -120,15 +122,22 @@ public class PersonalStatementService {
     private void formSecondSemesterInTable(Tbl table, List<Grade> grades) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         int currentIndex = tableRows.size() - 1;
-        Tr rowToCopy = tableRows.get(currentIndex);
-        fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0));
-        for (Grade grade : grades.subList(1, grades.size())) {
-            Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            fillRowByGrade(newRow, grade);
-            table.getContent().add(currentIndex, newRow);
-            currentIndex++;
+        if (grades != null && grades.size() > 0) {
+            Tr rowToCopy = tableRows.get(currentIndex);
+            fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0));
+            for (Grade grade : grades.subList(1, grades.size())) {
+                Tr newRow = XmlUtils.deepCopy(rowToCopy);
+                fillRowByGrade(newRow, grade);
+                table.getContent().add(currentIndex, newRow);
+                currentIndex++;
+            }
+            table.getContent().remove(currentIndex);
         }
-        table.getContent().remove(currentIndex);
+        else {
+            table.getContent().remove(currentIndex);
+            table.getContent().remove(currentIndex-1);
+        }
+
     }
 
     private void fillRowByGrade(Tr row, Grade grade) {
@@ -202,7 +211,7 @@ public class PersonalStatementService {
     }
 
     private Integer getSemesterByYearForGroup(Integer year, StudentGroup studentGroup) {
-        return (year - studentGroup.getCreationYear()) * 2 + 1;
+        return (year - studentGroup.getCreationYear() + studentGroup.getBeginYears() - 1) * 2 + 1;
     }
 
     @Getter
