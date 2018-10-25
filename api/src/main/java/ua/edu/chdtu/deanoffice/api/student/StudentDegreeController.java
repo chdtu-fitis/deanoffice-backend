@@ -159,12 +159,8 @@ public class StudentDegreeController {
             @PathVariable("id") Integer studentId,
             @RequestBody List<StudentDegreeDTO> studentDegreesDTOs
     ) {
-        if (isAnyStudentDegreeNotHaveId(studentDegreesDTOs)) {
-            String exceptionMessage = "Отримано недостатню кількість даних для оновлення. Зверністься до адміністратора";
-            handleException(new OperationCannotBePerformedException(exceptionMessage));
-        }
-
         try {
+            validateUpdateStudentDegreesBody(studentDegreesDTOs);
             List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
             Student student = studentService.findById(studentId);
 
@@ -179,6 +175,13 @@ public class StudentDegreeController {
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    private void validateUpdateStudentDegreesBody(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
+        if (isAnyStudentDegreeNotHaveId(studentDegreesDTOs)) {
+            String exceptionMessage = "Отримано недостатню кількість даних для оновлення. Зверністься до адміністратора";
+            throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
 
