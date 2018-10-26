@@ -1,13 +1,16 @@
 package ua.edu.chdtu.deanoffice.repository;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import java.util.List;
 
-public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer> {
+public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer>, JpaSpecificationExecutor<StudentDegree> {
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.active = :active " +
             "and sd.specialization.faculty.id = :facultyId " +
@@ -51,4 +54,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.id not in :ids and sd.active = true")
     List<StudentDegree> findAllStudentDegreesNotInImportedData(@Param("ids") List<Integer> absentIdsInImportedData);
+
+    @Override
+    List<StudentDegree> findAll(Specification<StudentDegree> spec);
 }

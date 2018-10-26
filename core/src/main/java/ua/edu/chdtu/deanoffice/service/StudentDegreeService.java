@@ -1,9 +1,16 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -50,4 +57,9 @@ public class StudentDegreeService {
     public void update(List<StudentDegree> studentDegree) {
         studentDegreeRepository.save(studentDegree);
     }
+
+    public List<StudentDegree> getAllNotInImportData(List<Integer> id){
+        return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(id));
+    }
+
 }

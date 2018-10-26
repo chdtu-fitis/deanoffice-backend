@@ -393,17 +393,18 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         edeboDataSyncronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue().stream().forEach(studentDegree ->
             idNotForAbsentInFileStudentDegrees.add(studentDegree.getStudentDegreeFromDb().getId()));
 
-        for(StudentDegree studentDegree: studentDegreeService.getAllStudentDegreesNotInImportedData(idNotForAbsentInFileStudentDegrees)){
-            if (!(selectionParams.get("faculty").toUpperCase().equals(studentDegree.getSpecialization().getFaculty().getName().toUpperCase()))
+        for(StudentDegree studentDegree: studentDegreeService.getAllNotInImportData(idNotForAbsentInFileStudentDegrees)){
+            String name = studentDegree.getSpecialization().getFaculty().getName();
+            if (!(selectionParams.get("faculty").toUpperCase().equals(name.toUpperCase()))
                     || !(selectionParams.get("degree")==null || selectionParams.get("degree").toUpperCase().equals(studentDegree.getSpecialization().getQualification().toUpperCase()))
                     || !(selectionParams.get("speciality")==null || selectionParams.get("speciality").toUpperCase().equals(studentDegree.getSpecialization().getSpeciality().getName().toUpperCase()))
             ){
                 continue;
             } else {
-                if (studentDegree.getStudent().getBirthDate()==null){
+                if (studentDegree.getStudent().getBirthDate() == null){
                     SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
                     try {
-                        Date d = sdf.parse("12.10.1998");
+                        Date d = sdf.parse("00.00.0000");
                         studentDegree.getStudent().setBirthDate(d);
                     } catch (ParseException e) {
                         e.printStackTrace();
