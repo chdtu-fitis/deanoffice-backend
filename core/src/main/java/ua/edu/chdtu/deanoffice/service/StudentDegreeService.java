@@ -46,10 +46,6 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
     }
 
-    public List<StudentDegree> getAllStudentDegreesNotInImportedData(List<Integer> absentIdsInImportedData){
-        return this.studentDegreeRepository.findAllStudentDegreesNotInImportedData(absentIdsInImportedData);
-    }
-
     public StudentDegree save(StudentDegree studentDegree) {
         return this.studentDegreeRepository.save(studentDegree);
     }
@@ -58,8 +54,8 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegree);
     }
 
-    public List<StudentDegree> getAllNotInImportData(List<Integer> id){
-        return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(id));
+    public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId){
+        return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId));
     }
 
 }

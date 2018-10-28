@@ -129,7 +129,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             for (ImportedData data : importedData) {
                 addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyId, selectionParams);
             }
-            getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, selectionParams);
+            getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, selectionParams, facultyId);
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
             e.printStackTrace();
@@ -386,14 +386,15 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
     }
 
-    private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, Map<String, String> selectionParams){
+    private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, Map<String, String> selectionParams, int facultyId){
         List<Integer> idNotForAbsentInFileStudentDegrees = new ArrayList<>();
         edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen().stream().forEach(studentDegree ->
                 idNotForAbsentInFileStudentDegrees.add(studentDegree.getId()));
         edeboDataSyncronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue().stream().forEach(studentDegree ->
             idNotForAbsentInFileStudentDegrees.add(studentDegree.getStudentDegreeFromDb().getId()));
 
-        for(StudentDegree studentDegree: studentDegreeService.getAllNotInImportData(idNotForAbsentInFileStudentDegrees)){
+        List<StudentDegree> studentDegrees = studentDegreeService.getAllNotInImportData(idNotForAbsentInFileStudentDegrees, facultyId);
+        for(StudentDegree studentDegree: studentDegrees){
             String name = studentDegree.getSpecialization().getFaculty().getName();
             if (!(selectionParams.get("faculty").toUpperCase().equals(name.toUpperCase()))
                     || !(selectionParams.get("degree")==null || selectionParams.get("degree").toUpperCase().equals(studentDegree.getSpecialization().getQualification().toUpperCase()))
