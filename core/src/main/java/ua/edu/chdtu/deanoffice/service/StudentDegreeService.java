@@ -1,9 +1,9 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.util.ObjectUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -40,23 +40,23 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
     }
 
-    public String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
+    private String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
         String message = "";
-        message += ObjectUtil.isEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getDiplomaDate()) ? "Дата диплома. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaDate()) ? "Попередня дата диплома. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaNumber()) ? "Попередній номер диплома. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getPreviousDiplomaIssuedBy()) ? "Попередній диплом виданий. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getAdmissionDate()) ? "Дата вступу. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getProtocolDate()) ? "Дата протокола. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getSupplementDate()) ? "Дата додатка. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
-        message += ObjectUtil.isEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома. " : "";
+        message += (studentDegree.getDiplomaDate()==null) ? "Дата диплома. " : "";
+        message += (studentDegree.getPreviousDiplomaDate()==null) ? "Попередня дата диплома. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getPreviousDiplomaNumber()) ? "Попередній номер диплома. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getPreviousDiplomaIssuedBy()) ? "Попередній диплом виданий. " : "";
+        message += (studentDegree.getAdmissionDate()==null) ? "Дата вступу. " : "";
+        message += (studentDegree.getProtocolDate()==null) ? "Дата протокола. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
+        message += (studentDegree.getSupplementDate()==null) ? "Дата додатка. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
         return message;
     }
 
@@ -66,8 +66,7 @@ public class StudentDegreeService {
         return studentDegrees
                 .stream()
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
-                .collect(Collectors.toMap(sd -> sd,
-                        sd -> checkGraduateFieldValuesAvailability(sd)));
+                .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability));
     }
 
     public StudentDegree save(StudentDegree studentDegree) {
