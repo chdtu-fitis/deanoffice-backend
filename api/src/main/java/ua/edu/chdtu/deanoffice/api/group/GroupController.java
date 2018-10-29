@@ -163,7 +163,8 @@ public class GroupController {
                                       @CurrentUser ApplicationUser user) {
         try {
             List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
-            validateDeleteGroupBody(groupIds, user, studentGroups);
+            verifyAccess(user, studentGroups);
+            validateDeleteGroupBody(groupIds, studentGroups);
             List<StudentGroup> groupsToDelete = findStudentGroupsInWhichAllStudentsAreInactive(studentGroups);
             studentGroupService.delete(groupsToDelete);
             return ResponseEntity.ok(Mapper.map(groupsToDelete, StudentGroupDTO.class));
@@ -206,6 +207,13 @@ public class GroupController {
         }
     }
 
+    private void verifyAccess(ApplicationUser user, List<StudentGroup> studentGroups) throws UnauthorizedFacultyDataException {
+        if (studentGroups.stream().filter(studentGroup -> studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()).findAny().isPresent()) {
+            String exceptionMessage = "Неможливо виконувати зміни в іншому факультеті";
+            throw new UnauthorizedFacultyDataException(exceptionMessage);
+        }
+    }
+
     private void validateCreateGroupBody(StudentGroupDTO studentGroupDTO) throws OperationCannotBePerformedException {
         if (studentGroupDTO == null) {
             String exceptionMessage = "Не було отримано жодних даних про групу. " +
@@ -226,12 +234,8 @@ public class GroupController {
         return studentGroup;
     }
 
-    private void validateDeleteGroupBody(Integer[] groupIds, ApplicationUser user, List<StudentGroup> studentGroups)
-            throws UnauthorizedFacultyDataException, NotFoundException, OperationCannotBePerformedException {
-        if (studentGroups.stream().filter(studentGroup -> studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()).findAny().isPresent()) {
-            String exceptionMessage = "Неможливо видаляти групи із інших факультетів.";
-            throw new UnauthorizedFacultyDataException(exceptionMessage);
-        }
+    private void validateDeleteGroupBody(Integer[] groupIds, List<StudentGroup> studentGroups)
+            throws NotFoundException, OperationCannotBePerformedException {
         if (studentGroups.size() != groupIds.length) {
             throw new NotFoundException("Групи не були знайдені "
                         + Arrays.toString(findNotFoundStudentGroups(studentGroups, asList(groupIds))));
