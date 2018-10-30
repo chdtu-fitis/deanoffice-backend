@@ -131,12 +131,38 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, selectionParams, facultyId);
             edeboDataSyncronizationReport.setSynchronizedStudentDegreesGreen(
                     edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen()
-                            .stream().sorted((sd1,sd2) -> (sd1.getDegreeName()+ " " +sd1.getFullSpecialityName()).compareTo(sd2.getDegreeName()+ " " +sd1.getFullSpecialityName()))
+                            .stream().sorted((sd1,sd2) -> (
+                                            sd1.getDegreeName()+ " "
+                                            + sd1.getFullSpecialityName() + " "
+                                            + sd1.getFullSpecializationName() + " "
+                                            + sd1.getLastName() + " "
+                                            + sd1.getFirstName() + " "
+                                            + sd1.getMiddleName())
+                                        .compareTo(
+                                                sd2.getDegreeName()+ " "
+                                                + sd2.getFullSpecialityName() + " "
+                                                + sd2.getFullSpecializationName() + " "
+                                                + sd2.getLastName() + " "
+                                                + sd2.getFirstName() + " "
+                                                + sd2.getMiddleName()))
                             .collect(Collectors.toList())
             );
             edeboDataSyncronizationReport.setMissingPrimaryDataRed(
                     edeboDataSyncronizationReport.getMissingPrimaryDataRed()
-                            .stream().sorted((sd1,sd2) -> (sd1.getStudentDegreePrimaryData().getDegreeName() + " " +sd1.getStudentDegreePrimaryData().getFullSpecialityName() + " "  + sd1).compareTo(sd2.getStudentDegreePrimaryData().getDegreeName()+ " " +sd2.getStudentDegreePrimaryData().getFullSpecialityName()))
+                            .stream().sorted((sd1,sd2) -> (
+                                    sd1.getStudentDegreePrimaryData().getDegreeName() + " "
+                                    + sd1.getStudentDegreePrimaryData().getFullSpecialityName() + " "
+                                    + sd1.getStudentDegreePrimaryData().getFullSpecializationName() + " "
+                                    + sd1.getStudentDegreePrimaryData().getLastName() + " "
+                                    + sd1.getStudentDegreePrimaryData().getFirstName() + " "
+                                    + sd1.getStudentDegreePrimaryData().getMiddleName())
+                                .compareTo(
+                                        sd2.getStudentDegreePrimaryData().getDegreeName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getFullSpecialityName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getFullSpecializationName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getLastName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getFirstName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getMiddleName()))
                             .collect(Collectors.toList())
             );
 
