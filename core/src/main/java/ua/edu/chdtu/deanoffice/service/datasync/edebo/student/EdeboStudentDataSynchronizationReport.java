@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import lombok.Getter;
+import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.UnmatchedSecondaryDataStudentDegreeBlueBean;
@@ -22,6 +23,7 @@ import java.util.List;
  */
 // add yellow case
 @Getter
+@Setter
 public class EdeboStudentDataSynchronizationReport {
     private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
     private List<UnmatchedSecondaryDataStudentDegreeBlueBean> unmatchedSecondaryDataStudentDegreesBlue;

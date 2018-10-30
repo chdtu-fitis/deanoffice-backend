@@ -129,6 +129,16 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyId, selectionParams);
             }
             getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, selectionParams, facultyId);
+            edeboDataSyncronizationReport.setSynchronizedStudentDegreesGreen(
+                    edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen()
+                            .stream().sorted((sd1,sd2) -> (sd1.getDegreeName()+ " " +sd1.getFullSpecialityName()).compareTo(sd2.getDegreeName()+ " " +sd1.getFullSpecialityName()))
+                            .collect(Collectors.toList())
+            );
+            edeboDataSyncronizationReport.setMissingPrimaryDataRed(
+                    edeboDataSyncronizationReport.getMissingPrimaryDataRed()
+                            .stream().sorted((sd1,sd2) -> (sd1.getStudentDegreePrimaryData().getDegreeName()+ " " +sd1.getStudentDegreePrimaryData().getFullSpecialityName()).compareTo(sd2.getStudentDegreePrimaryData().getDegreeName()+ " " +sd2.getStudentDegreePrimaryData().getFullSpecialityName()))
+                            .collect(Collectors.toList())
+            );
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
             e.printStackTrace();
