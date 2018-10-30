@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataWithGroupBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.UnmatchedSecondaryDataStudentDegreeBlueBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
 
@@ -25,11 +26,11 @@ import java.util.List;
 @Getter
 @Setter
 public class EdeboStudentDataSynchronizationReport {
-    private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
+    private List<StudentDegreePrimaryDataWithGroupBean> synchronizedStudentDegreesGreen;
     private List<UnmatchedSecondaryDataStudentDegreeBlueBean> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
     private List<MissingPrimaryDataRedMessageBean> missingPrimaryDataRed;
-    private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
+    private List<StudentDegreePrimaryDataWithGroupBean> absentInFileStudentDegreesYellow;
 
     public EdeboStudentDataSynchronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
@@ -39,7 +40,7 @@ public class EdeboStudentDataSynchronizationReport {
         absentInFileStudentDegreesYellow = new ArrayList<>();
     }
 
-    public void addSyncohronizedDegreeGreen(StudentDegreePrimaryDataBean bean) {
+    public void addSyncohronizedDegreeGreen(StudentDegreePrimaryDataWithGroupBean bean) {
         synchronizedStudentDegreesGreen.add(bean);
     }
 
@@ -51,11 +52,11 @@ public class EdeboStudentDataSynchronizationReport {
         noSuchStudentOrSuchStudentDegreeInDbOrange.add(studentDegreeFromData);
     }
 
-    public void addMissingPrimaryDataRed(MissingPrimaryDataRedMessageBean bean ) {
+    public void addMissingPrimaryDataRed(MissingPrimaryDataRedMessageBean bean) {
         missingPrimaryDataRed.add(bean);
     }
 
-    public void addAbsentInFileStudentDegreeYellow(StudentDegreePrimaryDataBean bean) {
+    public void addAbsentInFileStudentDegreeYellow(StudentDegreePrimaryDataWithGroupBean bean) {
         absentInFileStudentDegreesYellow.add(bean);
     }
 
