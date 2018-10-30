@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.data.jpa.domain.Specification;
-import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
@@ -11,7 +10,7 @@ import java.util.List;
 
 public class StudentDegreeSpecification {
 
-    public static Specification<StudentDegree> getAbsentStudentDegreeInImportData(List<Integer> ids, int facultyId){
+    public static Specification<StudentDegree> getAbsentStudentDegreeInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return new Specification<StudentDegree>() {
             @Override
             public Predicate toPredicate(Root<StudentDegree> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
@@ -21,8 +20,13 @@ public class StudentDegreeSpecification {
                     predicates.add(cb.not(root.get("id").in(ids)));
                 }
                 Join<StudentDegree, Specialization> specialization = root.join("specialization");
-                Join<Specialization, Faculty> faculty = specialization.join("faculty");
-                predicates.add(cb.equal(faculty.get("id"), facultyId));
+                if (degreeId != 0){
+                    predicates.add(cb.equal(specialization.get("degree"), degreeId));
+                }
+                if (specialityId != 0){
+                    predicates.add(cb.equal(specialization.get("speciality"), specialityId));
+                }
+                predicates.add(cb.equal(specialization.get("faculty"), facultyId));
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
         };

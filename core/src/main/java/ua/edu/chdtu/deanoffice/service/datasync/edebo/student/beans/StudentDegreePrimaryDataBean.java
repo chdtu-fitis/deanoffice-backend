@@ -29,7 +29,7 @@ public class StudentDegreePrimaryDataBean {
         this.lastName=studentDegree.getStudent().getSurname();
         this.firstName=s.getName();
         this.middleName=s.getPatronimic();
-        this.birthday=new SimpleDateFormat("dd.MM.yyyy").format(s.getBirthDate());
+        this.birthday=s.getBirthDate()==null? "" : new SimpleDateFormat("dd.MM.yyyy").format(s.getBirthDate());
         this.degreeName=studentDegree.getSpecialization().getDegree().getName();
         this.fullSpecialityName=sp.getSpeciality().getCode()+" "+sp.getSpeciality().getName();
         this.fullSpecializationName=sp.getName();

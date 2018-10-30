@@ -30,8 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.util.Objects.requireNonNull;
+import java.util.stream.Collectors;
 
 @Service
 public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
@@ -386,33 +385,30 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
     }
 
-    private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, Map<String, String> selectionParams, int facultyId){
-        List<Integer> idNotForAbsentInFileStudentDegrees = new ArrayList<>();
-        edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen().stream().forEach(studentDegree ->
-                idNotForAbsentInFileStudentDegrees.add(studentDegree.getId()));
-        edeboDataSyncronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue().stream().forEach(studentDegree ->
-            idNotForAbsentInFileStudentDegrees.add(studentDegree.getStudentDegreeFromDb().getId()));
-
-        List<StudentDegree> studentDegrees = studentDegreeService.getAllNotInImportData(idNotForAbsentInFileStudentDegrees, facultyId);
-        for(StudentDegree studentDegree: studentDegrees){
-            String name = studentDegree.getSpecialization().getFaculty().getName();
-            if (!(selectionParams.get("faculty").toUpperCase().equals(name.toUpperCase()))
-                    || !(selectionParams.get("degree")==null || selectionParams.get("degree").toUpperCase().equals(studentDegree.getSpecialization().getQualification().toUpperCase()))
-                    || !(selectionParams.get("speciality")==null || selectionParams.get("speciality").toUpperCase().equals(studentDegree.getSpecialization().getSpeciality().getName().toUpperCase()))
-            ){
-                continue;
-            } else {
-                if (studentDegree.getStudent().getBirthDate() == null){
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-                    try {
-                        Date d = sdf.parse("00.00.0000");
-                        studentDegree.getStudent().setBirthDate(d);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
-                edeboDataSyncronizationReport.addAbsentInFileStudentDegreeYellow(new StudentDegreePrimaryDataBean(studentDegree));
+    private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport,
+                                                       Map<String, String> selectionParams,
+                                                       int facultyId){
+        List<Integer> idNotForAbsentInFileStudentDegrees = edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen().stream().
+                map(studentDegree -> studentDegree.getId()).collect(Collectors.toList());
+        idNotForAbsentInFileStudentDegrees.addAll(edeboDataSyncronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue().stream().
+                map(studentDegree -> studentDegree.getStudentDegreeFromDb().getId()).collect(Collectors.toList()));
+        int degreeId = 0;
+        if (selectionParams.get("degree") != null) {
+            degreeId = degreeService.getByName(selectionParams.get("degree")).getId();
+        }
+        int specialityId = 0;
+        if (selectionParams.get("speciality") != null){
+            String code = "", name = "";
+            String specialityParts[] = selectionParams.get("speciality").split(" ", 2);
+            if (specialityParts.length == 2) {
+                code = specialityParts[0];
+                name = specialityParts[1];
+                specialityId = specialityService.findSpecialityByCodeAndName(code, name).getId();
             }
+        }
+        List<StudentDegree> studentDegrees = studentDegreeService.getAllNotInImportData(idNotForAbsentInFileStudentDegrees, facultyId, degreeId, specialityId);
+        for(StudentDegree studentDegree: studentDegrees){
+            edeboDataSyncronizationReport.addAbsentInFileStudentDegreeYellow(new StudentDegreePrimaryDataBean(studentDegree));
         }
     }
 
