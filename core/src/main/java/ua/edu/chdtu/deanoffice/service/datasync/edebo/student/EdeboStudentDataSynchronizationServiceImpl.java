@@ -136,9 +136,32 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             );
             edeboDataSyncronizationReport.setMissingPrimaryDataRed(
                     edeboDataSyncronizationReport.getMissingPrimaryDataRed()
-                            .stream().sorted((sd1,sd2) -> (sd1.getStudentDegreePrimaryData().getDegreeName()+ " " +sd1.getStudentDegreePrimaryData().getFullSpecialityName()).compareTo(sd2.getStudentDegreePrimaryData().getDegreeName()+ " " +sd2.getStudentDegreePrimaryData().getFullSpecialityName()))
+                            .stream().sorted((sd1,sd2) -> (sd1.getStudentDegreePrimaryData().getDegreeName() + " " +sd1.getStudentDegreePrimaryData().getFullSpecialityName() + " "  + sd1).compareTo(sd2.getStudentDegreePrimaryData().getDegreeName()+ " " +sd2.getStudentDegreePrimaryData().getFullSpecialityName()))
                             .collect(Collectors.toList())
             );
+
+            edeboDataSyncronizationReport.setNoSuchStudentOrSuchStudentDegreeInDbOrange(
+                    edeboDataSyncronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange()
+                            .stream().sorted((sd1,sd2) ->
+                                (sd1.getSpecialization().getDegree().getName() + " "
+                                            + sd1.getSpecialization().getSpeciality().getCode() + " "
+                                            + sd1.getSpecialization().getSpeciality().getName() + " "
+                                            + sd1.getSpecialization().getName() + " "
+                                            + sd1.getPreviousDiplomaType() + " "
+                                            + sd1.getStudent().getSurname() + " "
+                                            + sd1.getStudent().getName() + " "
+                                            + sd1.getStudent().getPatronimic())
+                                .compareTo(sd2.getSpecialization().getDegree().getName() + " "
+                                    + sd2.getSpecialization().getSpeciality().getCode() + " "
+                                    + sd2.getSpecialization().getSpeciality().getName() + " "
+                                    + sd2.getSpecialization().getName() + " "
+                                    + sd2.getPreviousDiplomaType() + " "
+                                    + sd2.getStudent().getSurname() + " "
+                                    + sd2.getStudent().getName() + " "
+                                    + sd2.getStudent().getPatronimic()))
+                            .collect(Collectors.toList())
+            );
+
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
             e.printStackTrace();
