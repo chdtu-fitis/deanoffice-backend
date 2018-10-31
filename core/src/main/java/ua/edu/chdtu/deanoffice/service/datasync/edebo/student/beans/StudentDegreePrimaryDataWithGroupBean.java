@@ -10,6 +10,7 @@ public class StudentDegreePrimaryDataWithGroupBean extends StudentDegreePrimaryD
     private String groupName;
     public StudentDegreePrimaryDataWithGroupBean(StudentDegree studentDegree){
         super(studentDegree);
-        this.groupName = studentDegree.getStudentGroup().getName();
+        if (studentDegree.getStudentGroup() != null)
+            this.groupName = studentDegree.getStudentGroup().getName();
     }
 }
