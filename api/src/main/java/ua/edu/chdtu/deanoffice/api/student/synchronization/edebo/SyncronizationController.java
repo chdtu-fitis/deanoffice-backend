@@ -154,8 +154,8 @@ public class SyncronizationController {
                 notSavedStudents.add(studentDegreeDTO.getStudent().getSurname() + " "
                         +studentDegreeDTO.getStudent().getName()+ " "
                         +studentDegreeDTO.getStudent().getPatronimic()+ " "
-                        +studentDegreeDTO.getSpecialization().getId()+ " "
-                        +studentDegreeDTO.getSpecialization().getName());
+                        +studentDegreeDTO.getSpecialization().getSpeciality().getCode()+ " "
+                        +studentDegreeDTO.getSpecialization().getSpeciality().getName());
             }
         }
         Map <String,Object> result = new HashMap <String, Object>();
