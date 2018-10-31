@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,6 +67,10 @@ public class StudentDegreeService {
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
                 .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability));
     }
+  
+    public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){
+        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
+    }
 
     public StudentDegree save(StudentDegree studentDegree) {
         return this.studentDegreeRepository.save(studentDegree);
@@ -75,5 +78,9 @@ public class StudentDegreeService {
 
     public void update(List<StudentDegree> studentDegree) {
         studentDegreeRepository.save(studentDegree);
+    }
+
+    public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
+        return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
 }

@@ -1,11 +1,11 @@
-package ua.edu.chdtu.deanoffice.service.document.importing;
+package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-class ImportedData {
+public class ImportedData {
     private String firstName;
     private String lastName;
     private String middleName;
