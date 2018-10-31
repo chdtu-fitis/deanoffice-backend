@@ -1,13 +1,16 @@
 package ua.edu.chdtu.deanoffice.repository;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
 import java.util.List;
 
-public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer> {
+public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer>, JpaSpecificationExecutor<StudentDegree> {
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.active = :active " +
             "and sd.specialization.faculty.id = :facultyId " +
@@ -38,4 +41,16 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("groupId") Integer groupId,
             @Param("active") boolean active
     );
+
+    @Query("SELECT sd from StudentDegree sd " +
+            "where sd.active = :active " +
+            "and sd.student.id = :studentId and sd.specialization.id = :specializationId ")
+    StudentDegree findByStudentIdAndSpecialityId(
+            @Param("active") boolean active,
+            @Param("studentId") Integer studentId,
+            @Param("specializationId") Integer specializationId
+    );
+
+    @Override
+    List<StudentDegree> findAll(Specification<StudentDegree> spec);
 }

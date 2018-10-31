@@ -35,6 +35,14 @@ public class SpecializationService {
         return specializations.size() == 0 ? null : specializations.get(0);
     }
 
+    public Specialization getForSpecialityIfSole(int specialityId, int facultyId){
+        List<Specialization> specializations = specializationRepository.findAllBySpecialityId(specialityId, facultyId);
+        if (specializations.size() == 1){
+            return specializations.get(0);
+        } else
+            return null;
+    }
+
     public void delete(Integer specializationId) {
         Specialization specialization = getById(specializationId);
         specialization.setActive(false);

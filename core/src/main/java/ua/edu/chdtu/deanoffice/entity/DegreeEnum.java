@@ -61,4 +61,15 @@ public enum DegreeEnum {
     public String getNameUkr() {
         return nameUkr;
     }
+
+    public static Degree getDegreeFromEnumByName(String degreeName){
+        DegreeEnum[] degreeEnums = DegreeEnum.values();
+        String degreeNameInUpperCase=degreeName.toUpperCase();
+        for (DegreeEnum degreeEnum: degreeEnums){
+            if (degreeNameInUpperCase.equals(degreeEnum.getNameUkr().toUpperCase())){
+                return new Degree(degreeEnum.getId(),degreeEnum.getNameUkr());
+            }
+        }
+        return null;
+    }
 }
