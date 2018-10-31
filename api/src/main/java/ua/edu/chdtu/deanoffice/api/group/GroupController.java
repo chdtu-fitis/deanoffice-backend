@@ -123,8 +123,7 @@ public class GroupController {
             studentGroup.setActive(true);
             StudentGroup studentGroupAfterSaving = studentGroupService.save(studentGroup);
             validateGroupAfterSave(studentGroupAfterSaving);
-            URI location = getNewResourceLocation(studentGroup.getId());
-            return ResponseEntity.created(location).body(studentGroup);
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
