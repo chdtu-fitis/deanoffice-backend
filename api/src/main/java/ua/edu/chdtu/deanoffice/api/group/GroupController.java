@@ -240,7 +240,7 @@ public class GroupController {
                         + Arrays.toString(findNotFoundStudentGroups(studentGroups, asList(groupIds))));
         }
 
-        if (hasInactiveStudentGroup(studentGroups)) {
+        if (hasInactiveStudentGroups(studentGroups)) {
             String exceptionMessage = "Групи " + Arrays.toString(findInactiveStudentGroups(studentGroups).toArray())
                     + " наразі не активні. Видалення неактивних груп неможливе.";
             throw new OperationCannotBePerformedException(exceptionMessage);
@@ -263,7 +263,7 @@ public class GroupController {
         return foundIds.size() == 0;
     }
 
-    private boolean hasInactiveStudentGroup(List<StudentGroup> studentGroups) {
+    private boolean hasInactiveStudentGroups(List<StudentGroup> studentGroups) {
         return findInactiveStudentGroups(studentGroups).size() != 0;
     }
 
