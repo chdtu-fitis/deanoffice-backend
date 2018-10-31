@@ -92,12 +92,12 @@ public class SyncronizationController {
     @PostMapping("/edebo-synchronization/save")
     public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO){
         try {
-        Map <String,Object> updateInformation = updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
-        Map <String,Object> saveInformation = createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
-        Map <String,Object> information = new HashMap<String, Object>();
-        information.put("updated",updateInformation);
-        information.put("created",saveInformation);
-        return ResponseEntity.ok(information);
+            Map <String,Object> updateInformation = updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
+            Map <String,Object> saveInformation = createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
+            Map <String,Object> information = new HashMap<String, Object>();
+            information.put("updated",updateInformation);
+            information.put("created",saveInformation);
+            return ResponseEntity.ok(information);
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -124,15 +124,14 @@ public class SyncronizationController {
                 notUpdateStudent.add(studentDegreeOfDb.getStudent().getSurname()+ " "
                         + studentDegreeOfDb.getStudent().getName()+ " "
                         + studentDegreeOfDb.getStudent().getPatronimic()+ " "
-                        + studentDegreeOfDb.getSpecialization().getCode()+ " "
-                        + studentDegreeOfDb.getSpecialization().getName());
+                        + studentDegreeOfDb.getSpecialization().getSpeciality().getCode()+ " "
+                        + studentDegreeOfDb.getSpecialization().getSpeciality().getName());
             }
         }
-        Map <String,Object> result1 = new HashMap<String, Object>();
-        result1.put("updatedStudentDegrees",count);
-        result1.put("notUpdatedStudentDegrees",notUpdateStudent);
-        //studentDegreeService.update(studentDegreesWithNewData);
-        return result1;
+        Map <String,Object> result = new HashMap<>();
+        result.put("updatedStudentDegrees",count);
+        result.put("notUpdatedStudentDegrees",notUpdateStudent);
+        return result;
     }
 
     private Map createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO){
@@ -159,10 +158,10 @@ public class SyncronizationController {
                         +studentDegreeDTO.getSpecialization().getName());
             }
         }
-        Map <String,Object> result2 = new HashMap <String, Object>();
-        result2.put("createdStudentDegrees", count);
-        result2.put("notCreatedStudentDegrees",notSavedStudents);
-        return result2;
+        Map <String,Object> result = new HashMap <String, Object>();
+        result.put("createdStudentDegrees", count);
+        result.put("notCreatedStudentDegrees",notSavedStudents);
+        return result;
     }
 
     private ResponseEntity handleException(Exception exception) {
