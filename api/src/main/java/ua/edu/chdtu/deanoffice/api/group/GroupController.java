@@ -24,6 +24,8 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -111,32 +113,20 @@ public class GroupController {
 
     @JsonView(StudentGroupView.AllGroupData.class)
     @PostMapping("/groups")
-    public ResponseEntity createGroup(@RequestBody StudentGroupDTO studentGroupDTO) {
+    public ResponseEntity createGroup(
+            @RequestBody StudentGroupDTO studentGroupDTO,
+            @CurrentUser ApplicationUser user) {
         try {
-            if (studentGroupDTO.getId() != null) {
-                throwException("Group`s id must be null");
-            }
+            validateCreateGroupBody(studentGroupDTO);
             StudentGroup studentGroup = create(studentGroupDTO);
-            studentGroup.setCreationYear(currentYearService.getYear());
+            verifyAccess(user, studentGroup);
             studentGroup.setActive(true);
-            studentGroup = studentGroupService.save(studentGroup);
-
-            URI location = getNewResourceLocation(studentGroup.getId());
-            return ResponseEntity.created(location).body(studentGroup);
+            StudentGroup studentGroupAfterSaving = studentGroupService.save(studentGroup);
+            validateGroupAfterSave(studentGroupAfterSaving);
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
-    }
-
-    private void throwException(String message) throws Exception {
-        throw new Exception(message);
-    }
-
-    private StudentGroup create(StudentGroupDTO studentGroupDTO) {
-        StudentGroup studentGroup = (StudentGroup) Mapper.strictMap(studentGroupDTO, StudentGroup.class);
-        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecialization().getId());
-        studentGroup.setSpecialization(specialization);
-        return studentGroup;
     }
 
     @JsonView(StudentGroupView.AllGroupData.class)
@@ -151,21 +141,16 @@ public class GroupController {
     }
 
     @PutMapping("/groups")
-    public ResponseEntity updateGroup(@RequestBody StudentGroupDTO studentGroupDTO) {
+    public ResponseEntity updateGroup(@RequestBody StudentGroupDTO studentGroupDTO,
+                                      @CurrentUser ApplicationUser user) {
         try {
-            if (studentGroupDTO.getId() == null) {
-                throwException("Group`s id must not be null");
-            } else if (studentGroupDTO.getId().equals(0)) {
-                throwException("Group`s id must not be null");
-            }
-            if (!studentGroupDTO.isActive()) {
-                throwException("You can not update inactive group");
-            }
+            validateUpdateGroupBody(studentGroupDTO);
             StudentGroup studentGroup = create(studentGroupDTO);
+            verifyAccess(user, studentGroup);
             List<StudentDegree> studentDegrees = studentDegreeService.getAllByGroupId(studentGroup.getId());
             studentGroup.setStudentDegrees(studentDegrees);
-            studentGroupService.save(studentGroup);
-
+            StudentGroup studentGroupAfterSave = studentGroupService.save(studentGroup);
+            validateGroupAfterSave(studentGroupAfterSave);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
@@ -173,25 +158,102 @@ public class GroupController {
     }
 
     @DeleteMapping("/groups/{group_ids}")
-    public ResponseEntity deleteGroup(@PathVariable("group_ids") Integer[] groupIds) {
-        List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
-        if (studentGroups.size() != groupIds.length) {
-            return handleException(
-                new NotFoundException("Not found groups " + Arrays.toString(findNouFoundStudentGroups(studentGroups, asList(groupIds))))
-            );
-        }
+    public ResponseEntity deleteGroup(@PathVariable("group_ids") Integer[] groupIds,
+                                      @CurrentUser ApplicationUser user) {
         try {
-            if (hasInactiveStudentGroup(studentGroups)) {
-                throwException("Groups " + Arrays.toString(findInactiveStudentGroup(studentGroups).toArray()) + " already inactive");
-            }
-            studentGroupService.delete(studentGroups);
-            return ResponseEntity.noContent().build();
+            List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
+            verifyAccess(user, studentGroups);
+            validateDeleteGroupBody(groupIds, studentGroups);
+            List<StudentGroup> groupsToDelete = findStudentGroupsInWhichAllStudentsAreInactive(studentGroups);
+            studentGroupService.delete(groupsToDelete);
+            return ResponseEntity.ok(Mapper.map(groupsToDelete, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    private Integer[] findNouFoundStudentGroups(List<StudentGroup> found, List<Integer> initial) {
+    private void validateUpdateGroupBody(StudentGroupDTO studentGroupDTO) throws OperationCannotBePerformedException {
+        if (studentGroupDTO == null) {
+            String exceptionMessage = "Не було отримано жодних даних про групу. " +
+                    "Зверніться до адміністратора чи розробника системи.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+        if (studentGroupDTO.getId() == null) {
+            String exceptionMessage = "Оновити групу [" + studentGroupDTO.getName() + "] неможливо. " +
+                    "Зверніться до адміністратора чи розробника системи.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        } else if (studentGroupDTO.getId().equals(0)) {
+            String exceptionMessage = "Оновити групу [" + studentGroupDTO.getName() + "] неможливо. " +
+                    "Зверніться до адміністратора чи розробника системи.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+        if (!studentGroupDTO.isActive()) {
+            String exceptionMessage = "Не можливо оновити дані про групу [" + studentGroupDTO.getName() + "], бо вона не активна.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+    }
+
+    private void validateGroupAfterSave(StudentGroup studentGroupAfterSaving) throws OperationCannotBePerformedException {
+        if (studentGroupAfterSaving == null) {
+            throw new OperationCannotBePerformedException("Групу не вдалося зберегти.");
+        }
+    }
+
+    private void verifyAccess(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
+        if (studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()) {
+            String exceptionMessage = "Неможливо виконувати зміни в іншому факультеті";
+            throw new UnauthorizedFacultyDataException(exceptionMessage);
+        }
+    }
+
+    private void verifyAccess(ApplicationUser user, List<StudentGroup> studentGroups) throws UnauthorizedFacultyDataException {
+        if (studentGroups.stream().filter(studentGroup -> studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()).findAny().isPresent()) {
+            String exceptionMessage = "Неможливо виконувати зміни в іншому факультеті";
+            throw new UnauthorizedFacultyDataException(exceptionMessage);
+        }
+    }
+
+    private void validateCreateGroupBody(StudentGroupDTO studentGroupDTO) throws OperationCannotBePerformedException {
+        if (studentGroupDTO == null) {
+            String exceptionMessage = "Не було отримано жодних даних про групу. " +
+                    "Зверніться до адміністратора чи розробника системи.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+        if (studentGroupDTO.getId() != null && !studentGroupDTO.getId().equals(0)) {
+            String exceptionMessage = "Створити групу [" + studentGroupDTO.getName() + "] неможливо. " +
+                    "Зверніться до адміністратора чи розробника системи.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+    }
+
+    private StudentGroup create(StudentGroupDTO studentGroupDTO) {
+        StudentGroup studentGroup = (StudentGroup) Mapper.strictMap(studentGroupDTO, StudentGroup.class);
+        Specialization specialization = specializationService.getById(studentGroupDTO.getSpecialization().getId());
+        studentGroup.setSpecialization(specialization);
+        return studentGroup;
+    }
+
+    private void validateDeleteGroupBody(Integer[] groupIds, List<StudentGroup> studentGroups)
+            throws NotFoundException, OperationCannotBePerformedException {
+        if (studentGroups.size() != groupIds.length) {
+            throw new NotFoundException("Групи не були знайдені "
+                        + Arrays.toString(findNotFoundStudentGroups(studentGroups, asList(groupIds))));
+        }
+
+        if (hasInactiveStudentGroup(studentGroups)) {
+            String exceptionMessage = "Групи " + Arrays.toString(findInactiveStudentGroups(studentGroups).toArray())
+                    + " наразі не активні. Видалення неактивних груп неможливе.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+    }
+
+    private List<StudentGroup> findStudentGroupsInWhichAllStudentsAreInactive(List<StudentGroup> studentGroups) {
+        return studentGroups.stream()
+                .filter(studentGroup -> studentGroup.getActiveStudents().size() == 0)
+                .collect(Collectors.toList());
+    }
+
+    private Integer[] findNotFoundStudentGroups(List<StudentGroup> found, List<Integer> initial) {
         List<Integer> foundIds = found.stream().map(BaseEntity::getId).collect(Collectors.toList());
         return (Integer[]) initial.stream().filter(integer -> findNouFoundStudentGroup(integer, foundIds)).toArray();
     }
@@ -202,10 +264,10 @@ public class GroupController {
     }
 
     private boolean hasInactiveStudentGroup(List<StudentGroup> studentGroups) {
-        return findInactiveStudentGroup(studentGroups).size() != 0;
+        return findInactiveStudentGroups(studentGroups).size() != 0;
     }
 
-    private List<StudentGroup> findInactiveStudentGroup(List<StudentGroup> studentGroups) {
+    private List<StudentGroup> findInactiveStudentGroups(List<StudentGroup> studentGroups) {
         return studentGroups.stream().filter(studentGroup -> !studentGroup.isActive()).collect(Collectors.toList());
     }
 
