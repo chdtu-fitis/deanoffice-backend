@@ -10,7 +10,8 @@ dependencies {
 			"org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",
 	)
 	compile("org.flywaydb:flyway-core:${flywayVersion}")
-
+	compile group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'
+	
 	compile (
 			"com.zaxxer:HikariCP:${hikariVersion}",
 			"postgresql:postgresql:${postgresqlDriverVersion}"
