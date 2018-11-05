@@ -371,6 +371,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
             return;
         }
+        studentDegreeFromData.setStudent(studentFromDB);
 
         StudentDegree studentDegreeFromDb = studentDegreeService.getByStudentIdAndSpecializationId(true, studentFromDB.getId(), specializationFromDB.getId());
         if (studentDegreeFromDb == null){
