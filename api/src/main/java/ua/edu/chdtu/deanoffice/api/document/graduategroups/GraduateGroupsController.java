@@ -2,11 +2,14 @@ package ua.edu.chdtu.deanoffice.api.document.graduategroups;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.itextpdf.text.*;
+import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +29,6 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -38,6 +40,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GraduateGroupsController extends DocumentResponseController{
 
     private CourseForGroupService courseForGroupService;
+    @Value(value = "classpath:fonts/arial/arial.ttf")
+    private Resource ttf;
+    private static BaseColor headerColor = new BaseColor(238, 238, 238);
 
     @Autowired
     public GraduateGroupsController(CourseForGroupService courseForGroupService) {
@@ -97,8 +102,8 @@ public class GraduateGroupsController extends DocumentResponseController{
         Document document = new Document(PageSize.A4);
         String filePath = getJavaTempDirectory() + "/" + cleanFileName(groupName) + getFileCreationDateAndTime() + ".pdf";
         File file = new File(filePath);
-        PdfWriter pdfWriter = PdfWriter.getInstance(document, new FileOutputStream(file));
-        BaseFont baseFont = BaseFont.createFont("c:/Windows/Fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        PdfWriter.getInstance(document, new FileOutputStream(file));
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont);
         document.open();
         PdfPTable table = new PdfPTable(5);
@@ -127,7 +132,7 @@ public class GraduateGroupsController extends DocumentResponseController{
             table.addCell(numberOfRowHeaderCell);
             table.addCell(semesterHeaderCell);
             PdfPCell knowledgeControlHeader = new PdfPCell(new Phrase(knowledgeControl.getName(), font));
-            knowledgeControlHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            knowledgeControlHeader.setBackgroundColor(headerColor);
             table.addCell(knowledgeControlHeader);
             table.addCell(hoursHeaderCell);
             table.addCell(creditsHeaderCell);
@@ -177,7 +182,7 @@ public class GraduateGroupsController extends DocumentResponseController{
 
     private PdfPCell createHeaderCell(String text, Font font) {
         PdfPCell numberOfRowHeaderCell = new PdfPCell(new Phrase(text, font));
-        numberOfRowHeaderCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        numberOfRowHeaderCell.setBackgroundColor(headerColor);
         numberOfRowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
         return numberOfRowHeaderCell;
     }
