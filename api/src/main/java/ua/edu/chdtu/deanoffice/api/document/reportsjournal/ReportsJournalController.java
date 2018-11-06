@@ -46,12 +46,12 @@ public class ReportsJournalController extends DocumentResponseController {
     }
 
     @GetMapping("/year/{yearId}/degree/{degreeId}")
-    public ResponseEntity<Resource> generateForYear(@PathVariable Integer yearId,
-                                                    @PathVariable Integer degreeId,
-                                                    @RequestParam("semester") int semester,
-                                                    @CurrentUser ApplicationUser user)  {
+            public ResponseEntity<Resource> generateForYear(@PathVariable Integer year,
+                    @PathVariable Integer degreeId,
+            @RequestParam("semester") int semester,
+            @CurrentUser ApplicationUser user)  {
         try {
-            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId,yearId, semester,user.getFaculty().getId());
+            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId,year, semester,user.getFaculty().getId());
             return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(),MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
