@@ -10,7 +10,7 @@ public enum EducationDocument {
     OTHER_FOREIGN(7, "Іноземний документ", "Foreign document"),
     QUALIFIED_WORKER_DIPLOMA(8, "Диплом кваліфікованого робітника", "Qualified Worker diploma"),
     WORKER_QUALIFICATION_DIPLOMA(9, "Свідоцтво про присвоєння(підвищення) робітничої кваліфікації", "Certificate of Appointment (Upgrade) of the Worker Qualification"),
-    SPECIALIST_DIPLOMA (10, "Диплом спеціаліста", "Specialist diploma");
+    SPECIALIST_DIPLOMA(10, "Диплом спеціаліста", "Specialist diploma");
 
     private final int id;
     private final String nameUkr;
@@ -44,6 +44,7 @@ public enum EducationDocument {
         return !isExist(document);
     }
 
+    //TODO Education Documents in determented wrong way + IllegalArgumentException;
     public static EducationDocument getPreviousDiplomaType(Integer degreeId) {
         switch (degreeId) {
             case 1:
@@ -55,6 +56,16 @@ public enum EducationDocument {
             default:
                 return SECONDARY_SCHOOL_CERTIFICATE;
         }
+    }
+
+    public static EducationDocument getEducationDocumentByName(String educationDocumentNameFromData) {
+        EducationDocument[] educationDocuments = EducationDocument.values();
+        String educationDocumentNameInUpperCase = educationDocumentNameFromData.toUpperCase();
+        for(EducationDocument educationDocument: educationDocuments){
+            if (educationDocumentNameInUpperCase.equals(educationDocument.getNameUkr().toUpperCase()))
+                return educationDocument;
+        }
+        return null;
     }
 
     public int getId() {

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ImportReportDTO {
+public class SyncronizationReportDTO {
     @JsonView(StudentView.DetailAndDegree.class)
     private List<StudentDegreeDTO> insertData;
     @JsonView(StudentView.DetailAndDegree.class)

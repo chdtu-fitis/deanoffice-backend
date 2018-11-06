@@ -28,6 +28,11 @@ public class Degree extends NameWithEngEntity {
     public Degree() {
     }
 
+    public Degree(int id, String name){
+        setId(id);
+        setName(name);
+    }
+
     public Degree(String name, String nameEng) {
         super(name, nameEng);
     }
