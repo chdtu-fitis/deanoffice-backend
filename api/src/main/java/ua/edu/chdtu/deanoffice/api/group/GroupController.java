@@ -47,6 +47,7 @@ public class GroupController {
     private final SpecializationService specializationService;
     private final CurrentYearService currentYearService;
     private final StudentDegreeService studentDegreeService;
+    private final static int FOREIGN_FACULTY_ID = 1;
 
     @Autowired
     public GroupController(
@@ -106,6 +107,24 @@ public class GroupController {
         try {
             List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
             return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("/groups/copy")
+    @JsonView(StudentGroupView.AllGroupData.class)
+    public ResponseEntity getActiveGroupsForCopy(
+            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive,
+            @CurrentUser ApplicationUser user
+    ) {
+        try {
+            if (user.getFaculty().getId() == FOREIGN_FACULTY_ID) {
+                List<StudentGroup> studentGroups = studentGroupService.getAllGroups(onlyActive);
+                return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+            } else {
+                return getActiveGroups(onlyActive, user);
+            }
         } catch (Exception exception) {
             return handleException(exception);
         }
