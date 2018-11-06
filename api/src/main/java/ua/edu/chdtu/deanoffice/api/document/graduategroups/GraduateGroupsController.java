@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.api.document.graduategroups;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.itextpdf.text.*;
-import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.api.document.groupgrade.GroupGradeReportController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.*;
@@ -24,6 +22,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
@@ -37,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @RequestMapping("/documents/graduate-groups")
-public class GraduateGroupsController extends DocumentResponseController{
+public class GraduateGroupsController extends DocumentResponseController {
 
     private CourseForGroupService courseForGroupService;
     @Value(value = "classpath:fonts/arial/arial.ttf")
@@ -57,27 +56,7 @@ public class GraduateGroupsController extends DocumentResponseController{
             List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
             validateBody(courseForGroups);
             verifyAccess(user, courseForGroups.get(0).getStudentGroup());
-            // Попередньо форматуємо таблицю
-            String groupName = courseForGroups.get(0).getStudentGroup().getName();
-            Map<KnowledgeControl, List<CourseForGroup>> tableMap = new TreeMap<>(Comparator.comparingInt(BaseEntity::getId));
-            courseForGroups.forEach(courseForGroup -> {
-                KnowledgeControl currentKnowledgeControl = courseForGroup.getCourse().getKnowledgeControl();
-                if (tableMap.containsKey(currentKnowledgeControl)) {
-                    tableMap.get(currentKnowledgeControl).add(courseForGroup);
-                } else {
-                    tableMap.put(currentKnowledgeControl, new ArrayList<>(Collections.singletonList(courseForGroup)));
-                }
-            });
-            tableMap.forEach((knowledgeControl, courseForGroups1) -> {
-                courseForGroups1.sort((o1, o2) -> {
-                    if (!o1.getCourse().getSemester().equals(o2.getCourse().getSemester())) {
-                        return o1.getCourse().getSemester().compareTo(o2.getCourse().getSemester());
-                    } else {
-                        return o1.getCourse().getCourseName().getName().compareTo(o2.getCourse().getCourseName().getName());
-                    }
-                });
-            });
-            File file = createDocument(groupName, tableMap);
+            File file = formDocument(courseForGroups);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
             return handleException(e);
@@ -92,17 +71,36 @@ public class GraduateGroupsController extends DocumentResponseController{
         return new SimpleDateFormat(" dd-MM-yyyy HH-mm").format(new Date());
     }
 
+    private String getFileNamePrefix() {
+        return "PREDM_DOD_";
+    }
+
     private String cleanFileName(final String fileName) {
         return fileName
                 .replaceAll(" +", " ")
-                .replaceAll("[^a-zA-Z0-9_]+", "");
+                .replaceAll("[^a-zA-Z0-9_-]+", "");
     }
 
-    private File createDocument(String groupName, Map<KnowledgeControl, List<CourseForGroup>> tableMap) throws DocumentException, IOException {
+    private File formDocument(List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
+        // Prepare the table data
+        String groupName = courseForGroups.get(0).getStudentGroup().getName();
+        Map<KnowledgeControl, List<CourseForGroup>> tableMap = new TreeMap<>(Comparator.comparingInt(BaseEntity::getId));
+        courseForGroups.forEach(courseForGroup -> {
+            tableMap.computeIfAbsent(courseForGroup.getCourse().getKnowledgeControl(), knowledgeControl -> new ArrayList<>())
+                    .add(courseForGroup);
+        });
+        tableMap.forEach((knowledgeControl, courseForGroupList) -> {
+            courseForGroupList.sort(Comparator.comparingInt((CourseForGroup o) -> o.getCourse().getSemester())
+                    .thenComparing(o -> o.getCourse().getCourseName().getName()));
+        });
+        // Create the document
         Document document = new Document(PageSize.A4);
-        String filePath = getJavaTempDirectory() + "/" + cleanFileName(groupName) + getFileCreationDateAndTime() + ".pdf";
+        // Create temp file for the document
+        String filePath = getJavaTempDirectory()
+                + "/" + getFileNamePrefix() + cleanFileName(LanguageUtil.transliterate(groupName)) + getFileCreationDateAndTime() + ".pdf";
         File file = new File(filePath);
         PdfWriter.getInstance(document, new FileOutputStream(file));
+        // Fill out the document
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont);
         document.open();
@@ -127,7 +125,7 @@ public class GraduateGroupsController extends DocumentResponseController{
         AtomicInteger hoursSum = new AtomicInteger(0);
         AtomicDouble creditsSum = new AtomicDouble(0);
         // Main table
-        tableMap.forEach((knowledgeControl, courseForGroups) -> {
+        tableMap.forEach((knowledgeControl, courseForGroupList) -> {
             // Add subtitle
             table.addCell(numberOfRowHeaderCell);
             table.addCell(semesterHeaderCell);
@@ -139,19 +137,19 @@ public class GraduateGroupsController extends DocumentResponseController{
             AtomicInteger index = new AtomicInteger(1);
             // end of subtitle
             // Main data
-            courseForGroups.forEach(courseForGroup -> {
+            courseForGroupList.forEach(courseForGroup -> {
                 Course currentCourse = courseForGroup.getCourse();
                 // number cell
-                table.addCell(createDataCenterCell(index.toString(), font));
+                table.addCell(createCellWithAlignCenter(index.toString(), font));
                 // semester cell
-                table.addCell(createDataCenterCell(currentCourse.getSemester().toString(), font));
+                table.addCell(createCellWithAlignCenter(currentCourse.getSemester().toString(), font));
                 // course name cell
                 PdfPCell courseNameDataCell = new PdfPCell(new Phrase(currentCourse.getCourseName().getName(), font));
                 table.addCell(courseNameDataCell);
                 // hours cell
-                table.addCell(createDataCenterCell(currentCourse.getHours().toString(), font));
+                table.addCell(createCellWithAlignCenter(currentCourse.getHours().toString(), font));
                 // credits
-                table.addCell(createDataCenterCell(currentCourse.getCredits().toPlainString(), font));
+                table.addCell(createCellWithAlignCenter(currentCourse.getCredits().toPlainString(), font));
                 // counters
                 hoursSum.addAndGet(currentCourse.getHours());
                 creditsSum.addAndGet(currentCourse.getCredits().doubleValue());
@@ -165,8 +163,8 @@ public class GraduateGroupsController extends DocumentResponseController{
             PdfPCell sumCell = new PdfPCell(new Phrase("Всього: ", font));
             sumCell.setColspan(3);
             table.addCell(sumCell);
-            table.addCell(createDataCenterCell(hoursSum.toString(), font));
-            table.addCell(createDataCenterCell(creditsSum.toString(), font));
+            table.addCell(createCellWithAlignCenter(hoursSum.toString(), font));
+            table.addCell(createCellWithAlignCenter(creditsSum.toString(), font));
         }
         // End of footer
         document.add(table);
@@ -174,7 +172,7 @@ public class GraduateGroupsController extends DocumentResponseController{
         return file;
     }
 
-    private PdfPCell createDataCenterCell(String text, Font font) {
+    private PdfPCell createCellWithAlignCenter(String text, Font font) {
         PdfPCell semesterDataCell = new PdfPCell(new Phrase(text, font));
         semesterDataCell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);
         return semesterDataCell;
@@ -195,12 +193,12 @@ public class GraduateGroupsController extends DocumentResponseController{
 
     private void validateBody(List<CourseForGroup> courseForGroups) throws OperationCannotBePerformedException {
         if (courseForGroups.size() == 0) {
-            String exceptionMessage = "Групу не було знайдено";
+            String exceptionMessage = "В групи відсутні предмети для формування документу";
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, GroupGradeReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, GraduateGroupsController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }
