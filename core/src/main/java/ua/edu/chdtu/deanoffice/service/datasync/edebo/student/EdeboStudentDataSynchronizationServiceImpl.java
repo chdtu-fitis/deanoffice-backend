@@ -371,6 +371,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
             return;
         }
+        studentDegreeFromData.setStudent(studentFromDB);
 
         StudentDegree studentDegreeFromDb = studentDegreeService.getByStudentIdAndSpecializationId(true, studentFromDB.getId(), specializationFromDB.getId());
         if (studentDegreeFromDb == null){
@@ -420,6 +421,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private Date parseDate(String fileDate) {
         try {
             DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
+            formatter.setTimeZone(TimeZone.getTimeZone("EET"));
             return formatter.parse(fileDate);
         } catch (ParseException e) {
             log.debug(e.getMessage());
