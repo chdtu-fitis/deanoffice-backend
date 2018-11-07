@@ -2,15 +2,9 @@ package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
@@ -32,14 +26,11 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 import static java.util.Arrays.asList;
-import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 public class GroupController {
@@ -47,19 +38,20 @@ public class GroupController {
     private final SpecializationService specializationService;
     private final CurrentYearService currentYearService;
     private final StudentDegreeService studentDegreeService;
-    private final static int FOREIGN_FACULTY_ID = 1;
+    private final Environment environment;
 
     @Autowired
     public GroupController(
             StudentGroupService studentGroupService,
             SpecializationService specializationService,
             CurrentYearService currentYearService,
-            StudentDegreeService studentDegreeService
-    ) {
+            StudentDegreeService studentDegreeService,
+            Environment environment) {
         this.studentGroupService = studentGroupService;
         this.currentYearService = currentYearService;
         this.specializationService = specializationService;
         this.studentDegreeService = studentDegreeService;
+        this.environment = environment;
     }
 
     @JsonView(StudentGroupView.WithStudents.class)
@@ -115,15 +107,15 @@ public class GroupController {
     @GetMapping("/groups/copy")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroupsForCopy(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive,
             @CurrentUser ApplicationUser user
     ) {
         try {
+            final int FOREIGN_FACULTY_ID = environment.getProperty("faculty.foreign.id", int.class);
             if (user.getFaculty().getId() == FOREIGN_FACULTY_ID) {
-                List<StudentGroup> studentGroups = studentGroupService.getAllGroups(onlyActive);
+                List<StudentGroup> studentGroups = studentGroupService.getAllGroups(true);
                 return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
             } else {
-                return getActiveGroups(onlyActive, user);
+                return getActiveGroups(true, user);
             }
         } catch (Exception exception) {
             return handleException(exception);
