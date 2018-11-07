@@ -23,6 +23,8 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
@@ -200,6 +202,42 @@ public class StudentDegreeController {
             return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @PostMapping("/group/{group_id}/add/students")
+    public ResponseEntity assignStudentsToGroup(
+            @PathVariable("group_id") Integer groupId,
+            @RequestBody Integer[] studentDegreeIds,
+            @CurrentUser ApplicationUser user
+            ) {
+        try {
+            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studentDegreeIds);
+            StudentGroup studentGroup = studentGroupService.getById(groupId);
+            validateBodyForAssignStudentsToGroup(studentDegreeIds, studentDegrees);
+            verifyAccessForAssignStudentsToGroup(user, studentDegrees, studentGroup);
+            studentDegreeService.assignStudentsToGroup(studentDegrees, studentGroup);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void validateBodyForAssignStudentsToGroup(Integer[] studentDegreeIds, List<StudentDegree> studentDegrees) throws NotFoundException {
+        if (studentDegrees.size() != studentDegreeIds.length) {
+            throw new NotFoundException("Не знайдено всіх переданих даних про студентів");
+        }
+    }
+
+    private void verifyAccessForAssignStudentsToGroup(
+            ApplicationUser user, List<StudentDegree> studentDegrees,
+            StudentGroup studentGroup) throws UnauthorizedFacultyDataException
+    {
+        if (studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()) {
+            throw new UnauthorizedFacultyDataException("Передана група знаходиться у недоступному для користувача факультеті");
+        }
+        if (studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId())) {
+            throw new UnauthorizedFacultyDataException("Передані студенти знаходяться у недоступному для користувача факультеті");
         }
     }
 
