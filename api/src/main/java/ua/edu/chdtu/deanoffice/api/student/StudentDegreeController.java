@@ -138,7 +138,7 @@ public class StudentDegreeController {
         if (EducationDocument.isExist(studentDegree.getPreviousDiplomaType())) {
             return studentDegree.getPreviousDiplomaType();
         }
-        return EducationDocument.getPreviousDiplomaType(studentDegree.getSpecialization().getDegree().getId());
+        return EducationDocument.getForecastedDiplomaTypeByDegree(studentDegree.getSpecialization().getDegree().getId());
     }
 
     @JsonView(StudentView.Degrees.class)
