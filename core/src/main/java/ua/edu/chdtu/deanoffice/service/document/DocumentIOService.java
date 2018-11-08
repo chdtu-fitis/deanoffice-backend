@@ -39,6 +39,14 @@ public class DocumentIOService {
         return SpreadsheetMLPackage.load(xlsxInputStream);
     }
 
+    public WordprocessingMLPackage loadTemplateWordDocument(String name) throws Docx4JException, IOException{
+        return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFilename()));
+    }
+
+    public WordprocessingMLPackage loadTemplateWordDocument(InputStream docxInputStream) throws Docx4JException{
+        return WordprocessingMLPackage.load(docxInputStream);
+    }
+
     public File saveDocumentToTemp(WordprocessingMLPackage document, String fileName, FileFormatEnum format)
             throws Docx4JException, FileNotFoundException {
         return saveDocument(document, fileName, format);
