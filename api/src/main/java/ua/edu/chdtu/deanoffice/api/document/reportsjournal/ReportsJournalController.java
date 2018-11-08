@@ -14,7 +14,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.io.File;
 
 @RestController
-@RequestMapping("/documents/course-report")
+@RequestMapping("/documents/exam-reports-journal-courses")
 public class ReportsJournalController extends DocumentResponseController {
     private ReportsCoursesService reportsCoursesService;
     private FacultyService facultyService;

@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -83,9 +84,9 @@ public class ReportsCoursesService {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semesterId);
         for(CourseForGroup courseForGroup:courseForGroups){
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
-                    courseForGroup.getCourse().getHours().toString(),
-                    courseForGroup.getTeacher() == null ? "": courseForGroup.getTeacher().getInitialsUkr(),
-                    fillFieldDate(courseForGroup)));
+                    fillFieldHours(courseForGroup),
+                    courseForGroup.getTeacher() == null ? "" : courseForGroup.getTeacher().getInitialsUkr(),
+                    courseForGroup.getExamDate() == null? "" : formatter.format(courseForGroup.getExamDate())));
         }
         return courseReports;
     }
@@ -115,18 +116,11 @@ public class ReportsCoursesService {
         tempTable.getContent().remove(templateRow);
     }
 
-    private String fillFieldDate(CourseForGroup courseForGroup){
-        if(courseForGroup.getExamDate() == null){
-            switch (courseForGroup.getCourse().getKnowledgeControl().getId()){
-                case 3:
-                    return "КР";
-                case 4:
-                    return "КП";
-                default:
-                    return "";
-            }
-        } else {
-            return formatter.format(courseForGroup.getExamDate());
-        }
+    private String fillFieldHours(CourseForGroup courseForGroup) {
+        if(courseForGroup.getCourse().getKnowledgeControl().getId() == Constants.COURSEWORK)
+            return "КР";
+        if(courseForGroup.getCourse().getKnowledgeControl().getId() == Constants.COURSE_PROJECT)
+            return "КП";
+        return courseForGroup.getCourse().getHours().toString();
     }
 }
