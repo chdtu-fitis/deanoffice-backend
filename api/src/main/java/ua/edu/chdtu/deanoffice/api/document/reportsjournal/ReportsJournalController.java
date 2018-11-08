@@ -1,9 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.document.reportsjournal;
 
-import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
@@ -15,12 +12,9 @@ import ua.edu.chdtu.deanoffice.service.document.report.journal.ReportsCoursesSer
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 @RestController
-@RequestMapping("/documents/course-report")
+@RequestMapping("/documents/exam-reports-journal-courses")
 public class ReportsJournalController extends DocumentResponseController {
     private ReportsCoursesService reportsCoursesService;
     private FacultyService facultyService;
@@ -31,10 +25,9 @@ public class ReportsJournalController extends DocumentResponseController {
     }
 
     @GetMapping("/groups/{groupId}")
-    public ResponseEntity<Resource> generateForGroup(
-            @PathVariable Integer groupId,
-            @RequestParam("semester") Integer semester,
-            @CurrentUser ApplicationUser user) {
+    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId,
+                                                     @RequestParam("semester") Integer semester,
+                                                     @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
             File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semester);
@@ -44,14 +37,13 @@ public class ReportsJournalController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/year/{yearId}/degree/{degreeId}")
-    public ResponseEntity<Resource> generateForYear(@PathVariable Integer yearId,
-                                                    @PathVariable Integer degreeId,
+    @GetMapping("/year/{year}/degree/{degreeId}")
+    public ResponseEntity<Resource> generateForYear(@PathVariable Integer year, @PathVariable Integer degreeId,
                                                     @RequestParam("semester") int semester,
                                                     @CurrentUser ApplicationUser user)  {
         try {
-            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId,yearId, semester,user.getFaculty().getId());
-            return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(),MEDIA_TYPE_DOCX);
+            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId, year, semester, user.getFaculty().getId());
+            return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
         }

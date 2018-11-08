@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -47,7 +48,7 @@ public class ReportsCoursesService {
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
-        formatter = new SimpleDateFormat("yyyy.MM.dd");
+        formatter = new SimpleDateFormat("dd.MM.yyyy");
     }
 
     public synchronized File prepareReportForGroup(Integer groupId, Integer semesterId) throws Docx4JException, IOException {
@@ -71,6 +72,7 @@ public class ReportsCoursesService {
                 wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE,
                                                                         courseReports,
                                                                         groups.getName()).getMainDocumentPart().getContent());
+
             }
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,
@@ -82,9 +84,9 @@ public class ReportsCoursesService {
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semesterId);
         for(CourseForGroup courseForGroup:courseForGroups){
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
-                    courseForGroup.getCourse().getHours().toString(),
-                    courseForGroup.getTeacher() == null ? "": courseForGroup.getTeacher().getInitialsUkr(),
-                    courseForGroup.getExamDate() == null ? "" : formatter.format(courseForGroup.getExamDate())));
+                    fillFieldHours(courseForGroup),
+                    courseForGroup.getTeacher() == null ? "" : courseForGroup.getTeacher().getInitialsUkr(),
+                    courseForGroup.getExamDate() == null? "" : formatter.format(courseForGroup.getExamDate())));
         }
         return courseReports;
     }
@@ -112,5 +114,13 @@ public class ReportsCoursesService {
             rowToAddIndex++;
         }
         tempTable.getContent().remove(templateRow);
+    }
+
+    private String fillFieldHours(CourseForGroup courseForGroup) {
+        if(courseForGroup.getCourse().getKnowledgeControl().getId() == Constants.COURSEWORK)
+            return "КР";
+        if(courseForGroup.getCourse().getKnowledgeControl().getId() == Constants.COURSE_PROJECT)
+            return "КП";
+        return courseForGroup.getCourse().getHours().toString();
     }
 }
