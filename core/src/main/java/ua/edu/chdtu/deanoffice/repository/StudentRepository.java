@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
+import java.util.Date;
 import java.util.List;
 
 public interface StudentRepository extends JpaRepository<Student, Integer> {
@@ -33,4 +34,16 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             @Param("surname") String surname,
             @Param("patronimic") String patronimic
             );
+
+    @Query("select s from Student s " +
+            "where s.name = :name " +
+            "and s.surname = :surname " +
+            "and s.patronimic = :patronimic " +
+            "and s.birthDate = :birthDate")
+    List<Student> findByFullNameUkrAndBirthDate(
+            @Param("name") String name,
+            @Param("surname") String surname,
+            @Param("patronimic") String patronimic,
+            @Param("birthDate") Date birthDate
+    );
 }

@@ -18,6 +18,10 @@ public class Mapper {
         return modelMapper.map(source, destination);
     }
 
+    public static void map(Object source, Object destination){
+        modelMapper.map(source, destination);
+    }
+
     public static List map(List source, Class destination) {
         return modelMapper.map(source, new ListParameterizedType(destination));
     }
