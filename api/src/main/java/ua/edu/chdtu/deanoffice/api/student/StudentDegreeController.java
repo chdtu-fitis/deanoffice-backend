@@ -160,7 +160,7 @@ public class StudentDegreeController {
             @RequestBody List<StudentDegreeDTO> studentDegreesDTOs
     ) {
         try {
-            validateUpdateStudentDegreesBody(studentDegreesDTOs);
+            validateStudentDegreesUpdates(studentDegreesDTOs);
             List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
             Student student = studentService.findById(studentId);
 
@@ -179,18 +179,16 @@ public class StudentDegreeController {
         }
     }
 
-    private void validateUpdateStudentDegreesBody(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
-        if (isAnyStudentDegreeNotHaveId(studentDegreesDTOs)) {
+    private void validateStudentDegreesUpdates(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
+        if (isAnyStudentDegreeMissingId(studentDegreesDTOs)) {
             String exceptionMessage = "Отримано недостатню кількість даних для оновлення. Зверністься до адміністратора";
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
 
-    private boolean isAnyStudentDegreeNotHaveId(List<StudentDegreeDTO> studentDegreeDTOs) {
-        return studentDegreeDTOs.stream()
-                .filter((studentDegreeDTO) -> studentDegreeDTO.getId() == null)
-                .findAny()
-                .isPresent();
+
+    private boolean isAnyStudentDegreeMissingId(List<StudentDegreeDTO> studentDegreeDTOs) {
+        return studentDegreeDTOs.stream().anyMatch((studentDegreeDTO) -> studentDegreeDTO.getId() == null);
     }
 
     private StudentGroup getStudentGroup(Integer groupId) {
