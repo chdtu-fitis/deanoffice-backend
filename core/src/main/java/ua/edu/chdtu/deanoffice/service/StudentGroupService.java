@@ -50,6 +50,13 @@ public class StudentGroupService {
         return this.studentGroupRepository.findAllByFaculty(facultyId);
     }
 
+    public List<StudentGroup> getAllGroups(boolean onlyActive) {
+        if (onlyActive) {
+            return this.studentGroupRepository.findAllActive();
+        }
+        return this.studentGroupRepository.findAll();
+    }
+
     public StudentGroup save(StudentGroup studentGroup) {
         return studentGroupRepository.save(studentGroup);
     }
