@@ -20,10 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
@@ -40,6 +37,25 @@ public class ReportsCoursesService {
     private CourseForGroupService courseForGroupService;
     private DocumentIOService documentIOService;
     private Format formatter;
+    private Comparator comparator = new Comparator<CourseForGroup>() {
+        @Override
+        public int compare(CourseForGroup o1, CourseForGroup o2) {
+            if (o1.getExamDate() != null && o2.getExamDate() != null) {
+                if (o1.getExamDate().before(o2.getExamDate())) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            } else if (o1.getExamDate() != null && o2.getExamDate() == null) {
+                return -1;
+            } else if (o1.getExamDate() == null && o2.getExamDate() != null) {
+                return 1;
+            } else if (o1.getExamDate() == null && o2.getExamDate() == null) {
+                return o1.getCourse().getCourseName().getName().compareTo(o2.getCourse().getCourseName().getName());
+            }
+            return 0;
+        }
+    };
 
     public ReportsCoursesService(StudentGroupService groupService,
                                  DocumentIOService documentIOService,
@@ -81,6 +97,7 @@ public class ReportsCoursesService {
     private List<CourseReport> prepareGroup(Integer groupId,Integer semesterId) {
         List<CourseReport> courseReports = new ArrayList<>();
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester((int)groupId,(int)semesterId);
+        courseForGroups.sort(comparator);
         for(CourseForGroup courseForGroup:courseForGroups){
             courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
                     courseForGroup.getCourse().getHours().toString(),
