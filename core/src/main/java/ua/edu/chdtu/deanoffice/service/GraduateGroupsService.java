@@ -80,14 +80,13 @@ public class GraduateGroupsService {
 
     private Map<KnowledgeControl, List<CourseForGroup>> preprocessedData(List<CourseForGroup> courseForGroups) {
         Map<KnowledgeControl, List<CourseForGroup>> tableMap = new TreeMap<>(Comparator.comparingInt(BaseEntity::getId));
-        courseForGroups.forEach(courseForGroup -> {
-            tableMap.computeIfAbsent(courseForGroup.getCourse().getKnowledgeControl(), knowledgeControl -> new ArrayList<>())
-                    .add(courseForGroup);
-        });
-        tableMap.forEach((knowledgeControl, courseForGroupList) -> {
-            courseForGroupList.sort(Comparator.comparingInt((CourseForGroup o) -> o.getCourse().getSemester())
-                    .thenComparing(o -> o.getCourse().getCourseName().getName()));
-        });
+        courseForGroups.forEach(courseForGroup -> tableMap
+                .computeIfAbsent(courseForGroup.getCourse().getKnowledgeControl(), knowledgeControl -> new ArrayList<>())
+                .add(courseForGroup));
+        tableMap.forEach((knowledgeControl, courseForGroupList) -> courseForGroupList
+                .sort(Comparator.comparingInt((CourseForGroup o) -> o.getCourse().getSemester())
+                    .thenComparing(o -> o.getCourse().getCourseName().getName())
+                ));
         return tableMap;
     }
 
