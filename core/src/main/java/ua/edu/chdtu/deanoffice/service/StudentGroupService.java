@@ -1,7 +1,9 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
@@ -68,5 +70,11 @@ public class StudentGroupService {
     public void delete(List<StudentGroup> studentGroups) {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
         studentGroupRepository.save(studentGroups);
+    }
+
+    public static void verifyAccess(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
+        if (user.getFaculty().getId() != studentGroup.getSpecialization().getFaculty().getId()) {
+            throw new UnauthorizedFacultyDataException("Група знаходить в недоступному факультеті для поточного користувача");
+        }
     }
 }

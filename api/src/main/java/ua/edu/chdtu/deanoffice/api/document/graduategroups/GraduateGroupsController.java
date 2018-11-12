@@ -11,11 +11,10 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GraduateGroupsService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
@@ -42,17 +41,11 @@ public class GraduateGroupsController extends DocumentResponseController {
         try {
             List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
             validateBody(courseForGroups);
-            verifyAccess(user, courseForGroups.get(0).getStudentGroup());
+            StudentGroupService.verifyAccess(user, courseForGroups.get(0).getStudentGroup());
             File file = graduateGroupsService.formDocument(courseForGroups);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
             return handleException(e);
-        }
-    }
-
-    private void verifyAccess(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
-        if (user.getFaculty().getId() != studentGroup.getSpecialization().getFaculty().getId()) {
-            throw new UnauthorizedFacultyDataException("Група знаходить в недоступному факультеті для поточного користувача");
         }
     }
 
