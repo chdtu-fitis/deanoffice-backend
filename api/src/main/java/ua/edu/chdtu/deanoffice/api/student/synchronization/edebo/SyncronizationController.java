@@ -59,23 +59,23 @@ public class SyncronizationController {
             selectionParams.put("degree", degree);
             selectionParams.put("speciality", speciality);
             edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(), user.getFaculty().getId(), selectionParams);
-            List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(
+            List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = strictMap(
                     edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(),
                     UnmatchedSecondaryDataStudentDegreeBlueDTO.class
             );
-            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = map(
+            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = strictMap(
                     edeboDataSynchronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange(),
                     StudentDegreeFullEdeboDataDto.class
             );
-            List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen = map(
+            List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen = strictMap(
                     edeboDataSynchronizationReport.getSynchronizedStudentDegreesGreen(),
                     StudentDegreePrimaryEdeboDataDTO.class
             );
-            List<MissingPrimaryDataRedDTO> missingPrimaryDataRed = map(
+            List<MissingPrimaryDataRedDTO> missingPrimaryDataRed = strictMap(
                     edeboDataSynchronizationReport.getMissingPrimaryDataRed(),
                     MissingPrimaryDataRedDTO.class
             );
-            List<StudentDegreePrimaryEdeboDataDTO> absentInFileStudentDegreesYellow = map(
+            List<StudentDegreePrimaryEdeboDataDTO> absentInFileStudentDegreesYellow = strictMap(
                     edeboDataSynchronizationReport.getAbsentInFileStudentDegreesYellow(),
                     StudentDegreePrimaryEdeboDataDTO.class);
             allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(noSuchStudentDegreeInDbOrangeDTOs);
@@ -108,29 +108,34 @@ public class SyncronizationController {
             return null;
         }
         int count = 0;
-        List<StudentDegree> studentDegreesWithNewData = new ArrayList<>();
-        List<String> notUpdateStudent = new ArrayList();
+        List<String> notUpdatedStudentDegrees = new ArrayList();
         for(StudentDegreeFullEdeboDataDto studentDegree: studentDegreesForUpdate){
             if (studentDegree.getId() == 0){
                 continue;
             }
-            StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
-            Mapper.map(studentDegree, studentDegreeOfDb);
             try {
-                studentDegreesWithNewData.add(studentDegreeOfDb);
-                studentDegreeService.update(studentDegreesWithNewData);
-                count++;
-            }catch (Exception e){
-                notUpdateStudent.add(studentDegreeOfDb.getStudent().getSurname()+ " "
-                        + studentDegreeOfDb.getStudent().getName()+ " "
-                        + studentDegreeOfDb.getStudent().getPatronimic()+ " "
-                        + studentDegreeOfDb.getSpecialization().getSpeciality().getCode()+ " "
-                        + studentDegreeOfDb.getSpecialization().getSpeciality().getName());
+                StudentDegree studentDegreeOfDb = null;
+//                if (studentDegree.isModified()) {
+                    studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
+                    Mapper.map(studentDegree, studentDegreeOfDb);
+                    studentDegreeService.save(studentDegreeOfDb);
+                    count++;
+//                } else {
+//                    if (studentDegree.getStudent().isModified()) {
+//                        count++;
+//                    }
+//                }
+            } catch (Exception e){
+                notUpdatedStudentDegrees.add(studentDegree.getStudent().getSurname()+ " "
+                        + studentDegree.getStudent().getName()+ " "
+                        + studentDegree.getStudent().getPatronimic()+ " "
+                        + studentDegree.getSpecialization().getSpeciality().getCode()+ " "
+                        + studentDegree.getSpecialization().getSpeciality().getName());
             }
         }
         Map <String,Object> result = new HashMap<>();
         result.put("updatedStudentDegrees",count);
-        result.put("notUpdatedStudentDegrees",notUpdateStudent);
+        result.put("notUpdatedStudentDegrees",notUpdatedStudentDegrees);
         return result;
     }
 
