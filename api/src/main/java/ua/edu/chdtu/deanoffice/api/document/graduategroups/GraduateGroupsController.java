@@ -51,7 +51,7 @@ public class GraduateGroupsController extends DocumentResponseController {
 
     private void validateBody(List<CourseForGroup> courseForGroups) throws OperationCannotBePerformedException {
         if (courseForGroups.size() == 0) {
-            String exceptionMessage = "Групу невдалося знайти, або в групи відсутні предмети для формування документу";
+            String exceptionMessage = "Групу не вдалося знайти, або в групи відсутні предмети для формування документу";
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
