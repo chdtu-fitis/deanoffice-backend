@@ -24,10 +24,10 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
-import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
@@ -40,16 +40,18 @@ public class StudentDegreeController {
     private final StudentDegreeService studentDegreeService;
     private final StudentService studentService;
     private final StudentGroupService studentGroupService;
+    private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public StudentDegreeController(
             StudentDegreeService studentDegreeService,
             StudentService studentService,
-            StudentGroupService studentGroupService
-    ) {
+            StudentGroupService studentGroupService,
+            FacultyAuthorizationService facultyAuthorizationService) {
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @JsonView(StudentView.Simple.class)
@@ -205,9 +207,9 @@ public class StudentDegreeController {
         }
     }
 
-    @PostMapping("/group/{group_id}/add/students")
+    @PostMapping("/group/{groupId}/add-students")
     public ResponseEntity assignStudentsToGroup(
-            @PathVariable("group_id") Integer groupId,
+            @PathVariable("groupId") Integer groupId,
             @RequestBody Integer[] studentDegreeIds,
             @CurrentUser ApplicationUser user
             ) {
@@ -215,7 +217,7 @@ public class StudentDegreeController {
             List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studentDegreeIds);
             StudentGroup studentGroup = studentGroupService.getById(groupId);
             validateBodyForAssignStudentsToGroup(studentDegreeIds, studentDegrees);
-            verifyAccessForAssignStudentsToGroup(user, studentDegrees, studentGroup);
+            facultyAuthorizationService.verifyAccessForAssignStudentsToGroup(user, studentDegrees, studentGroup);
             studentDegreeService.assignStudentsToGroup(studentDegrees, studentGroup);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -225,19 +227,7 @@ public class StudentDegreeController {
 
     private void validateBodyForAssignStudentsToGroup(Integer[] studentDegreeIds, List<StudentDegree> studentDegrees) throws NotFoundException {
         if (studentDegrees.size() != studentDegreeIds.length) {
-            throw new NotFoundException("Не знайдено всіх переданих даних про студентів");
-        }
-    }
-
-    private void verifyAccessForAssignStudentsToGroup(
-            ApplicationUser user, List<StudentDegree> studentDegrees,
-            StudentGroup studentGroup) throws UnauthorizedFacultyDataException
-    {
-        if (studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()) {
-            throw new UnauthorizedFacultyDataException("Передана група знаходиться у недоступному для користувача факультеті");
-        }
-        if (studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId())) {
-            throw new UnauthorizedFacultyDataException("Передані студенти знаходяться у недоступному для користувача факультеті");
+            throw new NotFoundException("Знайдено дані не для всіх студентів");
         }
     }
 
