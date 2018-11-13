@@ -110,21 +110,20 @@ public class SyncronizationController {
         int count = 0;
         List<String> notUpdatedStudentDegrees = new ArrayList();
         for(StudentDegreeFullEdeboDataDto studentDegree: studentDegreesForUpdate){
-            if (studentDegree.getId() == 0){
+            if (studentDegree.getId() == 0 || studentDegree.getStudent().getId() == 0){
                 continue;
             }
             try {
-                StudentDegree studentDegreeOfDb = null;
-//                if (studentDegree.isModified()) {
-                    studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
+                if (studentDegree.isModified()) {
+                    StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
                     Mapper.map(studentDegree, studentDegreeOfDb);
                     studentDegreeService.save(studentDegreeOfDb);
-                    count++;
-//                } else {
-//                    if (studentDegree.getStudent().isModified()) {
-//                        count++;
-//                    }
-//                }
+                } else {
+                    Student studentOfDb = studentService.findById(studentDegree.getStudent().getId());
+                    Mapper.map(studentDegree.getStudent(), studentOfDb);
+                    studentService.save(studentOfDb);
+                }
+                count++;
             } catch (Exception e){
                 notUpdatedStudentDegrees.add(studentDegree.getStudent().getSurname()+ " "
                         + studentDegree.getStudent().getName()+ " "
