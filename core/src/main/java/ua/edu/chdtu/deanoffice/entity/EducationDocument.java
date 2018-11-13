@@ -40,17 +40,11 @@ public enum EducationDocument {
         return false;
     }
 
-    public static boolean isNotExist(EducationDocument document) {
-        return !isExist(document);
-    }
-
-    //TODO Education Documents in determented wrong way + IllegalArgumentException;
-    public static EducationDocument getPreviousDiplomaType(Integer degreeId) {
+    public static EducationDocument getForecastedDiplomaTypeByDegree(Integer degreeId) {
         switch (degreeId) {
             case 1:
                 return SECONDARY_SCHOOL_CERTIFICATE;
             case 2:
-                return JUNIOR_BACHELOR_DIPLOMA;
             case 3:
                 return BACHELOR_DIPLOMA;
             default:
