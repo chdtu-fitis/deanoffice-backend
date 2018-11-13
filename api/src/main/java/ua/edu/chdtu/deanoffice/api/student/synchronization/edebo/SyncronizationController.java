@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 
 @RestController
 @RequestMapping("/students")
@@ -142,7 +142,7 @@ public class SyncronizationController {
         List <String> notSavedStudents = new ArrayList<>();
         for(StudentDegreeFullEdeboDataDto studentDegreeDTO: newStudentDTO){
             try {
-                StudentDegree studentDegree = (StudentDegree) map(studentDegreeDTO, StudentDegree.class);
+                StudentDegree studentDegree = (StudentDegree) strictMap(studentDegreeDTO, StudentDegree.class);
                 studentDegree.setActive(true);
                 if (studentDegree.getStudent().getId() == 0) {
                     Student student = studentService.save(studentDegree.getStudent());
