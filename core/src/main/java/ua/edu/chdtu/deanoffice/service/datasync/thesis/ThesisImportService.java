@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -22,11 +21,13 @@ public class ThesisImportService {
         this.documentIOService = documentIOService;
     }
 
-    public ThesisImportService getThesisImportService(InputStream docxInputStream) throws Exception{
+    public ThesisReport getThesisImportReport(InputStream docxInputStream) throws Exception{
         if (docxInputStream == null){
             throw new Exception("Помилка часу виконання");
         }
         List<ThesisImportData> thesisImportData = getThesisesFromStream(docxInputStream);
+        //ThesisImportService thesisImportService = null;
+        //thesisImportService = getThesisImportService(docxInputStream);
         return null;
     }
 
@@ -43,11 +44,20 @@ public class ThesisImportService {
         return getThesisImportedDataFromDocxPkg(docxPkg);
     }
 
-    private List<ThesisImportData> getThesisImportedDataFromDocxPkg(WordprocessingMLPackage docxPkg){
+    private List<ThesisImportData> getThesisImportedDataFromDocxPkg(WordprocessingMLPackage docxPkg) {
 
         List<ThesisImportData> thesisImportData = new ArrayList();
-
         return thesisImportData;
     }
 
 }
+
+
+//    MainDocumentPart mainDocumentPart = docxPkg.getMainDocumentPart();
+//        String textNotesPath = "//w:t";
+//        List <Object> textNotes = mainDocumentPart.getJAXBNodesViaXPath(textNotesPath, true);
+//        for (Object obj : textNotes) {
+//            Text text = (Text) ((JAXBElement) obj).getValue();
+//            String textValue = text.getValue();
+//            System.out.println(textValue);
+//        }

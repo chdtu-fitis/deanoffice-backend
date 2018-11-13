@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.student.synchronization;
+package ua.edu.chdtu.deanoffice.service.datasync.thesis;
 
 public class ThesisWithMessageRedBean {
     private ThesisDataBean thesisPrimaryData;

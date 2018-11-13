@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.student.synchronization;
+package ua.edu.chdtu.deanoffice.service.datasync.thesis;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -7,10 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
-import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisImportData;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisImportService;
-
-import java.util.List;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisReport;
 
 @RestController
 @RequestMapping("/thesis")
@@ -27,17 +25,20 @@ public class ThesisController {
         if (uploadFile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Файл не було надіслано");
         }
-        try {
-            thesisImportService.getThesisImportService(uploadFile.getInputStream());
 
-        } catch (Exception e){
-            e.getStackTrace();
+        ThesisReport thesisReport;
+        try {
+
+            thesisReport = thesisImportService.getThesisImportReport(uploadFile.getInputStream());
+
+            return ResponseEntity.ok().build();
+        } catch (Exception exception){
+            return handleException(exception);
         }
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/thesis-import/update")
-    public ResponseEntity studentSaveChanges(){
+    public ResponseEntity thesisSaveChanges(){
         try {
 
             return ResponseEntity.ok().build();
