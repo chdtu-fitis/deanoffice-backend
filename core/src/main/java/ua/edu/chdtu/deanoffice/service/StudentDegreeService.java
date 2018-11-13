@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import java.util.List;
@@ -82,5 +83,9 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
+    }
+
+    public boolean verifyAccess(ApplicationUser user, List<StudentDegree> studentDegrees) {
+        return studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId());
     }
 }

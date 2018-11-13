@@ -157,11 +157,13 @@ public class StudentDegreeController {
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
             @PathVariable("id") Integer studentId,
-            @RequestBody List<StudentDegreeDTO> studentDegreesDTOs
+            @RequestBody List<StudentDegreeDTO> studentDegreesDTOs,
+            @CurrentUser ApplicationUser user
     ) {
         try {
             validateStudentDegreesUpdates(studentDegreesDTOs);
             List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
+            studentDegreeService.verifyAccess(user, studentDegrees);
             Student student = studentService.findById(studentId);
 
             studentDegrees.forEach(studentDegree -> {
@@ -181,7 +183,7 @@ public class StudentDegreeController {
 
     private void validateStudentDegreesUpdates(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
         if (isAnyStudentDegreeMissingId(studentDegreesDTOs)) {
-            String exceptionMessage = "Отримано недостатню кількість даних для оновлення. Зверністься до адміністратора";
+            String exceptionMessage = "Отримано некоректну інформацію. Зверністься до адміністратора або розробника системи";
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
