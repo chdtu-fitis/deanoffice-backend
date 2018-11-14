@@ -32,6 +32,7 @@ import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -217,7 +218,7 @@ public class StudentDegreeController {
             ) {
         try {
             validateInputDataForAssignStudentsToGroup(studentDegreeIds);
-            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studentDegreeIds);
+            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(Arrays.asList(studentDegreeIds));
             if (studentDegrees.isEmpty()) {
                 String message = "За переданими даними жодного студента не було знайдено для призначення групи. " +
                         "Зверніться до адміністратора або розробника системи.";

@@ -24,8 +24,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.getById(id);
     }
 
-    public List<StudentDegree> getByIds(Integer[] ids) {
-        return studentDegreeRepository.findStudentDegreesByIds(ids);
+    public List<StudentDegree> getByIds(List<Integer> ids) {
+        return studentDegreeRepository.getAllByIds(ids);
     }
 
     public List<StudentDegree> getAllByActive(boolean active, int facultyId) {
