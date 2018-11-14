@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public class FacultyAuthorizationService {
-    public void verifyAccessForAssignStudentsToGroup(
+    public void verifyAccessibilityOfGroupAndStudents(
             ApplicationUser user, List<StudentDegree> studentDegrees,
             StudentGroup studentGroup) throws UnauthorizedFacultyDataException
     {

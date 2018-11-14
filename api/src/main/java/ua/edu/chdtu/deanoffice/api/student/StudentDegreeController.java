@@ -24,6 +24,7 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
@@ -32,6 +33,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -214,10 +216,19 @@ public class StudentDegreeController {
             @CurrentUser ApplicationUser user
             ) {
         try {
+            validateInputDataForAssignStudentsToGroup(studentDegreeIds);
             List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studentDegreeIds);
+            if (studentDegrees.isEmpty()) {
+                String message = "За переданими даними жодного студента не було знайдено для призначення групи. " +
+                        "Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
             StudentGroup studentGroup = studentGroupService.getById(groupId);
-            validateBodyForAssignStudentsToGroup(studentDegreeIds, studentDegrees);
-            facultyAuthorizationService.verifyAccessForAssignStudentsToGroup(user, studentDegrees, studentGroup);
+            if (Objects.isNull(studentGroup)) {
+                String message = "Групу для призначення не вдалося знайти. Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            facultyAuthorizationService.verifyAccessibilityOfGroupAndStudents(user, studentDegrees, studentGroup);
             studentDegreeService.assignStudentsToGroup(studentDegrees, studentGroup);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -225,9 +236,10 @@ public class StudentDegreeController {
         }
     }
 
-    private void validateBodyForAssignStudentsToGroup(Integer[] studentDegreeIds, List<StudentDegree> studentDegrees) throws NotFoundException {
-        if (studentDegrees.size() != studentDegreeIds.length) {
-            throw new NotFoundException("Знайдено дані не для всіх студентів");
+    private void validateInputDataForAssignStudentsToGroup(Integer[] studentDegreeIds) throws OperationCannotBePerformedException {
+        if (studentDegreeIds.length == 0) {
+            String message = "Для призначення групи потрібно передати хоча б одного студента.";
+            throw new OperationCannotBePerformedException(message);
         }
     }
 
