@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.service;
 
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,10 @@ public class StudentDegreeService {
 
     public StudentDegree getById(Integer id) {
         return studentDegreeRepository.getById(id);
+    }
+
+    public List<StudentDegree> getByIds(List<Integer> ids) {
+        return studentDegreeRepository.getAllByIds(ids);
     }
 
     public List<StudentDegree> getAllByActive(boolean active, int facultyId) {
@@ -82,5 +88,10 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
+    }
+
+    @Transactional
+    public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
+        studentDegreeRepository.assignStudentsToGroup(students, group);
     }
 }
