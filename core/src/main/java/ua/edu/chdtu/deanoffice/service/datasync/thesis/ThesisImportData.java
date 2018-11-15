@@ -12,7 +12,7 @@ public class ThesisImportData {
     String groupName;
     String thesisName;
     String thesisNameEng;
-    String fullSuperVitherName;
+    String fullSupervisorName;
 
     public ThesisImportData(){
         lastName = "";
@@ -21,6 +21,6 @@ public class ThesisImportData {
         groupName = "";
         thesisName = "";
         thesisNameEng = "";
-        fullSuperVitherName = "";
+        fullSupervisorName = "";
     }
 }
