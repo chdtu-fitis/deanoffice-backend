@@ -67,14 +67,14 @@ public class GradesJournalService {
         int sumOfCellsInTheTable2 = 0;
         for (StudentGroup studentGroup : studentGroups) {
             List<Student> students = studentGroup.getActiveStudents();
-            PdfPCell groupName = new PdfPCell(new Phrase(studentGroup.getName(), font));
-            groupName.setFixedHeight(28);//setMinimumHeight(30);
-            groupName.setPadding(5);
-            groupName.setBorder(0);
+            PdfPCell groupNameCell = new PdfPCell(new Phrase(studentGroup.getName(), font));
+            groupNameCell.setFixedHeight(28);//setMinimumHeight(30);
+            groupNameCell.setPadding(5);
+            groupNameCell.setBorder(0);
             if (oneOrTwo){
-                sumOfCellsInTheTable1 = addCellToTable(table1, groupName, sumOfCellsInTheTable1);
+                sumOfCellsInTheTable1 = addCellToTable(table1, groupNameCell, sumOfCellsInTheTable1);
             } else {
-                sumOfCellsInTheTable2 = addCellToTable(table2, groupName, sumOfCellsInTheTable2);
+                sumOfCellsInTheTable2 = addCellToTable(table2, groupNameCell, sumOfCellsInTheTable2);
             }
             for (Student student : students){
                 PdfPCell studentCell = new PdfPCell(new Phrase(student.getSurname() + " " + student.getName() + " " + student.getPatronimic(), font));
