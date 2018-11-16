@@ -47,12 +47,13 @@ public class GradesJournalService {
             return  file;
         }
         return null;
-
     }
 
     private PdfPTable addContent(List<StudentGroup> studentGroups, Font font) throws DocumentException {
         PdfPTable tableMain = new PdfPTable(2);
-        tableMain.setWidthPercentage(100);
+        tableMain.setLockedWidth(true);
+        tableMain.setTotalWidth(425);
+        //tableMain.setWidthPercentage(100);
         PdfPCell pdfPCell1 = new PdfPCell();
         pdfPCell1.setBorder(0);
         PdfPCell pdfPCell2 = new PdfPCell();
@@ -67,7 +68,7 @@ public class GradesJournalService {
         for (StudentGroup studentGroup : studentGroups) {
             List<Student> students = studentGroup.getActiveStudents();
             PdfPCell groupName = new PdfPCell(new Phrase(studentGroup.getName(), font));
-            groupName.setMinimumHeight(30);
+            groupName.setFixedHeight(29);//setMinimumHeight(30);
             groupName.setPadding(5);
             groupName.setBorder(0);
             if (oneOrTwo){
@@ -77,7 +78,7 @@ public class GradesJournalService {
             }
             for (Student student : students){
                 PdfPCell studentCell = new PdfPCell(new Phrase(student.getSurname() + " " + student.getName() + " " + student.getPatronimic(), font));
-                studentCell.setMinimumHeight(30);
+                studentCell.setFixedHeight(29);//setMinimumHeight(30);
                 if (oneOrTwo){
                     sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, sumOfCellsInTheTable1);
                 } else {
@@ -102,6 +103,6 @@ public class GradesJournalService {
 
     private int addCellToTable(PdfPTable table, PdfPCell cell, int sumOfCellsInTheTable) throws DocumentException{
             table.addCell(cell);
-            return sumOfCellsInTheTable++;
+            return ++sumOfCellsInTheTable;
     }
 }
