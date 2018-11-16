@@ -35,7 +35,7 @@ public class GradesJournalService {
     public File createStudentsListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
         if (studentGroups != null && studentGroups.size() != 0) {
-            Document document = new Document(PageSize.A4, 0f, 0f, 0f, 0f);
+            Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
             String filePath = getJavaTempDirectory() + "/" + "StudentGroupsList.pdf";
             File file = new File(filePath);
             PdfWriter.getInstance(document, new FileOutputStream(file));
@@ -68,7 +68,7 @@ public class GradesJournalService {
         for (StudentGroup studentGroup : studentGroups) {
             List<Student> students = studentGroup.getActiveStudents();
             PdfPCell groupName = new PdfPCell(new Phrase(studentGroup.getName(), font));
-            groupName.setFixedHeight(29);//setMinimumHeight(30);
+            groupName.setFixedHeight(28);//setMinimumHeight(30);
             groupName.setPadding(5);
             groupName.setBorder(0);
             if (oneOrTwo){
@@ -78,7 +78,7 @@ public class GradesJournalService {
             }
             for (Student student : students){
                 PdfPCell studentCell = new PdfPCell(new Phrase(student.getSurname() + " " + student.getName() + " " + student.getPatronimic(), font));
-                studentCell.setFixedHeight(29);//setMinimumHeight(30);
+                studentCell.setFixedHeight(28);//setMinimumHeight(30);
                 if (oneOrTwo){
                     sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, sumOfCellsInTheTable1);
                 } else {
