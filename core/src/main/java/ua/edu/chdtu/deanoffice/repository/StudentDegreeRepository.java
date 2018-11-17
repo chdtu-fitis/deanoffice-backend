@@ -1,12 +1,13 @@
 package ua.edu.chdtu.deanoffice.repository;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.List;
 
@@ -67,4 +68,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);
+
+    @Modifying
+    @Query(value = "UPDATE StudentDegree sd " +
+            "SET sd.studentGroup = :group WHERE sd IN (:studentDegrees)")
+    void assignStudentsToGroup(@Param("studentDegrees")List<StudentDegree> studentDegrees, @Param("group")StudentGroup group);
+
 }

@@ -19,5 +19,4 @@ public class StudentDTO {
     private Sex sex;
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date birthDate;
-    private boolean modified;
 }
