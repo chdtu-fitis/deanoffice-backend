@@ -44,17 +44,18 @@ public class GradesJournalService {
                     "course_" + getFileCreationDateAndTime() + ".pdf";
             File file = new File(filePath);
             PdfWriter.getInstance(document, new FileOutputStream(file));
-            BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            Font font = new Font(baseFont);
             document.open();
-            document.add(addContent(studentGroups, font));
+            document.add(addContent(studentGroups));
             document.close();
             return  file;
         }
         return null;
     }
 
-    private PdfPTable addContent(List<StudentGroup> studentGroups, Font font) throws DocumentException, IOException {
+    private PdfPTable addContent(List<StudentGroup> studentGroups) throws DocumentException, IOException {
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font = new Font(baseFont);
+        Font boldFont = new Font(baseFont, 12, Font.BOLD);
         PdfPTable tableMain = new PdfPTable(2);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(425);
@@ -87,7 +88,7 @@ public class GradesJournalService {
                         + studentDegree.getStudent().getName() + " "
                         + studentDegree.getStudent().getPatronimic(), font);
                 if (studentDegree.getPayment() == Payment.CONTRACT){
-                    studentText.add(new Chunk(" K", new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLDITALIC)));
+                    studentText.add(new Chunk(" к", boldFont));
                 }
                 PdfPCell studentCell = new PdfPCell(studentText);
                 studentCell.setFixedHeight(28);//setMinimumHeight(30);
@@ -97,11 +98,7 @@ public class GradesJournalService {
                     sumOfCellsInTheTable2 = addCellToTable(table2, studentCell, sumOfCellsInTheTable2);
                 }
             }
-            if (sumOfCellsInTheTable1 <= sumOfCellsInTheTable2){
-                oneOrTwo = true;
-            } else {
-                oneOrTwo = false;
-            }
+            oneOrTwo = sumOfCellsInTheTable1 <= sumOfCellsInTheTable2;
         }
 
         pdfPCell1.addElement(table1);
