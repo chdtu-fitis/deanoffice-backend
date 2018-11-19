@@ -13,7 +13,7 @@ import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.GraduateGroupsService;
+import ua.edu.chdtu.deanoffice.service.GraduateGroupCoursesService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -22,19 +22,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/documents")
-public class GraduateGroupsController extends DocumentResponseController {
+public class GraduatesDocumentsController extends DocumentResponseController {
 
     private final CourseForGroupService courseForGroupService;
-    private final GraduateGroupsService graduateGroupsService;
+    private final GraduateGroupCoursesService graduateGroupCoursesService;
     private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
-    public GraduateGroupsController(
+    public GraduatesDocumentsController(
             CourseForGroupService courseForGroupService,
-            GraduateGroupsService graduateGroupsService,
+            GraduateGroupCoursesService graduateGroupCoursesService,
             FacultyAuthorizationService facultyAuthorizationService) {
         this.courseForGroupService = courseForGroupService;
-        this.graduateGroupsService = graduateGroupsService;
+        this.graduateGroupCoursesService = graduateGroupCoursesService;
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
@@ -46,7 +46,7 @@ public class GraduateGroupsController extends DocumentResponseController {
             List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
             validateBody(courseForGroups);
             facultyAuthorizationService.verifyAccessibilityOfStudentGroup(user, courseForGroups.get(0).getStudentGroup());
-            File file = graduateGroupsService.formDocument(courseForGroups);
+            File file = graduateGroupCoursesService.formDocument(courseForGroups);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
             return handleException(e);
@@ -61,6 +61,6 @@ public class GraduateGroupsController extends DocumentResponseController {
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, GraduateGroupsController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, GraduatesDocumentsController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

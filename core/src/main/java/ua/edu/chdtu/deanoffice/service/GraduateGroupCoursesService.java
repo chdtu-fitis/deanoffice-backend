@@ -27,12 +27,12 @@ import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTi
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getJavaTempDirectory;
 
 @Service
-public class GraduateGroupsService {
+public class GraduateGroupCoursesService {
 
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
     private static BaseColor headerColor = new BaseColor(238, 238, 238);
-    private static final String FILE_NAME_PREFIX = "PREDM_DOD_";
+    private static final String FILE_NAME_PREFIX = "PREDMETY_";
 
     public File formDocument(List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
