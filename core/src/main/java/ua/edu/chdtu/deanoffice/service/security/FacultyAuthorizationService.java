@@ -20,9 +20,7 @@ public class FacultyAuthorizationService {
             ApplicationUser user, List<StudentDegree> studentDegrees,
             StudentGroup studentGroup) throws UnauthorizedFacultyDataException
     {
-        if (studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()) {
-            throw new UnauthorizedFacultyDataException("Передана група знаходиться у недоступному для користувача факультеті");
-        }
+        verifyAccessibilityOfStudentGroup(user, studentGroup);
         if (studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId())) {
             throw new UnauthorizedFacultyDataException("Передані студенти знаходяться у недоступному для користувача факультеті");
         }
