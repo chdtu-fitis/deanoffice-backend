@@ -26,4 +26,5 @@ public class StudentDegreeFullEdeboDataDto {
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date admissionOrderDate;
     private Payment payment;
+    private boolean modified;
 }
