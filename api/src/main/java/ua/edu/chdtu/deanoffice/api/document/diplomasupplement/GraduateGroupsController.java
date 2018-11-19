@@ -38,7 +38,7 @@ public class GraduateGroupsController extends DocumentResponseController {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
-    @GetMapping("/{groupId}/course")
+    @GetMapping("/groups/{groupId}/graduate-courses")
     public ResponseEntity generateListOfCourseForGraduationGroups(
             @PathVariable("groupId") Integer groupId,
             @CurrentUser ApplicationUser user) {
