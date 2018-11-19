@@ -10,13 +10,17 @@ import java.util.List;
 
 @Service
 public class FacultyAuthorizationService {
+    public void verifyAccessibilityOfStudentGroup(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
+        if (user.getFaculty().getId() != studentGroup.getSpecialization().getFaculty().getId()) {
+            throw new UnauthorizedFacultyDataException("Група знаходить в недоступному факультеті для поточного користувача");
+        }
+    }
+
     public void verifyAccessibilityOfGroupAndStudents(
             ApplicationUser user, List<StudentDegree> studentDegrees,
             StudentGroup studentGroup) throws UnauthorizedFacultyDataException
     {
-        if (studentGroup.getSpecialization().getFaculty().getId() != user.getFaculty().getId()) {
-            throw new UnauthorizedFacultyDataException("Передана група знаходиться у недоступному для користувача факультеті");
-        }
+        verifyAccessibilityOfStudentGroup(user, studentGroup);
         if (studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId())) {
             throw new UnauthorizedFacultyDataException("Передані студенти знаходяться у недоступному для користувача факультеті");
         }
