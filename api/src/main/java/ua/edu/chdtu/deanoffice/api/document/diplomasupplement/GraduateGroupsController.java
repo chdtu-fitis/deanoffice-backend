@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.graduategroups;
+package ua.edu.chdtu.deanoffice.api.document.diplomasupplement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,34 +14,38 @@ import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GraduateGroupsService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 import java.util.List;
 
-
 @RestController
-@RequestMapping("/documents/graduate-groups")
+@RequestMapping("/documents")
 public class GraduateGroupsController extends DocumentResponseController {
 
-    private CourseForGroupService courseForGroupService;
-    private GraduateGroupsService graduateGroupsService;
+    private final CourseForGroupService courseForGroupService;
+    private final GraduateGroupsService graduateGroupsService;
+    private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
-    public GraduateGroupsController(CourseForGroupService courseForGroupService, GraduateGroupsService graduateGroupsService) {
+    public GraduateGroupsController(
+            CourseForGroupService courseForGroupService,
+            GraduateGroupsService graduateGroupsService,
+            FacultyAuthorizationService facultyAuthorizationService) {
         this.courseForGroupService = courseForGroupService;
         this.graduateGroupsService = graduateGroupsService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
-    @GetMapping("/{group_id}/subjects")
-    public ResponseEntity generateListOfSubjectForGraduationGroups(
-            @PathVariable("group_id") Integer groupId,
+    @GetMapping("/{groupId}/course")
+    public ResponseEntity generateListOfCourseForGraduationGroups(
+            @PathVariable("groupId") Integer groupId,
             @CurrentUser ApplicationUser user) {
         try {
             List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForOneGroup(groupId);
             validateBody(courseForGroups);
-            StudentGroupService.verifyAccess(user, courseForGroups.get(0).getStudentGroup());
+            facultyAuthorizationService.verifyAccessibilityOfStudentGroup(user, courseForGroups.get(0).getStudentGroup());
             File file = graduateGroupsService.formDocument(courseForGroups);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {

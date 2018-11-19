@@ -3,9 +3,6 @@ package ua.edu.chdtu.deanoffice.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Created by Vladimir on 12/11/18.
- **/
 public class DocumentUtil {
     public static String getJavaTempDirectory() {
         return System.getProperty("java.io.tmpdir");

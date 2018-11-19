@@ -32,10 +32,7 @@ public class GraduateGroupsService {
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
     private static BaseColor headerColor = new BaseColor(238, 238, 238);
-
-    private String getFileNamePrefix() {
-        return "PREDM_DOD_";
-    }
+    private static final String FILE_NAME_PREFIX = "PREDM_DOD_";
 
     public File formDocument(List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
@@ -92,7 +89,7 @@ public class GraduateGroupsService {
 
     private File getTempFile(String groupName) {
         String filePath = getJavaTempDirectory()
-                + "/" + getFileNamePrefix()
+                + "/" + FILE_NAME_PREFIX
                 + cleanFileName(LanguageUtil.transliterate(groupName))
                 + getFileCreationDateAndTime() + ".pdf";
         return new File(filePath);
@@ -145,7 +142,7 @@ public class GraduateGroupsService {
         return semesterDataCell;
     }
 
-    private static PdfPCell createHeaderCell(String text, Font font) {
+    private PdfPCell createHeaderCell(String text, Font font) {
         PdfPCell numberOfRowHeaderCell = new PdfPCell(new Phrase(text, font));
         numberOfRowHeaderCell.setBackgroundColor(headerColor);
         numberOfRowHeaderCell.setHorizontalAlignment(PdfPCell.ALIGN_CENTER);

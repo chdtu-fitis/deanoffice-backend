@@ -71,10 +71,4 @@ public class StudentGroupService {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
         studentGroupRepository.save(studentGroups);
     }
-
-    public static void verifyAccess(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
-        if (user.getFaculty().getId() != studentGroup.getSpecialization().getFaculty().getId()) {
-            throw new UnauthorizedFacultyDataException("Група знаходить в недоступному факультеті для поточного користувача");
-        }
-    }
 }
