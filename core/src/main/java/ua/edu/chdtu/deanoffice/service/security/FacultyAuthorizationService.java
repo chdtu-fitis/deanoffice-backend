@@ -21,4 +21,12 @@ public class FacultyAuthorizationService {
             throw new UnauthorizedFacultyDataException("Передані студенти знаходяться у недоступному для користувача факультеті");
         }
     }
+
+    public void verifyAccessibilityOfStudentDegrees(ApplicationUser user, List<StudentDegree> studentDegrees)
+            throws UnauthorizedFacultyDataException
+    {
+        if (studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId())) {
+            throw new UnauthorizedFacultyDataException("Передані студенти знаходяться у недоступному для користувача факультеті");
+        }
+    }
 }

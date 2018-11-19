@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +95,5 @@ public class StudentDegreeService {
     @Transactional
     public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
         studentDegreeRepository.assignStudentsToGroup(students, group);
-    }
-
-    public boolean verifyAccess(ApplicationUser user, List<StudentDegree> studentDegrees) {
-        return studentDegrees.stream().anyMatch(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() != user.getFaculty().getId());
     }
 }

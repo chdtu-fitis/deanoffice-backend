@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -75,5 +76,5 @@ public class StudentDegreeDTO {
     @JsonView(StudentView.Degrees.class)
     private boolean diplomaWithHonours;
     @JsonView(StudentView.Degrees.class)
-    private Set<StudentPreviousUniversityDTO> studentPreviousUniversities;
+    private Set<StudentPreviousUniversityDTO> studentPreviousUniversities = new HashSet<>();
 }

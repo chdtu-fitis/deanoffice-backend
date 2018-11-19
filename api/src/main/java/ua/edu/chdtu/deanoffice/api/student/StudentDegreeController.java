@@ -169,9 +169,8 @@ public class StudentDegreeController {
         try {
             validateStudentDegreesUpdates(studentDegreesDTOs);
             List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
-            studentDegreeService.verifyAccess(user, studentDegrees);
-            Student student = studentService.findById(studentId);
 
+            Student student = studentService.findById(studentId);
             studentDegrees.forEach(studentDegree -> {
                 Integer groupId = studentDegreesDTOs.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
@@ -180,6 +179,7 @@ public class StudentDegreeController {
                 studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
             });
 
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
             studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -189,7 +189,7 @@ public class StudentDegreeController {
 
     private void validateStudentDegreesUpdates(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
         if (isAnyStudentDegreeMissingId(studentDegreesDTOs)) {
-            String exceptionMessage = "Отримано некоректну інформацію. Зверністься до адміністратора або розробника системи";
+            String exceptionMessage = "Отримано некоректну інформацію. Зверніться до адміністратора або розробника системи";
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
