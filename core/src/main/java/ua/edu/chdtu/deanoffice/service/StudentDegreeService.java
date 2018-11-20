@@ -94,4 +94,9 @@ public class StudentDegreeService {
     public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
         studentDegreeRepository.assignStudentsToGroup(students, group);
     }
+
+    @Transactional
+    public void assignRecordBookNumbersToStudents(Map<StudentDegree, String> studentDegreeToRecordNumberMap) {
+        studentDegreeToRecordNumberMap.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
+    }
 }

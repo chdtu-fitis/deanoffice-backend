@@ -3,13 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -18,11 +12,7 @@ import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -32,9 +22,8 @@ import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -234,6 +223,44 @@ public class StudentDegreeController {
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @PostMapping("/students/assign-record-book-numbers")
+    public ResponseEntity assignRecordBookNumbersToStudents(@RequestBody Map<Integer, String> studentDegreeToRecordNumber,
+                                                            @CurrentUser ApplicationUser user)
+    {
+        try {
+            validateInputDataForAssignRecordBookNumberToStudents(studentDegreeToRecordNumber);
+            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(new ArrayList<>(studentDegreeToRecordNumber.keySet()));
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
+            if (studentDegrees.isEmpty()) {
+                String message = "За переданими даними жодного студента не було знайдено для призначення номеру залікової книжки. " +
+                        "Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            Map<StudentDegree, String> studentDegreeToRecordNumberMap = studentDegrees
+                    .stream().collect(Collectors.toMap(item -> item, item -> studentDegreeToRecordNumber.get(item.getId())));
+            studentDegreeService.assignRecordBookNumbersToStudents(studentDegreeToRecordNumberMap);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void validateInputDataForAssignRecordBookNumberToStudents(Map<Integer, String> studentDegreeToRecordNumber) throws OperationCannotBePerformedException {
+        if (studentDegreeToRecordNumber.size() == 0) {
+            String message = "Для призначення номеру залікової книжки потрібно передати хоча б одного студента.";
+            throw new OperationCannotBePerformedException(message);
+        }
+        if (studentDegreeToRecordNumber.values().stream().anyMatch(item -> Objects.isNull(item) || item.isEmpty())) {
+            String message = "Номер залікової книжки не може бути пустим.";
+            throw new OperationCannotBePerformedException(message);
+        }
+        Set<String> recordBookNumberSet = new HashSet<>(studentDegreeToRecordNumber.values());
+        if (recordBookNumberSet.size() != studentDegreeToRecordNumber.size()) {
+            String message = "Номер залікової книжки не може бути однаковим у декількох студентів";
+            throw new OperationCannotBePerformedException(message);
         }
     }
 
