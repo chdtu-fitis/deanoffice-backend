@@ -227,20 +227,24 @@ public class StudentDegreeController {
     }
 
     @PostMapping("/students/assign-record-book-numbers")
-    public ResponseEntity assignRecordBookNumbersToStudents(@RequestBody Map<Integer, String> studentDegreeToRecordNumber,
-                                                            @CurrentUser ApplicationUser user)
-    {
+    public ResponseEntity assignRecordBookNumbersToStudents(
+            @RequestBody Map<Integer, String> studentDegreeIdsToRecordNumbers,
+            @CurrentUser ApplicationUser user) {
         try {
-            validateInputDataForAssignRecordBookNumberToStudents(studentDegreeToRecordNumber);
-            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(new ArrayList<>(studentDegreeToRecordNumber.keySet()));
+            validateInputDataForAssignRecordBookNumbersToStudents(studentDegreeIdsToRecordNumbers);
+            List<StudentDegree> studentDegrees =
+                    studentDegreeService.getByIds(new ArrayList<>(studentDegreeIdsToRecordNumbers.keySet()));
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
             if (studentDegrees.isEmpty()) {
-                String message = "За переданими даними жодного студента не було знайдено для призначення номеру залікової книжки. " +
-                        "Зверніться до адміністратора або розробника системи.";
+                String message = "За переданими даними жодного студента не було знайдено для призначення " +
+                        "номеру залікової книжки. Зверніться до адміністратора або розробника системи.";
                 throw new NotFoundException(message);
             }
             Map<StudentDegree, String> studentDegreeToRecordNumberMap = studentDegrees
-                    .stream().collect(Collectors.toMap(item -> item, item -> studentDegreeToRecordNumber.get(item.getId())));
+                    .stream().collect(Collectors.toMap(
+                            studentDegree -> studentDegree,
+                            studentDegree -> studentDegreeIdsToRecordNumbers.get(studentDegree.getId()))
+                    );
             studentDegreeService.assignRecordBookNumbersToStudents(studentDegreeToRecordNumberMap);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -248,7 +252,9 @@ public class StudentDegreeController {
         }
     }
 
-    private void validateInputDataForAssignRecordBookNumberToStudents(Map<Integer, String> studentDegreeToRecordNumber) throws OperationCannotBePerformedException {
+    private void validateInputDataForAssignRecordBookNumbersToStudents(
+            Map<Integer, String> studentDegreeToRecordNumber
+    ) throws OperationCannotBePerformedException {
         if (studentDegreeToRecordNumber.size() == 0) {
             String message = "Для призначення номеру залікової книжки потрібно передати хоча б одного студента.";
             throw new OperationCannotBePerformedException(message);
