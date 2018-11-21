@@ -66,16 +66,18 @@ public class DiplomaSupplementController extends DocumentResponseController {
                                                 @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
-            Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduates(user.getFaculty().getId(), degreeId);
+            Map<StudentDegree, List<String>> studentDegreesWithEmpty = studentDegreeService.checkAllGraduates(user.getFaculty().getId(), degreeId);
             List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<StudentDataCheckDto>();
-            for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
+            for (Map.Entry<StudentDegree, List<String>> entry: studentDegreesWithEmpty.entrySet()) {
                 StudentDegree studentDegree = entry.getKey();
+                List<String> messages = entry.getValue();
                 StudentDataCheckDto studentDataCheckDto = new StudentDataCheckDto();
                 studentDataCheckDto.setSurname(studentDegree.getStudent().getSurname());
                 studentDataCheckDto.setName(studentDegree.getStudent().getName());
                 studentDataCheckDto.setPatronimic(studentDegree.getStudent().getPatronimic());
                 studentDataCheckDto.setGroupName(studentDegree.getStudentGroup().getName());
-                studentDataCheckDto.setMessage(entry.getValue());
+                studentDataCheckDto.setStudentDegreeMessage(messages.get(0));
+                studentDataCheckDto.setGradeMessage(messages.get(1));
                 studentDataCheckDtoList.add(studentDataCheckDto);
             }
             return ResponseEntity.ok(studentDataCheckDtoList);
