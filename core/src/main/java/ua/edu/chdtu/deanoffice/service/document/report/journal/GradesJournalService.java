@@ -56,9 +56,6 @@ public class GradesJournalService {
     }
 
     private PdfPTable addContent(List<StudentGroup> studentGroups) throws DocumentException, IOException {
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        Font font = new Font(baseFont);
-        Font boldFont = new Font(baseFont, 12, Font.BOLD);
         PdfPTable tableMain = new PdfPTable(2);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(425);
@@ -72,6 +69,22 @@ public class GradesJournalService {
         PdfPTable table2 = new PdfPTable(2);
         table2.setWidths(new int[] {30,2});
         table2.setWidthPercentage(100);
+
+        addStudentsOnPdfTables(studentGroups, table1, table2);
+
+        pdfPCell1.addElement(table1);
+        pdfPCell1.setPadding(0);
+        pdfPCell2.addElement(table2);
+        pdfPCell2.setPadding(0);
+        tableMain.addCell(pdfPCell1);
+        tableMain.addCell(pdfPCell2);
+        return tableMain;
+    }
+
+    private void addStudentsOnPdfTables(List<StudentGroup> studentGroups, PdfPTable table1, PdfPTable table2) throws DocumentException, IOException {
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font = new Font(baseFont);
+        Font boldFont = new Font(baseFont, 12, Font.BOLD);
         boolean oneOrTwo = true;
         int sumOfCellsInTheTable1 = 0;
         int sumOfCellsInTheTable2 = 0;
@@ -110,14 +123,6 @@ public class GradesJournalService {
             }
             oneOrTwo = sumOfCellsInTheTable1 <= sumOfCellsInTheTable2;
         }
-
-        pdfPCell1.addElement(table1);
-        pdfPCell1.setPadding(0);
-        pdfPCell2.addElement(table2);
-        pdfPCell2.setPadding(0);
-        tableMain.addCell(pdfPCell1);
-        tableMain.addCell(pdfPCell2);
-        return tableMain;
     }
 
     private int addCellToTable(PdfPTable table, PdfPCell cell1, PdfPCell cell2, int sumOfCellsInTheTable) throws DocumentException{
