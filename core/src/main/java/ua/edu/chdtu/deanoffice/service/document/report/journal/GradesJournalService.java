@@ -8,7 +8,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -59,7 +58,6 @@ public class GradesJournalService {
         PdfPTable tableMain = new PdfPTable(2);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(425);
-        //tableMain.setWidthPercentage(100);
         PdfPCell pdfPCell1 = new PdfPCell();
         pdfPCell1.setBorder(0);
         PdfPCell pdfPCell2 = new PdfPCell();
@@ -73,9 +71,8 @@ public class GradesJournalService {
         int sumOfCellsInTheTable2 = 0;
         for (StudentGroup studentGroup : studentGroups)  {
             List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
-            //List<Student> students = studentGroup.getActiveStudents();
             PdfPCell groupNameCell = new PdfPCell(new Phrase(studentGroup.getName(), font));
-            groupNameCell.setFixedHeight(28);//setMinimumHeight(30);
+            groupNameCell.setFixedHeight(28);
             groupNameCell.setPadding(5);
             groupNameCell.setBorder(0);
             if (oneOrTwo){
@@ -91,7 +88,7 @@ public class GradesJournalService {
                     studentText.add(new Chunk(" к", boldFont));
                 }
                 PdfPCell studentCell = new PdfPCell(studentText);
-                studentCell.setFixedHeight(28);//setMinimumHeight(30);
+                studentCell.setFixedHeight(28);
                 if (oneOrTwo){
                     sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, sumOfCellsInTheTable1);
                 } else {
@@ -111,8 +108,8 @@ public class GradesJournalService {
     }
 
     private int addCellToTable(PdfPTable table, PdfPCell cell, int sumOfCellsInTheTable) throws DocumentException{
-            table.addCell(cell);
-            return ++sumOfCellsInTheTable;
+        table.addCell(cell);
+        return ++sumOfCellsInTheTable;
     }
 
     private String getFileCreationDateAndTime() {
