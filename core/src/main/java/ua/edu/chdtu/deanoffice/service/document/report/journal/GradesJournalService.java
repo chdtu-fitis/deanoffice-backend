@@ -63,10 +63,10 @@ public class GradesJournalService {
         PdfPCell pdfPCell2 = new PdfPCell();
         pdfPCell2.setBorder(0);
         PdfPTable table1 = new PdfPTable(2);
-        table1.setWidths(new int[] {28,4});
+        table1.setWidths(new int[] {30,2});
         table1.setWidthPercentage(100);
         PdfPTable table2 = new PdfPTable(2);
-        table2.setWidths(new int[] {28,4});
+        table2.setWidths(new int[] {30,2});
         table2.setWidthPercentage(100);
         boolean oneOrTwo = true;
         int sumOfCellsInTheTable1 = 0;
@@ -96,7 +96,7 @@ public class GradesJournalService {
                 isContractCell.setFixedHeight(28);
                 isContractCell.setBorderWidthLeft(0);
                 if (studentDegree.getPayment() == Payment.CONTRACT){
-                    isContractCell.addElement(new Phrase(" к", boldFont));
+                    isContractCell.addElement(new Phrase("к", boldFont));
                 }
                 if (oneOrTwo){
                     sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, isContractCell, sumOfCellsInTheTable1);
