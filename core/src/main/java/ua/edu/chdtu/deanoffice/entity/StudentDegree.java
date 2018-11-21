@@ -3,14 +3,18 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -55,4 +59,7 @@ public class StudentDegree extends BaseEntity {
 
     @Temporal(TemporalType.DATE)
     private Date admissionDate;
+
+    @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<StudentPreviousUniversity> studentPreviousUniversities;
 }

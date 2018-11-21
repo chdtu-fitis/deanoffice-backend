@@ -162,24 +162,24 @@ public class StudentDegreeController {
     @JsonView(StudentView.Degrees.class)
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
-            @PathVariable(value = "id") Integer studentId,
-            @RequestBody List<StudentDegreeDTO> studentDegreesDTO
+            @PathVariable("id") Integer studentId,
+            @RequestBody List<StudentDegreeDTO> studentDegreesDTOs,
+            @CurrentUser ApplicationUser user
     ) {
-        if (checkId(studentDegreesDTO)) {
-            return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id не може бути null");
-        }
-
         try {
-            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTO, StudentDegree.class);
-            Student student = studentService.findById(studentId);
+            validateStudentDegreesUpdates(studentDegreesDTOs);
+            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
 
+            Student student = studentService.findById(studentId);
             studentDegrees.forEach(studentDegree -> {
-                Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
+                Integer groupId = studentDegreesDTOs.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
                 studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
                 studentDegree.setStudent(student);
+                studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
             });
 
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
             studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -187,13 +187,16 @@ public class StudentDegreeController {
         }
     }
 
-    private boolean checkId(List<StudentDegreeDTO> studentDegreeDTOs) {
-        for (StudentDegreeDTO sd : studentDegreeDTOs) {
-            if (sd.getId() == null) {
-                return true;
-            }
+    private void validateStudentDegreesUpdates(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
+        if (isAnyStudentDegreeMissingId(studentDegreesDTOs)) {
+            String exceptionMessage = "Отримано некоректну інформацію. Зверніться до адміністратора або розробника системи";
+            throw new OperationCannotBePerformedException(exceptionMessage);
         }
-        return false;
+    }
+
+
+    private boolean isAnyStudentDegreeMissingId(List<StudentDegreeDTO> studentDegreeDTOs) {
+        return studentDegreeDTOs.stream().anyMatch((studentDegreeDTO) -> studentDegreeDTO.getId() == null);
     }
 
     private StudentGroup getStudentGroup(Integer groupId) {
