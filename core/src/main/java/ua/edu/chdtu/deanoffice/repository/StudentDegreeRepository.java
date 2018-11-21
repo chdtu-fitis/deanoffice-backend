@@ -76,6 +76,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
-            "SET sd.recordBookNumber = :recordNumber WHERE sd = :studentDegree")
-    void assignRecordBookNumbersToStudents(@Param("studentDegree") StudentDegree studentDegree, @Param("recordNumber") String recordNumber);
+            "SET sd.recordBookNumber = :recordBookNumber WHERE sd.id = :studentDegreeId")
+    void assignRecordBookNumbersToStudents(@Param("studentDegreeId") Integer studentDegreeId, @Param("recordBookNumber") String recordBookNumber);
 }

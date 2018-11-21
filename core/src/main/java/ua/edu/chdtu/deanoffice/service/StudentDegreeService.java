@@ -96,7 +96,7 @@ public class StudentDegreeService {
     }
 
     @Transactional
-    public void assignRecordBookNumbersToStudents(Map<StudentDegree, String> studentDegreeToRecordNumberMap) {
-        studentDegreeToRecordNumberMap.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
+    public void assignRecordBookNumbersToStudents(Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers) {
+        studentDegreeIdsAndRecordBooksNumbers.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
     }
 }

@@ -244,24 +244,19 @@ public class StudentDegreeController {
 
     @PostMapping("/students/record-book-numbers")
     public ResponseEntity assignRecordBookNumbersToStudents(
-            @RequestBody Map<Integer, String> studentDegreeIdsToRecordNumbers,
+            @RequestBody Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers,
             @CurrentUser ApplicationUser user) {
         try {
-            validateInputDataForAssignRecordBookNumbersToStudents(studentDegreeIdsToRecordNumbers);
+            validateInputDataForAssignRecordBookNumbersToStudents(studentDegreeIdsAndRecordBooksNumbers);
             List<StudentDegree> studentDegrees =
-                    studentDegreeService.getByIds(new ArrayList<>(studentDegreeIdsToRecordNumbers.keySet()));
+                    studentDegreeService.getByIds(new ArrayList<>(studentDegreeIdsAndRecordBooksNumbers.keySet()));
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
             if (studentDegrees.isEmpty()) {
                 String message = "За переданими даними жодного студента не було знайдено для призначення " +
                         "номеру залікової книжки. Зверніться до адміністратора або розробника системи.";
                 throw new NotFoundException(message);
             }
-            Map<StudentDegree, String> studentDegreeToRecordNumberMap = studentDegrees
-                    .stream().collect(Collectors.toMap(
-                            studentDegree -> studentDegree,
-                            studentDegree -> studentDegreeIdsToRecordNumbers.get(studentDegree.getId()))
-                    );
-            studentDegreeService.assignRecordBookNumbersToStudents(studentDegreeToRecordNumberMap);
+            studentDegreeService.assignRecordBookNumbersToStudents(studentDegreeIdsAndRecordBooksNumbers);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
@@ -276,7 +271,7 @@ public class StudentDegreeController {
             throw new OperationCannotBePerformedException(message);
         }
         if (studentDegreeToRecordNumber.values().stream().anyMatch(item -> Objects.isNull(item) || item.isEmpty())) {
-            String message = "Номер залікової книжки не може бути пустим.";
+            String message = "Номер залікової книжки не може бути порожнім.";
             throw new OperationCannotBePerformedException(message);
         }
         Set<String> recordBookNumberSet = new HashSet<>(studentDegreeToRecordNumber.values());
