@@ -1,16 +1,30 @@
 package ua.edu.chdtu.deanoffice.service.document;
 
-import com.itextpdf.text.*;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.Degree;
+import ua.edu.chdtu.deanoffice.entity.Speciality;
+import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
@@ -18,6 +32,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.cleanFileName;
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTime;
@@ -30,8 +46,64 @@ public class ConsolidatedReportService {
     private static final int NO_BORDER = 0;
     private static final int ALL_BORDER = 15;
 
+    private final CurrentYearService currentYearService;
 
-    public File formConsolidatedReport(Map<Course, List<StudentGroup>> courseToStudentGroups, ApplicationUser user) throws DocumentException, IOException {
+    @Autowired
+    public ConsolidatedReportService(CurrentYearService currentYearService) {
+        this.currentYearService = currentYearService;
+    }
+
+    public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
+        if (coursesToStudentGroups.size() == 0) {
+            throw new OperationCannotBePerformedException("Для формування документу потрібно передати хоча б один курс");
+        }
+        if (coursesToStudentGroups.values().stream().anyMatch(Objects::isNull) || coursesToStudentGroups.values().stream().anyMatch(List::isEmpty)) {
+            throw new OperationCannotBePerformedException("Для формування документу потрібно, щоб кожному предмету відповідала хоча б одна група");
+        }
+
+        Document document = new Document(PageSize.A4);
+        File file = getTempFile("3BEDEHA-BIDOMICTb");
+        PdfWriter.getInstance(document, new FileOutputStream(file));
+        document.open();
+
+        try {
+            for (Map.Entry<CourseForGroup, List<StudentGroup>> courseToStudentGroups : coursesToStudentGroups.entrySet()) {
+                createOneConsolidatedReport(document, courseToStudentGroups.getKey(), courseToStudentGroups.getValue(), user);
+            }
+        } catch (DocumentException | IOException | OperationCannotBePerformedException e) {
+            document.close();
+            file.deleteOnExit();
+            throw e;
+        }
+        document.newPage();
+
+        document.close();
+        return file;
+    }
+
+    private void createOneConsolidatedReport(Document document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
+        Degree degree = studentGroups.get(0).getSpecialization().getDegree();
+        for (StudentGroup studentGroup : studentGroups) {
+            if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
+                throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
+            }
+        }
+        Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
+        for (StudentGroup studentGroup : studentGroups) {
+            if (studentGroup.getSpecialization().getSpeciality().getId() != speciality.getId()) {
+                speciality = null;
+                break;
+            }
+        }
+        Specialization specialization = studentGroups.get(0).getSpecialization();
+        for (StudentGroup studentGroup : studentGroups) {
+            if (studentGroup.getSpecialization().getId() != specialization.getId()) {
+                specialization = null;
+                break;
+            }
+        }
+        String groupNames = studentGroups.stream().map(NameEntity::getName).collect(Collectors.joining(", "));
+
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         final Font FONT = new Font(baseFont);
         final Font BOLD_FONT = new Font(baseFont);
@@ -41,36 +113,53 @@ public class ConsolidatedReportService {
         final PdfPCell EMPTY_CELL_NO_BORDER = new PdfPCell(new Phrase(""));
         EMPTY_CELL_NO_BORDER.setBorder(0);
         final PdfPCell EMPTY_CELL = new PdfPCell(new Phrase(""));
-
-        Document document = new Document(PageSize.A4);
-        File file = getTempFile("DOCUMENT");
-        PdfWriter.getInstance(document, new FileOutputStream(file));
-        document.open();
         createTitleOfDocument(BOLD_FONT, document);
-        createFacultyHeader(FONT, BOLD_FONT, document);
-        createInfoAboutGroup(FONT, BOLD_FONT, EMPTY_CELL_NO_BORDER, document);
+        createFacultyHeader(FONT, BOLD_FONT, document, user.getFaculty().getAbbr().toUpperCase());
+        createInfoAboutGroup(FONT, BOLD_FONT, EMPTY_CELL_NO_BORDER, document,
+                degree.getName(),
+                speciality != null ? speciality.getName() : "",
+                specialization != null ? specialization.getName() : "",
+                "",
+                groupNames,
+                currentYearService.getYear() + "-" + (currentYearService.getYear() + 1)
+        );
         createNameTitle(BOLD_FONT, document);
-        createInfoAboutCourse(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document);
-        createInfoAboutSemester(FONT, document);
-        createInfoAboutKnowledgeControl(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document);
-        createInfoAboutTeacher(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document);
-        createMainTable(FONT, SMALL_FONT, document);
-        createInfoAboutExamination(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document);
+        createInfoAboutCourse(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, courseForGroup.getCourse().getCourseName().getName());
+        createInfoAboutSemester(FONT, document, courseForGroup.getCourse().getSemester().toString());
+        createInfoAboutKnowledgeControl(
+                FONT,
+                SMALL_FONT,
+                EMPTY_CELL_NO_BORDER,
+                document,
+                courseForGroup.getCourse().getKnowledgeControl().getName(),
+                String.valueOf(courseForGroup.getCourse().getHours().intValue())
+        );
+        createInfoAboutTeacher(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, courseForGroup.getTeacher().getFullNameUkr());
+        createMainTable(FONT, SMALL_FONT, BOLD_FONT, document, studentGroups);
+
+        String deanInitials = user.getFaculty().getDean();
+        if (deanInitials != null) {
+            String[] strings = deanInitials.split(" ");
+            if (strings.length == 3)
+                deanInitials = strings[0] + " " + strings[1].substring(0, 1) + "." + strings[2].substring(0, 1) + ".";
+        } else {
+            deanInitials = "";
+        }
+
+        createInfoAboutExamination(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, deanInitials);
         createTitleOfMarks(FONT, document);
         createMarksTable(FONT, EMPTY_CELL, document);
-        createFooter(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document);
-        document.close();
-        return file;
+        createFooter(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, courseForGroup.getTeacher().getFullNameUkr());
     }
 
-    private void createFooter(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document) throws DocumentException {
+    private void createFooter(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document, String teacherFullName) throws DocumentException {
         PdfPTable footerTable = new PdfPTable(3);
         footerTable.setWidths(new int[]{2, 1, 2});
         footerTable.setWidthPercentage(100);
         footerTable.getDefaultCell().setBorder(0);
         footerTable.addCell(new Phrase("Екзаменатор (викладач)", FONT));
         footerTable.addCell("______________");
-        footerTable.addCell(createCellWithUnderline("Тимченко Анатолій Анастасійович", FONT));
+        footerTable.addCell(createCellWithUnderline(teacherFullName, FONT));
         footerTable.addCell(EMPTY_CELL_NO_BORDER);
         footerTable.addCell(createCellWithParameters("(підпис)", SMALL_FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_TOP, 1, 1));
         footerTable.addCell(createCellWithParameters("(прізвище та ініціали)", SMALL_FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_TOP, 1, 1));
@@ -134,7 +223,7 @@ public class ConsolidatedReportService {
         document.add(new Paragraph(" "));
     }
 
-    private void createInfoAboutExamination(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document) throws DocumentException {
+    private void createInfoAboutExamination(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document, String facultyDean) throws DocumentException {
         PdfPTable aboutExamination = new PdfPTable(6);
         aboutExamination.setWidthPercentage(100);
         aboutExamination.setWidths(new int[]{3, 1, 3, 1, 3, 1});
@@ -144,7 +233,7 @@ public class ConsolidatedReportService {
         aboutExamination.addCell(EMPTY_CELL_NO_BORDER);
         aboutExamination.addCell(createCellWithUnderline("", FONT));
         aboutExamination.addCell(EMPTY_CELL_NO_BORDER);
-        aboutExamination.addCell(createCellWithUnderline("Трегубенко І.Б.", FONT));
+        aboutExamination.addCell(createCellWithUnderline(facultyDean, FONT));
         aboutExamination.addCell(EMPTY_CELL_NO_BORDER);
 
         aboutExamination.addCell(EMPTY_CELL_NO_BORDER);
@@ -157,10 +246,10 @@ public class ConsolidatedReportService {
         document.add(aboutExamination);
     }
 
-    private void createMainTable(Font FONT, Font SMALL_FONT, Document document) throws DocumentException {
+    private void createMainTable(Font FONT, Font SMALL_FONT, Font BOLD_FONT, Document document, List<StudentGroup> studentGroups) throws DocumentException {
         PdfPTable mainTable = new PdfPTable(8);
         mainTable.setWidthPercentage(100);
-        mainTable.setWidths(new int[]{1, 6, 2, 2, 2, 2, 3, 5});
+        mainTable.setWidths(new int[]{1, 5, 3, 2, 2, 2, 3, 5});
 
         mainTable.addCell(createCellWithParameters("№\nз/п", SMALL_FONT, ALL_BORDER, Element.ALIGN_CENTER, Element.ALIGN_MIDDLE, 1, 2));
         mainTable.addCell(createCellWithParameters("Прізвище та ініціали студентів", SMALL_FONT, ALL_BORDER, Element.ALIGN_CENTER, Element.ALIGN_MIDDLE, 1, 2));
@@ -179,17 +268,34 @@ public class ConsolidatedReportService {
             mainTable.addCell(createCellWithParameters(String.valueOf(i), FONT, ALL_BORDER, Element.ALIGN_CENTER, Element.ALIGN_MIDDLE, 1, 1));
         }
 
-        for (int i = 0; i < 50; i++) {
-            for (int j = 1; j <= 8; j++) {
-                mainTable.addCell(String.valueOf(i));
+        int index = 1;
+        for (StudentGroup studentGroup : studentGroups) {
+            mainTable.addCell(createCellWithParameters(String.valueOf(index++), FONT, ALL_BORDER, Element.ALIGN_CENTER, Element.ALIGN_MIDDLE, 1, 1));
+            mainTable.addCell(createCellWithParameters(studentGroup.getName(), BOLD_FONT, ALL_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 1, 1));
+            for (int i = 0; i < 6; i++) {
+                mainTable.addCell("");
+            }
+            for (StudentDegree studentDegree : studentGroup.getStudentDegrees()) {
+                mainTable.addCell(createCellWithParameters(String.valueOf(index++), FONT, ALL_BORDER, Element.ALIGN_CENTER, Element.ALIGN_MIDDLE, 1, 1));
+                mainTable.addCell(createCellWithParameters(studentDegree.getStudent().getInitialsUkr(), FONT, ALL_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 1, 1));
+                mainTable.addCell(createCellWithParameters(studentDegree.getRecordBookNumber(), FONT, ALL_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 1, 1));
+                for (int i = 0; i < 5; i++) {
+                    mainTable.addCell("");
+                }
             }
         }
 
-        /*load data*/
+        for (; index <= 50;) {
+            mainTable.addCell(String.valueOf(index++));
+            for (int j = 0; j < 7; j++) {
+                mainTable.addCell("");
+            }
+        }
+
         document.add(mainTable);
     }
 
-    private void createInfoAboutTeacher(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document) throws DocumentException {
+    private void createInfoAboutTeacher(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document, String teacherFullName) throws DocumentException {
         Paragraph emptyParagraph = new Paragraph("");
         document.add(emptyParagraph);
 
@@ -198,23 +304,23 @@ public class ConsolidatedReportService {
         table.setWidths(new int[]{1, 6});
         table.getDefaultCell().setBorder(0);
         table.addCell(new Phrase("Викладач", FONT));
-        table.addCell(createCellWithUnderline("Ткаченко Анатолій Анастасійович", FONT));
+        table.addCell(createCellWithUnderline(teacherFullName, FONT));
         table.addCell(EMPTY_CELL_NO_BORDER);
         table.addCell(createCellWithParameters("(вчене звання, прізвище та ініціали викладача, який виставляє оцінку)", SMALL_FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_TOP, 1, 1));
         document.add(table);
     }
 
-    private void createInfoAboutKnowledgeControl(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document) throws DocumentException {
+    private void createInfoAboutKnowledgeControl(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document, String knowledgeControl, String hours) throws DocumentException {
         PdfPTable infoAboutCourseTable = new PdfPTable(5);
         infoAboutCourseTable.setWidthPercentage(100);
         infoAboutCourseTable.setWidths(new int[]{5, 3, 1, 4, 1});
         infoAboutCourseTable.getDefaultCell().setBorder(0);
 
         infoAboutCourseTable.addCell(new Phrase("Форма семестрового контролю", FONT));
-        infoAboutCourseTable.addCell(createCellWithUnderline("іспит", FONT));
+        infoAboutCourseTable.addCell(createCellWithUnderline(knowledgeControl, FONT));
         infoAboutCourseTable.addCell(EMPTY_CELL_NO_BORDER);
         infoAboutCourseTable.addCell(createCellWithParameters("Загальна кількість годин:", FONT, 0, Element.ALIGN_RIGHT, Element.ALIGN_BOTTOM, 1,1));
-        infoAboutCourseTable.addCell(createCellWithUnderline("120", FONT));
+        infoAboutCourseTable.addCell(createCellWithUnderline(hours, FONT));
         infoAboutCourseTable.addCell(EMPTY_CELL_NO_BORDER);
         infoAboutCourseTable.addCell(createCellWithParameters("(іспит, залік, дифзалік)", SMALL_FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_TOP, 1, 1));
         infoAboutCourseTable.addCell(EMPTY_CELL_NO_BORDER);
@@ -223,74 +329,75 @@ public class ConsolidatedReportService {
         document.add(infoAboutCourseTable);
     }
 
-    private void createInfoAboutSemester(Font FONT, Document document) throws DocumentException {
+    private void createInfoAboutSemester(Font FONT, Document document, String semester) throws DocumentException {
         PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(40);
         table.setWidths(new int[]{1, 1, 8});
         table.getDefaultCell().setBorder(0);
         table.setHorizontalAlignment(Element.ALIGN_LEFT);
         table.addCell(new Phrase("за ", FONT));
-        table.addCell(createCellWithUnderline("2", FONT));
+        table.addCell(createCellWithUnderline(semester, FONT));
         table.addCell(new Phrase(" навчальний семестр", FONT));
         document.add(table);
     }
 
-    private void createInfoAboutCourse(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document) throws DocumentException {
+    private void createInfoAboutCourse(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document, String courseName) throws DocumentException {
         PdfPTable courseNameTable = new PdfPTable(2);
         courseNameTable.setWidthPercentage(100);
         courseNameTable.setWidths(new int[]{1, 40});
         courseNameTable.getDefaultCell().setBorder(0);
 
         courseNameTable.addCell(new Phrase("з ", FONT));
-        courseNameTable.addCell(createCellWithUnderline("Системи аналітичної обробки даних", FONT));
+        courseNameTable.addCell(createCellWithUnderline(courseName, FONT));
         courseNameTable.addCell(EMPTY_CELL_NO_BORDER);
-        courseNameTable.addCell(createCellWithParameters("(вчене звання, прізвище та ініціали викладача, який виставляє підсумкову оцінку)", SMALL_FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_TOP, 1, 1));
+        courseNameTable.addCell(createCellWithParameters("(назва навчальної дисципліни)", SMALL_FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_TOP, 1, 1));
         document.add(courseNameTable);
     }
 
     private void createNameTitle(Font BOLD_FONT, Document document) throws DocumentException {
-        /*document name title*/
         Paragraph nameOfDocument = new Paragraph("ВІДОМІСТЬ ОБЛІКУ УСПІШНОСТІ №_________", BOLD_FONT);
         nameOfDocument.setAlignment(Element.ALIGN_CENTER);
         document.add(nameOfDocument);
     }
 
-    private void createInfoAboutGroup(Font FONT, Font BOLD_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document) throws DocumentException {
+    private void createInfoAboutGroup(
+            Font FONT, Font BOLD_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document,
+            String degree,
+            String speciality,
+            String specialization,
+            String courseNumber,
+            String group,
+            String studyYears) throws DocumentException {
         PdfPTable dataTable = new PdfPTable(5);
         dataTable.getDefaultCell().setBorder(0);
         dataTable.setWidthPercentage(100);
         dataTable.setWidths(new int[]{2, 3, 1, 1, 6});
-        {/*row*/
-            dataTable.addCell(createCellWithParameters("Магістр".toUpperCase(), BOLD_FONT, NO_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 2, 1));
-            dataTable.addCell(EMPTY_CELL_NO_BORDER);
-            dataTable.addCell(createCellWithParameters("122-2 Комп'ютерні науки", FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_BOTTOM, 2, 1));
-        }
-        {/*row 2*/
-            dataTable.addCell(createCellWithParameters("Спеціальність", FONT, NO_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 2, 1));
-            dataTable.addCell(EMPTY_CELL_NO_BORDER);
-            PdfPCell specializationCell = createCellWithParameters("інформаційні управляючі системи та технології", FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_BOTTOM, 2, 1);
-            specializationCell.setBorderWidthBottom(1);
-            dataTable.addCell(specializationCell);
-        }
-        {/*row 3*/
-            dataTable.addCell(new Phrase("Курс", FONT));
-            dataTable.addCell(createCellWithUnderline("1", FONT));
-            dataTable.addCell(EMPTY_CELL_NO_BORDER);
-            dataTable.addCell(new Phrase("Група", FONT));
-            dataTable.addCell(createCellWithUnderline("МКТ-1701", FONT));
-        }
-        {
-            dataTable.addCell(createCellWithUnderline("2017-2018", FONT));
-            dataTable.addCell(new Phrase("навчальний рік", FONT));
-            dataTable.addCell(EMPTY_CELL_NO_BORDER);
-            dataTable.addCell(EMPTY_CELL_NO_BORDER);
-            dataTable.addCell(EMPTY_CELL_NO_BORDER);
-        }
+        /*row 1*/
+        dataTable.addCell(createCellWithParameters(degree.toUpperCase(), BOLD_FONT, NO_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 2, 1));
+        dataTable.addCell(EMPTY_CELL_NO_BORDER);
+        dataTable.addCell(createCellWithParameters(speciality, FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_BOTTOM, 2, 1));
+        /*row 2*/
+        dataTable.addCell(createCellWithParameters("Спеціальність", FONT, NO_BORDER, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 2, 1));
+        dataTable.addCell(EMPTY_CELL_NO_BORDER);
+        PdfPCell specializationCell = createCellWithParameters(specialization, FONT, NO_BORDER, Element.ALIGN_CENTER, Element.ALIGN_BOTTOM, 2, 1);
+        specializationCell.setBorderWidthBottom(1);
+        dataTable.addCell(specializationCell);
+        /*row 3*/
+        dataTable.addCell(createCellWithParameters("Курс", FONT, 0, Element.ALIGN_LEFT, Element.ALIGN_BOTTOM, 1, 1));
+        dataTable.addCell(createCellWithUnderline(courseNumber, FONT));
+        dataTable.addCell(EMPTY_CELL_NO_BORDER);
+        dataTable.addCell(createCellWithParameters("Група", FONT, 0, Element.ALIGN_RIGHT, Element.ALIGN_BOTTOM, 1, 1));
+        dataTable.addCell(createCellWithUnderline(group, FONT));
+        /*row 4*/
+        dataTable.addCell(createCellWithUnderline(studyYears, FONT));
+        dataTable.addCell(new Phrase("навчальний рік", FONT));
+        dataTable.addCell(EMPTY_CELL_NO_BORDER);
+        dataTable.addCell(EMPTY_CELL_NO_BORDER);
+        dataTable.addCell(EMPTY_CELL_NO_BORDER);
         document.add(dataTable);
     }
 
-    private void createFacultyHeader(Font FONT, Font BOLD_FONT, Document document) throws DocumentException {
-        /*Faculty*/
+    private void createFacultyHeader(Font FONT, Font BOLD_FONT, Document document, String faculty) throws DocumentException {
         PdfPTable facultyTable = new PdfPTable(2);
         facultyTable.setHorizontalAlignment(Element.ALIGN_LEFT);
         facultyTable.getDefaultCell().setBorder(0);
@@ -298,22 +405,20 @@ public class ConsolidatedReportService {
         facultyTable.setWidths(new int[]{1, 1});
 
         facultyTable.addCell(new Phrase("Факультет", FONT));
-        facultyTable.addCell(createCellWithUnderline("ФІТІС", BOLD_FONT));
+        facultyTable.addCell(createCellWithUnderline(faculty, BOLD_FONT));
 
         document.add(facultyTable);
     }
 
     private void createTitleOfDocument(Font BOLD_FONT, Document document) throws DocumentException {
-        /*Title*/
         Paragraph nameOfUniversity = new Paragraph("Черкаський державний технологічний університет", BOLD_FONT);
         nameOfUniversity.setAlignment(Paragraph.ALIGN_CENTER);
         document.add(nameOfUniversity);
     }
 
-    private File getTempFile(String groupName) {
+    private File getTempFile(String fileNamePrefix) {
         String filePath = getJavaTempDirectory()
-                + "/"
-                + cleanFileName(LanguageUtil.transliterate(groupName))
+                + "/" + cleanFileName(LanguageUtil.transliterate(fileNamePrefix))
                 + getFileCreationDateAndTime() + ".pdf";
         return new File(filePath);
     }
