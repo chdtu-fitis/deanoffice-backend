@@ -100,15 +100,15 @@ public class ConsolidatedReportController extends DocumentResponseController {
 
     @PostMapping("/create-document")
     public ResponseEntity getConsolidatedDocument(
-            @RequestBody Map<Integer, List<Integer>> mapCourseIdToStudentGroupsIds,
+            @RequestBody Map<Integer, List<Integer>> mapCourseForGroupIdToStudentGroupsIds,
             @CurrentUser ApplicationUser user
     ) {
         try {
-            Map<Course, List<StudentGroup>> mapCourseToStudentGroups = new HashMap<>();
-            mapCourseIdToStudentGroupsIds.forEach((courseId, studentGroupId) -> {
+            Map<CourseForGroup, List<StudentGroup>> mapCourseToStudentGroups = new HashMap<>();
+            mapCourseForGroupIdToStudentGroupsIds.forEach((courseForGroupId, studentGroupId) -> {
                 Integer[] studentGroupIdsArray = new Integer[studentGroupId.size()];
                 List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId.toArray(studentGroupIdsArray));
-                mapCourseToStudentGroups.put(courseService.getById(courseId), studentGroups);
+                mapCourseToStudentGroups.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
             });
             File consolidatedDocument = consolidatedReportService.formConsolidatedReport(mapCourseToStudentGroups, user);
             return buildDocumentResponseEntity(
