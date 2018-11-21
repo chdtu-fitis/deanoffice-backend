@@ -98,7 +98,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/create-document")
+    @PostMapping("/create-document")
     public ResponseEntity getConsolidatedDocument(
             @RequestBody Map<Integer, List<Integer>> mapCourseIdToStudentGroupsIds,
             @CurrentUser ApplicationUser user
