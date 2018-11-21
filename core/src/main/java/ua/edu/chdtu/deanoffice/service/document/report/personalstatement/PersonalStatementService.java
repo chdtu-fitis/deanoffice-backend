@@ -54,11 +54,9 @@ public class PersonalStatementService {
             throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
         YearGrades yearGrades = new YearGrades(getGradeMap(year, studentDegreeIds, SemesterType.FIRST), getGradeMap(year, studentDegreeIds, SemesterType.SECOND));
-
-        generateTables(template, yearGrades,year);
+        generateTables(template, yearGrades, year);
         Set<StudentGroup> groups = yearGrades.getGradeMapForFirstSemester().keySet().stream().map(sd -> sd.getStudentGroup()).collect(Collectors.toSet());
         return documentIOService.saveDocumentToTemp(template, transliterate(generateFileName(groups)), FileFormatEnum.DOCX);
-
     }
 
     private String generateFileName(Set<StudentGroup> groups) {
@@ -108,10 +106,9 @@ public class PersonalStatementService {
             replaceInRow(tableRows.get(0), getStudentDictionary(student));
     }
 
-
-    private void formFirstSemesterInTable(Tbl table, List<Grade> grades, Integer year) {
+    private void formFirstSemesterInTable(Tbl table, List<Grade> grades) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        //int clearRowIndex=2;
+        Tr rowToCopy = tableRows.get(2);
         int currentIndex = 2;
         Tr rowToCopy = tableRows.get(currentIndex);
         fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
@@ -128,7 +125,6 @@ public class PersonalStatementService {
             currentIndex++;
         }
         table.getContent().remove(currentIndex);
-        //table.getContent().remove(2);
     }
 
     private void formSecondSemesterInTable(Tbl table, List<Grade> grades, Integer year) {
@@ -142,7 +138,7 @@ public class PersonalStatementService {
             table.getContent().add(currentIndex, newRow);
             currentIndex++;
         }
-        for(int i=currentIndex;i<20;i++){
+        for(int i=currentIndex; i< 20; i++){
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
             fillRowByLost(newRow);
             table.getContent().add(currentIndex, newRow);
@@ -150,7 +146,6 @@ public class PersonalStatementService {
         }
         table.getContent().remove(currentIndex);
     }
-
 
     private Map<String, String> getGradeDictionary(Grade grade, Integer year) {
         Map<String, String> result = new HashMap<>();
@@ -175,7 +170,6 @@ public class PersonalStatementService {
         if (grade.getEcts() != null) {
             result.put("e", grade.getEcts().toString());
         }
-
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(grade.getStudentDegree().getStudentGroup().getId(), grade.getCourse().getId());
         if (courseForGroup.getExamDate() != null) {
             String date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(courseForGroup.getExamDate());
@@ -185,12 +179,6 @@ public class PersonalStatementService {
     }
     private Map<String, String> getLostDictionary() {
         Map<String, String> result = new HashMap<>();
-        //result.put("sy","НАВЧАЛЬНИЙ РІК");
-        //String gradeNumberYear="";
-        //gradeNumberYear="______ "+"20__-"+"20__";
-       // result.put("f","ПЕРШИЙ");
-        //result.put("s","ДРУГИЙ");
-       // result.put("n",gradeNumberYear);//потрібна умова для перевірки (ДРУГИЙ,ТРЕТІЙ....)
         result.put("subj", "");
         result.put("h", "");
         result.put("c","");

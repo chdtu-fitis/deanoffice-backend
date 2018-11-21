@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 public class EducationDocumentTest {
     private void assertGetPreviousDiplomaType(Integer degreeId, EducationDocument expectedEducationDocument) {
-        assertEquals(EducationDocument.getPreviousDiplomaType(degreeId), expectedEducationDocument);
+        assertEquals(EducationDocument.getForecastedDiplomaTypeByDegree(degreeId), expectedEducationDocument);
     }
 
     @Test

@@ -23,13 +23,18 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -38,16 +43,18 @@ public class StudentDegreeController {
     private final StudentDegreeService studentDegreeService;
     private final StudentService studentService;
     private final StudentGroupService studentGroupService;
+    private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public StudentDegreeController(
             StudentDegreeService studentDegreeService,
             StudentService studentService,
-            StudentGroupService studentGroupService
-    ) {
+            StudentGroupService studentGroupService,
+            FacultyAuthorizationService facultyAuthorizationService) {
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @JsonView(StudentView.Simple.class)
@@ -138,7 +145,7 @@ public class StudentDegreeController {
         if (EducationDocument.isExist(studentDegree.getPreviousDiplomaType())) {
             return studentDegree.getPreviousDiplomaType();
         }
-        return EducationDocument.getPreviousDiplomaType(studentDegree.getSpecialization().getDegree().getId());
+        return EducationDocument.getForecastedDiplomaTypeByDegree(studentDegree.getSpecialization().getDegree().getId());
     }
 
     @JsonView(StudentView.Degrees.class)
@@ -200,6 +207,40 @@ public class StudentDegreeController {
             return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @PostMapping("/group/{groupId}/add-students")
+    public ResponseEntity assignStudentsToGroup(
+            @PathVariable("groupId") Integer groupId,
+            @RequestBody Integer[] studentDegreeIds,
+            @CurrentUser ApplicationUser user
+            ) {
+        try {
+            validateInputDataForAssignStudentsToGroup(studentDegreeIds);
+            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(Arrays.asList(studentDegreeIds));
+            if (studentDegrees.isEmpty()) {
+                String message = "За переданими даними жодного студента не було знайдено для призначення групи. " +
+                        "Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            StudentGroup studentGroup = studentGroupService.getById(groupId);
+            if (Objects.isNull(studentGroup)) {
+                String message = "Групу для призначення не вдалося знайти. Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            facultyAuthorizationService.verifyAccessibilityOfGroupAndStudents(user, studentDegrees, studentGroup);
+            studentDegreeService.assignStudentsToGroup(studentDegrees, studentGroup);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void validateInputDataForAssignStudentsToGroup(Integer[] studentDegreeIds) throws OperationCannotBePerformedException {
+        if (studentDegreeIds.length == 0) {
+            String message = "Для призначення групи потрібно передати хоча б одного студента.";
+            throw new OperationCannotBePerformedException(message);
         }
     }
 

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.importing;
+package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 final class HeaderPatterns {
     static final String FIRST_NAME = "%2-firstName%";
