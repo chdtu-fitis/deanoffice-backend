@@ -62,9 +62,11 @@ public class GradesJournalService {
         pdfPCell1.setBorder(0);
         PdfPCell pdfPCell2 = new PdfPCell();
         pdfPCell2.setBorder(0);
-        PdfPTable table1 = new PdfPTable(1);
+        PdfPTable table1 = new PdfPTable(2);
+        table1.setWidths(new int[] {28,4});
         table1.setWidthPercentage(100);
-        PdfPTable table2 = new PdfPTable(1);
+        PdfPTable table2 = new PdfPTable(2);
+        table2.setWidths(new int[] {28,4});
         table2.setWidthPercentage(100);
         boolean oneOrTwo = true;
         int sumOfCellsInTheTable1 = 0;
@@ -75,24 +77,35 @@ public class GradesJournalService {
             groupNameCell.setFixedHeight(28);
             groupNameCell.setPadding(5);
             groupNameCell.setBorder(0);
+            PdfPCell emptyCell = new PdfPCell();
+            emptyCell.setFixedHeight(28);
+            emptyCell.setBorder(0);
             if (oneOrTwo){
                 sumOfCellsInTheTable1 = addCellToTable(table1, groupNameCell, sumOfCellsInTheTable1);
+                table1.addCell(emptyCell);
             } else {
                 sumOfCellsInTheTable2 = addCellToTable(table2, groupNameCell, sumOfCellsInTheTable2);
+                table2.addCell(emptyCell);
             }
             for (StudentDegree studentDegree : studentDegrees){
                 Phrase studentText = new Phrase(studentDegree.getStudent().getSurname() + " "
                         + studentDegree.getStudent().getName() + " "
                         + studentDegree.getStudent().getPatronimic(), font);
-                if (studentDegree.getPayment() == Payment.CONTRACT){
-                    studentText.add(new Chunk(" к", boldFont));
-                }
                 PdfPCell studentCell = new PdfPCell(studentText);
                 studentCell.setFixedHeight(28);
+                studentCell.setBorderWidthRight(0);
+                PdfPCell isContractCell = new PdfPCell();
+                isContractCell.setFixedHeight(28);
+                isContractCell.setBorderWidthLeft(0);
+                if (studentDegree.getPayment() == Payment.CONTRACT){
+                    isContractCell.addElement(new Phrase(" к", boldFont));
+                }
                 if (oneOrTwo){
                     sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, sumOfCellsInTheTable1);
+                    table1.addCell(isContractCell);
                 } else {
                     sumOfCellsInTheTable2 = addCellToTable(table2, studentCell, sumOfCellsInTheTable2);
+                    table2.addCell(isContractCell);
                 }
             }
             oneOrTwo = sumOfCellsInTheTable1 <= sumOfCellsInTheTable2;
