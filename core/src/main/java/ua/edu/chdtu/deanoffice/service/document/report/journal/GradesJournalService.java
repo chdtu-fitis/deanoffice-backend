@@ -81,11 +81,9 @@ public class GradesJournalService {
             emptyCell.setFixedHeight(28);
             emptyCell.setBorder(0);
             if (oneOrTwo){
-                sumOfCellsInTheTable1 = addCellToTable(table1, groupNameCell, sumOfCellsInTheTable1);
-                table1.addCell(emptyCell);
+                sumOfCellsInTheTable1 = addCellToTable(table1, groupNameCell, emptyCell, sumOfCellsInTheTable1);
             } else {
-                sumOfCellsInTheTable2 = addCellToTable(table2, groupNameCell, sumOfCellsInTheTable2);
-                table2.addCell(emptyCell);
+                sumOfCellsInTheTable2 = addCellToTable(table2, groupNameCell, emptyCell, sumOfCellsInTheTable2);
             }
             for (StudentDegree studentDegree : studentDegrees){
                 Phrase studentText = new Phrase(studentDegree.getStudent().getSurname() + " "
@@ -101,11 +99,9 @@ public class GradesJournalService {
                     isContractCell.addElement(new Phrase(" к", boldFont));
                 }
                 if (oneOrTwo){
-                    sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, sumOfCellsInTheTable1);
-                    table1.addCell(isContractCell);
+                    sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, isContractCell, sumOfCellsInTheTable1);
                 } else {
-                    sumOfCellsInTheTable2 = addCellToTable(table2, studentCell, sumOfCellsInTheTable2);
-                    table2.addCell(isContractCell);
+                    sumOfCellsInTheTable2 = addCellToTable(table2, studentCell, isContractCell, sumOfCellsInTheTable2);
                 }
             }
             oneOrTwo = sumOfCellsInTheTable1 <= sumOfCellsInTheTable2;
@@ -120,8 +116,9 @@ public class GradesJournalService {
         return tableMain;
     }
 
-    private int addCellToTable(PdfPTable table, PdfPCell cell, int sumOfCellsInTheTable) throws DocumentException{
-        table.addCell(cell);
+    private int addCellToTable(PdfPTable table, PdfPCell cell1, PdfPCell cell2, int sumOfCellsInTheTable) throws DocumentException{
+        table.addCell(cell1);
+        table.addCell(cell2);
         return ++sumOfCellsInTheTable;
     }
 
