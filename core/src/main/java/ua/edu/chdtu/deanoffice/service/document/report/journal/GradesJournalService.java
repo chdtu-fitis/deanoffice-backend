@@ -39,13 +39,17 @@ public class GradesJournalService {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
-            String filePath = getJavaTempDirectory() + "/" + "StudentGroupsList_" + year +
-                    "course_" + getFileCreationDateAndTime() + ".pdf";
+            String filePath = getJavaTempDirectory() + "/" + "StudentyJurnalOtsinok-" + year +
+                    "kurs-" + getFileCreationDateAndTime() + ".pdf";
             File file = new File(filePath);
             PdfWriter.getInstance(document, new FileOutputStream(file));
-            document.open();
-            document.add(addContent(studentGroups));
-            document.close();
+            try {
+                document.open();
+                document.add(addContent(studentGroups));
+            } finally {
+                if (document != null)
+                    document.close();
+            }
             return  file;
         }
         return null;
