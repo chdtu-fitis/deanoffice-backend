@@ -7,10 +7,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
@@ -19,8 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 
 @Service
@@ -144,8 +140,8 @@ public class GradesJournalService {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
-            String filePath = getJavaTempDirectory() + "/" + "SubjectsList_" + year +
-                    "course_" + getFileCreationDateAndTime() + ".pdf";
+            String filePath = getJavaTempDirectory() + "/" + "Predmeti-dlya-zhurnalu -" + year +
+                    "kurs_" + getFileCreationDateAndTime() + ".pdf";
             File file = new File(filePath);
             PdfWriter.getInstance(document, new FileOutputStream(file));
             try {
@@ -211,7 +207,7 @@ public class GradesJournalService {
 
     private PdfPTable addSubjectsOnTable(List<StudentGroup> studentGroups, Document document, int year) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        Font font1 = new Font(baseFont, 10);
+        Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
 
         //isCoursesForGroupEmpty(studentGroups, year);
@@ -260,8 +256,13 @@ public class GradesJournalService {
                     table.addCell(semesterCell);
 
                     List<CourseForGroup> courseForGroups  = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                                    SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+                    courseForGroups.sort(sortCourseForGroup);
+                                    //Collections.sort();
+                    //List<CourseForGroup> sortedCourseForGroup
                             for (CourseForGroup courseForGroup: courseForGroups){
-                                PdfPCell knowledgeControl = new PdfPCell(new Phrase(courseForGroup.getCourse().getKnowledgeControl().getName(), font2));
+                                PdfPCell knowledgeControl = new PdfPCell(new Phrase(
+                                        getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
                                 knowledgeControl.setFixedHeight(28);
                                 knowledgeControl.setPadding(0);
                                 knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -288,4 +289,39 @@ public class GradesJournalService {
 
         return tableMain;
     }
+
+    private String getKnowledgeControlNameById(int id){
+        switch (id){
+            case 1: return "іспит";
+            case 2: return "залік";
+            case 3: return "КР";
+            case 4: return "КП";
+            case 5: return "ДЗ";
+            case 6: return "ДІ";
+            case 7: return "атест.";
+            case 8: return "практ.";
+            case 9: return "практ.";
+        }
+        return null;
+    }
+
+    private class SortCourseForGroup implements Comparator<CourseForGroup>{
+        public int compare(CourseForGroup course1, CourseForGroup course2) {
+            int courseId1 = course1.getCourse().getKnowledgeControl().getId();
+            int courseId2 = course2.getCourse().getKnowledgeControl().getId();
+            if (courseId1 == courseId2) {
+                return 0;
+            }
+            if (courseId1 == 2 && courseId2 != 2) {
+                return -1;
+            }
+            if (courseId1 > courseId2) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+    }
+
 }
