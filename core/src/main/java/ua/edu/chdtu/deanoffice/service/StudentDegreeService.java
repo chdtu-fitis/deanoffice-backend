@@ -73,26 +73,26 @@ public class StudentDegreeService {
         if (grades == null)
             return "";
         final StringBuilder message = new StringBuilder();
-        grades.forEach(grade -> message.append(grade.getCourse().getCourseName().getName()));
+        grades.forEach(grade -> message.append(grade.getCourse().getCourseName().getName() + ", " + grade.getCourse().getSemester() + "сем; "));
         return message.toString();
     }
 
-    private List<String> getCheckResult(StudentDegree studentDegree){
-        String graduateFieldValuesAvailability = checkGraduateFieldValuesAvailability(studentDegree);
-        String studentGradesForSupplement = checkStudentGradesForSupplement(studentDegree);
-        List<String> stringList = new ArrayList<String>();
-        stringList.add(graduateFieldValuesAvailability);
-        stringList.add(studentGradesForSupplement);
-        return stringList;
-    }
-
-    public Map<StudentDegree, List<String>> checkAllGraduates(int facultyId, int degreeId) {
+    public Map<StudentDegree, String> checkAllGraduatesData(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
         List<StudentDegree> studentDegrees = studentDegreeRepository.findAllGraduates(year, facultyId, degreeId);
         return studentDegrees
                 .stream()
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
-                .collect(Collectors.toMap(sd -> sd, this::getCheckResult));
+                .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability));
+    }
+
+    public Map<StudentDegree, String> checkAllGraduatesGrades(int facultyId, int degreeId) {
+        int year = currentYearService.getYear();
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findAllGraduates(year, facultyId, degreeId);
+        return studentDegrees
+                .stream()
+                .filter(sd -> !checkStudentGradesForSupplement(sd).equals(""))
+                .collect(Collectors.toMap(sd -> sd, this::checkStudentGradesForSupplement));
     }
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){

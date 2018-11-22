@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.document.diplomasupplement;
 
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
@@ -16,7 +15,6 @@ import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupple
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,18 +64,41 @@ public class DiplomaSupplementController extends DocumentResponseController {
                                                 @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
-            Map<StudentDegree, List<String>> studentDegreesWithEmpty = studentDegreeService.checkAllGraduates(user.getFaculty().getId(), degreeId);
+            Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesData(user.getFaculty().getId(), degreeId);
             List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<StudentDataCheckDto>();
-            for (Map.Entry<StudentDegree, List<String>> entry: studentDegreesWithEmpty.entrySet()) {
+            for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
                 StudentDegree studentDegree = entry.getKey();
-                List<String> messages = entry.getValue();
+                String message = entry.getValue();
                 StudentDataCheckDto studentDataCheckDto = new StudentDataCheckDto();
                 studentDataCheckDto.setSurname(studentDegree.getStudent().getSurname());
                 studentDataCheckDto.setName(studentDegree.getStudent().getName());
                 studentDataCheckDto.setPatronimic(studentDegree.getStudent().getPatronimic());
                 studentDataCheckDto.setGroupName(studentDegree.getStudentGroup().getName());
-                studentDataCheckDto.setStudentDegreeMessage(messages.get(0));
-                studentDataCheckDto.setGradeMessage(messages.get(1));
+                studentDataCheckDto.setStudentDegreeMessage(message);
+                studentDataCheckDtoList.add(studentDataCheckDto);
+            }
+            return ResponseEntity.ok(studentDataCheckDtoList);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/grade-check")
+    public ResponseEntity checkGradeAvailability(@RequestParam Integer degreeId,
+                                                @CurrentUser ApplicationUser user) {
+        try {
+            facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
+            Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesGrades(user.getFaculty().getId(), degreeId);
+            List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<StudentDataCheckDto>();
+            for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
+                StudentDegree studentDegree = entry.getKey();
+                String messages = entry.getValue();
+                StudentDataCheckDto studentDataCheckDto = new StudentDataCheckDto();
+                studentDataCheckDto.setSurname(studentDegree.getStudent().getSurname());
+                studentDataCheckDto.setName(studentDegree.getStudent().getName());
+                studentDataCheckDto.setPatronimic(studentDegree.getStudent().getPatronimic());
+                studentDataCheckDto.setGroupName(studentDegree.getStudentGroup().getName());
+                studentDataCheckDto.setGradeMessage(messages);
                 studentDataCheckDtoList.add(studentDataCheckDto);
             }
             return ResponseEntity.ok(studentDataCheckDtoList);
