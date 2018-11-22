@@ -95,7 +95,7 @@ public class PersonalStatementService {
             fillFirstRow(table, studentDegree.getStudent());
             formFirstSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree),year);
             formSecondSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree),year);
-            fillLastRow(table,year);
+            fillLastRow(table,yearGrades.getGradeMapForSecondSemester().get(studentDegree),year);
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
@@ -106,9 +106,8 @@ public class PersonalStatementService {
             replaceInRow(tableRows.get(0), getStudentDictionary(student));
     }
 
-    private void formFirstSemesterInTable(Tbl table, List<Grade> grades) {
+    private void formFirstSemesterInTable(Tbl table, List<Grade> grades,Integer year) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        Tr rowToCopy = tableRows.get(2);
         int currentIndex = 2;
         Tr rowToCopy = tableRows.get(currentIndex);
         fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
@@ -150,11 +149,11 @@ public class PersonalStatementService {
     private Map<String, String> getGradeDictionary(Grade grade, Integer year) {
         Map<String, String> result = new HashMap<>();
         result.put("sy","НАВЧАЛЬНИЙ РІК");
-        String gradeNumberYear="";
-        int year2=year+1;
-        gradeNumberYear=getYearName(0).toUpperCase()+" "+year+"-"+year2;
-        result.put("f","ПЕРШИЙ");
-        result.put("s","ДРУГИЙ");
+        String gradeNumberYear = "";
+        gradeNumberYear = getYearName(getStudentStudyYear(grade.getStudentDegree(), year)).toUpperCase()+" "+year+"-"+(year+1);
+
+        result.put("f",getSemesterName(getStudentStudyYear(grade.getStudentDegree(), year)*2).toUpperCase());
+        result.put("s",getSemesterName((getStudentStudyYear(grade.getStudentDegree(), year)*2)+1).toUpperCase());
         result.put("n",gradeNumberYear);//потрібна умова для перевірки (ДРУГИЙ,ТРЕТІЙ....)
         result.put("subj", grade.getCourse().getCourseName().getName());
         result.put("h", resolveHoursField(grade));
@@ -238,29 +237,32 @@ public class PersonalStatementService {
         result.put("stud", student.getFullNameUkr());
         return result;
     }
-    private void fillLastRow(Tbl table, Integer year) {
+    private void fillLastRow(Tbl table, List<Grade> grades, Integer year) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        replaceInRow(tableRows.get(tableRows.size()-1), getLastRowDictionary(year));
+        replaceInRow(tableRows.get(tableRows.size()-1), getLastRowDictionary(year,grades.get(0)));
     }
-    private Map<String, String> getLastRowDictionary(Integer year) {
+    private Map<String, String> getLastRowDictionary(Integer year,Grade grade) {
         Map<String, String> result = new HashMap<>();
-        result.put("nc", "Переведений на "+ getYearName(1) +" курс. Наказ від «_____»________20___року №____");
+        result.put("nc", "Переведений на "+ getYearName((getStudentStudyYear(grade.getStudentDegree(), year+1))) +" курс. Наказ від «_____»________20___року №____");
         return result;
     }
 
     private Integer getSemesterByYearForGroup(Integer year, StudentGroup studentGroup) {
-        yearForName = year - studentGroup.getCreationYear() + studentGroup.getBeginYears()-1;
         return (year - studentGroup.getCreationYear() + studentGroup.getBeginYears() - 1) * 2 + 1;
     }
 
-    private String getYearName(Integer finder){
-        if (yearForName+finder>5) finder=0;
-        String[] yearNames = {"перший", "другий","третій","четвертий","п'ятий","шостий"};
-        return yearNames[yearForName+finder];
-//        switch (yearForName) {
-//            case 1: yearName = "";
-//            break;
-//
+    public int getStudentStudyYear(StudentDegree studentDegree, int year) {
+        return year - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears()-1;
+    }
+
+    private String getYearName(Integer year){
+        String[] yearNames = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий"};
+        return yearNames[year];
+    }
+    private String getSemesterName(Integer year){
+        String[] semestrNames = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий",
+                "дев'ятий", "десятий", "одинадцятий", "дванадцятий"};
+        return semestrNames[year];
     }
 
     @Getter
