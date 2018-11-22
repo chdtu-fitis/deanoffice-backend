@@ -32,9 +32,14 @@ import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -237,6 +242,45 @@ public class StudentDegreeController {
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @PostMapping("/students/record-book-numbers")
+    public ResponseEntity assignRecordBookNumbersToStudents(
+            @RequestBody Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers,
+            @CurrentUser ApplicationUser user) {
+        try {
+            validateInputDataForAssignRecordBookNumbersToStudents(studentDegreeIdsAndRecordBooksNumbers);
+            List<StudentDegree> studentDegrees =
+                    studentDegreeService.getByIds(new ArrayList<>(studentDegreeIdsAndRecordBooksNumbers.keySet()));
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
+            if (studentDegrees.isEmpty()) {
+                String message = "За переданими даними жодного студента не було знайдено для призначення " +
+                        "номеру залікової книжки. Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            studentDegreeService.assignRecordBookNumbersToStudents(studentDegreeIdsAndRecordBooksNumbers);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void validateInputDataForAssignRecordBookNumbersToStudents(
+            Map<Integer, String> studentDegreeToRecordNumber
+    ) throws OperationCannotBePerformedException {
+        if (studentDegreeToRecordNumber.size() == 0) {
+            String message = "Для призначення номеру залікової книжки потрібно передати хоча б одного студента.";
+            throw new OperationCannotBePerformedException(message);
+        }
+        if (studentDegreeToRecordNumber.values().stream().anyMatch(item -> Objects.isNull(item) || item.isEmpty())) {
+            String message = "Номер залікової книжки не може бути порожнім.";
+            throw new OperationCannotBePerformedException(message);
+        }
+        Set<String> recordBookNumberSet = new HashSet<>(studentDegreeToRecordNumber.values());
+        if (recordBookNumberSet.size() != studentDegreeToRecordNumber.size()) {
+            String message = "Номер залікової книжки не може бути однаковим у декількох студентів";
+            throw new OperationCannotBePerformedException(message);
         }
     }
 

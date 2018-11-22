@@ -21,7 +21,7 @@ public class StudentDegreeDTO {
     private StudentDTO student;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private NamedDTO studentGroup;
-    @JsonView(StudentView.DetailAndDegree.class)
+    @JsonView(StudentView.SimpleAndDegrees.class)
     private String recordBookNumber;
     @JsonView(StudentView.DetailAndDegree.class)
     private String diplomaNumber;
