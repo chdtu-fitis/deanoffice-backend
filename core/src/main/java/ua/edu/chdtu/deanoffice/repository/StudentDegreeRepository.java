@@ -67,4 +67,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);
+
+    @Query("SELECT sd from StudentDegree sd " +
+            "where sd.active = true " +
+            "and sd.studentGroup = :group_id " +
+            "and sd.student = :student_id")
+    List<StudentDegree> findByStudentGroupAndStudentId(@Param("group_id") int groupId,
+                                                       @Param("student_id") int studentId);
 }

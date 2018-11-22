@@ -83,4 +83,10 @@ public class StudentDegreeService {
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
+
+    public StudentDegree getByStudentGroupAndStudentId(int groupId, int studentId){
+        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findByStudentGroupAndStudentId(groupId, studentId);
+        return (studentDegrees.isEmpty()) ? null : studentDegrees.get(0);
+    }
+
 }

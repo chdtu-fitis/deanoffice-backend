@@ -7,6 +7,6 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.ImportedThesis
 @Getter
 @Setter
 public class MissingThesisDataRedDTO {
-    ImportedThesisDataDTO importedThesisDataDTO;
+    ImportedThesisDataDTO thesisPrimaryData;
     String message;
 }

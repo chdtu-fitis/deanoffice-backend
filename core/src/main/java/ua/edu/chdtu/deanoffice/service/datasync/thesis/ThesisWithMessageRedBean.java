@@ -1,5 +1,8 @@
 package ua.edu.chdtu.deanoffice.service.datasync.thesis;
 
+import lombok.Getter;
+
+@Getter
 public class ThesisWithMessageRedBean {
     private ThesisDataBean thesisPrimaryData;
     private String message;

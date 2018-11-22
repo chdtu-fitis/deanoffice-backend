@@ -25,6 +25,8 @@ public class ThesisReport {
         thesisRedMessage.add(bean);
     }
 
+
+
     public void clear(){
         thesisGreen.clear();
         thesisRedMessage.clear();

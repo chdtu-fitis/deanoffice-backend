@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ImportedThesisDataDTO {
+    int id;
     String fullName;
     String thesisName;
     String thesisNameEng;
