@@ -46,7 +46,7 @@ public class GradesJournalService {
             PdfWriter.getInstance(document, new FileOutputStream(file));
             try {
                 document.open();
-                document.add(addContent(studentGroups));
+                document.add(addStudentsContent(studentGroups));
             } finally {
                 if (document != null)
                     document.close();
@@ -56,7 +56,7 @@ public class GradesJournalService {
         return null;
     }
 
-    private PdfPTable addContent(List<StudentGroup> studentGroups) throws DocumentException, IOException {
+    private PdfPTable addStudentsContent(List<StudentGroup> studentGroups) throws DocumentException, IOException {
         PdfPTable tableMain = new PdfPTable(2);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(425);
@@ -99,9 +99,9 @@ public class GradesJournalService {
             emptyCell.setFixedHeight(28);
             emptyCell.setBorder(0);
             if (oneOrTwo){
-                sumOfCellsInTheTable1 = addCellToTable(table1, groupNameCell, emptyCell, sumOfCellsInTheTable1);
+                sumOfCellsInTheTable1 = addCellToStudentsTable(table1, groupNameCell, emptyCell, sumOfCellsInTheTable1);
             } else {
-                sumOfCellsInTheTable2 = addCellToTable(table2, groupNameCell, emptyCell, sumOfCellsInTheTable2);
+                sumOfCellsInTheTable2 = addCellToStudentsTable(table2, groupNameCell, emptyCell, sumOfCellsInTheTable2);
             }
             for (StudentDegree studentDegree : studentDegrees){
                 Phrase studentText = new Phrase(studentDegree.getStudent().getSurname() + " "
@@ -117,16 +117,16 @@ public class GradesJournalService {
                     isContractCell.addElement(new Phrase("к", boldFont));
                 }
                 if (oneOrTwo){
-                    sumOfCellsInTheTable1 = addCellToTable(table1, studentCell, isContractCell, sumOfCellsInTheTable1);
+                    sumOfCellsInTheTable1 = addCellToStudentsTable(table1, studentCell, isContractCell, sumOfCellsInTheTable1);
                 } else {
-                    sumOfCellsInTheTable2 = addCellToTable(table2, studentCell, isContractCell, sumOfCellsInTheTable2);
+                    sumOfCellsInTheTable2 = addCellToStudentsTable(table2, studentCell, isContractCell, sumOfCellsInTheTable2);
                 }
             }
             oneOrTwo = sumOfCellsInTheTable1 <= sumOfCellsInTheTable2;
         }
     }
 
-    private int addCellToTable(PdfPTable table, PdfPCell cell1, PdfPCell cell2, int sumOfCellsInTheTable) throws DocumentException{
+    private int addCellToStudentsTable(PdfPTable table, PdfPCell cell1, PdfPCell cell2, int sumOfCellsInTheTable) throws DocumentException{
         table.addCell(cell1);
         table.addCell(cell2);
         return ++sumOfCellsInTheTable;
@@ -136,7 +136,7 @@ public class GradesJournalService {
         return new SimpleDateFormat(" dd-MM-yyyy HH-mm").format(new Date());
     }
 
-    public File createSubjectsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException{
+    public File createCoursesListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException{
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
@@ -146,7 +146,7 @@ public class GradesJournalService {
             PdfWriter.getInstance(document, new FileOutputStream(file));
             try {
                 document.open();
-                document.add(addSubjectsOnTable(studentGroups, document, year));
+                document.add(addCoursesOnTable(studentGroups, document, year));
             } finally {
                 if (document != null)
                     document.close();
@@ -156,137 +156,67 @@ public class GradesJournalService {
         return null;
     }
 
-    private PdfPCell createPdfPCellForTableMain(){
+    private PdfPCell createPdfPCellForTableCoursesMain(){
         PdfPCell pdfPCell = new PdfPCell();
-        //pdfPCell.setFixedHeight(28);
         pdfPCell.setBorder(0);
         pdfPCell.setPadding(0);
         return pdfPCell;
     }
 
-    private PdfPTable createPdfPTableForCellsOfTableMain() throws DocumentException {
+    private PdfPTable createPdfPTableForCellsOfTableCoursesMain() throws DocumentException {
         PdfPTable pdfPTable = new PdfPTable(2);
         pdfPTable.setKeepTogether(true);
-        //pdfPTable.setExtendLastRow(true);
         pdfPTable.setWidths(new int[] {1,10});
         pdfPTable.setWidthPercentage(100);
         return  pdfPTable;
     }
 
-    private void isCoursesForGroupEmpty(List<StudentGroup> studentGroups, int year){
-//        for (int i = 0; i < studentGroups.size(); i++) {
-//            int semester = year * 2 - 1;
-//            //            for(int i = 0; i < 2; i++) {
-//                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroups.get(i).getId(), semester);
-//                if (courseForGroups.isEmpty()){
-//                    studentGroups.remove(studentGroups.remove(i));
-//                    break;
-//                } else {
-//                    year++;
-//                }
-//        }
-        List<Integer> groupsWithoutCourses = new ArrayList<>();
-        for (StudentGroup studentGroup: studentGroups){
-            int semester = year * 2 - 1;
-            for(int i = 0; i < 2; i++) {
-                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
-                if (courseForGroups.size() == 0){//if (courseForGroups.isEmpty()){
-                    groupsWithoutCourses.add(studentGroup.getId());
-                    //studentGroups.remove(studentGroups.indexOf(studentGroup));
-                    break;
-                } else {
-                    year++;
-                }
-            }
-        }
-
-        for (Integer groupWithoutCourses: groupsWithoutCourses){
-            studentGroups.remove(groupWithoutCourses);
-        }
-    }
-
-    private PdfPTable addSubjectsOnTable(List<StudentGroup> studentGroups, Document document, int year) throws DocumentException, IOException {
+    private PdfPTable addCoursesOnTable(List<StudentGroup> studentGroups, Document document, int year) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
-
-        //isCoursesForGroupEmpty(studentGroups, year);
-
-        //List<CourseForGroup> courseForGroups  = new ArrayList<CourseForGroup>();
-        //document.newPage();
-
         PdfPTable tableMain = new PdfPTable(6);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(562);
-
-//        PdfPCell pdfPCell1 = createPdfPCellForTableMain();
-//        PdfPCell pdfPCell2 = createPdfPCellForTableMain();
-//        PdfPCell pdfPCell3 = createPdfPCellForTableMain();
-//        PdfPCell pdfPCell4 = createPdfPCellForTableMain();
-//        PdfPCell pdfPCell5 = createPdfPCellForTableMain();
-//        PdfPCell pdfPCell6 = createPdfPCellForTableMain();
-//
-//        PdfPTable pdfPTable1 = createPdfPTableForCellsOfTableMain();
-//        PdfPTable pdfPTable2 = createPdfPTableForCellsOfTableMain();
-//        PdfPTable pdfPTable3 = createPdfPTableForCellsOfTableMain();;
-//        PdfPTable pdfPTable4 = createPdfPTableForCellsOfTableMain();
-//        PdfPTable pdfPTable5 = createPdfPTableForCellsOfTableMain();
-//        PdfPTable pdfPTable6 = createPdfPTableForCellsOfTableMain();
-
-        //int sumOfTables = 0;
-
         for (StudentGroup studentGroup: studentGroups){
-            //for (int i = 0; i < 6; i++){
-                //String tableName = "table" + String.valueOf(i);
-                PdfPCell cell = createPdfPCellForTableMain();
-                PdfPTable table = createPdfPTableForCellsOfTableMain();
-                PdfPCell emptyCell = new PdfPCell();
-                emptyCell.setBorder(0);
+            PdfPCell cell = createPdfPCellForTableCoursesMain();
+            PdfPTable table = createPdfPTableForCellsOfTableCoursesMain();
+            PdfPCell emptyCell = new PdfPCell();
+            emptyCell.setBorder(0);
+            table.addCell(emptyCell);
+            PdfPCell groupNameCell = new PdfPCell(new Phrase(studentGroup.getName(), font1));
+            groupNameCell.setBorder(0);
+            groupNameCell.setFixedHeight(14);
+            table.addCell(groupNameCell);
+            int semester = year * 2 - 1;
+            for (int j = 0; j < 2; j++){
                 table.addCell(emptyCell);
-                PdfPCell groupNameCell = new PdfPCell(new Phrase(studentGroup.getName(), font1));
-                groupNameCell.setBorder(0);
-                groupNameCell.setFixedHeight(14);
-                table.addCell(groupNameCell);
-                int semester = year * 2 - 1;
-                for (int j = 0; j < 2; j++){
-                    table.addCell(emptyCell);
-                    PdfPCell semesterCell = new PdfPCell(new Phrase("Семестр " + semester, font1));
-                    semesterCell.setBorder(0);
-                    semesterCell.setFixedHeight(14);
-                    table.addCell(semesterCell);
+                PdfPCell semesterCell = new PdfPCell(new Phrase("Семестр " + semester, font1));
+                semesterCell.setBorder(0);
+                semesterCell.setFixedHeight(14);
+                table.addCell(semesterCell);
 
-                    List<CourseForGroup> courseForGroups  = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
-                                    SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
-                    courseForGroups.sort(sortCourseForGroup);
-                                    //Collections.sort();
-                    //List<CourseForGroup> sortedCourseForGroup
-                            for (CourseForGroup courseForGroup: courseForGroups){
-                                PdfPCell knowledgeControl = new PdfPCell(new Phrase(
-                                        getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
-                                knowledgeControl.setFixedHeight(28);
-                                knowledgeControl.setPadding(0);
-                                knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
-                                knowledgeControl.setRotation(270);
-                                table.addCell(knowledgeControl);
-                                PdfPCell courseNameCell = new PdfPCell(new Phrase(courseForGroup.getCourse().getCourseName().getName() , font1));
-                                courseNameCell.setFixedHeight(28);
-                                table.addCell(courseNameCell);
-                            }
-                    semester++;
+                List<CourseForGroup> courseForGroups  = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+                courseForGroups.sort(sortCourseForGroup);
+                for (CourseForGroup courseForGroup: courseForGroups){
+                    PdfPCell knowledgeControl = new PdfPCell(new Phrase(
+                            getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
+                    knowledgeControl.setFixedHeight(28);
+                    knowledgeControl.setPadding(0);
+                    knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    knowledgeControl.setRotation(270);
+                    table.addCell(knowledgeControl);
+                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseForGroup.getCourse().getCourseName().getName() , font1));
+                    courseNameCell.setFixedHeight(28);
+                    table.addCell(courseNameCell);
                 }
-                cell.addElement(table);
-                tableMain.addCell(cell);
-            //}
+                semester++;
+            }
+            cell.addElement(table);
+            tableMain.addCell(cell);
             document.newPage();
         }
-
-//        tableMain.addCell(pdfPCell1);
-//        tableMain.addCell(pdfPCell2);
-//        tableMain.addCell(pdfPCell3);
-//        tableMain.addCell(pdfPCell4);
-//        tableMain.addCell(pdfPCell5);
-//        tableMain.addCell(pdfPCell6);
-
         return tableMain;
     }
 
