@@ -10,6 +10,5 @@ public class StudentDataCheckDto {
     private String name;
     private String patronimic;
     private String groupName;
-    private String studentDegreeMessage;
-    private String gradeMessage;
+    private String message;
 }

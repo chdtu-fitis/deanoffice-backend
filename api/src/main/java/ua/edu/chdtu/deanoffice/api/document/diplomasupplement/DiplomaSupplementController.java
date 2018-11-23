@@ -65,7 +65,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
         try {
             facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
             Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesData(user.getFaculty().getId(), degreeId);
-            List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<StudentDataCheckDto>();
+            List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<>();
             for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
                 StudentDegree studentDegree = entry.getKey();
                 String message = entry.getValue();
@@ -74,7 +74,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
                 studentDataCheckDto.setName(studentDegree.getStudent().getName());
                 studentDataCheckDto.setPatronimic(studentDegree.getStudent().getPatronimic());
                 studentDataCheckDto.setGroupName(studentDegree.getStudentGroup().getName());
-                studentDataCheckDto.setStudentDegreeMessage(message);
+                studentDataCheckDto.setMessage(message);
                 studentDataCheckDtoList.add(studentDataCheckDto);
             }
             return ResponseEntity.ok(studentDataCheckDtoList);
@@ -89,7 +89,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
         try {
             facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
             Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesGrades(user.getFaculty().getId(), degreeId);
-            List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<StudentDataCheckDto>();
+            List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<>();
             for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
                 StudentDegree studentDegree = entry.getKey();
                 String messages = entry.getValue();
@@ -98,7 +98,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
                 studentDataCheckDto.setName(studentDegree.getStudent().getName());
                 studentDataCheckDto.setPatronimic(studentDegree.getStudent().getPatronimic());
                 studentDataCheckDto.setGroupName(studentDegree.getStudentGroup().getName());
-                studentDataCheckDto.setGradeMessage(messages);
+                studentDataCheckDto.setMessage(messages);
                 studentDataCheckDtoList.add(studentDataCheckDto);
             }
             return ResponseEntity.ok(studentDataCheckDtoList);
