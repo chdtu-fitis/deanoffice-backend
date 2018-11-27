@@ -10,6 +10,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -197,18 +198,18 @@ public class PersonalStatementService {
 
     private String resolveHoursField(Grade grade) {
         switch (grade.getCourse().getKnowledgeControl().getId()) {
-            case 3:
+            case Constants.COURSEWORK:
                 return "КР";
-            case 4:
+            case Constants.COURSE_PROJECT:
                 return "КП";
-            case 8:
-            case 9:
+            case Constants.INTERNSHIP:
+            case Constants.NON_GRADED_INTERNSHIP:
                 return "пр";
-            case 1:
-            case 2:
-            case 5:
-            case 6:
-            case 7:
+            case Constants.EXAM:
+            case Constants.CREDIT:
+            case Constants.DIFFERENTIATED_CREDIT :
+            case Constants.STATE_EXAM:
+            case Constants.ATTESTATION:
             default:
                 return grade.getCourse().getHours().toString();
         }
