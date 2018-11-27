@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 public class StudentSummary {
 
     private static Logger log = LoggerFactory.getLogger(StudentSummary.class);
@@ -231,21 +233,5 @@ public class StudentSummary {
 
     protected void setGrades(List<List<Grade>> grades) {
         this.grades = grades;
-    }
-
-    public StudentDegree getStudentDegree() {
-        return this.studentDegree;
-    }
-
-    public List<List<Grade>> getGrades() {
-        return this.grades;
-    }
-
-    public Integer getTotalHours() {
-        return this.totalHours;
-    }
-
-    public BigDecimal getTotalCredits() {
-        return this.totalCredits;
     }
 }
