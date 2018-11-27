@@ -36,6 +36,8 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 @Service
 public class PersonalStatementService {
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "PersonalStatement.docx";
+    private static final int NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE = 10;
+    private static final int NUMBER_OF_MANDATORY_ROWS_IN_TABLE = 20;
     @Autowired
     private StudentDegreeRepository studentDegreeRepository;
     @Autowired
@@ -50,7 +52,7 @@ public class PersonalStatementService {
     private DocumentIOService documentIOService;
     @Autowired
     private CourseForGroupService courseForGroupService;
-    Integer yearForName;
+
     public File formDocument(Integer year, List<Integer> studentDegreeIds)
             throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
@@ -94,9 +96,9 @@ public class PersonalStatementService {
         for (StudentDegree studentDegree : studentDegrees) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, studentDegree.getStudent());
-            formFirstSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree),year);
-            formSecondSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree),year);
-            fillLastRow(table,yearGrades.getGradeMapForSecondSemester().get(studentDegree),year);
+            formSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree), year, SemesterType.FIRST);
+            formSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year, SemesterType.SECOND);
+            fillLastRow(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year);
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
@@ -107,9 +109,13 @@ public class PersonalStatementService {
             replaceInRow(tableRows.get(0), getStudentDictionary(student));
     }
 
-    private void formFirstSemesterInTable(Tbl table, List<Grade> grades,Integer year) {
+    private void formSemesterInTable(Tbl table, List<Grade> grades, Integer year, SemesterType semesterType) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        int currentIndex = 2;
+        int currentIndex = 2, rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE;
+        if(semesterType == SemesterType.SECOND) {
+           currentIndex = tableRows.size() - 2;
+           rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_TABLE;
+        }
         Tr rowToCopy = tableRows.get(currentIndex);
         fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
         for (Grade grade : grades.subList(1, grades.size())) {
@@ -118,27 +124,7 @@ public class PersonalStatementService {
             table.getContent().add(currentIndex, newRow);
             currentIndex++;
         }
-        for(int i=currentIndex;i<10;i++){
-            Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            fillRowByLost(newRow);
-            table.getContent().add(currentIndex, newRow);
-            currentIndex++;
-        }
-        table.getContent().remove(currentIndex);
-    }
-
-    private void formSecondSemesterInTable(Tbl table, List<Grade> grades, Integer year) {
-        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        int currentIndex = tableRows.size() - 2;
-        Tr rowToCopy = tableRows.get(currentIndex);
-        fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
-        for (Grade grade : grades.subList(1, grades.size())) {
-            Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            fillRowByGrade(newRow, grade, year);
-            table.getContent().add(currentIndex, newRow);
-            currentIndex++;
-        }
-        for(int i=currentIndex; i< 20; i++){
+        for(int i = currentIndex; i < rowNumber; i++){
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
             fillRowByLost(newRow);
             table.getContent().add(currentIndex, newRow);
@@ -152,10 +138,9 @@ public class PersonalStatementService {
         result.put("sy","НАВЧАЛЬНИЙ РІК");
         String gradeNumberYear = "";
         gradeNumberYear = getYearName(getStudentStudyYear(grade.getStudentDegree(), year)).toUpperCase()+" "+year+"-"+(year+1);
-
-        result.put("f",getSemesterName(getStudentStudyYear(grade.getStudentDegree(), year)*2).toUpperCase());
-        result.put("s",getSemesterName((getStudentStudyYear(grade.getStudentDegree(), year)*2)+1).toUpperCase());
-        result.put("n",gradeNumberYear);//потрібна умова для перевірки (ДРУГИЙ,ТРЕТІЙ....)
+        result.put("f", getSemesterName(getStudentStudyYear(grade.getStudentDegree(), year)*2).toUpperCase());
+        result.put("s", getSemesterName((getStudentStudyYear(grade.getStudentDegree(), year)*2)+1).toUpperCase());
+        result.put("n",gradeNumberYear);
         result.put("subj", grade.getCourse().getCourseName().getName());
         result.put("h", resolveHoursField(grade));
         result.put("c", grade.getCourse().getCredits().toString());
@@ -177,6 +162,7 @@ public class PersonalStatementService {
         }
         return result;
     }
+
     private Map<String, String> getLostDictionary() {
         Map<String, String> result = new HashMap<>();
         result.put("subj", "");
@@ -192,6 +178,7 @@ public class PersonalStatementService {
     private void fillRowByGrade(Tr row, Grade grade, Integer year) {
         replaceInRow(row, getGradeDictionary(grade, year));
     }
+
     private void fillRowByLost(Tr row) {
         replaceInRow(row, getLostDictionary());
     }
@@ -220,11 +207,13 @@ public class PersonalStatementService {
         result.put("stud", student.getFullNameUkr());
         return result;
     }
+
     private void fillLastRow(Tbl table, List<Grade> grades, Integer year) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         replaceInRow(tableRows.get(tableRows.size()-1), getLastRowDictionary(year,grades.get(0)));
     }
-    private Map<String, String> getLastRowDictionary(Integer year,Grade grade) {
+
+    private Map<String, String> getLastRowDictionary(Integer year, Grade grade) {
         Map<String, String> result = new HashMap<>();
         result.put("nc", "Переведений на "+ getYearName((getStudentStudyYear(grade.getStudentDegree(), year+1))) +" курс. Наказ від «_____»________20___року №____");
         return result;
@@ -239,22 +228,21 @@ public class PersonalStatementService {
     }
 
     private String getYearName(Integer year){
-        String[] yearNames = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий"};
-        return yearNames[year];
+        final String[] YEAR_NAMES = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий"};
+        return YEAR_NAMES[year];
     }
-    private String getSemesterName(Integer year){
-        String[] semestrNames = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий",
+
+    private String getSemesterName(Integer semester){
+        final String[] SEMESTER_NAMES = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий",
                 "дев'ятий", "десятий", "одинадцятий", "дванадцятий"};
-        return semestrNames[year];
+        return SEMESTER_NAMES[semester];
     }
 
     @Getter
     private enum SemesterType {
         FIRST(1),
         SECOND(2);
-
         private int number;
-
         SemesterType(int number) {
             this.number = number;
         }
