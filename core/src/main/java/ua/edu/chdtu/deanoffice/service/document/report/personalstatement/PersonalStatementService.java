@@ -195,41 +195,23 @@ public class PersonalStatementService {
         replaceInRow(row, getLostDictionary());
     }
 
-
     private String resolveHoursField(Grade grade) {
-        String result = "";
-        String hours = grade.getCourse().getHours().toString();
-        String practiceSignature = "пр";
         switch (grade.getCourse().getKnowledgeControl().getId()) {
-            case 1:
-                result = hours;
-                break;
-            case 2:
-                result = hours;
-                break;
             case 3:
-                result = "КР";
-                break;
+                return "КР";
             case 4:
-                result = "КП";
-                break;
-            case 5:
-                result = hours;
-                break;
-            case 6:
-                result = hours;
-                break;
-            case 7:
-                result = hours;
-                break;
+                return "КП";
             case 8:
-                result = practiceSignature;
-                break;
             case 9:
-                result = practiceSignature;
-                break;
+                return "пр";
+            case 1:
+            case 2:
+            case 5:
+            case 6:
+            case 7:
+            default:
+                return grade.getCourse().getHours().toString();
         }
-        return result;
     }
 
     private Map<String, String> getStudentDictionary(Student student) {
