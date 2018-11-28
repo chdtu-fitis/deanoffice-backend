@@ -1,10 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.datasync.thesis;
 
-import org.docx4j.TraversalUtil;
-import org.docx4j.finders.TableFinder;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,13 +12,12 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ThesisImportService {
@@ -47,12 +43,8 @@ public class ThesisImportService {
             throw new Exception("Помилка часу виконання");
         }
         try{
-            List<ThesisImportData> thesisImportData = getThesisesFromStream(docxInputStream);
-            Objects.requireNonNull(thesisImportData);
             ThesisReport thesisReport = new ThesisReport();
-            for (ThesisImportData thesisData: thesisImportData){
-                addSynchronizationReportForThesisImportedData(thesisData, thesisReport, facultyId);
-            }
+            readingThesisImportedDataFromDocxPkg(getLoadedWordDocument(docxInputStream), thesisReport, facultyId);
             return thesisReport;
         } catch (Docx4JException e){
             e.printStackTrace();
@@ -65,115 +57,68 @@ public class ThesisImportService {
         }
     }
 
-    private List<ThesisImportData> getThesisesFromStream(InputStream docxInputStream) throws Docx4JException, IOException {
-        return getThesisImportInfo(docxInputStream);
-    }
-
-    private List<ThesisImportData> getThesisImportInfo(Object source) throws Docx4JException, IOException {
+    private WordprocessingMLPackage getLoadedWordDocument(Object source) throws Docx4JException, IOException {
         WordprocessingMLPackage docxPkg;
         if (source instanceof String){
             docxPkg = documentIOService.loadTemplateWordDocument((String) source);
         } else
             docxPkg = documentIOService.loadTemplateWordDocument((InputStream) source);
-        return getThesisImportedDataFromDocxPkg(docxPkg);
+        return docxPkg;
     }
 
-    private List<ThesisImportData> getThesisImportedDataFromDocxPkg(WordprocessingMLPackage docxPkg) {
-        MainDocumentPart mainDocumentPart = docxPkg.getMainDocumentPart();
+    private void readingThesisImportedDataFromDocxPkg(WordprocessingMLPackage docxPkg, ThesisReport thesisReport, int facultyId) {
         List<ThesisImportData> thesisImportDatas = new ArrayList();
-
-        TableFinder finder = new TableFinder();
-        new TraversalUtil(mainDocumentPart.getContent(), finder);
-        int rowCount = 0;
-        int cellCount = 1;
-
-        for (Object table: finder.tblList){
-            Tbl tbl = (Tbl) table;
-            String groupName = "";
-            List<Object> allRows = tbl.getContent();
-
-            for (Object tableRow: allRows){
-                if (rowCount == 1){
-                    rowCount++;
-                    continue;
-                }
-                ThesisImportData thesisImportData = new ThesisImportData();
-                Tr row = (Tr) tableRow;
-                List<Object> allCells = row.getContent();
-                String cellData = "";
-                cellCount = 1;
-
-                for (Object tableCell: allCells){
-                    if (cellCount == 1){
-                        cellCount++;
-                        continue;
+        String groupName = "";
+        List<Tbl> allTables = TemplateUtil.getAllTablesFromDocument(docxPkg);
+        for (Tbl tbl: allTables){
+            List<Tr> allTableRows = TemplateUtil.getAllRowsFromTable(tbl);
+            String[] splitGroupName = TemplateUtil.getAllTextsFromObject(allTableRows.get(0)).get(0).getValue().split(" ", 2);
+            groupName = splitGroupName[1];
+            allTableRows.remove(1);
+            allTableRows.remove(0);
+            for (Tr tr: allTableRows){
+                String paragraphsContent = "";
+                List<Object> allTableCells = TemplateUtil.getAllElementsFromObject(tr, Tc.class);
+                allTableCells.remove(0);
+                for (Object cellText: allTableCells){
+                    if (!paragraphsContent.equals("")){
+                        paragraphsContent += "/";
                     }
-                    if (!cellData.equals("")){
-                        cellData += "/";
-                    }
-                    Tc cell = null;
-                    if (tableCell instanceof JAXBElement) {
-                        JAXBElement jaxbElement = (JAXBElement) tableCell;
-                        cell = (Tc) jaxbElement.getValue();
-                    } else
-                        cell = (Tc) tableCell;
-                    List<Object> allPara = cell.getContent();
-
-                    for (Object tableParagraph: allPara){
-                        P paragraph = (P) tableParagraph;
-                        if (paragraph.getRsidRPr().equals("00DE0929")){
-                            continue;
-                        }
-                        List<Object> allRun = paragraph.getContent();
-                        if (allRun.size() == 0){
-                            continue;
-                        }
-
-                        for (Object tableRun: allRun){
-                            if (!(tableRun instanceof R)){
-                                continue;
-                            }
-                            R run = (R) tableRun;
-                            List<Object> allText = run.getContent();
-
-                            for (Object tableText: allText){
-                                Text text = null;
-                                if (tableText instanceof JAXBElement){
-                                    JAXBElement jaxbElement = (JAXBElement) tableText;
-                                    text = (Text) jaxbElement.getValue();
-                                } else {
-                                    text = (Text) tableText;
-                                }
-                                if (rowCount == 0){
-                                    rowCount = 1;
-                                    groupName = text.getValue();
-                                } else
-                                    cellData += text.getValue();
-                            }
-                        }
+                    List<Text> allCellText = TemplateUtil.getAllTextsFromObject(cellText);
+                    for (Text text: allCellText){
+                        paragraphsContent += text.getValue();
                     }
                 }
-                if(!cellData.equals("")){
-                    String rowParts[] = cellData.split("/", 4);
-                    String[] studentData = rowParts[0].split(" ", 3);
-                    String[] groupString = groupName.split(" ", 2);
-                    thesisImportData.setLastName(studentData[0]);
-                    thesisImportData.setFirstName(studentData[1]);
-                    thesisImportData.setMiddleName(studentData[2]);
-                    thesisImportData.setThesisName(rowParts[1]);
-                    thesisImportData.setThesisNameEng(rowParts[2]);
-                    thesisImportData.setFullSupervisorName(rowParts[3]);
-                    thesisImportData.setGroupName(groupString[1]);
+                ThesisImportData thesisImportData = getDataAboutStudentFromRow(paragraphsContent, groupName);
+                if (!addToRedListIfDataIsWrong(thesisImportData, thesisReport, facultyId)){
                     thesisImportDatas.add(thesisImportData);
-                    cellData = "";
                 }
             }
-            rowCount = 0;
+            if (thesisImportDatas.size() != 0){
+                addThesisDataToImportedList(thesisImportDatas, thesisReport, facultyId, groupName);
+                thesisImportDatas.clear();
+            }
         }
-        return thesisImportDatas;
     }
 
-    public void addSynchronizationReportForThesisImportedData(ThesisImportData thesisImportData, ThesisReport thesisReport, int facultyId){
+    private void addThesisDataToImportedList(List<ThesisImportData> thesisImportDatas, ThesisReport thesisReport, int facultyId, String groupName){
+        List<ThesisDataBean> thesisDataBeans = new ArrayList();
+        for (ThesisImportData thesisImportData: thesisImportDatas){
+            List<Student> student = studentService.searchByFullName(
+                    thesisImportData.getFirstName(),
+                    thesisImportData.getLastName(),
+                    thesisImportData.getMiddleName(),
+                    facultyId
+            );
+            List<StudentDegree> studentDegreeFromDb = studentDegreeService.getAllActiveByStudent(student.get(0).getId());
+            if (studentDegreeFromDb.size() != 0){
+                thesisDataBeans.add(new ThesisDataBean(studentDegreeFromDb.get(0), thesisImportData.getThesisName(), thesisImportData.getThesisNameEng()));
+            }
+        }
+        thesisReport.addThesisGreen(new ListThesisDatasForGroupBean(groupName,thesisDataBeans));
+    }
+
+    private Boolean addToRedListIfDataIsWrong(ThesisImportData thesisImportData, ThesisReport thesisReport, int facultyId){
         List<Student> student = studentService.searchByFullName(
                 thesisImportData.getFirstName(),
                 thesisImportData.getLastName(),
@@ -183,28 +128,49 @@ public class ThesisImportService {
         if (student.size() == 0){
             String message = "Даний студент відсутній";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
-            return;
+            return true;
         }
-        if (thesisImportData.getGroupName().equals(" ")){
+        if (thesisImportData.getGroupName().equals("")){
             String message = "Відсутня назва групи";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
-            return;
+            return true;
         }
         StudentGroup studentGroup = studentGroupService.getByName(thesisImportData.getGroupName());
         if (studentGroup == null){
             String message = "Дана група відсутня";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
-            return;
+            return true;
         }
-        if (thesisImportData.getThesisName().equals(" ")){
+        if (thesisImportData.getThesisName().equals("")){
             String message = "Відсутня тема дипломної роботи українською мовою";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            return true;
         }
-        if (thesisImportData.getThesisNameEng().equals(" ")){
+        if (thesisImportData.getThesisNameEng().equals("")){
             String message = "Відсутня тема дипломної роботи англійською мовою";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            return true;
         }
-        List<StudentDegree> studentDegreeFromDb = studentDegreeService.getAllActiveByStudent(student.get(0).getId());
-        thesisReport.addThesisGreen(new ThesisDataBean(studentDegreeFromDb.get(0), thesisImportData.getThesisName(), thesisImportData.getThesisNameEng()));
+        return false;
+    }
+
+    private ThesisImportData getDataAboutStudentFromRow(String source, String groupName){
+        ThesisImportData thesisImportData = new ThesisImportData();
+        String[] allStudentData = source.split("/", 4);
+        String[] fullStudentName = allStudentData[0].split(" ", 3);
+
+        if (!fullStudentName[2].equals("")){
+            thesisImportData.setLastName(fullStudentName[0]);
+            thesisImportData.setFirstName(fullStudentName[1]);
+            thesisImportData.setMiddleName(fullStudentName[2]);
+        } else if((!fullStudentName[1].equals("")) && (!fullStudentName[0].equals("")) && fullStudentName[2].equals("")){
+            thesisImportData.setLastName(fullStudentName[0]);
+            thesisImportData.setFirstName(fullStudentName[1]);
+        }
+        thesisImportData.setThesisName(allStudentData[1]);
+        thesisImportData.setThesisNameEng(allStudentData[2]);
+        thesisImportData.setFullSupervisorName(allStudentData[3]);
+        thesisImportData.setGroupName(groupName);
+        return thesisImportData;
     }
 }

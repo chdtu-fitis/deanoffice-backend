@@ -11,4 +11,5 @@ public class ImportedThesisDataDTO {
     String thesisName;
     String thesisNameEng;
     String oldThesisName;
+    String fullSupervisorName;
 }

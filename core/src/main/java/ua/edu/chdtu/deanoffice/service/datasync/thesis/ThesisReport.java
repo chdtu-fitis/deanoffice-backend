@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ThesisReport {
-    private List <ThesisDataBean> thesisGreen;
+    private List <ListThesisDatasForGroupBean> thesisGreen;
     private List <ThesisWithMessageRedBean> thesisRedMessage;
 
     public ThesisReport(){
@@ -17,7 +17,7 @@ public class ThesisReport {
         thesisRedMessage = new ArrayList<>();
     }
 
-    public void addThesisGreen(ThesisDataBean bean){
+    public void addThesisGreen(ListThesisDatasForGroupBean bean){
         thesisGreen.add(bean);
     }
 

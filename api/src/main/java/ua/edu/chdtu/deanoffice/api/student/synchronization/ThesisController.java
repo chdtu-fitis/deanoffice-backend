@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationC
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.AllThesisListsDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.ImportedThesisDataDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.ListThesisDataForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.MissingThesisDataRedDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -50,13 +51,13 @@ public class ThesisController {
         try {
             AllThesisListsDTO allThesisListsDTO = new AllThesisListsDTO();
             thesisReport = thesisImportService.getThesisImportReport(uploadFile.getInputStream(), user.getFaculty().getId());
-            List<ImportedThesisDataDTO> importedThesisDataDTOs = map(
+            List<ListThesisDataForGroupDTO> importedThesisDataDTOs = map(
                     thesisReport.getThesisGreen(),
-                    ImportedThesisDataDTO.class);
+                    ListThesisDataForGroupDTO.class);
             List<MissingThesisDataRedDTO> missingThesisDataRedDTOs = map(
                     thesisReport.getThesisRedMessage(),
                     MissingThesisDataRedDTO.class);
-            allThesisListsDTO.setImportedThesisDataDTOs(importedThesisDataDTOs);
+            allThesisListsDTO.setListThesisDataForGroupDTOs(importedThesisDataDTOs);
             allThesisListsDTO.setMissingThesisDataRedDTOs(missingThesisDataRedDTOs);
             return ResponseEntity.ok(allThesisListsDTO);
         } catch (Exception exception){
@@ -68,9 +69,7 @@ public class ThesisController {
     public ResponseEntity thesisSaveChanges(@RequestBody ImportedThesisDataDTO[] importedThesisDataDTOs){
         try {
             Map<String, Object> savedThesis = saveThesisData(importedThesisDataDTOs);
-            Map<String, Object> information = new HashMap();
-            information.put("saved", savedThesis);
-            return ResponseEntity.ok(information);
+            return ResponseEntity.ok(savedThesis);
         } catch (Exception exception) {
             return handleException(exception);
         }
