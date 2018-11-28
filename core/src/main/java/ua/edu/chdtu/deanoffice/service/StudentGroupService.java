@@ -63,8 +63,8 @@ public class StudentGroupService {
         studentGroupRepository.save(studentGroups);
     }
 
-    public StudentGroup getByName(String groupName){
-        List<StudentGroup> studentGroups = studentGroupRepository.findByName(groupName);
+    public StudentGroup getByNameAndFacultyId(String groupName, int facultyId){
+        List<StudentGroup> studentGroups = studentGroupRepository.findByName(groupName, facultyId);
         return (studentGroups.isEmpty()) ? null : studentGroups.get(0);
     }
 }

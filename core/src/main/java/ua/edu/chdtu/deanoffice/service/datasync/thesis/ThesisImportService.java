@@ -119,25 +119,25 @@ public class ThesisImportService {
     }
 
     private Boolean addToRedListIfDataIsWrong(ThesisImportData thesisImportData, ThesisReport thesisReport, int facultyId){
-        List<Student> student = studentService.searchByFullName(
-                thesisImportData.getFirstName(),
-                thesisImportData.getLastName(),
-                thesisImportData.getMiddleName(),
-                facultyId
-        );
-        if (student.size() == 0){
-            String message = "Даний студент відсутній";
-            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
-            return true;
-        }
         if (thesisImportData.getGroupName().equals("")){
             String message = "Відсутня назва групи";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
-        StudentGroup studentGroup = studentGroupService.getByName(thesisImportData.getGroupName());
+        StudentGroup studentGroup = studentGroupService.getByNameAndFacultyId(thesisImportData.getGroupName(), facultyId);
         if (studentGroup == null){
-            String message = "Дана група відсутня";
+            String message = "Дана група не існує";
+            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            return true;
+        }
+        StudentDegree studentDegree = studentDegreeService.getAllStudentDegreeByStudentFullNameAngGroupId(
+                thesisImportData.getLastName(),
+                thesisImportData.getFirstName(),
+                thesisImportData.getMiddleName(),
+                studentGroup.getId()
+                );
+        if (studentDegree == null){
+            String message = "Даний студент відсутній";
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }

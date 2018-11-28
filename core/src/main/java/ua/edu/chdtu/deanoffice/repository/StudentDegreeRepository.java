@@ -74,4 +74,16 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "and sd.student = :student_id")
     List<StudentDegree> findByStudentGroupAndStudentId(@Param("group_id") int groupId,
                                                        @Param("student_id") int studentId);
+
+    @Query("SELECT sd from StudentDegree sd " +
+            "INNER JOIN sd.student s " +
+            "where s.surname = :surname " +
+            "and s.name = :name " +
+            "and s.patronimic = :patronimic " +
+            "and sd.studentGroup.id = :group_id " +
+            "and sd.active = true")
+    List<StudentDegree> findAllStudentDegreeByStudentFullNameAngGroupId(@Param("surname") String surname,
+                                                                        @Param("name") String name,
+                                                                        @Param("patronimic") String patronimic,
+                                                                        @Param("group_id") int groupId);
 }
