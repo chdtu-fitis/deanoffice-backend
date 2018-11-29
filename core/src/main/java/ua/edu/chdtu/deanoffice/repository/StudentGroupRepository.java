@@ -14,6 +14,11 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "order by sg.name")
     List<StudentGroup> findAllActiveByFaculty(@Param("facultyId") int facultyId);
 
+    @Query("SELECT sg FROM StudentGroup AS sg " +
+            "WHERE sg.active = TRUE " +
+            "ORDER BY sg.name")
+    List<StudentGroup> findAllActive();
+
     @Query("select sg from StudentGroup as sg " +
             "where sg.specialization.faculty.id = :facultyId " +
             "order by sg.name")

@@ -9,14 +9,9 @@ import static java.util.Arrays.asList;
 public class PersonUtil {
 
     public static String toCapitalizedCase(String string) {
-        if (string == null) {
-            return null;
-        }
-
-        if (string.isEmpty()) {
+        if (string == null || string.isEmpty()) {
             return "";
         }
-
         return wordsToCapitalizedCase(string);
     }
 

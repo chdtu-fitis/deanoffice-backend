@@ -42,7 +42,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "previousDiplomaNumber", "previousDiplomaDate",
             "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate","admissionOrderNumber","admissionOrderDate"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
-            "surnameEng", "nameEng", "patronimicEng"};
+            "surnameEng", "nameEng", "patronimicEng", "sex"};
     private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
     private final DocumentIOService documentIOService;
     private final StudentService studentService;
@@ -371,7 +371,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
             return;
         }
-        studentDegreeFromData.setStudent(studentFromDB);
+        studentDegreeFromData.getStudent().setId(studentFromDB.getId());
 
         StudentDegree studentDegreeFromDb = studentDegreeService.getByStudentIdAndSpecializationId(true, studentFromDB.getId(), specializationFromDB.getId());
         if (studentDegreeFromDb == null){

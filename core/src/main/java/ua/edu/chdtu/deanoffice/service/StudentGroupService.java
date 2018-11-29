@@ -7,8 +7,6 @@ import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.Constants.FACULTY_ID;
-
 @Service
 public class StudentGroupService {
 
@@ -48,6 +46,13 @@ public class StudentGroupService {
             return this.studentGroupRepository.findAllActiveByFaculty(facultyId);
         }
         return this.studentGroupRepository.findAllByFaculty(facultyId);
+    }
+
+    public List<StudentGroup> getAllGroups(boolean onlyActive) {
+        if (onlyActive) {
+            return this.studentGroupRepository.findAllActive();
+        }
+        return this.studentGroupRepository.findAll();
     }
 
     public StudentGroup save(StudentGroup studentGroup) {

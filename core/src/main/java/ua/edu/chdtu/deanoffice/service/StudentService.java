@@ -22,7 +22,7 @@ public class StudentService {
     }
 
     public Student findById(Integer id) {
-        return studentRepository.getOne(id);
+        return studentRepository.findOne(id);
     }
 
     public List<Student> searchByFullName(String name, String surname, String patronymic, int facultyId) {
@@ -47,10 +47,10 @@ public class StudentService {
     public Student save(Student student) {
         student.setName(toCapitalizedCase(student.getName()));
         student.setSurname(toCapitalizedCase(student.getSurname()));
-        student.setPatronimic(toCapitalizedCase(student.getPatronimic()));
+        student.setPatronimic(student.getPatronimic());
         student.setNameEng(toCapitalizedCase(student.getNameEng()));
         student.setSurnameEng(toCapitalizedCase(student.getSurnameEng()));
-        student.setPatronimicEng(toCapitalizedCase(student.getPatronimicEng()));
+        student.setPatronimicEng(student.getPatronimicEng());
         return this.studentRepository.save(student);
     }
 
