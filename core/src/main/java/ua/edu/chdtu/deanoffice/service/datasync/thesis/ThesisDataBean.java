@@ -15,13 +15,17 @@ public class ThesisDataBean {
     private String oldThesisName;
     private String fullSupervisorName;
 
-    public ThesisDataBean(StudentDegree studentDegree, String thesisName, String thesisNameEng){
+    public ThesisDataBean(StudentDegree studentDegree,
+                          String thesisName,
+                          String thesisNameEng,
+                          String fullSupervisorName){
         Student s = studentDegree.getStudent();
         this.studentDegreeId = studentDegree.getId();
         this.fullName = s.getSurname() + " " + s.getName() + " " + s.getPatronimic();
         this.oldThesisName = studentDegree.getThesisName();
         this.thesisName = thesisName;
         this.thesisNameEng = thesisNameEng;
+        this.fullSupervisorName = fullSupervisorName;
     }
 
     public ThesisDataBean(ThesisImportData thesisImportData){
