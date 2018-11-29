@@ -4,6 +4,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -86,4 +87,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                                                                         @Param("name") String name,
                                                                         @Param("patronimic") String patronimic,
                                                                         @Param("group_id") int groupId);
+    @Modifying
+    @Query(value = "UPDATE StudentDegree sd " +
+            "SET sd.thesisName = :thesisName, sd.thesisNameEng=:thesisNameEng WHERE sd.id = :idStudentDegree")
+    void updateThesis(
+            @Param("idStudentDegree") int idStudentDegree,
+            @Param("thesisName") String thesisName,
+            @Param("thesisNameEng") String thesisNameEng);
 }

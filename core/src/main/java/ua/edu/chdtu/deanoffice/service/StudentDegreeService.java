@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -80,6 +82,10 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegree);
     }
 
+    @Transactional
+    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng){
+        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng);
+    }
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }

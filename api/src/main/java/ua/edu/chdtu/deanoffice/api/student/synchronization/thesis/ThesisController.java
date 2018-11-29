@@ -8,10 +8,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.AllThesisListsDTO;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.ImportedThesisDataDTO;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.ListThesisDataForGroupDTO;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.MissingThesisDataRedDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.*;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -65,36 +62,37 @@ public class ThesisController {
     }
 
     @PostMapping("/thesis-import/update")
-    public ResponseEntity thesisSaveChanges(@RequestBody ImportedThesisDataDTO[] importedThesisDataDTOs){
+    public ResponseEntity thesisSaveChanges(@RequestBody ThesisDataForSaveDTO[] thesisDataForSaveDTOs){
         try {
-            Map<String, Object> savedThesis = saveThesisData(importedThesisDataDTOs);
+            Map<String, Object> savedThesis = saveThesisData(thesisDataForSaveDTOs);
             return ResponseEntity.ok(savedThesis);
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    private Map saveThesisData(ImportedThesisDataDTO[] importedThesisDataDTOs){
-        if(importedThesisDataDTOs.length == 0){
+    private Map saveThesisData(ThesisDataForSaveDTO[] thesisDataForSaveDTOs){
+        if(thesisDataForSaveDTOs.length == 0){
             return null;
         }
         int count = 0;
         List<StudentDegree> studentDegreesWithNewThesisData = new ArrayList<>();
         List<String> notSavedStudentsThesises = new ArrayList();
-        for(ImportedThesisDataDTO thesisData: importedThesisDataDTOs){
-            if (thesisData.getId() == 0){
+        for(ThesisDataForSaveDTO thesisData: thesisDataForSaveDTOs){
+            if (thesisData.getIdStudentDegree() == 0){
                 continue;
             }
-            StudentDegree studentDegreeOfDb = studentDegreeService.getById(thesisData.getId());
-            Mapper.map(thesisData, studentDegreeOfDb);
+//              StudentDegree studentDegreeOfDb = studentDegreeService.updateThesisName(thesisData.getIdStudentDegree(),thesisData.getThesisName(),thesisData.getThesisNameEng());;
+//            //Mapper.map(thesisData, studentDegreeOfDb);
             try {
-                studentDegreesWithNewThesisData.add(studentDegreeOfDb);
-                studentDegreeService.update(studentDegreesWithNewThesisData);
+                  //studentDegreesWithNewThesisData.add(studentDegreeOfDb);
+                  studentDegreeService.updateThesisName(thesisData.getIdStudentDegree(),thesisData.getThesisName(),thesisData.getThesisNameEng());
+                  //studentDegreeService.update(studentDegreesWithNewThesisData);
                 count++;
             }catch (Exception e){
-                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname()+ " "
-                        + studentDegreeOfDb.getStudent().getName()+ " "
-                        + studentDegreeOfDb.getStudent().getPatronimic());
+//                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname()+ " "
+//                        + studentDegreeOfDb.getStudent().getName()+ " "
+//                        + studentDegreeOfDb.getStudent().getPatronimic());
             }
         }
         Map <String,Object> result = new HashMap<>();
