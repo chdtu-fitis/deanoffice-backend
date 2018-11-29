@@ -82,8 +82,14 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "and s.patronimic = :patronimic " +
             "and sd.studentGroup.id = :group_id " +
             "and sd.active = true")
-    List<StudentDegree> findAllStudentDegreeByStudentFullNameAngGroupId(@Param("surname") String surname,
-                                                                        @Param("name") String name,
-                                                                        @Param("patronimic") String patronimic,
-                                                                        @Param("group_id") int groupId);
+    List<StudentDegree> findAllByFullNameAngGroupId(@Param("surname") String surname,
+                                                    @Param("name") String name,
+                                                    @Param("patronimic") String patronimic,
+                                                    @Param("group_id") int groupId);
+
+    @Query("select sd from StudentDegree sd " +
+            "where concat(sd.student.surname, ' ', sd.student.name, ' ', sd.student.patronimic) = :full_name " +
+            "and sd.studentGroup.id = :group_id " +
+            "and sd.active = true")
+    List<StudentDegree> findByFullNameAndGroupId(@Param("full_name") String fullName, @Param("group_id") int groupId);
 }

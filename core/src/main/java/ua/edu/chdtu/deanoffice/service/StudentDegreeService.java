@@ -89,8 +89,13 @@ public class StudentDegreeService {
         return (studentDegrees.isEmpty()) ? null : studentDegrees.get(0);
     }
 
-    public StudentDegree getAllStudentDegreeByStudentFullNameAngGroupId(String surname, String name, String patronimic, int groupId){
-        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findAllStudentDegreeByStudentFullNameAngGroupId(surname, name, patronimic, groupId);
+    public StudentDegree getStudentDegreeByStudentFullNameAngGroupId(String surname, String name, String patronimic, int groupId){
+        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findAllByFullNameAngGroupId(surname, name, patronimic, groupId);
+        return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
+    }
+
+    public StudentDegree getByStudentFullNameAngGroupId(String fullName, int groupId){
+        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findByFullNameAndGroupId(fullName, groupId);
         return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
     }
 
