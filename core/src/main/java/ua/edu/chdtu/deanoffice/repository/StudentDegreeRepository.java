@@ -69,34 +69,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);
 
-    @Query("SELECT sd from StudentDegree sd " +
-            "where sd.active = true " +
-            "and sd.studentGroup = :group_id " +
-            "and sd.student = :student_id")
-    List<StudentDegree> findByStudentGroupAndStudentId(@Param("group_id") int groupId,
-                                                       @Param("student_id") int studentId);
-
-    @Query("SELECT sd from StudentDegree sd " +
-            "INNER JOIN sd.student s " +
-            "where s.surname = :surname " +
-            "and s.name = :name " +
-            "and s.patronimic = :patronimic " +
-            "and sd.studentGroup.id = :group_id " +
-            "and sd.active = true")
-    List<StudentDegree> findAllByFullNameAngGroupId(@Param("surname") String surname,
-                                                    @Param("name") String name,
-                                                    @Param("patronimic") String patronimic,
-                                                    @Param("group_id") int groupId);
-
     @Query("select sd from StudentDegree sd " +
             "where concat(sd.student.surname, ' ', sd.student.name, ' ', sd.student.patronimic) = :full_name " +
             "and sd.studentGroup.id = :group_id " +
             "and sd.active = true")
     List<StudentDegree> findByFullNameAndGroupId(@Param("full_name") String fullName, @Param("group_id") int groupId);
-    List<StudentDegree> findAllStudentDegreeByStudentFullNameAngGroupId(@Param("surname") String surname,
-                                                                        @Param("name") String name,
-                                                                        @Param("patronimic") String patronimic,
-                                                                        @Param("group_id") int groupId);
+
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.thesisName = :thesisName, sd.thesisNameEng=:thesisNameEng WHERE sd.id = :idStudentDegree")

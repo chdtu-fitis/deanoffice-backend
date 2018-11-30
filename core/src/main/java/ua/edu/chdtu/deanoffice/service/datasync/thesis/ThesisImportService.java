@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.util.StudentNameUtil.putNameInCorrectForm;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.putNameInCorrectForm;
 
 @Service
 public class ThesisImportService {
@@ -107,10 +107,8 @@ public class ThesisImportService {
         StudentGroup studentGroup = studentGroupService.getByNameAndFacultyId(thesisImportData.get(0).getGroupName(), facultyId);
 
         for (ThesisImportData importData: thesisImportData){
-            StudentDegree studentDegree = studentDegreeService.getStudentDegreeByStudentFullNameAngGroupId(
-                    importData.getLastName(),
-                    importData.getFirstName(),
-                    importData.getMiddleName(),
+            StudentDegree studentDegree = studentDegreeService.getByStudentFullNameAndGroupId(
+                    importData.getStudentFullName(),
                     studentGroup.getId()
             );
             thesisDataBeans.add(new ThesisDataBean(studentDegree, importData.getThesisName(), importData.getThesisNameEng(), importData.getFullSupervisorName()));
@@ -130,16 +128,8 @@ public class ThesisImportService {
             thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
-//        StudentDegree studentDegree = studentDegreeService.getStudentDegreeByStudentFullNameAngGroupId(
-////                thesisImportData.getLastName(),
-////                thesisImportData.getFirstName(),
-////                thesisImportData.getMiddleName(),
-////                studentGroup.getId()
-////        );
-        StudentDegree studentDegree = studentDegreeService.getByStudentFullNameAngGroupId(
-                thesisImportData.getLastName()+ " " +
-                thesisImportData.getFirstName()+ " " +
-                thesisImportData.getMiddleName(),
+        StudentDegree studentDegree = studentDegreeService.getByStudentFullNameAndGroupId(
+                thesisImportData.getStudentFullName(),
                 studentGroup.getId()
         );
         if (studentDegree == null){
@@ -162,20 +152,11 @@ public class ThesisImportService {
 
     private ThesisImportData getDataAboutStudentFromRow(String[] rowsContent, String groupName){
         ThesisImportData thesisImportData = new ThesisImportData();
-        String[] fullStudentName = rowsContent[0].split(" ", 3);
-        String s = putNameInCorrectForm(rowsContent[0]);
-        if (fullStudentName.length == 3){
-            thesisImportData.setLastName(fullStudentName[0].substring(0,1).toUpperCase() + fullStudentName[0].substring(1).toLowerCase());
-            thesisImportData.setFirstName(fullStudentName[1].substring(0,1).toUpperCase() + fullStudentName[1].substring(1).toLowerCase());
-            thesisImportData.setMiddleName(fullStudentName[2].substring(0,1).toUpperCase() + fullStudentName[2].substring(1).toLowerCase());
-        } else {
-            thesisImportData.setLastName(fullStudentName[0].substring(0,1).toUpperCase() + fullStudentName[0].substring(1).toLowerCase());
-            thesisImportData.setFirstName(fullStudentName[1].substring(0,1).toUpperCase() + fullStudentName[1].substring(1).toLowerCase());
-        }
-        thesisImportData.setThesisName(rowsContent[1]);
-        thesisImportData.setThesisNameEng(rowsContent[2]);
-        thesisImportData.setFullSupervisorName(rowsContent[3]);
-        thesisImportData.setGroupName(groupName);
+        thesisImportData.setStudentFullName(putNameInCorrectForm(rowsContent[0].trim()));
+        thesisImportData.setThesisName(rowsContent[1].trim());
+        thesisImportData.setThesisNameEng(rowsContent[2].trim());
+        thesisImportData.setFullSupervisorName(rowsContent[3].trim());
+        thesisImportData.setGroupName(groupName.trim());
         return thesisImportData;
     }
 }

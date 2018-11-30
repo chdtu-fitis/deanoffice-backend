@@ -29,9 +29,7 @@ public class ThesisDataBean {
     }
 
     public ThesisDataBean(ThesisImportData thesisImportData){
-        this.fullName = thesisImportData.getLastName() + " "
-                + thesisImportData.getFirstName() + " "
-                + thesisImportData.getMiddleName();
+        this.fullName = thesisImportData.getStudentFullName();
         this.thesisName = thesisImportData.getThesisName();
         this.thesisNameEng = thesisImportData.getThesisNameEng();
         this.fullSupervisorName = thesisImportData.getFullSupervisorName();
