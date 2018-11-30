@@ -41,4 +41,35 @@ public class PersonUtil {
                 + fullNameParts.get(2).substring(0, 1).toUpperCase() + ". "
                 + fullNameParts.get(0);
     }
+
+    public static String putNameInCorrectForm(String nameString){
+        String processedFullString = "";
+        if(nameString != null && nameString != ""){
+            int numberOfSpace = nameString.replace("[^ ]]", "").length();
+            String[] nameParts = nameString.split(" ", numberOfSpace);
+            for (String namePart: nameParts){
+                if (namePart.equals("оглу") || namePart.equals("огли") || namePart.equals("кизи")){
+                    processedFullString += namePart + " ";
+                    continue;
+                }
+                String wordOnProcessing = StringUtil.replaceSingleQuotes(namePart);
+                wordOnProcessing = wordOnProcessing.substring(0, 1).toUpperCase() + wordOnProcessing.substring(1).toLowerCase();
+                processedFullString += findDashInWord(wordOnProcessing) + " ";
+            }
+        }
+        String processedFullStringByTrim = processedFullString.trim();
+        return processedFullStringByTrim;
+    }
+
+    private static String findDashInWord(String word){
+        String processedWord = "";
+        if (word.indexOf("-") == -1){
+            return word;
+        } else {
+            processedWord += word.substring(0, word.indexOf("-") + 1)
+                    + word.substring(word.indexOf("-") + 1, word.indexOf("-") + 2).toUpperCase()
+                    + word.substring(word.indexOf("-") + 2);
+        }
+        return processedWord;
+    }
 }
