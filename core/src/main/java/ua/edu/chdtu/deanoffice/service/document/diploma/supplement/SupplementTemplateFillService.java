@@ -263,10 +263,11 @@ public class SupplementTemplateFillService {
         result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname").toUpperCase());
         result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
         result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
-        result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), "По-батькові"));
-        result.put("PatronimicEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimicEng().toUpperCase(), "Patronimic"));
+        result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), ""));
+        result.put("PatronimicEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimicEng().toUpperCase(), ""));
 
         DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        DateFormat yearDateFormat = new SimpleDateFormat("yyyy");
         result.put("BirthDate", studentSummary.getStudent().getBirthDate() != null
                 ? simpleDateFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
@@ -374,7 +375,8 @@ public class SupplementTemplateFillService {
             result.put("DiplomaHonoursEng", "WITH HONOURS");
         }
 
-        result.put("CurrentYear", String.format("%4d", Calendar.getInstance().get(Calendar.YEAR)));
+        result.put("CurrentYear", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
+                : yearDateFormat.format(studentDegree.getSupplementDate()));
 
         result.put("PreviousDiplomaName", studentDegree.getPreviousDiplomaType().getNameUkr());
         result.put("PreviousDiplomaNameEng", studentDegree.getPreviousDiplomaType().getNameEng());
