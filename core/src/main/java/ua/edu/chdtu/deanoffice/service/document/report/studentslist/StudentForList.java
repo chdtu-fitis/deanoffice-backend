@@ -8,27 +8,24 @@ import java.util.Map;
 
 public class StudentForList {
     private static Logger log = LoggerFactory.getLogger(StudentForList.class);
-    private String name;
-    private String numberBook;
+    private String fullName;
+    private String recordBookNumber;
     private String number;
-    private String numberContract;
+    private String contract;
 
-
-    public StudentForList(String number, String name, String numberBook,String numberContract) {
+    public StudentForList(String number, String fullName, String recordBookNumber,String contract) {
         this.number = number;
-        this.name = name;
-        this.numberBook = numberBook;
-        this.numberContract = numberContract;
+        this.fullName = fullName;
+        this.recordBookNumber = recordBookNumber;
+        this.contract = contract;
     }
 
     Map<String, String> getDictionary() {
         Map<String, String> result = new HashMap<>();
         result.put("n", number);
-        result.put("name", name);
-        result.put("nBook", numberBook);
-        result.put("c", numberContract);
+        result.put("name", fullName);
+        result.put("nBook", recordBookNumber);
+        result.put("c", contract);
         return result;
     }
-
-
 }

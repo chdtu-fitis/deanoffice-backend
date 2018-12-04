@@ -7,20 +7,29 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.*;
+
+import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.addRowToTable;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.findTable;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextPlaceholdersInTemplate;
+
 @Service
 public class StudentsListService {
 
@@ -33,67 +42,77 @@ public class StudentsListService {
 
     private StudentGroupService groupService;
     private DocumentIOService documentIOService;
-    private StudentDegreeService studentDegreeService;
     private CurrentYearService currentYearService;
     private FacultyService facultyService;
 
 
-    public StudentsListService(StudentGroupService groupService,
-                               DocumentIOService documentIOService,
-                               StudentDegreeService studentDegreeService,
-                               CurrentYearService currentYearService,
-                               FacultyService facultyService) {
+    public StudentsListService(
+        StudentGroupService groupService,
+        DocumentIOService documentIOService,
+        CurrentYearService currentYearService,
+        FacultyService facultyService
+    ) {
         this.groupService = groupService;
         this.documentIOService = documentIOService;
-        this.studentDegreeService = studentDegreeService;
         this.currentYearService = currentYearService;
         this.facultyService = facultyService;
     }
 
-    public synchronized File prepareReport(Integer degreeId,
-                                           Integer year,
-                                           Integer facultyId) throws Docx4JException, IOException {
+    public synchronized File prepareReport(
+        Integer degreeId,
+        Integer year,
+        Integer facultyId,
+        String tuitionFormText
+    ) throws Docx4JException, IOException {
+        TuitionForm tuitionForm = TuitionForm.valueOf(tuitionFormText);
         List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYear(degreeId,year,facultyId);
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
-        for(StudentGroup group:studentGroups){
-            List<Student> students = group.getActiveStudents();
+        for (StudentGroup group:studentGroups){
+            List<StudentDegree> students = group.getStudentDegrees();
             List<StudentForList> studentForLists = prepareGroup(students);
             group.getTuitionForm().toString();
             if(studentGroups.get(0) == group){
-                wordMLPackage = fillTemplateHeaders(TEMPLATEHEADERS,
-                                                    facultyService.getById(facultyId).getAbbr(),
-                                                    year,
-                                                    group.getTuitionForm().getNameUkr());
-                wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE,
-                studentForLists,
-                group).getMainDocumentPart().getContent());
-            }
-            else {
-                wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE,
-                studentForLists,
-                group).getMainDocumentPart().getContent());
+                wordMLPackage = fillTemplateHeaders(
+                    TEMPLATEHEADERS,
+                    facultyService.getById(facultyId).getAbbr(),
+                    year,
+                    tuitionForm.getNameUkr()
+                );
+            } else {
+                wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(
+                    TEMPLATE,
+                    studentForLists,
+                    group
+                ).getMainDocumentPart().getContent());
             }
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,FILE_NAME+year+KURS, FileFormatEnum.DOCX);
     }
 
-
-    private List<StudentForList> prepareGroup(List<Student> students) {
+    private List<StudentForList> prepareGroup(List<StudentDegree> students) {
         List<StudentForList> studentForLists = new ArrayList<>();
         int numberStudent = 1;
-        for(Student student:students){
-            studentForLists.add(new StudentForList(String.valueOf(numberStudent)+'.',
-                                                   student.getFullNameUkr(),
-                                                   studentDegreeService.getById(student.getId()).getRecordBookNumber(),
-                                                   studentDegreeService.getById(student.getId()).getPayment() == Payment.CONTRACT ? "договір" : ""));
+        for (StudentDegree student:students){
+            String numberStudentWithPoint = String.valueOf(numberStudent)+'.';
+            String contract = student.getPayment() == Payment.CONTRACT ? "договір" : "";
+            studentForLists.add(new StudentForList(
+                numberStudentWithPoint,
+                student.getStudent().getFullNameUkr(),
+                student.getRecordBookNumber(),
+                contract
+            ));
             numberStudent++;
         }
         return studentForLists;
     }
 
-    private WordprocessingMLPackage fillTemplate(String templateName, List<StudentForList> studentForLists, StudentGroup group) throws Docx4JException {
+    private WordprocessingMLPackage fillTemplate(
+        String templateName,
+        List<StudentForList> studentForLists,
+        StudentGroup group
+    ) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
-        fillTableWithGrades(template, studentForLists);
+        fillTable(template, studentForLists);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.put("groupName", group.getName());
         commonDict.put("code",group.getSpecialization().getSpeciality().getCode());
@@ -103,10 +122,12 @@ public class StudentsListService {
         return template;
     }
 
-    private WordprocessingMLPackage fillTemplateHeaders(String templateName,
-                                                        String facultyName,
-                                                        Integer year,
-                                                        String tuitionForm) throws Docx4JException {
+    private WordprocessingMLPackage fillTemplateHeaders(
+        String templateName,
+        String facultyName,
+        Integer year,
+        String tuitionForm
+    ) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.put("faculty", facultyName);
@@ -117,7 +138,7 @@ public class StudentsListService {
         return template;
     }
 
-    private void fillTableWithGrades(WordprocessingMLPackage template, List<StudentForList> studentForLists) {
+    private void fillTable(WordprocessingMLPackage template, List<StudentForList> studentForLists) {
         Tbl tempTable = findTable(template, "#n");
         if (tempTable == null) {
             return;
