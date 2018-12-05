@@ -57,6 +57,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("degree_id") int degreeId
     );
 
+    @Query(value = "select sd.id from student_degree sd " +
+            "inner join specialization s ON s.id = sd.specialization_id " +
+            "WHERE sd.id  in :studentDegreeIds and s.faculty_id <> :facultyId", nativeQuery = true)
+    List <Integer> findIdByIdsAndFacultyId(@Param("studentDegreeIds") List<Integer> studentDegreeIds, @Param("facultyId") int facultyId);
+
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.active = :active " +
             "and sd.student.id = :studentId and sd.specialization.id = :specializationId ")
@@ -77,11 +82,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
-            "SET sd.thesisName = :thesisName, sd.thesisNameEng=:thesisNameEng WHERE sd.id = :idStudentDegree")
+            "SET sd.thesisName = :thesisName, sd.thesisNameEng = :thesisNameEng, sd.thesisSupervisor = :thesisSupervisor WHERE sd.id = :idStudentDegree")
     void updateThesis(
             @Param("idStudentDegree") int idStudentDegree,
             @Param("thesisName") String thesisName,
-            @Param("thesisNameEng") String thesisNameEng);
+            @Param("thesisNameEng") String thesisNameEng,
+            @Param("thesisSupervisor") String thesisSupervisor);
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +

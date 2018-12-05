@@ -90,8 +90,8 @@ public class StudentDegreeService {
     }
 
     @Transactional
-    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng){
-        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng);
+    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng, String fullSupervisor){
+        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng, fullSupervisor);
     }
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
