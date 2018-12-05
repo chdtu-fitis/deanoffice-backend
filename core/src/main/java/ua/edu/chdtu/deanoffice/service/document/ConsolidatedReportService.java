@@ -69,13 +69,14 @@ public class ConsolidatedReportService {
         try {
             for (Map.Entry<CourseForGroup, List<StudentGroup>> courseToStudentGroups : coursesToStudentGroups.entrySet()) {
                 createOneConsolidatedReport(document, courseToStudentGroups.getKey(), courseToStudentGroups.getValue(), user);
+                document.newPage();
             }
         } catch (DocumentException | IOException | OperationCannotBePerformedException e) {
             document.close();
-            file.deleteOnExit();
+            if (!file.delete())
+                System.out.println("File: [" + file.getPath() + "/" + file.getName() + "] not deleted");
             throw e;
         }
-        document.newPage();
 
         document.close();
         return file;
