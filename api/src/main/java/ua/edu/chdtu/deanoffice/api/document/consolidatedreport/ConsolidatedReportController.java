@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.api.document.consolidatedreport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -12,15 +11,18 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.document.ConsolidatedReportService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,18 +37,21 @@ public class ConsolidatedReportController extends DocumentResponseController {
     private final StudentGroupService studentGroupService;
     private final CourseService courseService;
     private final ConsolidatedReportService consolidatedReportService;
+    private final GradeService gradeService;
 
     @Autowired
     public ConsolidatedReportController(
             CourseForGroupService courseForGroupService,
             StudentGroupService studentGroupService,
             CourseService courseService,
-            ConsolidatedReportService consolidatedReportService
+            ConsolidatedReportService consolidatedReportService,
+            GradeService gradeService
     ) {
         this.courseForGroupService = courseForGroupService;
         this.studentGroupService = studentGroupService;
         this.courseService = courseService;
         this.consolidatedReportService = consolidatedReportService;
+        this.gradeService = gradeService;
     }
 
     @GetMapping("/groups/{groupId}/subjects")
@@ -77,12 +82,12 @@ public class ConsolidatedReportController extends DocumentResponseController {
             mapWithStudentGroup.forEach((courseId, studentGroups) ->
                     mapWithCourseAndStudentGroup.put(courseService.getById(courseId), studentGroups)
             );
-            Map<CourseDTO, List<StudentGroupDTO>> mapWithCourseAndStundentGroupsDTOs = new HashMap<>();
+            Map<Integer, List<StudentGroupDTO>> mapWithCourseAndStudentGroupsDTOs = new HashMap<>();
             mapWithCourseAndStudentGroup.forEach((course, studentGroups) ->
-                    mapWithCourseAndStundentGroupsDTOs
-                            .put((CourseDTO) map(course, CourseDTO.class), map(studentGroups, StudentGroupDTO.class))
+                    mapWithCourseAndStudentGroupsDTOs
+                            .put(course.getId(), map(studentGroups, StudentGroupDTO.class))
             );
-            return ResponseEntity.ok(mapWithCourseAndStundentGroupsDTOs);
+            return ResponseEntity.ok(mapWithCourseAndStudentGroupsDTOs);
         } catch (Exception e) {
             return handleException(e);
         }
@@ -110,7 +115,22 @@ public class ConsolidatedReportController extends DocumentResponseController {
                 List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId.toArray(studentGroupIdsArray));
                 mapCourseToStudentGroups.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
             });
-            File consolidatedDocument = consolidatedReportService.formConsolidatedReport(mapCourseToStudentGroups, user);
+            Map<CourseForGroup, List<StudentGroup>> mapCourseToStudentGroupsForCreate = new HashMap<>();
+            mapCourseToStudentGroups.forEach((courseForGroup, studentGroups) -> {
+                mapCourseToStudentGroupsForCreate.put(courseForGroup, new ArrayList<>());
+                studentGroups.forEach(group -> {
+                    List<StudentDegree> studentDegrees = group.getStudentDegrees();
+                    List<StudentDegree> studentDegreeThatHasGoodMark =
+                            gradeService.getStudentDegreesThatHasGoodMark(studentDegrees, courseForGroup);
+                    group.setStudentDegrees(studentDegreeThatHasGoodMark);
+                    if (studentDegreeThatHasGoodMark.size() > 0)
+                        mapCourseToStudentGroupsForCreate.get(courseForGroup).add(group);
+                });
+                if (mapCourseToStudentGroupsForCreate.get(courseForGroup).size() == 0) {
+                    mapCourseToStudentGroupsForCreate.remove(courseForGroup);
+                }
+            });
+            File consolidatedDocument = consolidatedReportService.formConsolidatedReport(mapCourseToStudentGroupsForCreate, user);
             return buildDocumentResponseEntity(
                     consolidatedDocument,
                     consolidatedDocument.getName(),

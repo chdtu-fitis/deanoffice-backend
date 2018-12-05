@@ -186,4 +186,14 @@ public class GradeService {
         }
         return gradeDefinition;
     }
+
+    public List<StudentDegree> getStudentDegreesThatHasGoodMark(List<StudentDegree> studentDegrees, CourseForGroup courseForGroup) {
+        List<StudentDegree> studentDegreeResult = new ArrayList<>();
+        studentDegrees.forEach(studentDegree -> {
+            if (gradeRepository.isStudentHaveGoodMarkFromCourse(studentDegree.getId(), studentDegree.getStudentGroup().getId(), courseForGroup.getId()))
+                studentDegreeResult.add(studentDegree);
+        });
+        return studentDegreeResult;
+    }
+
 }
