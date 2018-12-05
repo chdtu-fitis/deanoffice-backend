@@ -90,9 +90,8 @@ public class ThesisController {
                   //studentDegreeService.update(studentDegreesWithNewThesisData);
                 count++;
             }catch (Exception e){
-//                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname()+ " "
-//                        + studentDegreeOfDb.getStudent().getName()+ " "
-//                        + studentDegreeOfDb.getStudent().getPatronimic());
+                StudentDegree studentDegreeOfDb = studentDegreeService.getById(thesisData.getIdStudentDegree());
+                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname() +" "+studentDegreeOfDb.getStudent().getName()+" "+studentDegreeOfDb.getStudent().getPatronimic());
             }
         }
         Map <String,Object> result = new HashMap<>();
