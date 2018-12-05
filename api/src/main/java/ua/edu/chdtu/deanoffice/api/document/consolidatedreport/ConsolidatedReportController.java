@@ -84,8 +84,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
             );
             Map<Integer, List<StudentGroupDTO>> mapWithCourseAndStudentGroupsDTOs = new HashMap<>();
             mapWithCourseAndStudentGroup.forEach((course, studentGroups) ->
-                    mapWithCourseAndStudentGroupsDTOs
-                            .put(course.getId(), map(studentGroups, StudentGroupDTO.class))
+                    mapWithCourseAndStudentGroupsDTOs.put(course.getId(), map(studentGroups, StudentGroupDTO.class))
             );
             return ResponseEntity.ok(mapWithCourseAndStudentGroupsDTOs);
         } catch (Exception e) {
@@ -118,14 +117,17 @@ public class ConsolidatedReportController extends DocumentResponseController {
             Map<CourseForGroup, List<StudentGroup>> mapCourseToStudentGroupsForCreate = new HashMap<>();
             mapCourseToStudentGroups.forEach((courseForGroup, studentGroups) -> {
                 mapCourseToStudentGroupsForCreate.put(courseForGroup, new ArrayList<>());
+
                 studentGroups.forEach(group -> {
-                    List<StudentDegree> studentDegrees = group.getStudentDegrees();
+                    StudentGroup cloneStudentGroup = createClone(group);
+                    List<StudentDegree> studentDegrees = cloneStudentGroup.getStudentDegrees();
                     List<StudentDegree> studentDegreeThatHasGoodMark =
-                            gradeService.getStudentDegreesThatHasGoodMark(studentDegrees, courseForGroup);
-                    group.setStudentDegrees(studentDegreeThatHasGoodMark);
+                            gradeService.getStudentDegreesThatHasNotGoodMark(studentDegrees, courseForGroup);
+                    cloneStudentGroup.setStudentDegrees(studentDegreeThatHasGoodMark);
                     if (studentDegreeThatHasGoodMark.size() > 0)
-                        mapCourseToStudentGroupsForCreate.get(courseForGroup).add(group);
+                        mapCourseToStudentGroupsForCreate.get(courseForGroup).add(cloneStudentGroup);
                 });
+
                 if (mapCourseToStudentGroupsForCreate.get(courseForGroup).size() == 0) {
                     mapCourseToStudentGroupsForCreate.remove(courseForGroup);
                 }
@@ -139,6 +141,21 @@ public class ConsolidatedReportController extends DocumentResponseController {
         } catch (Exception e) {
             return handleException(e);
         }
+    }
+
+    private static StudentGroup createClone(StudentGroup group) {
+        StudentGroup studentGroup = new StudentGroup();
+        studentGroup.setStudentDegrees(group.getStudentDegrees());
+        studentGroup.setSpecialization(group.getSpecialization());
+        studentGroup.setBeginYears(group.getBeginYears());
+        studentGroup.setStudySemesters(group.getStudySemesters());
+        studentGroup.setStudyYears(group.getStudyYears());
+        studentGroup.setTuitionForm(group.getTuitionForm());
+        studentGroup.setTuitionTerm(group.getTuitionTerm());
+        studentGroup.setActive(group.isActive());
+        studentGroup.setId(group.getId());
+        studentGroup.setName(group.getName());
+        return studentGroup;
     }
 
     private static ResponseEntity handleException(Exception exception) {
