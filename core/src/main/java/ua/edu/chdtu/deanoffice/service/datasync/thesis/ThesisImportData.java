@@ -6,18 +6,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ThesisImportData {
-    private String lastName;
-    private String firstName;
-    private String middleName;
+    private String studentFullName;
     private String groupName;
     private String thesisName;
     private String thesisNameEng;
     private String fullSupervisorName;
 
     public ThesisImportData(){
-        lastName = "";
-        firstName = "";
-        middleName = "";
+        studentFullName = "";
         groupName = "";
         thesisName = "";
         thesisNameEng = "";

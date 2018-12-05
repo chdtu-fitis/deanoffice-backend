@@ -1,16 +1,15 @@
 package ua.edu.chdtu.deanoffice.api.student.synchronization.thesis;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.*;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisImportService;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisReport;
@@ -39,12 +38,9 @@ public class ThesisController {
     @PostMapping("/thesis-import")
     public ResponseEntity importThesis(@RequestParam("file") MultipartFile uploadFile,
                                        @CurrentUser ApplicationUser user){
-        if (uploadFile.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Файл не було надіслано");
-        }
-
         ThesisReport thesisReport;
         try {
+            validateInputDataForFileWithTheses(uploadFile);
             AllThesisListsDTO allThesisListsDTO = new AllThesisListsDTO();
             thesisReport = thesisImportService.getThesisImportReport(uploadFile.getInputStream(), user.getFaculty().getId());
             List<ListThesisDataForGroupDTO> importedThesisDataDTOs = map(
@@ -98,6 +94,13 @@ public class ThesisController {
         result.put("updatedStudentDegrees",count);
         result.put("notUpdatedStudentDegrees",notSavedStudentsThesises);
         return result;
+    }
+
+    private void validateInputDataForFileWithTheses(MultipartFile uploadFile) throws OperationCannotBePerformedException {
+        if (uploadFile.isEmpty()) {
+            String message = "Файл не було надіслано";
+            throw new OperationCannotBePerformedException(message);
+        }
     }
 
     private ResponseEntity handleException(Exception exception) {
