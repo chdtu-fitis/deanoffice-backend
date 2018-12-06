@@ -123,7 +123,8 @@ public class GraduateGroupCoursesService {
         sumCell.setColspan(3);
         table.addCell(sumCell);
         table.addCell(createCellWithAlignCenter(hoursSum.toString(), font));
-        table.addCell(createCellWithAlignCenter(creditsSum.toString(), font));
+        String creditsSumFormattedString = String.format("%.2f", creditsSum.doubleValue()).replace(',', '.');
+        table.addCell(createCellWithAlignCenter(creditsSumFormattedString, font));
     }
 
     private void addSubtitle(PdfPTable table, KnowledgeControl knowledgeControl, PdfPCell numberOfRowHeaderCell, PdfPCell semesterHeaderCell, PdfPCell hoursHeaderCell, PdfPCell creditsHeaderCell, Font font) {
