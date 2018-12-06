@@ -39,11 +39,11 @@ public class DocumentIOService {
         return SpreadsheetMLPackage.load(xlsxInputStream);
     }
 
-    public WordprocessingMLPackage loadTemplateWordDocument(String name) throws Docx4JException, IOException{
+    public WordprocessingMLPackage loadWordDocument(String name) throws Docx4JException, IOException{
         return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFilename()));
     }
 
-    public WordprocessingMLPackage loadTemplateWordDocument(InputStream docxInputStream) throws Docx4JException{
+    public WordprocessingMLPackage loadWordDocument(InputStream docxInputStream) throws Docx4JException{
         return WordprocessingMLPackage.load(docxInputStream);
     }
 

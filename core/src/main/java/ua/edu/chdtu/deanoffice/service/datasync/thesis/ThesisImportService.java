@@ -53,9 +53,9 @@ public class ThesisImportService {
     private WordprocessingMLPackage getLoadedWordDocument(Object source) throws Docx4JException, IOException {
         WordprocessingMLPackage docxPkg;
         if (source instanceof String) {
-            docxPkg = documentIOService.loadTemplateWordDocument((String) source);
+            docxPkg = documentIOService.loadWordDocument((String) source);
         } else
-            docxPkg = documentIOService.loadTemplateWordDocument((InputStream) source);
+            docxPkg = documentIOService.loadWordDocument((InputStream) source);
         return docxPkg;
     }
 
