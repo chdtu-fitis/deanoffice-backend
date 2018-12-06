@@ -1,4 +1,5 @@
 package ua.edu.chdtu.deanoffice.api.student.synchronization.thesis;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class ThesisController {
     @Autowired
     public ThesisController(ThesisImportService thesisImportService,
                             StudentDegreeService studentDegreeService,
-                            FacultyAuthorizationService facultyAuthorizationService){
+                            FacultyAuthorizationService facultyAuthorizationService) {
         this.thesisImportService = thesisImportService;
         this.studentDegreeService = studentDegreeService;
         this.facultyAuthorizationService = facultyAuthorizationService;
@@ -44,7 +45,7 @@ public class ThesisController {
 
     @PostMapping("/thesis-import")
     public ResponseEntity importThesis(@RequestParam("file") MultipartFile uploadFile,
-                                       @CurrentUser ApplicationUser user){
+                                       @CurrentUser ApplicationUser user) {
         ThesisReport thesisReport;
         try {
             validateInputDataForFileWithTheses(uploadFile);
@@ -59,14 +60,14 @@ public class ThesisController {
             allThesisListsDTO.setListThesisDataForGroupDTOs(importedThesisDataDTOs);
             allThesisListsDTO.setMissingThesisDataRedDTOs(missingThesisDataRedDTOs);
             return ResponseEntity.ok(allThesisListsDTO);
-        } catch (Exception exception){
+        } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
     @PostMapping("/thesis-import/update")
     public ResponseEntity thesisSaveChanges(@RequestBody ThesisDataForSaveDTO[] thesisDataForSaveDTOs,
-                                            @CurrentUser ApplicationUser user){
+                                            @CurrentUser ApplicationUser user) {
         try {
             validateDataAboutThesesForSave(thesisDataForSaveDTOs.length);
             validateStudentDegreeIdWithFacultyId(user, thesisDataForSaveDTOs);
@@ -80,34 +81,34 @@ public class ThesisController {
     private Map saveThesisData(ThesisDataForSaveDTO[] thesisDataForSaveDTOs) {
         int count = 0;
         List<String> notSavedStudentsThesises = new ArrayList();
-        for(ThesisDataForSaveDTO thesisData: thesisDataForSaveDTOs){
-            if (thesisData.getStudentDegreeId() == 0){
+        for (ThesisDataForSaveDTO thesisData : thesisDataForSaveDTOs) {
+            if (thesisData.getStudentDegreeId() == 0) {
                 continue;
             }
             try {
                 studentDegreeService.updateThesisName(thesisData.getStudentDegreeId(), thesisData.getThesisName(),
                         thesisData.getThesisNameEng(), thesisData.getThesisSupervisor());
                 count++;
-            } catch (Exception e){
+            } catch (Exception e) {
                 notSavedStudentsThesises.add(thesisData.getStudentFullName());
             }
         }
-        Map <String,Object> result = new HashMap<>();
-        result.put("updatedStudentDegrees",count);
-        result.put("notUpdatedStudentDegrees",notSavedStudentsThesises);
+        Map<String, Object> result = new HashMap<>();
+        result.put("updatedStudentDegrees", count);
+        result.put("notUpdatedStudentDegrees", notSavedStudentsThesises);
         return result;
     }
 
-    private void validateStudentDegreeIdWithFacultyId(ApplicationUser user,ThesisDataForSaveDTO[] thesisDataForSaveDTOs) throws Exception{
-        List <Integer> idsStudentDegrees = new ArrayList<>();
-        for(ThesisDataForSaveDTO thesisData: thesisDataForSaveDTOs){
+    private void validateStudentDegreeIdWithFacultyId(ApplicationUser user, ThesisDataForSaveDTO[] thesisDataForSaveDTOs) throws Exception {
+        List<Integer> idsStudentDegrees = new ArrayList<>();
+        for (ThesisDataForSaveDTO thesisData : thesisDataForSaveDTOs) {
             idsStudentDegrees.add(thesisData.getStudentDegreeId());
         }
-        facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(idsStudentDegrees,user);
+        facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(idsStudentDegrees, user);
     }
 
-    private void validateDataAboutThesesForSave(int thesisDataForSaveLenght) throws OperationCannotBePerformedException{
-        if (thesisDataForSaveLenght == 0){
+    private void validateDataAboutThesesForSave(int thesisDataForSaveLenght) throws OperationCannotBePerformedException {
+        if (thesisDataForSaveLenght == 0) {
             String message = "Для даної операції необхідно вибрати хоча б одного студента";
             throw new OperationCannotBePerformedException(message);
         }

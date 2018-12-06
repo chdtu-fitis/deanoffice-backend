@@ -19,7 +19,7 @@ public class ThesisDataBean {
     public ThesisDataBean(StudentDegree studentDegree,
                           String thesisName,
                           String thesisNameEng,
-                          String fullSupervisorName){
+                          String fullSupervisorName) {
         Student s = studentDegree.getStudent();
         this.studentDegreeId = studentDegree.getId();
         this.fullName = s.getSurname() + " " + s.getName() + " " + s.getPatronimic();
@@ -29,7 +29,7 @@ public class ThesisDataBean {
         this.fullSupervisorName = fullSupervisorName;
     }
 
-    public ThesisDataBean(ThesisImportData thesisImportData){
+    public ThesisDataBean(ThesisImportData thesisImportData) {
         this.fullName = thesisImportData.getStudentFullName();
         this.thesisName = thesisImportData.getThesisName();
         this.thesisNameEng = thesisImportData.getThesisNameEng();
