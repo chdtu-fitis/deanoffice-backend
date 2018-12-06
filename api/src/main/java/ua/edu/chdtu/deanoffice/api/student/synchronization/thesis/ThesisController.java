@@ -89,10 +89,7 @@ public class ThesisController {
                         thesisData.getThesisNameEng(), thesisData.getThesisSupervisor());
                 count++;
             } catch (Exception e){
-                StudentDegree studentDegreeOfDb = studentDegreeService.getById(thesisData.getStudentDegreeId());
-                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname() + " "
-                        + studentDegreeOfDb.getStudent().getName() + " "
-                        + studentDegreeOfDb.getStudent().getPatronimic());
+                notSavedStudentsThesises.add(thesisData.getStudentFullName());
             }
         }
         Map <String,Object> result = new HashMap<>();
