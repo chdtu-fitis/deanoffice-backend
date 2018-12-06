@@ -68,6 +68,7 @@ public class ThesisController {
     public ResponseEntity thesisSaveChanges(@RequestBody ThesisDataForSaveDTO[] thesisDataForSaveDTOs,
                                             @CurrentUser ApplicationUser user){
         try {
+            validateDataAboutThesesForSave(thesisDataForSaveDTOs.length);
             validateStudentDegreeIdWithFacultyId(user, thesisDataForSaveDTOs);
             Map<String, Object> savedThesis = saveThesisData(thesisDataForSaveDTOs);
             return ResponseEntity.ok(savedThesis);
@@ -77,9 +78,6 @@ public class ThesisController {
     }
 
     private Map saveThesisData(ThesisDataForSaveDTO[] thesisDataForSaveDTOs) {
-        if(thesisDataForSaveDTOs.length == 0){
-            return null;
-        }
         int count = 0;
         List<String> notSavedStudentsThesises = new ArrayList();
         for(ThesisDataForSaveDTO thesisData: thesisDataForSaveDTOs){
@@ -87,11 +85,14 @@ public class ThesisController {
                 continue;
             }
             try {
-                  studentDegreeService.updateThesisName(thesisData.getStudentDegreeId(),thesisData.getThesisName(),thesisData.getThesisNameEng(),thesisData.getThesisSupervisor());
+                studentDegreeService.updateThesisName(thesisData.getStudentDegreeId(), thesisData.getThesisName(),
+                        thesisData.getThesisNameEng(), thesisData.getThesisSupervisor());
                 count++;
             } catch (Exception e){
                 StudentDegree studentDegreeOfDb = studentDegreeService.getById(thesisData.getStudentDegreeId());
-                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname() +" "+studentDegreeOfDb.getStudent().getName()+" "+studentDegreeOfDb.getStudent().getPatronimic());
+                notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname() + " "
+                        + studentDegreeOfDb.getStudent().getName() + " "
+                        + studentDegreeOfDb.getStudent().getPatronimic());
             }
         }
         Map <String,Object> result = new HashMap<>();
@@ -106,6 +107,13 @@ public class ThesisController {
             idsStudentDegrees.add(thesisData.getStudentDegreeId());
         }
         facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(idsStudentDegrees,user);
+    }
+
+    private void validateDataAboutThesesForSave(int thesisDataForSaveLenght) throws OperationCannotBePerformedException{
+        if (thesisDataForSaveLenght == 0){
+            String message = "Для даної операції необхідно вибрати хоча б одного студента";
+            throw new OperationCannotBePerformedException(message);
+        }
     }
 
     private void validateInputDataForFileWithTheses(MultipartFile uploadFile) throws OperationCannotBePerformedException {
