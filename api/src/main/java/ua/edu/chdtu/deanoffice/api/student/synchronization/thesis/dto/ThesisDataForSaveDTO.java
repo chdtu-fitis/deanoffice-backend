@@ -6,8 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ThesisDataForSaveDTO {
-    int idStudentDegree;
+    int studentDegreeId;
     private String thesisName;
-    private String  thesisNameEng;
-    private String fullSupervisor;
+    private String thesisNameEng;
+    private String thesisSupervisor;
 }

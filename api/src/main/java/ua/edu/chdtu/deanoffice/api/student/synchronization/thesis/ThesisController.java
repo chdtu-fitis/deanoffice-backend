@@ -83,14 +83,14 @@ public class ThesisController {
         int count = 0;
         List<String> notSavedStudentsThesises = new ArrayList();
         for(ThesisDataForSaveDTO thesisData: thesisDataForSaveDTOs){
-            if (thesisData.getIdStudentDegree() == 0){
+            if (thesisData.getStudentDegreeId() == 0){
                 continue;
             }
             try {
-                  studentDegreeService.updateThesisName(thesisData.getIdStudentDegree(),thesisData.getThesisName(),thesisData.getThesisNameEng(),thesisData.getFullSupervisor());
+                  studentDegreeService.updateThesisName(thesisData.getStudentDegreeId(),thesisData.getThesisName(),thesisData.getThesisNameEng(),thesisData.getThesisSupervisor());
                 count++;
             } catch (Exception e){
-                StudentDegree studentDegreeOfDb = studentDegreeService.getById(thesisData.getIdStudentDegree());
+                StudentDegree studentDegreeOfDb = studentDegreeService.getById(thesisData.getStudentDegreeId());
                 notSavedStudentsThesises.add(studentDegreeOfDb.getStudent().getSurname() +" "+studentDegreeOfDb.getStudent().getName()+" "+studentDegreeOfDb.getStudent().getPatronimic());
             }
         }
@@ -103,7 +103,7 @@ public class ThesisController {
     private void validateStudentDegreeIdWithFacultyId(ApplicationUser user,ThesisDataForSaveDTO[] thesisDataForSaveDTOs) throws Exception{
         List <Integer> idsStudentDegrees = new ArrayList<>();
         for(ThesisDataForSaveDTO thesisData: thesisDataForSaveDTOs){
-            idsStudentDegrees.add(thesisData.getIdStudentDegree());
+            idsStudentDegrees.add(thesisData.getStudentDegreeId());
         }
         facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(idsStudentDegrees,user);
     }
