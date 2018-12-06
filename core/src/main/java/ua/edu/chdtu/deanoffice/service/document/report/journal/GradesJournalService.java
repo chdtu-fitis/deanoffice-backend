@@ -207,7 +207,8 @@ public class GradesJournalService {
                     knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
                     knowledgeControl.setRotation(270);
                     table.addCell(knowledgeControl);
-                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseForGroup.getCourse().getCourseName().getName() , font1));
+                    String courseName = courseForGroup.getCourse().getCourseName().getName();
+                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length()<35 ? font1 : font2));
                     courseNameCell.setFixedHeight(28);
                     table.addCell(courseNameCell);
                 }
