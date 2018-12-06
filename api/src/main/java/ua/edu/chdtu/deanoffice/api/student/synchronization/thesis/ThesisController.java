@@ -78,7 +78,7 @@ public class ThesisController {
         }
     }
 
-    private Map saveThesisData(ThesisDataForSaveDTO[] thesisDataForSaveDTOs) {
+    private Map<String, Object> saveThesisData(ThesisDataForSaveDTO[] thesisDataForSaveDTOs) {
         int count = 0;
         List<String> notSavedStudentsThesises = new ArrayList();
         for (ThesisDataForSaveDTO thesisData : thesisDataForSaveDTOs) {
@@ -100,11 +100,11 @@ public class ThesisController {
     }
 
     private void validateStudentDegreeIdWithFacultyId(ApplicationUser user, ThesisDataForSaveDTO[] thesisDataForSaveDTOs) throws Exception {
-        List<Integer> idsStudentDegrees = new ArrayList<>();
+        List<Integer> studentDegreeIds = new ArrayList<>();
         for (ThesisDataForSaveDTO thesisData : thesisDataForSaveDTOs) {
-            idsStudentDegrees.add(thesisData.getStudentDegreeId());
+            studentDegreeIds.add(thesisData.getStudentDegreeId());
         }
-        facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(idsStudentDegrees, user);
+        facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studentDegreeIds, user);
     }
 
     private void validateDataAboutThesesForSave(int thesisDataForSaveLenght) throws OperationCannotBePerformedException {
