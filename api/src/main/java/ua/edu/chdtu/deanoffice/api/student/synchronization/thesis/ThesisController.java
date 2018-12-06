@@ -6,11 +6,13 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.*;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.AllThesisListsDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.ListThesisDataForGroupDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.MissingThesisDataRedDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.ThesisDataForSaveDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisImportService;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisReport;
@@ -25,7 +27,7 @@ import java.util.Map;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
-@RequestMapping("/thesis")
+@RequestMapping("/students")
 public class ThesisController {
     private final ThesisImportService thesisImportService;
     private final StudentDegreeService studentDegreeService;
@@ -52,7 +54,7 @@ public class ThesisController {
                     thesisReport.getThesisGreen(),
                     ListThesisDataForGroupDTO.class);
             List<MissingThesisDataRedDTO> missingThesisDataRedDTOs = map(
-                    thesisReport.getThesisRedMessage(),
+                    thesisReport.getThesisRedWithMessage(),
                     MissingThesisDataRedDTO.class);
             allThesisListsDTO.setListThesisDataForGroupDTOs(importedThesisDataDTOs);
             allThesisListsDTO.setMissingThesisDataRedDTOs(missingThesisDataRedDTOs);
@@ -66,7 +68,7 @@ public class ThesisController {
     public ResponseEntity thesisSaveChanges(@RequestBody ThesisDataForSaveDTO[] thesisDataForSaveDTOs,
                                             @CurrentUser ApplicationUser user){
         try {
-            validateStudentDegreeIdWithFacultyId(user,thesisDataForSaveDTOs);
+            validateStudentDegreeIdWithFacultyId(user, thesisDataForSaveDTOs);
             Map<String, Object> savedThesis = saveThesisData(thesisDataForSaveDTOs);
             return ResponseEntity.ok(savedThesis);
         } catch (Exception exception) {

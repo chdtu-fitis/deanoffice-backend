@@ -1,9 +1,10 @@
-package ua.edu.chdtu.deanoffice.service.datasync.thesis;
+package ua.edu.chdtu.deanoffice.service.datasync.thesis.beans;
 
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisImportData;
 
 @Getter
 @Setter

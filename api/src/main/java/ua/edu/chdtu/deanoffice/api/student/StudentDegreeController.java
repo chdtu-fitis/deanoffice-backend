@@ -294,6 +294,4 @@ public class StudentDegreeController {
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, StudentDegreeController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
-
-
 }

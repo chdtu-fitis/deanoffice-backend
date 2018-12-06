@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.datasync.thesis;
+package ua.edu.chdtu.deanoffice.service.datasync.thesis.beans;
 
 import lombok.Getter;
 import lombok.Setter;

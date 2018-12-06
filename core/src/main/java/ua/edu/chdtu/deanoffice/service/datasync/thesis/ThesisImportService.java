@@ -9,7 +9,9 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ListThesisDatasForGroupBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ThesisDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.RedThesisWithMessageBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
@@ -25,17 +27,14 @@ public class ThesisImportService {
 
     private DocumentIOService documentIOService;
     private StudentDegreeService studentDegreeService;
-    private StudentService studentService;
     private StudentGroupService studentGroupService;
 
     @Autowired
     public ThesisImportService(DocumentIOService documentIOService,
                                StudentDegreeService studentDegreeService,
-                               StudentService studentService,
                                StudentGroupService studentGroupService){
         this.documentIOService = documentIOService;
         this.studentDegreeService = studentDegreeService;
-        this.studentService = studentService;
         this.studentGroupService = studentGroupService;
     }
 
@@ -119,13 +118,13 @@ public class ThesisImportService {
     private boolean addToRedListIfDataIsWrong(ThesisImportData thesisImportData, ThesisReport thesisReport, int facultyId){
         if (thesisImportData.getGroupName().equals("")){
             String message = "Відсутня назва групи";
-            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         StudentGroup studentGroup = studentGroupService.getByNameAndFacultyId(thesisImportData.getGroupName(), facultyId);
         if (studentGroup == null){
             String message = "Дана група не існує";
-            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         StudentDegree studentDegree = studentDegreeService.getByStudentFullNameAndGroupId(
@@ -134,17 +133,17 @@ public class ThesisImportService {
         );
         if (studentDegree == null){
             String message = "Даний студент відсутній";
-            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         if (thesisImportData.getThesisName().equals("")){
             String message = "Відсутня тема дипломної роботи українською мовою";
-            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         if (thesisImportData.getThesisNameEng().equals("")){
             String message = "Відсутня тема дипломної роботи англійською мовою";
-            thesisReport.addThesisRed(new ThesisWithMessageRedBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         return false;

@@ -2,6 +2,8 @@ package ua.edu.chdtu.deanoffice.service.datasync.thesis;
 
 import lombok.Getter;
 import lombok.Setter;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ListThesisDatasForGroupBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.RedThesisWithMessageBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,25 +12,18 @@ import java.util.List;
 @Setter
 public class ThesisReport {
     private List <ListThesisDatasForGroupBean> thesisGreen;
-    private List <ThesisWithMessageRedBean> thesisRedMessage;
+    private List <RedThesisWithMessageBean> thesisRedWithMessage;
 
     public ThesisReport(){
         thesisGreen = new ArrayList<>();
-        thesisRedMessage = new ArrayList<>();
+        thesisRedWithMessage = new ArrayList<>();
     }
 
     public void addThesisGreen(ListThesisDatasForGroupBean bean){
         thesisGreen.add(bean);
     }
 
-    public void addThesisRed(ThesisWithMessageRedBean bean){
-        thesisRedMessage.add(bean);
-    }
-
-
-
-    public void clear(){
-        thesisGreen.clear();
-        thesisRedMessage.clear();
+    public void addThesisRed(RedThesisWithMessageBean bean){
+        thesisRedWithMessage.add(bean);
     }
 }
