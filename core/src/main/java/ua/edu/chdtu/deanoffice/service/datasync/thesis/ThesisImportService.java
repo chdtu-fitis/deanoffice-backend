@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.putNameInCorrectForm;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.correctCaseInName;
 
 @Service
 public class ThesisImportService {
@@ -151,7 +151,7 @@ public class ThesisImportService {
 
     private ThesisImportData getDataAboutStudentFromRow(String[] rowsContent, String groupName) {
         ThesisImportData thesisImportData = new ThesisImportData();
-        thesisImportData.setStudentFullName(putNameInCorrectForm(rowsContent[0].trim()));
+        thesisImportData.setStudentFullName(correctCaseInName(rowsContent[0].trim()));
         thesisImportData.setThesisName(rowsContent[1].trim());
         thesisImportData.setThesisNameEng(rowsContent[2].trim());
         thesisImportData.setFullSupervisorName(rowsContent[3].trim());

@@ -42,7 +42,7 @@ public class PersonUtil {
                 + fullNameParts.get(0);
     }
 
-    public static String putNameInCorrectForm(String nameString){
+    public static String correctCaseInName(String nameString){
         String processedFullString = "";
         if(nameString != null && !nameString.isEmpty()){
             String[] nameParts = nameString.split(" +");
