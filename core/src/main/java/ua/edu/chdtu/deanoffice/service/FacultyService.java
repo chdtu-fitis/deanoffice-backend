@@ -43,4 +43,7 @@ public class FacultyService {
     public Faculty getByName(String name) {
         return facultyRepository.findByName(name);
     }
+    public Faculty getById(Integer id) {
+        return facultyRepository.findById(id);
+    }
 }
