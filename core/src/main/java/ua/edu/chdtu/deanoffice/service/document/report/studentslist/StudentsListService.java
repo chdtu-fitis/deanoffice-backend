@@ -32,7 +32,6 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextP
 
 @Service
 public class StudentsListService {
-
     private static final String TEMPLATES_PATH = "/docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "StudentsList.docx";
     private static final String TEMPLATEHEADERS = TEMPLATES_PATH + "StudentsListHeaders.docx";
@@ -44,7 +43,6 @@ public class StudentsListService {
     private DocumentIOService documentIOService;
     private CurrentYearService currentYearService;
     private FacultyService facultyService;
-
 
     public StudentsListService(
         StudentGroupService groupService,
@@ -65,7 +63,7 @@ public class StudentsListService {
         String tuitionFormText
     ) throws Docx4JException, IOException {
         TuitionForm tuitionForm = TuitionForm.valueOf(tuitionFormText);
-        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYear(degreeId,year,facultyId);
+        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId,year,facultyId,tuitionForm);
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
         for (StudentGroup group:studentGroups){
             List<StudentDegree> students = group.getStudentDegrees();
@@ -79,11 +77,12 @@ public class StudentsListService {
                     tuitionForm.getNameUkr()
                 );
             } else {
-                wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(
-                    TEMPLATE,
-                    studentForLists,
-                    group
-                ).getMainDocumentPart().getContent());
+                wordMLPackage.
+                getMainDocumentPart().
+                getContent().
+                addAll(fillTemplate(TEMPLATE,studentForLists,group).
+                getMainDocumentPart().
+                getContent());
             }
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,FILE_NAME+year+KURS, FileFormatEnum.DOCX);
