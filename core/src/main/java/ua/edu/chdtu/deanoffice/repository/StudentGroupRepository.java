@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 
 import java.util.List;
 
@@ -52,6 +54,21 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             @Param("study_year") Integer studyYear,
             @Param("curr_year") Integer currYear,
             @Param("faculty_id") int facultyId
+    );
+
+    @Query("select sg from StudentGroup sg " +
+            "where sg.active = true " +
+            "and sg.specialization.degree.id = :degree_id " +
+            "and :curr_year - sg.creationYear + sg.beginYears = :study_year " +
+            "and sg.specialization.faculty.id = :faculty_id " +
+            "and sg.tuitionForm = :tuitionForm "+
+            "order by sg.name")
+    List<StudentGroup> findGroupsByDegreeAndYearAndTuitionForm(
+            @Param("degree_id") Integer degreeId,
+            @Param("study_year") Integer studyYear,
+            @Param("curr_year") Integer currYear,
+            @Param("faculty_id") int facultyId,
+            @Param("tuitionForm") TuitionForm tuitionForm
     );
 
     @Query("select sg from StudentGroup sg " +
