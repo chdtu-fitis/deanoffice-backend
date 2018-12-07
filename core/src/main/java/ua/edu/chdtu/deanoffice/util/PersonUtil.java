@@ -44,9 +44,8 @@ public class PersonUtil {
 
     public static String putNameInCorrectForm(String nameString){
         String processedFullString = "";
-        if(nameString != null && nameString != ""){
-            int numberOfSpace = nameString.replace("[^ ]]", "").length();
-            String[] nameParts = nameString.split(" ", numberOfSpace);
+        if(nameString != null && !nameString.isEmpty()){
+            String[] nameParts = nameString.split(" +");
             for (String namePart: nameParts){
                 if (namePart.equals("оглу") || namePart.equals("огли") || namePart.equals("кизи")){
                     processedFullString += namePart + " ";
@@ -54,14 +53,13 @@ public class PersonUtil {
                 }
                 String wordOnProcessing = StringUtil.replaceSingleQuotes(namePart);
                 wordOnProcessing = wordOnProcessing.substring(0, 1).toUpperCase() + wordOnProcessing.substring(1).toLowerCase();
-                processedFullString += findDashInWord(wordOnProcessing) + " ";
+                processedFullString += processDashInWord(wordOnProcessing) + " ";
             }
         }
-        String processedFullStringByTrim = processedFullString.trim();
-        return processedFullStringByTrim;
+        return processedFullString.trim();
     }
 
-    private static String findDashInWord(String word){
+    private static String processDashInWord(String word){
         String processedWord = "";
         if (word.indexOf("-") == -1){
             return word;
