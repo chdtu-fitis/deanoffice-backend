@@ -13,24 +13,21 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationC
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationService;
-import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 @RestController
 @RequestMapping("/students")
 public class DiplomaNumberController {
-    EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService;
-    DocumentIOService documentIOService;
+    private EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService;
     @Autowired
-    public DiplomaNumberController(DocumentIOService documentIOService){
-        this.documentIOService = documentIOService;
+    public DiplomaNumberController(EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService){
+        this.edeboDiplomaNumberSynchronizationService = edeboDiplomaNumberSynchronizationService;
     }
 
     @PostMapping("/edebo-diploma-number-synchronization/process-file")
     public ResponseEntity diplomaNumberSynchronization(@RequestParam("file") MultipartFile uploadFile,
                                                        @CurrentUser ApplicationUser user){
         try{
-            edeboDiplomaNumberSynchronizationService = new EdeboDiplomaNumberSynchronizationService(documentIOService);
             EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = edeboDiplomaNumberSynchronizationService.getEdeboDiplomaNumberSynchronizationReport(uploadFile.getInputStream(), user.getFaculty().getId());
             return ResponseEntity.ok().body("");
         } catch (Exception exception){
