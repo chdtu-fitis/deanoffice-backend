@@ -3,23 +3,21 @@ package ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.util.ReflectionUtils;
-import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.ImportedData;
 
 import java.util.Objects;
 
 @Getter
 @Setter
-public class DiplomaSheetData{
+class DiplomaSheetData{
     private DiplomaImportData headerData;
     private DiplomaImportData studentData;
 
     DiplomaSheetData(){
-        super();
         headerData = new DiplomaImportData();
         studentData = new DiplomaImportData();
     }
 
-    public void assignHeader(String pattern, String columnName) {
+    void assignHeader(String pattern, String columnName) {
         columnName = removeDigits(columnName);
         switch (pattern){
             case DiplomaHeaderPatterns.FIRST_NAME:
