@@ -14,7 +14,9 @@ import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Worksheet;
 
+import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.SpecialityService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.beans.DiplomaAndStudentSynchronizedDataBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.beans.MissingDataBean;
@@ -32,20 +34,22 @@ public class EdeboDiplomaNumberSynchronizationService {
     private static Logger log = LoggerFactory.getLogger(EdeboDiplomaNumberSynchronizationService.class);
     private final DocumentIOService documentIOService;
     private final StudentDegreeService studentDegreeService;
+    private final SpecialityService specialityService;
 
     @Autowired
-    public EdeboDiplomaNumberSynchronizationService(DocumentIOService documentIOService, StudentDegreeService studentDegreeService) {
+    public EdeboDiplomaNumberSynchronizationService(DocumentIOService documentIOService, StudentDegreeService studentDegreeService, SpecialityService specialityService) {
         this.documentIOService = documentIOService;
         this.studentDegreeService = studentDegreeService;
+        this.specialityService = specialityService;
     }
 
-    public EdeboDiplomaNumberSynchronizationReport getEdeboDiplomaNumberSynchronizationReport(InputStream xlsxInputStream, int facultyId) throws Exception {
+    public EdeboDiplomaNumberSynchronizationReport getEdeboDiplomaNumberSynchronizationReport(InputStream xlsxInputStream, int facultyId, String facultyName) throws Exception {
         try {
             List<DiplomaImportData> diplomaImportData = getStudentDegreesFromStream(xlsxInputStream);
             EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport = new EdeboDiplomaNumberSynchronizationReport();
 
             for (DiplomaImportData importData : diplomaImportData) {
-                addSynchronizationReportForDiplomaImportedData(importData, diplomaSynchronizationReport, facultyId);
+                addSynchronizationReportForDiplomaImportedData(importData, diplomaSynchronizationReport, facultyId, facultyName);
             }
 
             return diplomaSynchronizationReport;
@@ -112,20 +116,56 @@ public class EdeboDiplomaNumberSynchronizationService {
 
     public void addSynchronizationReportForDiplomaImportedData(DiplomaImportData importData,
                                                                EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport,
-                                                               int facultyId) {
-        if (isCriticalDataAvailable(importData)){
-            String message = "недостатньо даних для синхронізяції";
-            diplomaSynchronizationReport.addBeanToMissingDataList(new MissingDataBean(message, new DiplomaAndStudentSynchronizedDataBean(importData)));
+                                                               int facultyId,
+                                                               String facultyName) {
+        if (!importData.getFacultyName().equals(facultyName)) {
+            return;
         }
+
+        if (isCriticalDataAvailable(importData)) {
+            String message = "Недостатньо даних для синхронізації";
+            diplomaSynchronizationReport.addBeanToMissingDataList(
+                    new MissingDataBean(
+                            message,
+                            new DiplomaAndStudentSynchronizedDataBean(importData)
+                    )
+            );
+        }
+
+        Speciality specialityFromDb = specialityService.getByCodeAndNameAndFacultyId(importData.getSpecialityName(), facultyId);
+        if (specialityFromDb == null){
+            String message = "Даної спеціальності не існує на даному факультеті";
+            diplomaSynchronizationReport.addBeanToMissingDataList(
+                    new MissingDataBean(
+                            message,
+                            new DiplomaAndStudentSynchronizedDataBean(importData)
+                    )
+            );
+        }
+
         StudentDegree studentDegreefromDb = studentDegreeService.getByStudentFullNameAndSupplementNumber(
                 importData.getLastName(),
                 importData.getFirstName(),
                 importData.getMiddleName(),
                 importData.getEducationId()
         );
-        if (studentDegreefromDb == null){
+        if (studentDegreefromDb == null) {
             String message = "Даного студента не існує в базі даних";
-            diplomaSynchronizationReport.addBeanToMissingDataList(new MissingDataBean(message, new DiplomaAndStudentSynchronizedDataBean(importData)));
+            diplomaSynchronizationReport.addBeanToMissingDataList(
+                    new MissingDataBean(
+                            message,
+                            new DiplomaAndStudentSynchronizedDataBean(importData)
+                    )
+            );
+        } else {
+            String diplomaSeriesAndNumber = importData.getDocumentSeries() + " № " + importData.getFacultyName();
+            diplomaSynchronizationReport.addBeanToSynchronizedList(
+                    new DiplomaAndStudentSynchronizedDataBean(
+                            studentDegreefromDb,
+                            diplomaSeriesAndNumber,
+                            importData.getAwardTypeId()
+                    )
+            );
         }
     }
 

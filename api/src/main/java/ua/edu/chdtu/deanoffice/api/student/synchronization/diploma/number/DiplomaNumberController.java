@@ -28,7 +28,11 @@ public class DiplomaNumberController {
     public ResponseEntity diplomaNumberSynchronization(@RequestParam("file") MultipartFile uploadFile,
                                                        @CurrentUser ApplicationUser user){
         try{
-            EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = edeboDiplomaNumberSynchronizationService.getEdeboDiplomaNumberSynchronizationReport(uploadFile.getInputStream(), user.getFaculty().getId());
+            EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = edeboDiplomaNumberSynchronizationService.getEdeboDiplomaNumberSynchronizationReport(
+                    uploadFile.getInputStream(),
+                    user.getFaculty().getId(),
+                    user.getFirstName()
+            );
             return ResponseEntity.ok().body("");
         } catch (Exception exception){
             return handleException(exception);
