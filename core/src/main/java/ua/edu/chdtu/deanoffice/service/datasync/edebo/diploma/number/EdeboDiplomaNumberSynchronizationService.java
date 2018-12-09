@@ -118,11 +118,11 @@ public class EdeboDiplomaNumberSynchronizationService {
                                                                EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport,
                                                                int facultyId,
                                                                String facultyName) {
-        if (!importData.getFacultyName().equals(facultyName)) {
+        if (!importData.getFacultyName().toUpperCase().equals(facultyName.toUpperCase())) {
             return;
         }
 
-        if (isCriticalDataAvailable(importData)) {
+        if (!isCriticalDataAvailable(importData)) {
             String message = "Недостатньо даних для синхронізації";
             diplomaSynchronizationReport.addBeanToMissingDataList(
                     new MissingDataBean(
@@ -132,16 +132,16 @@ public class EdeboDiplomaNumberSynchronizationService {
             );
         }
 
-        Speciality specialityFromDb = specialityService.getByCodeAndNameAndFacultyId(importData.getSpecialityName(), facultyId);
-        if (specialityFromDb == null){
-            String message = "Даної спеціальності не існує на даному факультеті";
-            diplomaSynchronizationReport.addBeanToMissingDataList(
-                    new MissingDataBean(
-                            message,
-                            new DiplomaAndStudentSynchronizedDataBean(importData)
-                    )
-            );
-        }
+//        Speciality specialityFromDb = specialityService.getByCodeAndNameAndFacultyId(importData.getSpecialityName(), facultyId);
+//        if (specialityFromDb == null){
+//            String message = "Даної спеціальності не існує на даному факультеті";
+//            diplomaSynchronizationReport.addBeanToMissingDataList(
+//                    new MissingDataBean(
+//                            message,
+//                            new DiplomaAndStudentSynchronizedDataBean(importData)
+//                    )
+//            );
+//        }
 
         StudentDegree studentDegreefromDb = studentDegreeService.getByStudentFullNameAndSupplementNumber(
                 importData.getLastName(),

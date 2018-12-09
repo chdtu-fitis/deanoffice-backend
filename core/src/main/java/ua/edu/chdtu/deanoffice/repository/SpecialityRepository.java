@@ -37,10 +37,10 @@ public interface SpecialityRepository extends JpaRepository<Speciality, Integer>
 
     Speciality getSpecialityByCode(String code);
 
-    @Query("SELECT s.id FROM speciality s " +
-            "INNER JOIN specialization sz ON s.id = sz.speciality_id " +
-            "WHERE sz.faculty_id = :faculty_id " +
-            "AND s.active = true " +
-            "AND concat(s.code, ' ', s.name) = :codeAndName")
-    Speciality findByCodeAndNameAndFacultyId(@Param("codeAndName") String codeAndName, @Param("facultyId") int facultyId);
+//    @Query("SELECT s.id FROM speciality s " +
+//            "INNER JOIN specialization sz ON s.id = sz.speciality_id " +
+//            "WHERE sz.faculty_id = :facultyId " +
+//            "AND s.active = true " +
+//            "AND concat(s.code, ' ', s.name) = :codeAndName")
+//    Speciality findByCodeAndNameAndFacultyId(@Param("codeAndName") String codeAndName, @Param("facultyId") int facultyId);
 }

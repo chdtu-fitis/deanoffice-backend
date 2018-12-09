@@ -42,7 +42,7 @@ public class SpecialityService {
         return specialityRepository.save(speciality);
     }
 
-    public Speciality getByCodeAndNameAndFacultyId(String codeAndName, int facultyId){
-        return getByCodeAndNameAndFacultyId(codeAndName, facultyId);
-    }
+//    public Speciality getByCodeAndNameAndFacultyId(String codeAndName, int facultyId){
+//        return specialityRepository.findByCodeAndNameAndFacultyId(codeAndName, facultyId);
+//    }
 }

@@ -31,7 +31,7 @@ public class DiplomaNumberController {
             EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = edeboDiplomaNumberSynchronizationService.getEdeboDiplomaNumberSynchronizationReport(
                     uploadFile.getInputStream(),
                     user.getFaculty().getId(),
-                    user.getFirstName()
+                    user.getFaculty().getName()
             );
             return ResponseEntity.ok().body("");
         } catch (Exception exception){
