@@ -1,15 +1,23 @@
 package ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number;
 
+import com.google.common.base.Strings;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.xlsx4j.org.apache.poi.ss.usermodel.DataFormatter;
 import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Worksheet;
 
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.beans.DiplomaAndStudentSynchronizedDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.beans.MissingDataBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.util.StringUtil;
 
@@ -19,27 +27,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Service
 public class EdeboDiplomaNumberSynchronizationService {
+    private static Logger log = LoggerFactory.getLogger(EdeboDiplomaNumberSynchronizationService.class);
     private final DocumentIOService documentIOService;
+    private final StudentDegreeService studentDegreeService;
 
     @Autowired
-    public EdeboDiplomaNumberSynchronizationService(DocumentIOService documentIOService){
+    public EdeboDiplomaNumberSynchronizationService(DocumentIOService documentIOService, StudentDegreeService studentDegreeService) {
         this.documentIOService = documentIOService;
+        this.studentDegreeService = studentDegreeService;
     }
 
-    public EdeboDiplomaNumberSynchronizationReport getEdeboDiplomaNumberSynchronizationReport(InputStream xlsxInputStream, int facultyId) throws Exception{
-        if (xlsxInputStream == null)
-            throw new Exception("Помилка читання файлу");
+    public EdeboDiplomaNumberSynchronizationReport getEdeboDiplomaNumberSynchronizationReport(InputStream xlsxInputStream, int facultyId) throws Exception {
         try {
             List<DiplomaImportData> diplomaImportData = getStudentDegreesFromStream(xlsxInputStream);
+            EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport = new EdeboDiplomaNumberSynchronizationReport();
 
-            EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = new EdeboDiplomaNumberSynchronizationReport();
+            for (DiplomaImportData importData : diplomaImportData) {
+                addSynchronizationReportForDiplomaImportedData(importData, diplomaSynchronizationReport, facultyId);
+            }
 
-            return edeboDiplomaNumberSynchronizationReport;
-        } catch (Docx4JException e) {
-            e.printStackTrace();
-            throw new Exception("Помилка обробки файлу");
-        } catch (IOException e) {
+            return diplomaSynchronizationReport;
+        } catch (Docx4JException | IOException e) {
             e.printStackTrace();
             throw new Exception("Помилка читання файлу");
         } finally {
@@ -73,13 +83,13 @@ public class EdeboDiplomaNumberSynchronizationService {
             String cellValue;
 
             for (Row r : sheetData.getRow()) {
-//                log.debug("importing row: " + r.getR());
+                log.debug("importing row: " + r.getR());
                 for (Cell c : r.getC()) {
                     cellValue = "";
                     try {
                         cellValue = StringUtil.replaceSingleQuotes(formatter.formatCellValue(c));
                     } catch (Exception e) {
-//                        log.debug(e.getMessage());
+                        log.debug(e.getMessage());
                     }
                     if (r.getR() == 1) {
                         sd.assignHeader(cellValue, c.getR());
@@ -95,8 +105,42 @@ public class EdeboDiplomaNumberSynchronizationService {
             }
             return importedData;
         } catch (Exception e) {
-//            log.error(e.getMessage());
+            log.error(e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    public void addSynchronizationReportForDiplomaImportedData(DiplomaImportData importData,
+                                                               EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport,
+                                                               int facultyId) {
+        if (isCriticalDataAvailable(importData)){
+            String message = "недостатньо даних для синхронізяції";
+            diplomaSynchronizationReport.addBeanToMissingDataList(new MissingDataBean(message, new DiplomaAndStudentSynchronizedDataBean(importData)));
+        }
+        StudentDegree studentDegreefromDb = studentDegreeService.getByStudentFullNameAndSupplementNumber(
+                importData.getLastName(),
+                importData.getFirstName(),
+                importData.getMiddleName(),
+                importData.getEducationId()
+        );
+        if (studentDegreefromDb == null){
+            String message = "Даного студента не існує в базі даних";
+            diplomaSynchronizationReport.addBeanToMissingDataList(new MissingDataBean(message, new DiplomaAndStudentSynchronizedDataBean(importData)));
+        }
+    }
+
+    private boolean isCriticalDataAvailable(DiplomaImportData importData) {
+        List<String> dataOnCheck = new ArrayList();
+        dataOnCheck.add(importData.getLastName() + " " + importData.getFirstName() + " " + importData.getMiddleName());
+        dataOnCheck.add(importData.getSpecialityName());
+        dataOnCheck.add(importData.getDocumentNumber());
+        dataOnCheck.add(importData.getDocumentSeries());
+        dataOnCheck.add(importData.getEducationId());// Чи необхідно перевіряти наявність відзнаки?
+        for (String data : dataOnCheck) {
+            if (Strings.isNullOrEmpty(data)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
