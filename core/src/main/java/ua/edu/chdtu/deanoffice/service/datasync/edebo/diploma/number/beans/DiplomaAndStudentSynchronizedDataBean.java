@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.DiplomaImpo
 @Getter
 @Setter
 public class DiplomaAndStudentSynchronizedDataBean {
+    private int id;
     private String surname;
     private String name;
     private String patronimic;
@@ -21,6 +22,7 @@ public class DiplomaAndStudentSynchronizedDataBean {
     public DiplomaAndStudentSynchronizedDataBean(StudentDegree studentDegree, String diplomaSeriesAndNumber, String honor){
         Student student = studentDegree.getStudent();
         Speciality speciality = studentDegree.getSpecialization().getSpeciality();
+        this.id = studentDegree.getId();
         this.surname = student.getSurname();
         this.name = student.getName();
         this.patronimic = student.getPatronimic();
@@ -36,7 +38,6 @@ public class DiplomaAndStudentSynchronizedDataBean {
         this.patronimic = importData.getMiddleName();
         this.diplomaSeriesAndNumber = importData.getDocumentSeries() + " № " + importData.getDocumentNumber();
         this.fullSpecialityName = importData.getSpecialityName();
-        this.groupName = "";
         this.honor = (importData.getAwardTypeId().equals("-")) ? false : true;
     }
 }
