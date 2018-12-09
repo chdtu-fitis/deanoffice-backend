@@ -66,6 +66,17 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("specializationId") Integer specializationId
     );
 
+    @Query("SELECT sd FROM StudentDegree sd " +
+            "WHERE sd.active = true " +
+            "AND sd.student.surname = :surname " +
+            "AND sd.student.name = :name " +
+            "AND sd.student.patronimic = :patronimic " +
+            "AND sd.supplementNumber = :supplementNumper")
+    StudentDegree findByStudentFullNameAndSupplementNumber(@Param("surname") String surname,
+                                                           @Param("name") String name,
+                                                           @Param("patronimic") String patronimic,
+                                                           @Param("supplementNumper") String supplementNumper);
+
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);
 

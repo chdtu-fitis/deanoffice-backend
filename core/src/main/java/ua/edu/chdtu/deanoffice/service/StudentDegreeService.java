@@ -92,6 +92,10 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
 
+    public StudentDegree getByStudentFullNameAndSupplementNumber(String surname, String name, String patronimic, String supplementNumber){
+        return studentDegreeRepository.findByStudentFullNameAndSupplementNumber(surname, name, patronimic, supplementNumber);
+    }
+
     @Transactional
     public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
         studentDegreeRepository.assignStudentsToGroup(students, group);
