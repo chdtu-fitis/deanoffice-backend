@@ -112,19 +112,19 @@ public class ThesisImportService {
             );
             thesisDataBeans.add(new ThesisDataBean(studentDegree, importData.getThesisName(), importData.getThesisNameEng(), importData.getFullSupervisorName()));
         }
-        thesisReport.addThesisGreen(new ListThesisDatasForGroupBean(groupName, thesisDataBeans));
+        thesisReport.addThesisDataForImportToGreenList(new ListThesisDatasForGroupBean(groupName, thesisDataBeans));
     }
 
     private boolean addToRedListIfDataIsWrong(ThesisImportData thesisImportData, ThesisReport thesisReport, int facultyId) {
         if (thesisImportData.getGroupName().equals("")) {
             String message = "Відсутня назва групи";
-            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         StudentGroup studentGroup = studentGroupService.getByNameAndFacultyId(thesisImportData.getGroupName(), facultyId);
         if (studentGroup == null) {
             String message = "Дана група не існує";
-            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         StudentDegree studentDegree = studentDegreeService.getByStudentFullNameAndGroupId(
@@ -133,17 +133,17 @@ public class ThesisImportService {
         );
         if (studentDegree == null) {
             String message = "Даний студент відсутній";
-            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         if (thesisImportData.getThesisName().equals("")) {
             String message = "Відсутня тема дипломної роботи українською мовою";
-            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         if (thesisImportData.getThesisNameEng().equals("")) {
             String message = "Відсутня тема дипломної роботи англійською мовою";
-            thesisReport.addThesisRed(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         return false;

@@ -19,11 +19,11 @@ public class ThesisReport {
         thesisRedWithMessage = new ArrayList<>();
     }
 
-    public void addThesisGreen(ListThesisDatasForGroupBean bean){
+    public void addThesisDataForImportToGreenList(ListThesisDatasForGroupBean bean){
         thesisGreen.add(bean);
     }
 
-    public void addThesisRed(RedThesisWithMessageBean bean){
+    public void addThesisWithMissingDataToRedList(RedThesisWithMessageBean bean){
         thesisRedWithMessage.add(bean);
     }
 }
