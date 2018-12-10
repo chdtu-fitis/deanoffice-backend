@@ -65,7 +65,7 @@ public class ThesisController {
         }
     }
 
-    @PutMapping("/thesis-import/update")
+    @PutMapping("/thesis-import")
     public ResponseEntity thesisSaveChanges(@RequestBody ThesisDataForSaveDTO[] thesisDataForSaveDTOs,
                                             @CurrentUser ApplicationUser user) {
         try {
