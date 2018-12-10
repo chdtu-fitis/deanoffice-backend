@@ -63,11 +63,10 @@ public class PersonUtil {
         String processedWord = "";
         if (word.indexOf("-") == -1){
             return word;
-        } else {
-            processedWord += word.substring(0, word.indexOf("-") + 1)
-                    + word.substring(word.indexOf("-") + 1, word.indexOf("-") + 2).toUpperCase()
-                    + word.substring(word.indexOf("-") + 2);
         }
+        processedWord += word.substring(0, word.indexOf("-") + 1)
+                + word.substring(word.indexOf("-") + 1, word.indexOf("-") + 2).toUpperCase()
+                + word.substring(word.indexOf("-") + 2);
         return processedWord;
     }
 }
