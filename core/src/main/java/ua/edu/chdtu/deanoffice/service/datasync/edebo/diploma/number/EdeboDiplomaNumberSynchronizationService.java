@@ -34,22 +34,20 @@ public class EdeboDiplomaNumberSynchronizationService {
     private static Logger log = LoggerFactory.getLogger(EdeboDiplomaNumberSynchronizationService.class);
     private final DocumentIOService documentIOService;
     private final StudentDegreeService studentDegreeService;
-    private final SpecialityService specialityService;
 
     @Autowired
-    public EdeboDiplomaNumberSynchronizationService(DocumentIOService documentIOService, StudentDegreeService studentDegreeService, SpecialityService specialityService) {
+    public EdeboDiplomaNumberSynchronizationService(DocumentIOService documentIOService, StudentDegreeService studentDegreeService) {
         this.documentIOService = documentIOService;
         this.studentDegreeService = studentDegreeService;
-        this.specialityService = specialityService;
     }
 
-    public EdeboDiplomaNumberSynchronizationReport getEdeboDiplomaNumberSynchronizationReport(InputStream xlsxInputStream, int facultyId, String facultyName) throws Exception {
+    public EdeboDiplomaNumberSynchronizationReport getEdeboDiplomaNumberSynchronizationReport(InputStream xlsxInputStream, String facultyName) throws Exception {
         try {
             List<DiplomaImportData> diplomaImportData = getStudentDegreesFromStream(xlsxInputStream);
             EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport = new EdeboDiplomaNumberSynchronizationReport();
 
             for (DiplomaImportData importData : diplomaImportData) {
-                addSynchronizationReportForDiplomaImportedData(importData, diplomaSynchronizationReport, facultyId, facultyName);
+                addSynchronizationReportForDiplomaImportedData(importData, diplomaSynchronizationReport, facultyName);
             }
 
             return diplomaSynchronizationReport;
@@ -116,7 +114,6 @@ public class EdeboDiplomaNumberSynchronizationService {
 
     public void addSynchronizationReportForDiplomaImportedData(DiplomaImportData importData,
                                                                EdeboDiplomaNumberSynchronizationReport diplomaSynchronizationReport,
-                                                               int facultyId,
                                                                String facultyName) {
         if (!importData.getFacultyName().toUpperCase().equals(facultyName.toUpperCase())) {
             return;
@@ -147,11 +144,10 @@ public class EdeboDiplomaNumberSynchronizationService {
                     )
             );
         } else {
-            String diplomaSeriesAndNumber = importData.getDocumentSeries() + " № " + importData.getFacultyName();
             diplomaSynchronizationReport.addBeanToSynchronizedList(
                     new DiplomaAndStudentSynchronizedDataBean(
                             studentDegreefromDb,
-                            diplomaSeriesAndNumber,
+                            importData.getDocumentSeries() + " № " + importData.getFacultyName(),
                             importData.getAwardTypeId()
                     )
             );
