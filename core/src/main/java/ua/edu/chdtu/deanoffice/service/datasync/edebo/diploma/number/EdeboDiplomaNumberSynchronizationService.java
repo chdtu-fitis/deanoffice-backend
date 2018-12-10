@@ -131,18 +131,7 @@ public class EdeboDiplomaNumberSynchronizationService {
                     )
             );
         }
-
-//        Speciality specialityFromDb = specialityService.getByCodeAndNameAndFacultyId(importData.getSpecialityName(), facultyId);
-//        if (specialityFromDb == null){
-//            String message = "Даної спеціальності не існує на даному факультеті";
-//            diplomaSynchronizationReport.addBeanToMissingDataList(
-//                    new MissingDataBean(
-//                            message,
-//                            new DiplomaAndStudentSynchronizedDataBean(importData)
-//                    )
-//            );
-//        }
-
+        
         StudentDegree studentDegreefromDb = studentDegreeService.getByStudentFullNameAndSupplementNumber(
                 importData.getLastName(),
                 importData.getFirstName(),
