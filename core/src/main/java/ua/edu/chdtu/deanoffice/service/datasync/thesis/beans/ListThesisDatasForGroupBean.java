@@ -8,8 +8,8 @@ import java.util.List;
 @Getter
 @Setter
 public class ListThesisDatasForGroupBean {
-    String groupName;
-    List<ThesisDataBean> thesisDataBeans;
+    private String groupName;
+    private List<ThesisDataBean> thesisDataBeans;
 
     public ListThesisDatasForGroupBean(String groupName, List<ThesisDataBean> thesisDataBeans){
         this.groupName = groupName;
