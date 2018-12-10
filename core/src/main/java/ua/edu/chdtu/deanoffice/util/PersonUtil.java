@@ -42,13 +42,21 @@ public class PersonUtil {
                 + fullNameParts.get(0);
     }
 
-    public static String correctCaseInName(String nameString){
+    /**
+     * Даний метод оброблює повне імя за такими правилами:
+     * 1 - починає всі частини ім'я з великої літери;
+     * 2 - замінює апострофи на правильний символ;
+     * 3 - шукає подвійну частину ім'я (де слова розділені дефісом) та починає другу частину з великої літери;
+     * 4 - деякі частини по-батькові іноземних студентів робить маленькими буквами
+     **/
+    public static String correctCaseInName(String name){
         String processedFullString = "";
-        if(nameString != null && !nameString.isEmpty()){
-            String[] nameParts = nameString.split(" +");
+        if(name != null && !name.isEmpty()){
+            String[] nameParts = name.split(" +");
             for (String namePart: nameParts){
-                if (namePart.equals("оглу") || namePart.equals("огли") || namePart.equals("кизи")){
-                    processedFullString += namePart + " ";
+                String partInLower = namePart.toLowerCase();
+                if (partInLower.equals("оглу") || partInLower.equals("огли") || partInLower.equals("кизи")){
+                    processedFullString += partInLower + " ";
                     continue;
                 }
                 String wordOnProcessing = StringUtil.replaceSingleQuotes(namePart);
