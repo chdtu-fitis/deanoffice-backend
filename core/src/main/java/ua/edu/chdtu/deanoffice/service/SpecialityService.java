@@ -41,8 +41,4 @@ public class SpecialityService {
     public Speciality save(Speciality speciality) {
         return specialityRepository.save(speciality);
     }
-
-//    public Speciality getByCodeAndNameAndFacultyId(String codeAndName, int facultyId){
-//        return specialityRepository.findByCodeAndNameAndFacultyId(codeAndName, facultyId);
-//    }
 }
