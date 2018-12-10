@@ -6,10 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ImportedThesisDataDTO {
-    int id;
-    String fullName;
-    String thesisName;
-    String thesisNameEng;
-    String oldThesisName;
-    String fullSupervisorName;
+    private int id;
+    private String fullName;
+    private String thesisName;
+    private  String thesisNameEng;
+    private String oldThesisName;
+    private String fullSupervisorName;
 }

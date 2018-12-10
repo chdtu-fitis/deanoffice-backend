@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class AllThesisListsDTO {
-    List<ListThesisDataForGroupDTO> listThesisDataForGroupDTOs;
-    List<MissingThesisDataRedDTO> missingThesisDataRedDTOs;
+    private List<ListThesisDataForGroupDTO> listThesisDataForGroupDTOs;
+    private List<MissingThesisDataRedDTO> missingThesisDataRedDTOs;
 }

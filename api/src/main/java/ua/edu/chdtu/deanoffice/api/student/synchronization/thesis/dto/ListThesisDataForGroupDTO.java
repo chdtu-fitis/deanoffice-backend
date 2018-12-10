@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class ListThesisDataForGroupDTO {
-    String groupName;
-    List<ImportedThesisDataDTO> thesisDataBeans;
+    private String groupName;
+    private List<ImportedThesisDataDTO> thesisDataBeans;
 }

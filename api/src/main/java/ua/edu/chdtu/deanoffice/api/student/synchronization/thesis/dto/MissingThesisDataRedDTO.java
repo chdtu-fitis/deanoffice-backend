@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MissingThesisDataRedDTO {
-    ImportedThesisDataDTO thesisPrimaryData;
-    String message;
+    private ImportedThesisDataDTO thesisPrimaryData;
+    private String message;
 }
