@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EdeboDiplomaNumberSynchronizationService {
@@ -49,6 +50,8 @@ public class EdeboDiplomaNumberSynchronizationService {
             for (DiplomaImportData importData : diplomaImportData) {
                 addSynchronizationReportForDiplomaImportedData(importData, diplomaSynchronizationReport, facultyName);
             }
+
+            sortingDiplomaAndStudentSynchronizedData(diplomaSynchronizationReport);
 
             return diplomaSynchronizationReport;
         } catch (Docx4JException | IOException e) {
@@ -167,5 +170,22 @@ public class EdeboDiplomaNumberSynchronizationService {
             }
         }
         return true;
+    }
+
+    private void sortingDiplomaAndStudentSynchronizedData(EdeboDiplomaNumberSynchronizationReport edeboDataSyncronizationReport){
+        edeboDataSyncronizationReport.setDiplomaAndStudentSynchronizedDataBeans(
+                edeboDataSyncronizationReport.getDiplomaAndStudentSynchronizedDataBeans()
+                        .stream().sorted((sd1,sd2) -> (
+                                sd1.getGroupName() + " "
+                                + sd1.getSurname() + " "
+                                + sd1.getName() + " "
+                                + sd1.getPatronimic())
+                        .compareTo(
+                                sd1.getGroupName() + " "
+                                        + sd1.getSurname() + " "
+                                        + sd1.getName() + " "
+                                        + sd1.getPatronimic()))
+                        .collect(Collectors.toList())
+        );
     }
 }
