@@ -12,7 +12,6 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.ListThesis
 import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.MissingThesisDataRedDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.thesis.dto.ThesisDataForSaveDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.ThesisImportService;
@@ -52,10 +51,10 @@ public class ThesisController {
             AllThesisListsDTO allThesisListsDTO = new AllThesisListsDTO();
             thesisReport = thesisImportService.getThesisImportReport(uploadFile.getInputStream(), user.getFaculty().getId());
             List<ListThesisDataForGroupDTO> importedThesisDataDTOs = map(
-                    thesisReport.getThesisGreen(),
+                    thesisReport.getThesisDataForImportGreen(),
                     ListThesisDataForGroupDTO.class);
             List<MissingThesisDataRedDTO> missingThesisDataRedDTOs = map(
-                    thesisReport.getThesisRedWithMessage(),
+                    thesisReport.getThesisDataWithMessageRed(),
                     MissingThesisDataRedDTO.class);
             allThesisListsDTO.setListThesisDataForGroupDTOs(importedThesisDataDTOs);
             allThesisListsDTO.setMissingThesisDataRedDTOs(missingThesisDataRedDTOs);

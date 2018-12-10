@@ -4,12 +4,12 @@ import lombok.Getter;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ThesisDataBean;
 
 @Getter
-public class RedThesisWithMessageBean {
+public class ThesisDataWithMessageBean {
     private ThesisDataBean thesisPrimaryData;
     private String message;
 
-    public RedThesisWithMessageBean(){}
-    public RedThesisWithMessageBean(String message, ThesisDataBean thesisPrimaryData){
+    public ThesisDataWithMessageBean(){}
+    public ThesisDataWithMessageBean(String message, ThesisDataBean thesisPrimaryData){
         this.message = message;
         this.thesisPrimaryData = thesisPrimaryData;
     }

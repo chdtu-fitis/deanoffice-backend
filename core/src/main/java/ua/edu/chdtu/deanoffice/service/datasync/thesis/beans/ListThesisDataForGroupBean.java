@@ -7,11 +7,11 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ListThesisDatasForGroupBean {
+public class ListThesisDataForGroupBean {
     private String groupName;
     private List<ThesisDataBean> thesisDataBeans;
 
-    public ListThesisDatasForGroupBean(String groupName, List<ThesisDataBean> thesisDataBeans){
+    public ListThesisDataForGroupBean(String groupName, List<ThesisDataBean> thesisDataBeans){
         this.groupName = groupName;
         this.thesisDataBeans = thesisDataBeans;
     }

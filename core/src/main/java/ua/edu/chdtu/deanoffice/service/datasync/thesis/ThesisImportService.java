@@ -9,9 +9,9 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ListThesisDatasForGroupBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ListThesisDataForGroupBean;
 import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ThesisDataBean;
-import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.RedThesisWithMessageBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ThesisDataWithMessageBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
@@ -75,9 +75,16 @@ public class ThesisImportService {
                 List<Object> allTableCells = TemplateUtil.getAllElementsFromObject(tr, Tc.class);
                 for (int cellNumber = 1; cellNumber < allTableCells.size(); cellNumber++) {
                     rowsContent[cellNumber - 1] = "";
-                    List<Text> allCellText = TemplateUtil.getAllTextsFromObject(allTableCells.get(cellNumber));
-                    for (int textPice = 0; textPice < allCellText.size(); textPice++) {
-                        rowsContent[cellNumber - 1] += allCellText.get(textPice).getValue();
+                    List<Object> allParagraphsFromCell = TemplateUtil.getAllElementsFromObject(allTableCells.get(cellNumber), P.class);
+                    for (Object paragraph: allParagraphsFromCell){
+                        List<Text> allParagraphText = TemplateUtil.getAllTextsFromObject(paragraph);
+                        for (int textPice = 0; textPice < allParagraphText.size(); textPice++) {
+                            if (allParagraphText.size() == 1){
+                                rowsContent[cellNumber - 1] += allParagraphText.get(textPice).getValue().trim() + " ";
+                            } else {
+                                rowsContent[cellNumber - 1] += allParagraphText.get(textPice).getValue();
+                            }
+                        }
                     }
                 }
                 ThesisImportData thesisData = getDataAboutStudentFromRow(rowsContent, groupName);
@@ -112,19 +119,19 @@ public class ThesisImportService {
             );
             thesisDataBeans.add(new ThesisDataBean(studentDegree, importData.getThesisName(), importData.getThesisNameEng(), importData.getFullSupervisorName()));
         }
-        thesisReport.addThesisDataForImportToGreenList(new ListThesisDatasForGroupBean(groupName, thesisDataBeans));
+        thesisReport.addThesisDataForImportToGreenList(new ListThesisDataForGroupBean(groupName, thesisDataBeans));
     }
 
     private boolean addToRedListIfDataIsWrong(ThesisImportData thesisImportData, ThesisReport thesisReport, int facultyId) {
         if (thesisImportData.getGroupName().equals("")) {
             String message = "Відсутня назва групи";
-            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new ThesisDataWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         StudentGroup studentGroup = studentGroupService.getByNameAndFacultyId(thesisImportData.getGroupName(), facultyId);
         if (studentGroup == null) {
             String message = "Дана група не існує";
-            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new ThesisDataWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         StudentDegree studentDegree = studentDegreeService.getByStudentFullNameAndGroupId(
@@ -133,17 +140,17 @@ public class ThesisImportService {
         );
         if (studentDegree == null) {
             String message = "Даний студент відсутній";
-            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new ThesisDataWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         if (thesisImportData.getThesisName().equals("")) {
             String message = "Відсутня тема дипломної роботи українською мовою";
-            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new ThesisDataWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         if (thesisImportData.getThesisNameEng().equals("")) {
             String message = "Відсутня тема дипломної роботи англійською мовою";
-            thesisReport.addThesisWithMissingDataToRedList(new RedThesisWithMessageBean(message, new ThesisDataBean(thesisImportData)));
+            thesisReport.addThesisWithMissingDataToRedList(new ThesisDataWithMessageBean(message, new ThesisDataBean(thesisImportData)));
             return true;
         }
         return false;

@@ -2,8 +2,8 @@ package ua.edu.chdtu.deanoffice.service.datasync.thesis;
 
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ListThesisDatasForGroupBean;
-import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.RedThesisWithMessageBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ListThesisDataForGroupBean;
+import ua.edu.chdtu.deanoffice.service.datasync.thesis.beans.ThesisDataWithMessageBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,19 +11,19 @@ import java.util.List;
 @Getter
 @Setter
 public class ThesisReport {
-    private List <ListThesisDatasForGroupBean> thesisGreen;
-    private List <RedThesisWithMessageBean> thesisRedWithMessage;
+    private List <ListThesisDataForGroupBean> thesisDataForImportGreen;
+    private List <ThesisDataWithMessageBean> thesisDataWithMessageRed;
 
     public ThesisReport(){
-        thesisGreen = new ArrayList<>();
-        thesisRedWithMessage = new ArrayList<>();
+        thesisDataForImportGreen = new ArrayList<>();
+        thesisDataWithMessageRed = new ArrayList<>();
     }
 
-    public void addThesisDataForImportToGreenList(ListThesisDatasForGroupBean bean){
-        thesisGreen.add(bean);
+    public void addThesisDataForImportToGreenList(ListThesisDataForGroupBean bean){
+        thesisDataForImportGreen.add(bean);
     }
 
-    public void addThesisWithMissingDataToRedList(RedThesisWithMessageBean bean){
-        thesisRedWithMessage.add(bean);
+    public void addThesisWithMissingDataToRedList(ThesisDataWithMessageBean bean){
+        thesisDataWithMessageRed.add(bean);
     }
 }
