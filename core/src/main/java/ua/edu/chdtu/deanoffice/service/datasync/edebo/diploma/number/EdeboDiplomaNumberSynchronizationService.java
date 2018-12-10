@@ -131,7 +131,7 @@ public class EdeboDiplomaNumberSynchronizationService {
                     )
             );
         }
-        
+
         StudentDegree studentDegreefromDb = studentDegreeService.getByStudentFullNameAndSupplementNumber(
                 importData.getLastName(),
                 importData.getFirstName(),
