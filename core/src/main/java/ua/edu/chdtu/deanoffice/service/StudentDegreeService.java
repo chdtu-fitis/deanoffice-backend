@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -88,6 +89,10 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegree);
     }
 
+    @Transactional
+    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng, String fullSupervisor){
+        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng, fullSupervisor);
+    }
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
@@ -101,4 +106,10 @@ public class StudentDegreeService {
     public void assignRecordBookNumbersToStudents(Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers) {
         studentDegreeIdsAndRecordBooksNumbers.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
     }
+
+    public StudentDegree getByStudentFullNameAndGroupId(String fullName, int groupId){
+        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findByFullNameAndGroupId(fullName, groupId);
+        return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
+    }
+
 }
