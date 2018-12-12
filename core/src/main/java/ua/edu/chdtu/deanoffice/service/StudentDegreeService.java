@@ -91,7 +91,8 @@ public class StudentDegreeService {
     }
 
     public StudentDegree getBySupplementNumber(String supplementNumber){
-        return studentDegreeRepository.findBySupplementNumber(supplementNumber);
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findBySupplementNumber(supplementNumber);
+        return (studentDegrees.size() == 1) ? studentDegrees.get(0) : null;
     }
 
     @Transactional
