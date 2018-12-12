@@ -89,6 +89,11 @@ public class StudentDegreeService {
     }
 
     @Transactional
+    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng, String fullSupervisor){
+        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng, fullSupervisor);
+    }
+
+    @Transactional
     public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, boolean honor, Date diplomaDate, Date supplementDate) {
         studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, honor, diplomaDate, supplementDate);
     }
@@ -111,4 +116,10 @@ public class StudentDegreeService {
     public void assignRecordBookNumbersToStudents(Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers) {
         studentDegreeIdsAndRecordBooksNumbers.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
     }
+
+    public StudentDegree getByStudentFullNameAndGroupId(String fullName, int groupId){
+        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findByFullNameAndGroupId(fullName, groupId);
+        return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
+    }
+
 }
