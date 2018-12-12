@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class EdeboDiplomaNumberSynchronizationService {
+    private final String HONOR_OF_DIPLOMA = "відзнака";
     private static Logger log = LoggerFactory.getLogger(EdeboDiplomaNumberSynchronizationService.class);
     private final DocumentIOService documentIOService;
     private final StudentDegreeService studentDegreeService;
@@ -142,11 +143,15 @@ public class EdeboDiplomaNumberSynchronizationService {
                     )
             );
         } else {
+            boolean diplomaHonor = false;
+            if (importData.getAwardTypeId().toLowerCase().equals(HONOR_OF_DIPLOMA)){
+                diplomaHonor = true;
+            }
             diplomaSynchronizationReport.addBeanToSynchronizedList(
                     new DiplomaAndStudentSynchronizedDataBean(
                             studentDegreefromDb,
                             importData.getDocumentSeries() + " № " + importData.getFacultyName(),
-                            importData.getAwardTypeId()
+                            diplomaHonor
                     )
             );
         }
@@ -158,7 +163,7 @@ public class EdeboDiplomaNumberSynchronizationService {
         dataOnCheck.add(importData.getSpecialityName());
         dataOnCheck.add(importData.getDocumentNumber());
         dataOnCheck.add(importData.getDocumentSeries());
-        dataOnCheck.add(importData.getEducationId());// Чи необхідно перевіряти наявність відзнаки?
+        dataOnCheck.add(importData.getEducationId());
         for (String data : dataOnCheck) {
             if (Strings.isNullOrEmpty(data)) {
                 return false;

@@ -19,7 +19,7 @@ public class DiplomaAndStudentSynchronizedDataBean {
     private String groupName;
     private boolean honor;
 
-    public DiplomaAndStudentSynchronizedDataBean(StudentDegree studentDegree, String diplomaSeriesAndNumber, String honor){
+    public DiplomaAndStudentSynchronizedDataBean(StudentDegree studentDegree, String diplomaSeriesAndNumber, boolean honor) {
         Student student = studentDegree.getStudent();
         Speciality speciality = studentDegree.getSpecialization().getSpeciality();
         this.id = studentDegree.getId();
@@ -29,10 +29,10 @@ public class DiplomaAndStudentSynchronizedDataBean {
         this.diplomaSeriesAndNumber = diplomaSeriesAndNumber;
         this.fullSpecialityName = speciality.getName() + " " + speciality.getCode();
         this.groupName = studentDegree.getStudentGroup().getName();
-        this.honor = (honor.equals("-")) ? false : true;
+        this.honor = honor;
     }
 
-    public DiplomaAndStudentSynchronizedDataBean(DiplomaImportData importData){
+    public DiplomaAndStudentSynchronizedDataBean(DiplomaImportData importData) {
         this.surname = importData.getLastName();
         this.name = importData.getFirstName();
         this.patronimic = importData.getMiddleName();
