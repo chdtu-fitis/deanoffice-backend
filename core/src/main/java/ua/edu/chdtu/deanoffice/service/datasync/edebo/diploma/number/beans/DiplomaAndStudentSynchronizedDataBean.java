@@ -38,6 +38,6 @@ public class DiplomaAndStudentSynchronizedDataBean {
         this.patronimic = importData.getMiddleName();
         this.diplomaSeriesAndNumber = importData.getDocumentSeries() + " № " + importData.getDocumentNumber();
         this.fullSpecialityName = importData.getSpecialityName();
-        this.honor = (importData.getAwardTypeId().equals("-")) ? false : true;
+        this.honor = (importData.getAwardTypeId().toLowerCase().equals("відзнака".toLowerCase())) ? true : false;
     }
 }
