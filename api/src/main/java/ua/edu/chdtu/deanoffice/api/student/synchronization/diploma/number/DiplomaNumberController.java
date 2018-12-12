@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.Fo
 import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.MissingDataRedDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -36,6 +37,7 @@ public class DiplomaNumberController {
     public ResponseEntity diplomaNumberSynchronization(@RequestParam("file") MultipartFile uploadFile,
                                                        @CurrentUser ApplicationUser user){
         try{
+            validateInputDataForFileWithTheses(uploadFile);
             FormedListsWithDiplomaDataDTO listsWithDiplomaData = new FormedListsWithDiplomaDataDTO();
             EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = edeboDiplomaNumberSynchronizationService.getEdeboDiplomaNumberSynchronizationReport(
                     uploadFile.getInputStream(),
@@ -86,6 +88,13 @@ public class DiplomaNumberController {
         result.put("updatedDiplomaData",count);
         result.put("notUpdatedDiplomaData",notSavedDiplomaData);
         return result;
+    }
+
+    private void validateInputDataForFileWithTheses(MultipartFile uploadFile) throws OperationCannotBePerformedException {
+        if (uploadFile.isEmpty()) {
+            String message = "Файл не було надіслано";
+            throw new OperationCannotBePerformedException(message);
+        }
     }
 
     private ResponseEntity handleException(Exception exception) {
