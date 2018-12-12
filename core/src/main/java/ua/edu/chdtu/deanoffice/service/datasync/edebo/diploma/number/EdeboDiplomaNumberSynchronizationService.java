@@ -168,8 +168,8 @@ public class EdeboDiplomaNumberSynchronizationService {
     }
 
     private void sortingDiplomaAndStudentSynchronizedData(EdeboDiplomaNumberSynchronizationReport edeboDataSyncronizationReport){
-        edeboDataSyncronizationReport.setDiplomaAndStudentSynchronizedDataBeans(
-                edeboDataSyncronizationReport.getDiplomaAndStudentSynchronizedDataBeans()
+        edeboDataSyncronizationReport.setDiplomaAndStudentSynchronizedDataGreen(
+                edeboDataSyncronizationReport.getDiplomaAndStudentSynchronizedDataGreen()
                         .stream().sorted((sd1,sd2) -> (
                                 sd1.getGroupName() + " "
                                 + sd1.getSurname() + " "

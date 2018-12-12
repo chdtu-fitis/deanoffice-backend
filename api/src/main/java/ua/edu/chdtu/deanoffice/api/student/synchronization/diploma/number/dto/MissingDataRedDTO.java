@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class MissingDataRedDTO {
     private String message;
-    private DiplomaAndStudentSynchronizedDataDTO diplomaAndStudentSynchronizedDataDTO;
+    private DiplomaAndStudentSynchronizedDataDTO diplomaAndStudentSynchronizedDataBean;
 }

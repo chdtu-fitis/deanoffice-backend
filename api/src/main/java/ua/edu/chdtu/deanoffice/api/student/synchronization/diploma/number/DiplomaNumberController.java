@@ -47,11 +47,11 @@ public class DiplomaNumberController {
             );
 
             List<DiplomaAndStudentSynchronizedDataDTO> diplomaAndStudentSynchronizedDataDTOs = map(
-                    edeboDiplomaNumberSynchronizationReport.getDiplomaAndStudentSynchronizedDataBeans(),
+                    edeboDiplomaNumberSynchronizationReport.getDiplomaAndStudentSynchronizedDataGreen(),
                     DiplomaAndStudentSynchronizedDataDTO.class
             );
             List<MissingDataRedDTO> missingDataRedDTOs = map(
-                    edeboDiplomaNumberSynchronizationReport.getMissingDataBeans(),
+                    edeboDiplomaNumberSynchronizationReport.getMissingDataRed(),
                     MissingDataRedDTO.class
             );
             listsWithDiplomaData.setDiplomaAndStudentSynchronizedDataDTOs(diplomaAndStudentSynchronizedDataDTOs);

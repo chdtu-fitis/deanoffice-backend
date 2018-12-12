@@ -11,18 +11,18 @@ import java.util.List;
 @Getter
 @Setter
 public class EdeboDiplomaNumberSynchronizationReport {
-    private List<DiplomaAndStudentSynchronizedDataBean> diplomaAndStudentSynchronizedDataBeans;
-    private List<MissingDataBean> missingDataBeans;
+    private List<DiplomaAndStudentSynchronizedDataBean> diplomaAndStudentSynchronizedDataGreen;
+    private List<MissingDataBean> missingDataRed;
 
     public EdeboDiplomaNumberSynchronizationReport(){
-        diplomaAndStudentSynchronizedDataBeans = new ArrayList();
-        missingDataBeans = new ArrayList();
+        diplomaAndStudentSynchronizedDataGreen = new ArrayList();
+        missingDataRed = new ArrayList();
     }
 
     public void addBeanToSynchronizedList(DiplomaAndStudentSynchronizedDataBean bean){
-        diplomaAndStudentSynchronizedDataBeans.add(bean);
+        diplomaAndStudentSynchronizedDataGreen.add(bean);
     }
     public void addBeanToMissingDataList(MissingDataBean bean){
-        missingDataBeans.add(bean);
+        missingDataRed.add(bean);
     }
 }
