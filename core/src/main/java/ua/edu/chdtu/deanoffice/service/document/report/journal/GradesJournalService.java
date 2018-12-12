@@ -5,6 +5,13 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tc;
+import org.docx4j.wml.Tr;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
@@ -12,6 +19,10 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import org.springframework.core.io.Resource;
+import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,17 +30,27 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+
 @Service
 public class GradesJournalService {
 
+    private static final String TEMPLATE = TEMPLATES_PATH + "CourseList.docx";
+    private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
+
+    private DocumentIOService documentIOService;
     private StudentGroupService studentGroupService;
     private CourseForGroupService courseForGroupService;
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
-    public GradesJournalService(StudentGroupService studentGroupService, CourseForGroupService courseForGroupService){
+    public GradesJournalService(StudentGroupService studentGroupService,
+                                CourseForGroupService courseForGroupService,
+                                DocumentIOService documentIOService){
         this.studentGroupService = studentGroupService;
         this.courseForGroupService = courseForGroupService;
+        this.documentIOService = documentIOService;
     }
 
     private String getJavaTempDirectory() {
@@ -253,5 +274,228 @@ public class GradesJournalService {
             }
         }
     }
+
+//    public File createCoursesListsDocx(int degreeId, int year, int facultyId) throws IOException{
+//        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+//        if (studentGroups != null && studentGroups.size() != 0) {
+//            String filePath = getJavaTempDirectory() + "/" + "Predmeti-dlya-zhurnalu -" + year +
+//                    "kurs_" + getFileCreationDateAndTime() + ".docx";
+//            File file = new File(filePath);
+//
+//
+//
+//            return  file;
+//        }
+//        return null;
+//    }
+
+
+
+    public synchronized File createCoursesListsDocx(int degreeId, int year, int facultyId) throws Docx4JException, IOException {
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+        if (studentGroups != null && studentGroups.size() != 0) {
+            return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year),
+                    "Predmeti-dlya-zhurnalu -" + year +
+                    "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
+        }
+        return null;
+    }
+
+    private WordprocessingMLPackage prepareTemplate(String templateName, List<StudentGroup> studentGroups, int year) throws IOException, Docx4JException {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
+        formTable(template, studentGroups, year);
+        return template;
+    }
+
+    private void formTable(WordprocessingMLPackage template, List<StudentGroup> studentGroups, int year) {
+        Tbl tempTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+        if (tempTable == null) {
+            return;
+        }
+        List<Object> patternTableRows = getAllElementsFromObject(tempTable, Tr.class);
+
+        Tr patternGroupNameRow = (Tr) patternTableRows.get(0);
+        Tr patternSemesterRow = (Tr) patternTableRows.get(1);
+        Tr patternCourseRow = (Tr) patternTableRows.get(2);
+
+        int numberRowBlocksForGroups = studentGroups.size() / 6 + ((studentGroups.size() % 6 != 0) ? 1 : 0);
+
+        int rowToAddIndex = 3;
+        for (int i = 0; i < numberRowBlocksForGroups; i++) {
+            addRowToTable(tempTable, patternGroupNameRow, rowToAddIndex);
+            rowToAddIndex++;
+            int semester = year * 2 - 1;
+            for (int j = 0; j < 2; j++) {
+                addRowToTable(tempTable, patternSemesterRow, rowToAddIndex);
+                rowToAddIndex++;
+
+                int maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, i);
+
+                for (int k = 0; k < maximumNumberOfCourses; k++) {
+                    addRowToTable(tempTable, patternCourseRow, rowToAddIndex);
+                    rowToAddIndex++;
+                }
+                semester++;
+            }
+        }
+        tempTable.getContent().remove(patternGroupNameRow);
+        tempTable.getContent().remove(patternSemesterRow);
+        tempTable.getContent().remove(patternCourseRow);
+
+        fillTable(tempTable, studentGroups, year);
+    }
+
+    private void fillTable(Tbl tempTable, List<StudentGroup> studentGroups, int year) {
+        //Tbl tempTable = tempTable;//(Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+
+        List<Object> tableRows = getAllElementsFromObject(tempTable, Tr.class);
+
+        int numberRowForGroups = studentGroups.size() / 6;
+        if (numberRowForGroups % 6 != 0){
+            numberRowForGroups++;
+        }
+
+        int numberOfRow = 0;
+        int numberOfCell = 0;
+        int endOfGroup = 0;
+        int count = 0;
+
+
+        int maximumNumberOfCourses = 0;
+
+        Map<String, String> replace = new HashMap<>();
+
+        for (StudentGroup studentGroup: studentGroups) {
+            numberOfRow = numberOfRow - endOfGroup;
+            endOfGroup = 0;
+            Tr row = (Tr) tableRows.get(numberOfRow);
+            List<Object> cellsOfRow = getAllElementsFromObject(row, Tc.class);
+            Tc cell = (Tc) cellsOfRow.get(numberOfCell);
+            replace.clear();
+            replace.put("Name", studentGroup.getName());
+            replaceInCell(cell, replace);
+            numberOfRow++;
+            endOfGroup++;
+
+            int semester = year * 2 - 1;
+
+
+            for (int i = 0; i < 2; i++) {
+                row = (Tr) tableRows.get(numberOfRow);
+                cellsOfRow = getAllElementsFromObject(row, Tc.class);
+                cell = (Tc) cellsOfRow.get(numberOfCell);
+                replace.clear();
+                replace.put("Semester", String.valueOf(semester));
+                replaceInCell(cell, replace);
+                numberOfRow++;
+                endOfGroup++;
+
+
+                List<CourseForGroup> courseForGroups  = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+                courseForGroups.sort(sortCourseForGroup);
+                //if (numberOfCell % 6 == 0) {
+                    maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, count);
+                //}
+
+                for (int j = 0; j < maximumNumberOfCourses; j++) {
+                    row = (Tr) tableRows.get(numberOfRow);
+                    cellsOfRow = getAllElementsFromObject(row, Tc.class);
+                    cell = (Tc) cellsOfRow.get(numberOfCell * 2);
+                    replace.clear();
+                    try {
+                        replace.put("kc", getKnowledgeControlNameById(courseForGroups.get(j).getCourse().getKnowledgeControl().getId()));
+                    } catch (Exception e){
+                        replace.put("kc", "");
+                    }
+                    replaceInCell(cell, replace);
+                    cell = (Tc) cellsOfRow.get(numberOfCell * 2 + 1);
+                    replace.clear();
+                    try {//if (courseForGroups.get(j) != null){
+                        replace.put("Course", courseForGroups.get(j).getCourse().getCourseName().getName());
+                    } catch (Exception e) {//else {
+                        replace.put("Course", "");
+                    }
+                    replaceInCell(cell, replace);
+                    numberOfRow++;
+                    endOfGroup++;
+                }
+
+                semester++;
+            }
+            numberOfCell++;
+
+            if (numberOfCell == 6) {
+                numberOfCell = 0;
+                numberOfRow += 1 + 2 + determineTheMaximumNumberOfCourses(studentGroups, year * 2 - 1, count) +
+                    determineTheMaximumNumberOfCourses(studentGroups, year * 2, count);
+                count++;
+            }
+        }
+
+                for (int i = 0; i < 6 - (studentGroups.size() % 6); i++) {
+                    numberOfRow = numberOfRow - endOfGroup;
+                    endOfGroup = 0;
+                    Tr row = (Tr) tableRows.get(numberOfRow);
+                    List<Object> cellsOfRow = getAllElementsFromObject(row, Tc.class);
+                    Tc cell = (Tc) cellsOfRow.get(numberOfCell);
+                    replace.clear();
+                    replace.put("Name", "");
+                    replaceInCell(cell, replace);
+                    numberOfRow++;
+                    endOfGroup++;
+                    int semester = year * 2 - 1;
+                    for (int j = 0; j < 2; j++) {
+                        row = (Tr) tableRows.get(numberOfRow);
+                        cellsOfRow = getAllElementsFromObject(row, Tc.class);
+                        cell = (Tc) cellsOfRow.get(numberOfCell);
+                        replace.clear();
+                        replace.put("Semester", "");
+                        replaceInCell(cell, replace);
+                        numberOfRow++;
+                        endOfGroup++;
+
+                        maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, count);
+
+                        for (int k = 0; k < maximumNumberOfCourses; k++) {
+                            row = (Tr) tableRows.get(numberOfRow);
+                            cellsOfRow = getAllElementsFromObject(row, Tc.class);
+                            cell = (Tc) cellsOfRow.get(numberOfCell * 2);
+                            replace.clear();
+                            replace.put("kc", "");
+                            replaceInCell(cell, replace);
+                            cell = (Tc) cellsOfRow.get(numberOfCell * 2 + 1);
+                            replace.clear();
+                            replace.put("Course", "");
+                            replaceInCell(cell, replace);
+                            numberOfRow++;
+                            endOfGroup++;
+                        }
+                        semester++;
+                    }
+                    numberOfCell++;
+                }
+    }
+
+    private int determineTheMaximumNumberOfCourses(List<StudentGroup> studentGroups, int semester, int currentRowOfGroups) {
+        currentRowOfGroups = (currentRowOfGroups + 1) * 6;
+        int max = 0;
+
+        for (int i = currentRowOfGroups - 6; i < currentRowOfGroups; i++ ) {
+            try {
+                StudentGroup studentGroup = studentGroups.get(i);
+                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+
+                if (max < courseForGroups.size()) {
+                    max = courseForGroups.size();
+                }
+            } catch (Exception e) {
+                return max;
+            }
+        }
+
+        return max;
+    }
+
 
 }

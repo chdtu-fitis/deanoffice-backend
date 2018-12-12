@@ -208,6 +208,11 @@ public class TemplateUtil {
         reviewTable.getContent().add(rowNumber, workingRow);
     }
 
+    public static void addRowToTable(Tbl reviewTable, Tr templateRow, int rowNumber) {
+        Tr workingRow = XmlUtils.deepCopy(templateRow);
+        reviewTable.getContent().add(rowNumber, workingRow);
+    }
+
     public static void replaceInRow(Tr tableRow, Map<String, String> replacements) {
         List<Text> textElements = getTextsPlaceholdersFromContentAccessor(tableRow);
         replaceValuesInTextPlaceholders(textElements, replacements);
