@@ -95,6 +95,13 @@ public class TemplateUtil {
         return result;
     }
 
+    public static void emptyTableCell(Tc cell) {
+        List<Text> texts = getAllTextsFromObject(cell);
+        for (Text text : texts) {
+            text.setValue("");
+        }
+    }
+
     public static void replaceTextPlaceholdersInTemplate(WordprocessingMLPackage template,
                                                          Map<String, String> placeholdersValues,
                                                          Boolean replaceEmptyWithBlank) {

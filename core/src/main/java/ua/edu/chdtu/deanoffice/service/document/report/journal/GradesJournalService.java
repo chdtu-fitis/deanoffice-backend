@@ -21,6 +21,7 @@ import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import org.springframework.core.io.Resource;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 
 import java.io.File;
@@ -37,6 +38,7 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 public class GradesJournalService {
 
     private static final String TEMPLATE = TEMPLATES_PATH + "CourseList.docx";
+    private static final Integer THE_LAST_CELL_OF_ROW = 6;
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
     private DocumentIOService documentIOService;
@@ -47,7 +49,7 @@ public class GradesJournalService {
 
     public GradesJournalService(StudentGroupService studentGroupService,
                                 CourseForGroupService courseForGroupService,
-                                DocumentIOService documentIOService){
+                                DocumentIOService documentIOService) {
         this.studentGroupService = studentGroupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
@@ -86,10 +88,10 @@ public class GradesJournalService {
         PdfPCell pdfPCell2 = new PdfPCell();
         pdfPCell2.setBorder(0);
         PdfPTable table1 = new PdfPTable(2);
-        table1.setWidths(new int[] {30,2});
+        table1.setWidths(new int[]{30, 2});
         table1.setWidthPercentage(100);
         PdfPTable table2 = new PdfPTable(2);
-        table2.setWidths(new int[] {30,2});
+        table2.setWidths(new int[]{30, 2});
         table2.setWidthPercentage(100);
 
         addStudentsOnPdfTables(studentGroups, table1, table2);
@@ -249,17 +251,26 @@ public class GradesJournalService {
         return tableMain;
     }
 
-    private String getKnowledgeControlNameById(int id){
-        switch (id){
-            case 1: return "іспит";
-            case 2: return "залік";
-            case 3: return "КР";
-            case 4: return "КП";
-            case 5: return "ДЗ";
-            case 6: return "ДІ";
-            case 7: return "атест.";
-            case 8: return "практ.";
-            case 9: return "практ.";
+    private String getKnowledgeControlNameById(int id) {
+        switch (id) {
+            case 1:
+                return "іспит";
+            case 2:
+                return "залік";
+            case 3:
+                return "КР";
+            case 4:
+                return "КП";
+            case 5:
+                return "ДЗ";
+            case 6:
+                return "ДІ";
+            case 7:
+                return "атест.";
+            case 8:
+                return "практ.";
+            case 9:
+                return "практ.";
         }
         return null;
     }
@@ -287,7 +298,7 @@ public class GradesJournalService {
         if (studentGroups != null && studentGroups.size() != 0) {
             return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year),
                     "Predmeti-dlya-zhurnalu -" + year +
-                    "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
+                            "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
         }
         return null;
     }
@@ -309,7 +320,7 @@ public class GradesJournalService {
         Tr patternSemesterRow = (Tr) patternTableRows.get(1);
         Tr patternCourseRow = (Tr) patternTableRows.get(2);
 
-        int numberRowBlocksForGroups = studentGroups.size() / 6 + ((studentGroups.size() % 6 != 0) ? 1 : 0);
+        int numberRowBlocksForGroups = studentGroups.size() / THE_LAST_CELL_OF_ROW + ((studentGroups.size() % THE_LAST_CELL_OF_ROW != 0) ? 1 : 0);
 
         int rowToAddIndex = 3;
         for (int i = 0; i < numberRowBlocksForGroups; i++) {
@@ -337,142 +348,82 @@ public class GradesJournalService {
     }
 
     private void fillTable(Tbl tempTable, List<StudentGroup> studentGroups, int year) {
-        //Tbl tempTable = tempTable;//(Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
-
         List<Object> tableRows = getAllElementsFromObject(tempTable, Tr.class);
-
-        int numberRowForGroups = studentGroups.size() / 6;
-        if (numberRowForGroups % 6 != 0){
-            numberRowForGroups++;
-        }
 
         int numberOfRow = 0;
         int numberOfCell = 0;
         int endOfGroup = 0;
         int count = 0;
+        int maximumNumberOfCourses;
 
-
-        int maximumNumberOfCourses = 0;
-
-        Map<String, String> replace = new HashMap<>();
-
-        for (StudentGroup studentGroup: studentGroups) {
+        for (StudentGroup studentGroup : studentGroups) {
             numberOfRow = numberOfRow - endOfGroup;
             endOfGroup = 0;
-            Tr row = (Tr) tableRows.get(numberOfRow);
-            List<Object> cellsOfRow = getAllElementsFromObject(row, Tc.class);
-            Tc cell = (Tc) cellsOfRow.get(numberOfCell);
-            replace.clear();
-            replace.put("Name", studentGroup.getName());
-            replaceInCell(cell, replace);
+            replaceTextInCell(tableRows, numberOfRow, numberOfCell, "Name", studentGroup.getName());
             numberOfRow++;
             endOfGroup++;
-
             int semester = year * 2 - 1;
 
-
             for (int i = 0; i < 2; i++) {
-                row = (Tr) tableRows.get(numberOfRow);
-                cellsOfRow = getAllElementsFromObject(row, Tc.class);
-                cell = (Tc) cellsOfRow.get(numberOfCell);
-                replace.clear();
-                replace.put("Semester", String.valueOf(semester));
-                replaceInCell(cell, replace);
+                replaceTextInCell(tableRows, numberOfRow, numberOfCell, "Semester", "Семестер № " + String.valueOf(semester));
                 numberOfRow++;
                 endOfGroup++;
-
-
-                List<CourseForGroup> courseForGroups  = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
                 SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
                 courseForGroups.sort(sortCourseForGroup);
-                //if (numberOfCell % 6 == 0) {
-                    maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, count);
-                //}
+                maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, count);
 
                 for (int j = 0; j < maximumNumberOfCourses; j++) {
-                    row = (Tr) tableRows.get(numberOfRow);
-                    cellsOfRow = getAllElementsFromObject(row, Tc.class);
-                    cell = (Tc) cellsOfRow.get(numberOfCell * 2);
-                    replace.clear();
-                    try {
-                        replace.put("kc", getKnowledgeControlNameById(courseForGroups.get(j).getCourse().getKnowledgeControl().getId()));
-                    } catch (Exception e){
-                        replace.put("kc", "");
-                    }
-                    replaceInCell(cell, replace);
-                    cell = (Tc) cellsOfRow.get(numberOfCell * 2 + 1);
-                    replace.clear();
-                    try {//if (courseForGroups.get(j) != null){
-                        replace.put("Course", courseForGroups.get(j).getCourse().getCourseName().getName());
-                    } catch (Exception e) {//else {
-                        replace.put("Course", "");
-                    }
-                    replaceInCell(cell, replace);
+                    replaceTextInCell(tableRows, numberOfRow, numberOfCell * 2, "kc", j >= courseForGroups.size() ? "" : getKnowledgeControlNameById(courseForGroups.get(j).getCourse().getKnowledgeControl().getId()));
+                    replaceTextInCell(tableRows, numberOfRow, numberOfCell * 2 + 1, "Course", j >= courseForGroups.size() ? "" : courseForGroups.get(j).getCourse().getCourseName().getName());
                     numberOfRow++;
                     endOfGroup++;
                 }
-
                 semester++;
             }
             numberOfCell++;
 
-            if (numberOfCell == 6) {
+            if (numberOfCell == THE_LAST_CELL_OF_ROW) {
                 numberOfCell = 0;
                 numberOfRow += 1 + 2 + determineTheMaximumNumberOfCourses(studentGroups, year * 2 - 1, count) +
-                    determineTheMaximumNumberOfCourses(studentGroups, year * 2, count);
+                        determineTheMaximumNumberOfCourses(studentGroups, year * 2, count);
                 count++;
             }
         }
 
-                for (int i = 0; i < 6 - (studentGroups.size() % 6); i++) {
-                    numberOfRow = numberOfRow - endOfGroup;
-                    endOfGroup = 0;
-                    Tr row = (Tr) tableRows.get(numberOfRow);
-                    List<Object> cellsOfRow = getAllElementsFromObject(row, Tc.class);
-                    Tc cell = (Tc) cellsOfRow.get(numberOfCell);
-                    replace.clear();
-                    replace.put("Name", "");
-                    replaceInCell(cell, replace);
-                    numberOfRow++;
-                    endOfGroup++;
-                    int semester = year * 2 - 1;
-                    for (int j = 0; j < 2; j++) {
-                        row = (Tr) tableRows.get(numberOfRow);
-                        cellsOfRow = getAllElementsFromObject(row, Tc.class);
-                        cell = (Tc) cellsOfRow.get(numberOfCell);
-                        replace.clear();
-                        replace.put("Semester", "");
-                        replaceInCell(cell, replace);
-                        numberOfRow++;
-                        endOfGroup++;
+        if (studentGroups.size() % 6 != 0) {
+            addEmptyCellInTable(studentGroups, tableRows, numberOfRow, endOfGroup);
+        }
+    }
 
-                        maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, count);
+    private void replaceTextInCell(List<Object> tableRows, int numberOfRow, int numberOfCell, String patternText, String text) {
+        Tr row = (Tr) tableRows.get(numberOfRow);
+        List<Object> cellsOfRow = getAllElementsFromObject(row, Tc.class);
+        Tc cell = (Tc) cellsOfRow.get(numberOfCell);
+        Map<String, String> replace = new HashMap<>();
+        replace.put(patternText, text);
+        replaceInCell(cell, replace);
+    }
 
-                        for (int k = 0; k < maximumNumberOfCourses; k++) {
-                            row = (Tr) tableRows.get(numberOfRow);
-                            cellsOfRow = getAllElementsFromObject(row, Tc.class);
-                            cell = (Tc) cellsOfRow.get(numberOfCell * 2);
-                            replace.clear();
-                            replace.put("kc", "");
-                            replaceInCell(cell, replace);
-                            cell = (Tc) cellsOfRow.get(numberOfCell * 2 + 1);
-                            replace.clear();
-                            replace.put("Course", "");
-                            replaceInCell(cell, replace);
-                            numberOfRow++;
-                            endOfGroup++;
-                        }
-                        semester++;
-                    }
-                    numberOfCell++;
-                }
+    private void addEmptyCellInTable(List<StudentGroup> studentGroups, List<Object> tableRows,
+                                     int numberOfRow, int endOfGroup) {
+        numberOfRow = numberOfRow - endOfGroup;
+        for (int j = numberOfRow; j < numberOfRow + endOfGroup; j++) {
+            Tr row = (Tr) tableRows.get(j);
+            List<Object> cellsOfRow = getAllElementsFromObject(row, Tc.class);
+
+            for (int i = studentGroups.size() % THE_LAST_CELL_OF_ROW * cellsOfRow.size() / THE_LAST_CELL_OF_ROW; i < cellsOfRow.size(); i++) {
+                Tc cell = (Tc) cellsOfRow.get(i);
+                TemplateUtil.emptyTableCell(cell);
+            }
+        }
     }
 
     private int determineTheMaximumNumberOfCourses(List<StudentGroup> studentGroups, int semester, int currentRowOfGroups) {
-        currentRowOfGroups = (currentRowOfGroups + 1) * 6;
+        currentRowOfGroups = (currentRowOfGroups + 1) * THE_LAST_CELL_OF_ROW;
         int max = 0;
 
-        for (int i = currentRowOfGroups - 6; i < currentRowOfGroups; i++ ) {
+        for (int i = currentRowOfGroups - THE_LAST_CELL_OF_ROW; i < currentRowOfGroups; i++) {
             try {
                 StudentGroup studentGroup = studentGroups.get(i);
                 List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
