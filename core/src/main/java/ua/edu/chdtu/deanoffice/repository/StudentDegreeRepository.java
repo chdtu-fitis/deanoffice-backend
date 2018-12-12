@@ -87,7 +87,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
-            "SET sd.diplomaNumber = :diplomaNumber, sd.diplomaWithHonours = :diplomaWithHonours, sd.diplomaDate = :diplomaDate, sd.supplementDate = :supplementDate WHERE sd.id = :studentDegreeId")
+            "SET sd.diplomaNumber = :diplomaNumber, sd.diplomaWithHonours = :diplomaWithHonours," +
+            " sd.diplomaDate = :diplomaDate," +
+            " sd.supplementDate = :supplementDate " +
+            "WHERE sd.id = :studentDegreeId")
     void updateDiplomaNumber(
             @Param("studentDegreeId") int studentDegreeId,
             @Param("diplomaNumber") String diplomaNumber,
