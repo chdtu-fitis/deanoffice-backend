@@ -14,9 +14,7 @@ import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Worksheet;
 
-import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.SpecialityService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.beans.DiplomaAndStudentSynchronizedDataBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.beans.MissingDataBean;
@@ -132,10 +130,7 @@ public class EdeboDiplomaNumberSynchronizationService {
             );
         }
 
-        StudentDegree studentDegreefromDb = studentDegreeService.getByStudentFullNameAndSupplementNumber(
-                importData.getLastName(),
-                importData.getFirstName(),
-                importData.getMiddleName(),
+        StudentDegree studentDegreefromDb = studentDegreeService.getBySupplementNumber(
                 importData.getEducationId()
         );
         if (studentDegreefromDb == null) {
