@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +14,12 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.Mi
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 
@@ -28,15 +27,18 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 @RequestMapping("/students")
 public class DiplomaNumberController {
     private EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService;
+    private final StudentDegreeService studentDegreeService;
+
     @Autowired
-    public DiplomaNumberController(EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService){
+    public DiplomaNumberController(EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService, StudentDegreeService studentDegreeService) {
         this.edeboDiplomaNumberSynchronizationService = edeboDiplomaNumberSynchronizationService;
+        this.studentDegreeService = studentDegreeService;
     }
 
     @PostMapping("/edebo-diploma-number-synchronization")
     public ResponseEntity diplomaNumberSynchronization(@RequestParam("file") MultipartFile uploadFile,
-                                                       @CurrentUser ApplicationUser user){
-        try{
+                                                       @CurrentUser ApplicationUser user) {
+        try {
             validateInputDataForFileWithTheses(uploadFile);
             FormedListsWithDiplomaDataDTO listsWithDiplomaData = new FormedListsWithDiplomaDataDTO();
             EdeboDiplomaNumberSynchronizationReport edeboDiplomaNumberSynchronizationReport = edeboDiplomaNumberSynchronizationService.getEdeboDiplomaNumberSynchronizationReport(
@@ -54,9 +56,8 @@ public class DiplomaNumberController {
             );
             listsWithDiplomaData.setDiplomaAndStudentSynchronizedDataDTOs(diplomaAndStudentSynchronizedDataDTOs);
             listsWithDiplomaData.setMissingDataRedDTOs(missingDataRedDTOs);
-
             return ResponseEntity.ok(listsWithDiplomaData);
-        } catch (Exception exception){
+        } catch (Exception exception) {
             return handleException(exception);
         }
 
@@ -64,29 +65,33 @@ public class DiplomaNumberController {
 
     @PutMapping("/edebo-diploma-number-synchronization")
     public ResponseEntity diplomaNumberSaveChanges(@RequestBody DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS,
-                                                   @CurrentUser ApplicationUser user){
-        try{
-            Map<String,Object> savedDiploma = savedDiplomaData(diplomaNumberDataForSaveDTOS);
+                                                   @CurrentUser ApplicationUser user,
+                                                   @RequestParam(required = false) Date diplomaDate,
+                                                   @RequestParam(required = false) Date supplementDate) {
+        try {
+            Map<String, Object> savedDiploma = savedDiplomaData(diplomaNumberDataForSaveDTOS, diplomaDate, supplementDate);
             return ResponseEntity.ok(savedDiploma);
-        }catch (Exception exception){
+        } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    private Map<String,Object> savedDiplomaData(DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS){
+    private Map<String, Object> savedDiplomaData(DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS,
+                                                 @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET") Date diplomaDate,
+                                                 @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")  Date supplementDate) {
         int count = 0;
         List<String> notSavedDiplomaData = new ArrayList<>();
         for (DiplomaNumberDataForSaveDTO diplomaData : diplomaNumberDataForSaveDTOS) {
             try {
-
+                studentDegreeService.updateDiplomaNumber(diplomaData.getId(), diplomaData.getDiplomaSeriesAndNumber(), diplomaData.isHonor(), diplomaDate, supplementDate);
                 count++;
             } catch (Exception exception) {
                 notSavedDiplomaData.add(diplomaData.getSurname() + " " + diplomaData.getName() + " " + diplomaData.getPatronimic());
             }
         }
-        Map <String,Object> result = new HashMap<>();
-        result.put("updatedDiplomaData",count);
-        result.put("notUpdatedDiplomaData",notSavedDiplomaData);
+        Map<String, Object> result = new HashMap<>();
+        result.put("updatedDiplomaData", count);
+        result.put("notUpdatedDiplomaData", notSavedDiplomaData);
         return result;
     }
 

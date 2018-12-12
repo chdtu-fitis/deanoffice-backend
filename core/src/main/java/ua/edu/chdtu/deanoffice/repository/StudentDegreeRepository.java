@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
+import java.util.Date;
 import java.util.List;
 
 public interface StudentDegreeRepository extends JpaRepository<StudentDegree, Integer>, JpaSpecificationExecutor<StudentDegree> {
@@ -83,4 +84,14 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.recordBookNumber = :recordBookNumber WHERE sd.id = :studentDegreeId")
     void assignRecordBookNumbersToStudents(@Param("studentDegreeId") Integer studentDegreeId, @Param("recordBookNumber") String recordBookNumber);
+
+    @Modifying
+    @Query(value = "UPDATE StudentDegree sd " +
+            "SET sd.diplomaNumber = :diplomaNumber, sd.diplomaWithHonours = :diplomaWithHonours, sd.diplomaDate = :diplomaDate, sd.supplementDate = :supplementDate WHERE sd.id = :studentDegreeId")
+    void updateDiplomaNumber(
+            @Param("studentDegreeId") int studentDegreeId,
+            @Param("diplomaNumber") String diplomaNumber,
+            @Param("diplomaWithHonours") boolean diplomaWithHonours,
+            @Param("diplomaDate") Date diplomaDate,
+            @Param("supplementDate") Date supplementDate);
 }

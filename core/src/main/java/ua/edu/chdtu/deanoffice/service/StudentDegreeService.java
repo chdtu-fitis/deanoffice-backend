@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,14 +50,14 @@ public class StudentDegreeService {
     private String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
         String message = "";
         message += Strings.isNullOrEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома. " : "";
-        message += (studentDegree.getDiplomaDate()==null) ? "Дата диплома. " : "";
-        message += (studentDegree.getPreviousDiplomaDate()==null) ? "Попередня дата диплома. " : "";
+        message += (studentDegree.getDiplomaDate() == null) ? "Дата диплома. " : "";
+        message += (studentDegree.getPreviousDiplomaDate() == null) ? "Попередня дата диплома. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getPreviousDiplomaNumber()) ? "Попередній номер диплома. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getPreviousDiplomaIssuedBy()) ? "Попередній диплом виданий. " : "";
-        message += (studentDegree.getAdmissionDate()==null) ? "Дата вступу. " : "";
-        message += (studentDegree.getProtocolDate()==null) ? "Дата протокола. " : "";
+        message += (studentDegree.getAdmissionDate() == null) ? "Дата вступу. " : "";
+        message += (studentDegree.getProtocolDate() == null) ? "Дата протокола. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
-        message += (studentDegree.getSupplementDate()==null) ? "Дата додатка. " : "";
+        message += (studentDegree.getSupplementDate() == null) ? "Дата додатка. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
@@ -73,9 +75,9 @@ public class StudentDegreeService {
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
                 .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability));
     }
-  
-    public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){
-        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
+
+    public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
+        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active, studentId, specializationId);
     }
 
     public StudentDegree save(StudentDegree studentDegree) {
@@ -86,11 +88,16 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegree);
     }
 
-    public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
+    @Transactional
+    public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, boolean honor, Date diplomaDate, Date supplementDate) {
+        studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, honor, diplomaDate, supplementDate);
+    }
+
+    public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId) {
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
 
-    public StudentDegree getBySupplementNumber(String supplementNumber){
+    public StudentDegree getBySupplementNumber(String supplementNumber) {
         return studentDegreeRepository.findBySupplementNumber(supplementNumber);
     }
 
