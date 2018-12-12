@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -64,15 +66,19 @@ public class StudentController {
     @JsonView(StudentView.Personal.class)
     @GetMapping("/{student_id}")
     public ResponseEntity getStudentsById(@PathVariable("student_id") Integer studentId) {
-        Student student = studentService.findById(studentId);
-        return ResponseEntity.ok(map(student, StudentDTO.class));
+        try {
+            Student student = studentService.findById(studentId);
+            return ResponseEntity.ok(map(student, StudentDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @PutMapping
     public ResponseEntity updateStudent(@RequestBody Student student) {
         try {
             if (student.getId() == 0) {
-                ExceptionHandlerAdvice.handleException("Student`s id must not be null", StudentController.class);
+                handleException(new OperationCannotBePerformedException("Не можна змінити дані неіснуючого студента"));
             }
             studentService.save(student);
             return ResponseEntity.ok().build();
@@ -93,11 +99,15 @@ public class StudentController {
 
     @GetMapping("/{student_id}/photo")
     public ResponseEntity getStudentPhoto(@PathVariable(value = "student_id") Integer id) {
-        Student student = studentService.findById(id);
-        return ResponseEntity.ok().body(student.getPhotoUrl());
+        try {
+            Student student = studentService.findById(id);
+            return ResponseEntity.ok().body(student.getPhotoUrl());
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, StudentController.class);
+        return ExceptionHandlerAdvice.handleException(exception, StudentController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

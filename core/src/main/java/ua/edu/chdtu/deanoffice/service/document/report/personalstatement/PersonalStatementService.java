@@ -10,9 +10,11 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -33,120 +35,112 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
 public class PersonalStatementService {
-
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "PersonalStatement.docx";
-
+    private static final int NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE = 10;
+    private static final int NUMBER_OF_MANDATORY_ROWS_IN_TABLE = 20;
     @Autowired
-    private GradeService gradeService;
-
-    @Autowired
-    private StudentDegreeService studentDegreeService;
-
-    @Autowired
-    private StudentGroupService studentGroupService;
-
+    private StudentDegreeRepository studentDegreeRepository;
     @Autowired
     private CourseRepository courseRepository;
-
+    @Autowired
+    private GradeService gradeService;
+    @Autowired
+    private StudentDegreeService studentDegreeService;
+    @Autowired
+    private StudentGroupService studentGroupService;
     @Autowired
     private DocumentIOService documentIOService;
-
     @Autowired
     private CourseForGroupService courseForGroupService;
 
-    public File formDocument(Integer year, List<Integer> groupIds)
+    public File formDocument(Integer year, List<Integer> studentDegreeIds)
             throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
-        YearGrades yearGrades = new YearGrades(getGradeMap(year, groupIds, SemesterType.FIRST), getGradeMap(year, groupIds, SemesterType.SECOND));
-        generateTables(template, yearGrades);
-        return documentIOService.saveDocumentToTemp(template, transliterate(generateFileName(groupIds)), FileFormatEnum.DOCX);
+        YearGrades yearGrades = new YearGrades(getGradeMap(year, studentDegreeIds, SemesterType.FIRST), getGradeMap(year, studentDegreeIds, SemesterType.SECOND));
+        generateTables(template, yearGrades, year);
+        Set<StudentGroup> groups = yearGrades.getGradeMapForFirstSemester().keySet().stream().map(sd -> sd.getStudentGroup()).collect(Collectors.toSet());
+        return documentIOService.saveDocumentToTemp(template, transliterate(generateFileName(groups)), FileFormatEnum.DOCX);
     }
 
-    private String generateFileName(List<Integer> groupIds) {
+    private String generateFileName(Set<StudentGroup> groups) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("PersonalStatement_");
-        groupIds.forEach(groupId -> {
-            stringBuilder.append(studentGroupService.getById(groupId).getName()).append("_");
+        stringBuilder.append("PersonalFile_");
+        groups.forEach(groupId -> {
+            stringBuilder.append(groupId.getName()).append("_");
         });
         return stringBuilder.toString();
     }
 
-    private Map<StudentDegree, List<Grade>> getGradeMap(Integer year, List<Integer> groupIds, SemesterType semesterType) {
-        List<Integer> studentDegreeIds =
-                groupIds.stream().map(groupId -> studentDegreeService.getAllByGroupId(groupId)).
-                        collect(Collectors.toList()).stream().flatMap(Collection::stream).collect(Collectors.toList())
-                        .stream().map(BaseEntity::getId).sorted().collect(Collectors.toList());
-
-        List<Integer> courseIds = groupIds.stream().map(groupId ->
-                courseRepository.getByGroupIdAndSemester(groupId,
-                        getSemesterByYearForGroup(year, studentGroupService.getById(groupId)) + semesterType.getNumber() - 1))
-                .collect(Collectors.toList())
-                .stream().flatMap(Collection::stream)
-                .collect(Collectors.toList())
-                .stream().map(BaseEntity::getId)
-                .collect(Collectors.toList());
-
-        if (courseIds.size() > 0) {
-            return gradeService.getGradeMapForStudents(studentDegreeIds, courseIds);
-        } else return new HashMap<>();
+    private Map<StudentDegree, List<Grade>> getGradeMap(Integer year, List<Integer> studentDegreeIds, SemesterType semesterType) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(studentDegreeIds);
+        Map<StudentGroup, List<StudentDegree>> groupsWithStudents = studentDegrees.stream().collect(Collectors.groupingBy(sd -> sd.getStudentGroup()));
+        Map<StudentGroup, List<Integer>> groupsWithStudentIds = groupsWithStudents.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey(),
+                entry -> entry.getValue().stream().map(BaseEntity::getId).collect(Collectors.toList())
+        ));
+        Set<StudentGroup> groups = groupsWithStudents.keySet();
+        Map<StudentGroup, List<Integer>> courseIdsForGroups = groups.stream().collect(Collectors.toMap(
+                group -> group,
+                group -> courseRepository.getByGroupIdAndSemester(group.getId(),getSemesterByYearForGroup(year, group) + semesterType.getNumber() - 1)
+                        .stream()
+                        .map(BaseEntity::getId)
+                        .collect(Collectors.toList())
+        ));
+        return gradeService.getGradeMapForStudents(groupsWithStudentIds, courseIdsForGroups);
     }
 
-
-    private void generateTables(WordprocessingMLPackage template, YearGrades yearGrades) {
+    private void generateTables(WordprocessingMLPackage template, YearGrades yearGrades, Integer year) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
         List<StudentDegree> studentDegrees = new ArrayList<>(yearGrades.getGradeMapForFirstSemester().keySet());
         studentDegrees.sort(new GroupStudentDegreeComparator());
         for (StudentDegree studentDegree : studentDegrees) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, studentDegree.getStudent());
-            formFirstSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree));
-            formSecondSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree));
+            formSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree), year, SemesterType.FIRST);
+            formSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year, SemesterType.SECOND);
+            fillLastRow(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year);
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
     }
 
     private void fillFirstRow(Tbl table, Student student) {
-        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        replaceInRow(tableRows.get(0), getStudentDictionary(student));
+            List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+            replaceInRow(tableRows.get(0), getStudentDictionary(student));
     }
 
-    private void formFirstSemesterInTable(Tbl table, List<Grade> grades) {
+    private void formSemesterInTable(Tbl table, List<Grade> grades, Integer year, SemesterType semesterType) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        Tr rowToCopy = tableRows.get(2);
-        int currentIndex = 2;
-        for (Grade grade : grades) {
-            Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            fillRowByGrade(newRow, grade);
-            table.getContent().add(currentIndex, newRow);
-            currentIndex++;
+        int currentIndex = 2, rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE;
+        if(semesterType == SemesterType.SECOND) {
+           currentIndex = tableRows.size() - 2;
+           rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_TABLE;
         }
-        table.getContent().remove(currentIndex);
-        table.getContent().remove(2);
-        table.getContent().remove(1);
-    }
-
-    private void formSecondSemesterInTable(Tbl table, List<Grade> grades) {
-        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        int currentIndex = tableRows.size() - 1;
         Tr rowToCopy = tableRows.get(currentIndex);
-        fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0));
-        for (Grade grade : grades.subList(0, grades.size() - 2)) {
+        fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
+        for (Grade grade : grades.subList(1, grades.size())) {
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            fillRowByGrade(newRow, grade);
+            fillRowByGrade(newRow, grade, year);
+            table.getContent().add(currentIndex, newRow);
+            currentIndex++;
+        }
+        for(int i = currentIndex; i < rowNumber; i++){
+            Tr newRow = XmlUtils.deepCopy(rowToCopy);
+            fillRowByLost(newRow);
             table.getContent().add(currentIndex, newRow);
             currentIndex++;
         }
         table.getContent().remove(currentIndex);
     }
 
-    private void fillRowByGrade(Tr row, Grade grade) {
-        replaceInRow(row, getGradeDictionary(grade));
-    }
-
-
-    private Map<String, String> getGradeDictionary(Grade grade) {
+    private Map<String, String> getGradeDictionary(Grade grade, Integer year) {
         Map<String, String> result = new HashMap<>();
+        result.put("sy","НАВЧАЛЬНИЙ РІК");
+        String gradeNumberYear = "";
+        gradeNumberYear = getYearName(getStudentStudyYear(grade.getStudentDegree(), year)).toUpperCase()+" "+year+"-"+(year+1);
+        result.put("f", getSemesterName(getStudentStudyYear(grade.getStudentDegree(), year)*2).toUpperCase());
+        result.put("s", getSemesterName((getStudentStudyYear(grade.getStudentDegree(), year)*2)+1).toUpperCase());
+        result.put("n",gradeNumberYear);
         result.put("subj", grade.getCourse().getCourseName().getName());
         result.put("h", resolveHoursField(grade));
         result.put("c", grade.getCourse().getCredits().toString());
@@ -169,41 +163,43 @@ public class PersonalStatementService {
         return result;
     }
 
-    private String resolveHoursField(Grade grade) {
-        String result = "";
-        String hours = grade.getCourse().getHours().toString();
-        String practiceSignature = "пр";
-        switch (grade.getCourse().getKnowledgeControl().getId()) {
-            case 1:
-                result = hours;
-                break;
-            case 2:
-                result = hours;
-                break;
-            case 3:
-                result = "КР";
-                break;
-            case 4:
-                result = "КП";
-                break;
-            case 5:
-                result = hours;
-                break;
-            case 6:
-                result = hours;
-                break;
-            case 7:
-                result = hours;
-                break;
-            case 8:
-                result = practiceSignature;
-                break;
-            case 9:
-                result = practiceSignature;
-                break;
-
-        }
+    private Map<String, String> getLostDictionary() {
+        Map<String, String> result = new HashMap<>();
+        result.put("subj", "");
+        result.put("h", "");
+        result.put("c","");
+        result.put("g", "");
+        result.put("p","");
+        result.put("e", "");
+        result.put("d", "");
         return result;
+    }
+
+    private void fillRowByGrade(Tr row, Grade grade, Integer year) {
+        replaceInRow(row, getGradeDictionary(grade, year));
+    }
+
+    private void fillRowByLost(Tr row) {
+        replaceInRow(row, getLostDictionary());
+    }
+
+    private String resolveHoursField(Grade grade) {
+        switch (grade.getCourse().getKnowledgeControl().getId()) {
+            case Constants.COURSEWORK:
+                return "КР";
+            case Constants.COURSE_PROJECT:
+                return "КП";
+            case Constants.INTERNSHIP:
+            case Constants.NON_GRADED_INTERNSHIP:
+                return "пр";
+            case Constants.EXAM:
+            case Constants.CREDIT:
+            case Constants.DIFFERENTIATED_CREDIT :
+            case Constants.STATE_EXAM:
+            case Constants.ATTESTATION:
+            default:
+                return grade.getCourse().getHours().toString();
+        }
     }
 
     private Map<String, String> getStudentDictionary(Student student) {
@@ -212,18 +208,41 @@ public class PersonalStatementService {
         return result;
     }
 
+    private void fillLastRow(Tbl table, List<Grade> grades, Integer year) {
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        replaceInRow(tableRows.get(tableRows.size()-1), getLastRowDictionary(year,grades.get(0)));
+    }
+
+    private Map<String, String> getLastRowDictionary(Integer year, Grade grade) {
+        Map<String, String> result = new HashMap<>();
+        result.put("nc", "Переведений на "+ getYearName((getStudentStudyYear(grade.getStudentDegree(), year+1))) +" курс. Наказ від «_____»________20___року №____");
+        return result;
+    }
 
     private Integer getSemesterByYearForGroup(Integer year, StudentGroup studentGroup) {
-        return (year - studentGroup.getCreationYear()) * 2 + 1;
+        return (year - studentGroup.getCreationYear() + studentGroup.getBeginYears() - 1) * 2 + 1;
+    }
+
+    public int getStudentStudyYear(StudentDegree studentDegree, int year) {
+        return year - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears()-1;
+    }
+
+    private String getYearName(Integer year){
+        final String[] YEAR_NAMES = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий"};
+        return YEAR_NAMES[year];
+    }
+
+    private String getSemesterName(Integer semester){
+        final String[] SEMESTER_NAMES = {"перший", "другий", "третій", "четвертий", "п'ятий", "шостий", "сьомий", "восьмий",
+                "дев'ятий", "десятий", "одинадцятий", "дванадцятий"};
+        return SEMESTER_NAMES[semester];
     }
 
     @Getter
     private enum SemesterType {
         FIRST(1),
         SECOND(2);
-
         private int number;
-
         SemesterType(int number) {
             this.number = number;
         }

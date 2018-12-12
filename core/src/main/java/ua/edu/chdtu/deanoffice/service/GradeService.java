@@ -8,14 +8,11 @@ import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-
 
 @Service
 public class GradeService {
@@ -79,7 +76,6 @@ public class GradeService {
 
     public List<Grade> getAllDifferentiatedGrades(Integer studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
-        Student student = studentDegree.getStudent();
         List<Integer> knowledgeControlTypes = Arrays.asList(Constants.EXAM, Constants.DIFFERENTIATED_CREDIT, Constants.COURSEWORK, Constants.COURSE_PROJECT,
                 Constants.ATTESTATION, Constants.INTERNSHIP, Constants.STATE_EXAM);
         List<Integer> courseIds = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId())
@@ -92,9 +88,19 @@ public class GradeService {
         return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentsIds, courseIds);
     }
 
-    public Map<StudentDegree, List<Grade>>getGradeMapForStudents(List<Integer> studentDegreeIds, List<Integer> courseIds){
-        return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream().collect(
-                Collectors.groupingBy(Grade::getStudentDegree,toList()));
+    public Map<StudentDegree, List<Grade>> getGradeMapForStudents(Map<StudentGroup, List<Integer>> groupsWithStudents, Map<StudentGroup, List<Integer>> courseIdsForGroup){
+        Map<StudentDegree, List<Grade>> result = new HashMap<StudentDegree, List<Grade>>();
+        for (StudentGroup group: groupsWithStudents.keySet()) {
+            List<Integer> studentDegreeIds = groupsWithStudents.get(group);
+            List<Integer> courseIds = courseIdsForGroup.get(group);
+            Map<StudentDegree, List<Grade>> oneGroupGrades = gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream()
+                    .sorted((g1,g2) -> new Integer(g1.getCourse().getKnowledgeControl().getId()).compareTo(g2.getCourse().getKnowledgeControl().getId()))
+                    .collect(Collectors.groupingBy(Grade::getStudentDegree,toList()));
+            result = Stream.concat(result.entrySet().stream(), oneGroupGrades.entrySet().stream()).collect(Collectors.toMap(
+                    entry -> entry.getKey(),
+                    entry -> entry.getValue()));
+        }
+        return result;
     }
 
     public List<Grade> insertGrades(List<Grade> grades) {

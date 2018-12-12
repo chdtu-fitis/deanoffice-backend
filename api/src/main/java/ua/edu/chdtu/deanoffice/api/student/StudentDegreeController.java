@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
@@ -22,13 +23,23 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -37,28 +48,38 @@ public class StudentDegreeController {
     private final StudentDegreeService studentDegreeService;
     private final StudentService studentService;
     private final StudentGroupService studentGroupService;
+    private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public StudentDegreeController(
             StudentDegreeService studentDegreeService,
             StudentService studentService,
-            StudentGroupService studentGroupService
-    ) {
+            StudentGroupService studentGroupService,
+            FacultyAuthorizationService facultyAuthorizationService) {
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @JsonView(StudentView.Simple.class)
     @GetMapping("/students/degrees")
     public ResponseEntity getActiveStudentsDegree(@CurrentUser ApplicationUser user) {
-        return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        try {
+            return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @JsonView(StudentView.Detail.class)
     @GetMapping("/students/degrees/more-detail")
     public ResponseEntity getActiveStudentsDegree_moreDetail(@CurrentUser ApplicationUser user) {
-        return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        try {
+            return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     private List<StudentDegreeDTO> getActiveStudentDegrees(int facultyId) {
@@ -129,37 +150,41 @@ public class StudentDegreeController {
         if (EducationDocument.isExist(studentDegree.getPreviousDiplomaType())) {
             return studentDegree.getPreviousDiplomaType();
         }
-        return EducationDocument.getPreviousDiplomaType(studentDegree.getSpecialization().getDegree().getId());
+        return EducationDocument.getForecastedDiplomaTypeByDegree(studentDegree.getSpecialization().getDegree().getId());
     }
 
     @JsonView(StudentView.Degrees.class)
     @GetMapping("/students/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
-        Student student = studentService.findById(studentId);
-        return ResponseEntity.ok(Mapper.map(student, StudentDTO.class));
+        try {
+            Student student = studentService.findById(studentId);
+            return ResponseEntity.ok(Mapper.map(student, StudentDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @JsonView(StudentView.Degrees.class)
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
-            @PathVariable(value = "id") Integer studentId,
-            @RequestBody List<StudentDegreeDTO> studentDegreesDTO
+            @PathVariable("id") Integer studentId,
+            @RequestBody List<StudentDegreeDTO> studentDegreesDTOs,
+            @CurrentUser ApplicationUser user
     ) {
-        if (checkId(studentDegreesDTO)) {
-            return ResponseEntity.unprocessableEntity().body("[StudentDegree]: Id not must be null");
-        }
-
         try {
-            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTO, StudentDegree.class);
-            Student student = studentService.findById(studentId);
+            validateStudentDegreesUpdates(studentDegreesDTOs);
+            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
 
+            Student student = studentService.findById(studentId);
             studentDegrees.forEach(studentDegree -> {
-                Integer groupId = studentDegreesDTO.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
+                Integer groupId = studentDegreesDTOs.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
                 studentDegree.setStudentGroup(getStudentGroup(groupId));
                 studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
                 studentDegree.setStudent(student);
+                studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
             });
 
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
             studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -167,26 +192,106 @@ public class StudentDegreeController {
         }
     }
 
-    private boolean checkId(List<StudentDegreeDTO> studentDegreeDTOs) {
-        for (StudentDegreeDTO sd : studentDegreeDTOs) {
-            if (sd.getId() == null) {
-                return true;
-            }
+    private void validateStudentDegreesUpdates(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
+        if (isAnyStudentDegreeMissingId(studentDegreesDTOs)) {
+            String exceptionMessage = "Отримано некоректну інформацію. Зверніться до адміністратора або розробника системи";
+            throw new OperationCannotBePerformedException(exceptionMessage);
         }
-        return false;
+    }
+
+
+    private boolean isAnyStudentDegreeMissingId(List<StudentDegreeDTO> studentDegreeDTOs) {
+        return studentDegreeDTOs.stream().anyMatch((studentDegreeDTO) -> studentDegreeDTO.getId() == null);
     }
 
     private StudentGroup getStudentGroup(Integer groupId) {
         return this.studentGroupService.getById(groupId);
     }
 
-    private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, StudentDegreeController.class);
-    }
-
     @GetMapping("/groups/{group_id}/students")
     public ResponseEntity getStudentsByGroupId(@PathVariable("group_id") Integer groupId) {
-        List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
-        return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
+        try {
+            List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
+            return ResponseEntity.ok(Mapper.map(students, StudentDegreeFullNameDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PostMapping("/group/{groupId}/add-students")
+    public ResponseEntity assignStudentsToGroup(
+            @PathVariable("groupId") Integer groupId,
+            @RequestBody Integer[] studentDegreeIds,
+            @CurrentUser ApplicationUser user
+            ) {
+        try {
+            validateInputDataForAssignStudentsToGroup(studentDegreeIds);
+            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(Arrays.asList(studentDegreeIds));
+            if (studentDegrees.isEmpty()) {
+                String message = "За переданими даними жодного студента не було знайдено для призначення групи. " +
+                        "Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            StudentGroup studentGroup = studentGroupService.getById(groupId);
+            if (Objects.isNull(studentGroup)) {
+                String message = "Групу для призначення не вдалося знайти. Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            facultyAuthorizationService.verifyAccessibilityOfGroupAndStudents(user, studentDegrees, studentGroup);
+            studentDegreeService.assignStudentsToGroup(studentDegrees, studentGroup);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PostMapping("/students/record-book-numbers")
+    public ResponseEntity assignRecordBookNumbersToStudents(
+            @RequestBody Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers,
+            @CurrentUser ApplicationUser user) {
+        try {
+            validateInputDataForAssignRecordBookNumbersToStudents(studentDegreeIdsAndRecordBooksNumbers);
+            List<StudentDegree> studentDegrees =
+                    studentDegreeService.getByIds(new ArrayList<>(studentDegreeIdsAndRecordBooksNumbers.keySet()));
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
+            if (studentDegrees.isEmpty()) {
+                String message = "За переданими даними жодного студента не було знайдено для призначення " +
+                        "номеру залікової книжки. Зверніться до адміністратора або розробника системи.";
+                throw new NotFoundException(message);
+            }
+            studentDegreeService.assignRecordBookNumbersToStudents(studentDegreeIdsAndRecordBooksNumbers);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    private void validateInputDataForAssignRecordBookNumbersToStudents(
+            Map<Integer, String> studentDegreeToRecordNumber
+    ) throws OperationCannotBePerformedException {
+        if (studentDegreeToRecordNumber.size() == 0) {
+            String message = "Для призначення номеру залікової книжки потрібно передати хоча б одного студента.";
+            throw new OperationCannotBePerformedException(message);
+        }
+        if (studentDegreeToRecordNumber.values().stream().anyMatch(item -> Objects.isNull(item) || item.isEmpty())) {
+            String message = "Номер залікової книжки не може бути порожнім.";
+            throw new OperationCannotBePerformedException(message);
+        }
+        Set<String> recordBookNumberSet = new HashSet<>(studentDegreeToRecordNumber.values());
+        if (recordBookNumberSet.size() != studentDegreeToRecordNumber.size()) {
+            String message = "Номер залікової книжки не може бути однаковим у декількох студентів";
+            throw new OperationCannotBePerformedException(message);
+        }
+    }
+
+    private void validateInputDataForAssignStudentsToGroup(Integer[] studentDegreeIds) throws OperationCannotBePerformedException {
+        if (studentDegreeIds.length == 0) {
+            String message = "Для призначення групи потрібно передати хоча б одного студента.";
+            throw new OperationCannotBePerformedException(message);
+        }
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, StudentDegreeController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
-import ua.edu.chdtu.deanoffice.exception.PageNotFoundException;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 
@@ -32,7 +32,7 @@ public class FacultyService {
 
     private void compareFacultyIds(Integer facultyId, Integer realFacultyId) throws Exception {
         if (realFacultyId == null) {
-            throw new PageNotFoundException("Факультет не знайдено");
+            throw new NotFoundException("Факультет не знайдено");
         } else if (realFacultyId.equals(facultyId)) {
             return;
         } else {
@@ -42,5 +42,8 @@ public class FacultyService {
 
     public Faculty getByName(String name) {
         return facultyRepository.findByName(name);
+    }
+    public Faculty getById(Integer id) {
+        return facultyRepository.findById(id);
     }
 }

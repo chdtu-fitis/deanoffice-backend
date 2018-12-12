@@ -31,7 +31,7 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 public class AcademicReferenceService {
 
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
-    private static final int INDEX_OF_TABLE_WITH_GRADES = 10;
+    private static final int INDEX_OF_TABLE_WITH_GRADES = 11;
     private static final String DOCUMENT_DELIMITER = "/";
     private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
@@ -81,6 +81,8 @@ public class AcademicReferenceService {
         result.put("studentNameEng", studentNameEng);
         result.put("facultyNameUkr", studentDegree.getSpecialization().getFaculty().getName());
         result.put("facultyNameEng", studentDegree.getSpecialization().getFaculty().getNameEng());
+        result.put("degreeUkr", studentDegree.getSpecialization().getDegree().getName());
+        result.put("degreeEng", studentDegree.getSpecialization().getDegree().getNameEng());
         String code = studentDegree.getSpecialization().getSpeciality().getCode();
         result.put("specialityUkr", code + " " + studentDegree.getSpecialization().getSpeciality().getName());
         result.put("specialityEng", code + " " + studentDegree.getSpecialization().getSpeciality().getNameEng());
@@ -88,6 +90,8 @@ public class AcademicReferenceService {
         result.put("educationalProgramEng", studentDegree.getSpecialization().getNameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
         result.put("individualNumber",studentDegree.getSupplementNumber());
+        result.put("countryOfBirthUkr", "Україна");
+        result.put("countryOfBirthEng", "Ukraine");
         result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
         result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());

@@ -1,8 +1,9 @@
 package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import lombok.Getter;
+import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataWithGroupBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.UnmatchedSecondaryDataStudentDegreeBlueBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
 
@@ -22,12 +23,13 @@ import java.util.List;
  */
 // add yellow case
 @Getter
+@Setter
 public class EdeboStudentDataSynchronizationReport {
-    private List<StudentDegreePrimaryDataBean> synchronizedStudentDegreesGreen;
+    private List<StudentDegreePrimaryDataWithGroupBean> synchronizedStudentDegreesGreen;
     private List<UnmatchedSecondaryDataStudentDegreeBlueBean> unmatchedSecondaryDataStudentDegreesBlue;
     private List<StudentDegree> noSuchStudentOrSuchStudentDegreeInDbOrange;
     private List<MissingPrimaryDataRedMessageBean> missingPrimaryDataRed;
-    private List<StudentDegreePrimaryDataBean> absentInFileStudentDegreesYellow;
+    private List<StudentDegreePrimaryDataWithGroupBean> absentInFileStudentDegreesYellow;
 
     public EdeboStudentDataSynchronizationReport() {
         synchronizedStudentDegreesGreen = new ArrayList<>();
@@ -37,7 +39,7 @@ public class EdeboStudentDataSynchronizationReport {
         absentInFileStudentDegreesYellow = new ArrayList<>();
     }
 
-    public void addSyncohronizedDegreeGreen(StudentDegreePrimaryDataBean bean) {
+    public void addSyncohronizedDegreeGreen(StudentDegreePrimaryDataWithGroupBean bean) {
         synchronizedStudentDegreesGreen.add(bean);
     }
 
@@ -49,47 +51,11 @@ public class EdeboStudentDataSynchronizationReport {
         noSuchStudentOrSuchStudentDegreeInDbOrange.add(studentDegreeFromData);
     }
 
-    public void addMissingPrimaryDataRed(MissingPrimaryDataRedMessageBean bean ) {
+    public void addMissingPrimaryDataRed(MissingPrimaryDataRedMessageBean bean) {
         missingPrimaryDataRed.add(bean);
     }
 
-    public void addAbsentInFileStudentDegreeYellow(StudentDegreePrimaryDataBean bean) {
+    public void addAbsentInFileStudentDegreeYellow(StudentDegreePrimaryDataWithGroupBean bean) {
         absentInFileStudentDegreesYellow.add(bean);
     }
-
-    public void clear() {
-        synchronizedStudentDegreesGreen.clear();
-        unmatchedSecondaryDataStudentDegreesBlue.clear();
-        noSuchStudentOrSuchStudentDegreeInDbOrange.clear();
-        missingPrimaryDataRed.clear();
-        absentInFileStudentDegreesYellow.clear();
-    }
-
-//    public StudentDegreePrimaryDataDto getKeyValuesStudentDegreeForFront(StudentDegree sdData){
-//        Student stud = sdData.getStudent();
-//        Specialization specialization = sdData.getSpecialization();
-//        Speciality speciality = sdData.getSpecialization().getSpeciality();
-//        return new StudentDegreePrimaryDataDto(stud.getSurname(), stud.getName(),
-//                stud.getPatronimic(), stud.getBirthDate(), sdData.getSpecialization().getDegree().getName(), speciality.getName(),
-//                (specialization.getCode().equals("")) ? specialization.getName() : specialization.getCode() + " " + specialization.getName() );
-//    }
-//
-//    public StudentDegreePrimaryDataBean getKeyValuesImportedData(ImportedData importedData){
-//        return new StudentDegreePrimaryDataBean(importedData.getLastName(),importedData.getFirstName(),importedData.getMiddleName(),
-//                importedData.getBirthday(),importedData.getQualificationGroupName(),importedData.getFullSpecialityName(),
-//                importedData.getFullSpecializationName(),importedData.getProgramName());
-//    }
-//
-//    public FullDbDataCrossedStudentDegreeDto getFullDbDataCrossedStudentDegreeForFront(StudentDegree sdData){
-//        Student stud = sdData.getStudent();
-//        Specialization specialization = sdData.getSpecialization();
-//        Speciality speciality = sdData.getSpecialization().getSpeciality();
-//        return new FullDbDataCrossedStudentDegreeDto(stud.getSurname(), stud.getName(),
-//                stud.getPatronimic(), stud.getBirthDate(), sdData.getSpecialization().getDegree().getName(), speciality.getName(),
-//                (specialization.getCode().equals("")) ? specialization.getName() : specialization.getCode() + " " + specialization.getName(),
-//                sdData.getDiplomaNumber(),sdData.getPayment(),sdData.getPreviousDiplomaDate(), sdData.getPreviousDiplomaType(), sdData.getSupplementNumber(),
-//                sdData.getAdmissionDate(),stud.getSurnameEng(),stud.getNameEng(),stud.getPatronimicEng());
-//    }
-
-
 }

@@ -9,6 +9,8 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -19,7 +21,7 @@ public class StudentDegreeDTO {
     private StudentDTO student;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private NamedDTO studentGroup;
-    @JsonView(StudentView.DetailAndDegree.class)
+    @JsonView(StudentView.SimpleAndDegrees.class)
     private String recordBookNumber;
     @JsonView(StudentView.DetailAndDegree.class)
     private String diplomaNumber;
@@ -62,10 +64,17 @@ public class StudentDegreeDTO {
     @JsonView(StudentView.Degrees.class)
     private String previousDiplomaIssuedBy;
     @JsonView(StudentView.Degrees.class)
+    private String previousDiplomaIssuedByEng;
+    @JsonView(StudentView.Degrees.class)
     private Date admissionDate;
 
     @JsonView(StudentView.Degrees.class)
     private Integer studentGroupId;
     @JsonView(StudentView.Degrees.class)
     private Integer specializationId;
+
+    @JsonView(StudentView.Degrees.class)
+    private boolean diplomaWithHonours;
+    @JsonView(StudentView.Degrees.class)
+    private Set<StudentPreviousUniversityDTO> studentPreviousUniversities = new HashSet<>();
 }

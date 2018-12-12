@@ -2,10 +2,7 @@ package ua.edu.chdtu.deanoffice.api.document.reportsjournal;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -17,9 +14,8 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.io.File;
 
 @RestController
-@RequestMapping("/documents/coursereport")
+@RequestMapping("/documents/exam-reports-journal-courses")
 public class ReportsJournalController extends DocumentResponseController {
-
     private ReportsCoursesService reportsCoursesService;
     private FacultyService facultyService;
 
@@ -28,17 +24,26 @@ public class ReportsJournalController extends DocumentResponseController {
         this.facultyService = facultyService;
     }
 
-    //TODO Нужно поправить на /groups/{group_id}/semester/{semester} или лучше на /groups/{group_id}?semester={semester}
-
-    @GetMapping("/groups/{group_id}/{semester}")
-    public ResponseEntity<Resource> generateForGroup(
-            @PathVariable("group_id") Integer groupId,
-            @PathVariable Integer semester,
-            @CurrentUser ApplicationUser user) {
+    @GetMapping("/groups/{groupId}")
+    public ResponseEntity<Resource> generateForGroup(@PathVariable Integer groupId,
+                                                     @RequestParam("semester") Integer semester,
+                                                     @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
             File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semester);
             return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/year/{year}/degree/{degreeId}")
+    public ResponseEntity<Resource> generateForYear(@PathVariable Integer year, @PathVariable Integer degreeId,
+                                                    @RequestParam("semester") int semester,
+                                                    @CurrentUser ApplicationUser user)  {
+        try {
+            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId, year, semester, user.getFaculty().getId());
+            return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
         }

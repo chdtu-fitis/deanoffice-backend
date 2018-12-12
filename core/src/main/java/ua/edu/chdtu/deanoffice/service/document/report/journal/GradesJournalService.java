@@ -45,6 +45,7 @@ public class GradesJournalService {
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
+    public GradesJournalService(StudentGroupService studentGroupService, CourseForGroupService courseForGroupService) {
     public GradesJournalService(StudentGroupService studentGroupService,
                                 CourseForGroupService courseForGroupService,
                                 DocumentIOService documentIOService){
@@ -72,7 +73,7 @@ public class GradesJournalService {
                 if (document != null)
                     document.close();
             }
-            return  file;
+            return file;
         }
         return null;
     }
@@ -110,7 +111,7 @@ public class GradesJournalService {
         boolean oneOrTwo = true;
         int sumOfCellsInTheTable1 = 0;
         int sumOfCellsInTheTable2 = 0;
-        for (StudentGroup studentGroup : studentGroups)  {
+        for (StudentGroup studentGroup : studentGroups) {
             List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
             PdfPCell groupNameCell = new PdfPCell(new Phrase(studentGroup.getName(), font));
             groupNameCell.setFixedHeight(28);
@@ -119,12 +120,12 @@ public class GradesJournalService {
             PdfPCell emptyCell = new PdfPCell();
             emptyCell.setFixedHeight(28);
             emptyCell.setBorder(0);
-            if (oneOrTwo){
+            if (oneOrTwo) {
                 sumOfCellsInTheTable1 = addCellToStudentsTable(table1, groupNameCell, emptyCell, sumOfCellsInTheTable1);
             } else {
                 sumOfCellsInTheTable2 = addCellToStudentsTable(table2, groupNameCell, emptyCell, sumOfCellsInTheTable2);
             }
-            for (StudentDegree studentDegree : studentDegrees){
+            for (StudentDegree studentDegree : studentDegrees) {
                 Phrase studentText = new Phrase(studentDegree.getStudent().getSurname() + " "
                         + studentDegree.getStudent().getName() + " "
                         + studentDegree.getStudent().getPatronimic(), font);
@@ -134,10 +135,10 @@ public class GradesJournalService {
                 PdfPCell isContractCell = new PdfPCell();
                 isContractCell.setFixedHeight(28);
                 isContractCell.setBorderWidthLeft(0);
-                if (studentDegree.getPayment() == Payment.CONTRACT){
+                if (studentDegree.getPayment() == Payment.CONTRACT) {
                     isContractCell.addElement(new Phrase("к", boldFont));
                 }
-                if (oneOrTwo){
+                if (oneOrTwo) {
                     sumOfCellsInTheTable1 = addCellToStudentsTable(table1, studentCell, isContractCell, sumOfCellsInTheTable1);
                 } else {
                     sumOfCellsInTheTable2 = addCellToStudentsTable(table2, studentCell, isContractCell, sumOfCellsInTheTable2);
@@ -147,7 +148,7 @@ public class GradesJournalService {
         }
     }
 
-    private int addCellToStudentsTable(PdfPTable table, PdfPCell cell1, PdfPCell cell2, int sumOfCellsInTheTable) throws DocumentException{
+    private int addCellToStudentsTable(PdfPTable table, PdfPCell cell1, PdfPCell cell2, int sumOfCellsInTheTable) throws DocumentException {
         table.addCell(cell1);
         table.addCell(cell2);
         return ++sumOfCellsInTheTable;
@@ -157,7 +158,7 @@ public class GradesJournalService {
         return new SimpleDateFormat(" dd-MM-yyyy HH-mm").format(new Date());
     }
 
-    public File createCoursesListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException{
+    public File createCoursesListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
@@ -172,12 +173,12 @@ public class GradesJournalService {
                 if (document != null)
                     document.close();
             }
-            return  file;
+            return file;
         }
         return null;
     }
 
-    private PdfPCell createPdfPCellForTableCoursesMain(){
+    private PdfPCell createPdfPCellForTableCoursesMain() {
         PdfPCell pdfPCell = new PdfPCell();
         pdfPCell.setBorder(0);
         pdfPCell.setPadding(0);
@@ -187,9 +188,9 @@ public class GradesJournalService {
     private PdfPTable createPdfPTableForCellsOfTableCoursesMain() throws DocumentException {
         PdfPTable pdfPTable = new PdfPTable(2);
         pdfPTable.setKeepTogether(true);
-        pdfPTable.setWidths(new int[] {1,10});
+        pdfPTable.setWidths(new int[]{1, 10});
         pdfPTable.setWidthPercentage(100);
-        return  pdfPTable;
+        return pdfPTable;
     }
 
     private PdfPTable addCoursesOnTable(List<StudentGroup> studentGroups, Document document, int year) throws DocumentException, IOException {
@@ -199,7 +200,8 @@ public class GradesJournalService {
         PdfPTable tableMain = new PdfPTable(6);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(562);
-        for (StudentGroup studentGroup: studentGroups){
+        int finishedCells = 0;
+        for (StudentGroup studentGroup : studentGroups) {
             PdfPCell cell = createPdfPCellForTableCoursesMain();
             PdfPTable table = createPdfPTableForCellsOfTableCoursesMain();
             PdfPCell emptyCell = new PdfPCell();
@@ -210,17 +212,17 @@ public class GradesJournalService {
             groupNameCell.setFixedHeight(14);
             table.addCell(groupNameCell);
             int semester = year * 2 - 1;
-            for (int j = 0; j < 2; j++){
+            for (int j = 0; j < 2; j++) {
                 table.addCell(emptyCell);
                 PdfPCell semesterCell = new PdfPCell(new Phrase("Семестр " + semester, font1));
                 semesterCell.setBorder(0);
                 semesterCell.setFixedHeight(14);
                 table.addCell(semesterCell);
 
-                List<CourseForGroup> courseForGroups  = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
                 SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
                 courseForGroups.sort(sortCourseForGroup);
-                for (CourseForGroup courseForGroup: courseForGroups){
+                for (CourseForGroup courseForGroup : courseForGroups) {
                     PdfPCell knowledgeControl = new PdfPCell(new Phrase(
                             getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
                     knowledgeControl.setFixedHeight(28);
@@ -228,7 +230,8 @@ public class GradesJournalService {
                     knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
                     knowledgeControl.setRotation(270);
                     table.addCell(knowledgeControl);
-                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseForGroup.getCourse().getCourseName().getName() , font1));
+                    String courseName = courseForGroup.getCourse().getCourseName().getName();
+                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < 35 ? font1 : font2));
                     courseNameCell.setFixedHeight(28);
                     table.addCell(courseNameCell);
                 }
@@ -236,8 +239,14 @@ public class GradesJournalService {
             }
             cell.addElement(table);
             tableMain.addCell(cell);
-            document.newPage();
+            finishedCells++;
         }
+
+        for (int i = 0; i < 6 - finishedCells % 6; i++) {
+            PdfPCell emptyCellForTableMain = createPdfPCellForTableCoursesMain();
+            tableMain.addCell(emptyCellForTableMain);
+        }
+
         return tableMain;
     }
 
@@ -256,7 +265,7 @@ public class GradesJournalService {
         return null;
     }
 
-    private class SortCourseForGroup implements Comparator<CourseForGroup>{
+    private class SortCourseForGroup implements Comparator<CourseForGroup> {
         public int compare(CourseForGroup course1, CourseForGroup course2) {
             int courseId1 = course1.getCourse().getKnowledgeControl().getId();
             int courseId2 = course2.getCourse().getKnowledgeControl().getId();
@@ -268,28 +277,11 @@ public class GradesJournalService {
             }
             if (courseId1 > courseId2) {
                 return 1;
-            }
-            else {
+            } else {
                 return -1;
             }
         }
     }
-
-//    public File createCoursesListsDocx(int degreeId, int year, int facultyId) throws IOException{
-//        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
-//        if (studentGroups != null && studentGroups.size() != 0) {
-//            String filePath = getJavaTempDirectory() + "/" + "Predmeti-dlya-zhurnalu -" + year +
-//                    "kurs_" + getFileCreationDateAndTime() + ".docx";
-//            File file = new File(filePath);
-//
-//
-//
-//            return  file;
-//        }
-//        return null;
-//    }
-
-
 
     public synchronized File createCoursesListsDocx(int degreeId, int year, int facultyId) throws Docx4JException, IOException {
         List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);

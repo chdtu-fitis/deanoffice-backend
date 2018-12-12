@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.QualificationEventsDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.QualificationForSpecializationDTO;
 import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
@@ -39,24 +40,36 @@ public class ProfessionalQualificationController {
 
     @RequestMapping(method = RequestMethod.HEAD, value = "/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity canEdit(@PathVariable("specialization-id") int specializationsId) {
-        if (qualificationForSpecializationService.canEdit(specializationsId)) {
-            return ResponseEntity.ok().build();
+        try {
+            if (qualificationForSpecializationService.canEdit(specializationsId)) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (Exception exception) {
+            return handleException(exception);
         }
-        return ResponseEntity.noContent().build();
     }
 
 
     @GetMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity getQualificationsForSpecialization(@PathVariable("specialization-id") int specializationsId) {
-        List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationService
-                .findAllBySpecializationIdAndYear(specializationsId);
-        return ResponseEntity.ok(map(qualificationForSpecializations, QualificationForSpecializationDTO.class));
+        try {
+            List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationService
+                    .findAllBySpecializationIdAndYear(specializationsId);
+            return ResponseEntity.ok(map(qualificationForSpecializations, QualificationForSpecializationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @GetMapping("/professional-qualifications")
     public ResponseEntity getQualifications() {
-        List<ProfessionalQualification> professionalQualifications = professionalQualificationService.getAll();
-        return ResponseEntity.ok(professionalQualifications);
+        try {
+            List<ProfessionalQualification> professionalQualifications = professionalQualificationService.getAll();
+            return ResponseEntity.ok(professionalQualifications);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     @PostMapping("/specializations/{specialization-id}/professional-qualifications")
@@ -73,7 +86,7 @@ public class ProfessionalQualificationController {
             }
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
-            return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);
+            return handleException(exception);
         }
     }
 
@@ -84,7 +97,11 @@ public class ProfessionalQualificationController {
             URI location = getNewResourceLocation(professionalQualification.getId());
             return ResponseEntity.created(location).body(professionalQualification);
         } catch (Exception exception) {
-            return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class);
+            return handleException(exception);
         }
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, ProfessionalQualificationController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

@@ -20,7 +20,6 @@ public class RenewedExpelledStudentDTO {
     private String academicCertificateNumber;
     private Date academicCertificateDate;
     private String academicCertificateIssuedBy;
-    private Date expelDate;
     private String orderNumber;
     private Date orderDate;
 

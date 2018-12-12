@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.*;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
@@ -13,7 +14,6 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSe
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 
 @RestController
 @RequestMapping("/students")
@@ -58,27 +58,31 @@ public class SyncronizationController {
             selectionParams.put("faculty", user.getFaculty().getName());
             selectionParams.put("degree", degree);
             selectionParams.put("speciality", speciality);
-            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(), selectionParams);
-            List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = map(
+            edeboDataSynchronizationReport = edeboDataSynchronizationService.getEdeboDataSynchronizationReport(uploadfile.getInputStream(), user.getFaculty().getId(), selectionParams);
+            List<UnmatchedSecondaryDataStudentDegreeBlueDTO> unmatchedSecondaryDataStudentDegreesBlueDTOs = strictMap(
                     edeboDataSynchronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue(),
                     UnmatchedSecondaryDataStudentDegreeBlueDTO.class
             );
-            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = map(
+            List<StudentDegreeFullEdeboDataDto> noSuchStudentDegreeInDbOrangeDTOs = strictMap(
                     edeboDataSynchronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange(),
                     StudentDegreeFullEdeboDataDto.class
             );
-            List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen = map(
+            List<StudentDegreePrimaryEdeboDataDTO> synchronizedStudentDegreesGreen = strictMap(
                     edeboDataSynchronizationReport.getSynchronizedStudentDegreesGreen(),
                     StudentDegreePrimaryEdeboDataDTO.class
             );
-            List<MissingPrimaryDataRedDTO> missingPrimaryDataRed = map(
+            List<MissingPrimaryDataRedDTO> missingPrimaryDataRed = strictMap(
                     edeboDataSynchronizationReport.getMissingPrimaryDataRed(),
                     MissingPrimaryDataRedDTO.class
             );
+            List<StudentDegreePrimaryEdeboDataDTO> absentInFileStudentDegreesYellow = strictMap(
+                    edeboDataSynchronizationReport.getAbsentInFileStudentDegreesYellow(),
+                    StudentDegreePrimaryEdeboDataDTO.class);
             allListsDTO.setNoSuchStudentOrSuchStudentDegreeInDbOrange(noSuchStudentDegreeInDbOrangeDTOs);
             allListsDTO.setUnmatchedSecondaryDataStudentDegreesBlue(unmatchedSecondaryDataStudentDegreesBlueDTOs);
             allListsDTO.setSynchronizedStudentDegreesGreen(synchronizedStudentDegreesGreen);
             allListsDTO.setMissingPrimaryDataRed(missingPrimaryDataRed);
+            allListsDTO.setAbsentInFileStudentDegreesYellow(absentInFileStudentDegreesYellow);
             return ResponseEntity.ok(allListsDTO);
         } catch (Exception exception) {
             return handleException(exception);
@@ -87,43 +91,84 @@ public class SyncronizationController {
 
     @PostMapping("/edebo-synchronization/save")
     public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO){
-        updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
-        createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
-        return ResponseEntity.ok(200);
+        try {
+            Map <String,Object> updateInformation = updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
+            Map <String,Object> saveInformation = createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
+            Map <String,Object> information = new HashMap<String, Object>();
+            information.put("updated",updateInformation);
+            information.put("created",saveInformation);
+            return ResponseEntity.ok(information);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
-    private void updateSecondaryData(StudentDegreeFullEdeboDataDto[] studentDegreesForUpdate){
+    private Map updateSecondaryData(StudentDegreeFullEdeboDataDto[] studentDegreesForUpdate){
         if (studentDegreesForUpdate.length == 0){
-            return;
+            return null;
         }
-        List<StudentDegree> studentDegreesWithNewData = new ArrayList<>();
+        int count = 0;
+        List<String> notUpdatedStudentDegrees = new ArrayList();
         for(StudentDegreeFullEdeboDataDto studentDegree: studentDegreesForUpdate){
-            if (studentDegree.getId() == 0){
+            if (studentDegree.getId() == 0 || studentDegree.getStudent().getId() == 0){
                 continue;
             }
-            StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
-            Mapper.map(studentDegree, studentDegreeOfDb);
-            studentDegreesWithNewData.add(studentDegreeOfDb);
+            try {
+                if (studentDegree.isModified()) {
+                    StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
+                    Mapper.map(studentDegree, studentDegreeOfDb);
+                    studentDegreeService.save(studentDegreeOfDb);
+                } else {
+                    Student studentOfDb = studentService.findById(studentDegree.getStudent().getId());
+                    Mapper.map(studentDegree.getStudent(), studentOfDb);
+                    studentService.save(studentOfDb);
+                }
+                count++;
+            } catch (Exception e){
+                notUpdatedStudentDegrees.add(studentDegree.getStudent().getSurname()+ " "
+                        + studentDegree.getStudent().getName()+ " "
+                        + studentDegree.getStudent().getPatronimic()+ " "
+                        + studentDegree.getSpecialization().getSpeciality().getCode()+ " "
+                        + studentDegree.getSpecialization().getSpeciality().getName());
+            }
         }
-        studentDegreeService.update(studentDegreesWithNewData);
+        Map <String,Object> result = new HashMap<>();
+        result.put("updatedStudentDegrees",count);
+        result.put("notUpdatedStudentDegrees",notUpdatedStudentDegrees);
+        return result;
     }
 
-    private void createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO){
+    private Map createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO){
         if(newStudentDTO.length==0){
-            return;
+            return null;
         }
-        for(StudentDegreeFullEdeboDataDto studentDTO: newStudentDTO){
-            StudentDegree studentDegree = (StudentDegree) map(studentDTO,StudentDegree.class);
-            studentDegree.setActive(true);
-            if (studentDegree.getStudent().getId()==0) {
-                Student student = studentService.save(studentDegree.getStudent());
-                studentDegree.setStudent(student);
+        int count = 0;
+        List <String> notSavedStudents = new ArrayList<>();
+        for(StudentDegreeFullEdeboDataDto studentDegreeDTO: newStudentDTO){
+            try {
+                StudentDegree studentDegree = (StudentDegree) strictMap(studentDegreeDTO, StudentDegree.class);
+                studentDegree.setActive(true);
+                if (studentDegree.getStudent().getId() == 0) {
+                    Student student = studentService.save(studentDegree.getStudent());
+                    studentDegree.setStudent(student);
+                }
+                studentDegreeService.save(studentDegree);
+                count++;
+            } catch (Exception e){
+                notSavedStudents.add(studentDegreeDTO.getStudent().getSurname() + " "
+                        +studentDegreeDTO.getStudent().getName()+ " "
+                        +studentDegreeDTO.getStudent().getPatronimic()+ " "
+                        +studentDegreeDTO.getSpecialization().getSpeciality().getCode()+ " "
+                        +studentDegreeDTO.getSpecialization().getSpeciality().getName());
             }
-            studentDegreeService.save(studentDegree);
         }
+        Map <String,Object> result = new HashMap <String, Object>();
+        result.put("createdStudentDegrees", count);
+        result.put("notCreatedStudentDegrees",notSavedStudents);
+        return result;
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, SyncronizationController.class);
+        return ExceptionHandlerAdvice.handleException(exception, SyncronizationController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

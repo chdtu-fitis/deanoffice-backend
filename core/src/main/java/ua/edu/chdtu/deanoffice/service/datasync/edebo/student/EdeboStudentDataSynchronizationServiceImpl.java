@@ -18,6 +18,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
+import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataWithGroupBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.util.StringUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.EntityUtil;
@@ -30,8 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.util.Objects.requireNonNull;
+import java.util.stream.Collectors;
 
 @Service
 public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
@@ -42,7 +42,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "previousDiplomaNumber", "previousDiplomaDate",
             "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate","admissionOrderNumber","admissionOrderDate"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
-            "surnameEng", "nameEng", "patronimicEng"};
+            "surnameEng", "nameEng", "patronimicEng", "sex"};
     private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
     private final DocumentIOService documentIOService;
     private final StudentService studentService;
@@ -119,7 +119,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, Map<String,String> selectionParams) throws Exception {
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, int facultyId, Map<String,String> selectionParams) throws Exception {
         if (xlsxInputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
@@ -127,8 +127,13 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
-                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, selectionParams);
+                addSynchronizationReportForImportedData(data, edeboDataSyncronizationReport, facultyId, selectionParams);
             }
+            getAllIdForAbsentInFileStudentDegrees(edeboDataSyncronizationReport, selectionParams, facultyId);
+            sortingSyncohronizedDegreeGreen(edeboDataSyncronizationReport);
+            sortingAbsentInFileStudentDegreeYellow(edeboDataSyncronizationReport);
+            sortingMissingPrimaryDataRed(edeboDataSyncronizationReport);
+            sortingNoSuchStudentOrStudentDegreeInDbOrange(edeboDataSyncronizationReport);
             return edeboDataSyncronizationReport;
         } catch (Docx4JException e) {
             e.printStackTrace();
@@ -180,11 +185,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 if (specializationMatcher.matches()) {
                     return true;
                 } else {
-                    if (Strings.isNullOrEmpty(specializationName) && !Strings.isNullOrEmpty(programName)) {
-                        return true;
-                    } else {
+                    if (!Strings.isNullOrEmpty(specializationName)) {
                         return false;
-                    }
+                    } else
+                        return true;
                 }
             } else {
                 return false;
@@ -299,7 +303,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
-    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, Map<String, String> selectionParams) {
+    public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, int facultyId, Map<String, String> selectionParams) {
         if (!(selectionParams.get("faculty").toUpperCase().equals(importedData.getFacultyName().toUpperCase()))
                 || !(selectionParams.get("degree")==null || selectionParams.get("degree").toUpperCase().equals(importedData.getQualificationGroupName().toUpperCase()))
                 || !(selectionParams.get("speciality")==null || selectionParams.get("speciality").toUpperCase().equals(importedData.getFullSpecialityName().toUpperCase()))
@@ -334,18 +338,26 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
+
         Specialization specializationFromDB = specializationService.getByNameAndDegreeAndSpecialityAndFaculty(
                 specializationFromData.getName(),
                 specializationFromData.getDegree().getId(),
                 specialityFromDb.getId(),
                 facultyFromDb.getId());
         if (specializationFromDB == null){
-            String message = "Дана спеціалізація відсутня";
-            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
-            return;
-        } else {
-            studentDegreeFromData.setSpecialization(specializationFromDB);
+            if (Strings.isNullOrEmpty(specializationFromData.getName()) && specialityFromDb.getCode().length() == 3) {
+                Specialization soleSpecialization = specializationService.getForSpecialityIfSole(specialityFromDb.getId(), facultyId);
+                if (soleSpecialization != null) {
+                    specializationFromDB = soleSpecialization;
+                }
+            }
         }
+        if (specializationFromDB == null){
+                String message = "Дана спеціалізація відсутня";
+                edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
+                return;
+        }
+        studentDegreeFromData.setSpecialization(specializationFromDB);
 
         Student studentFromData = studentDegreeFromData.getStudent();
         Student studentFromDB = studentService.searchByFullNameAndBirthDate(
@@ -359,6 +371,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
             return;
         }
+        studentDegreeFromData.getStudent().setId(studentFromDB.getId());
 
         StudentDegree studentDegreeFromDb = studentDegreeService.getByStudentIdAndSpecializationId(true, studentFromDB.getId(), specializationFromDB.getId());
         if (studentDegreeFromDb == null){
@@ -367,7 +380,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
 
         if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb)) {
-            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(new StudentDegreePrimaryDataBean(studentDegreeFromData));
+            edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(new StudentDegreePrimaryDataWithGroupBean(studentDegreeFromDb));
         } else {
             edeboDataSyncronizationReport.addUnmatchedSecondaryDataStudentDegreeBlue(studentDegreeFromData,studentDegreeFromDb);
         }
@@ -378,13 +391,132 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
     }
 
+    private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport,
+                                                       Map<String, String> selectionParams,
+                                                       int facultyId){
+        List<Integer> idNotForAbsentInFileStudentDegrees = edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen().stream().
+                map(studentDegree -> studentDegree.getId()).collect(Collectors.toList());
+        idNotForAbsentInFileStudentDegrees.addAll(edeboDataSyncronizationReport.getUnmatchedSecondaryDataStudentDegreesBlue().stream().
+                map(studentDegree -> studentDegree.getStudentDegreeFromDb().getId()).collect(Collectors.toList()));
+        int degreeId = 0;
+        if (selectionParams.get("degree") != null) {
+            degreeId = degreeService.getByName(selectionParams.get("degree")).getId();
+        }
+        int specialityId = 0;
+        if (selectionParams.get("speciality") != null){
+            String code = "", name = "";
+            String specialityParts[] = selectionParams.get("speciality").split(" ", 2);
+            if (specialityParts.length == 2) {
+                code = specialityParts[0];
+                name = specialityParts[1];
+                specialityId = specialityService.findSpecialityByCodeAndName(code, name).getId();
+            }
+        }
+        List<StudentDegree> studentDegrees = studentDegreeService.getAllNotInImportData(idNotForAbsentInFileStudentDegrees, facultyId, degreeId, specialityId);
+        for(StudentDegree studentDegree: studentDegrees){
+            edeboDataSyncronizationReport.addAbsentInFileStudentDegreeYellow(new StudentDegreePrimaryDataWithGroupBean(studentDegree));
+        }
+    }
+
     private Date parseDate(String fileDate) {
         try {
             DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
+            formatter.setTimeZone(TimeZone.getTimeZone("EET"));
             return formatter.parse(fileDate);
         } catch (ParseException e) {
             log.debug(e.getMessage());
         }
         return null;
+    }
+
+    private void sortingSyncohronizedDegreeGreen(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport){
+        edeboDataSyncronizationReport.setSynchronizedStudentDegreesGreen(
+                edeboDataSyncronizationReport.getSynchronizedStudentDegreesGreen()
+                        .stream().sorted((sd1,sd2) -> (
+                        sd1.getDegreeName()+ " "
+                                + sd1.getFullSpecialityName() + " "
+                                + sd1.getFullSpecializationName() + " "
+                                + sd1.getGroupName() + " "
+                                + sd1.getLastName() + " "
+                                + sd1.getFirstName() + " "
+                                + sd1.getMiddleName())
+                        .compareTo(
+                                sd2.getDegreeName()+ " "
+                                        + sd2.getFullSpecialityName() + " "
+                                        + sd2.getFullSpecializationName() + " "
+                                        + sd2.getGroupName() + " "
+                                        + sd2.getLastName() + " "
+                                        + sd2.getFirstName() + " "
+                                        + sd2.getMiddleName()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private void sortingMissingPrimaryDataRed(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport){
+        edeboDataSyncronizationReport.setMissingPrimaryDataRed(
+                edeboDataSyncronizationReport.getMissingPrimaryDataRed()
+                        .stream().sorted((sd1,sd2) -> (
+                        sd1.getStudentDegreePrimaryData().getDegreeName() + " "
+                                + sd1.getStudentDegreePrimaryData().getFullSpecialityName() + " "
+                                + sd1.getStudentDegreePrimaryData().getFullSpecializationName() + " "
+                                + sd1.getStudentDegreePrimaryData().getLastName() + " "
+                                + sd1.getStudentDegreePrimaryData().getFirstName() + " "
+                                + sd1.getStudentDegreePrimaryData().getMiddleName())
+                        .compareTo(
+                                sd2.getStudentDegreePrimaryData().getDegreeName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getFullSpecialityName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getFullSpecializationName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getLastName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getFirstName() + " "
+                                        + sd2.getStudentDegreePrimaryData().getMiddleName()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private void sortingAbsentInFileStudentDegreeYellow(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport){
+        edeboDataSyncronizationReport.setAbsentInFileStudentDegreesYellow(
+                edeboDataSyncronizationReport.getAbsentInFileStudentDegreesYellow()
+                        .stream().sorted((sd1,sd2) -> (
+                        sd1.getDegreeName()+ " "
+                                + sd1.getFullSpecialityName() + " "
+                                + sd1.getFullSpecializationName() + " "
+                                + sd1.getGroupName() + " "
+                                + sd1.getLastName() + " "
+                                + sd1.getFirstName() + " "
+                                + sd1.getMiddleName())
+                        .compareTo(
+                                sd2.getDegreeName()+ " "
+                                        + sd2.getFullSpecialityName() + " "
+                                        + sd2.getFullSpecializationName() + " "
+                                        + sd2.getGroupName() + " "
+                                        + sd2.getLastName() + " "
+                                        + sd2.getFirstName() + " "
+                                        + sd2.getMiddleName()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private void sortingNoSuchStudentOrStudentDegreeInDbOrange(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport){
+        edeboDataSyncronizationReport.setNoSuchStudentOrSuchStudentDegreeInDbOrange(
+                edeboDataSyncronizationReport.getNoSuchStudentOrSuchStudentDegreeInDbOrange()
+                        .stream().sorted((sd1,sd2) ->
+                        (sd1.getSpecialization().getDegree().getName() + " "
+                                + sd1.getSpecialization().getSpeciality().getCode() + " "
+                                + sd1.getSpecialization().getSpeciality().getName() + " "
+                                + sd1.getSpecialization().getName() + " "
+                                + sd1.getPreviousDiplomaType() + " "
+                                + sd1.getStudent().getSurname() + " "
+                                + sd1.getStudent().getName() + " "
+                                + sd1.getStudent().getPatronimic())
+                                .compareTo(sd2.getSpecialization().getDegree().getName() + " "
+                                        + sd2.getSpecialization().getSpeciality().getCode() + " "
+                                        + sd2.getSpecialization().getSpeciality().getName() + " "
+                                        + sd2.getSpecialization().getName() + " "
+                                        + sd2.getPreviousDiplomaType() + " "
+                                        + sd2.getStudent().getSurname() + " "
+                                        + sd2.getStudent().getName() + " "
+                                        + sd2.getStudent().getPatronimic()))
+                        .collect(Collectors.toList())
+        );
     }
 }

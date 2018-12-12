@@ -12,7 +12,6 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
