@@ -2,14 +2,12 @@ package ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.DiplomaAndStudentSynchronizedDataDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.DiplomaNumberDataForSaveDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.FormedListsWithDiplomaDataDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.dto.MissingDataRedDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.SyncronizationController;
@@ -18,7 +16,10 @@ import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplom
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 
@@ -31,7 +32,7 @@ public class DiplomaNumberController {
         this.edeboDiplomaNumberSynchronizationService = edeboDiplomaNumberSynchronizationService;
     }
 
-    @PostMapping("/edebo-diploma-number-synchronization/process-file")
+    @PostMapping("/edebo-diploma-number-synchronization")
     public ResponseEntity diplomaNumberSynchronization(@RequestParam("file") MultipartFile uploadFile,
                                                        @CurrentUser ApplicationUser user){
         try{
@@ -57,6 +58,34 @@ public class DiplomaNumberController {
             return handleException(exception);
         }
 
+    }
+
+    @PutMapping("/edebo-diploma-number-synchronization")
+    public ResponseEntity diplomaNumberSaveChanges(@RequestBody DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS,
+                                                   @CurrentUser ApplicationUser user){
+        try{
+            Map<String,Object> savedDiploma = savedDiplomaData(diplomaNumberDataForSaveDTOS);
+            return ResponseEntity.ok(savedDiploma);
+        }catch (Exception exception){
+            return handleException(exception);
+        }
+    }
+
+    private Map<String,Object> savedDiplomaData(DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS){
+        int count = 0;
+        List<String> notSavedDiplomaData = new ArrayList<>();
+        for (DiplomaNumberDataForSaveDTO diplomaData : diplomaNumberDataForSaveDTOS) {
+            try {
+
+                count++;
+            } catch (Exception exception) {
+                notSavedDiplomaData.add(diplomaData.getSurname() + " " + diplomaData.getName() + " " + diplomaData.getPatronimic());
+            }
+        }
+        Map <String,Object> result = new HashMap<>();
+        result.put("updatedDiplomaData",count);
+        result.put("notUpdatedDiplomaData",notSavedDiplomaData);
+        return result;
     }
 
     private ResponseEntity handleException(Exception exception) {
