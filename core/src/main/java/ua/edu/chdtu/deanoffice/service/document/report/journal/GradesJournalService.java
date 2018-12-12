@@ -45,7 +45,6 @@ public class GradesJournalService {
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
-    public GradesJournalService(StudentGroupService studentGroupService, CourseForGroupService courseForGroupService) {
     public GradesJournalService(StudentGroupService studentGroupService,
                                 CourseForGroupService courseForGroupService,
                                 DocumentIOService documentIOService){
@@ -488,6 +487,4 @@ public class GradesJournalService {
 
         return max;
     }
-
-
 }
