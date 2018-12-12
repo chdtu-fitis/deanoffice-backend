@@ -3,10 +3,8 @@ package ua.edu.chdtu.deanoffice.service;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import java.util.List;
 import java.util.Map;
@@ -92,8 +90,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
 
-    public StudentDegree getByStudentFullNameAndSupplementNumber(String surname, String name, String patronimic, String supplementNumber){
-        return studentDegreeRepository.findByStudentFullNameAndSupplementNumber(surname, name, patronimic, supplementNumber);
+    public StudentDegree getBySupplementNumber(String supplementNumber){
+        return studentDegreeRepository.findBySupplementNumber(supplementNumber);
     }
 
     @Transactional
