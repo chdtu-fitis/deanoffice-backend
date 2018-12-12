@@ -6,10 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DiplomaNumberDataForSaveDTO {
-        private int id;
-        private String surname;
-        private String name;
-        private String patronimic;
-        private String diplomaSeriesAndNumber;
-        private boolean honor;
+    private int id;
+    private String surname;
+    private String name;
+    private String patronimic;
+    private String diplomaSeriesAndNumber;
+    private boolean honor;
 }

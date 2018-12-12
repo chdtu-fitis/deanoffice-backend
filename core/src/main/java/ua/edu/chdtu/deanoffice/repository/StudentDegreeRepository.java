@@ -78,7 +78,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.studentGroup = :group WHERE sd IN (:studentDegrees)")
-    void assignStudentsToGroup(@Param("studentDegrees")List<StudentDegree> studentDegrees, @Param("group")StudentGroup group);
+    void assignStudentsToGroup(@Param("studentDegrees") List<StudentDegree> studentDegrees, @Param("group") StudentGroup group);
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +

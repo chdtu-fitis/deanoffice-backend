@@ -77,8 +77,8 @@ public class DiplomaNumberController {
     }
 
     private Map<String, Object> savedDiplomaData(DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS,
-                                                 @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET") Date diplomaDate,
-                                                 @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")  Date supplementDate) {
+                                                 @JsonFormat(pattern = "yyyy-MM-dd", locale = "uk_UA", timezone = "EET") Date diplomaDate,
+                                                 @JsonFormat(pattern = "yyyy-MM-dd", locale = "uk_UA", timezone = "EET") Date supplementDate) {
         int count = 0;
         List<String> notSavedDiplomaData = new ArrayList<>();
         for (DiplomaNumberDataForSaveDTO diplomaData : diplomaNumberDataForSaveDTOS) {
