@@ -156,6 +156,7 @@ public class PersonalStatementService {
         result.put("s", getSemesterName((getStudentStudyYear(grade.getStudentDegree(), year)*2)+1).toUpperCase());
         result.put("n",gradeNumberYear);
         result.put("subj", grade.getCourse().getCourseName().getName());
+        result.put("t", resolveTypeField(grade));
         result.put("h", resolveHoursField(grade));
         result.put("c", grade.getCourse().getCredits().toString());
         String gradeFieldValue = "";
@@ -180,6 +181,7 @@ public class PersonalStatementService {
     private Map<String, String> getLostDictionary() {
         Map<String, String> result = new HashMap<>();
         result.put("subj", "");
+        result.put("t", "");
         result.put("h", "");
         result.put("c","");
         result.put("g", "");
@@ -217,6 +219,25 @@ public class PersonalStatementService {
             case Constants.ATTESTATION:
             default:
                 return grade.getCourse().getHours().toString();
+        }
+    }
+    private String resolveTypeField(Grade grade) {
+        switch (grade.getCourse().getKnowledgeControl().getId()) {
+            case Constants.COURSEWORK:
+                return "КР";
+            case Constants.COURSE_PROJECT:
+                return "КП";
+            case Constants.INTERNSHIP:
+            case Constants.NON_GRADED_INTERNSHIP:
+                return "пр";
+            case Constants.EXAM:
+                return "і";
+            case Constants.CREDIT:
+            case Constants.DIFFERENTIATED_CREDIT :
+            case Constants.STATE_EXAM:
+            case Constants.ATTESTATION:
+            default:
+                return "з";
         }
     }
 
