@@ -96,9 +96,9 @@ public class PersonalStatementService {
         for (StudentDegree studentDegree : studentDegrees) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, studentDegree.getStudent());
-            formSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree), year, SemesterType.FIRST);
-            formSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year, SemesterType.SECOND);
-            fillLastRow(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year);
+            formSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree), year, SemesterType.FIRST, studentDegree);
+            formSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year, SemesterType.SECOND, studentDegree);
+            fillLastRow(table, studentDegree, year);
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
@@ -109,7 +109,7 @@ public class PersonalStatementService {
             replaceInRow(tableRows.get(0), getStudentDictionary(student));
     }
 
-    private void formSemesterInTable(Tbl table, List<Grade> grades, Integer year, SemesterType semesterType) {
+    private void formSemesterInTable(Tbl table, List<Grade> grades, Integer year, SemesterType semesterType, StudentDegree studentDegree) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         int currentIndex = 2, rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE;
         if(semesterType == SemesterType.SECOND) {
@@ -117,6 +117,7 @@ public class PersonalStatementService {
            rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_TABLE;
         }
         Tr rowToCopy = tableRows.get(currentIndex);
+        if (grades!=null){
         fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
         for (Grade grade : grades.subList(1, grades.size())) {
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
@@ -124,6 +125,8 @@ public class PersonalStatementService {
             table.getContent().add(currentIndex, newRow);
             currentIndex++;
         }
+        }
+        else fillRowByEmpty(tableRows.get(currentIndex - 1), studentDegree, year);
         for(int i = currentIndex; i < rowNumber; i++){
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
             fillRowByLost(newRow);
@@ -131,6 +134,17 @@ public class PersonalStatementService {
             currentIndex++;
         }
         table.getContent().remove(currentIndex);
+    }
+
+    private Map<String, String> getGradeDictionaryForEmpty(StudentDegree studentDegree, Integer year){
+        Map<String, String> result = new HashMap<>();
+        result.put("sy","НАВЧАЛЬНИЙ РІК");
+        String gradeNumberYear = "";
+        gradeNumberYear = getYearName(getStudentStudyYear(studentDegree, year)).toUpperCase()+" "+year+"-"+(year+1);
+        result.put("f", getSemesterName(getStudentStudyYear(studentDegree, year)*2).toUpperCase());
+        result.put("s", getSemesterName((getStudentStudyYear(studentDegree, year)*2)+1).toUpperCase());
+        result.put("n",gradeNumberYear);
+        return result;
     }
 
     private Map<String, String> getGradeDictionary(Grade grade, Integer year) {
@@ -145,18 +159,18 @@ public class PersonalStatementService {
         result.put("h", resolveHoursField(grade));
         result.put("c", grade.getCourse().getCredits().toString());
         String gradeFieldValue = "";
-        if (grade.getGrade() != null) {
+        if (grade.getGrade() != null && grade.getPoints()!=0) {
             gradeFieldValue = grade.getCourse().getKnowledgeControl().isGraded() ? grade.getGrade().toString() : "зарах";
         }
         result.put("g", gradeFieldValue);
-        if (grade.getPoints() != null) {
+        if (grade.getPoints() != null && grade.getPoints()!=0) {
             result.put("p", grade.getPoints().toString());
         }
-        if (grade.getEcts() != null) {
+        if (grade.getEcts() != null && grade.getPoints()!=0) {
             result.put("e", grade.getEcts().toString());
         }
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(grade.getStudentDegree().getStudentGroup().getId(), grade.getCourse().getId());
-        if (courseForGroup.getExamDate() != null) {
+        if (courseForGroup.getExamDate() != null && grade.getPoints()!=0) {
             String date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(courseForGroup.getExamDate());
             result.put("d", date);
         }
@@ -173,6 +187,10 @@ public class PersonalStatementService {
         result.put("e", "");
         result.put("d", "");
         return result;
+    }
+
+    private void fillRowByEmpty(Tr row, StudentDegree studentDegree, Integer year){
+        replaceInRow(row, getGradeDictionaryForEmpty(studentDegree, year));
     }
 
     private void fillRowByGrade(Tr row, Grade grade, Integer year) {
@@ -208,14 +226,14 @@ public class PersonalStatementService {
         return result;
     }
 
-    private void fillLastRow(Tbl table, List<Grade> grades, Integer year) {
+    private void fillLastRow(Tbl table, StudentDegree studentDegree, Integer year) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        replaceInRow(tableRows.get(tableRows.size()-1), getLastRowDictionary(year,grades.get(0)));
+        replaceInRow(tableRows.get(tableRows.size()-1), getLastRowDictionary(year, studentDegree));
     }
 
-    private Map<String, String> getLastRowDictionary(Integer year, Grade grade) {
+    private Map<String, String> getLastRowDictionary(Integer year, StudentDegree studentDegree) {
         Map<String, String> result = new HashMap<>();
-        result.put("nc", "Переведений на "+ getYearName((getStudentStudyYear(grade.getStudentDegree(), year+1))) +" курс. Наказ від «_____»________20___року №____");
+        result.put("nc", "Переведений на "+ getYearName((getStudentStudyYear(studentDegree, year+1))) +" курс. Наказ від «_____»________20___року №____");
         return result;
     }
 
