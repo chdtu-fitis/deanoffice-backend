@@ -25,6 +25,8 @@ public class StudentDegree extends BaseEntity {
     private Date admissionOrderDate;
     private String admissionOrderNumber;
     @Temporal(TemporalType.DATE)
+    private Date admissionDate;
+    @Temporal(TemporalType.DATE)
     private Date contractDate;
     private String contractNumber;
     private String diplomaNumber;
@@ -57,10 +59,6 @@ public class StudentDegree extends BaseEntity {
     private Student student;
     @ManyToOne
     private StudentGroup studentGroup;
-
-    @Temporal(TemporalType.DATE)
-    private Date admissionDate;
-
     @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentPreviousUniversity> studentPreviousUniversities;
 }
