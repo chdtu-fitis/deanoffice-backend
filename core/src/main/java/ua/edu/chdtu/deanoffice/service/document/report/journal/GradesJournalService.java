@@ -36,12 +36,13 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
 public class GradesJournalService {
-
     private static final String TEMPLATE = TEMPLATES_PATH + "CourseList.docx";
     private static final Integer THE_LAST_CELL_OF_ROW = 6;
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
 
     private DocumentIOService documentIOService;
+    private static final int MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT = 30;
+  
     private StudentGroupService studentGroupService;
     private CourseForGroupService courseForGroupService;
     @Value(value = "classpath:fonts/arial/arial.ttf")
@@ -232,7 +233,7 @@ public class GradesJournalService {
                     knowledgeControl.setRotation(270);
                     table.addCell(knowledgeControl);
                     String courseName = courseForGroup.getCourse().getCourseName().getName();
-                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < 35 ? font1 : font2));
+                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
                     courseNameCell.setFixedHeight(28);
                     table.addCell(courseNameCell);
                 }
