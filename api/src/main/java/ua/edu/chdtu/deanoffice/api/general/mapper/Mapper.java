@@ -1,7 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.general.mapper;
 
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
 import ua.edu.chdtu.deanoffice.api.general.mapper.type.ListParameterizedType;
@@ -68,11 +68,15 @@ public class Mapper {
 
     public static void mapStudentDegreeDTOToStudentDegreeSimpleFields(StudentDegreeDTO dto, StudentDegree entity) {
         modelMapper.getConfiguration().setMatchingStrategy(STRICT_MATCHING_STRATEGY);
-        TypeMap<StudentDegreeDTO, StudentDegree> typeMap = modelMapper.createTypeMap(StudentDegreeDTO.class, StudentDegree.class);
-        typeMap.addMappings(mapper -> mapper.skip(StudentDegree::setStudentPreviousUniversities))
-                .addMappings(mapper -> mapper.skip(StudentDegree::setSpecialization))
-                .addMappings(mapper -> mapper.skip(StudentDegree::setStudent))
-                .addMappings(mapper -> mapper.skip(StudentDegree::setStudentGroup));
+        modelMapper.addMappings(new PropertyMap<StudentDegreeDTO, StudentDegree>() {
+            @Override
+            protected void configure() {
+                skip(destination.getStudentPreviousUniversities());
+                skip(destination.getSpecialization());
+                skip(destination.getStudent());
+                skip(destination.getStudentGroup());
+            }
+        });
         modelMapper.map(dto, entity);
 //        return modelMapper.createTypeMap(StudentDegreeDTO.class, StudentDegree.class)
 //                .addMapping(StudentDegreeDTO::getRecordBookNumber, StudentDegree::setRecordBookNumber)
