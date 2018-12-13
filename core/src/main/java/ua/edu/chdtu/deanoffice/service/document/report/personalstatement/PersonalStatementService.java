@@ -159,18 +159,18 @@ public class PersonalStatementService {
         result.put("h", resolveHoursField(grade));
         result.put("c", grade.getCourse().getCredits().toString());
         String gradeFieldValue = "";
-        if (grade.getGrade() != null) {
+        if (grade.getGrade() != null && grade.getPoints()!=0) {
             gradeFieldValue = grade.getCourse().getKnowledgeControl().isGraded() ? grade.getGrade().toString() : "зарах";
         }
         result.put("g", gradeFieldValue);
-        if (grade.getPoints() != null) {
+        if (grade.getPoints() != null && grade.getPoints()!=0) {
             result.put("p", grade.getPoints().toString());
         }
-        if (grade.getEcts() != null) {
+        if (grade.getEcts() != null && grade.getPoints()!=0) {
             result.put("e", grade.getEcts().toString());
         }
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(grade.getStudentDegree().getStudentGroup().getId(), grade.getCourse().getId());
-        if (courseForGroup.getExamDate() != null) {
+        if (courseForGroup.getExamDate() != null && grade.getPoints()!=0) {
             String date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(courseForGroup.getExamDate());
             result.put("d", date);
         }
