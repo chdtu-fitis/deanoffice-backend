@@ -17,22 +17,32 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationReport;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.diploma.number.EdeboDiplomaNumberSynchronizationService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
-import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+
 
 @RestController
 @RequestMapping("/students")
 public class DiplomaNumberController {
     private EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService;
     private final StudentDegreeService studentDegreeService;
+    private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
-    public DiplomaNumberController(EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService, StudentDegreeService studentDegreeService) {
+    public DiplomaNumberController(EdeboDiplomaNumberSynchronizationService edeboDiplomaNumberSynchronizationService,
+                                   StudentDegreeService studentDegreeService,
+                                   FacultyAuthorizationService facultyAuthorizationService) {
         this.edeboDiplomaNumberSynchronizationService = edeboDiplomaNumberSynchronizationService;
         this.studentDegreeService = studentDegreeService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @PostMapping("/edebo-diploma-number-synchronization")
@@ -69,6 +79,8 @@ public class DiplomaNumberController {
                                                    @RequestParam(required = false) Date diplomaDate,
                                                    @RequestParam(required = false) Date supplementDate) {
         try {
+            validateDataAboutDiplomaNumbersForSave(diplomaNumberDataForSaveDTOS.length);
+            validateStudentDegreeIdWithFacultyId(user, diplomaNumberDataForSaveDTOS);
             Map<String, Object> savedDiploma = savedDiplomaData(diplomaNumberDataForSaveDTOS, diplomaDate, supplementDate);
             return ResponseEntity.ok(savedDiploma);
         } catch (Exception exception) {
@@ -80,7 +92,7 @@ public class DiplomaNumberController {
                                                  @JsonFormat(pattern = "yyyy-MM-dd", locale = "uk_UA", timezone = "EET") Date diplomaDate,
                                                  @JsonFormat(pattern = "yyyy-MM-dd", locale = "uk_UA", timezone = "EET") Date supplementDate) {
         int count = 0;
-        List<String> notSavedDiplomaData = new ArrayList<>();
+        List<String> notSavedDiplomaData = new ArrayList();
         for (DiplomaNumberDataForSaveDTO diplomaData : diplomaNumberDataForSaveDTOS) {
             try {
                 studentDegreeService.updateDiplomaNumber(diplomaData.getId(), diplomaData.getDiplomaSeriesAndNumber(), diplomaData.isHonor(), diplomaDate, supplementDate);
@@ -89,7 +101,7 @@ public class DiplomaNumberController {
                 notSavedDiplomaData.add(diplomaData.getSurname() + " " + diplomaData.getName() + " " + diplomaData.getPatronimic());
             }
         }
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap();
         result.put("updatedDiplomaData", count);
         result.put("notUpdatedDiplomaData", notSavedDiplomaData);
         return result;
@@ -98,6 +110,21 @@ public class DiplomaNumberController {
     private void validateInputDataForFileWithTheses(MultipartFile uploadFile) throws OperationCannotBePerformedException {
         if (uploadFile.isEmpty()) {
             String message = "Файл не було надіслано";
+            throw new OperationCannotBePerformedException(message);
+        }
+    }
+
+    private void validateStudentDegreeIdWithFacultyId(ApplicationUser user, DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOs) throws Exception {
+        List<Integer> studentDegreeIds = new ArrayList();
+        for (DiplomaNumberDataForSaveDTO diplomaData : diplomaNumberDataForSaveDTOs) {
+            studentDegreeIds.add(diplomaData.getId());
+        }
+        facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studentDegreeIds, user);
+    }
+
+    private void validateDataAboutDiplomaNumbersForSave(int thesisDataForSaveLenght) throws OperationCannotBePerformedException {
+        if (thesisDataForSaveLenght == 0) {
+            String message = "Для даної операції необхідно вибрати хоча б одного студента";
             throw new OperationCannotBePerformedException(message);
         }
     }
