@@ -50,6 +50,7 @@ public class StudentDegree extends BaseEntity {
     private String supplementNumber;
     private String thesisName;
     private String thesisNameEng;
+    private String thesisSupervisor;
     @ManyToOne(fetch = FetchType.LAZY)
     private Specialization specialization;
     @ManyToOne
