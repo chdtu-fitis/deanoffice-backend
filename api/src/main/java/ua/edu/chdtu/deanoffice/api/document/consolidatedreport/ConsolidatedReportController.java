@@ -11,7 +11,6 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -22,10 +21,7 @@ import ua.edu.chdtu.deanoffice.service.document.ConsolidatedReportService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
@@ -104,35 +100,31 @@ public class ConsolidatedReportController extends DocumentResponseController {
 
     @PostMapping("/create-document")
     public ResponseEntity getConsolidatedDocument(
-            @RequestBody Map<Integer, List<Integer>> mapCourseForGroupIdToStudentGroupsIds,
+            @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
             @CurrentUser ApplicationUser user
     ) {
         try {
-            Map<CourseForGroup, List<StudentGroup>> mapCourseToStudentGroups = new HashMap<>();
-            mapCourseForGroupIdToStudentGroupsIds.forEach((courseForGroupId, studentGroupId) -> {
-                Integer[] studentGroupIdsArray = new Integer[studentGroupId.size()];
-                List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId.toArray(studentGroupIdsArray));
-                mapCourseToStudentGroups.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
+            Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
+            courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupId) -> {
+                List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId.toArray(new Integer[0]));
+                courseForGroupToGroup.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
             });
-            Map<CourseForGroup, List<StudentGroup>> mapCourseToStudentGroupsForCreate = new HashMap<>();
-            mapCourseToStudentGroups.forEach((courseForGroup, studentGroups) -> {
-                mapCourseToStudentGroupsForCreate.put(courseForGroup, new ArrayList<>());
-
+            Map<CourseForGroup, List<StudentGroup>> courseToStudentGroupsForCreate = new HashMap<>();
+            courseForGroupToGroup.forEach((courseForGroup, studentGroups) -> {
                 studentGroups.forEach(group -> {
                     StudentGroup cloneStudentGroup = createClone(group);
-                    List<StudentDegree> studentDegrees = cloneStudentGroup.getStudentDegrees();
-                    List<StudentDegree> studentDegreeThatHasGoodMark =
-                            gradeService.getStudentDegreesThatHasNotGoodMark(studentDegrees, courseForGroup);
-                    cloneStudentGroup.setStudentDegrees(studentDegreeThatHasGoodMark);
-                    if (studentDegreeThatHasGoodMark.size() > 0)
-                        mapCourseToStudentGroupsForCreate.get(courseForGroup).add(cloneStudentGroup);
-                });
+                    cloneStudentGroup.setStudentDegrees(
+                            gradeService.filterStudentByGrade(cloneStudentGroup.getStudentDegrees(), courseForGroup, true)
+                    );
+                    if (!cloneStudentGroup.getStudentDegrees().isEmpty()) {
+                        List<StudentGroup> item = courseToStudentGroupsForCreate.getOrDefault(courseForGroup, new ArrayList<>());
+                        item.add(cloneStudentGroup);
+                        courseToStudentGroupsForCreate.put(courseForGroup, item);
+                    }
 
-                if (mapCourseToStudentGroupsForCreate.get(courseForGroup).size() == 0) {
-                    mapCourseToStudentGroupsForCreate.remove(courseForGroup);
-                }
+                });
             });
-            File consolidatedDocument = consolidatedReportService.formConsolidatedReport(mapCourseToStudentGroupsForCreate, user);
+            File consolidatedDocument = consolidatedReportService.formConsolidatedReport(courseToStudentGroupsForCreate, user);
             return buildDocumentResponseEntity(
                     consolidatedDocument,
                     consolidatedDocument.getName(),
@@ -143,7 +135,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         }
     }
 
-    private static StudentGroup createClone(StudentGroup group) {
+    private StudentGroup createClone(StudentGroup group) {
         StudentGroup studentGroup = new StudentGroup();
         studentGroup.setStudentDegrees(group.getStudentDegrees());
         studentGroup.setSpecialization(group.getSpecialization());

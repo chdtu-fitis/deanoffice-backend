@@ -54,15 +54,10 @@ public class ConsolidatedReportService {
     }
 
     public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
-        if (coursesToStudentGroups.size() == 0) {
-            throw new OperationCannotBePerformedException("Для формування документу потрібно передати хоча б один курс");
-        }
-        if (coursesToStudentGroups.values().stream().anyMatch(Objects::isNull) || coursesToStudentGroups.values().stream().anyMatch(List::isEmpty)) {
-            throw new OperationCannotBePerformedException("Для формування документу потрібно, щоб кожному предмету відповідала хоча б одна група");
-        }
+        validateData(coursesToStudentGroups);
 
         Document document = new Document(PageSize.A4);
-        File file = getTempFile("3BEDEHA-BIDOMICTb");
+        File file = getTempFile("ZVEDENA-VIDOMIST");
         PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
 
@@ -80,6 +75,15 @@ public class ConsolidatedReportService {
 
         document.close();
         return file;
+    }
+
+    private void validateData(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups) throws OperationCannotBePerformedException {
+        if (coursesToStudentGroups.size() == 0) {
+            throw new OperationCannotBePerformedException("Для формування документу потрібно передати хоча б один курс");
+        }
+        if (coursesToStudentGroups.values().stream().anyMatch(Objects::isNull) || coursesToStudentGroups.values().stream().anyMatch(List::isEmpty)) {
+            throw new OperationCannotBePerformedException("Для формування документу потрібно, щоб кожному предмету відповідала хоча б одна група");
+        }
     }
 
     private void createOneConsolidatedReport(Document document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
