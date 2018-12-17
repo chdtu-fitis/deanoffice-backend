@@ -24,6 +24,10 @@ public class GradeUtil {
         return 0;
     }
 
+    public static boolean isEnoughToPass(Integer points) {
+        return (points == null || points < 60) ? false : true;
+    }
+
     private static boolean isBetween(int number, int lowerBound, int upperBound) {
         return (number >= lowerBound && number <= upperBound);
     }
