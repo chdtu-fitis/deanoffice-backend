@@ -52,6 +52,7 @@ public class PersonalStatementService {
             throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(studentDegreeIds);
+        studentDegrees = studentDegrees.stream().filter(sd -> getStudentStudyYear(sd, year) >= 0).collect(Collectors.toList());
         YearGrades yearGrades = new YearGrades(getGradeMap(year, studentDegrees, SemesterType.FIRST), getGradeMap(year, studentDegrees, SemesterType.SECOND));
         generateTables(template, yearGrades, year);
         Set<StudentGroup> groups = yearGrades.getGradeMapForFirstSemester().keySet().stream().map(sd -> sd.getStudentGroup()).collect(Collectors.toSet());
