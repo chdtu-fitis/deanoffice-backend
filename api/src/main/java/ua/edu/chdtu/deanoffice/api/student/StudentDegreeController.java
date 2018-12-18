@@ -185,33 +185,15 @@ public class StudentDegreeController {
             List<StudentDegree> studentDegrees = studentDegreeService.getActiveByIdsAndFaculty(studentDegreeIds, user.getFaculty().getId());
 
             for (StudentDegree sd : studentDegrees) {
-//                Student student = sd.getStudent();
-//                Specialization specialization = sd.getSpecialization();
-//                StudentGroup studentGroup = sd.getStudentGroup();
-//                sd.setStudent(null);
-//                sd.setSpecialization(null);
-//                sd.setStudentGroup(null);
                 StudentDegreeDTO currSdDto = studentDegreesDTOs.stream().filter(sdDto -> sdDto.getId() == sd.getId()).findFirst().get();
                 Mapper.mapStudentDegreeDTOToStudentDegreeSimpleFields(currSdDto, sd);
                 if (sd.getStudentGroup().getId() != currSdDto.getStudentGroupId()) {
                     sd.setStudentGroup(getStudentGroup(currSdDto.getStudentGroupId()));
                     sd.setSpecialization(sd.getStudentGroup().getSpecialization());
-                } else {
-//                    sd.setStudentGroup(studentGroup);
-//                    sd.setSpecialization(specialization);
                 }
-//                sd.setStudent(student);
             }
-//            studentDegrees.forEach(studentDegree -> {
-//                Integer groupId = studentDegreesDTOs.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
-//                studentDegree.setStudentGroup(getStudentGroup(groupId));
-//                studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
-//                studentDegree.setStudent(student);
 //                studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
-//            });
-
-//            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
-//            studentDegreeService.update(studentDegrees);
+            studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);

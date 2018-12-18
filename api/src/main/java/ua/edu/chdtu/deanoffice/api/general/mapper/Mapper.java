@@ -16,6 +16,19 @@ public class Mapper {
     private static final MatchingStrategy STRICT_MATCHING_STRATEGY = MatchingStrategies.STRICT;
     private static final ModelMapper modelMapper = new ModelMapper();
 
+    static {
+        modelMapper.getConfiguration().setMatchingStrategy(STRICT_MATCHING_STRATEGY);
+        modelMapper.addMappings(new PropertyMap<StudentDegreeDTO, StudentDegree>() {
+            @Override
+            protected void configure() {
+                skip(destination.getStudentPreviousUniversities());
+                skip(destination.getSpecialization());
+                skip(destination.getStudent());
+                skip(destination.getStudentGroup());
+            }
+        });
+    }
+
     public static Object map(Object source, Class destination) {
         return modelMapper.map(source, destination);
     }
@@ -67,16 +80,6 @@ public class Mapper {
     }
 
     public static void mapStudentDegreeDTOToStudentDegreeSimpleFields(StudentDegreeDTO dto, StudentDegree entity) {
-        modelMapper.getConfiguration().setMatchingStrategy(STRICT_MATCHING_STRATEGY);
-        modelMapper.addMappings(new PropertyMap<StudentDegreeDTO, StudentDegree>() {
-            @Override
-            protected void configure() {
-                skip(destination.getStudentPreviousUniversities());
-                skip(destination.getSpecialization());
-                skip(destination.getStudent());
-                skip(destination.getStudentGroup());
-            }
-        });
         modelMapper.map(dto, entity);
 //        return modelMapper.createTypeMap(StudentDegreeDTO.class, StudentDegree.class)
 //                .addMapping(StudentDegreeDTO::getRecordBookNumber, StudentDegree::setRecordBookNumber)
