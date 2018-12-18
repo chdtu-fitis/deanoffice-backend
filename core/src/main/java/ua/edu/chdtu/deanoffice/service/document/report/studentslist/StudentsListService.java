@@ -64,26 +64,22 @@ public class StudentsListService {
     ) throws Docx4JException, IOException {
         TuitionForm tuitionForm = TuitionForm.valueOf(tuitionFormText);
         List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId,year,facultyId,tuitionForm);
-        WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
+        WordprocessingMLPackage wordMLPackage = fillTemplateHeaders(
+            TEMPLATEHEADERS,
+            facultyService.getById(facultyId).getAbbr(),
+            year,
+            tuitionForm.getNameUkr()
+        );
         for (StudentGroup group:studentGroups){
             List<StudentDegree> students = group.getStudentDegrees();
             List<StudentForList> studentForLists = prepareGroup(students);
             group.getTuitionForm().toString();
-            if(studentGroups.get(0) == group){
-                wordMLPackage = fillTemplateHeaders(
-                    TEMPLATEHEADERS,
-                    facultyService.getById(facultyId).getAbbr(),
-                    year,
-                    tuitionForm.getNameUkr()
-                );
-            } else {
-                wordMLPackage.
-                getMainDocumentPart().
-                getContent().
-                addAll(fillTemplate(TEMPLATE,studentForLists,group).
-                getMainDocumentPart().
-                getContent());
-            }
+            wordMLPackage.
+            getMainDocumentPart().
+            getContent().
+            addAll(fillTemplate(TEMPLATE,studentForLists,group).
+            getMainDocumentPart().
+            getContent());
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,FILE_NAME+year+KURS, FileFormatEnum.DOCX);
     }
