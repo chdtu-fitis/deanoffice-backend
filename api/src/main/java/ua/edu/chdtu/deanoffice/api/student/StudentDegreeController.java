@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.student;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import org.modelmapper.TypeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,21 +12,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
-import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -39,14 +35,11 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
@@ -181,7 +174,7 @@ public class StudentDegreeController {
     ) {
         try {
             validateStudentDegreesUpdates(studentDegreesDTOs);
-            List<Integer> studentDegreeIds = studentDegreesDTOs.stream().map(sd -> sd.getId()).collect(Collectors.toList());
+            List<Integer> studentDegreeIds = studentDegreesDTOs.stream().map(StudentDegreeDTO::getId).collect(Collectors.toList());
             List<StudentDegree> studentDegrees = studentDegreeService.getActiveByIdsAndFaculty(studentDegreeIds, user.getFaculty().getId());
 
             for (StudentDegree sd : studentDegrees) {
@@ -191,8 +184,10 @@ public class StudentDegreeController {
                     sd.setStudentGroup(getStudentGroup(currSdDto.getStudentGroupId()));
                     sd.setSpecialization(sd.getStudentGroup().getSpecialization());
                 }
+                sd.getStudentPreviousUniversities().clear();
+                sd.getStudentPreviousUniversities().addAll(Mapper.strictMap(currSdDto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
+                sd.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(sd));
             }
-//                studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
             studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {

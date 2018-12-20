@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -60,5 +61,5 @@ public class StudentDegree extends BaseEntity {
     @ManyToOne
     private StudentGroup studentGroup;
     @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<StudentPreviousUniversity> studentPreviousUniversities;
+    private Set<StudentPreviousUniversity> studentPreviousUniversities = new HashSet<>();
 }
