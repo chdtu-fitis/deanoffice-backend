@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.api.general.mapper;
 
 import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
 import ua.edu.chdtu.deanoffice.api.general.mapper.type.ListParameterizedType;
@@ -16,20 +15,7 @@ public class Mapper {
     private static final MatchingStrategy STRICT_MATCHING_STRATEGY = MatchingStrategies.STRICT;
     private static final ModelMapper modelMapper = new ModelMapper();
 
-    static {
-        modelMapper.getConfiguration().setMatchingStrategy(STRICT_MATCHING_STRATEGY);
-        modelMapper.addMappings(new PropertyMap<StudentDegreeDTO, StudentDegree>() {
-            @Override
-            protected void configure() {
-                skip(destination.getStudentPreviousUniversities());
-                skip(destination.getSpecialization());
-                skip(destination.getStudent());
-                skip(destination.getStudentGroup());
-            }
-        });
-    }
-
-    public static Object map(Object source, Class destination) {
+    public static <T> T map(Object source, Class<T> destination) {
         return modelMapper.map(source, destination);
     }
 
@@ -37,23 +23,23 @@ public class Mapper {
         modelMapper.map(source, destination);
     }
 
-    public static List map(List source, Class destination) {
+    public static <T> List<T> map(List source, Class<T> destination) {
         return modelMapper.map(source, new ListParameterizedType(destination));
     }
 
-    public static Set map(Set source, Class destination) {
+    public static <T> Set<T> map(Set source, Class<T> destination) {
         return modelMapper.map(source, new SetParameterizedType(destination));
     }
 
-    public static Object map(Object source, Class destination, MatchingStrategy matchingStrategy) {
+    public static <T> T map(Object source, Class<T> destination, MatchingStrategy matchingStrategy) {
         return createModelMapperWithStrategy(matchingStrategy).map(source, destination);
     }
 
-    public static List map(List source, Class destination, MatchingStrategy matchingStrategy) {
+    public static <T> List<T> map(List source, Class<T> destination, MatchingStrategy matchingStrategy) {
         return createModelMapperWithStrategy(matchingStrategy).map(source, new ListParameterizedType(destination));
     }
 
-    public static Set map(Set source, Class destination, MatchingStrategy matchingStrategy) {
+    public static <T> Set<T> map(Set source, Class<T> destination, MatchingStrategy matchingStrategy) {
         return createModelMapperWithStrategy(matchingStrategy).map(source, new SetParameterizedType(destination));
     }
 
@@ -61,15 +47,15 @@ public class Mapper {
         createModelMapperWithStrategy(STRICT_MATCHING_STRATEGY).map(source, destination);
     }
 
-    public static Object strictMap(Object source, Class destination) {
+    public static <T> T strictMap(Object source, Class<T> destination) {
         return map(source, destination, STRICT_MATCHING_STRATEGY);
     }
 
-    public static List strictMap(List source, Class destination) {
+    public static <T> List<T> strictMap(List source, Class<T> destination) {
         return map(source, destination, STRICT_MATCHING_STRATEGY);
     }
 
-    public static Set strictMap(Set source, Class destination) {
+    public static <T> Set<T> strictMap(Set source, Class<T> destination) {
         return map(source, destination, STRICT_MATCHING_STRATEGY);
     }
 
@@ -80,7 +66,29 @@ public class Mapper {
     }
 
     public static void mapStudentDegreeDTOToStudentDegreeSimpleFields(StudentDegreeDTO dto, StudentDegree entity) {
-        modelMapper.map(dto, entity);
+        entity.setActive(dto.isActive());
+        entity.setAdmissionDate(dto.getAdmissionDate());
+        entity.setAdmissionOrderNumber(dto.getAdmissionOrderNumber());
+        entity.setAdmissionOrderDate(dto.getAdmissionOrderDate());
+        entity.setContractDate(dto.getContractDate());
+        entity.setContractNumber(dto.getContractNumber());
+        entity.setDiplomaNumber(dto.getDiplomaNumber());
+        entity.setDiplomaDate(dto.getDiplomaDate());
+        entity.setDiplomaWithHonours(dto.isDiplomaWithHonours());
+        entity.setPayment(dto.getPayment());
+        entity.setPreviousDiplomaDate(dto.getPreviousDiplomaDate());
+        entity.setPreviousDiplomaType(dto.getPreviousDiplomaType());
+        entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());
+        entity.setPreviousDiplomaIssuedBy(dto.getPreviousDiplomaIssuedBy());
+        entity.setPreviousDiplomaIssuedByEng(dto.getPreviousDiplomaIssuedByEng());
+        entity.setProtocolDate(dto.getProtocolDate());
+        entity.setProtocolNumber(dto.getProtocolNumber());
+        entity.setRecordBookNumber(dto.getRecordBookNumber());
+        entity.setStudentCardNumber(dto.getStudentCardNumber());
+        entity.setSupplementDate(dto.getSupplementDate());
+        entity.setSupplementNumber(dto.getSupplementNumber());
+        entity.setThesisName(dto.getThesisName());
+        entity.setThesisNameEng(dto.getThesisNameEng());
 //        return modelMapper.createTypeMap(StudentDegreeDTO.class, StudentDegree.class)
 //                .addMapping(StudentDegreeDTO::getRecordBookNumber, StudentDegree::setRecordBookNumber)
 //                .addMapping(StudentDegreeDTO::getDiplomaNumber, StudentDegree::setDiplomaNumber)
