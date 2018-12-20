@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
@@ -79,6 +80,24 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "and sd.studentGroup.id = :group_id " +
             "and sd.active = true")
     List<StudentDegree> findByFullNameAndGroupId(@Param("full_name") String fullName, @Param("group_id") int groupId);
+
+    @Query(value = "SELECT student_degree.id, student.surname, student.name, student.patronimic,\n" +
+            "student_group.name, speciality.code, speciality.name, specialization.name,\n" +
+            "course_name.name, knowledge_control.name, course.semester, \n" +
+            "grade.points, grade.grade, grade.ects\n" +
+            "FROM student\n" +
+            "INNER JOIN student_degree ON student_degree.student_id = student.id\n" +
+            "INNER JOIN specialization ON student_degree.specialization_id = specialization.id\n" +
+            "INNER JOIN speciality ON specialization.speciality_id = speciality.id\n" +
+            "INNER JOIN student_group ON student_degree.student_group_id = student_group.id\n" +
+            "INNER JOIN courses_for_groups ON courses_for_groups.student_group_id = student_group.id\n" +
+            "INNER JOIN course ON courses_for_groups.course_id = course.id\n" +
+            "INNER JOIN course_name ON course.course_name_id = course_name.id\n" +
+            "INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id\n" +
+            "LEFT JOIN  grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id\n" +
+            "WHERE student_group.id = 421 and student_degree.active=true and student_degree.payment='BUDGET' and (grade.points is null OR grade.points<60)\n" +
+            "order by student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
+    List<Grade> findDebtorStudentDegrees(@Param("degreeId") int degreeId);
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
