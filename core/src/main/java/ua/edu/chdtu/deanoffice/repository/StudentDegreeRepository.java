@@ -60,8 +60,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value = "select sd.id from student_degree sd " +
             "inner join specialization s ON s.id = sd.specialization_id " +
-            "WHERE sd.id  in :studentDegreeIds and s.faculty_id <> :facultyId", nativeQuery = true)
-    List <Integer> findIdByIdsAndFacultyId(@Param("studentDegreeIds") List<Integer> studentDegreeIds, @Param("facultyId") int facultyId);
+            "WHERE sd.id in :studentDegreeIds and s.faculty_id <> :facultyId", nativeQuery = true)
+    List<Integer> findIdsByIdsAndFacultyId(@Param("studentDegreeIds") List<Integer> studentDegreeIds, @Param("facultyId") int facultyId);
+
+    @Query(value = "select sd from StudentDegree sd " +
+            "WHERE sd.id in :studentDegreeIds and sd.specialization.faculty.id = :facultyId")
+    List<StudentDegree> findActiveByIdsAndFacultyId(@Param("studentDegreeIds") List<Integer> studentDegreeIds, @Param("facultyId") int facultyId);
 
     @Query("SELECT sd from StudentDegree sd " +
             "where sd.active = :active " +
