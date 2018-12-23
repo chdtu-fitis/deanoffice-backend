@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.type.ListParameterizedType;
 import ua.edu.chdtu.deanoffice.api.general.mapper.type.SetParameterizedType;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 
 import java.util.List;
 import java.util.Set;
@@ -89,29 +90,9 @@ public class Mapper {
         entity.setSupplementNumber(dto.getSupplementNumber());
         entity.setThesisName(dto.getThesisName());
         entity.setThesisNameEng(dto.getThesisNameEng());
-//        return modelMapper.createTypeMap(StudentDegreeDTO.class, StudentDegree.class)
-//                .addMapping(StudentDegreeDTO::getRecordBookNumber, StudentDegree::setRecordBookNumber)
-//                .addMapping(StudentDegreeDTO::getDiplomaNumber, StudentDegree::setDiplomaNumber)
-//                .addMapping(StudentDegreeDTO::getDiplomaDate, StudentDegree::setDiplomaDate)
-//                .addMapping(StudentDegreeDTO::getSupplementNumber, StudentDegree::setSupplementNumber)
-//                .addMapping(StudentDegreeDTO::getSupplementDate, StudentDegree::setSupplementDate)
-//                .addMapping(StudentDegreeDTO::getThesisName, StudentDegree::setThesisName)
-//                .addMapping(StudentDegreeDTO::getThesisNameEng, StudentDegree::setThesisNameEng)
-//                .addMapping(StudentDegreeDTO::getProtocolNumber, StudentDegree::setProtocolNumber)
-//                .addMapping(StudentDegreeDTO::getProtocolDate, StudentDegree::setProtocolDate)
-//                .addMapping(StudentDegreeDTO::getPreviousDiplomaType, StudentDegree::setPreviousDiplomaType)
-//                .addMapping(StudentDegreeDTO::getPreviousDiplomaNumber, StudentDegree::setPreviousDiplomaNumber)
-//                .addMapping(StudentDegreeDTO::getPreviousDiplomaDate, StudentDegree::setPreviousDiplomaDate)
-//                .addMapping(StudentDegreeDTO::getPayment, StudentDegree::setPayment)
-//                .addMapping(StudentDegreeDTO::getStudentCardNumber, StudentDegree::setStudentCardNumber)
-//                .addMapping(StudentDegreeDTO::getAdmissionOrderDate, StudentDegree::setAdmissionOrderDate)
-//                .addMapping(StudentDegreeDTO::getAdmissionOrderNumber, StudentDegree::setAdmissionOrderNumber)
-//                .addMapping(StudentDegreeDTO::getContractDate, StudentDegree::setContractDate)
-//                .addMapping(StudentDegreeDTO::getContractNumber, StudentDegree::setContractNumber)
-//                .addMapping(StudentDegreeDTO::getPreviousDiplomaIssuedBy, StudentDegree::setPreviousDiplomaIssuedBy)
-//                .addMapping(StudentDegreeDTO::getPreviousDiplomaIssuedByEng, StudentDegree::setPreviousDiplomaIssuedByEng)
-//                .addMapping(StudentDegreeDTO::getAdmissionDate, StudentDegree::setAdmissionDate)
-//                .addMapping(StudentDegreeDTO::isDiplomaWithHonours, StudentDegree::setDiplomaWithHonours);
+        entity.getStudentPreviousUniversities().clear();
+        entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
+        entity.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(entity));
     }
 
 }

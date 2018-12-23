@@ -184,9 +184,6 @@ public class StudentDegreeController {
                     sd.setStudentGroup(getStudentGroup(currSdDto.getStudentGroupId()));
                     sd.setSpecialization(sd.getStudentGroup().getSpecialization());
                 }
-                sd.getStudentPreviousUniversities().clear();
-                sd.getStudentPreviousUniversities().addAll(Mapper.strictMap(currSdDto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
-                sd.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(sd));
             }
             studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
