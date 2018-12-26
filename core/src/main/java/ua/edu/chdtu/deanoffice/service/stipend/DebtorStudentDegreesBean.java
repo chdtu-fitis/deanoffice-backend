@@ -22,5 +22,7 @@ public class DebtorStudentDegreesBean {
     private String specializationName;
     private String departmentAbbreviation;
     private double averageGrade;
-    private List<Course> debtCourses;
+    private String courseName;
+    private String knowledgeControlName;
+    private int semester;
 }
