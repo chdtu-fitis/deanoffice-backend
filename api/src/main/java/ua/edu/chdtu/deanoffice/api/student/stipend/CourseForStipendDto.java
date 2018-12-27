@@ -9,4 +9,10 @@ public class CourseForStipendDto {
     private String courseName;
     private String knowledgeControlName;
     private int semester;
+
+    public CourseForStipendDto(String courseName, String knowledgeControlName, int semester) {
+        this.courseName = courseName;
+        this.knowledgeControlName = knowledgeControlName;
+        this.semester = semester;
+    }
 }

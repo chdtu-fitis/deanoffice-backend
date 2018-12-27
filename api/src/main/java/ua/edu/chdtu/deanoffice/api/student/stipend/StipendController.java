@@ -13,6 +13,9 @@ import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/student-degree/stipend")
@@ -24,10 +27,30 @@ public class StipendController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DebtorStudentDegreesBean>> getPersonalStatement(@CurrentUser ApplicationUser user) {
+    public ResponseEntity<Set<StudentInfoForStipendDto>> getPersonalStatement(@CurrentUser ApplicationUser user) {
         try {
             List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService.getDebtorStudentDegrees(user.getFaculty().getId(), 1);
-            return ResponseEntity.ok(debtorStudentDegrees);
+            Map<StudentInfoForStipendDto, List<DebtorStudentDegreesBean>> collect = debtorStudentDegrees.stream().collect(Collectors.groupingBy(post -> new StudentInfoForStipendDto(
+                    post.getId(),
+                    post.getSurname(),
+                    post.getName(),
+                    post.getPatronimic(),
+                    post.getDegreeName(),
+                    post.getGroupName(),
+                    post.getYear(),
+                    post.getTuitionTerm(),
+                    post.getSpecialityCode(),
+                    post.getSpecialityName(),
+                    post.getSpecializationName(),
+                    post.getDepartmentAbbreviation(),
+                    post.getAverageGrade())));
+            collect.forEach((key, value) -> {
+                value.forEach(item -> key.getDebtCourses().add(
+                        new CourseForStipendDto(item.getCourseName(), item.getKnowledgeControlName(), item.getSemester())
+                ));
+            });
+
+            return ResponseEntity.ok(collect.keySet());
         } catch (Exception e) {
             return handleException(e);
         }
