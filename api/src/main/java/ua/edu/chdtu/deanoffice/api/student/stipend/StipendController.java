@@ -2,9 +2,9 @@ package ua.edu.chdtu.deanoffice.api.student.stipend;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.edu.chdtu.deanoffice.api.document.groupgrade.GroupGradeReportController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
@@ -26,11 +26,16 @@ public class StipendController {
         this.stipendService = stipendService;
     }
 
-    @GetMapping
-    public ResponseEntity<Set<StudentInfoForStipendDto>> getPersonalStatement(@CurrentUser ApplicationUser user) {
+    @GetMapping("degree/{degree_id}")
+    public ResponseEntity<Set<StudentInfoForStipendDto>> getPersonalStatement(
+            @CurrentUser ApplicationUser user,
+            @PathVariable("degree_id") Integer degreeId) {
         try {
-            List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService.getDebtorStudentDegrees(user.getFaculty().getId(), 1);
-            Map<StudentInfoForStipendDto, List<DebtorStudentDegreesBean>> collect = debtorStudentDegrees.stream().collect(Collectors.groupingBy(post -> new StudentInfoForStipendDto(
+            List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService
+                    .getDebtorStudentDegrees(user.getFaculty().getId(), degreeId);
+            Map<StudentInfoForStipendDto, List<DebtorStudentDegreesBean>> collect =
+                    debtorStudentDegrees.stream()
+                            .collect(Collectors.groupingBy(post -> new StudentInfoForStipendDto(
                     post.getId(),
                     post.getSurname(),
                     post.getName(),
@@ -44,12 +49,9 @@ public class StipendController {
                     post.getSpecializationName(),
                     post.getDepartmentAbbreviation(),
                     post.getAverageGrade())));
-            collect.forEach((key, value) -> {
-                value.forEach(item -> key.getDebtCourses().add(
-                        new CourseForStipendDto(item.getCourseName(), item.getKnowledgeControlName(), item.getSemester())
-                ));
-            });
-
+            collect.forEach((key, value) -> value.forEach(item -> key.getDebtCourses().add(
+                    new CourseForStipendDto(item.getCourseName(), item.getKnowledgeControlName(), item.getSemester())
+            )));
             return ResponseEntity.ok(collect.keySet());
         } catch (Exception e) {
             return handleException(e);
