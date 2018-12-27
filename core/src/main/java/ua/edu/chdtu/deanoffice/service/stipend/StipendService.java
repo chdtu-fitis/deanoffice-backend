@@ -20,8 +20,8 @@ public class StipendService {
 
     }
 
-    public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId, int degreeId, boolean active) {
-        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(degreeId, facultyId, active, "FULL_TIME", "BUDGET");
+    public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId, int degreeId) {
+        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(degreeId, facultyId);
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
