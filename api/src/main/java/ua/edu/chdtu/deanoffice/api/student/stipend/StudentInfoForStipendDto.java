@@ -1,7 +1,12 @@
 package ua.edu.chdtu.deanoffice.api.student.stipend;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
 public class StudentInfoForStipendDto {
     private Integer id;
     private String surname;
