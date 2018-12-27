@@ -16,7 +16,7 @@ public class StudentInfoForStipendDto {
     private String groupName;
     private int year;
     private String tuitionTerm;
-    private String code;
+    private String specialityCode;
     private String specialityName;
     private String specializationName;
     private String departmentAbbreviation;

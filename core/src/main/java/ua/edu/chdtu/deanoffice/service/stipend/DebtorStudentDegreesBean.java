@@ -17,7 +17,7 @@ public class DebtorStudentDegreesBean {
     private String groupName;
     private int year;
     private String tuitionTerm;
-    private String code;
+    private String specialityCode;
     private String specialityName;
     private String specializationName;
     private String departmentAbbreviation;
@@ -25,4 +25,38 @@ public class DebtorStudentDegreesBean {
     private String courseName;
     private String knowledgeControlName;
     private int semester;
+
+    public DebtorStudentDegreesBean(Integer id,
+                                    String surname,
+                                    String name,
+                                    String patronimic,
+                                    String degreeName,
+                                    String groupName,
+                                    int year,
+                                    String tuitionTerm,
+                                    String specialityCode,
+                                    String specialityName,
+                                    String specializationName,
+                                    String departmentAbbreviation,
+                                    double averageGrade,
+                                    String courseName,
+                                    String knowledgeControlName,
+                                    int semester) {
+        this.id = id;
+        this.surname = surname;
+        this.name = name;
+        this.patronimic = patronimic;
+        this.degreeName = degreeName;
+        this.groupName = groupName;
+        this.year = year;
+        this.tuitionTerm = tuitionTerm;
+        this.specialityCode = specialityCode;
+        this.specialityName = specialityName;
+        this.specializationName = specializationName;
+        this.departmentAbbreviation = departmentAbbreviation;
+        this.averageGrade = averageGrade;
+        this.courseName = courseName;
+        this.knowledgeControlName = knowledgeControlName;
+        this.semester = semester;
+    }
 }

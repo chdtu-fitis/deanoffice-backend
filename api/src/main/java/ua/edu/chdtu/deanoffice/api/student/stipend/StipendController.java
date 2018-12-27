@@ -26,7 +26,8 @@ public class StipendController {
     @GetMapping
     public ResponseEntity<List<DebtorStudentDegreesBean>> getPersonalStatement(@CurrentUser ApplicationUser user) {
         try {
-            return ResponseEntity.ok(null);
+            List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService.getDebtorStudentDegrees(user.getFaculty().getId(), 1, true);
+            return ResponseEntity.ok(debtorStudentDegrees);
         } catch (Exception e) {
             return handleException(e);
         }
