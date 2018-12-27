@@ -21,5 +21,5 @@ public class StudentInfoForStipendDto {
     private String specializationName;
     private String departmentAbbreviation;
     private double averageGrade;
-    List<CourseForStipendDto> courses;
+    List<CourseForStipendDto> debtCourses;
 }
