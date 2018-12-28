@@ -5,12 +5,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CourseForStipendDto {
+public class CourseForStipendDTO {
     private String courseName;
     private String knowledgeControlName;
     private int semester;
 
-    public CourseForStipendDto(String courseName, String knowledgeControlName, int semester) {
+    public CourseForStipendDTO(String courseName, String knowledgeControlName, int semester) {
         this.courseName = courseName;
         this.knowledgeControlName = knowledgeControlName;
         this.semester = semester;

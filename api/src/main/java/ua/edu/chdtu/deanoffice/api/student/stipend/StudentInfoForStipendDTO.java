@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @Getter
 @Setter
-public class StudentInfoForStipendDto {
+public class StudentInfoForStipendDTO {
     private Integer id;
     private String surname;
     private String name;
@@ -23,13 +23,13 @@ public class StudentInfoForStipendDto {
     private String specializationName;
     private String departmentAbbreviation;
     private double averageGrade;
-    List<CourseForStipendDto> debtCourses = new ArrayList<>();
+    List<CourseForStipendDTO> debtCourses = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StudentInfoForStipendDto that = (StudentInfoForStipendDto) o;
+        StudentInfoForStipendDTO that = (StudentInfoForStipendDTO) o;
         return year == that.year &&
                 Double.compare(that.averageGrade, averageGrade) == 0 &&
                 id.equals(that.id) &&

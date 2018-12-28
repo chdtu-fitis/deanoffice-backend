@@ -38,7 +38,7 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                /*(BigDecimal)item[12]*/new BigDecimal(0)/*averageCode*/,
+                BigDecimal.ZERO/*averageGrade*/,
                 (String)item[13]/*courseName*/,
                 (String)item[14]/*knowledgeControlName*/,
                 (Integer)item[15]/*semester*/
@@ -62,7 +62,7 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                (BigDecimal)item[12]/*averageCode*/
+                (BigDecimal)item[12]/*averageGradee*/
         )));
         return debtorStudentDegreesBeans;
     }

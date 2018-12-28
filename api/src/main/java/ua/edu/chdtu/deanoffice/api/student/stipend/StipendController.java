@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.api.student.stipend;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -13,9 +12,10 @@ import ua.edu.chdtu.deanoffice.service.stipend.DebtorStudentDegreesBean;
 import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/student-degree/stipend")
@@ -27,30 +27,35 @@ public class StipendController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentInfoForStipendDto>> getPersonalStatement(
+    public ResponseEntity<List<StudentInfoForStipendDTO>> getPersonalStatement(
             @CurrentUser ApplicationUser user) {
         try {
             List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService
                     .getDebtorStudentDegrees(user.getFaculty().getId(), 1);
-            LinkedHashMap<Integer, StudentInfoForStipendDto> debtorStudentDegreesDtosMap = new LinkedHashMap<>();
+            LinkedHashMap<Integer, StudentInfoForStipendDTO> debtorStudentDegreesDTOsMap = new LinkedHashMap<>();
             debtorStudentDegrees.forEach(dsd -> {
-                StudentInfoForStipendDto studentInfoForStipendDto = debtorStudentDegreesDtosMap.get(dsd.getId());
-                if (studentInfoForStipendDto == null) {
-                    studentInfoForStipendDto = (StudentInfoForStipendDto)Mapper.strictMap(dsd, StudentInfoForStipendDto.class);
+                StudentInfoForStipendDTO studentInfoForStipendDTO = debtorStudentDegreesDTOsMap.get(dsd.getId());
+                if (studentInfoForStipendDTO == null) {
+                    studentInfoForStipendDTO = Mapper.strictMap(dsd, StudentInfoForStipendDTO.class);
                 }
-                CourseForStipendDto courseForStipendDto = new CourseForStipendDto(
+                CourseForStipendDTO courseForStipendDto = new CourseForStipendDTO(
                         dsd.getCourseName(), dsd.getKnowledgeControlName(), dsd.getSemester()
                 );
-                studentInfoForStipendDto.getDebtCourses().add(courseForStipendDto);
-                debtorStudentDegreesDtosMap.put(studentInfoForStipendDto.getId(), studentInfoForStipendDto);
+                studentInfoForStipendDTO.getDebtCourses().add(courseForStipendDto);
+                debtorStudentDegreesDTOsMap.put(studentInfoForStipendDTO.getId(), studentInfoForStipendDTO);
             });
-            List<DebtorStudentDegreesBean> noDebtsStudentDegrees = stipendService.getNoDebtStudentDegrees(
-                    user.getFaculty().getId(), 1, debtorStudentDegreesDtosMap.keySet()
-                    );
-            List<StudentInfoForStipendDto> noDebtsStudentDegreesDtos = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDto.class);
-            List<StudentInfoForStipendDto> studentsForStipend = noDebtsStudentDegreesDtos;
-            studentsForStipend.addAll(debtorStudentDegreesDtosMap.values().stream().collect(Collectors.toList()));
-            return ResponseEntity.ok(studentsForStipend);
+            List<DebtorStudentDegreesBean> noDebtsStudentDegrees = stipendService
+                    .getNoDebtStudentDegrees(user.getFaculty().getId(), 1, debtorStudentDegreesDTOsMap.keySet());
+            List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDTO.class);
+            noDebtsStudentDegreesDTOs.addAll(new ArrayList<>(debtorStudentDegreesDTOsMap.values()));
+            noDebtsStudentDegreesDTOs.sort(Comparator
+                    .comparing(StudentInfoForStipendDTO::getGroupName)
+                    .thenComparingDouble(StudentInfoForStipendDTO::getAverageGrade)
+                    .thenComparing(StudentInfoForStipendDTO::getSurname)
+                    .thenComparing(StudentInfoForStipendDTO::getName)
+                    .thenComparing(StudentInfoForStipendDTO::getPatronimic)
+            );
+            return ResponseEntity.ok(noDebtsStudentDegreesDTOs);
         } catch (Exception e) {
             return handleException(e);
         }
