@@ -44,7 +44,13 @@ public class StipendController {
                 studentInfoForStipendDto.getDebtCourses().add(courseForStipendDto);
                 debtorStudentDegreesDtosMap.put(studentInfoForStipendDto.getId(), studentInfoForStipendDto);
             });
-            return ResponseEntity.ok(debtorStudentDegreesDtosMap.values().stream().collect(Collectors.toList()));
+            List<DebtorStudentDegreesBean> noDebtsStudentDegrees = stipendService.getNoDebtStudentDegrees(
+                    user.getFaculty().getId(), 1, debtorStudentDegreesDtosMap.keySet()
+                    );
+            List<StudentInfoForStipendDto> noDebtsStudentDegreesDtos = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDto.class);
+            List<StudentInfoForStipendDto> studentsForStipend = noDebtsStudentDegreesDtos;
+            studentsForStipend.addAll(debtorStudentDegreesDtosMap.values().stream().collect(Collectors.toList()));
+            return ResponseEntity.ok(studentsForStipend);
         } catch (Exception e) {
             return handleException(e);
         }

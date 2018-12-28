@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.Course;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -21,7 +22,7 @@ public class DebtorStudentDegreesBean {
     private String specialityName;
     private String specializationName;
     private String departmentAbbreviation;
-    private double averageGrade;
+    private BigDecimal averageGrade;
     private String courseName;
     private String knowledgeControlName;
     private int semester;
@@ -38,7 +39,7 @@ public class DebtorStudentDegreesBean {
                                     String specialityName,
                                     String specializationName,
                                     String departmentAbbreviation,
-                                    double averageGrade,
+                                    BigDecimal averageGrade,
                                     String courseName,
                                     String knowledgeControlName,
                                     int semester) {
@@ -58,5 +59,33 @@ public class DebtorStudentDegreesBean {
         this.courseName = courseName;
         this.knowledgeControlName = knowledgeControlName;
         this.semester = semester;
+    }
+
+    public DebtorStudentDegreesBean(Integer id,
+                                    String surname,
+                                    String name,
+                                    String patronimic,
+                                    String degreeName,
+                                    String groupName,
+                                    int year,
+                                    String tuitionTerm,
+                                    String specialityCode,
+                                    String specialityName,
+                                    String specializationName,
+                                    String departmentAbbreviation,
+                                    BigDecimal averageGrade) {
+        this.id = id;
+        this.surname = surname;
+        this.name = name;
+        this.patronimic = patronimic;
+        this.degreeName = degreeName;
+        this.groupName = groupName;
+        this.year = year;
+        this.tuitionTerm = tuitionTerm;
+        this.specialityCode = specialityCode;
+        this.specialityName = specialityName;
+        this.specializationName = specializationName;
+        this.departmentAbbreviation = departmentAbbreviation;
+        this.averageGrade = averageGrade;
     }
 }
