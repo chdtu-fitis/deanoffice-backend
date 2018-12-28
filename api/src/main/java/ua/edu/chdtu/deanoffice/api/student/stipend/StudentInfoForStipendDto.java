@@ -3,7 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student.stipend;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,24 +23,7 @@ public class StudentInfoForStipendDto {
     private String specializationName;
     private String departmentAbbreviation;
     private double averageGrade;
-    List<CourseForStipendDto> debtCourses;
-
-    public StudentInfoForStipendDto(Integer id, String surname, String name, String patronimic, String degreeName, String groupName, int year, String tuitionTerm, String specialityCode, String specialityName, String specializationName, String departmentAbbreviation, double averageGrade) {
-        this.id = id;
-        this.surname = surname;
-        this.name = name;
-        this.patronimic = patronimic;
-        this.degreeName = degreeName;
-        this.groupName = groupName;
-        this.year = year;
-        this.tuitionTerm = tuitionTerm;
-        this.specialityCode = specialityCode;
-        this.specialityName = specialityName;
-        this.specializationName = specializationName;
-        this.departmentAbbreviation = departmentAbbreviation;
-        this.averageGrade = averageGrade;
-        debtCourses = new LinkedList<>();
-    }
+    List<CourseForStipendDto> debtCourses = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

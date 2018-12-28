@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.stipend.DebtorStudentDegreesBean;
 import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,33 +26,25 @@ public class StipendController {
         this.stipendService = stipendService;
     }
 
-    @GetMapping("degree/{degree_id}")
-    public ResponseEntity<Set<StudentInfoForStipendDto>> getPersonalStatement(
-            @CurrentUser ApplicationUser user,
-            @PathVariable("degree_id") Integer degreeId) {
+    @GetMapping
+    public ResponseEntity<List<StudentInfoForStipendDto>> getPersonalStatement(
+            @CurrentUser ApplicationUser user) {
         try {
             List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService
-                    .getDebtorStudentDegrees(user.getFaculty().getId(), degreeId);
-            Map<StudentInfoForStipendDto, List<DebtorStudentDegreesBean>> collect =
-                    debtorStudentDegrees.stream()
-                            .collect(Collectors.groupingBy(post -> new StudentInfoForStipendDto(
-                    post.getId(),
-                    post.getSurname(),
-                    post.getName(),
-                    post.getPatronimic(),
-                    post.getDegreeName(),
-                    post.getGroupName(),
-                    post.getYear(),
-                    post.getTuitionTerm(),
-                    post.getSpecialityCode(),
-                    post.getSpecialityName(),
-                    post.getSpecializationName(),
-                    post.getDepartmentAbbreviation(),
-                    post.getAverageGrade())));
-            collect.forEach((key, value) -> value.forEach(item -> key.getDebtCourses().add(
-                    new CourseForStipendDto(item.getCourseName(), item.getKnowledgeControlName(), item.getSemester())
-            )));
-            return ResponseEntity.ok(collect.keySet());
+                    .getDebtorStudentDegrees(user.getFaculty().getId(), 1);
+            LinkedHashMap<Integer, StudentInfoForStipendDto> debtorStudentDegreesDtosMap = new LinkedHashMap<>();
+            debtorStudentDegrees.forEach(dsd -> {
+                StudentInfoForStipendDto studentInfoForStipendDto = debtorStudentDegreesDtosMap.get(dsd.getId());
+                if (studentInfoForStipendDto == null) {
+                    studentInfoForStipendDto = (StudentInfoForStipendDto)Mapper.strictMap(dsd, StudentInfoForStipendDto.class);
+                }
+                CourseForStipendDto courseForStipendDto = new CourseForStipendDto(
+                        dsd.getCourseName(), dsd.getKnowledgeControlName(), dsd.getSemester()
+                );
+                studentInfoForStipendDto.getDebtCourses().add(courseForStipendDto);
+                debtorStudentDegreesDtosMap.put(studentInfoForStipendDto.getId(), studentInfoForStipendDto);
+            });
+            return ResponseEntity.ok(debtorStudentDegreesDtosMap.values().stream().collect(Collectors.toList()));
         } catch (Exception e) {
             return handleException(e);
         }
