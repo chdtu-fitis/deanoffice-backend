@@ -157,7 +157,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "  AND student_degree.payment = 'BUDGET' " +
             "  AND (grade.points IS NULL OR grade.points < 60) " +
             "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
-            "ORDER BY student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
+            "ORDER BY degree.id, speciality.code, student_group.name, student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
     List<Object[]> findDebtorStudentDegreesRaw(
             @Param("degreeId") int degreeId,
             @Param("facultyId") int facultyId);
