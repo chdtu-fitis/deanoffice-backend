@@ -15,9 +15,9 @@ public class SemesterDetails {
 
     public SemesterDetails() {
         this.grades = new ArrayList<>();
-        this.grades.add(new ArrayList<>());
-        this.grades.add(new ArrayList<>());
-        this.grades.add(new ArrayList<>());
-        this.grades.add(new ArrayList<>());
+        this.grades.add(new ArrayList<>());//екзамени та заліки
+        this.grades.add(new ArrayList<>());//курсові
+        this.grades.add(new ArrayList<>());//практики
+        this.grades.add(new ArrayList<>());//випускні роботи
     }
 }

@@ -13,7 +13,6 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
@@ -37,9 +36,6 @@ public class AcademicReferenceService {
 
     @Autowired
     private DocumentIOService documentIOService;
-
-    @Autowired
-    private StudentGroupService studentGroupService;
 
     @Autowired
     private GradeService gradeService;
@@ -118,11 +114,18 @@ public class AcademicReferenceService {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         Tr rowWithSignature = tableRows.get(1);
         Tr rowWithCourse = tableRows.get(2);
-        int currentSemester = 1;
+        Set <Integer> semestersSet = studentSummary.getSemesters().keySet();
         int currentRow = 2;
-        for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
-            currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, getSignatureDictionary(currentSemester), semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX));
-            currentSemester++;
+        int currentSemester;
+        Iterator<Integer> setIterator = semestersSet.iterator();
+        if (setIterator.hasNext()) {
+            currentSemester = setIterator.next();
+            for (SemesterDetails semesterDetails : studentSummary.getSemesters().values()) {
+                currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, getSignatureDictionary(currentSemester), semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX));
+                if (setIterator.hasNext()) {
+                    currentSemester = setIterator.next();
+                }
+            }
         }
         List<List<Grade>> coursePapersAndInternships = getCoursePapersAndInternships(studentSummary);
         if (coursePapersAndInternships.get(0).size() > 0) {
@@ -157,7 +160,7 @@ public class AcademicReferenceService {
         List<List<Grade>> coursePapersAndInternships = new ArrayList<List<Grade>>();
         coursePapersAndInternships.add(new ArrayList<>());
         coursePapersAndInternships.add(new ArrayList<>());
-        for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
+        for (SemesterDetails semesterDetails : studentSummary.getSemesters().values()) {
             if (semesterDetails.getGrades().get(COURSE_PAPERS_INDEX).size()>0) {
                 for (Grade grade : semesterDetails.getGrades().get(COURSE_PAPERS_INDEX)) {
                     coursePapersAndInternships.get(0).add(grade);

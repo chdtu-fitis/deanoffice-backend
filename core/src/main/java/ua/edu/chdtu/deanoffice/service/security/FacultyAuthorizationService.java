@@ -38,7 +38,7 @@ public class FacultyAuthorizationService {
     }
 
     public void verifyAccessibilityOfStudentDegrees(List<Integer> studentDegreeIds, ApplicationUser user) throws UnauthorizedFacultyDataException {
-        List <Integer> studentDegreeIdFromDb = studentDegreeRepository.findIdByIdsAndFacultyId(studentDegreeIds,user.getFaculty().getId());
+        List <Integer> studentDegreeIdFromDb = studentDegreeRepository.findIdsByIdsAndFacultyId(studentDegreeIds,user.getFaculty().getId());
         if (studentDegreeIdFromDb.size() != 0)
             throw new UnauthorizedFacultyDataException("Вибрані студенти навчаються на недоступному для користувача факультеті");
 

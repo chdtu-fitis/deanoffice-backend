@@ -23,6 +23,7 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -164,7 +165,7 @@ public class StudentDegreeController {
         }
     }
 
-    @JsonView(StudentView.Degrees.class)
+//    @JsonView(StudentView.Degrees.class)
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
             @PathVariable("id") Integer studentId,
@@ -173,18 +174,17 @@ public class StudentDegreeController {
     ) {
         try {
             validateStudentDegreesUpdates(studentDegreesDTOs);
-            List<StudentDegree> studentDegrees = Mapper.strictMap(studentDegreesDTOs, StudentDegree.class);
+            List<Integer> studentDegreeIds = studentDegreesDTOs.stream().map(StudentDegreeDTO::getId).collect(Collectors.toList());
+            List<StudentDegree> studentDegrees = studentDegreeService.getActiveByIdsAndFaculty(studentDegreeIds, user.getFaculty().getId());
 
-            Student student = studentService.findById(studentId);
-            studentDegrees.forEach(studentDegree -> {
-                Integer groupId = studentDegreesDTOs.get(studentDegrees.indexOf(studentDegree)).getStudentGroupId();
-                studentDegree.setStudentGroup(getStudentGroup(groupId));
-                studentDegree.setSpecialization(studentDegree.getStudentGroup().getSpecialization());
-                studentDegree.setStudent(student);
-                studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
-            });
-
-            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, studentDegrees);
+            for (StudentDegree sd : studentDegrees) {
+                StudentDegreeDTO currSdDto = studentDegreesDTOs.stream().filter(sdDto -> sdDto.getId() == sd.getId()).findFirst().get();
+                Mapper.mapStudentDegreeDTOToStudentDegreeSimpleFields(currSdDto, sd);
+                if (sd.getStudentGroup().getId() != currSdDto.getStudentGroupId()) {
+                    sd.setStudentGroup(getStudentGroup(currSdDto.getStudentGroupId()));
+                    sd.setSpecialization(sd.getStudentGroup().getSpecialization());
+                }
+            }
             studentDegreeService.update(studentDegrees);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -193,12 +193,20 @@ public class StudentDegreeController {
     }
 
     private void validateStudentDegreesUpdates(List<StudentDegreeDTO> studentDegreesDTOs) throws OperationCannotBePerformedException {
+        if (studentDegreesDTOs == null || studentDegreesDTOs.size()== 0) {
+            String exceptionMessage = "Список студентів не може бути порожнім. Зверніться до адміністратора або розробника системи";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
         if (isAnyStudentDegreeMissingId(studentDegreesDTOs)) {
             String exceptionMessage = "Отримано некоректну інформацію. Зверніться до адміністратора або розробника системи";
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
+        Set<Integer> distinctIds = studentDegreesDTOs.stream().map(sd -> sd.getId()).collect(Collectors.toSet());
+        if (distinctIds.size() != studentDegreesDTOs.size()) {
+            String exceptionMessage = "Не можна двічі зберегти одного і того ж студента. Зверніться до адміністратора або розробника системи";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
     }
-
 
     private boolean isAnyStudentDegreeMissingId(List<StudentDegreeDTO> studentDegreeDTOs) {
         return studentDegreeDTOs.stream().anyMatch((studentDegreeDTO) -> studentDegreeDTO.getId() == null);
