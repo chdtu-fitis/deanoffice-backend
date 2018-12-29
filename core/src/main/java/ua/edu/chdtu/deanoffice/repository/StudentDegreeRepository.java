@@ -166,15 +166,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value =
             "SELECT student_degree.id, student.surname, student.name, student.patronimic, " +
-            "       degree.name                                                    as degreeName, " +
-            "       student_group.name                                             as groupName, " +
+            "       degree.name as degreeName, student_group.name as groupName, " +
             "       2018 - student_group.creation_year + student_group.begin_years as year, " +
-            "       student_group.tuition_term                                     as tuitionTerm, " +
-            "       speciality.code                                                as specialityCode, " +
-            "       speciality.name                                                as specialityName, " +
-            "       specialization.name                                            as specializationName, " +
-            "       department.abbr                                                as departmentAbbreviation, " +
-            "       avg(grade.points)                                              as averageGrade " +
+            "       student_group.tuition_term as tuitionTerm, speciality.code as specialityCode, " +
+            "       speciality.name as specialityName, specialization.name as specializationName, " +
+            "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade " +
             "FROM student " +
             "       INNER JOIN student_degree ON student_degree.student_id = student.id " +
             "       INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
@@ -193,7 +189,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
             "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
-            "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
+            "  AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
+            "  AND knowledge_control.graded = true " +
             "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
             "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation " +
             "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic", nativeQuery = true)
