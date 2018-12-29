@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,8 +50,9 @@ public class StipendController {
             List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDTO.class);
             noDebtsStudentDegreesDTOs.addAll(new ArrayList<>(debtorStudentDegreesDTOsMap.values()));
             noDebtsStudentDegreesDTOs.sort(Comparator
-                    .comparing(StudentInfoForStipendDTO::getGroupName)
-                    .thenComparingDouble(StudentInfoForStipendDTO::getAverageGrade)
+                    .comparing(StudentInfoForStipendDTO::getYear)
+                    .thenComparing(StudentInfoForStipendDTO::getGroupName)
+                    .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipendDTO::getAverageGrade)))
                     .thenComparing(StudentInfoForStipendDTO::getSurname)
                     .thenComparing(StudentInfoForStipendDTO::getName)
                     .thenComparing(StudentInfoForStipendDTO::getPatronimic)
