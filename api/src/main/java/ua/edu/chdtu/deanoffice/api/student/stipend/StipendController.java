@@ -51,7 +51,8 @@ public class StipendController {
             List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDTO.class);
             noDebtsStudentDegreesDTOs.addAll(new ArrayList<>(debtorStudentDegreesDTOsMap.values()));
             noDebtsStudentDegreesDTOs.sort(Comparator
-                    .comparing(StudentInfoForStipendDTO::getYear)
+                    .comparing(StudentInfoForStipendDTO::getDegreeName)
+                    .thenComparing(StudentInfoForStipendDTO::getYear)
                     .thenComparing(StudentInfoForStipendDTO::getSpecialityCode)
                     .thenComparing(StudentInfoForStipendDTO::getSpecializationName)
                     .thenComparing(StudentInfoForStipendDTO::getGroupName)
