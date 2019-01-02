@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/student-degree/stipend")
@@ -32,7 +33,7 @@ public class StipendController {
             @CurrentUser ApplicationUser user) {
         try {
             List<DebtorStudentDegreesBean> debtorStudentDegrees = stipendService
-                    .getDebtorStudentDegrees(user.getFaculty().getId(), 1);
+                    .getDebtorStudentDegrees(user.getFaculty().getId());
             LinkedHashMap<Integer, StudentInfoForStipendDTO> debtorStudentDegreesDTOsMap = new LinkedHashMap<>();
             debtorStudentDegrees.forEach(dsd -> {
                 StudentInfoForStipendDTO studentInfoForStipendDTO = debtorStudentDegreesDTOsMap.get(dsd.getId());
@@ -46,11 +47,13 @@ public class StipendController {
                 debtorStudentDegreesDTOsMap.put(studentInfoForStipendDTO.getId(), studentInfoForStipendDTO);
             });
             List<DebtorStudentDegreesBean> noDebtsStudentDegrees = stipendService
-                    .getNoDebtStudentDegrees(user.getFaculty().getId(), 1, debtorStudentDegreesDTOsMap.keySet());
+                    .getNoDebtStudentDegrees(user.getFaculty().getId(), debtorStudentDegreesDTOsMap.keySet());
             List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDTO.class);
             noDebtsStudentDegreesDTOs.addAll(new ArrayList<>(debtorStudentDegreesDTOsMap.values()));
             noDebtsStudentDegreesDTOs.sort(Comparator
                     .comparing(StudentInfoForStipendDTO::getYear)
+                    .thenComparing(StudentInfoForStipendDTO::getSpecialityCode)
+                    .thenComparing(StudentInfoForStipendDTO::getSpecializationName)
                     .thenComparing(StudentInfoForStipendDTO::getGroupName)
                     .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipendDTO::getAverageGrade)))
                     .thenComparing(StudentInfoForStipendDTO::getSurname)

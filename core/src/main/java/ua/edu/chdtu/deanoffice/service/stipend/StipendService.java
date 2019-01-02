@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,8 +23,8 @@ public class StipendService {
 
     }
 
-    public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId, int degreeId) {
-        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(degreeId, facultyId);
+    public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
+        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId);
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
@@ -46,8 +47,12 @@ public class StipendService {
         return debtorStudentDegreesBeans;
     }
 
-    public List<DebtorStudentDegreesBean> getNoDebtStudentDegrees(int facultyId, int degreeId, Set<Integer> debtorStudentDegreeIds) {
-        List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(degreeId, facultyId, debtorStudentDegreeIds);
+    public List<DebtorStudentDegreesBean> getNoDebtStudentDegrees(int facultyId, Set<Integer> debtorStudentDegreeIds) {
+        if (debtorStudentDegreeIds.size() == 0) {
+            debtorStudentDegreeIds = new HashSet();
+            debtorStudentDegreeIds.add(0);
+        }
+        List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(facultyId, debtorStudentDegreeIds);
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,

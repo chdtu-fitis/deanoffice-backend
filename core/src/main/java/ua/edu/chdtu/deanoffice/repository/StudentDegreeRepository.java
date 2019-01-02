@@ -152,8 +152,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
             "       LEFT JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
-            "WHERE specialization.degree_id = :degreeId " +
-            "  AND specialization.faculty_id = :facultyId " +
+            "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
@@ -161,7 +160,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
             "ORDER BY degree.id, speciality.code, student_group.name, student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
     List<Object[]> findDebtorStudentDegreesRaw(
-            @Param("degreeId") int degreeId,
             @Param("facultyId") int facultyId);
 
     @Query(value =
@@ -183,8 +181,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
             "       LEFT JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
-            "WHERE specialization.degree_id = :degreeId " +
-            "  AND specialization.faculty_id = :facultyId " +
+            "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
@@ -195,7 +192,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation " +
             "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic", nativeQuery = true)
     List<Object[]> findNoDebtStudentDegreesRaw(
-            @Param("degreeId") int degreeId,
             @Param("facultyId") int facultyId,
             @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds);
 }
