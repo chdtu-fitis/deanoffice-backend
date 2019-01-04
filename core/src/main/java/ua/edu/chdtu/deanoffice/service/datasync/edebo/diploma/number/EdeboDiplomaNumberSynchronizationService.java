@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class EdeboDiplomaNumberSynchronizationService {
-    private final String HONOR_OF_DIPLOMA = "відзнака";
+    private final String HONOR_OF_DIPLOMA = "З відзнакою";
     private static Logger log = LoggerFactory.getLogger(EdeboDiplomaNumberSynchronizationService.class);
     private final DocumentIOService documentIOService;
     private final StudentDegreeService studentDegreeService;
@@ -150,7 +150,7 @@ public class EdeboDiplomaNumberSynchronizationService {
             diplomaSynchronizationReport.addBeanToSynchronizedList(
                     new DiplomaAndStudentSynchronizedDataBean(
                             studentDegreefromDb,
-                            importData.getDocumentSeries() + " № " + importData.getFacultyName(),
+                            importData.getDocumentSeries() + " № " + importData.getDocumentNumber(),
                             diplomaHonor
                     )
             );
