@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class EdeboDiplomaNumberSynchronizationService {
-    private final String HONOR_OF_DIPLOMA = "З відзнакою";
+    private final String HONOR_OF_DIPLOMA = "з відзнакою";
     private static Logger log = LoggerFactory.getLogger(EdeboDiplomaNumberSynchronizationService.class);
     private final DocumentIOService documentIOService;
     private final StudentDegreeService studentDegreeService;

@@ -29,15 +29,6 @@ class DiplomaSheetData{
             case DiplomaHeaderPatterns.MIDDLE_NAME:
                 headerData.setMiddleName(columnName);
                 break;
-            case DiplomaHeaderPatterns.FIRST_NAME_EN:
-                headerData.setFirstNameEn(columnName);
-                break;
-            case DiplomaHeaderPatterns.LAST_NAME_EN:
-                headerData.setLastNameEn(columnName);
-                break;
-            case DiplomaHeaderPatterns.MIDDLE_NAME_EN:
-                headerData.setMiddleNameEn(columnName);
-                break;
             case DiplomaHeaderPatterns.FULL_SPECIALITY_NAME:
                 headerData.setSpecialityName(columnName);
                 break;

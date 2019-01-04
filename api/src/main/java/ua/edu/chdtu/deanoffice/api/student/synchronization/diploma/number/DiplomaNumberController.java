@@ -63,7 +63,6 @@ public class DiplomaNumberController {
                     edeboDiplomaNumberSynchronizationReport.getMissingDataRed(),
                     MissingDataRedDTO.class
             );
-
             listsWithDiplomaData.setDiplomaAndStudentSynchronizedDataDTOs(diplomaAndStudentSynchronizedDataDTOs);
             listsWithDiplomaData.setMissingDataRedDTOs(missingDataRedDTOs);
             return ResponseEntity.ok(listsWithDiplomaData);
