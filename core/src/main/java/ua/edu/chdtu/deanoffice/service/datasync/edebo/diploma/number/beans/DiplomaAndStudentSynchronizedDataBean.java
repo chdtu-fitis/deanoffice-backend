@@ -28,7 +28,7 @@ public class DiplomaAndStudentSynchronizedDataBean {
         this.patronimic = student.getPatronimic();
         this.diplomaSeriesAndNumber = diplomaSeriesAndNumber;
         this.fullSpecialityName = speciality.getName() + " " + speciality.getCode();
-        this.groupName = studentDegree.getStudentGroup().getName();
+        this.groupName = studentDegree.getStudentGroup() == null ? "" : studentDegree.getStudentGroup().getName();
         this.honor = honor;
     }
 
