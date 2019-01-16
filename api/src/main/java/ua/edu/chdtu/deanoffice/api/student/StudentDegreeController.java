@@ -180,7 +180,8 @@ public class StudentDegreeController {
             for (StudentDegree sd : studentDegrees) {
                 StudentDegreeDTO currSdDto = studentDegreesDTOs.stream().filter(sdDto -> sdDto.getId() == sd.getId()).findFirst().get();
                 Mapper.mapStudentDegreeDTOToStudentDegreeSimpleFields(currSdDto, sd);
-                if (sd.getStudentGroup().getId() != currSdDto.getStudentGroupId()) {
+                if ((sd.getStudentGroup() == null && currSdDto.getStudentGroupId() != 0) ||
+                        (sd.getStudentGroup() != null && sd.getStudentGroup().getId() != currSdDto.getStudentGroupId())) {
                     sd.setStudentGroup(getStudentGroup(currSdDto.getStudentGroupId()));
                     sd.setSpecialization(sd.getStudentGroup().getSpecialization());
                 }
