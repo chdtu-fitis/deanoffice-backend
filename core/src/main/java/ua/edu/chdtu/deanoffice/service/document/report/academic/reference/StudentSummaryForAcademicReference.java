@@ -2,52 +2,51 @@ package ua.edu.chdtu.deanoffice.service.document.report.academic.reference;
 
 import lombok.Getter;
 import lombok.Setter;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 @Getter
 @Setter
 public class StudentSummaryForAcademicReference {
 
-    List<SemesterDetails> semesters;
+    Map<Integer, SemesterDetails> semesters;
     private StudentDegree studentDegree;
 
     public StudentSummaryForAcademicReference(StudentDegree studentDegree, List<List<Grade>> allGrades) {
         this.studentDegree = studentDegree;
-        semesters = new ArrayList<>();
-        int gradesIndex = 0;
-        for (List<Grade> grades : allGrades) {
-            fillSemesterWithSpecificGrades(grades, gradesIndex);
-            gradesIndex++;
+        semesters = new TreeMap<>();
+        for (List<Grade> gradeList : allGrades) {
+            for (Grade grade : gradeList) {
+                if (isGradeValid(grade)) {
+                    Integer currentSemester = grade.getCourse().getSemester();
+                    int knowledgeControlId = grade.getCourse().getKnowledgeControl().getId();
+                    if (!semesters.containsKey(currentSemester)) {
+                        semesters.put(currentSemester, new SemesterDetails());
+                    }
+                    SemesterDetails semesterDetails = semesters.get(currentSemester);
+                    if (knowledgeControlId == Constants.EXAM ||
+                            knowledgeControlId == Constants.CREDIT || knowledgeControlId == Constants.DIFFERENTIATED_CREDIT) {
+                        semesterDetails.getGrades().get(0).add(grade);
+                    }
+                    if (knowledgeControlId == Constants.COURSEWORK || knowledgeControlId == Constants.COURSE_PROJECT) {
+                        semesterDetails.getGrades().get(1).add(grade);
+                    }
+                    if (knowledgeControlId == Constants.INTERNSHIP || knowledgeControlId == Constants.NON_GRADED_INTERNSHIP) {
+                        semesterDetails.getGrades().get(2).add(grade);
+                    }
+                    if (knowledgeControlId == Constants.ATTESTATION || knowledgeControlId == Constants.STATE_EXAM) {
+                        semesterDetails.getGrades().get(3).add(grade);
+                    }
+                    semesters.replace(currentSemester, semesterDetails);
+                }
+            }
         }
     }
 
-    private void fillSemesterWithSpecificGrades(List<Grade> grades, int gradesIndex) {
-        Map<Integer, List<Grade>> utilMap = new TreeMap<>();
-        for (Grade grade : grades) {
-            int semester = grade.getCourse().getSemester();
-            if (checkGradeValidity(grade)) {
-                utilMap.computeIfAbsent(semester, k -> new ArrayList<>());
-                utilMap.get(semester).add(grade);
-            }
-        }
-
-        for (Integer semester : utilMap.keySet()) {
-            if (semester - 1 >= semesters.size()) {
-                semesters.add(new SemesterDetails());
-            }
-            SemesterDetails semesterDetails = semesters.get(semester - 1);
-            List<Grade> gradeList = semesterDetails.getGrades().get(gradesIndex);
-            gradeList.addAll(utilMap.get(semester));
-        }
-    }
-
-    private boolean checkGradeValidity(Grade grade) {
+    private boolean isGradeValid(Grade grade) {
         return grade != null && grade.getGrade() != null && grade.getPoints() != null && grade.getGrade() != 0;
     }
 }

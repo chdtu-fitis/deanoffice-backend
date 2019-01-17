@@ -128,8 +128,11 @@ public class CourseController {
         Course course = new Course();
         course.setSemester(semester);
         course.setCourseName(courseName);
-        BigDecimal credits = BigDecimal.valueOf(hours).divide(BigDecimal.valueOf(hoursPerCredit), 2, BigDecimal.ROUND_HALF_UP);
-        course.setCredits(credits);
+        if (hoursPerCredit.equals(0) || hours.equals(0)) {
+            course.setCredits(BigDecimal.ZERO);
+        } else {
+            course.setCredits(BigDecimal.valueOf(hours).divide(BigDecimal.valueOf(hoursPerCredit), 2, BigDecimal.ROUND_HALF_UP));
+        }
         course.setHours(hours);
         course.setHoursPerCredit(hoursPerCredit);
         course.setKnowledgeControl(knowledgeControl);
@@ -169,8 +172,7 @@ public class CourseController {
         CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
         if (courseNameFromDB != null){
             newCourse.setCourseName(courseNameFromDB);
-        }
-        else {
+        } else {
             CourseName newCourseName = new CourseName();
             newCourseName.setName(courseName.getName());
             newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));

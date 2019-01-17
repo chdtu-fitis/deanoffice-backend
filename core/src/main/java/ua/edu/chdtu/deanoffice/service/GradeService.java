@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
@@ -26,6 +27,7 @@ public class GradeService {
     private final StudentDegreeRepository studentDegreeRepository;
     private CourseService courseService;
 
+    @Autowired
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
                         StudentDegreeRepository studentDegreeRepository, CourseService courseService) {
         this.gradeRepository = gradeRepository;
@@ -93,9 +95,13 @@ public class GradeService {
         for (StudentGroup group: groupsWithStudents.keySet()) {
             List<Integer> studentDegreeIds = groupsWithStudents.get(group);
             List<Integer> courseIds = courseIdsForGroup.get(group);
-            Map<StudentDegree, List<Grade>> oneGroupGrades = gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream()
+            Map<StudentDegree, List<Grade>> oneGroupGrades = null;
+            if (!studentDegreeIds.isEmpty() && !courseIds.isEmpty())
+                oneGroupGrades = gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream()
                     .sorted((g1,g2) -> new Integer(g1.getCourse().getKnowledgeControl().getId()).compareTo(g2.getCourse().getKnowledgeControl().getId()))
                     .collect(Collectors.groupingBy(Grade::getStudentDegree,toList()));
+            else
+                oneGroupGrades = new HashMap<>();
             result = Stream.concat(result.entrySet().stream(), oneGroupGrades.entrySet().stream()).collect(Collectors.toMap(
                     entry -> entry.getKey(),
                     entry -> entry.getValue()));

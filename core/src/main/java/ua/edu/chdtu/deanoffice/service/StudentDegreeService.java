@@ -8,6 +8,8 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,7 +75,7 @@ public class StudentDegreeService {
         return studentDegrees
                 .stream()
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
-                .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability));
+                .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
@@ -122,4 +124,9 @@ public class StudentDegreeService {
         return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
     }
 
+    public List<StudentDegree> getActiveByIdsAndFaculty(List<Integer> ids, int facultyId){
+        if (ids == null || ids.size() == 0)
+            return new ArrayList<>();
+        return studentDegreeRepository.findActiveByIdsAndFacultyId(ids, facultyId);
+    }
 }
