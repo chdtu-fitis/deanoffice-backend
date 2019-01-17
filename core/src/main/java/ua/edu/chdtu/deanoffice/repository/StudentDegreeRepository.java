@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -77,6 +78,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("specializationId") Integer specializationId
     );
 
+    @Query("SELECT sd FROM StudentDegree sd " +
+            "WHERE sd.active = true " +
+            "AND sd.supplementNumber = :supplementNumper")
+    List<StudentDegree> findBySupplementNumber(@Param("supplementNumper") String supplementNumper);
+
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);
 
@@ -116,12 +122,25 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.studentGroup = :group WHERE sd IN (:studentDegrees)")
-    void assignStudentsToGroup(@Param("studentDegrees")List<StudentDegree> studentDegrees, @Param("group")StudentGroup group);
+    void assignStudentsToGroup(@Param("studentDegrees") List<StudentDegree> studentDegrees, @Param("group") StudentGroup group);
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.recordBookNumber = :recordBookNumber WHERE sd.id = :studentDegreeId")
     void assignRecordBookNumbersToStudents(@Param("studentDegreeId") Integer studentDegreeId, @Param("recordBookNumber") String recordBookNumber);
+
+    @Modifying
+    @Query(value = "UPDATE StudentDegree sd " +
+            "SET sd.diplomaNumber = :diplomaNumber, sd.diplomaWithHonours = :diplomaWithHonours," +
+            " sd.diplomaDate = :diplomaDate," +
+            " sd.supplementDate = :supplementDate " +
+            "WHERE sd.id = :studentDegreeId")
+    void updateDiplomaNumber(
+            @Param("studentDegreeId") int studentDegreeId,
+            @Param("diplomaNumber") String diplomaNumber,
+            @Param("diplomaWithHonours") boolean diplomaWithHonours,
+            @Param("diplomaDate") Date diplomaDate,
+            @Param("supplementDate") Date supplementDate);
 
     @Query(value =
             "SELECT student_degree.id, " +
