@@ -78,6 +78,19 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("specializationId") Integer specializationId
     );
 
+    @Query("SELECT count(DISTINCT sd.id) FROM student_degree sd " +
+            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
+            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "AND grade.course_id = cfg.course_id " +
+            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
+            "AND sd.specialization_id = :specialization AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+    List<StudentDegree> findAllBudgetDebtors (
+        @Param("specializationId") int specializationId,
+        @Param("currentYear") int currentYear,
+        @Param("studyYear") int studyYear
+    );
+
     @Query("SELECT sd FROM StudentDegree sd " +
             "WHERE sd.active = true " +
             "AND sd.supplementNumber = :supplementNumper")
