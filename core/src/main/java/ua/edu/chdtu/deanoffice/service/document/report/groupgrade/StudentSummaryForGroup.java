@@ -11,9 +11,39 @@ public class StudentSummaryForGroup extends StudentSummary {
     public StudentSummaryForGroup(StudentDegree studentDegree, List<List<Grade>> grades) {
         setStudentDegree(studentDegree);
         setGrades(grades);
+        removeUnwantedGrades();
         calculateTotalHours();
         calculateTotalCredits();
         combineMultipleSemesterCourseGrades();
+    }
+
+    @Override
+    protected void removeUnwantedGrades() {
+        for (List<Grade> gradesSublist : getGrades())
+            for (Grade grade : gradesSublist)
+                if (grade.getPoints() == null)
+                    grade.setPoints(0);
+    }
+
+    private boolean isAllRightForDiplomaSupplement(){
+        boolean answer = true;
+        int hoursSum = 0;
+        BigDecimal creditsSum = new BigDecimal(0);
+        for (List<Grade> gradesSublist : getGrades()){
+            for (Grade g : gradesSublist) {
+                if (g.getCourse().getHours() != null && g.getCourse().getCredits() != null) {
+                    hoursSum += g.getCourse().getHours();
+                    creditsSum = creditsSum.add(g.getCourse().getCredits());
+                    if (g.getPoints() == 0) {
+                        answer = false;
+                        break;
+                    }
+                }
+            }
+            if (!answer) break;
+        }
+        if (hoursSum != getTotalHours() || creditsSum != getTotalCredits()) answer = false;
+        return answer;
     }
 
     @Override
@@ -21,7 +51,7 @@ public class StudentSummaryForGroup extends StudentSummary {
         int hoursSum = 0;
         for (List<Grade> gradesSublist : getGrades())
             for (Grade g : gradesSublist)
-                if (g.getCourse().getHours() != null) hoursSum += g.getCourse().getHours();
+                if (g.getCourse().getHours() != null && g.getPoints() != 0) hoursSum += g.getCourse().getHours();
         setTotalHours(hoursSum);
         }
 
@@ -31,7 +61,7 @@ public class StudentSummaryForGroup extends StudentSummary {
         BigDecimal creditsSum = new BigDecimal(0);
         for (List<Grade> gradesSublist : getGrades())
             for (Grade g : gradesSublist)
-                if (g.getCourse().getCredits() != null) creditsSum = creditsSum.add(g.getCourse().getCredits());
+                if (g.getCourse().getCredits() != null && g.getPoints() != 0) creditsSum = creditsSum.add(g.getCourse().getCredits());
         setTotalCredits(creditsSum);
     }
 
