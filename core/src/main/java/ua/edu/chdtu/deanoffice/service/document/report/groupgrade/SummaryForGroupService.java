@@ -16,18 +16,15 @@ import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
-
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
 public class SummaryForGroupService {
-
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesTable.docx";
     private static final int MAXIMUM_STUDENTS_IN_TABLE = 15;
 
@@ -41,7 +38,6 @@ public class SummaryForGroupService {
     private GradeService gradeService;
 
     SummaryForGroupService() {
-
     }
 
     public File formDocument(Integer groupId)
