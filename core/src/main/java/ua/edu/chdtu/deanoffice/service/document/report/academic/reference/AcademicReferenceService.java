@@ -3,8 +3,7 @@ package ua.edu.chdtu.deanoffice.service.document.report.academic.reference;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Tr;
+import org.docx4j.wml.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -15,6 +14,7 @@ import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.File;
@@ -32,6 +32,8 @@ public class AcademicReferenceService {
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
     private static final int INDEX_OF_TABLE_WITH_GRADES = 11;
     private static final String DOCUMENT_DELIMITER = "/";
+    private static final String FIRST_ROW = "Заліків та іспитів не здавав.";
+    private static final String SECCOND_ROW = "No credits and exams.";
     private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
     @Autowired
@@ -107,7 +109,36 @@ public class AcademicReferenceService {
 
     private void prepareTable(WordprocessingMLPackage template, StudentSummaryForAcademicReference studentSummary) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(INDEX_OF_TABLE_WITH_GRADES);
-        prepareRows(table, studentSummary);
+        if(studentSummary.semesters.isEmpty()){
+            table.getContent().remove(2);
+            Text textWithAcquiredCompetenciesPlaceholder = getTextsPlaceholdersFromContentAccessor(table)
+                .stream().filter(text -> "#n".equals(text.getValue().trim())).findFirst().get();
+            R parentContainer = (R) textWithAcquiredCompetenciesPlaceholder.getParent();
+            P parentParagraph = (P) TemplateUtil.findParentNode(textWithAcquiredCompetenciesPlaceholder, P.class);
+            ContentAccessor paragraphsParent = (ContentAccessor) parentParagraph.getParent();
+            P newParagraph = XmlUtils.deepCopy(parentParagraph);
+            newParagraph.getContent().clear();
+            R container = XmlUtils.deepCopy(parentContainer);
+            container.getContent().clear();
+            Text competency = XmlUtils.deepCopy(textWithAcquiredCompetenciesPlaceholder);
+            competency.setValue(FIRST_ROW);
+            container.getContent().add(competency);
+            newParagraph.getContent().add(container);
+            paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
+            newParagraph = XmlUtils.deepCopy(parentParagraph);
+            newParagraph.getContent().clear();
+            container = XmlUtils.deepCopy(parentContainer);
+            container.getContent().clear();
+            competency = XmlUtils.deepCopy(textWithAcquiredCompetenciesPlaceholder);
+            competency.setValue(SECCOND_ROW);
+            container.getContent().add(competency);
+            newParagraph.getContent().add(container);
+            paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
+            paragraphsParent.getContent().remove(2);
+        } else {
+            prepareRows(table, studentSummary);
+        }
+
     }
 
     private void prepareRows(Tbl table, StudentSummaryForAcademicReference studentSummary) {
@@ -215,6 +246,11 @@ public class AcademicReferenceService {
         } else {
             result = "";
         }
+        return result;
+    }
+
+    private boolean isStudentSurrenderSomething(){
+        boolean result = false;
         return result;
     }
 }
