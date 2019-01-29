@@ -31,7 +31,7 @@ public class DebtorReportController {
             DebtorAnalysisDto dad2 = new DebtorAnalysisDto("11", "3");
             debtorsReport.put("Інженерія програмного забезпечення", dad1);
             debtorsReport.put("Системний аналіз", dad2);
-            ResponseEntity.ok(debtorsReport);
+            return ResponseEntity.ok().body(debtorsReport);
         } catch (Exception e) {
             e.printStackTrace();
         }
