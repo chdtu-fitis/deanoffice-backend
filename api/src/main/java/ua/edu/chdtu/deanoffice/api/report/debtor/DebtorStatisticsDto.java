@@ -5,14 +5,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DebtorAnalysisDto {
+public class DebtorStatisticsDto {
     private String studentNumber;
     private String debtorNumber;
 
-    public DebtorAnalysisDto() {
+    public DebtorStatisticsDto() {
     }
 
-    public DebtorAnalysisDto(String studentNumber, String debtorNumber) {
+    public DebtorStatisticsDto(String studentNumber, String debtorNumber) {
         this.studentNumber = studentNumber;
         this.debtorNumber = debtorNumber;
     }
