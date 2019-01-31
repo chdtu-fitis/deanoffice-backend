@@ -78,17 +78,67 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("specializationId") Integer specializationId
     );
 
+        //TODO неперевірений
+    @Query("SELECT count(sd.id) FROM student_degree sd " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "WHERE sd.payment = 'BUDGET' AND sd.active = true " +
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+    int findCountAllActiveBudgetStudentsBySpecializationIdAndStudyYear (
+        @Param("specializationId") int specializationId,
+        @Param("currentYear") int currentYear,
+        @Param("studyYear") int studyYear
+    );
+
+        //TODO неперевірений
+    @Query("SELECT count(sd.id) FROM student_degree sd " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "WHERE sd.payment = 'CONTRACT' AND sd.active = true " +
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+    int findCountAllActiveContractStudentsBySpecializationIdAndStudyYear (
+            @Param("specializationId") int specializationId,
+            @Param("currentYear") int currentYear,
+            @Param("studyYear") int studyYear
+    );
+
+        //TODO неперевірений
     @Query("SELECT count(DISTINCT sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "AND grade.course_id = cfg.course_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
-            "AND sd.specialization_id = :specialization AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
-    List<StudentDegree> findAllBudgetDebtors (
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+    int findCountAllActiveBudgetDebtorsBySpecializationIdAndStudyYear (
         @Param("specializationId") int specializationId,
         @Param("currentYear") int currentYear,
         @Param("studyYear") int studyYear
+    );
+
+        //TODO неперевірений
+    @Query("SELECT count(DISTINCT sd.id) FROM student_degree sd " +
+            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
+            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "AND grade.course_id = cfg.course_id " +
+            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+    int findCountAllActiveContractDebtorsBySpecializationIdAndStudyYear (
+            @Param("specializationId") int specializationId,
+            @Param("currentYear") int currentYear,
+            @Param("studyYear") int studyYear
+    );
+
+        //TODO неперевірений + недороблений (повинно повертати int, а не list)
+    @Query("SELECT count(sd.id) FROM student_degree sd " +
+            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
+            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
+            "AND sd.specialization_id = :specializationId " +
+            "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+            "GROUP BY sd.id HAVING count (sd.id) < 3")
+    int findCountAllActiveBudgetDebtorsWithLessThanThreeDebs (
+            @Param("specializationId") int specializationId,
+            @Param("currentYear") int currentYear,
+            @Param("studyYear") int studyYear
     );
 
     @Query("SELECT sd FROM StudentDegree sd " +

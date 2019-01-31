@@ -129,4 +129,20 @@ public class StudentDegreeService {
             return new ArrayList<>();
         return studentDegreeRepository.findActiveByIdsAndFacultyId(ids, facultyId);
     }
+
+    public int getCountAllActiveBudgetStudents(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveBudgetStudentsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
+    }
+
+    public int getCountAllActiveContractStudents(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveContractStudentsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
+    }
+
+    public int getCountAllActiveBudgetDebtors(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveBudgetDebtorsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
+    }
+
+    public int getCountAllActiveContractDebtors(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveContractDebtorsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
+    }
 }
