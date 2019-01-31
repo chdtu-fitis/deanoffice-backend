@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.service.report.debtor.DebtorReportService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/report/debtor")
@@ -23,11 +24,16 @@ public class DebtorReportController {
     }
 
     @GetMapping
-    public ResponseEntity getReportOfDebtors(@CurrentUser ApplicationUser user) {
+    public ResponseEntity<Map<String, DebtorAnalysisDto>> getReportOfDebtors(@CurrentUser ApplicationUser user) {
         try {
-            Map debtorsReport = debtorReportService.calculateDebtorsReportData(user.getFaculty().getId());
+            Map<String, DebtorAnalysisDto> debtorsReport = new TreeMap<>(); //debtorReportService.calculateDebtorsReportData(user.getFaculty().getId());
+            DebtorAnalysisDto dad1 = new DebtorAnalysisDto("13", "2");
+            DebtorAnalysisDto dad2 = new DebtorAnalysisDto("11", "3");
+            debtorsReport.put("Інженерія програмного забезпечення", dad1);
+            debtorsReport.put("Системний аналіз", dad2);
+            return ResponseEntity.ok().body(debtorsReport);
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return null;
     }
