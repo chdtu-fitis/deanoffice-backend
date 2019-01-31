@@ -82,19 +82,19 @@ public class StudentExpelController {
         }
     }
 
-    @GetMapping("/students-expel/search-all")
+    @GetMapping("/all")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchByShortNameAndDate(
             @RequestParam (value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam (value = "name", defaultValue = "", required = false) String name,
-            @RequestParam(required = false) String startDate1,
-            @RequestParam(required = false) String endDate1,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @CurrentUser ApplicationUser user){
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date startDate = format.parse(startDate1);
-            Date endDate = format.parse(endDate1);
-            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(startDate, endDate, surname, name);
+            Date startDate1 = format.parse(startDate);
+            Date endDate1 = format.parse(endDate);
+            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(startDate1, endDate1, surname, name);
             List<StudentExpelDTO> studentExpelDTOs = Mapper.map(foundExcludedStudents, StudentExpelDTO.class);
             return ResponseEntity.ok(studentExpelDTOs);
         } catch (Exception exception) {
