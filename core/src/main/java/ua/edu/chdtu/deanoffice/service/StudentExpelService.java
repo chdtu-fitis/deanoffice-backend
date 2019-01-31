@@ -90,4 +90,8 @@ public class StudentExpelService {
     public StudentExpel getById(Integer studentExpelId) {
         return studentExpelRepository.getOne(studentExpelId);
     }
+
+    public List<StudentExpel> getSpecificationName(Date startDate, Date endDate,String surname, String name) {
+        return studentExpelRepository.findAll(StudentDegreeSpecification.getExpelStudent(startDate,endDate,surname, name));
+    }
 }

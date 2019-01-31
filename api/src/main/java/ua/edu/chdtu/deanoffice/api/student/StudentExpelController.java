@@ -3,11 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -29,6 +25,8 @@ import ua.edu.chdtu.deanoffice.util.StudentUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +77,26 @@ public class StudentExpelController {
             Object[] ids = studentExpelDTOs.stream().map(StudentExpelDTO::getId).toArray();
             URI location = getNewResourceLocation(ids);
             return ResponseEntity.created(location).build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("/students-expel/search-all")
+    @JsonView(StudentView.Expel.class)
+    public ResponseEntity searchByShortNameAndDate(
+            @RequestParam (value = "surname", defaultValue = "", required = false) String surname,
+            @RequestParam (value = "name", defaultValue = "", required = false) String name,
+            @RequestParam(required = false) String startDate1,
+            @RequestParam(required = false) String endDate1,
+            @CurrentUser ApplicationUser user){
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date startDate = format.parse(startDate1);
+            Date endDate = format.parse(endDate1);
+            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(startDate, endDate, surname, name);
+            List<StudentExpelDTO> studentExpelDTOs = Mapper.map(foundExcludedStudents, StudentExpelDTO.class);
+            return ResponseEntity.ok(studentExpelDTOs);
         } catch (Exception exception) {
             return handleException(exception);
         }
