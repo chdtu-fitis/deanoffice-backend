@@ -24,13 +24,10 @@ public class DebtorReportController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, DebtorStatisticsDto>> getReportOfDebtors(@CurrentUser ApplicationUser user) {
+    public ResponseEntity<Map<String, SpecializationDebtorStatisticsDto>> getReportOfDebtors(@CurrentUser ApplicationUser user) {
         try {
-            Map<String, DebtorStatisticsDto> debtorsReport = new TreeMap<>(); //debtorReportService.calculateDebtorsReportData(user.getFaculty().getId());
-            DebtorStatisticsDto dad1 = new DebtorStatisticsDto("13", "2");
-            DebtorStatisticsDto dad2 = new DebtorStatisticsDto("11", "3");
-            debtorsReport.put("Інженерія програмного забезпечення", dad1);
-            debtorsReport.put("Системний аналіз", dad2);
+            Map<String, SpecializationDebtorStatisticsDto> debtorsReport = new TreeMap<>(); //debtorReportService.calculateDebtorsReportData(user.getFaculty().getId());
+
             return ResponseEntity.ok().body(debtorsReport);
         } catch (Exception e) {
             e.printStackTrace();
