@@ -145,4 +145,20 @@ public class StudentDegreeService {
     public int getCountAllActiveContractDebtors(int specializationId, int studyYear) {
         return studentDegreeRepository.findCountAllActiveContractDebtorsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
     }
+
+    public int getCountAllActiveBudgetDebtorsWithLessThanThreeDebs(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveBudgetDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear).length;
+    }
+
+    public int getCountAllActiveContractDebtorsWithLessThanThreeDebs(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveContractDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear).length;
+    }
+
+    public int getCountAllActiveBudgetDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveBudgetDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear).length;
+    }
+
+    public int getCountAllActiveContractDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear) {
+        return studentDegreeRepository.findCountAllActiveContractDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear).length;
+    }
 }
