@@ -79,10 +79,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
         //TODO неперевірений
-    @Query("SELECT count(sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "WHERE sd.payment = 'BUDGET' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
     int findCountAllActiveBudgetStudentsBySpecializationIdAndStudyYear (
         @Param("specializationId") int specializationId,
         @Param("currentYear") int currentYear,
@@ -90,10 +90,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
         //TODO неперевірений
-    @Query("SELECT count(sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "WHERE sd.payment = 'CONTRACT' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
     int findCountAllActiveContractStudentsBySpecializationIdAndStudyYear (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
@@ -101,13 +101,13 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
         //TODO неперевірений
-    @Query("SELECT count(DISTINCT sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(DISTINCT sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "AND grade.course_id = cfg.course_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
     int findCountAllActiveBudgetDebtorsBySpecializationIdAndStudyYear (
         @Param("specializationId") int specializationId,
         @Param("currentYear") int currentYear,
@@ -115,13 +115,13 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
         //TODO неперевірений
-    @Query("SELECT count(DISTINCT sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(DISTINCT sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "AND grade.course_id = cfg.course_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear")
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
     int findCountAllActiveContractDebtorsBySpecializationIdAndStudyYear (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
@@ -129,12 +129,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
         //TODO неперевірений + недороблений (повинно повертати int, а не int[])
-    @Query("SELECT count(sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-            "GROUP BY sd.id HAVING count (sd.id) < 3")
+            "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
     int[] findCountAllActiveBudgetDebtorsWithLessThanThreeDebs (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
@@ -142,12 +142,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
     //TODO неперевірений + недороблений (повинно повертати int, а не int[])
-    @Query("SELECT count(sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-            "GROUP BY sd.id HAVING count (sd.id) < 3")
+            "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
     int[] findCountAllActiveContractDebtorsWithLessThanThreeDebs (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
@@ -155,12 +155,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
     //TODO неперевірений + недороблений (повинно повертати int, а не int[])
-    @Query("SELECT count(sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-            "GROUP BY sd.id HAVING count (sd.id) > 2")
+            "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
     int[] findCountAllActiveBudgetDebtorsWithThreeOrMoreDebts (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
@@ -168,12 +168,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
     //TODO неперевірений + недороблений (повинно повертати int, а не int[])
-    @Query("SELECT count(sd.id) FROM student_degree sd " +
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN grade ON sd.id = grade.student_degree_id " +
             "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-            "GROUP BY sd.id HAVING count (sd.id) > 2")
+            "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
     int[] findCountAllActiveContractDebtorsWithThreeOrMoreDebts (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
