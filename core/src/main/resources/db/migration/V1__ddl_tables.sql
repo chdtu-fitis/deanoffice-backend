@@ -5,35 +5,6 @@
 -- Dumped from database version 9.6.3
 -- Dumped by pg_dump version 9.6.3
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
-
-SET search_path = public, pg_catalog;
-
-SET default_tablespace = '';
-
-SET default_with_oids = false;
-
 --
 -- Name: course; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -49,8 +20,6 @@ CREATE TABLE course (
 );
 
 
-ALTER TABLE course OWNER TO postgres;
-
 --
 -- Name: course_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -62,8 +31,6 @@ CREATE SEQUENCE course_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE course_id_seq OWNER TO postgres;
 
 --
 -- Name: course_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -84,8 +51,6 @@ CREATE TABLE course_name (
 );
 
 
-ALTER TABLE course_name OWNER TO postgres;
-
 --
 -- Name: course_name_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -97,8 +62,6 @@ CREATE SEQUENCE course_name_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE course_name_id_seq OWNER TO postgres;
 
 --
 -- Name: course_name_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -120,8 +83,6 @@ CREATE TABLE courses_for_groups (
 );
 
 
-ALTER TABLE courses_for_groups OWNER TO postgres;
-
 --
 -- Name: courses_for_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -133,8 +94,6 @@ CREATE SEQUENCE courses_for_groups_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE courses_for_groups_id_seq OWNER TO postgres;
 
 --
 -- Name: courses_for_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -153,8 +112,6 @@ CREATE TABLE current_year (
 );
 
 
-ALTER TABLE current_year OWNER TO postgres;
-
 --
 -- Name: current_year_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -166,8 +123,6 @@ CREATE SEQUENCE current_year_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE current_year_id_seq OWNER TO postgres;
 
 --
 -- Name: current_year_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -195,8 +150,6 @@ CREATE TABLE degree (
 );
 
 
-ALTER TABLE degree OWNER TO postgres;
-
 --
 -- Name: degree_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -208,8 +161,6 @@ CREATE SEQUENCE degree_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE degree_id_seq OWNER TO postgres;
 
 --
 -- Name: degree_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -231,8 +182,6 @@ CREATE TABLE department (
 );
 
 
-ALTER TABLE department OWNER TO postgres;
-
 --
 -- Name: department_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -244,8 +193,6 @@ CREATE SEQUENCE department_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE department_id_seq OWNER TO postgres;
 
 --
 -- Name: department_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -268,8 +215,6 @@ CREATE TABLE faculty (
 );
 
 
-ALTER TABLE faculty OWNER TO postgres;
-
 --
 -- Name: faculty_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -281,8 +226,6 @@ CREATE SEQUENCE faculty_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE faculty_id_seq OWNER TO postgres;
 
 --
 -- Name: faculty_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -305,8 +248,6 @@ CREATE TABLE grade (
 );
 
 
-ALTER TABLE grade OWNER TO postgres;
-
 --
 -- Name: grade_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -318,8 +259,6 @@ CREATE SEQUENCE grade_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE grade_id_seq OWNER TO postgres;
 
 --
 -- Name: grade_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -340,8 +279,6 @@ CREATE TABLE knowledge_control (
 );
 
 
-ALTER TABLE knowledge_control OWNER TO postgres;
-
 --
 -- Name: knowledge_control_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -353,8 +290,6 @@ CREATE SEQUENCE knowledge_control_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE knowledge_control_id_seq OWNER TO postgres;
 
 --
 -- Name: knowledge_control_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -375,8 +310,6 @@ CREATE TABLE order_reason (
 );
 
 
-ALTER TABLE order_reason OWNER TO postgres;
-
 --
 -- Name: order_reason_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -388,8 +321,6 @@ CREATE SEQUENCE order_reason_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE order_reason_id_seq OWNER TO postgres;
 
 --
 -- Name: order_reason_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -408,8 +339,6 @@ CREATE TABLE "position" (
 );
 
 
-ALTER TABLE "position" OWNER TO postgres;
-
 --
 -- Name: position_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -421,8 +350,6 @@ CREATE SEQUENCE position_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE position_id_seq OWNER TO postgres;
 
 --
 -- Name: position_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -442,8 +369,6 @@ CREATE TABLE privilege (
 );
 
 
-ALTER TABLE privilege OWNER TO postgres;
-
 --
 -- Name: privilege_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -455,8 +380,6 @@ CREATE SEQUENCE privilege_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE privilege_id_seq OWNER TO postgres;
 
 --
 -- Name: privilege_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -480,8 +403,6 @@ CREATE TABLE renewed_academic_vacation_student (
 );
 
 
-ALTER TABLE renewed_academic_vacation_student OWNER TO postgres;
-
 --
 -- Name: renewed_academic_vacation_student_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -493,8 +414,6 @@ CREATE SEQUENCE renewed_academic_vacation_student_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE renewed_academic_vacation_student_id_seq OWNER TO postgres;
 
 --
 -- Name: renewed_academic_vacation_student_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -521,8 +440,6 @@ CREATE TABLE renewed_expelled_student (
 );
 
 
-ALTER TABLE renewed_expelled_student OWNER TO postgres;
-
 --
 -- Name: renewed_expelled_student_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -534,8 +451,6 @@ CREATE SEQUENCE renewed_expelled_student_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE renewed_expelled_student_id_seq OWNER TO postgres;
 
 --
 -- Name: renewed_expelled_student_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -559,8 +474,6 @@ CREATE TABLE speciality (
 );
 
 
-ALTER TABLE speciality OWNER TO postgres;
-
 --
 -- Name: speciality_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -572,8 +485,6 @@ CREATE SEQUENCE speciality_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE speciality_id_seq OWNER TO postgres;
 
 --
 -- Name: speciality_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -612,8 +523,6 @@ CREATE TABLE specialization (
 );
 
 
-ALTER TABLE specialization OWNER TO postgres;
-
 --
 -- Name: specialization_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -625,8 +534,6 @@ CREATE SEQUENCE specialization_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE specialization_id_seq OWNER TO postgres;
 
 --
 -- Name: specialization_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -666,8 +573,6 @@ CREATE TABLE student (
 );
 
 
-ALTER TABLE student OWNER TO postgres;
-
 --
 -- Name: student_academic_vacation; Type: TABLE; Schema: public; Owner: postgres
 --
@@ -687,8 +592,6 @@ CREATE TABLE student_academic_vacation (
 );
 
 
-ALTER TABLE student_academic_vacation OWNER TO postgres;
-
 --
 -- Name: student_academic_vacation_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -699,9 +602,6 @@ CREATE SEQUENCE student_academic_vacation_id_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
-ALTER TABLE student_academic_vacation_id_seq OWNER TO postgres;
 
 --
 -- Name: student_academic_vacation_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -742,8 +642,6 @@ CREATE TABLE student_degree (
 );
 
 
-ALTER TABLE student_degree OWNER TO postgres;
-
 --
 -- Name: student_degree_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -755,8 +653,6 @@ CREATE SEQUENCE student_degree_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE student_degree_id_seq OWNER TO postgres;
 
 --
 -- Name: student_degree_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -783,8 +679,6 @@ CREATE TABLE student_expel (
 );
 
 
-ALTER TABLE student_expel OWNER TO postgres;
-
 --
 -- Name: student_expel_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -796,8 +690,6 @@ CREATE SEQUENCE student_expel_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE student_expel_id_seq OWNER TO postgres;
 
 --
 -- Name: student_expel_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -824,8 +716,6 @@ CREATE TABLE student_group (
 );
 
 
-ALTER TABLE student_group OWNER TO postgres;
-
 --
 -- Name: student_group_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -837,8 +727,6 @@ CREATE SEQUENCE student_group_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE student_group_id_seq OWNER TO postgres;
 
 --
 -- Name: student_group_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -858,8 +746,6 @@ CREATE SEQUENCE student_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE student_id_seq OWNER TO postgres;
 
 --
 -- Name: student_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -885,8 +771,6 @@ CREATE TABLE teacher (
 );
 
 
-ALTER TABLE teacher OWNER TO postgres;
-
 --
 -- Name: teacher_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
@@ -898,8 +782,6 @@ CREATE SEQUENCE teacher_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
-ALTER TABLE teacher_id_seq OWNER TO postgres;
 
 --
 -- Name: teacher_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
