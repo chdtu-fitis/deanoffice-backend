@@ -413,7 +413,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             return;
         }
 
-        if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb)) {
+        if (isSecondaryFieldsMatch(studentDegreeFromData, studentDegreeFromDb) &&
+                isPreviousUniversityFieldsMatch(studentDegreeFromData.getStudentPreviousUniversities(), studentDegreeFromDb.getStudentPreviousUniversities())) {
             edeboDataSyncronizationReport.addSyncohronizedDegreeGreen(new StudentDegreePrimaryDataWithGroupBean(studentDegreeFromDb));
         } else {
             edeboDataSyncronizationReport.addUnmatchedSecondaryDataStudentDegreeBlue(studentDegreeFromData,studentDegreeFromDb);
@@ -423,6 +424,24 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     public boolean isSecondaryFieldsMatch(StudentDegree studentDegreeFromFile, StudentDegree studentDegreeFromDb) {
         return (EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile, studentDegreeFromDb, SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE) &&
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
+    }
+
+    private boolean isPreviousUniversityFieldsMatch(Set<StudentPreviousUniversity> studentPreviousUniversityFromFile, Set<StudentPreviousUniversity> studentPreviousUniversityFromDb){
+        if (studentPreviousUniversityFromDb.size() != studentPreviousUniversityFromFile.size()){
+            return false;
+        }
+        for (StudentPreviousUniversity universityFromFile: studentPreviousUniversityFromFile){
+            for (StudentPreviousUniversity universityFromDb: studentPreviousUniversityFromDb){
+                if (!EntityUtil.isValuesOfFieldsReturnedByGettersMatch(
+                        universityFromFile,
+                        universityFromDb,
+                        STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE)
+                ){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport,
