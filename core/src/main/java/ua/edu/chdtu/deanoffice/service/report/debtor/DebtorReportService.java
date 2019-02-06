@@ -3,7 +3,9 @@ package ua.edu.chdtu.deanoffice.service.report.debtor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -40,8 +42,13 @@ public class DebtorReportService {
 
                 int budgetStudents = studentDegreeService.getCountAllActiveBudgetStudents(specialization.getId(), year);
                 int contractStudents = studentDegreeService.getCountAllActiveContractStudents(specialization.getId(), year);
-                int budgetDebtors = studentDegreeService.getCountAllActiveBudgetDebtors(specialization.getId(), year);
-                int contractDebtors = studentDegreeService.getCountAllActiveContractDebtors(specialization.getId(), year);
+
+                if (budgetStudents + contractStudents == 0) {
+                    continue;
+                }
+
+                int budgetDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
+                int contractDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
                 double debtorsPercent = (budgetDebtors + contractDebtors) / (budgetStudents + contractStudents) * 100;
                 int lessThanThreeDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveBudgetDebtorsWithLessThanThreeDebs(specialization.getId(), year);
                 int lessThanThreeDebtsForContractDebtors = studentDegreeService.getCountAllActiveContractDebtorsWithLessThanThreeDebs(specialization.getId(), year);
