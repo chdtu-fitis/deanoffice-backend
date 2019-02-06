@@ -265,7 +265,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     @Override
     public StudentPreviousUniversity getStudentPreviousUniversityFromData(ImportedData data) {
         StudentPreviousUniversity studentPreviousUniversity = null;
-        if (Strings.isNullOrEmpty(data.getRefillInfo()) && !Strings.isNullOrEmpty(data.getEduFromInfo())){
+        if (!Strings.isNullOrEmpty(data.getUniversityFrom()) && !Strings.isNullOrEmpty(data.getEduFromInfo())){
             studentPreviousUniversity = new StudentPreviousUniversity();
             studentPreviousUniversity.setUniversityName(data.getUniversityFrom());
             studentPreviousUniversity.setStudyEndDate(getDeductionDateFromPreviousUniversity(data.getEduFromInfo()));
