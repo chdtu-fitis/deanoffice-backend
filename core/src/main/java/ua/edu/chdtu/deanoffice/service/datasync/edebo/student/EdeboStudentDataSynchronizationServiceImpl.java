@@ -426,22 +426,24 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                EntityUtil.isValuesOfFieldsReturnedByGettersMatch(studentDegreeFromFile.getStudent(),studentDegreeFromDb.getStudent(),SECONDARY_STUDENT_FIELDS_TO_COMPARE));
     }
 
-    private boolean isPreviousUniversityFieldsMatch(Set<StudentPreviousUniversity> studentPreviousUniversityFromFile, Set<StudentPreviousUniversity> studentPreviousUniversityFromDb){
-        if (studentPreviousUniversityFromDb.size() != studentPreviousUniversityFromFile.size()){
-            return false;
+    private boolean isPreviousUniversityFieldsMatch(Set<StudentPreviousUniversity> studentPreviousUniversityFromFile,
+                                                    Set<StudentPreviousUniversity> studentPreviousUniversityFromDb){
+        if (studentPreviousUniversityFromDb.size() == 0 && studentPreviousUniversityFromFile.size() == 0){
+            return true;
         }
-        for (StudentPreviousUniversity universityFromFile: studentPreviousUniversityFromFile){
-            for (StudentPreviousUniversity universityFromDb: studentPreviousUniversityFromDb){
-                if (!EntityUtil.isValuesOfFieldsReturnedByGettersMatch(
+
+        for (StudentPreviousUniversity universityFromFile : studentPreviousUniversityFromFile) {
+            for (StudentPreviousUniversity universityFromDb : studentPreviousUniversityFromDb) {
+                if (EntityUtil.isValuesOfFieldsReturnedByGettersMatch(
                         universityFromFile,
                         universityFromDb,
                         STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE)
-                ){
-                    return false;
+                ) {
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     private void getAllIdForAbsentInFileStudentDegrees(EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport,
