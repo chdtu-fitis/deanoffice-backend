@@ -6,9 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 
 import java.util.Date;
 import java.util.List;
@@ -78,7 +76,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("specializationId") Integer specializationId
     );
 
-        //TODO неперевірений
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "WHERE sd.payment = 'BUDGET' AND sd.active = true " +
@@ -89,7 +86,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
         @Param("studyYear") int studyYear
     );
 
-        //TODO неперевірений
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "WHERE sd.payment = 'CONTRACT' AND sd.active = true " +
@@ -101,32 +97,20 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     );
 
         //TODO неперевірений
-    @Query(value = "SELECT count(DISTINCT sd.id) FROM student_degree sd " +
-            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
-            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
-            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
-            "AND grade.course_id = cfg.course_id " +
-            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
-    int findCountAllActiveBudgetDebtorsBySpecializationIdAndStudyYear (
-        @Param("specializationId") int specializationId,
-        @Param("currentYear") int currentYear,
-        @Param("studyYear") int studyYear
-    );
-
-        //TODO неперевірений
-    @Query(value = "SELECT count(DISTINCT sd.id) FROM student_degree sd " +
-            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
-            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id " +
-            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
-            "AND grade.course_id = cfg.course_id " +
-            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
-    int findCountAllActiveContractDebtorsBySpecializationIdAndStudyYear (
+    @Query(value =  "SELECT count(DISTINCT sd.id) FROM student_degree sd " +
+                    "INNER JOIN grade g ON sd.id = g.student_degree_id " +
+                    "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+                    "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+                    "WHERE (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+                    "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+                    "AND sg.tuition_form = :tuitionForm", nativeQuery = true)
+    int findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
-            @Param("studyYear") int studyYear
-    );
+            @Param("studyYear") int studyYear,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("payment")String payment
+            );
 
         //TODO неперевірений + недороблений (повинно повертати int, а не int[])
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +

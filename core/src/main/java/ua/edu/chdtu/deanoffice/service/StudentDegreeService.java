@@ -3,8 +3,10 @@ package ua.edu.chdtu.deanoffice.service;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.Date;
@@ -138,12 +140,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findCountAllActiveContractStudentsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
     }
 
-    public int getCountAllActiveBudgetDebtors(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveBudgetDebtorsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
-    }
-
-    public int getCountAllActiveContractDebtors(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveContractDebtorsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
+    public int getCountAllActiveDebtors(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment) {
+        return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString());
     }
 
     public int getCountAllActiveBudgetDebtorsWithLessThanThreeDebs(int specializationId, int studyYear) {
