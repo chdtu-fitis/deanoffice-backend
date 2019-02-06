@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSe
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
@@ -22,10 +23,7 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegr
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.MissingPrimaryDataRedDTO;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 
@@ -151,6 +149,10 @@ public class SyncronizationController {
                 if (studentDegree.getStudent().getId() == 0) {
                     Student student = studentService.save(studentDegree.getStudent());
                     studentDegree.setStudent(student);
+                }
+                if (studentDegree.getStudentPreviousUniversities().size() > 0){
+                    studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudyStartDate(new Date()));
+                    studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
                 }
                 studentDegreeService.save(studentDegree);
                 count++;
