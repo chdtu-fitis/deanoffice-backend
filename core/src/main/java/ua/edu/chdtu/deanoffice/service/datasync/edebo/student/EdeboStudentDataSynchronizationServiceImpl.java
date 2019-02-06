@@ -263,6 +263,32 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     }
 
     @Override
+    public StudentPreviousUniversity getStudentPreviousUniversityFromData(ImportedData data) {
+        StudentPreviousUniversity studentPreviousUniversity = null;
+        if (Strings.isNullOrEmpty(data.getRefillInfo()) && !Strings.isNullOrEmpty(data.getEduFromInfo())){
+            studentPreviousUniversity = new StudentPreviousUniversity();
+            studentPreviousUniversity.setUniversityName(data.getUniversityFrom());
+            studentPreviousUniversity.setStudyEndDate(getDeductionDateFromPreviousUniversity(data.getEduFromInfo()));
+        }
+        return studentPreviousUniversity;
+    }
+
+    private Date getDeductionDateFromPreviousUniversity(String eduFromInfo){
+        Date deductionDateFromPreviousUniversity = null;
+        DateFormat deductionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
+        Pattern pattern = Pattern.compile(DEDUCTION_DATE_REGEXP);
+        Matcher matcher = pattern.matcher(eduFromInfo);
+        try {
+            if (matcher.find()) {
+                deductionDateFromPreviousUniversity = matcher.groupCount() > 0 ? deductionDateFormatter.parse(matcher.group(1)) : null;
+            }
+        } catch (ParseException e) {
+            log.debug(e.getMessage());
+        }
+        return deductionDateFromPreviousUniversity;
+    }
+
+    @Override
     public StudentDegree getStudentDegreeFromData(ImportedData data) {
         Student student = getStudentFromData(data);
         Specialization specialization = getSpecializationFromData(data); //getSpeciality inside
@@ -270,6 +296,12 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         studentDegree.setActive(true);
         studentDegree.setStudent(student);
         studentDegree.setSpecialization(specialization);
+
+        if(getStudentPreviousUniversityFromData(data) != null){
+            Set<StudentPreviousUniversity> studentPreviousUniversities = new HashSet<>();
+            studentPreviousUniversities.add(getStudentPreviousUniversityFromData(data));
+            studentDegree.setStudentPreviousUniversities(studentPreviousUniversities);
+        }
 
         studentDegree.setSupplementNumber(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
