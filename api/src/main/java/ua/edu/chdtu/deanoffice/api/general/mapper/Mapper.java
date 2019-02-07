@@ -66,7 +66,7 @@ public class Mapper {
         return modelMapper;
     }
 
-    public static void mapStudentDegreeDTOToStudentDegreeSimpleFields(StudentDegreeDTO dto, StudentDegree entity) {
+    public static void mapStudentDegreeDtoToStudentDegreeSimpleFields(StudentDegreeDTO dto, StudentDegree entity) {
         entity.setActive(dto.isActive());
         entity.setAdmissionDate(dto.getAdmissionDate());
         entity.setAdmissionOrderNumber(dto.getAdmissionOrderNumber());
