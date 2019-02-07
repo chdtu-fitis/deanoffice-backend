@@ -268,6 +268,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         if (!Strings.isNullOrEmpty(data.getUniversityFrom()) && !Strings.isNullOrEmpty(data.getEduFromInfo())){
             studentPreviousUniversity = new StudentPreviousUniversity();
             studentPreviousUniversity.setUniversityName(data.getUniversityFrom());
+            studentPreviousUniversity.setStudyStartDate(parseDate(data.getEducationDateBegin()));
             studentPreviousUniversity.setStudyEndDate(getDeductionDateFromPreviousUniversity(data.getEduFromInfo()));
         }
         return studentPreviousUniversity;
@@ -432,15 +433,12 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             return true;
         }
 
-        for (StudentPreviousUniversity universityFromFile : studentPreviousUniversityFromFile) {
-            for (StudentPreviousUniversity universityFromDb : studentPreviousUniversityFromDb) {
-                if (EntityUtil.isValuesOfFieldsReturnedByGettersMatch(
-                        universityFromFile,
-                        universityFromDb,
-                        STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE)
-                ) {
-                    return true;
-                }
+        for (StudentPreviousUniversity universityFromDb : studentPreviousUniversityFromDb) {
+            if (EntityUtil.isValuesOfFieldsReturnedByGettersMatch(
+                    studentPreviousUniversityFromFile,
+                    universityFromDb,
+                    STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE)) {
+                return true;
             }
         }
         return false;
