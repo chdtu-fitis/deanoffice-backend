@@ -151,7 +151,6 @@ public class SyncronizationController {
                     studentDegree.setStudent(student);
                 }
                 if (studentDegree.getStudentPreviousUniversities().size() > 0){
-                    studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudyStartDate(new Date()));
                     studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
                 }
                 studentDegreeService.save(studentDegree);
