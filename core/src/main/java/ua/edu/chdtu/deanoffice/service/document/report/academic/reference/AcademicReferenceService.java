@@ -46,8 +46,6 @@ public class AcademicReferenceService {
     private StudentExpelService studentExpelService;
 
     public File formDocument(int studentExpelId) throws Docx4JException, IOException {
-
-
         StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
         StudentDegree studentDegree = studentExpel.getStudentDegree();
         Student student = studentDegree.getStudent();
@@ -113,14 +111,13 @@ public class AcademicReferenceService {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(INDEX_OF_TABLE_WITH_GRADES);
         if(studentSummary.semesters.isEmpty()){
             table.getContent().remove(2);
-            fillingInTwoLines(table);
+            showNoGradesMessage(table);
         } else {
             prepareRows(table, studentSummary);
         }
-
     }
 
-    private void fillingInTwoLines(Tbl table){
+    private void showNoGradesMessage(Tbl table){
         Text textInTable = getTextsPlaceholdersFromContentAccessor(table)
                 .stream().filter(text -> "#n".equals(text.getValue().trim())).findFirst().get();
         R parentContainer = (R) textInTable.getParent();
@@ -130,18 +127,18 @@ public class AcademicReferenceService {
         newParagraph.getContent().clear();
         R container = XmlUtils.deepCopy(parentContainer);
         container.getContent().clear();
-        Text competency = XmlUtils.deepCopy(textInTable);
-        competency.setValue(NO_GRADES_DESCRIPTION_UKR);
-        container.getContent().add(competency);
+        Text noGradesMessage = XmlUtils.deepCopy(textInTable);
+        noGradesMessage.setValue(NO_GRADES_DESCRIPTION_UKR);
+        container.getContent().add(noGradesMessage);
         newParagraph.getContent().add(container);
         paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
         newParagraph = XmlUtils.deepCopy(parentParagraph);
         newParagraph.getContent().clear();
         container = XmlUtils.deepCopy(parentContainer);
         container.getContent().clear();
-        competency = XmlUtils.deepCopy(textInTable);
-        competency.setValue(NO_GRADES_DESCRIPTION_EN);
-        container.getContent().add(competency);
+        noGradesMessage = XmlUtils.deepCopy(textInTable);
+        noGradesMessage.setValue(NO_GRADES_DESCRIPTION_EN);
+        container.getContent().add(noGradesMessage);
         newParagraph.getContent().add(container);
         paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
         paragraphsParent.getContent().remove(2);
