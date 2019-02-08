@@ -12,5 +12,7 @@ public class StudentPreviousUniversityDTO {
     private int studentDegreeId;
     private String universityName;
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
+    private Date studyStartDate;
+    @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date studyEndDate;
 }
