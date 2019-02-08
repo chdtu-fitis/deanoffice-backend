@@ -402,6 +402,28 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 studentFromData.getBirthDate()
         );
 
+        Set<StudentPreviousUniversity> studentPreviousUniversityFromData = studentDegreeFromData.getStudentPreviousUniversities();
+        if (studentPreviousUniversityFromData.size() != 0){
+            studentPreviousUniversityFromData.stream().forEach(
+                    studentPreviousUniversity -> {
+                        if (studentPreviousUniversity.getStudyStartDate() == null){
+                            String message = "Відсутня дата почаику навчання в попередньому ВНЗ";
+                            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
+                            return;
+                        }
+                        if (studentPreviousUniversity.getStudyEndDate() == null){
+                            String message = "Відсутня дата закінчення навчання попереднього ВНЗ";
+                            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
+                            return;
+                        }
+                        if (Strings.isNullOrEmpty(studentPreviousUniversity.getUniversityName())){
+                            String message = "Відсутня назва попереднього ВНЗ";
+                            edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
+                            return;
+                        }
+                    });
+        }
+
         if (studentFromDB == null) {
             edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
             return;
