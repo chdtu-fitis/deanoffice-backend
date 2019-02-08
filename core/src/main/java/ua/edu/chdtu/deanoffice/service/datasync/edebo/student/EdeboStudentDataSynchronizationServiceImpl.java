@@ -466,7 +466,9 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
 
         for (StudentPreviousUniversity universityFromFile : studentPreviousUniversityFromFile) {
             for (StudentPreviousUniversity universityFromDb : studentPreviousUniversityFromDb) {
-                return EntityUtil.isValuesOfFieldsReturnedByGettersMatch(universityFromFile, universityFromDb, STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE);
+                if (EntityUtil.isValuesOfFieldsReturnedByGettersMatch(universityFromFile, universityFromDb, STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE)){
+                    return true;
+                }
             }
         }
         return false;
