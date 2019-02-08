@@ -26,6 +26,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -88,13 +89,18 @@ public class StudentExpelController {
             @RequestParam (value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam (value = "name", defaultValue = "", required = false) String name,
             @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
+            @RequestParam (required = false) String endDate,
             @CurrentUser ApplicationUser user){
         try {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date startDate1 = format.parse(startDate);
-            Date endDate1 = format.parse(endDate);
-            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(startDate1, endDate1, surname, name);
+            Date parsedStartDate = format.parse(startDate);
+            Date parsedEndDate;
+            if(endDate != null && !endDate.isEmpty()){
+                parsedEndDate = format.parse(endDate);
+            } else{
+                parsedEndDate = new Date();
+            }
+            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(parsedStartDate, parsedEndDate, surname, name);
             List<StudentExpelDTO> studentExpelDTOs = Mapper.map(foundExcludedStudents, StudentExpelDTO.class);
             return ResponseEntity.ok(studentExpelDTOs);
         } catch (Exception exception) {
