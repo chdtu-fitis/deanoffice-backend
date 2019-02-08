@@ -50,10 +50,10 @@ public class DebtorReportService {
                 int budgetDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
                 int contractDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
                 double debtorsPercent = (budgetDebtors + contractDebtors) / (budgetStudents + contractStudents) * 100;
-                int lessThanThreeDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveBudgetDebtorsWithLessThanThreeDebs(specialization.getId(), year);
-                int lessThanThreeDebtsForContractDebtors = studentDegreeService.getCountAllActiveContractDebtorsWithLessThanThreeDebs(specialization.getId(), year);
-                int threeOrMoreDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveBudgetDebtorsWithThreeOrMoreDebts(specialization.getId(), year);
-                int threeOrMoreDebtsForContractDebtors = studentDegreeService.getCountAllActiveContractDebtorsWithThreeOrMoreDebts(specialization.getId(), year);
+                int lessThanThreeDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
+                int lessThanThreeDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
+                int threeOrMoreDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
+                int threeOrMoreDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
 
                 SpecializationDebtorsYearBean specializationDebtorsYearBean
                     = new SpecializationDebtorsYearBean(budgetStudents, contractStudents, budgetDebtors,

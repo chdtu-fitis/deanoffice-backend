@@ -144,19 +144,11 @@ public class StudentDegreeService {
         return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString());
     }
 
-    public int getCountAllActiveBudgetDebtorsWithLessThanThreeDebs(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveBudgetDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear).length;
+    public int getCountAllActiveDebtorsWithLessThanThreeDebs(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment) {
+        return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString()).length;
     }
 
-    public int getCountAllActiveContractDebtorsWithLessThanThreeDebs(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveContractDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear).length;
-    }
-
-    public int getCountAllActiveBudgetDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveBudgetDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear).length;
-    }
-
-    public int getCountAllActiveContractDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveContractDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear).length;
+    public int getCountAllActiveDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear,  TuitionForm tuitionForm, Payment payment) {
+        return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString()).length;
     }
 }

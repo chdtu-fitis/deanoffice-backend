@@ -112,56 +112,40 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("payment")String payment
             );
 
-        //TODO неперевірений + недороблений (повинно повертати int, а не int[])
+        //TODO неперевірений
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
-            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
-            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
+            "INNER JOIN grade g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "WHERE (g.points is null OR points < 60) AND sd.payment = :payment AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+            "AND sg.tuition_form = :tuitionForm " +
             "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
-    int[] findCountAllActiveBudgetDebtorsWithLessThanThreeDebs (
+    int[] findAllActiveDebtorsWithLessThanThreeDebs (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
-            @Param("studyYear") int studyYear
+            @Param("studyYear") int studyYear,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("payment")String payment
     );
 
-    //TODO неперевірений + недороблений (повинно повертати int, а не int[])
+    //TODO неперевірений
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
-            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
-            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
+            "INNER JOIN grade g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "WHERE (g.points is null OR points < 60) AND sd.payment = :payment AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-            "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
-    int[] findCountAllActiveContractDebtorsWithLessThanThreeDebs (
-            @Param("specializationId") int specializationId,
-            @Param("currentYear") int currentYear,
-            @Param("studyYear") int studyYear
-    );
-
-    //TODO неперевірений + недороблений (повинно повертати int, а не int[])
-    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
-            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
-            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'BUDGET' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId " +
-            "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+            "AND sg.tuition_form = :tuitionForm " +
             "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
-    int[] findCountAllActiveBudgetDebtorsWithThreeOrMoreDebts (
+    int[] findAllActiveDebtorsWithThreeOrMoreDebts (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
-            @Param("studyYear") int studyYear
-    );
-
-    //TODO неперевірений + недороблений (повинно повертати int, а не int[])
-    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
-            "INNER JOIN grade ON sd.id = grade.student_degree_id " +
-            "WHERE (grade.points is null OR points < 60) AND sd.payment = 'CONTRACT' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId " +
-            "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-            "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
-    int[] findCountAllActiveContractDebtorsWithThreeOrMoreDebts (
-            @Param("specializationId") int specializationId,
-            @Param("currentYear") int currentYear,
-            @Param("studyYear") int studyYear
+            @Param("studyYear") int studyYear,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("payment")String payment
     );
 
     @Query("SELECT sd FROM StudentDegree sd " +
