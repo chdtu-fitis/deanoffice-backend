@@ -108,6 +108,28 @@ public class StudentExpelController {
         }
     }
 
+    @GetMapping("/expelled-renewed-information")
+    @JsonView(StudentView.Expel.class)
+    public ResponseEntity searchByStudentDegreeId(
+            @RequestParam(required = false) Integer studentDegreeId,
+            @CurrentUser ApplicationUser user){
+        try{
+           List <StudentExpel> expelledInformation = studentExpelService.getByStudentDegreeId(studentDegreeId);
+           List <RenewedAndExpelledStudentBean> renewedAndExpelledStudentBeans = new ArrayList();
+           for (StudentExpel studentExpel : expelledInformation) {
+               renewedAndExpelledStudentBeans.add(new RenewedAndExpelledStudentBean(studentExpel));
+               RenewedExpelledStudent renewedInformation = studentExpelService.getRenewedStudentByExpelledId(studentExpel.getId());
+               if (renewedInformation != null) {
+                   renewedAndExpelledStudentBeans.add(new RenewedAndExpelledStudentBean(renewedInformation));
+               }
+           }
+           List <RenewedAndExpelledStudentDTO> renewedAndExpelledStudentDTOS = Mapper.map(renewedAndExpelledStudentBeans, RenewedAndExpelledStudentDTO.class);
+           return ResponseEntity.ok(renewedAndExpelledStudentDTOS);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
     private List<StudentExpel> createStudentExpels(StudentExpelDTO studentExpelDTO) {
         OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getOrderReasonId());
         studentExpelDTO.setEntityOrderReason(orderReason);
