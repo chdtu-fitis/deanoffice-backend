@@ -406,6 +406,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         if (studentPreviousUniversityFromData.size() != 0){
             Iterator<StudentPreviousUniversity> iterator = studentPreviousUniversityFromData.iterator();
             StudentPreviousUniversity studentPreviousUniversity = iterator.next();
+
             if (studentPreviousUniversity.getStudyStartDate() == null){
                 String message = "Відсутня дата початку навчання в попередньому ВНЗ";
                 edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(
