@@ -394,14 +394,6 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         }
         studentDegreeFromData.setSpecialization(specializationFromDB);
 
-        Student studentFromData = studentDegreeFromData.getStudent();
-        Student studentFromDB = studentService.searchByFullNameAndBirthDate(
-                studentFromData.getName(),
-                studentFromData.getSurname(),
-                studentFromData.getPatronimic(),
-                studentFromData.getBirthDate()
-        );
-
         Set<StudentPreviousUniversity> studentPreviousUniversityFromData = studentDegreeFromData.getStudentPreviousUniversities();
         if (studentPreviousUniversityFromData.size() != 0){
             Iterator<StudentPreviousUniversity> iterator = studentPreviousUniversityFromData.iterator();
@@ -432,6 +424,14 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 return;
             }
         }
+
+        Student studentFromData = studentDegreeFromData.getStudent();
+        Student studentFromDB = studentService.searchByFullNameAndBirthDate(
+                studentFromData.getName(),
+                studentFromData.getSurname(),
+                studentFromData.getPatronimic(),
+                studentFromData.getBirthDate()
+        );
 
         if (studentFromDB == null) {
             edeboDataSyncronizationReport.addNoSuchStudentOrStudentDegreeInDbOrange(studentDegreeFromData);
