@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentPreviousUniversityDTO {
-    private int studentDegreeId;
+    private int id;
     private String universityName;
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date studyStartDate;
