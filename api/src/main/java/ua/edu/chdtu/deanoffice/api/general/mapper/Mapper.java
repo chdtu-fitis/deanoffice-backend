@@ -6,6 +6,7 @@ import org.modelmapper.spi.MatchingStrategy;
 import ua.edu.chdtu.deanoffice.api.general.mapper.type.ListParameterizedType;
 import ua.edu.chdtu.deanoffice.api.general.mapper.type.SetParameterizedType;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreeFullEdeboDataDto;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 
@@ -94,5 +95,23 @@ public class Mapper {
         entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
         entity.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(entity));
     }
-
+    public static void mapStudentDegreeDTOToStudentDegree(StudentDegreeFullEdeboDataDto dto, StudentDegree entity) {
+        entity.setId(dto.getId());
+        map(dto.getStudent(),entity.getStudent());
+        map(dto.getSpecialization(),entity.getSpecialization());
+        entity.setAdmissionDate(dto.getAdmissionDate());
+        entity.setAdmissionOrderNumber(dto.getAdmissionOrderNumber());
+        entity.setAdmissionOrderDate(dto.getAdmissionOrderDate());
+        entity.setPayment(dto.getPayment());
+        entity.setPreviousDiplomaDate(dto.getPreviousDiplomaDate());
+        entity.setPreviousDiplomaType(dto.getPreviousDiplomaType());
+        entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());
+        entity.setPreviousDiplomaIssuedBy(dto.getPreviousDiplomaIssuedBy());
+        entity.setSupplementNumber(dto.getSupplementNumber());
+        if (dto.getStudentPreviousUniversities().size() > 0){
+            entity.getStudentPreviousUniversities().clear();
+            entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
+            entity.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(entity));
+        }
+    }
 }
