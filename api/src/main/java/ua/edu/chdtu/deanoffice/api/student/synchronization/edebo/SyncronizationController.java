@@ -38,7 +38,7 @@ public class SyncronizationController {
     private final StudentService studentService;
 
     @Autowired
-    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService, StudentDegreeService studentDegreeService,StudentService studentService) {
+    public SyncronizationController(EdeboStudentDataSyncronizationService edeboDataSynchronizationService, StudentDegreeService studentDegreeService, StudentService studentService) {
         this.edeboDataSynchronizationService = edeboDataSynchronizationService;
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
@@ -47,7 +47,7 @@ public class SyncronizationController {
     @PostMapping("/edebo-synchronization/process-file")
     public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile,
                                                        @CurrentUser ApplicationUser user,
-                                                       @RequestParam(required=false) String degree, @RequestParam(required=false) String speciality) {
+                                                       @RequestParam(required = false) String degree, @RequestParam(required = false) String speciality) {
         if (uploadfile.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Файл не було надіслано");
         }
@@ -91,27 +91,27 @@ public class SyncronizationController {
     }
 
     @PostMapping("/edebo-synchronization/save")
-    public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO){
+    public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO) {
         try {
-            Map <String,Object> updateInformation = updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
-            Map <String,Object> saveInformation = createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
-            Map <String,Object> information = new HashMap<String, Object>();
-            information.put("updated",updateInformation);
-            information.put("created",saveInformation);
+            Map<String, Object> updateInformation = updateSecondaryData(newAndUpdatedStudentDegreesDTO.getStudentDegreesForUpdate());
+            Map<String, Object> saveInformation = createNewStudent(newAndUpdatedStudentDegreesDTO.getNewStudentDegrees());
+            Map<String, Object> information = new HashMap<String, Object>();
+            information.put("updated", updateInformation);
+            information.put("created", saveInformation);
             return ResponseEntity.ok(information);
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    private Map updateSecondaryData(StudentDegreeFullEdeboDataDto[] studentDegreesForUpdate){
-        if (studentDegreesForUpdate.length == 0){
+    private Map updateSecondaryData(StudentDegreeFullEdeboDataDto[] studentDegreesForUpdate) {
+        if (studentDegreesForUpdate.length == 0) {
             return null;
         }
         int count = 0;
         List<String> notUpdatedStudentDegrees = new ArrayList();
-        for(StudentDegreeFullEdeboDataDto studentDegree: studentDegreesForUpdate){
-            if (studentDegree.getId() == 0 || studentDegree.getStudent().getId() == 0){
+        for (StudentDegreeFullEdeboDataDto studentDegree : studentDegreesForUpdate) {
+            if (studentDegree.getId() == 0 || studentDegree.getStudent().getId() == 0) {
                 continue;
             }
             try {
@@ -125,27 +125,27 @@ public class SyncronizationController {
                     studentService.save(studentOfDb);
                 }
                 count++;
-            } catch (Exception e){
-                notUpdatedStudentDegrees.add(studentDegree.getStudent().getSurname()+ " "
-                        + studentDegree.getStudent().getName()+ " "
-                        + studentDegree.getStudent().getPatronimic()+ " "
-                        + studentDegree.getSpecialization().getSpeciality().getCode()+ " "
+            } catch (Exception e) {
+                notUpdatedStudentDegrees.add(studentDegree.getStudent().getSurname() + " "
+                        + studentDegree.getStudent().getName() + " "
+                        + studentDegree.getStudent().getPatronimic() + " "
+                        + studentDegree.getSpecialization().getSpeciality().getCode() + " "
                         + studentDegree.getSpecialization().getSpeciality().getName());
             }
         }
-        Map <String,Object> result = new HashMap<>();
-        result.put("updatedStudentDegrees",count);
-        result.put("notUpdatedStudentDegrees",notUpdatedStudentDegrees);
+        Map<String, Object> result = new HashMap<>();
+        result.put("updatedStudentDegrees", count);
+        result.put("notUpdatedStudentDegrees", notUpdatedStudentDegrees);
         return result;
     }
 
-    private Map createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO){
-        if(newStudentDTO.length==0){
+    private Map createNewStudent(StudentDegreeFullEdeboDataDto[] newStudentDTO) {
+        if (newStudentDTO.length == 0) {
             return null;
         }
         int count = 0;
-        List <String> notSavedStudents = new ArrayList<>();
-        for(StudentDegreeFullEdeboDataDto studentDegreeDTO: newStudentDTO){
+        List<String> notSavedStudents = new ArrayList<>();
+        for (StudentDegreeFullEdeboDataDto studentDegreeDTO : newStudentDTO) {
             try {
                 StudentDegree studentDegree = (StudentDegree) strictMap(studentDegreeDTO, StudentDegree.class);
                 studentDegree.setActive(true);
@@ -153,22 +153,22 @@ public class SyncronizationController {
                     Student student = studentService.save(studentDegree.getStudent());
                     studentDegree.setStudent(student);
                 }
-                if (studentDegree.getStudentPreviousUniversities().size() > 0){
+                if (studentDegree.getStudentPreviousUniversities().size() > 0) {
                     studentDegree.getStudentPreviousUniversities().forEach(studentPreviousUniversity -> studentPreviousUniversity.setStudentDegree(studentDegree));
                 }
                 studentDegreeService.save(studentDegree);
                 count++;
-            } catch (Exception e){
+            } catch (Exception e) {
                 notSavedStudents.add(studentDegreeDTO.getStudent().getSurname() + " "
-                        +studentDegreeDTO.getStudent().getName()+ " "
-                        +studentDegreeDTO.getStudent().getPatronimic()+ " "
-                        +studentDegreeDTO.getSpecialization().getSpeciality().getCode()+ " "
-                        +studentDegreeDTO.getSpecialization().getSpeciality().getName());
+                        + studentDegreeDTO.getStudent().getName() + " "
+                        + studentDegreeDTO.getStudent().getPatronimic() + " "
+                        + studentDegreeDTO.getSpecialization().getSpeciality().getCode() + " "
+                        + studentDegreeDTO.getSpecialization().getSpeciality().getName());
             }
         }
-        Map <String,Object> result = new HashMap <String, Object>();
+        Map<String, Object> result = new HashMap<String, Object>();
         result.put("createdStudentDegrees", count);
-        result.put("notCreatedStudentDegrees",notSavedStudents);
+        result.put("notCreatedStudentDegrees", notSavedStudents);
         return result;
     }
 
