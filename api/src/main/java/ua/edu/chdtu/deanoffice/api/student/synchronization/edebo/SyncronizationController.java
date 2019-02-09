@@ -3,7 +3,11 @@ package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -14,7 +18,6 @@ import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.UnmatchedSe
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSynchronizationReport;
@@ -114,7 +117,7 @@ public class SyncronizationController {
             try {
                 if (studentDegree.isModified()) {
                     StudentDegree studentDegreeOfDb = studentDegreeService.getById(studentDegree.getId());
-                    Mapper.map(studentDegree, studentDegreeOfDb);
+                    mapStudentDegreeDTOToStudentDegree(studentDegree, studentDegreeOfDb);
                     studentDegreeService.save(studentDegreeOfDb);
                 } else {
                     Student studentOfDb = studentService.findById(studentDegree.getStudent().getId());
