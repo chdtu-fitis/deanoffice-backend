@@ -49,7 +49,7 @@ public class DebtorReportService {
 
                 int budgetDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
                 int contractDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
-                double debtorsPercent = (budgetDebtors + contractDebtors) / (budgetStudents + contractStudents) * 100;
+                double debtorsPercent = (budgetDebtors + contractDebtors) / (budgetStudents * 1.0 + contractStudents) * 100;
                 int lessThanThreeDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
                 int lessThanThreeDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
                 int threeOrMoreDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);

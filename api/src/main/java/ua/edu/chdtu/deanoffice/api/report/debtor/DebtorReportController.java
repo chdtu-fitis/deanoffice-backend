@@ -29,7 +29,14 @@ public class DebtorReportController {
     @GetMapping
     public ResponseEntity<Map<String, SpecializationDebtorStatisticsDto>> getReportOfDebtors(@CurrentUser ApplicationUser user) {
         try {
-            Map<String, SpecializationDebtorStatisticsDto> debtorsReport = new TreeMap<>(); //debtorReportService.calculateDebtorsReportData(user.getFaculty().getId());
+            Map<String, SpecializationDebtorsBean> debtorsReport = debtorReportService.calculateDebtorsReportData(user.getFaculty());
+            Map<String, SpecializationDebtorStatisticsDto> debtorsReportDTO = new TreeMap<>();
+            for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry: debtorsReport.entrySet()) {
+                SpecializationDebtorStatisticsDto sds = new SpecializationDebtorStatisticsDto();
+                Mapper.strictMap(specializationDebtorsBeanEntry.getValue(), sds);
+                debtorsReportDTO.put(specializationDebtorsBeanEntry.getKey(), sds);
+            }
+            /*Map<String, SpecializationDebtorStatisticsDto> debtorsReport = new TreeMap<>(); //debtorReportService.calculateDebtorsReportData(user.getFaculty().getId());
 //             = debtorReportService.calculateDebtorsReportData(user.getFaculty());
 //            Mapper.map(, debtorsReport);
             Map<Integer, SpecializationDebtorsYearBean> testMap = new TreeMap<>();
@@ -49,17 +56,15 @@ public class DebtorReportController {
             SpecializationDebtorsBean specializationDebtorsBean2 = new SpecializationDebtorsBean();
             specializationDebtorsBean2.setSpecializationDebtorsYearBeanMap(testMap);
 
-            Map<String, SpecializationDebtorsBean> sourceDebtorsReport = new TreeMap<>();
-            sourceDebtorsReport.put("Інженерія програмного забезпечення", specializationDebtorsBean);
             SpecializationDebtorStatisticsDto sds1 = new SpecializationDebtorStatisticsDto();
             Mapper.map(specializationDebtorsBean, sds1);
             debtorsReport.put("test specialization1", sds1);
 
             SpecializationDebtorStatisticsDto sds2 = new SpecializationDebtorStatisticsDto();
             Mapper.map(specializationDebtorsBean2, sds2);
-            debtorsReport.put("test specialization2", sds2);
+            debtorsReport.put("test specialization2", sds2);*/
 
-            return ResponseEntity.ok().body(debtorsReport);
+            return ResponseEntity.ok().body(debtorsReportDTO);
         } catch (Exception e) {
             e.printStackTrace();
         }
