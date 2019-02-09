@@ -108,6 +108,7 @@ public class Mapper {
         entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());
         entity.setPreviousDiplomaIssuedBy(dto.getPreviousDiplomaIssuedBy());
         entity.setSupplementNumber(dto.getSupplementNumber());
+        
         if (dto.getStudentPreviousUniversities().size() > 0){
             entity.getStudentPreviousUniversities().clear();
             entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
