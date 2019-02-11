@@ -78,13 +78,16 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN specialization s ON sd.specialization_id = s.id " +
             "WHERE sd.payment = :payment AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
+            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+            "AND s.degree_id = :degreeId", nativeQuery = true)
     int findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment (
         @Param("specializationId") int specializationId,
         @Param("currentYear") int currentYear,
         @Param("studyYear") int studyYear,
-        @Param("payment")String payment
+        @Param("payment")String payment,
+        @Param("degreeId") int degreeId
     );
 
         //TODO неперевірений
@@ -92,15 +95,18 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "INNER JOIN grade g ON sd.id = g.student_degree_id " +
                     "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
                     "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+                    "INNER JOIN specialization s ON sd.specialization_id = s.id " +
                     "WHERE (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
                     "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
-                    "AND sg.tuition_form = :tuitionForm", nativeQuery = true)
+                    "AND sg.tuition_form = :tuitionForm " +
+                    "AND s.degree_id = :degreeId", nativeQuery = true)
     int findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
             @Param("studyYear") int studyYear,
             @Param("tuitionForm") String tuitionForm,
-            @Param("payment")String payment
+            @Param("payment")String payment,
+            @Param("degreeId") int degreeId
             );
 
         //TODO неперевірений
@@ -108,17 +114,20 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "INNER JOIN grade g ON sd.id = g.student_degree_id " +
             "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN specialization s ON sd.specialization_id = s.id " +
             "WHERE (g.points is null OR points < 60) AND sd.payment = :payment AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
             "AND sg.tuition_form = :tuitionForm " +
+            "AND s.degree_id = :degreeId " +
             "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
     int[] findAllActiveDebtorsWithLessThanThreeDebs (
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
             @Param("studyYear") int studyYear,
             @Param("tuitionForm") String tuitionForm,
-            @Param("payment")String payment
+            @Param("payment")String payment,
+            @Param("degreeId") int degreeId
     );
 
     //TODO неперевірений
@@ -126,9 +135,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "INNER JOIN grade g ON sd.id = g.student_degree_id " +
             "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN specialization s ON sd.specialization_id = s.id " +
             "WHERE (g.points is null OR points < 60) AND sd.payment = :payment AND sd.active = true " +
             "AND sd.specialization_id = :specializationId " +
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+            "AND s.degree_id = :degreeId " +
             "AND sg.tuition_form = :tuitionForm " +
             "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
     int[] findAllActiveDebtorsWithThreeOrMoreDebts (
@@ -136,7 +147,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("currentYear") int currentYear,
             @Param("studyYear") int studyYear,
             @Param("tuitionForm") String tuitionForm,
-            @Param("payment")String payment
+            @Param("payment")String payment,
+            @Param("degreeId") int degreeId
     );
 
     @Query("SELECT sd FROM StudentDegree sd " +

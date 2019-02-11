@@ -2,10 +2,7 @@ package ua.edu.chdtu.deanoffice.service.report.debtor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Faculty;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -37,23 +34,21 @@ public class DebtorReportService {
         for (Specialization specialization : specializations) {
             Map<Integer, SpecializationDebtorsYearBean> specializationDebtorsYearBeanMap = new TreeMap<>();
 
-
-
             for (int year = 1; year <= NUMBER_OF_YEARS; year++) {
-                int budgetStudents = studentDegreeService.getCountAllActiveStudents(specialization.getId(), year, Payment.BUDGET);
-                int contractStudents = studentDegreeService.getCountAllActiveStudents(specialization.getId(), year, Payment.CONTRACT);
+                int budgetStudents = studentDegreeService.getCountAllActiveStudents(specialization.getId(), getCorrectYear(year), Payment.BUDGET, getDegreeIdByYear(year));
+                int contractStudents = studentDegreeService.getCountAllActiveStudents(specialization.getId(), getCorrectYear(year), Payment.CONTRACT, getDegreeIdByYear(year));
 
                 if (budgetStudents + contractStudents == 0) {
                     continue;
                 }
 
-                int budgetDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
-                int contractDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
+                int budgetDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
+                int contractDebtors = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
                 double debtorsPercent = (budgetDebtors + contractDebtors) / (budgetStudents * 1.0 + contractStudents) * 100;
-                int lessThanThreeDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
-                int lessThanThreeDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
-                int threeOrMoreDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.BUDGET);
-                int threeOrMoreDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), year, TuitionForm.FULL_TIME, Payment.CONTRACT);
+                int lessThanThreeDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
+                int lessThanThreeDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebs(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
+                int threeOrMoreDebtsForBudgetDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
+                int threeOrMoreDebtsForContractDebtors = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
 
                 SpecializationDebtorsYearBean specializationDebtorsYearBean
                     = new SpecializationDebtorsYearBean(budgetStudents, contractStudents, budgetDebtors,
@@ -108,7 +103,6 @@ public class DebtorReportService {
             int allContractStudentOfCurrentFaculty = 0;
             int allBudgetDebtorsOfCurrentFaculty = 0;
             int allContractDebtorsOfCurrentFaculty = 0;
-            int allDebtorsPercentOfCurrentFaculty = 0;
             int allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty = 0;
             int allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty = 0;
             int allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty = 0;
@@ -122,7 +116,6 @@ public class DebtorReportService {
                 allContractStudentOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getContractStudents();
                 allBudgetDebtorsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getBudgetDebtors();
                 allContractDebtorsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getContractDebtors();
-                allDebtorsPercentOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getDebtorsPercent();
                 allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getLessThanThreeDebtsForBudgetDebtors();
                 allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getLessThanThreeDebtsForContractDebtors();
                 allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getThreeOrMoreDebtsForBudgetDebtors();
@@ -132,7 +125,7 @@ public class DebtorReportService {
             SpecializationDebtorsYearBean specializationDebtorsForFacultyYearBean
                     = new SpecializationDebtorsYearBean(allBudgetStudentOfCurrentFaculty, allContractStudentOfCurrentFaculty,
                                                         allBudgetDebtorsOfCurrentFaculty, allContractDebtorsOfCurrentFaculty,
-                                                        allDebtorsPercentOfCurrentFaculty / specializations.size(),
+                    (allBudgetDebtorsOfCurrentFaculty + allContractDebtorsOfCurrentFaculty) * 1.0 / (allBudgetStudentOfCurrentFaculty + allContractStudentOfCurrentFaculty) * 100,
                                                         allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty,
                                                         allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty,
                                                         allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty,
@@ -144,7 +137,6 @@ public class DebtorReportService {
         int allContractStudentOfFaculty = 0;
         int allBudgetDebtorsOfFaculty = 0;
         int allContractDebtorsOfFaculty = 0;
-        double allDebtorsPercentOfFaculty = 0;
         int allBudgetDebtorsWithLessThanThreeDebtsOfFaculty = 0;
         int allContractDebtorsWithLessThanThreeDebtsOfFaculty = 0;
         int allBudgetDebtorsWithThreeOrMoreDebtsOfFaculty = 0;
@@ -156,7 +148,6 @@ public class DebtorReportService {
             allContractStudentOfFaculty += entry.getValue().getContractStudents();
             allBudgetDebtorsOfFaculty += entry.getValue().getBudgetDebtors();
             allContractDebtorsOfFaculty += entry.getValue().getContractDebtors();
-            allDebtorsPercentOfFaculty += entry.getValue().getDebtorsPercent();
             allBudgetDebtorsWithLessThanThreeDebtsOfFaculty += entry.getValue().getLessThanThreeDebtsForBudgetDebtors();
             allContractDebtorsWithLessThanThreeDebtsOfFaculty += entry.getValue().getLessThanThreeDebtsForContractDebtors();
             allBudgetDebtorsWithThreeOrMoreDebtsOfFaculty += entry.getValue().getThreeOrMoreDebtsForBudgetDebtors();
@@ -166,7 +157,7 @@ public class DebtorReportService {
         SpecializationDebtorsYearBean facultyDebtorsForAllYearsBean
                 = new SpecializationDebtorsYearBean(allBudgetStudentOfFaculty, allContractStudentOfFaculty,
                                                     allBudgetDebtorsOfFaculty, allContractDebtorsOfFaculty,
-                                                    allDebtorsPercentOfFaculty / NUMBER_OF_YEARS,
+                (allBudgetDebtorsOfFaculty + allContractDebtorsOfFaculty) * 1.0 / (allBudgetStudentOfFaculty + allContractStudentOfFaculty) * 100,
                                                     allBudgetDebtorsWithLessThanThreeDebtsOfFaculty,
                                                     allContractDebtorsWithLessThanThreeDebtsOfFaculty,
                                                     allBudgetDebtorsWithThreeOrMoreDebtsOfFaculty,
@@ -179,5 +170,19 @@ public class DebtorReportService {
         debtorsReport.put(faculty.getName(), specializationDebtorsBean);
 
         return debtorsReport;
+    }
+
+    private int getCorrectYear(int year) {
+        if (year < 5) {
+            return year;
+        }
+        return year - 4;
+    }
+
+    private int getDegreeIdByYear(int year) {
+        if (year < 5) {
+            return DegreeEnum.BACHELOR.getId();
+        }
+        return DegreeEnum.MASTER.getId();
     }
 }
