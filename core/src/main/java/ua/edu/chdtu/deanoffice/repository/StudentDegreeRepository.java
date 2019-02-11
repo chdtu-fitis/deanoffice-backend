@@ -78,22 +78,13 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
-            "WHERE sd.payment = 'BUDGET' AND sd.active = true " +
+            "WHERE sd.payment = :payment AND sd.active = true " +
             "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
-    int findCountAllActiveBudgetStudentsBySpecializationIdAndStudyYear (
+    int findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment (
         @Param("specializationId") int specializationId,
         @Param("currentYear") int currentYear,
-        @Param("studyYear") int studyYear
-    );
-
-    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
-            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
-            "WHERE sd.payment = 'CONTRACT' AND sd.active = true " +
-            "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear", nativeQuery = true)
-    int findCountAllActiveContractStudentsBySpecializationIdAndStudyYear (
-            @Param("specializationId") int specializationId,
-            @Param("currentYear") int currentYear,
-            @Param("studyYear") int studyYear
+        @Param("studyYear") int studyYear,
+        @Param("payment")String payment
     );
 
         //TODO неперевірений

@@ -132,12 +132,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findActiveByIdsAndFacultyId(ids, facultyId);
     }
 
-    public int getCountAllActiveBudgetStudents(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveBudgetStudentsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
-    }
-
-    public int getCountAllActiveContractStudents(int specializationId, int studyYear) {
-        return studentDegreeRepository.findCountAllActiveContractStudentsBySpecializationIdAndStudyYear(specializationId, currentYearService.getYear(), studyYear);
+    public int getCountAllActiveStudents(int specializationId, int studyYear, Payment payment) {
+        return studentDegreeRepository.findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment(specializationId, currentYearService.getYear(), studyYear, payment.toString());
     }
 
     public int getCountAllActiveDebtors(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment) {

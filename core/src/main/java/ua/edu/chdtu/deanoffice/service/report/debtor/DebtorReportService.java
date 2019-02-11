@@ -40,8 +40,8 @@ public class DebtorReportService {
 
 
             for (int year = 1; year <= NUMBER_OF_YEARS; year++) {
-                int budgetStudents = studentDegreeService.getCountAllActiveBudgetStudents(specialization.getId(), year);
-                int contractStudents = studentDegreeService.getCountAllActiveContractStudents(specialization.getId(), year);
+                int budgetStudents = studentDegreeService.getCountAllActiveStudents(specialization.getId(), year, Payment.BUDGET);
+                int contractStudents = studentDegreeService.getCountAllActiveStudents(specialization.getId(), year, Payment.CONTRACT);
 
                 if (budgetStudents + contractStudents == 0) {
                     continue;
