@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class RenewedAndExpelledStudentDTO {
+public class ExpelledOrRenewedStudentDTO {
     @JsonView(StudentView.Expel.class)
     private String operation;
     @JsonView(StudentView.Expel.class)

@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class RenewedAndExpelledStudentBean {
+public class ExpelledOrRenewedStudentBean {
     private String operation;
     private Integer expelOrRenewId;
     private int expelOrRenewStudyYear;
@@ -19,7 +19,7 @@ public class RenewedAndExpelledStudentBean {
     private OrderReason orderReason;
     private Date expelOrRenewApplicationDate;
 
-    public RenewedAndExpelledStudentBean(StudentExpel studentExpel) {
+    public ExpelledOrRenewedStudentBean(StudentExpel studentExpel) {
         this.expelOrRenewId = studentExpel.getId();
         this.expelOrRenewStudyYear = studentExpel.getStudyYear();
         this.expelOrRenewPayment = studentExpel.getPayment();
@@ -33,7 +33,7 @@ public class RenewedAndExpelledStudentBean {
         }
     }
 
-    public RenewedAndExpelledStudentBean(RenewedExpelledStudent renewedExpelledStudent) {
+    public ExpelledOrRenewedStudentBean(RenewedExpelledStudent renewedExpelledStudent) {
         this.expelOrRenewId = renewedExpelledStudent.getId();
         this.expelOrRenewStudyYear = renewedExpelledStudent.getStudyYear();
         this.expelOrRenewDate = renewedExpelledStudent.getRenewDate();
@@ -45,6 +45,6 @@ public class RenewedAndExpelledStudentBean {
         }
     }
 
-    public RenewedAndExpelledStudentBean() {
+    public ExpelledOrRenewedStudentBean() {
     }
 }

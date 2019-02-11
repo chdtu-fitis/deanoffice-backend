@@ -17,10 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.OrderReasonService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentExpelService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -37,6 +34,7 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 @RestController
 @RequestMapping("/students/degrees/expels")
 public class StudentExpelController {
+    private final RenewedExpelledStudentService renewedExpelledStudentService;
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
     private final StudentExpelService studentExpelService;
@@ -45,12 +43,14 @@ public class StudentExpelController {
 
     @Autowired
     public StudentExpelController(
+            RenewedExpelledStudentService renewedExpelledStudentService,
             StudentDegreeService studentDegreeService,
             OrderReasonService orderReasonService,
             StudentExpelService studentExpelService,
             StudentGroupService studentGroupService,
             StudentUtil studentUtil
     ) {
+        this.renewedExpelledStudentService = renewedExpelledStudentService;
         this.studentDegreeService = studentDegreeService;
         this.orderReasonService = orderReasonService;
         this.studentExpelService = studentExpelService;
@@ -83,7 +83,7 @@ public class StudentExpelController {
         }
     }
 
-    @GetMapping("/all")
+    @GetMapping("/search")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchByShortNameAndDate(
             @RequestParam (value = "surname", defaultValue = "", required = false) String surname,
@@ -108,23 +108,23 @@ public class StudentExpelController {
         }
     }
 
-    @GetMapping("/expelled-renewed-information")
+    @GetMapping("/{student-degrees-id}/expels-and-renews")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchByStudentDegreeId(
             @RequestParam(required = false) Integer studentDegreeId,
             @CurrentUser ApplicationUser user){
         try{
            List <StudentExpel> expelledInformation = studentExpelService.getByStudentDegreeId(studentDegreeId);
-           List <RenewedAndExpelledStudentBean> renewedAndExpelledStudentBeans = new ArrayList();
+           List <ExpelledOrRenewedStudentBean> expelledOrRenewedStudentBeans = new ArrayList();
            for (StudentExpel studentExpel : expelledInformation) {
-               renewedAndExpelledStudentBeans.add(new RenewedAndExpelledStudentBean(studentExpel));
-               RenewedExpelledStudent renewedInformation = studentExpelService.getRenewedStudentByExpelledId(studentExpel.getId());
+               expelledOrRenewedStudentBeans.add(new ExpelledOrRenewedStudentBean(studentExpel));
+               RenewedExpelledStudent renewedInformation = renewedExpelledStudentService.getRenewedStudentByExpelledId(studentExpel.getId());
                if (renewedInformation != null) {
-                   renewedAndExpelledStudentBeans.add(new RenewedAndExpelledStudentBean(renewedInformation));
+                   expelledOrRenewedStudentBeans.add(new ExpelledOrRenewedStudentBean(renewedInformation));
                }
            }
-           List <RenewedAndExpelledStudentDTO> renewedAndExpelledStudentDTOS = Mapper.map(renewedAndExpelledStudentBeans, RenewedAndExpelledStudentDTO.class);
-           return ResponseEntity.ok(renewedAndExpelledStudentDTOS);
+           List <ExpelledOrRenewedStudentDTO> expelledOrRenewedStudentDTOS = Mapper.map(expelledOrRenewedStudentBeans, ExpelledOrRenewedStudentDTO.class);
+           return ResponseEntity.ok(expelledOrRenewedStudentDTOS);
         } catch (Exception exception) {
             return handleException(exception);
         }

@@ -100,8 +100,4 @@ public class StudentExpelService {
         return expelledStudentInformation;
     }
 
-    public RenewedExpelledStudent getRenewedStudentByExpelledId(Integer expelId){
-        RenewedExpelledStudent renewedExpelledStudentInformation = studentExpelRepository.findRenewedStudentByExpelId(expelId);
-        return renewedExpelledStudentInformation;
-    }
 }
