@@ -108,10 +108,10 @@ public class StudentExpelController {
         }
     }
 
-    @GetMapping("/{student-degrees-id}/expels-and-renews")
+    @GetMapping("/{id}/expels-and-renews")
     @JsonView(StudentView.Expel.class)
-    public ResponseEntity searchByStudentDegreeId(
-            @RequestParam(required = false) Integer studentDegreeId,
+    public ResponseEntity searchExpelsAndRenewsByStudentDegreeId(
+            @PathVariable("id") Integer studentDegreeId,
             @CurrentUser ApplicationUser user){
         try{
            List <StudentExpel> expelledInformation = studentExpelService.getByStudentDegreeId(studentDegreeId);
