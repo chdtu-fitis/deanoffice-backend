@@ -32,7 +32,7 @@ public class AcademicReferenceService {
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
     private static final int INDEX_OF_TABLE_WITH_GRADES = 11;
     private static final String DOCUMENT_DELIMITER = "/";
-    private static final String NO_GRADES_DESCRIPTION_UKR = "Заліків та іспитів не здавав.";
+    private static final String NO_GRADES_DESCRIPTION_UKR = "Заліків та іспитів не здавав(ла).";
     private static final String NO_GRADES_DESCRIPTION_EN = "No credits and exams.";
     private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
