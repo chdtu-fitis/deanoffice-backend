@@ -32,6 +32,9 @@ public class DebtorReportService {
         Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
         List<Specialization> specializations = specializationRepository.findAllByActive(true, faculty.getId());
         for (Specialization specialization : specializations) {
+            if (specialization.getName().equals("")) {
+                continue;
+            }
             Map<Integer, SpecializationDebtorsYearBean> specializationDebtorsYearBeanMap = new TreeMap<>();
 
             for (int year = 1; year <= NUMBER_OF_YEARS; year++) {
@@ -63,6 +66,28 @@ public class DebtorReportService {
                 continue;
             }
 
+            String specializationName = specialization.getName();
+
+            if (debtorsReport.get(specializationName) != null) {
+                debtorsReport.get(specializationName).getSpecializationDebtorsYearBeanMap().putAll(specializationDebtorsYearBeanMap);
+            } else {
+                SpecializationDebtorsBean specializationDebtorsBean = new SpecializationDebtorsBean();
+                specializationDebtorsBean.setSpecializationDebtorsYearBeanMap(specializationDebtorsYearBeanMap);
+                debtorsReport.put(specializationName, specializationDebtorsBean);
+            }
+        }
+
+        calculateAllDataOfSpecialization(debtorsReport);
+        calculateAllDataOfFacultyForEachYear(debtorsReport, faculty);
+
+        return debtorsReport;
+    }
+
+    private void calculateAllDataOfSpecialization(Map<String, SpecializationDebtorsBean> debtorsReport) {
+        for (Map.Entry<String, SpecializationDebtorsBean> specialization: debtorsReport.entrySet()) {
+
+            Map<Integer, SpecializationDebtorsYearBean> specializationDebtorsYearBeanMap = specialization.getValue().getSpecializationDebtorsYearBeanMap();
+
             int allBudgetStudent = 0;
             int allContractStudent = 0;
             int allBudgetDebtors = 0;
@@ -73,29 +98,28 @@ public class DebtorReportService {
             int allContractDebtorsWithThreeOrMoreDebts = 0;
 
             for (Map.Entry<Integer, SpecializationDebtorsYearBean> entry: specializationDebtorsYearBeanMap.entrySet()) {
-                allBudgetStudent += entry.getValue().getBudgetStudents();
-                allContractStudent += entry.getValue().getContractStudents();
-                allBudgetDebtors += entry.getValue().getBudgetDebtors();
-                allContractDebtors += entry.getValue().getContractDebtors();
-                allBudgetDebtorsWithLessThanThreeDebts += entry.getValue().getLessThanThreeDebtsForBudgetDebtors();
-                allContractDebtorsWithLessThanThreeDebts += entry.getValue().getLessThanThreeDebtsForContractDebtors();
-                allBudgetDebtorsWithThreeOrMoreDebts += entry.getValue().getThreeOrMoreDebtsForBudgetDebtors();
-                allContractDebtorsWithThreeOrMoreDebts += entry.getValue().getThreeOrMoreDebtsForContractDebtors();
+                SpecializationDebtorsYearBean specializationDebtorsYearBean = entry.getValue();
+                allBudgetStudent += specializationDebtorsYearBean.getBudgetStudents();
+                allContractStudent += specializationDebtorsYearBean.getContractStudents();
+                allBudgetDebtors += specializationDebtorsYearBean.getBudgetDebtors();
+                allContractDebtors += specializationDebtorsYearBean.getContractDebtors();
+                allBudgetDebtorsWithLessThanThreeDebts += specializationDebtorsYearBean.getLessThanThreeDebtsForBudgetDebtors();
+                allContractDebtorsWithLessThanThreeDebts += specializationDebtorsYearBean.getLessThanThreeDebtsForContractDebtors();
+                allBudgetDebtorsWithThreeOrMoreDebts += specializationDebtorsYearBean.getThreeOrMoreDebtsForBudgetDebtors();
+                allContractDebtorsWithThreeOrMoreDebts += specializationDebtorsYearBean.getThreeOrMoreDebtsForContractDebtors();
             }
 
             SpecializationDebtorsYearBean specializationDebtorsForAllYearsBean
                     = new SpecializationDebtorsYearBean(allBudgetStudent, allContractStudent, allBudgetDebtors,
-                                                        allContractDebtors, (allBudgetDebtors + allContractDebtors) * 1.0 / (allBudgetStudent + allContractStudent) * 100,
-                                                        allBudgetDebtorsWithLessThanThreeDebts, allContractDebtorsWithLessThanThreeDebts,
-                                                        allBudgetDebtorsWithThreeOrMoreDebts, allContractDebtorsWithThreeOrMoreDebts);
+                    allContractDebtors, (allBudgetDebtors + allContractDebtors) * 1.0 / (allBudgetStudent + allContractStudent) * 100,
+                    allBudgetDebtorsWithLessThanThreeDebts, allContractDebtorsWithLessThanThreeDebts,
+                    allBudgetDebtorsWithThreeOrMoreDebts, allContractDebtorsWithThreeOrMoreDebts);
 
-            specializationDebtorsYearBeanMap.put(NUMBER_OF_YEARS + 1, specializationDebtorsForAllYearsBean);
-
-            SpecializationDebtorsBean specializationDebtorsBean = new SpecializationDebtorsBean();
-            specializationDebtorsBean.setSpecializationDebtorsYearBeanMap(specializationDebtorsYearBeanMap);
-            debtorsReport.put(specialization.getName(), specializationDebtorsBean);
+            debtorsReport.get(specialization.getKey()).getSpecializationDebtorsYearBeanMap().put(NUMBER_OF_YEARS + 1, specializationDebtorsForAllYearsBean);
         }
+    }
 
+    private void calculateAllDataOfFacultyForEachYear(Map<String, SpecializationDebtorsBean> debtorsReport, Faculty faculty) {
         Map<Integer, SpecializationDebtorsYearBean> allSpecializationDebtorsYearBeanMap = new TreeMap<>();
 
         for (int year = 1; year <= NUMBER_OF_YEARS; year++) {
@@ -109,30 +133,34 @@ public class DebtorReportService {
             int allContractDebtorsWithThreeOrMoreDebtsOfCurrentFaculty = 0;
 
             for (Map.Entry<String, SpecializationDebtorsBean> entry: debtorsReport.entrySet()) {
-                if (entry.getValue().getSpecializationDebtorsYearBeanMap().get(year) == null) {
+                SpecializationDebtorsYearBean specializationDebtorsYearBean = entry.getValue().getSpecializationDebtorsYearBeanMap().get(year);
+                if (specializationDebtorsYearBean == null) {
                     continue;
                 }
-                allBudgetStudentOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getBudgetStudents();
-                allContractStudentOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getContractStudents();
-                allBudgetDebtorsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getBudgetDebtors();
-                allContractDebtorsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getContractDebtors();
-                allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getLessThanThreeDebtsForBudgetDebtors();
-                allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getLessThanThreeDebtsForContractDebtors();
-                allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getThreeOrMoreDebtsForBudgetDebtors();
-                allContractDebtorsWithThreeOrMoreDebtsOfCurrentFaculty += entry.getValue().getSpecializationDebtorsYearBeanMap().get(year).getThreeOrMoreDebtsForContractDebtors();
+                allBudgetStudentOfCurrentFaculty += specializationDebtorsYearBean.getBudgetStudents();
+                allContractStudentOfCurrentFaculty += specializationDebtorsYearBean.getContractStudents();
+                allBudgetDebtorsOfCurrentFaculty += specializationDebtorsYearBean.getBudgetDebtors();
+                allContractDebtorsOfCurrentFaculty += specializationDebtorsYearBean.getContractDebtors();
+                allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty += specializationDebtorsYearBean.getLessThanThreeDebtsForBudgetDebtors();
+                allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty += specializationDebtorsYearBean.getLessThanThreeDebtsForContractDebtors();
+                allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty += specializationDebtorsYearBean.getThreeOrMoreDebtsForBudgetDebtors();
+                allContractDebtorsWithThreeOrMoreDebtsOfCurrentFaculty += specializationDebtorsYearBean.getThreeOrMoreDebtsForContractDebtors();
             }
-
             SpecializationDebtorsYearBean specializationDebtorsForFacultyYearBean
                     = new SpecializationDebtorsYearBean(allBudgetStudentOfCurrentFaculty, allContractStudentOfCurrentFaculty,
-                                                        allBudgetDebtorsOfCurrentFaculty, allContractDebtorsOfCurrentFaculty,
+                    allBudgetDebtorsOfCurrentFaculty, allContractDebtorsOfCurrentFaculty,
                     (allBudgetDebtorsOfCurrentFaculty + allContractDebtorsOfCurrentFaculty) * 1.0 / (allBudgetStudentOfCurrentFaculty + allContractStudentOfCurrentFaculty) * 100,
-                                                        allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty,
-                                                        allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty,
-                                                        allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty,
-                                                        allContractDebtorsWithThreeOrMoreDebtsOfCurrentFaculty);
+                    allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFaculty,
+                    allContractDebtorsWithLessThanThreeDebtsOfCurrentFaculty,
+                    allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFaculty,
+                    allContractDebtorsWithThreeOrMoreDebtsOfCurrentFaculty);
             allSpecializationDebtorsYearBeanMap.put(year, specializationDebtorsForFacultyYearBean);
         }
+        calculateAllDataOfFaculty(allSpecializationDebtorsYearBeanMap, debtorsReport, faculty);
+    }
 
+    private void calculateAllDataOfFaculty(Map<Integer, SpecializationDebtorsYearBean> allSpecializationDebtorsYearBeanMap,
+                                           Map<String, SpecializationDebtorsBean> debtorsReport, Faculty faculty) {
         int allBudgetStudentOfFaculty = 0;
         int allContractStudentOfFaculty = 0;
         int allBudgetDebtorsOfFaculty = 0;
@@ -143,7 +171,6 @@ public class DebtorReportService {
         int allContractDebtorsWithThreeOrMoreDebtsOfFaculty = 0;
 
         for (Map.Entry<Integer, SpecializationDebtorsYearBean> entry: allSpecializationDebtorsYearBeanMap.entrySet()) {
-
             allBudgetStudentOfFaculty += entry.getValue().getBudgetStudents();
             allContractStudentOfFaculty += entry.getValue().getContractStudents();
             allBudgetDebtorsOfFaculty += entry.getValue().getBudgetDebtors();
@@ -156,20 +183,18 @@ public class DebtorReportService {
 
         SpecializationDebtorsYearBean facultyDebtorsForAllYearsBean
                 = new SpecializationDebtorsYearBean(allBudgetStudentOfFaculty, allContractStudentOfFaculty,
-                                                    allBudgetDebtorsOfFaculty, allContractDebtorsOfFaculty,
+                allBudgetDebtorsOfFaculty, allContractDebtorsOfFaculty,
                 (allBudgetDebtorsOfFaculty + allContractDebtorsOfFaculty) * 1.0 / (allBudgetStudentOfFaculty + allContractStudentOfFaculty) * 100,
-                                                    allBudgetDebtorsWithLessThanThreeDebtsOfFaculty,
-                                                    allContractDebtorsWithLessThanThreeDebtsOfFaculty,
-                                                    allBudgetDebtorsWithThreeOrMoreDebtsOfFaculty,
-                                                    allContractDebtorsWithThreeOrMoreDebtsOfFaculty);
+                allBudgetDebtorsWithLessThanThreeDebtsOfFaculty,
+                allContractDebtorsWithLessThanThreeDebtsOfFaculty,
+                allBudgetDebtorsWithThreeOrMoreDebtsOfFaculty,
+                allContractDebtorsWithThreeOrMoreDebtsOfFaculty);
 
         allSpecializationDebtorsYearBeanMap.put(NUMBER_OF_YEARS + 1, facultyDebtorsForAllYearsBean);
 
         SpecializationDebtorsBean specializationDebtorsBean = new SpecializationDebtorsBean();
         specializationDebtorsBean.setSpecializationDebtorsYearBeanMap(allSpecializationDebtorsYearBeanMap);
         debtorsReport.put(faculty.getName(), specializationDebtorsBean);
-
-        return debtorsReport;
     }
 
     private int getCorrectYear(int year) {
