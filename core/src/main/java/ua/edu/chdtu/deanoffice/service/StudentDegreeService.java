@@ -3,8 +3,10 @@ package ua.edu.chdtu.deanoffice.service;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.Date;
@@ -128,5 +130,21 @@ public class StudentDegreeService {
         if (ids == null || ids.size() == 0)
             return new ArrayList<>();
         return studentDegreeRepository.findActiveByIdsAndFacultyId(ids, facultyId);
+    }
+
+    public int getCountAllActiveStudents(int specializationId, int studyYear, Payment payment, int degreeId) {
+        return studentDegreeRepository.findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment(specializationId, currentYearService.getYear(), studyYear, payment.toString(), degreeId);
+    }
+
+    public int getCountAllActiveDebtors(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
+        return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId);
+    }
+
+    public int getCountAllActiveDebtorsWithLessThanThreeDebs(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
+        return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
+    }
+
+    public int getCountAllActiveDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear,  TuitionForm tuitionForm, Payment payment, int degreeId) {
+        return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
     }
 }
