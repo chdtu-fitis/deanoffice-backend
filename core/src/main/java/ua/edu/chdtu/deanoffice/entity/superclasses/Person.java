@@ -16,7 +16,9 @@ public class Person extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private Sex sex = Sex.MALE;
 
-    public String getFullNameUkr() { return getSurname() + " " + getName() + " " + getPatronimic(); }
+    public String getFullNameUkr() {
+        return getSurname() + " " + getName() + " " + getPatronimic();
+    }
 
     public String getInitialsUkr() {
         String result = getSurname() + " " + getName().substring(0, 1) + ". ";
