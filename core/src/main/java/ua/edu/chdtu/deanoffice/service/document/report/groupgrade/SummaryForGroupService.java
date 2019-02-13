@@ -11,23 +11,22 @@ import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.Constants;
+import ua.edu.chdtu.deanoffice.service.CourseService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
-
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
 public class SummaryForGroupService {
-
     private static final String TEMPLATE = TEMPLATES_PATH + "GradesTable.docx";
     private static final int MAXIMUM_STUDENTS_IN_TABLE = 15;
 
@@ -40,15 +39,19 @@ public class SummaryForGroupService {
     @Autowired
     private GradeService gradeService;
 
-    SummaryForGroupService() {
+    @Autowired
+    private CourseService courseService;
 
+
+    SummaryForGroupService() {
     }
 
     public File formDocument(Integer groupId)
             throws Docx4JException, IOException {
         List<StudentSummaryForGroup> studentsSummaries = new ArrayList<>();
         StudentGroup group = studentGroupService.getById(groupId);
-        fillStudentsSummaries(studentsSummaries, group);
+        List<Course> courses = courseService.getCoursesByGroupId(groupId);
+        fillStudentsSummaries(studentsSummaries, group, courses);
 
         List<List<StudentSummaryForGroup>> dividedStudentSummaries = divideStudentSummaries(studentsSummaries);
 
@@ -58,14 +61,62 @@ public class SummaryForGroupService {
         return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
     }
 
-    private void fillStudentsSummaries(List<StudentSummaryForGroup> studentsSummaries, StudentGroup group) {
+    private void fillStudentsSummaries(List<StudentSummaryForGroup> studentsSummaries,
+                                       StudentGroup group, List<Course> courses) {
         List<StudentDegree> studentDegrees = new ArrayList<>(group.getStudentDegrees());
         studentDegrees.sort((sd1, sd2) -> {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
             return ukrainianCollator.compare(sd1.getStudent().getSurname(), sd2.getStudent().getSurname());
         });
         studentDegrees.forEach((studentDegree) -> {
-                    List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            List<Grade> gradesToAdd1 = new ArrayList<>();
+            List<Grade> gradesToAdd2 = new ArrayList<>();
+            List<Grade> gradesToAdd3 = new ArrayList<>();
+            List<Grade> gradesToAdd4 = new ArrayList<>();
+            boolean courseIsRepeated;
+            for (Course course : courses) {
+                courseIsRepeated = false;
+                for (List<Grade> gradesSublist : grades) {
+                    for (Grade grade : gradesSublist)
+                        if (course.equals(grade.getCourse())) courseIsRepeated = true;
+                }
+                if(!courseIsRepeated) {
+                    Grade grade = new Grade();
+                    grade.setCourse(course);
+                    switch (grade.getCourse().getKnowledgeControl().getId()) {
+                        case Constants.COURSEWORK:
+                        case Constants.COURSE_PROJECT: {
+                            gradesToAdd2.add(grade);
+                            break;
+                        }
+                        case Constants.INTERNSHIP:
+                        case Constants.NON_GRADED_INTERNSHIP: {
+                            gradesToAdd3.add(grade);
+                            break;
+                        }
+                        case Constants.EXAM:
+                        case Constants.CREDIT:
+                        case Constants.DIFFERENTIATED_CREDIT : {
+                            gradesToAdd1.add(grade);
+                            break;
+                        }
+                        case Constants.STATE_EXAM:
+                        case Constants.ATTESTATION:
+                        default:
+                            gradesToAdd4.add(grade);
+                            break;
+                    }
+                }
+            }
+            gradesToAdd1.addAll(grades.remove(0));
+            grades.add(0, gradesToAdd1);
+            gradesToAdd2.addAll(grades.remove(1));
+            grades.add(1, gradesToAdd2);
+            gradesToAdd3.addAll(grades.remove(2));
+            grades.add(2, gradesToAdd3);
+            gradesToAdd4.addAll(grades.remove(3));
+            grades.add(3, gradesToAdd4);
                     studentsSummaries.add(new StudentSummaryForGroup(studentDegree, grades));
                 }
         );
