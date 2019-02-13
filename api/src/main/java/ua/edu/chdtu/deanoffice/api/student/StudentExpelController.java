@@ -141,7 +141,7 @@ public class StudentExpelController {
     }
 
     private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, int studentDegreeId) {
-        StudentExpel studentExpel = (StudentExpel) Mapper.strictMap(studentExpelDTO, StudentExpel.class);
+        StudentExpel studentExpel = Mapper.strictMap(studentExpelDTO, StudentExpel.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
@@ -184,8 +184,7 @@ public class StudentExpelController {
     }
 
     private RenewedExpelledStudent createRenewedExpelledStudent(RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
-        RenewedExpelledStudent renewedExpelledStudent =
-                (RenewedExpelledStudent) Mapper.strictMap(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
+        RenewedExpelledStudent renewedExpelledStudent = Mapper.strictMap(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
         StudentExpel studentExpel = studentExpelService.getById(renewedExpelledStudentDTO.getStudentExpelId());
         renewedExpelledStudent.setStudentExpel(studentExpel);
         StudentGroup studentGroup = studentGroupService.getById(renewedExpelledStudentDTO.getStudentGroupId());
