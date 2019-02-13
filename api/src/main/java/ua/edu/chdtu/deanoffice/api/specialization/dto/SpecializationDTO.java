@@ -25,6 +25,7 @@ public class SpecializationDTO {
     @JsonView(SpecializationView.WithDegreeAndSpeciality.class)
     private NamedDTO degree;
     private NamedDTO department;
+    private String code;
     private String qualification;
     private String qualificationEng;
     private BigDecimal paymentFulltime;
