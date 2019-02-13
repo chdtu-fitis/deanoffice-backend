@@ -7,6 +7,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -22,6 +23,7 @@ import java.util.*;
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
+
 @Service
 public class AcademicDifferenceService {
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicDifference.docx";
@@ -31,7 +33,15 @@ public class AcademicDifferenceService {
     private StudentDegreeService studentDegreeService;
     @Autowired
     private GradeService gradeService;
-
+    private Comparator comparator = new Comparator<UnpassedSubject>() {
+        @Override
+        public int compare(UnpassedSubject u1, UnpassedSubject u2) {
+            if (u2.getKnowledgeControl().equals("залік") && u1.getKnowledgeControl().equals("іспит")){
+                return -1;
+            }
+            return 0;
+        }
+    };
     public File formDocument(int studentDegreeId) throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE,studentDegree);
@@ -55,7 +65,8 @@ public class AcademicDifferenceService {
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
         for(List<Grade> GradesWithСertainKC:grades){
             for(Grade grade: GradesWithСertainKC){
-                if (grade.getGrade() == null || grade.getGrade() == 0){
+                System.out.println(grade.getCourse().getCourseName().getName()+"|"+grade.getCourse().getKnowledgeControl().getName());
+                if (grade.getPoints() == null){
                     int numberSemester = grade.getCourse().getSemester();
                     if (semesters.get(numberSemester) == null){
                         semesters.put(numberSemester,new ArrayList<UnpassedSubject>());
@@ -87,6 +98,7 @@ public class AcademicDifferenceService {
             replaceInRow(newRowWithSignature, title);
             table.getContent().add(row,newRowWithSignature);
             row++;
+            semesters.get(key).sort(comparator);
             for (UnpassedSubject unpassedSubject:semesters.get(key)){
                 Tr newRow = XmlUtils.deepCopy(rowWithCourse);
                 replaceInRow(newRow, unpassedSubject.getDictionary());

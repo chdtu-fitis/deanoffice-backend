@@ -1,7 +1,8 @@
 package ua.edu.chdtu.deanoffice.service.document.report.academicdifference;
 
 import java.util.HashMap;
-
+import lombok.Getter;
+@Getter
 public class UnpassedSubject {
     public String name;
     public int hours;
