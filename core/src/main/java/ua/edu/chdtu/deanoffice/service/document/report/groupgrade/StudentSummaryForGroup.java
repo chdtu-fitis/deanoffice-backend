@@ -25,27 +25,6 @@ public class StudentSummaryForGroup extends StudentSummary {
                     grade.setPoints(0);
     }
 
-    private boolean isAllRightForDiplomaSupplement(){
-        boolean answer = true;
-        int hoursSum = 0;
-        BigDecimal creditsSum = new BigDecimal(0);
-        for (List<Grade> gradesSublist : getGrades()){
-            for (Grade g : gradesSublist) {
-                if (g.getCourse().getHours() != null && g.getCourse().getCredits() != null) {
-                    hoursSum += g.getCourse().getHours();
-                    creditsSum = creditsSum.add(g.getCourse().getCredits());
-                    if (g.getPoints() == 0) {
-                        answer = false;
-                        break;
-                    }
-                }
-            }
-            if (!answer) break;
-        }
-        if (hoursSum != getTotalHours() || creditsSum != getTotalCredits()) answer = false;
-        return answer;
-    }
-
     @Override
     protected void calculateTotalHours(){
         int hoursSum = 0;
@@ -53,8 +32,7 @@ public class StudentSummaryForGroup extends StudentSummary {
             for (Grade g : gradesSublist)
                 if (g.getCourse().getHours() != null && g.getPoints() != 0) hoursSum += g.getCourse().getHours();
         setTotalHours(hoursSum);
-        }
-
+    }
 
     @Override
     protected void calculateTotalCredits(){
@@ -148,6 +126,5 @@ public class StudentSummaryForGroup extends StudentSummary {
         newCourse.setCombined(true);
         result.setCourse(newCourse);
         return result;
-
     }
 }

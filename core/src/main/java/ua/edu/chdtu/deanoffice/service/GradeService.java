@@ -120,6 +120,12 @@ public class GradeService {
     public List<Grade> getGradesByCourseAndGroup(int courseId, int groupId) {
         return gradeRepository.findByCourseAndGroup(courseId, groupId);
     }
+    public List<Grade> getGrades2(int groupId,
+                                                 List<Integer> courseIds,
+                                                 List<Integer> knowledgeControlTypes) {
+        return gradeRepository.findByCourse(groupId, courseIds,
+                knowledgeControlTypes);
+    }
 
     public void saveGradesByCourse(Course course, List<Grade> grades) {
         for (Grade grade : grades) {
