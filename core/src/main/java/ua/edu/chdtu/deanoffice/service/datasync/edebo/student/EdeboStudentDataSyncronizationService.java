@@ -1,9 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
-import ua.edu.chdtu.deanoffice.entity.Speciality;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.*;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -18,6 +15,8 @@ public interface EdeboStudentDataSyncronizationService {
     Speciality getSpecialityFromData(ImportedData data);
 
     Specialization getSpecializationFromData(ImportedData data);
+
+    StudentPreviousUniversity getStudentPreviousUniversityFromData(ImportedData data);
 
     StudentDegree getStudentDegreeFromData(ImportedData data);
 

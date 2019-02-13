@@ -23,7 +23,6 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -168,7 +167,6 @@ public class StudentDegreeController {
 //    @JsonView(StudentView.Degrees.class)
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
-            @PathVariable("id") Integer studentId,
             @RequestBody List<StudentDegreeDTO> studentDegreesDTOs,
             @CurrentUser ApplicationUser user
     ) {
@@ -179,8 +177,9 @@ public class StudentDegreeController {
 
             for (StudentDegree sd : studentDegrees) {
                 StudentDegreeDTO currSdDto = studentDegreesDTOs.stream().filter(sdDto -> sdDto.getId() == sd.getId()).findFirst().get();
-                Mapper.mapStudentDegreeDTOToStudentDegreeSimpleFields(currSdDto, sd);
-                if (sd.getStudentGroup().getId() != currSdDto.getStudentGroupId()) {
+                Mapper.mapStudentDegreeDtoToStudentDegreeSimpleFields(currSdDto, sd);
+                if ((sd.getStudentGroup() == null && currSdDto.getStudentGroupId() != 0) ||
+                        (sd.getStudentGroup() != null && sd.getStudentGroup().getId() != currSdDto.getStudentGroupId())) {
                     sd.setStudentGroup(getStudentGroup(currSdDto.getStudentGroupId()));
                     sd.setSpecialization(sd.getStudentGroup().getSpecialization());
                 }

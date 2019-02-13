@@ -1,5 +1,9 @@
 apply plugin: 'war'
 
+bootRepackage {
+    mainClass = 'ua.edu.chdtu.deanoffice.webstarter.Application'
+}
+
 dependencies {
     compile(project(":core"))
 
