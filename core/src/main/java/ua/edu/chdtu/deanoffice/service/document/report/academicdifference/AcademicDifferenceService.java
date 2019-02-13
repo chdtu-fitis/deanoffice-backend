@@ -65,7 +65,6 @@ public class AcademicDifferenceService {
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
         for(List<Grade> GradesWithСertainKC:grades){
             for(Grade grade: GradesWithСertainKC){
-                System.out.println(grade.getCourse().getCourseName().getName()+"|"+grade.getCourse().getKnowledgeControl().getName());
                 if (grade.getPoints() == null){
                     int numberSemester = grade.getCourse().getSemester();
                     if (semesters.get(numberSemester) == null){
@@ -85,8 +84,8 @@ public class AcademicDifferenceService {
 
     private void prepareRows(Tbl table, Map<Integer,List<UnpassedSubject>> semesters) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        Tr rowWithWordSemestr = tableRows.get(1);
-        Tr rowWithCourse =  tableRows.get(2);
+        Tr rowWithWordSemester = tableRows.get(1);
+        Tr rowWithUnpassedSubject =  tableRows.get(2);
         table.getContent().remove(2);
         table.getContent().remove(1);
         int row = 1;
@@ -94,13 +93,13 @@ public class AcademicDifferenceService {
 
             HashMap<String, String> title = new HashMap();
             title.put("num",String.valueOf(key));
-            Tr newRowWithSignature = XmlUtils.deepCopy(rowWithWordSemestr);
-            replaceInRow(newRowWithSignature, title);
-            table.getContent().add(row,newRowWithSignature);
+            Tr newRowWithWordSemester = XmlUtils.deepCopy(rowWithWordSemester);
+            replaceInRow(newRowWithWordSemester, title);
+            table.getContent().add(row,newRowWithWordSemester);
             row++;
             semesters.get(key).sort(comparator);
             for (UnpassedSubject unpassedSubject:semesters.get(key)){
-                Tr newRow = XmlUtils.deepCopy(rowWithCourse);
+                Tr newRow = XmlUtils.deepCopy(rowWithUnpassedSubject);
                 replaceInRow(newRow, unpassedSubject.getDictionary());
                 table.getContent().add(row,newRow);
                 row++;
