@@ -1,0 +1,1 @@
+ALTER TABLE student_expel ALTER COLUMN application_date DROP NOT NULL;
