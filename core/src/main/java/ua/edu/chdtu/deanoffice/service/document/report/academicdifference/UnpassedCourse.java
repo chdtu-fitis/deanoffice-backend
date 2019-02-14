@@ -3,12 +3,12 @@ package ua.edu.chdtu.deanoffice.service.document.report.academicdifference;
 import java.util.HashMap;
 import lombok.Getter;
 @Getter
-public class UnpassedSubject {
+public class UnpassedCourse {
     public String name;
     public int hours;
     public String knowledgeControl;
 
-    public UnpassedSubject(String name, int hours, String knowledgeControl) {
+    public UnpassedCourse(String name, int hours, String knowledgeControl) {
         this.name = name;
         this.hours = hours;
         this.knowledgeControl = knowledgeControl;

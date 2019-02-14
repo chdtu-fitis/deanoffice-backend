@@ -24,22 +24,21 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/documents/academic-difference")
 public class AcademicDifferenceController extends DocumentResponseController {
-
     private AcademicDifferenceService academicDifferenceService;
-
     private FacultyService facultyService;
-
     public AcademicDifferenceController(AcademicDifferenceService academicDifferenceService, FacultyService facultyService) {
         this.academicDifferenceService = academicDifferenceService;
         this.facultyService = facultyService;
     }
 
-    @GetMapping("/{studentExpelId}")
-    public ResponseEntity<Resource> generateDocumentForStudent(@PathVariable Integer studentExpelId,
-                                                               @CurrentUser ApplicationUser user) throws IOException, Docx4JException {
+    @GetMapping("/{studentDegreeId}")
+    public ResponseEntity<Resource> generateDocumentForStudent(
+        @PathVariable Integer studentDegreeId,
+        @CurrentUser ApplicationUser user
+        ) throws IOException, Docx4JException {
         try {
-            facultyService.checkStudentExpel(studentExpelId, user.getFaculty().getId());
-            File academicDifferenceReport = academicDifferenceService.formDocument(studentExpelId);
+            facultyService.checkStudentExpel(studentDegreeId, user.getFaculty().getId());
+            File academicDifferenceReport = academicDifferenceService.formDocument(studentDegreeId);
             return buildDocumentResponseEntity(academicDifferenceReport, academicDifferenceReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
