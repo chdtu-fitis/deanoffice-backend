@@ -30,7 +30,7 @@ public class SpecialityController {
     @GetMapping
     public ResponseEntity getAllSpecialities(@CurrentUser ApplicationUser user) {
         try {
-            List<Speciality> specialities = specialityService.getAll(user.getFaculty().getId());
+            List<Speciality> specialities = specialityService.getAllInFaculty(user.getFaculty().getId());
             return ResponseEntity.ok(mapToSpecialityDTO(specialities));
         } catch (Exception exception) {
             return handleException(exception);
@@ -40,7 +40,17 @@ public class SpecialityController {
     @GetMapping("/active")
     public ResponseEntity getActiveSpecialities(@CurrentUser ApplicationUser user) {
         try {
-            List<Speciality> specialities = specialityService.getAllActive(user.getFaculty().getId());
+            List<Speciality> specialities = specialityService.getAllActiveInFaculty(user.getFaculty().getId());
+            return ResponseEntity.ok(mapToSpecialityDTO(specialities));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity getAllActiveSpecialities() {
+        try {
+            List<Speciality> specialities = specialityService.getAllActive(true);
             return ResponseEntity.ok(mapToSpecialityDTO(specialities));
         } catch (Exception exception) {
             return handleException(exception);
