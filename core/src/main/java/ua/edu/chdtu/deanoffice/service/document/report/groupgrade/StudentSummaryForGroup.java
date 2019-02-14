@@ -4,19 +4,43 @@ import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
-
 import java.math.BigDecimal;
 import java.util.List;
 
 public class StudentSummaryForGroup extends StudentSummary {
-
-
     public StudentSummaryForGroup(StudentDegree studentDegree, List<List<Grade>> grades) {
         setStudentDegree(studentDegree);
         setGrades(grades);
+        removeUnwantedGrades();
         calculateTotalHours();
         calculateTotalCredits();
         combineMultipleSemesterCourseGrades();
+    }
+
+    @Override
+    protected void removeUnwantedGrades() {
+        for (List<Grade> gradesSublist : getGrades())
+            for (Grade grade : gradesSublist)
+                if (grade.getPoints() == null)
+                    grade.setPoints(0);
+    }
+
+    @Override
+    protected void calculateTotalHours(){
+        int hoursSum = 0;
+        for (List<Grade> gradesSublist : getGrades())
+            for (Grade g : gradesSublist)
+                if (g.getCourse().getHours() != null && g.getPoints() != 0) hoursSum += g.getCourse().getHours();
+        setTotalHours(hoursSum);
+    }
+
+    @Override
+    protected void calculateTotalCredits(){
+        BigDecimal creditsSum = new BigDecimal(0);
+        for (List<Grade> gradesSublist : getGrades())
+            for (Grade g : gradesSublist)
+                if (g.getCourse().getCredits() != null && g.getPoints() != 0) creditsSum = creditsSum.add(g.getCourse().getCredits());
+        setTotalCredits(creditsSum);
     }
 
     public Double getAverageGrade() {
@@ -102,6 +126,5 @@ public class StudentSummaryForGroup extends StudentSummary {
         newCourse.setCombined(true);
         result.setCourse(newCourse);
         return result;
-
     }
 }

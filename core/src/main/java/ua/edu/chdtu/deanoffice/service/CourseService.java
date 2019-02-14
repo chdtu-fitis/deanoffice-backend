@@ -36,4 +36,6 @@ public class CourseService {
     public Course getByCourse(Course course){
         return courseRepository.findOne(course.getId());
     }
+
+    public List<Course> getCoursesByGroupId(Integer groupId){ return courseRepository.getByGroupId(groupId);}
 }
