@@ -16,12 +16,16 @@ public class SpecialityService {
         this.specialityRepository = specialityRepository;
     }
 
-    public List<Speciality> getAllActive(int facultyId) {
-        return specialityRepository.findAllActive(facultyId);
+    public List<Speciality> getAllActiveInFaculty(int facultyId) {
+        return specialityRepository.findAllActiveInFaculty(facultyId);
     }
 
-    public List<Speciality> getAll(int facultyId) {
-        return specialityRepository.findAll(facultyId);
+    public List<Speciality> getAllInFaculty(int facultyId) {
+        return specialityRepository.findAllInFaculty(facultyId);
+    }
+
+    public List<Speciality> getAllActive(boolean active) {
+        return specialityRepository.findAllByActiveOrderByName(active);
     }
 
     public Speciality getById(Integer specialityId) {
