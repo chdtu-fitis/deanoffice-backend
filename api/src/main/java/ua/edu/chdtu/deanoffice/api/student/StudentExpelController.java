@@ -100,7 +100,7 @@ public class StudentExpelController {
             } else{
                 parsedEndDate = new Date();
             }
-            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(parsedStartDate, parsedEndDate, surname, name);
+            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(parsedStartDate, parsedEndDate, surname, name, user.getFaculty().getId());
             List<StudentExpelDTO> studentExpelDTOs = Mapper.map(foundExcludedStudents, StudentExpelDTO.class);
             return ResponseEntity.ok(studentExpelDTOs);
         } catch (Exception exception) {

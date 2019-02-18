@@ -35,7 +35,7 @@ public class StudentDegreeSpecification {
         };
     }
 
-    public static Specification<StudentExpel> getExpelStudent(Date startDate,Date endDate,String surname, String name){
+    public static Specification<StudentExpel> getExpelStudent(Date startDate,Date endDate,String surname, String name, int facultyId){
         return new Specification<StudentExpel>(){
             @Override
             public Predicate toPredicate(Root<StudentExpel> root, CriteriaQuery<?> query, CriteriaBuilder cb){
@@ -50,6 +50,8 @@ public class StudentDegreeSpecification {
                 if (name != null && !name.isEmpty()){
                     predicates.add(cb.equal(student.get("name"), name));
                 }
+                Join<StudentDegree, Specialization> specialization = studentDegree.join("specialization");
+                predicates.add(cb.equal(specialization.get("faculty"), facultyId));
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
         };
