@@ -190,6 +190,8 @@ public class CourseController {
     @PostMapping("/groups/{groupId}/courses")
     public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {
         try {
+            courseForGroupService.validateDeleteCourseForGroups(coursesForGroupHolder.getDeleteCoursesIds());
+
             List<CourseForGroupDTO> newCourses = coursesForGroupHolder.getNewCourses();
             List<CourseForGroupDTO> updatedCourses = coursesForGroupHolder.getUpdatedCourses();
             List<Integer> deleteCoursesIds = coursesForGroupHolder.getDeleteCoursesIds();
