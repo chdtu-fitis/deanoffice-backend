@@ -56,7 +56,7 @@ public class CourseForGroupService {
     public void validateDeleteCourseForGroups(List<Integer> courseForGroupsIds) throws Exception {
         if (areGradesForCourseForGroups(courseForGroupsIds)) {
             throw new OperationCannotBePerformedException(
-                    "Не можливо видалити предмет, якщо хоч в одного студента є оцінка за цей предмет."
+                    "Неможливо видалити предмет, якщо хоч в одного студента є оцінка з предмету, що видаляється."
             );
         }
     }
