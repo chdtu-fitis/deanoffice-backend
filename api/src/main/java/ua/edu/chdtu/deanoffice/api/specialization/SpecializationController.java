@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.specialization;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,21 +79,9 @@ public class SpecializationController {
         try {
             Specialization specialization = create(specializationDTO, user.getFaculty());
             specialization.setActive(true);
-            specialization = specializationService.save(specialization);
-
-            URI location = getNewResourceLocation(specialization.getId());
-
-            class Id {
-                private int id;
-                private Id(int id) {
-                    this.id = id;
-                }
-
-                public int getId() {
-                    return id;
-                }
-            }
-            return ResponseEntity.created(location).body(new Id(specialization.getId()));
+            Specialization specializationAfterSave = specializationService.save(specialization);
+            SpecializationDTO specializationSavedDTO = Mapper.strictMap(specializationAfterSave, SpecializationDTO.class);
+            return new ResponseEntity(specializationSavedDTO, HttpStatus.CREATED);
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -134,8 +123,9 @@ public class SpecializationController {
                 );
             }
             Specialization specialization = create(specializationDTO, user.getFaculty());
-            specializationService.save(specialization);
-            return ResponseEntity.ok().build();
+            Specialization specializationAfterSave = specializationService.save(specialization);
+            SpecializationDTO specializationSavedDTO = Mapper.strictMap(specializationAfterSave, SpecializationDTO.class);
+            return new ResponseEntity(specializationSavedDTO, HttpStatus.CREATED);
         } catch (Exception exception) {
             return handleException(exception);
         }

@@ -136,9 +136,7 @@ public class GroupController {
             StudentGroup studentGroupAfterSaving = studentGroupService.save(studentGroup);
             validateGroupAfterSave(studentGroupAfterSaving);
             StudentGroupDTO studentGroupSavedDTO = Mapper.strictMap(studentGroupAfterSaving, StudentGroupDTO.class);
-           // Mapper.map(studentGroup, studentGroupSavedDTO);
             return new ResponseEntity(studentGroupSavedDTO, HttpStatus.CREATED);
-           // return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -166,7 +164,8 @@ public class GroupController {
             studentGroup.setStudentDegrees(studentDegrees);
             StudentGroup studentGroupAfterSave = studentGroupService.save(studentGroup);
             validateGroupAfterSave(studentGroupAfterSave);
-            return ResponseEntity.ok().build();
+            StudentGroupDTO studentGroupSavedDto = Mapper.strictMap(studentGroupAfterSave, StudentGroupDTO.class);
+            return new ResponseEntity(studentGroupSavedDto, HttpStatus.CREATED);
         } catch (Exception exception) {
             return handleException(exception);
         }
