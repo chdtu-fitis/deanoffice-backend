@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.group;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -134,7 +135,8 @@ public class GroupController {
             studentGroup.setActive(true);
             StudentGroup studentGroupAfterSaving = studentGroupService.save(studentGroup);
             validateGroupAfterSave(studentGroupAfterSaving);
-            return ResponseEntity.ok().build();
+            StudentGroupDTO studentGroupSavedDTO = Mapper.strictMap(studentGroupAfterSaving, StudentGroupDTO.class);
+            return new ResponseEntity(studentGroupSavedDTO, HttpStatus.CREATED);
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -162,7 +164,8 @@ public class GroupController {
             studentGroup.setStudentDegrees(studentDegrees);
             StudentGroup studentGroupAfterSave = studentGroupService.save(studentGroup);
             validateGroupAfterSave(studentGroupAfterSave);
-            return ResponseEntity.ok().build();
+            StudentGroupDTO studentGroupSavedDto = Mapper.strictMap(studentGroupAfterSave, StudentGroupDTO.class);
+            return new ResponseEntity(studentGroupSavedDto, HttpStatus.CREATED);
         } catch (Exception exception) {
             return handleException(exception);
         }
