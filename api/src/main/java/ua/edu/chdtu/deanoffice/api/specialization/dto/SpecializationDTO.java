@@ -41,4 +41,6 @@ public class SpecializationDTO {
     private Integer specialityId;
     private Integer degreeId;
     private Integer departmentId;
+    @JsonView(SpecializationView.Faculty.class)
+    private Integer facultyId;
 }
