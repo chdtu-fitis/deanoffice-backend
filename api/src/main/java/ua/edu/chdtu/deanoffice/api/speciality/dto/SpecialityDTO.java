@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SpecialityDTO {
-    @JsonView(SpecialityView.Basic.class)
+    @JsonView({SpecialityView.Basic.class, SpecialityView.LessCode.class})
     private int id;
-    @JsonView(SpecialityView.Basic.class)
+    @JsonView({SpecialityView.Basic.class, SpecialityView.LessCode.class})
     private String name;
     private String nameEng;
     private boolean active;

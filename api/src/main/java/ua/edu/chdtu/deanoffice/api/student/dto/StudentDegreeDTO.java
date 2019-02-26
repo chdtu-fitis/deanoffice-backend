@@ -47,7 +47,7 @@ public class StudentDegreeDTO {
     private Date previousDiplomaDate;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private Payment payment;
-    @JsonView(StudentView.WithSpecilization.class)
+    @JsonView({StudentView.WithSpecilization.class, StudentView.SimpleAndSpecilization.class})
     private SpecializationDTO specialization;
     @JsonView(StudentView.WithActive.class)
     private boolean active;
