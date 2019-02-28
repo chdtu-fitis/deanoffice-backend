@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
@@ -52,6 +53,14 @@ public class StudentExpelService {
         studentDegreeRepository.save(studentDegrees);
 
         return studentExpelRepository.save(studentExpels);
+    }
+
+    public void expelStudents(List<Integer> ids, Date expelDate, Date orderDate, int orderNumber) {
+        List<StudentExpel> studentExpels = new ArrayList<>();
+        List<StudentDegree> studentDegrees = studentDegreeRepository.
+        for (int i = 0; i < ids.size(); i++) {
+            studentExpels.add(new StudentExpel(studentDegrees.get()))
+        }
     }
 
     public List<StudentExpel> getAllExpelledStudents(Integer facultyId) {

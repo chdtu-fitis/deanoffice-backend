@@ -198,6 +198,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     void assignStudentsToGroup(@Param("studentDegrees") List<StudentDegree> studentDegrees, @Param("group") StudentGroup group);
 
     @Modifying
+    @Query(value = "UPDATE student_degree sd " +
+           "SET sd.active = false WHERE sd.id IN (:ids)", nativeQuery = true)
+    void setStudentDegreesInactive(@Param("ids") List<Integer> ids);
+
+    @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.recordBookNumber = :recordBookNumber WHERE sd.id = :studentDegreeId")
     void assignRecordBookNumbersToStudents(@Param("studentDegreeId") Integer studentDegreeId, @Param("recordBookNumber") String recordBookNumber);
@@ -286,4 +291,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     List<Object[]> findNoDebtStudentDegreesRaw(
             @Param("facultyId") int facultyId,
             @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds);
+
+    @Query(value = "SELECT sd.id FROM student_degree WHERE sd.id = IN (:ids) AND sd.active = false", nativeQuery = true)
+    int countInactiveStudentDegreesByIds(@Param("ids") List<Integer> ids);
 }
