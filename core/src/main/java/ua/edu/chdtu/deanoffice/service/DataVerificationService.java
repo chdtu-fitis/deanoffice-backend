@@ -14,7 +14,7 @@ public class DataVerificationService {
         this.studentDegreeRepository = studentDegreeRepository;
     }
 
-    public boolean isStudentDegreesActiveByIds(List<Integer> ids) {
+    public boolean isStudentDegreesActiveByIds(List<Integer> ids) throws Exception {
         int countInactiveStudentDegrees = studentDegreeRepository.countInactiveStudentDegreesByIds(ids);
         if (countInactiveStudentDegrees != 0) {
             return false;
