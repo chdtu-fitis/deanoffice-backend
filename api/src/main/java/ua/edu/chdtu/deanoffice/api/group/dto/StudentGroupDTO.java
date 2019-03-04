@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -24,7 +25,7 @@ public class StudentGroupDTO {
     @JsonView(StudentGroupView.Basic.class)
     private int creationYear;
     @JsonView(StudentGroupView.WithStudents.class)
-    private List<StudentDegreeFullNameDTO> studentDegrees;
+    private List<StudentDegreeFullNameDTO> studentDegrees = new ArrayList<>();
     @JsonView(StudentGroupView.AllGroupData.class)
     private SpecializationDTO specialization;
     @JsonView(StudentGroupView.Basic.class)
