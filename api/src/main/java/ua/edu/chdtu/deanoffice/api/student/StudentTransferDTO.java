@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentTransferDTO {
-    private Integer transferId;
+    private Integer id;
     private Date orderDate;
     private String orderNumber;
     private Integer oldStudyYear;

@@ -40,7 +40,7 @@ ALTER TABLE student_transfer
 ALTER TABLE student_transfer
     ADD CONSTRAINT fk_student_transfer_new_specialization_id FOREIGN KEY (new_specialization_id) REFERENCES specialization(id);
 
-ALTER TABLE student_transfer
+ALTER TABLE ONLY student_transfer
     ADD CONSTRAINT fk_student_transfer_student_degree_id FOREIGN KEY (student_degree_id) REFERENCES student_degree(id);
 
 ALTER TABLE student_transfer
@@ -48,3 +48,6 @@ ALTER TABLE student_transfer
 
 ALTER TABLE student_transfer
     ADD CONSTRAINT fk_student_transfer_new_group_id FOREIGN KEY (new_student_group_id) REFERENCES student_group(id);
+
+
+ALTER TABLE ONLY student_transfer ALTER COLUMN id SET DEFAULT nextval('student_transfer_id_seq'::regclass);
