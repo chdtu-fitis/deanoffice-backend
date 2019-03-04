@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -22,4 +23,17 @@ public class Course extends BaseEntity {
     private Integer hours;
     private Integer hoursPerCredit;
     private BigDecimal credits;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return getId() == course.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCourseName(), getSemester(), getKnowledgeControl(), getHours(), getHoursPerCredit());
+    }
 }

@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice;
 
 public class Constants {
-    public static final double HOURS_PER_CREDIT = 30.0;
     public static final int EXAM = 1;
     public static final int CREDIT = 2;
     public static final int COURSEWORK = 3;
@@ -14,7 +13,6 @@ public class Constants {
     //TODO cr: це схоже на якийсь список для якоїсь однієї цілі. Можливо тут краще використастити енум замість констант?
 
     public static final Integer[] SUCCESS_REASON_IDS = {7, 8, 16};
-    public static final Integer FACULTY_ID = 1;
-    public static final int EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW = 12;
+    public static final int EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW = 5;
 
 }

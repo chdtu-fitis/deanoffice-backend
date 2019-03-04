@@ -3,11 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -21,14 +17,14 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.OrderReasonService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentExpelService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +34,7 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 @RestController
 @RequestMapping("/students/degrees/expels")
 public class StudentExpelController {
+    private final RenewedExpelledStudentService renewedExpelledStudentService;
     private final StudentDegreeService studentDegreeService;
     private final OrderReasonService orderReasonService;
     private final StudentExpelService studentExpelService;
@@ -46,12 +43,14 @@ public class StudentExpelController {
 
     @Autowired
     public StudentExpelController(
+            RenewedExpelledStudentService renewedExpelledStudentService,
             StudentDegreeService studentDegreeService,
             OrderReasonService orderReasonService,
             StudentExpelService studentExpelService,
             StudentGroupService studentGroupService,
             StudentUtil studentUtil
     ) {
+        this.renewedExpelledStudentService = renewedExpelledStudentService;
         this.studentDegreeService = studentDegreeService;
         this.orderReasonService = orderReasonService;
         this.studentExpelService = studentExpelService;
@@ -84,6 +83,53 @@ public class StudentExpelController {
         }
     }
 
+    @GetMapping("/search")
+    @JsonView(StudentView.Expel.class)
+    public ResponseEntity searchByShortNameAndDate(
+            @RequestParam (value = "surname", defaultValue = "", required = false) String surname,
+            @RequestParam (value = "name", defaultValue = "", required = false) String name,
+            @RequestParam(required = false) String startDate,
+            @RequestParam (required = false) String endDate,
+            @CurrentUser ApplicationUser user){
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date parsedStartDate = format.parse(startDate);
+            Date parsedEndDate;
+            if(endDate != null && !endDate.isEmpty()){
+                parsedEndDate = format.parse(endDate);
+            } else{
+                parsedEndDate = new Date();
+            }
+            List<StudentExpel> foundExcludedStudents = studentExpelService.getSpecificationName(parsedStartDate, parsedEndDate, surname, name, user.getFaculty().getId());
+            List<StudentExpelDTO> studentExpelDTOs = Mapper.map(foundExcludedStudents, StudentExpelDTO.class);
+            return ResponseEntity.ok(studentExpelDTOs);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("/{id}/expels-and-renews")
+    @JsonView(StudentView.Expel.class)
+    public ResponseEntity searchExpelsAndRenewsByStudentDegreeId(
+            @PathVariable("id") Integer studentDegreeId,
+            @CurrentUser ApplicationUser user){
+        try{
+           List <StudentExpel> expelledInformation = studentExpelService.getByStudentDegreeId(studentDegreeId);
+           List <ExpelledOrRenewedStudentBean> expelledOrRenewedStudentBeans = new ArrayList();
+           for (StudentExpel studentExpel : expelledInformation) {
+               expelledOrRenewedStudentBeans.add(new ExpelledOrRenewedStudentBean(studentExpel));
+               RenewedExpelledStudent renewedInformation = renewedExpelledStudentService.getRenewedStudentByExpelledId(studentExpel.getId());
+               if (renewedInformation != null) {
+                   expelledOrRenewedStudentBeans.add(new ExpelledOrRenewedStudentBean(renewedInformation));
+               }
+           }
+           List <ExpelledOrRenewedStudentDTO> expelledOrRenewedStudentDTOS = Mapper.map(expelledOrRenewedStudentBeans, ExpelledOrRenewedStudentDTO.class);
+           return ResponseEntity.ok(expelledOrRenewedStudentDTOS);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
     private List<StudentExpel> createStudentExpels(StudentExpelDTO studentExpelDTO) {
         OrderReason orderReason = orderReasonService.getById(studentExpelDTO.getOrderReasonId());
         studentExpelDTO.setEntityOrderReason(orderReason);
@@ -95,7 +141,7 @@ public class StudentExpelController {
     }
 
     private StudentExpel createStudentExpel(StudentExpelDTO studentExpelDTO, int studentDegreeId) {
-        StudentExpel studentExpel = (StudentExpel) Mapper.strictMap(studentExpelDTO, StudentExpel.class);
+        StudentExpel studentExpel = Mapper.strictMap(studentExpelDTO, StudentExpel.class);
 
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         studentExpel.setStudentDegree(studentDegree);
@@ -138,8 +184,7 @@ public class StudentExpelController {
     }
 
     private RenewedExpelledStudent createRenewedExpelledStudent(RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
-        RenewedExpelledStudent renewedExpelledStudent =
-                (RenewedExpelledStudent) Mapper.strictMap(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
+        RenewedExpelledStudent renewedExpelledStudent = Mapper.strictMap(renewedExpelledStudentDTO, RenewedExpelledStudent.class);
         StudentExpel studentExpel = studentExpelService.getById(renewedExpelledStudentDTO.getStudentExpelId());
         renewedExpelledStudent.setStudentExpel(studentExpel);
         StudentGroup studentGroup = studentGroupService.getById(renewedExpelledStudentDTO.getStudentGroupId());

@@ -8,16 +8,12 @@ CREATE TABLE student_previous_university (
     academic_certificate_date date
 );
 
-ALTER TABLE course OWNER TO postgres;
-
 CREATE SEQUENCE student_previous_university_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-ALTER TABLE student_previous_university_id_seq OWNER TO postgres;
 
 ALTER TABLE ONLY student_previous_university ALTER COLUMN id SET DEFAULT nextval('student_previous_university_id_seq'::regclass);
 

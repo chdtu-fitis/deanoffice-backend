@@ -42,7 +42,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://is.chdtu.edu.ua:4200"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://is.chdtu.edu.ua:4200", "http://ec2-34-255-117-251.eu-west-1.compute.amazonaws.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
