@@ -12,7 +12,7 @@ public class SpecializationView {
 
     public interface Extended extends WithDegreeAndSpeciality {}
 
-    public interface WithSpeciality extends Basic, SpecialityView.LessCode {}
+    public interface WithSpeciality extends Basic, SpecialityView.Basic{}
 
     public interface WithDegreeAndSpeciality extends Basic, SpecialityView.Basic, GeneralView.Named {}
 
