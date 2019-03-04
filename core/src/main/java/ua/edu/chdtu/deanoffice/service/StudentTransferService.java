@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
 import ua.edu.chdtu.deanoffice.repository.StudentTransferRepository;
 
@@ -16,8 +17,12 @@ public class StudentTransferService {
         this.studentTransferRepository = studentTransferRepository;
     }
 
-    public StudentTransfer studentTransfer(StudentTransfer studentTransfer){
+    public StudentTransfer save(StudentTransfer studentTransfer){
+        return studentTransferRepository.save(studentTransfer);
+    }
 
-        return null;
+    @Transactional
+    public  void updateSpecialization(Integer newSpecializationId, Integer studentDegreeId){
+        studentTransferRepository.updateSpecialization(newSpecializationId,studentDegreeId);
     }
 }
