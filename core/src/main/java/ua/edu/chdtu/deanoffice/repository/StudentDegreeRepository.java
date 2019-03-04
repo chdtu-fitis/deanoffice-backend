@@ -292,6 +292,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("facultyId") int facultyId,
             @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds);
 
-    @Query(value = "SELECT sd.id FROM student_degree WHERE sd.id = IN (:ids) AND sd.active = false", nativeQuery = true)
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd WHERE sd.id IN (:ids) AND sd.active = false", nativeQuery = true)
     int countInactiveStudentDegreesByIds(@Param("ids") List<Integer> ids);
 }
