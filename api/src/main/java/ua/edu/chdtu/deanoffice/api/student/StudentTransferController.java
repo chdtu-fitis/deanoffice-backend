@@ -11,13 +11,13 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentTransferService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
+
 
 @RestController
 @RequestMapping("/students/degrees/transfers")
@@ -25,16 +25,19 @@ public class StudentTransferController {
     private final StudentDegreeService studentDegreeService;
     private final SpecializationService specializationService;
     private final StudentTransferService studentTransferService;
+    private final DataVerificationService dataVerificationService;
 
     @Autowired
     public StudentTransferController(
             StudentDegreeService studentDegreeService,
             SpecializationService specializationService,
-            StudentTransferService studentTransferService
+            StudentTransferService studentTransferService,
+            DataVerificationService dataVerificationService
     ){
         this.studentDegreeService = studentDegreeService;
         this.specializationService = specializationService;
         this.studentTransferService = studentTransferService;
+        this.dataVerificationService = dataVerificationService;
     }
 
     @PostMapping
@@ -42,11 +45,12 @@ public class StudentTransferController {
                                            @CurrentUser ApplicationUser user){
         try{
             StudentTransfer studentTransfer = create(studentTransferDTO);
-
+            dataVerificationService.validateNewGroupExistsAndMatchesSpecialization(studentTransfer.getNewSpecializationId(),studentTransfer.getNewStudentGroupId());
             StudentTransfer studentTransferAfterSaving = studentTransferService.save(studentTransfer);
-            validateTransferAfterSave(studentTransferAfterSaving);
+            dataVerificationService.validateTransferAfterSave(studentTransferAfterSaving);
             StudentTransferDTO studentTransferSavedDTO = Mapper.strictMap(studentTransferAfterSaving, StudentTransferDTO.class);
             studentTransferService.updateSpecialization(studentTransferAfterSaving.getNewSpecializationId(), studentTransferAfterSaving.getStudentDegreeId());
+            studentTransferService.updateStudentGroup(studentTransfer.getNewStudentGroupId(), studentTransfer.getStudentDegreeId());
             return new ResponseEntity(studentTransferSavedDTO, HttpStatus.CREATED);
         }catch (Exception exception){
             return handleException(exception);
@@ -55,15 +59,11 @@ public class StudentTransferController {
 
     private StudentTransfer create(StudentTransferDTO studentTransferDTO){
         StudentTransfer studentTransfer = (StudentTransfer) Mapper.strictMap(studentTransferDTO, StudentTransfer.class);
-        Specialization specialization = specializationService.getById(studentTransferDTO.getOldSpecializationId());
-        studentTransfer.setNewSpecializationId(studentTransferDTO.getNewSpecializationId());
+        studentTransfer.setOldSpecializationId(studentTransferService.getSpecializationIdByStudentDegreeId(studentTransfer.getStudentDegreeId()));
+        studentTransfer.setOldStudentGroupId(studentTransferService.getStudentGroupIdByStudentDegreeId(studentTransfer.getStudentDegreeId()));
+        studentTransfer.setOldPayment(studentTransferService.getPaymentByStudentDegreeId(studentTransfer.getStudentDegreeId()));
+        studentTransfer.setOldStudyYear(studentTransferService.getStudyYear(studentTransfer.getOldStudentGroupId()));
         return studentTransfer;
-    }
-
-    private void validateTransferAfterSave(StudentTransfer studentTransferSaving) throws OperationCannotBePerformedException {
-        if (studentTransferSaving == null) {
-            throw new OperationCannotBePerformedException("Дані про переведення студента не вдалося зберегти");
-        }
     }
 
     private ResponseEntity handleException(Exception exception) {
