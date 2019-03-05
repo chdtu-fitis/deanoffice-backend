@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -8,6 +9,7 @@ import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 
 import java.util.List;
+import java.util.Set;
 
 public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer> {
 
@@ -80,4 +82,8 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "and sg.name = :name " +
             "and sg.specialization.faculty.id = :faculty_id")
     List<StudentGroup> findByName(@Param("name") String name, @Param("faculty_id") int facultyId);
+
+    @Modifying
+    @Query(value = "UPDATE student_group sg SET active = false WHERE sg.id IN (:ids)", nativeQuery = true)
+    void setStudentGroupInactiveByIds(@Param("ids") Set<Integer> ids);
 }
