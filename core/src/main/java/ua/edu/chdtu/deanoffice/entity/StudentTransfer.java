@@ -4,10 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
-import javax.persistence.Entity;
+import javax.persistence.*;
 //import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.util.Date;
 
 @Entity
@@ -21,7 +19,9 @@ public class StudentTransfer extends BaseEntity {
     private Integer newStudyYear;
     private Integer oldSpecializationId;
     private Integer newSpecializationId;
+    @Enumerated(value = EnumType.STRING)
     private Payment oldPayment = Payment.BUDGET;
+    @Enumerated(value = EnumType.STRING)
     private Payment newPayment = Payment.BUDGET;
     @Temporal(TemporalType.DATE)
     private Date applicationDate;
