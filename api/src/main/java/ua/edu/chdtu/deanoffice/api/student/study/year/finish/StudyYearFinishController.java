@@ -46,13 +46,9 @@ public class StudyYearFinishController {
         try {
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studyYearFinishDTO.getIds(), user);
             dataVerificationService.isStudentDegreesActiveByIds(studyYearFinishDTO.getIds());
-
             List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studyYearFinishDTO.getIds());
-
             dataVerificationService.existActiveStudentDegreesInInactiveStudentGroups(studentDegrees);
-
             studyYearFinishService.expelStudents(studentDegrees, studyYearFinishDTO.getExpelDate(), studyYearFinishDTO.getOrderDate(), studyYearFinishDTO.getOrderNumber());
-
         } catch (Exception e) {
             handleException(e);
         }
