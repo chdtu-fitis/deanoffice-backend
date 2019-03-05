@@ -14,7 +14,7 @@ public class SpecializationView {
 
     public interface WithSpeciality extends Basic, SpecialityView.Basic{}
 
-    public interface WithDegreeAndSpeciality extends Basic, SpecialityView.Basic, GeneralView.Named {}
+    public interface WithDegreeAndSpeciality extends Basic, SpecialityView.Basic, GeneralView.Named, Faculty {}
 
     public interface AcquiredCompetenciesUkr extends AcquiredCompetencies {}
 
