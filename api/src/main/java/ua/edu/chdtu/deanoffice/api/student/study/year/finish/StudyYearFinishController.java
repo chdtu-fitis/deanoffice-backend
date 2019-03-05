@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.DiplomaNumberController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -27,25 +28,30 @@ public class StudyYearFinishController {
     private StudyYearFinishService studyYearFinishService;
     private FacultyAuthorizationService facultyAuthorizationService;
     private DataVerificationService dataVerificationService;
+    private StudentDegreeService studentDegreeService;
 
     @Autowired
     public StudyYearFinishController(StudyYearFinishService studyYearFinishService,
                                      FacultyAuthorizationService facultyAuthorizationService,
-                                     DataVerificationService dataVerificationService){
+                                     DataVerificationService dataVerificationService,
+                                     StudentDegreeService studentDegreeService){
         this.studyYearFinishService = studyYearFinishService;
         this.facultyAuthorizationService = facultyAuthorizationService;
         this.dataVerificationService = dataVerificationService;
+        this.studentDegreeService = studentDegreeService;
     }
 
     @PostMapping("/expel-students")
     public ResponseEntity expelStudents(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user){
         try {
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studyYearFinishDTO.getIds(), user);
-            if (!dataVerificationService.isStudentDegreesActiveByIds(studyYearFinishDTO.getIds())) {
-                throw new OperationCannotBePerformedException("Серед даних студентів є неактивні");
-            }
+            dataVerificationService.isStudentDegreesActiveByIds(studyYearFinishDTO.getIds());
 
-            studyYearFinishService.expelStudents(studyYearFinishDTO.getIds(), studyYearFinishDTO.getExpelDate(), studyYearFinishDTO.getOrderDate(), studyYearFinishDTO.getOrderNumber());
+            List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studyYearFinishDTO.getIds());
+
+            dataVerificationService.existActiveStudentDegreesInInactiveStudentGroups(studentDegrees);
+
+            studyYearFinishService.expelStudents(studentDegrees, studyYearFinishDTO.getExpelDate(), studyYearFinishDTO.getOrderDate(), studyYearFinishDTO.getOrderNumber());
 
         } catch (Exception e) {
             handleException(e);
