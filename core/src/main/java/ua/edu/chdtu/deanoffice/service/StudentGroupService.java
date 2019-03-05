@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class StudentGroupService {
@@ -76,5 +77,9 @@ public class StudentGroupService {
     public StudentGroup getByNameAndFacultyId(String groupName, int facultyId){
         List<StudentGroup> studentGroups = studentGroupRepository.findByName(groupName, facultyId);
         return (studentGroups.isEmpty()) ? null : studentGroups.get(0);
+    }
+
+    public void setStudentGroupsInactiveByIds(Set<Integer> ids) {
+        studentGroupRepository.setStudentGroupInactiveByIds(ids);
     }
 }
