@@ -199,7 +199,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Modifying
     @Query(value = "UPDATE student_degree sd " +
-           "SET sd.active = false WHERE sd.id IN (:ids)", nativeQuery = true)
+           "SET active = false WHERE sd.id IN (:ids)", nativeQuery = true)
     void setStudentDegreesInactive(@Param("ids") List<Integer> ids);
 
     @Modifying
