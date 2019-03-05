@@ -14,9 +14,11 @@ public class StudentView {
 
     interface WithSpecilization extends SpecializationView.WithDegreeAndSpeciality {}
 
-    public interface Simple extends SearchSimpleDegrees, SimpleAndDegrees {}
+    interface SimpleAndSpecilization extends SpecializationView.WithSpeciality {}
 
-    public interface Detail extends Simple, DetailAndDegree {}
+    public interface Simple extends SearchSimpleDegrees, SimpleAndDegrees, SimpleAndSpecilization {}
+
+    public interface Detail extends Simple, DetailAndDegree, SpecializationView.Faculty{}
 
     public interface Degree extends Simple, DetailAndDegree, WithSpecilization {}
 
