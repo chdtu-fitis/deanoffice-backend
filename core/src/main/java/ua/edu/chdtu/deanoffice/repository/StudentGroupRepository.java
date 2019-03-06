@@ -101,4 +101,9 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     Integer getBeginYearsByStudentDegreeId(
             @Param("student_group_id") Integer studentGroupId
     );
+
+    @Query("SELECT sg from StudentGroup sg " +
+            "WHERE sg.specialization.id = :specializationId " +
+            "and sg.active = true")
+    List<StudentGroup> findBySpecializationId(@Param("specializationId") int specializationId);
 }
