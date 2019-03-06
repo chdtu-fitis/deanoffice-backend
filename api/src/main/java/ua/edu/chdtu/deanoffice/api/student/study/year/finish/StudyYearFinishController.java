@@ -47,6 +47,9 @@ public class StudyYearFinishController {
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studyYearFinishDTO.getIds(), user);
             dataVerificationService.isStudentDegreesActiveByIds(studyYearFinishDTO.getIds());
             List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studyYearFinishDTO.getIds());
+            if (studentDegrees.size() != studyYearFinishDTO.getIds().size()) {
+                throw new OperationCannotBePerformedException("Серед даних ідентифікаторів є неіснуючі в базі даних");
+            }
             dataVerificationService.existActiveStudentDegreesInInactiveStudentGroups(studentDegrees);
             studyYearFinishService.expelStudents(studentDegrees, studyYearFinishDTO.getExpelDate(), studyYearFinishDTO.getOrderDate(), studyYearFinishDTO.getOrderNumber());
         } catch (Exception e) {
