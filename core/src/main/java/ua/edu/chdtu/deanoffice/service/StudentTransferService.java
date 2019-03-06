@@ -31,13 +31,8 @@ public class StudentTransferService {
     }
 
     @Transactional
-    public  void updateSpecialization(Integer newSpecializationId, Integer studentDegreeId){
-        studentTransferRepository.updateSpecialization(newSpecializationId,studentDegreeId);
-    }
-
-    @Transactional
-    public void  updateStudentGroup(Integer newStudentGroupId, Integer studentDegreeId){
-        studentTransferRepository.updateStudentGroup(newStudentGroupId,studentDegreeId);
+    public  void updateSpecializationAndStudentGroupAndPayment(Integer newSpecializationId, Integer newStudentGroupId, Payment newPayment, Integer studentDegreeId){
+        studentTransferRepository.updateSpecializationAndStudentGroupAndPayment(newSpecializationId, newStudentGroupId, newPayment, studentDegreeId);
     }
 
     private int getCurrentYear() {

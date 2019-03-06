@@ -49,8 +49,7 @@ public class StudentTransferController {
             StudentTransfer studentTransferAfterSaving = studentTransferService.save(studentTransfer);
             dataVerificationService.validateTransferAfterSave(studentTransferAfterSaving);
             StudentTransferDTO studentTransferSavedDTO = Mapper.strictMap(studentTransferAfterSaving, StudentTransferDTO.class);
-            studentTransferService.updateSpecialization(studentTransferAfterSaving.getNewSpecializationId(), studentTransferAfterSaving.getStudentDegreeId());
-            studentTransferService.updateStudentGroup(studentTransfer.getNewStudentGroupId(), studentTransfer.getStudentDegreeId());
+            studentTransferService.updateSpecializationAndStudentGroupAndPayment(studentTransferAfterSaving.getNewSpecializationId(), studentTransferAfterSaving.getNewStudentGroupId(), studentTransferAfterSaving.getNewPayment(), studentTransferAfterSaving.getStudentDegreeId());
             return new ResponseEntity(studentTransferSavedDTO, HttpStatus.CREATED);
         }catch (Exception exception){
             return handleException(exception);

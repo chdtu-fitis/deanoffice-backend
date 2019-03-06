@@ -11,18 +11,15 @@ public interface StudentTransferRepository extends JpaRepository<StudentTransfer
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
-            "SET  sd.specialization.id = :new_specialization_id where sd.id = :student_degree_id ")
-    void updateSpecialization(
+            "SET  sd.specialization.id = :new_specialization_id, " +
+            "sd.studentGroup.id = :new_student_group_id, " +
+            "sd.payment = :new_payment " +
+            "where sd.id = :student_degree_id ")
+    void updateSpecializationAndStudentGroupAndPayment(
             @Param("new_specialization_id") Integer newSpecializationId,
-            @Param("student_degree_id") Integer studentDegreeId
-    );
-
-    @Modifying
-    @Query(value = "UPDATE StudentDegree sd " +
-                   "SET sd.studentGroup.id = :new_student_group_id where sd.id = :student_degree_id ")
-    void updateStudentGroup(
             @Param("new_student_group_id") Integer newStudentGroupId,
-            @Param("student_degree_id") Integer studentGroupId
+            @Param("new_payment") Payment newPayment,
+            @Param("student_degree_id") Integer studentDegreeId
     );
 
     @Query("select sd.specialization.id from StudentDegree sd " +
