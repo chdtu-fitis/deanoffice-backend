@@ -2,9 +2,8 @@ package ua.edu.chdtu.deanoffice.service.study.year.finish;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -31,7 +30,7 @@ public class StudyYearFinishService {
             Set<Integer> groups = new HashSet<>();
             for (StudentDegree studentDegree : studentDegrees) {
                 if (studentDegree.getStudentGroup().isActive() == true) {
-                    if (studentDegree.getStudentGroup().getActiveStudents() == null || studentDegree.getStudentGroup().getActiveStudents().size() == 0) {
+                    if (studentDegree.getStudentGroup().getStudentDegrees().size() == 0) {
                         groups.add(studentDegree.getStudentGroup().getId());
                     }
                 }
