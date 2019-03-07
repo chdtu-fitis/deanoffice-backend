@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.student.study.year.finish;
+package ua.edu.chdtu.deanoffice.api.studyyear.finish;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,22 +8,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number.DiplomaNumberController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.service.study.year.finish.StudyYearFinishService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-
-import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/student/study-year-finish")
+@RequestMapping("/study-year-finish")
 public class StudyYearFinishController {
     private StudyYearFinishService studyYearFinishService;
     private FacultyAuthorizationService facultyAuthorizationService;

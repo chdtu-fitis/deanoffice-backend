@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.student.study.year.finish;
+package ua.edu.chdtu.deanoffice.api.studyyear.finish;
 
 import lombok.Getter;
 import lombok.Setter;
