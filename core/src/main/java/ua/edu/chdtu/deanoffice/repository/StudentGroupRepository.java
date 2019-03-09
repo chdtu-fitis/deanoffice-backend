@@ -86,4 +86,30 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     @Modifying
     @Query(value = "UPDATE student_group sg SET active = false WHERE sg.id IN (:ids)", nativeQuery = true)
     void setStudentGroupInactiveByIds(@Param("ids") Set<Integer> ids);
+
+    @Query("select sg from StudentGroup as sg " +
+            "where sg.specialization.id = :specialization_id " +
+            "and sg.id = :student_group_id " +
+            "order by sg.name")
+    List <StudentGroup> findAllBySpecializationIdAndGroupId(
+            @Param("specialization_id") Integer specializationId,
+            @Param("student_group_id") Integer studentGroupId
+    );
+
+    @Query("select sg.creationYear from StudentGroup sg " +
+            "where sg.id = :student_group_id")
+    Integer getCreationYearByStudentDegreeId(
+            @Param("student_group_id") Integer studentGroupId
+    );
+
+    @Query("select sg.studyYears from StudentGroup sg " +
+            "where sg.id = :student_group_id")
+    Integer getBeginYearsByStudentDegreeId(
+            @Param("student_group_id") Integer studentGroupId
+    );
+
+    @Query("SELECT sg from StudentGroup sg " +
+            "WHERE sg.specialization.id = :specializationId " +
+            "and sg.active = true")
+    List<StudentGroup> findBySpecializationId(@Param("specializationId") int specializationId);
 }
