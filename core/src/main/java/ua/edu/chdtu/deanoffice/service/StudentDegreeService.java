@@ -147,4 +147,10 @@ public class StudentDegreeService {
     public int getCountAllActiveDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear,  TuitionForm tuitionForm, Payment payment, int degreeId) {
         return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
     }
+
+    public void setStudentDegreesInactive(List<Integer> ids) {
+        if (ids.size() != 0) {
+            studentDegreeRepository.setStudentDegreesInactive(ids);
+        }
+    }
 }
