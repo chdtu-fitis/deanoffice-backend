@@ -83,6 +83,7 @@ public class StudentGroupService {
     @Transactional
     public void setStudentGroupsInactiveByIds(Set<Integer> ids) {
         studentGroupRepository.setStudentGroupInactiveByIds(ids);
+    }
 
     public List<StudentGroup> getBySpecializationId(int specializationId){
         List<StudentGroup> studentGroups = studentGroupRepository.findBySpecializationId(specializationId);
