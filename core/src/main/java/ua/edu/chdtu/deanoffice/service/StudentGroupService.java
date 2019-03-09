@@ -1,12 +1,14 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class StudentGroupService {
@@ -77,6 +79,10 @@ public class StudentGroupService {
         List<StudentGroup> studentGroups = studentGroupRepository.findByName(groupName, facultyId);
         return (studentGroups.isEmpty()) ? null : studentGroups.get(0);
     }
+
+    @Transactional
+    public void setStudentGroupsInactiveByIds(Set<Integer> ids) {
+        studentGroupRepository.setStudentGroupInactiveByIds(ids);
 
     public List<StudentGroup> getBySpecializationId(int specializationId){
         List<StudentGroup> studentGroups = studentGroupRepository.findBySpecializationId(specializationId);
