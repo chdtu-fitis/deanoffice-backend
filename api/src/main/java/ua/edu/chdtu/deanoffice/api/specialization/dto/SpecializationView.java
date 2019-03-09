@@ -8,9 +8,13 @@ public class SpecializationView {
 
     public interface AcquiredCompetencies {}
 
+    public interface Faculty {}
+
     public interface Extended extends WithDegreeAndSpeciality {}
 
-    public interface WithDegreeAndSpeciality extends Basic, SpecialityView.Basic, GeneralView.Named {}
+    public interface WithSpeciality extends Basic, SpecialityView.Basic{}
+
+    public interface WithDegreeAndSpeciality extends Basic, SpecialityView.Basic, GeneralView.Named, Faculty {}
 
     public interface AcquiredCompetenciesUkr extends AcquiredCompetencies {}
 

@@ -77,4 +77,9 @@ public class StudentGroupService {
         List<StudentGroup> studentGroups = studentGroupRepository.findByName(groupName, facultyId);
         return (studentGroups.isEmpty()) ? null : studentGroups.get(0);
     }
+
+    public List<StudentGroup> getBySpecializationId(int specializationId){
+        List<StudentGroup> studentGroups = studentGroupRepository.findBySpecializationId(specializationId);
+        return (studentGroups.size() > 0) ? studentGroups : null;
+    }
 }
