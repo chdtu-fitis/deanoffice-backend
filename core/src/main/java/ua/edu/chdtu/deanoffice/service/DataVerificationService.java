@@ -4,13 +4,9 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentTransferRepository;
 
 import java.util.List;
 
@@ -18,18 +14,15 @@ import java.util.List;
 public class DataVerificationService {
 
     private StudentDegreeRepository studentDegreeRepository;
-    private final StudentTransferRepository studentTransferRepository;
     private final StudentGroupRepository studentGroupRepository;
 
     public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
-                                  StudentTransferRepository studentTransferRepository,
                                   StudentGroupRepository studentGroupRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
-        this.studentTransferRepository = studentTransferRepository;
         this.studentGroupRepository = studentGroupRepository;
     }
 
-    public void isStudentDegreesActiveByIds(List<Integer> ids) throws Exception {
+    public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
         int countInactiveStudentDegrees = studentDegreeRepository.countInactiveStudentDegreesByIds(ids);
         if (countInactiveStudentDegrees != 0) {
             throw new OperationCannotBePerformedException("Серед даних студентів є неактивні");

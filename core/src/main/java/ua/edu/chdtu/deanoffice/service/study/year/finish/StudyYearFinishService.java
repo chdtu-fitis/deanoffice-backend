@@ -25,7 +25,7 @@ public class StudyYearFinishService {
         this.studentGroupService = studentGroupService;
     }
 
-    public void expelStudents(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) throws Exception {
+    public void expelStudentsAndDisableGroups(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) throws Exception {
             studentExpelService.expelStudents(studentDegrees, expelDate, orderDate, orderNumber);
             Set<Integer> groups = new HashSet<>();
             for (StudentDegree studentDegree : studentDegrees) {

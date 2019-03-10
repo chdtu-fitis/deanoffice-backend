@@ -15,4 +15,7 @@ public class Constants {
     public static final Integer[] SUCCESS_REASON_IDS = {7, 8, 16};
     public static final int EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW = 5;
 
+    public static final Integer ID_SUCCESSFUL_END_BACHELOR = 7;
+    public static final Integer ID_SUCCESSFUL_END_SPECIALIST = 8;
+    public static final Integer ID_SUCCESSFUL_END_MASTER = 16;
 }

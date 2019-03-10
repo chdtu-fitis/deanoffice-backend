@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -10,11 +11,14 @@ import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
-import java.util.*;
-
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
@@ -22,10 +26,6 @@ import static ua.edu.chdtu.deanoffice.Constants.SUCCESS_REASON_IDS;
 
 @Service
 public class StudentExpelService {
-    private static final Integer ID_SUCCESSFUL_END_BACHELOR = 7;
-    private static final Integer ID_SUCCESSFUL_END_SPECIALIST = 8;
-    private static final Integer ID_SUCCESSFUL_END_MASTER = 16;
-
     private final StudentDegreeRepository studentDegreeRepository;
     private final StudentExpelRepository studentExpelRepository;
     private final CurrentYearRepository currentYearRepository;
@@ -68,15 +68,16 @@ public class StudentExpelService {
         studentDegreeRepository.save(studentDegrees);
 
         Map<Integer, OrderReason> orderReasonMap = new HashMap<>();
-        orderReasonMap.put(1, orderReasonService.getById(ID_SUCCESSFUL_END_BACHELOR));
-        orderReasonMap.put(2, orderReasonService.getById(ID_SUCCESSFUL_END_SPECIALIST));
-        orderReasonMap.put(3, orderReasonService.getById(ID_SUCCESSFUL_END_MASTER));
+        orderReasonMap.put(1, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_BACHELOR));
+        orderReasonMap.put(2, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_SPECIALIST));
+        orderReasonMap.put(3, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_MASTER));
 
+        int currentYear = currentYearRepository.getOne(1).getCurrYear();
         for (StudentDegree studentDegree : studentDegrees) {
-            studentExpels.add(new StudentExpel( studentDegree, studentDegree.getStudentGroup(), currentYearRepository.getOne(1).getCurrYear() -
-                                                studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears(),
-                                                studentDegree.getPayment(), expelDate, orderNumber, orderDate,
-                                                orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()), null));
+            studentExpels.add(new StudentExpel( studentDegree, studentDegree.getStudentGroup(),
+                    currentYear - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears(),
+                    studentDegree.getPayment(), expelDate, orderNumber, orderDate,
+                    orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()), null));
         }
 
         studentExpelRepository.save(studentExpels);

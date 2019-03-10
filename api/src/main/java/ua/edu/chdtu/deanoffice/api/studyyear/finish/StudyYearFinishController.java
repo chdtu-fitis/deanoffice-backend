@@ -37,8 +37,8 @@ public class StudyYearFinishController {
         this.studentDegreeService = studentDegreeService;
     }
 
-    @PostMapping("/expel-students")
-    public ResponseEntity expelStudents(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user){
+    @PostMapping
+    public ResponseEntity finishStudyYear(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user){
         try {
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studyYearFinishDTO.getIds(), user);
             dataVerificationService.isStudentDegreesActiveByIds(studyYearFinishDTO.getIds());
@@ -47,7 +47,7 @@ public class StudyYearFinishController {
                 throw new OperationCannotBePerformedException("Серед даних ідентифікаторів є неіснуючі в базі даних");
             }
             dataVerificationService.existActiveStudentDegreesInInactiveStudentGroups(studentDegrees);
-            studyYearFinishService.expelStudents(studentDegrees, studyYearFinishDTO.getExpelDate(), studyYearFinishDTO.getOrderDate(), studyYearFinishDTO.getOrderNumber());
+            studyYearFinishService.expelStudentsAndDisableGroups(studentDegrees, studyYearFinishDTO.getExpelDate(), studyYearFinishDTO.getOrderDate(), studyYearFinishDTO.getOrderNumber());
         } catch (Exception e) {
             handleException(e);
         }
