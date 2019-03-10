@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.api.document.diplomasupplement;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +7,6 @@ import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
@@ -28,16 +26,15 @@ public class DiplomaSupplementController extends DocumentResponseController {
     private DiplomaSupplementService diplomaSupplementService;
     private FacultyService facultyService;
     private StudentDegreeService studentDegreeService;
-
-    @Autowired
     private CourseNameService courseNameService;
 
     public DiplomaSupplementController(DiplomaSupplementService diplomaSupplementService,
                                        FacultyService facultyService,
-                                       StudentDegreeService studentDegreeService) {
+                                       StudentDegreeService studentDegreeService, CourseNameService courseNameService) {
         this.diplomaSupplementService = diplomaSupplementService;
         this.facultyService = facultyService;
         this.studentDegreeService = studentDegreeService;
+        this.courseNameService = courseNameService;
     }
 
     @GetMapping("/degrees/{studentDegreeId}/docx")
@@ -68,13 +65,13 @@ public class DiplomaSupplementController extends DocumentResponseController {
     public ResponseEntity checkEnglishTranslationForCourses(@RequestParam Integer degreeId,
                                                             @CurrentUser ApplicationUser user){
         try {
-            Map<CourseName, String> coursesWithOutEnglishTranslation =
+            Map<String, String> coursesWithoutEnglishTranslation =
                     courseNameService.getAllCoursesWhereEngNameIsNullOrEmpty(user.getFaculty().getId(), degreeId);
             List<CourseNameDTO> courseNameDTOList = new ArrayList<>();
-            for (Map.Entry<CourseName, String> entry : coursesWithOutEnglishTranslation.entrySet()) {
-                CourseName courseName = entry.getKey();
+            for (Map.Entry<String, String> entry : coursesWithoutEnglishTranslation.entrySet()) {
+                String courseName = entry.getKey();
                 CourseNameDTO courseNameDTO = new CourseNameDTO();
-                courseNameDTO.setName(courseName.getName());
+                courseNameDTO.setName(courseName);
                 courseNameDTO.setMessage(entry.getValue());
                 courseNameDTOList.add(courseNameDTO);
             }
