@@ -61,10 +61,13 @@ public class SpecializationController {
     @JsonView(SpecializationView.Extended.class)
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
+            @RequestParam(value = "facultyId", required = false) Integer facultyId,
             @CurrentUser ApplicationUser user
     ) {
         try{
-            List<Specialization> specializations = specializationService.getAllByActive(active, user.getFaculty().getId());
+            if (facultyId == null)
+                facultyId = user.getFaculty().getId();
+            List<Specialization> specializations = specializationService.getAllByActive(active, facultyId);
             return ResponseEntity.ok(Mapper.map(specializations, SpecializationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
