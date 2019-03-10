@@ -5,7 +5,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CourseNameDTO {
+public class CourseNameWithoutEngDTO {
      private String name;
      private String message;
+
+     public CourseNameWithoutEngDTO(String name, String message) {
+          this.name = name;
+          this.message = message;
+     }
 }

@@ -35,14 +35,12 @@ public class CourseNameService {
         List<Object[]> coursesName = courseNameRepository.findAllForGraduates(year, facultyId, degreeId);
         return coursesName
                 .stream()
-                .filter(cn -> !checkNameEng(cn).equals(""))
                 .collect(Collectors.toMap(cn -> (String)cn[0], this::checkNameEng, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     private String checkNameEng(Object item[]){
         String message = "";
-        message += Strings.isNullOrEmpty((String)item[1]) ? String.format("Група: %s Семестр: %d",
-                (String) item[2], (Integer) item[3]) : "";
+        message += String.format("Група: %s Семестр: %d", (String) item[1], (Integer) item[2]);
         return message;
     }
 }
