@@ -66,7 +66,7 @@ public class StudentGroupService {
         return studentGroupRepository.save(studentGroup);
     }
 
-    public List<StudentGroup> getByIds(Integer[] groupIds) {
+    public List<StudentGroup> getByIds(List<Integer> groupIds) {
         return studentGroupRepository.findAllByIds(groupIds);
     }
 
