@@ -6,11 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -151,8 +147,27 @@ public class StudentDegreeService {
         }
     }
 
-    public List<StudentDegreeShortBean> getStudentDegreeShortBeans(List<Integer> studentGroupIds) {
+    public Map<String, List<StudentDegreeShortBean>> getStudentsShortInfoGroupedByGroupNames(List<Integer> studentGroupIds) {
         List<Object[]> studentDegreesShortFields = studentDegreeRepository.getStudentDegreeShortFields(studentGroupIds);
+        List<StudentDegreeShortBean> studentDegreeShortBeans = mapToStudentDegreeShortBeans(studentDegreesShortFields);
+        Map<String, List<StudentDegreeShortBean>> groupNameAndListStudentDegreeShortBeansMap = new HashMap<>();
+
+        for (StudentDegreeShortBean studentDegreeShortBean : studentDegreeShortBeans) {
+            String groupName = studentDegreeShortBean.getGroupName();
+            if (groupNameAndListStudentDegreeShortBeansMap.get(groupName) == null) {
+                List<StudentDegreeShortBean> sDSBByGroupName = new ArrayList<>();
+                sDSBByGroupName.add(studentDegreeShortBean);
+                groupNameAndListStudentDegreeShortBeansMap.put(groupName, sDSBByGroupName);
+            } else {
+                List<StudentDegreeShortBean> sDSBByGroupName = groupNameAndListStudentDegreeShortBeansMap.get(groupName);
+                sDSBByGroupName.add(studentDegreeShortBean);
+            }
+        }
+
+        return groupNameAndListStudentDegreeShortBeansMap;
+    }
+
+    private List<StudentDegreeShortBean> mapToStudentDegreeShortBeans(List<Object[]> studentDegreesShortFields) {
         List<StudentDegreeShortBean> studentDegreeShortBeans = new ArrayList<>(studentDegreesShortFields.size());
         for (Object[] studentDegreeShortFields : studentDegreesShortFields ) {
             studentDegreeShortBeans.add(new StudentDegreeShortBean( (String)studentDegreeShortFields[0], (String)studentDegreeShortFields[1],
