@@ -294,4 +294,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value = "SELECT count(sd.id) FROM student_degree sd WHERE sd.id IN (:ids) AND sd.active = false", nativeQuery = true)
     int countInactiveStudentDegreesByIds(@Param("ids") List<Integer> ids);
+
+    @Query(value =  "SELECT s.surname, s.name, s.patronimic, sd.diploma_number, sg.name " +
+            "FROM student_degree sd " +
+            "INNER JOIN student s ON sd.student_id = s.id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "WHERE sg.id IN (:studentGroupIds) ORDER BY sg.name", nativeQuery = true)
+    List<Object[]> getStudentDegreeShortFields(@Param("studentGroupIds") List<Integer> studentGroupIds);
 }
