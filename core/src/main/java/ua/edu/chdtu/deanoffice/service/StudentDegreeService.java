@@ -3,10 +3,7 @@ package ua.edu.chdtu.deanoffice.service;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.Date;
@@ -152,5 +149,16 @@ public class StudentDegreeService {
         if (ids.size() != 0) {
             studentDegreeRepository.setStudentDegreesInactive(ids);
         }
+    }
+
+    public List<StudentDegreeShortBean> getStudentDegreeShortBeans(List<Integer> studentGroupIds) {
+        List<Object[]> studentDegreesShortFields = studentDegreeRepository.getStudentDegreeShortFields(studentGroupIds);
+        List<StudentDegreeShortBean> studentDegreeShortBeans = new ArrayList<>(studentDegreesShortFields.size());
+        for (Object[] studentDegreeShortFields : studentDegreesShortFields ) {
+            studentDegreeShortBeans.add(new StudentDegreeShortBean( (String)studentDegreeShortFields[0], (String)studentDegreeShortFields[1],
+                                                                    (String)studentDegreeShortFields[2], (String)studentDegreeShortFields[3],
+                                                                    (String)studentDegreeShortFields[4]));
+        }
+        return studentDegreeShortBeans;
     }
 }
