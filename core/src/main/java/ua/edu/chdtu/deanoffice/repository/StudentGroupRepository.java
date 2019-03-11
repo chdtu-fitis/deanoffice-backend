@@ -75,7 +75,7 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
 
     @Query("select sg from StudentGroup sg " +
             "where sg.id in :group_ids")
-    List<StudentGroup> findAllByIds(@Param("group_ids") Integer[] groupIds);
+    List<StudentGroup> findAllByIds(@Param("group_ids") List<Integer> groupIds);
 
     @Query("SELECT sg from StudentGroup sg " +
             "where sg.active = true " +
@@ -112,4 +112,7 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "WHERE sg.specialization.id = :specializationId " +
             "and sg.active = true")
     List<StudentGroup> findBySpecializationId(@Param("specializationId") int specializationId);
+
+    @Query(value = "SELECT count(sg.id) FROM student_group sg WHERE sg.id IN (:ids) AND sg.active = false", nativeQuery = true)
+    int countInactiveStudentGroupsByIds(@Param("ids") List<Integer> ids);
 }
