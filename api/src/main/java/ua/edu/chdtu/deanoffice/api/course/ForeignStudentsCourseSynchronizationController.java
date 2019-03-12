@@ -30,8 +30,7 @@ public class ForeignStudentsCourseSynchronizationController {
     public ResponseEntity synchronization() {
         try {
             List<ForeignStudentsSynchronizationBean> foreignStudentsSynchronizationResult = courseService.getForeignStudentsSynchronizationResult();
-            List<ForeignStudentsSynchronizationDTO> map = Mapper.strictMap(foreignStudentsSynchronizationResult, ForeignStudentsSynchronizationDTO.class);
-            return ResponseEntity.ok(map);
+            return ResponseEntity.ok(Mapper.strictMap(foreignStudentsSynchronizationResult, ForeignStudentsSynchronizationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
