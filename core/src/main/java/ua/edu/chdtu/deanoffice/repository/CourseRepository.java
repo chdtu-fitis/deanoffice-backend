@@ -11,7 +11,8 @@ import java.util.List;
 public interface CourseRepository extends JpaRepository<Course, Integer> {
     @Query("select course from CourseForGroup courseForGroup " +
             "join courseForGroup.course course " +
-            "where courseForGroup.studentGroup.id=:groupId")
+            "where courseForGroup.studentGroup.id=:groupId " +
+            "order by course.semester, course.knowledgeControl.name, course.courseName.name")
     List<Course> getByGroupId(@Param("groupId") Integer groupId);
 
     @Query("select course from CourseForGroup courseForGroup " +
