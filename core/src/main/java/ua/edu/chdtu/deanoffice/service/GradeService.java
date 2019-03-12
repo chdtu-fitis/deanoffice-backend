@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.service.course.CourseService;
 
 import java.util.*;
 import java.util.stream.Collectors;
