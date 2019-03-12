@@ -1,27 +1,40 @@
 package ua.edu.chdtu.deanoffice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentTransferRepository;
 
 import java.util.List;
 
 @Service
 public class DataVerificationService {
-    private final StudentTransferRepository studentTransferRepository;
+
+    private StudentDegreeRepository studentDegreeRepository;
     private final StudentGroupRepository studentGroupRepository;
 
-    @Autowired
-    public DataVerificationService (
-            StudentTransferRepository studentTransferRepository,
-            StudentGroupRepository studentGroupRepository
-    ){
-        this.studentTransferRepository = studentTransferRepository;
+    public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
+                                  StudentGroupRepository studentGroupRepository) {
+        this.studentDegreeRepository = studentDegreeRepository;
         this.studentGroupRepository = studentGroupRepository;
+    }
+
+    public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
+        int countInactiveStudentDegrees = studentDegreeRepository.countInactiveStudentDegreesByIds(ids);
+        if (countInactiveStudentDegrees != 0) {
+            throw new OperationCannotBePerformedException("Серед даних студентів є неактивні");
+        }
+    }
+
+    public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
+        for (StudentDegree activeStudentDegree : activeStudentDegrees) {
+            if (activeStudentDegree.getStudentGroup().isActive() == false) {
+                throw new OperationCannotBePerformedException("Активний студент не може входити в неактивну групу");
+            }
+        }
     }
 
     public void validateNewGroupExistsAndMatchesSpecialization(Integer specializationId, Integer studentGroupId) throws OperationCannotBePerformedException {
@@ -37,5 +50,4 @@ public class DataVerificationService {
             throw new OperationCannotBePerformedException("Дані про переведення студента не вдалося зберегти");
         }
     }
-
 }
