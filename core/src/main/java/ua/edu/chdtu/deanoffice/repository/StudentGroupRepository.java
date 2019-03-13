@@ -96,18 +96,6 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             @Param("student_group_id") Integer studentGroupId
     );
 
-    @Query("select sg.creationYear from StudentGroup sg " +
-            "where sg.id = :student_group_id")
-    Integer getCreationYearByStudentDegreeId(
-            @Param("student_group_id") Integer studentGroupId
-    );
-
-    @Query("select sg.studyYears from StudentGroup sg " +
-            "where sg.id = :student_group_id")
-    Integer getBeginYearsByStudentDegreeId(
-            @Param("student_group_id") Integer studentGroupId
-    );
-
     @Query("SELECT sg from StudentGroup sg " +
             "WHERE sg.specialization.id = :specializationId " +
             "and sg.active = true")
