@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class StudentGroup extends NameWithActiveEntity {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Specialization specialization;
     private int creationYear;
     @Enumerated(value = EnumType.STRING)
