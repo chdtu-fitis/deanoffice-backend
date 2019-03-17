@@ -79,6 +79,17 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/courses/hours-per-credit")
+    public ResponseEntity getCoursesBySemesterAndHoursPerCredit(@RequestParam(value = "semester") int semester,
+                                                         @RequestParam(value = "hoursPerCredit") int hoursPerCredit) {
+        try {
+            List<Course> courses = courseService.getCoursesBySemesterAndHoursPerCredit(semester, hoursPerCredit);
+            return ResponseEntity.ok(map(courses, CourseDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
     @GetMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
