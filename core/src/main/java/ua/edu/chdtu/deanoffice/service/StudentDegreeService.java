@@ -2,6 +2,13 @@ package ua.edu.chdtu.deanoffice.service;
 
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.repository.GradeRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -20,10 +27,13 @@ import java.util.stream.Collectors;
 public class StudentDegreeService {
     private final StudentDegreeRepository studentDegreeRepository;
     private final CurrentYearService currentYearService;
+    private final GradeRepository gradeRepository;
 
-    public StudentDegreeService(StudentDegreeRepository studentDegreeRepository, CurrentYearService currentYearService) {
+    public StudentDegreeService(StudentDegreeRepository studentDegreeRepository, CurrentYearService currentYearService,
+                                GradeRepository gradeRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.currentYearService = currentYearService;
+        this.gradeRepository = gradeRepository;
     }
 
     public StudentDegree getById(Integer id) {
@@ -68,10 +78,20 @@ public class StudentDegreeService {
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
+        checkStudentGradesForSupplement(studentDegree);
         return message;
     }
 
-    public Map<StudentDegree, String> checkAllGraduates(int facultyId, int degreeId) {
+    private String checkStudentGradesForSupplement(StudentDegree studentDegree) {
+        List<Grade> grades = gradeRepository.getByCheckStudentGradesForSupplement(studentDegree.getId());
+        if (grades == null)
+            return "";
+        final StringBuilder message = new StringBuilder();
+        grades.forEach(grade -> message.append(grade.getCourse().getCourseName().getName() + ", " + grade.getCourse().getSemester() + "сем; "));
+        return message.toString();
+    }
+
+    public Map<StudentDegree, String> checkAllGraduatesData(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
         List<StudentDegree> studentDegrees = studentDegreeRepository.findAllGraduates(year, facultyId, degreeId);
         return studentDegrees
@@ -79,6 +99,18 @@ public class StudentDegreeService {
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
                 .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability, (e1, e2) -> e1, LinkedHashMap::new));
     }
+
+    public Map<StudentDegree, String> checkAllGraduatesGrades(int facultyId, int degreeId) {
+        int year = currentYearService.getYear();
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findAllGraduates(year, facultyId, degreeId);
+        return studentDegrees
+                .stream()
+                .filter(sd -> !checkStudentGradesForSupplement(sd).equals(""))
+                .collect(Collectors.toMap(sd -> sd, this::checkStudentGradesForSupplement));
+    }
+
+    public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){
+        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
         return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active, studentId, specializationId);

@@ -22,6 +22,19 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             @Param("KnowledgeControlIds") List<Integer> knowledgeControlsIds
     );
 
+    @Query(value = "select g.* from grade g" +
+            " inner join course c ON c.id = g.course_id" +
+            " inner join course_name cn ON cn.id = c.course_name_id" +
+            " inner join student_degree sd ON sd.id = g.student_degree_id" +
+            " inner join student s ON s.id = sd.student_id" +
+            " inner join student_group sg ON sg.id = sd.student_group_id" +
+            " left outer join courses_for_groups cfg ON cfg.course_id = c.id and sg.id=cfg.student_group_id" +
+            " where g.student_degree_id = :studentDegreeId" +
+            " order by cn.name", nativeQuery = true)
+    List<Grade> getByCheckStudentGradesForSupplement(
+            @Param("studentDegreeId") Integer studentDegreeId
+    );
+
     @Query("select grade from Grade grade " +
             "join grade.course course " +
             "where grade.studentDegree.id in (:studentIds)" +
