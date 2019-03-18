@@ -25,7 +25,7 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
     @Query("select cfg from CourseForGroup as cfg " +
             "where cfg.course.semester = :semester and cfg.studentGroup.id=:groupId " +
             "order by cfg.course.knowledgeControl.id, cfg.course.courseName.name")
-    List<CourseForGroup> findAllByStudentGroupIdAndCourse_Semester(@Param("groupId") int groupId, @Param("semester") int semester);
+    List<CourseForGroup> findAllByStudentGroupIdAndCourseSemester(@Param("groupId") int groupId, @Param("semester") int semester);
 
     CourseForGroup findByStudentGroupIdAndCourseId(@Param("studentGroupId") int groupId, @Param("courseId") int courseId);
 
@@ -34,4 +34,12 @@ public interface CourseForGroupRepository extends JpaRepository<CourseForGroup, 
     @Query("SELECT cfg FROM CourseForGroup AS cfg " +
             "WHERE cfg.id IN (:ids)")
     List<CourseForGroup> findByIds(@Param("ids") int[] ids);
+
+    @Query( value =
+            "SELECT (count(*) > 0) AS result " +
+            "  FROM courses_for_groups cfg " +
+            "       INNER JOIN student_degree sd ON sd.student_group_id = cfg.student_group_id " +
+            "       INNER JOIN grade g on sd.id = g.student_degree_id and g.course_id = cfg.course_id " +
+            " WHERE cfg.id = :courseForGroupId", nativeQuery = true)
+    boolean areGradesFor(@Param("courseForGroupId") int courseForGroupId);
 }

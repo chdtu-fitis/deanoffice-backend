@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
 import java.util.Date;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,4 +27,6 @@ public class StudentDegreeFullEdeboDataDto {
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date admissionOrderDate;
     private Payment payment;
+    private boolean modified;
+    private Set<StudentPreviousUniversityDTO> studentPreviousUniversities;
 }

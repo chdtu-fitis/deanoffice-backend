@@ -2,6 +2,8 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
+import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
@@ -9,11 +11,14 @@ import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
-import java.util.List;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
@@ -26,6 +31,7 @@ public class StudentExpelService {
     private final CurrentYearRepository currentYearRepository;
     private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
     private final StudentUtil studentUtil;
+    private final OrderReasonService orderReasonService;
 
     @Autowired
     public StudentExpelService(
@@ -33,13 +39,15 @@ public class StudentExpelService {
             StudentExpelRepository studentExpelRepository,
             CurrentYearRepository currentYearRepository,
             RenewedExpelledStudentRepository renewedExpelledStudentRepository,
-            StudentUtil studentUtil
+            StudentUtil studentUtil,
+            OrderReasonService orderReasonService
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
         this.currentYearRepository = currentYearRepository;
         this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
         this.studentUtil = studentUtil;
+        this.orderReasonService = orderReasonService;
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
@@ -52,6 +60,27 @@ public class StudentExpelService {
         studentDegreeRepository.save(studentDegrees);
 
         return studentExpelRepository.save(studentExpels);
+    }
+
+    public void expelStudents(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) throws Exception {
+        List<StudentExpel> studentExpels = new ArrayList<>();
+        studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
+        studentDegreeRepository.save(studentDegrees);
+
+        Map<Integer, OrderReason> orderReasonMap = new HashMap<>();
+        orderReasonMap.put(1, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_BACHELOR));
+        orderReasonMap.put(2, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_SPECIALIST));
+        orderReasonMap.put(3, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_MASTER));
+
+        int currentYear = currentYearRepository.getOne(1).getCurrYear();
+        for (StudentDegree studentDegree : studentDegrees) {
+            studentExpels.add(new StudentExpel( studentDegree, studentDegree.getStudentGroup(),
+                    currentYear - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears(),
+                    studentDegree.getPayment(), expelDate, orderNumber, orderDate,
+                    orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()), null));
+        }
+
+        studentExpelRepository.save(studentExpels);
     }
 
     public List<StudentExpel> getAllExpelledStudents(Integer facultyId) {
@@ -90,4 +119,14 @@ public class StudentExpelService {
     public StudentExpel getById(Integer studentExpelId) {
         return studentExpelRepository.getOne(studentExpelId);
     }
+
+    public List<StudentExpel> getSpecificationName(Date startDate, Date endDate,String surname, String name, int facultyId) {
+        return studentExpelRepository.findAll(StudentDegreeSpecification.getExpelStudent(startDate,endDate,surname, name, facultyId));
+    }
+
+    public List <StudentExpel> getByStudentDegreeId(Integer studentDegreeId){
+        List <StudentExpel> expelledStudentInformation = studentExpelRepository.findByStudentDegreeIdOrderByExpelDate(studentDegreeId);
+        return expelledStudentInformation;
+    }
+
 }

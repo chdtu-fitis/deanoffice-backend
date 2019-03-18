@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
@@ -35,7 +36,7 @@ public class CourseForGroupService {
     }
 
     public List<CourseForGroup> getCoursesForGroupBySemester(int idGroup, int semester) {
-        return courseForGroupRepository.findAllByStudentGroupIdAndCourse_Semester(idGroup, semester);
+        return courseForGroupRepository.findAllByStudentGroupIdAndCourseSemester(idGroup, semester);
     }
 
     public List<CourseForGroup> getCourseForGroupBySpecialization(int specialization, int semester) {
@@ -44,6 +45,20 @@ public class CourseForGroupService {
 
     public List<CourseForGroup> getCoursesForGroupBySemester(int semester) {
         return courseForGroupRepository.findAllBySemester(semester);
+    }
+
+    public boolean areGradesForCourseForGroups(List<Integer> courseForGroupIds) {
+        return courseForGroupIds
+                .stream()
+                .anyMatch(courseForGroupRepository::areGradesFor);
+    }
+
+    public void validateDeleteCourseForGroups(List<Integer> courseForGroupsIds) throws Exception {
+        if (areGradesForCourseForGroups(courseForGroupsIds)) {
+            throw new OperationCannotBePerformedException(
+                    "Неможливо видалити предмет, якщо хоч в одного студента є оцінка з предмету, що видаляється."
+            );
+        }
     }
 
     public void addCourseForGroupAndNewChanges(

@@ -1,6 +1,8 @@
 package ua.edu.chdtu.deanoffice.repository;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
@@ -8,7 +10,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import java.util.Date;
 import java.util.List;
 
-public interface StudentExpelRepository extends JpaRepository<StudentExpel, Integer> {
+public interface StudentExpelRepository extends JpaRepository<StudentExpel, Integer>, JpaSpecificationExecutor<StudentExpel> {
     @Query("select se from StudentExpel se " +
             "where se.orderReason.id not in :success_reason_ids and " +
             "se.studentDegree.specialization.faculty.id = :faculty_id " +
@@ -26,4 +28,10 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
             "where se.studentDegree.id in :student_degree_ids " +
             "and se.studentDegree.active = false")
     List<StudentExpel> findAllActiveFired(@Param("student_degree_ids") Integer[] studentDegreeIds);
+
+    @Override
+    List<StudentExpel> findAll(Specification<StudentExpel> spec);
+
+    List <StudentExpel> findByStudentDegreeIdOrderByExpelDate(@Param("student_degree_id") Integer studentDegreeId);
+
 }

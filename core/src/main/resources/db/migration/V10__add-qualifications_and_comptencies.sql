@@ -8,8 +8,6 @@ CREATE SEQUENCE public.acquired_competencies_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.acquired_competencies_id_seq
-    OWNER TO postgres;
 
 CREATE TABLE public.acquired_competencies
 (
@@ -30,9 +28,6 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.acquired_competencies
-    OWNER to postgres;
-
 -- Table: public.professional_qualification
 
 CREATE SEQUENCE public.professional_qualification_id_seq
@@ -41,9 +36,6 @@ CREATE SEQUENCE public.professional_qualification_id_seq
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
-
-ALTER SEQUENCE public.professional_qualification_id_seq
-    OWNER TO postgres;
 
 CREATE TABLE public.professional_qualification
 (
@@ -58,9 +50,6 @@ WITH (
 )
 TABLESPACE pg_default;
 
-ALTER TABLE public.professional_qualification
-    OWNER to postgres;
-
 -- Table: public.qualifications_for_specializations
 
 CREATE SEQUENCE public.qualifications_for_specializations_id_seq
@@ -69,9 +58,6 @@ CREATE SEQUENCE public.qualifications_for_specializations_id_seq
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
-
-ALTER SEQUENCE public.qualifications_for_specializations_id_seq
-    OWNER TO postgres;
 
 CREATE TABLE public.qualifications_for_specializations
 (
@@ -94,11 +80,6 @@ WITH (
     OIDS = FALSE
 )
 TABLESPACE pg_default;
-
-ALTER TABLE public.qualifications_for_specializations
-    OWNER to postgres;
-
-
 
 ALTER TABLE public.specialization
 ADD COLUMN certificate_date date NOT NULL DEFAULT '1980-01-01'::date,

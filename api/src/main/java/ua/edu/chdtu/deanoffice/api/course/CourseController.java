@@ -3,7 +3,13 @@ package ua.edu.chdtu.deanoffice.api.course;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
@@ -12,14 +18,29 @@ import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
+import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.service.course.CourseService;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
@@ -128,8 +149,11 @@ public class CourseController {
         Course course = new Course();
         course.setSemester(semester);
         course.setCourseName(courseName);
-        BigDecimal credits = BigDecimal.valueOf(hours).divide(BigDecimal.valueOf(hoursPerCredit), 2, BigDecimal.ROUND_HALF_UP);
-        course.setCredits(credits);
+        if (hoursPerCredit.equals(0) || hours.equals(0)) {
+            course.setCredits(BigDecimal.ZERO);
+        } else {
+            course.setCredits(BigDecimal.valueOf(hours).divide(BigDecimal.valueOf(hoursPerCredit), 2, BigDecimal.ROUND_HALF_UP));
+        }
         course.setHours(hours);
         course.setHoursPerCredit(hoursPerCredit);
         course.setKnowledgeControl(knowledgeControl);
@@ -169,8 +193,7 @@ public class CourseController {
         CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
         if (courseNameFromDB != null){
             newCourse.setCourseName(courseNameFromDB);
-        }
-        else {
+        } else {
             CourseName newCourseName = new CourseName();
             newCourseName.setName(courseName.getName());
             newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
@@ -188,6 +211,8 @@ public class CourseController {
     @PostMapping("/groups/{groupId}/courses")
     public ResponseEntity addCoursesForGroup(@RequestBody CoursesForGroupHolder coursesForGroupHolder, @PathVariable Integer groupId) {
         try {
+            courseForGroupService.validateDeleteCourseForGroups(coursesForGroupHolder.getDeleteCoursesIds());
+
             List<CourseForGroupDTO> newCourses = coursesForGroupHolder.getNewCourses();
             List<CourseForGroupDTO> updatedCourses = coursesForGroupHolder.getUpdatedCourses();
             List<Integer> deleteCoursesIds = coursesForGroupHolder.getDeleteCoursesIds();

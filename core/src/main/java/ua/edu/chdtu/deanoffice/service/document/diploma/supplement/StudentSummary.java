@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.edu.chdtu.deanoffice.Constants;
@@ -12,13 +13,13 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
+@Setter
 public class StudentSummary {
 
     private static Logger log = LoggerFactory.getLogger(StudentSummary.class);
@@ -40,7 +41,7 @@ public class StudentSummary {
     protected StudentSummary() {
     }
 
-    private void removeUnwantedGrades() {
+    protected void removeUnwantedGrades() {
         for (List<Grade> gradesSublist : grades) {
             List<Grade> gradesToRemove = new ArrayList<>();
             for (Grade grade : gradesSublist) {

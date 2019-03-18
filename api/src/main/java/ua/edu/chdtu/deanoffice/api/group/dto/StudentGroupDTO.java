@@ -8,14 +8,15 @@ import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 public class StudentGroupDTO {
-    @JsonView(StudentGroupView.Basic.class)
+    @JsonView({StudentGroupView.Basic.class, StudentGroupView.Short.class})
     private Integer id;
-    @JsonView(StudentGroupView.Basic.class)
+    @JsonView({StudentGroupView.Basic.class, StudentGroupView.Short.class})
     private String name;
     @JsonView(StudentGroupView.AllGroupData.class)
     private boolean active;
@@ -24,7 +25,7 @@ public class StudentGroupDTO {
     @JsonView(StudentGroupView.Basic.class)
     private int creationYear;
     @JsonView(StudentGroupView.WithStudents.class)
-    private List<StudentDegreeFullNameDTO> studentDegrees;
+    private List<StudentDegreeFullNameDTO> studentDegrees = new ArrayList<>();
     @JsonView(StudentGroupView.AllGroupData.class)
     private SpecializationDTO specialization;
     @JsonView(StudentGroupView.Basic.class)

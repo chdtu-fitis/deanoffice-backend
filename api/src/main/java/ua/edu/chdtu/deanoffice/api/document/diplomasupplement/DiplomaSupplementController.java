@@ -66,6 +66,7 @@ public class DiplomaSupplementController extends DocumentResponseController {
             facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
             Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesData(user.getFaculty().getId(), degreeId);
             List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<>();
+
             for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
                 StudentDegree studentDegree = entry.getKey();
                 String message = entry.getValue();

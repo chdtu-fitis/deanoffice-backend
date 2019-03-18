@@ -39,6 +39,14 @@ public class DocumentIOService {
         return SpreadsheetMLPackage.load(xlsxInputStream);
     }
 
+    public WordprocessingMLPackage loadWordDocument(String name) throws Docx4JException, IOException{
+        return WordprocessingMLPackage.load(new FileInputStream(new ClassPathResource(name).getFilename()));
+    }
+
+    public WordprocessingMLPackage loadWordDocument(InputStream docxInputStream) throws Docx4JException{
+        return WordprocessingMLPackage.load(docxInputStream);
+    }
+
     public File saveDocumentToTemp(WordprocessingMLPackage document, String fileName, FileFormatEnum format)
             throws Docx4JException, FileNotFoundException {
         return saveDocument(document, fileName, format);
@@ -80,7 +88,7 @@ public class DocumentIOService {
     public String cleanFileName(String fileName) {
         String result = new String(fileName);
         result = result.replaceAll(" +", " ");
-        result = result.replaceAll("[^a-zA-Z0-9_]+", "");
+        result = result.replaceAll("[^a-zA-Z0-9_\\-]+", "");
         return result;
     }
 }

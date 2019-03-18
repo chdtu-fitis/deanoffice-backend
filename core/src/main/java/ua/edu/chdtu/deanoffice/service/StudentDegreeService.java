@@ -9,6 +9,16 @@ import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+
+import java.util.Date;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,6 +38,10 @@ public class StudentDegreeService {
 
     public StudentDegree getById(Integer id) {
         return studentDegreeRepository.getById(id);
+    }
+
+    public List<StudentDegree> getByIds(List<Integer> ids) {
+        return studentDegreeRepository.getAllByIds(ids);
     }
 
     public List<StudentDegree> getAllByActive(boolean active, int facultyId) {
@@ -50,14 +64,14 @@ public class StudentDegreeService {
     private String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
         String message = "";
         message += Strings.isNullOrEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома. " : "";
-        message += (studentDegree.getDiplomaDate()==null) ? "Дата диплома. " : "";
-        message += (studentDegree.getPreviousDiplomaDate()==null) ? "Попередня дата диплома. " : "";
+        message += (studentDegree.getDiplomaDate() == null) ? "Дата диплома. " : "";
+        message += (studentDegree.getPreviousDiplomaDate() == null) ? "Попередня дата диплома. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getPreviousDiplomaNumber()) ? "Попередній номер диплома. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getPreviousDiplomaIssuedBy()) ? "Попередній диплом виданий. " : "";
-        message += (studentDegree.getAdmissionDate()==null) ? "Дата вступу. " : "";
-        message += (studentDegree.getProtocolDate()==null) ? "Дата протокола. " : "";
+        message += (studentDegree.getAdmissionDate() == null) ? "Дата вступу. " : "";
+        message += (studentDegree.getProtocolDate() == null) ? "Дата протокола. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
-        message += (studentDegree.getSupplementDate()==null) ? "Дата додатка. " : "";
+        message += (studentDegree.getSupplementDate() == null) ? "Дата додатка. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
@@ -83,7 +97,7 @@ public class StudentDegreeService {
         return studentDegrees
                 .stream()
                 .filter(sd -> !checkGraduateFieldValuesAvailability(sd).equals(""))
-                .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability));
+                .collect(Collectors.toMap(sd -> sd, this::checkGraduateFieldValuesAvailability, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     public Map<StudentDegree, String> checkAllGraduatesGrades(int facultyId, int degreeId) {
@@ -97,6 +111,9 @@ public class StudentDegreeService {
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){
         return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
+
+    public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
+        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active, studentId, specializationId);
     }
 
     public StudentDegree save(StudentDegree studentDegree) {
@@ -107,7 +124,65 @@ public class StudentDegreeService {
         studentDegreeRepository.save(studentDegree);
     }
 
-    public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId){
+    @Transactional
+    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng, String fullSupervisor){
+        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng, fullSupervisor);
+    }
+
+    @Transactional
+    public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, boolean honor, Date diplomaDate, Date supplementDate) {
+        studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, honor, diplomaDate, supplementDate);
+    }
+
+    public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId) {
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
+    }
+
+    public StudentDegree getBySupplementNumber(String supplementNumber) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findBySupplementNumber(supplementNumber);
+        return (studentDegrees.size() == 1) ? studentDegrees.get(0) : null;
+    }
+
+    @Transactional
+    public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
+        studentDegreeRepository.assignStudentsToGroup(students, group);
+    }
+
+    @Transactional
+    public void assignRecordBookNumbersToStudents(Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers) {
+        studentDegreeIdsAndRecordBooksNumbers.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
+    }
+
+    public StudentDegree getByStudentFullNameAndGroupId(String fullName, int groupId){
+        List<StudentDegree> studentDegrees = this.studentDegreeRepository.findByFullNameAndGroupId(fullName, groupId);
+        return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
+    }
+
+    public List<StudentDegree> getActiveByIdsAndFaculty(List<Integer> ids, int facultyId){
+        if (ids == null || ids.size() == 0)
+            return new ArrayList<>();
+        return studentDegreeRepository.findActiveByIdsAndFacultyId(ids, facultyId);
+    }
+
+    public int getCountAllActiveStudents(int specializationId, int studyYear, Payment payment, int degreeId) {
+        return studentDegreeRepository.findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment(specializationId, currentYearService.getYear(), studyYear, payment.toString(), degreeId);
+    }
+
+    public int getCountAllActiveDebtors(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
+        return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId);
+    }
+
+    public int getCountAllActiveDebtorsWithLessThanThreeDebs(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
+        return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
+    }
+
+    public int getCountAllActiveDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear,  TuitionForm tuitionForm, Payment payment, int degreeId) {
+        return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
+    }
+
+    public void setStudentDegreesInactive(List<Integer> ids) {
+        if (ids.size() != 0) {
+            studentDegreeRepository.setStudentDegreesInactive(ids);
+        }
     }
 }

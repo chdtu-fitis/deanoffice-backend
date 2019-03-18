@@ -3,8 +3,7 @@ package ua.edu.chdtu.deanoffice.service.document.report.academic.reference;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Tr;
+import org.docx4j.wml.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -13,9 +12,9 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.File;
@@ -33,13 +32,12 @@ public class AcademicReferenceService {
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
     private static final int INDEX_OF_TABLE_WITH_GRADES = 11;
     private static final String DOCUMENT_DELIMITER = "/";
+    private static final String NO_GRADES_DESCRIPTION_UKR = "Заліків та іспитів не здавав(ла).";
+    private static final String NO_GRADES_DESCRIPTION_EN = "No credits and exams.";
     private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
     @Autowired
     private DocumentIOService documentIOService;
-
-    @Autowired
-    private StudentGroupService studentGroupService;
 
     @Autowired
     private GradeService gradeService;
@@ -111,18 +109,57 @@ public class AcademicReferenceService {
 
     private void prepareTable(WordprocessingMLPackage template, StudentSummaryForAcademicReference studentSummary) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(INDEX_OF_TABLE_WITH_GRADES);
-        prepareRows(table, studentSummary);
+        if(studentSummary.semesters.isEmpty()){
+            table.getContent().remove(2);
+            showNoGradesMessage(table);
+        } else {
+            prepareRows(table, studentSummary);
+        }
+    }
+
+    private void showNoGradesMessage(Tbl table){
+        Text textInTable = getTextsPlaceholdersFromContentAccessor(table)
+                .stream().filter(text -> "#n".equals(text.getValue().trim())).findFirst().get();
+        R parentContainer = (R) textInTable.getParent();
+        P parentParagraph = (P) TemplateUtil.findParentNode(textInTable, P.class);
+        ContentAccessor paragraphsParent = (ContentAccessor) parentParagraph.getParent();
+        P newParagraph = XmlUtils.deepCopy(parentParagraph);
+        newParagraph.getContent().clear();
+        R container = XmlUtils.deepCopy(parentContainer);
+        container.getContent().clear();
+        Text noGradesMessage = XmlUtils.deepCopy(textInTable);
+        noGradesMessage.setValue(NO_GRADES_DESCRIPTION_UKR);
+        container.getContent().add(noGradesMessage);
+        newParagraph.getContent().add(container);
+        paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
+        newParagraph = XmlUtils.deepCopy(parentParagraph);
+        newParagraph.getContent().clear();
+        container = XmlUtils.deepCopy(parentContainer);
+        container.getContent().clear();
+        noGradesMessage = XmlUtils.deepCopy(textInTable);
+        noGradesMessage.setValue(NO_GRADES_DESCRIPTION_EN);
+        container.getContent().add(noGradesMessage);
+        newParagraph.getContent().add(container);
+        paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
+        paragraphsParent.getContent().remove(2);
     }
 
     private void prepareRows(Tbl table, StudentSummaryForAcademicReference studentSummary) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         Tr rowWithSignature = tableRows.get(1);
         Tr rowWithCourse = tableRows.get(2);
-        int currentSemester = 1;
+        Set <Integer> semestersSet = studentSummary.getSemesters().keySet();
         int currentRow = 2;
-        for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
-            currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, getSignatureDictionary(currentSemester), semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX));
-            currentSemester++;
+        int currentSemester;
+        Iterator<Integer> setIterator = semestersSet.iterator();
+        if (setIterator.hasNext()) {
+            currentSemester = setIterator.next();
+            for (SemesterDetails semesterDetails : studentSummary.getSemesters().values()) {
+                currentRow = insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, getSignatureDictionary(currentSemester), semesterDetails.getGrades().get(EXAMS_AND_CREDITS_INDEX));
+                if (setIterator.hasNext()) {
+                    currentSemester = setIterator.next();
+                }
+            }
         }
         List<List<Grade>> coursePapersAndInternships = getCoursePapersAndInternships(studentSummary);
         if (coursePapersAndInternships.get(0).size() > 0) {
@@ -157,7 +194,7 @@ public class AcademicReferenceService {
         List<List<Grade>> coursePapersAndInternships = new ArrayList<List<Grade>>();
         coursePapersAndInternships.add(new ArrayList<>());
         coursePapersAndInternships.add(new ArrayList<>());
-        for (SemesterDetails semesterDetails : studentSummary.getSemesters()) {
+        for (SemesterDetails semesterDetails : studentSummary.getSemesters().values()) {
             if (semesterDetails.getGrades().get(COURSE_PAPERS_INDEX).size()>0) {
                 for (Grade grade : semesterDetails.getGrades().get(COURSE_PAPERS_INDEX)) {
                     coursePapersAndInternships.get(0).add(grade);

@@ -15,7 +15,7 @@ public interface SpecialityRepository extends JpaRepository<Speciality, Integer>
             "group by s.id " +
             "order by s.name, s.code",
             nativeQuery = true)
-    List<Speciality> findAllActive(@Param("faculty_id") int facultyId);
+    List<Speciality> findAllActiveInFaculty(@Param("faculty_id") int facultyId);
 
     @Query(value =
             "select s.* from speciality as s " +
@@ -24,7 +24,7 @@ public interface SpecialityRepository extends JpaRepository<Speciality, Integer>
             "group by s.id " +
             "order by s.name, s.code",
             nativeQuery = true)
-    List<Speciality> findAll(@Param("faculty_id") int facultyId);
+    List<Speciality> findAllInFaculty(@Param("faculty_id") int facultyId);
 
     @Query("SELECT s from Speciality s " +
             "where s.code = :code " +

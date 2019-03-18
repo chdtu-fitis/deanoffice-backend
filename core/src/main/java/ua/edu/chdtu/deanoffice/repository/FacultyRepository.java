@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 
+import java.util.List;
+
 public interface FacultyRepository extends JpaRepository<Faculty, Integer> {
     @Query(value = "select f.id from student_degree sd " +
             "inner join student_group sg on sg.id = sd.student_group_id " +
@@ -29,4 +31,9 @@ public interface FacultyRepository extends JpaRepository<Faculty, Integer> {
 
     @Query("select f from Faculty f where upper(f.name)=upper(:name)")
     Faculty findByName(@Param("name") String name);
+
+    Faculty findById(@Param("id") Integer id);
+
+    @Query("select f from Faculty f where f.active = true order by name")
+    List<Faculty> findAllActive();
 }

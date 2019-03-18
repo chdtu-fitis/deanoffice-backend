@@ -3,14 +3,19 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -20,6 +25,8 @@ public class StudentDegree extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date admissionOrderDate;
     private String admissionOrderNumber;
+    @Temporal(TemporalType.DATE)
+    private Date admissionDate;
     @Temporal(TemporalType.DATE)
     private Date contractDate;
     private String contractNumber;
@@ -46,13 +53,13 @@ public class StudentDegree extends BaseEntity {
     private String supplementNumber;
     private String thesisName;
     private String thesisNameEng;
+    private String thesisSupervisor;
     @ManyToOne(fetch = FetchType.LAZY)
     private Specialization specialization;
     @ManyToOne
     private Student student;
     @ManyToOne
     private StudentGroup studentGroup;
-
-    @Temporal(TemporalType.DATE)
-    private Date admissionDate;
+    @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<StudentPreviousUniversity> studentPreviousUniversities = new HashSet<>();
 }
