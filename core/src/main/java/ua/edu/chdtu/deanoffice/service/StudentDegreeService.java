@@ -78,7 +78,6 @@ public class StudentDegreeService {
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
-        checkStudentGradesForSupplement(studentDegree);
         return message;
     }
 
@@ -108,9 +107,6 @@ public class StudentDegreeService {
                 .filter(sd -> !checkStudentGradesForSupplement(sd).equals(""))
                 .collect(Collectors.toMap(sd -> sd, this::checkStudentGradesForSupplement));
     }
-
-    public StudentDegree getByStudentIdAndSpecializationId(boolean active,Integer studentId, Integer specializationId){
-        return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active,studentId,specializationId);
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
         return this.studentDegreeRepository.findByStudentIdAndSpecialityId(active, studentId, specializationId);

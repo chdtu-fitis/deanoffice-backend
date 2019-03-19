@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
@@ -28,9 +29,9 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             " inner join student_degree sd ON sd.id = g.student_degree_id" +
             " inner join student s ON s.id = sd.student_id" +
             " inner join student_group sg ON sg.id = sd.student_group_id" +
-            " left outer join courses_for_groups cfg ON cfg.course_id = c.id and sg.id=cfg.student_group_id" +
-            " where g.student_degree_id = :studentDegreeId" +
-            " order by cn.name", nativeQuery = true)
+            " inner join courses_for_groups cfg ON cfg.course_id = c.id and sg.id=cfg.student_group_id" +
+            " where g.student_degree_id = :studentDegreeId and (g.points is null or g.points < " + Constants.MINIMAL_SATISFACTORY_POINTS +")" +
+            " order by c.semester, cn.name", nativeQuery = true)
     List<Grade> getByCheckStudentGradesForSupplement(
             @Param("studentDegreeId") Integer studentDegreeId
     );
