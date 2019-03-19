@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.course;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,11 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
+import ua.edu.chdtu.deanoffice.api.course.dto.CoursePaginationDTO;
 import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
 import ua.edu.chdtu.deanoffice.api.course.util.CoursesForGroupHolder;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
@@ -30,6 +33,7 @@ import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.service.course.CoursePaginationBean;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 
 import java.math.BigDecimal;
@@ -174,7 +178,7 @@ public class CourseController {
             } else {
                 CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
                 newCourse = updateCourseName(courseName, newCourse);
-                if (courseForGroupService.hasSoleCourse(oldCourseId)){
+                if (courseForGroupService.hasSoleCourse(oldCourseId)) {
                     courseService.createOrUpdateCourse(newCourse);
                 } else {
                     newCourse.setId(0);
@@ -189,9 +193,9 @@ public class CourseController {
         }
     }
 
-    private Course updateCourseName(CourseName courseName, Course newCourse){
+    private Course updateCourseName(CourseName courseName, Course newCourse) {
         CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
-        if (courseNameFromDB != null){
+        if (courseNameFromDB != null) {
             newCourse.setCourseName(courseNameFromDB);
         } else {
             CourseName newCourseName = new CourseName();
@@ -292,6 +296,41 @@ public class CourseController {
         try {
             List<CourseName> courseNames = this.courseNameService.getCourseNames();
             return ResponseEntity.ok(map(courseNames, NamedDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("/test")
+    public void test(@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
+                     @RequestParam(required = false, name = "courseName", defaultValue = "") String courseName,
+                     @RequestParam(required = false, name = "hours", defaultValue = "0") Integer hours,
+                     @RequestParam(required = false, name = "hoursPerCredit", defaultValue = "0") Integer hoursPerCredit,
+                     @RequestParam(required = false, name = "knowledgeControl", defaultValue = "") String knowledgeControl,
+                     @RequestParam(required = false, name = "nameStartingWith", defaultValue = "") String nameStartingWith,
+                     @RequestParam(required = false, name = "nameMatches", defaultValue = "") String nameMatches
+    ) {
+        CoursePaginationBean courseByFilters = courseService.getCourseByFilters(
+                page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameMatches);
+        System.out.println("");
+    }
+
+    @GetMapping("course/unused")
+    public ResponseEntity getUnusedCourses(
+            @RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
+        try {
+            CoursePaginationBean unusedCourses = courseService.getUnusedCourses(page);
+            return ResponseEntity.ok(Mapper.strictMap(unusedCourses, CoursePaginationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @DeleteMapping("/delete/course")
+    public ResponseEntity deleteCourseByIds(@RequestParam List<Integer> ids) {
+        try {
+//            courseService.deleteCourseByIds(ids);
+            return (ResponseEntity) ResponseEntity.ok();
         } catch (Exception exception) {
             return handleException(exception);
         }
