@@ -32,6 +32,10 @@ public class CourseService {
         return courseRepository.findAllBySemester(semester);
     }
 
+    public List<Course> getCoursesBySemesterAndHoursPerCredit(int semester, int hoursPerCredit){
+        return courseRepository.findAllBySemesterAndHoursPerCredit(semester, hoursPerCredit);
+    }
+
     public Course createOrUpdateCourse(Course course) {
         return this.courseRepository.save(course);
     }
