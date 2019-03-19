@@ -16,7 +16,7 @@ import java.util.Map;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final StudentGroupService studentGroupService;
-    private final int PER_PAGE = 10;
+    private final int ROWS_PER_PAGE = 50;
 
     public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService) {
         this.courseRepository = courseRepository;
@@ -105,29 +105,26 @@ public class CourseService {
         return courseRepository.findAllCourses();
     }
 
+    //doesn't work
     public CoursePaginationBean getCourseByFilters(int page, String courseName, int hours, int hoursPerCredit, String knowledgeControl,
                                                    String nameStartingWith, String nameMatches) {
         int totalPages = 13;
-        PageRequest pageRequest = new PageRequest(page, PER_PAGE);
+        PageRequest pageRequest = new PageRequest(page, ROWS_PER_PAGE);
         List<Course> items = courseRepository.findAll(CourseSpecification.getCourseWithImportFilters(
                 courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameMatches), pageRequest);
         return new CoursePaginationBean(totalPages, page, items);
     }
 
-    //do we need getTotalMethod
-    public CoursePaginationBean getUnusedCourses(int page) {
-        int totalPages = (getTotalOfUnusedCourses() / PER_PAGE) + ((getTotalOfUnusedCourses() % PER_PAGE) == 0 ? 0 : 1);
-        List<Course> items = courseRepository.findUnusedCourses(new PageRequest(page, PER_PAGE));
+    public CoursePaginationBean getPaginatedUnusedCourses(int page) {
+        int totalOfUnusedCourses = courseRepository.findTotalOfUnusedCourses();
+        int totalPages = (totalOfUnusedCourses / ROWS_PER_PAGE) + ((totalOfUnusedCourses % ROWS_PER_PAGE) == 0 ? 0 : 1);
+        List<Course> items = courseRepository.findUnusedCourses(new PageRequest(page, ROWS_PER_PAGE));
         return new CoursePaginationBean(totalPages, page, items);
     }
 
-    private int getTotalOfUnusedCourses() {
-        return courseRepository.findTotalOfUnusedCourses();
+    public void deleteCoursesByIds(List<Integer> ids) {
+        courseRepository.deleteByIdIn(ids);
     }
-
-//    public void deleteCourseByIds(List<Integer> id) {
-//        courseRepository.deleteCourseByIds(id);
-//    }
 
 //    private long getTotalCoursesByFilters(String courseName, int hours, int hoursPerCredit, String knowledgeControl,
 //                                          String nameStartingWith, String nameMatches) {
