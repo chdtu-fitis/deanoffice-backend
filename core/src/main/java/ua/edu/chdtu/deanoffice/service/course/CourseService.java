@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.course;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -15,6 +16,7 @@ import java.util.Map;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final StudentGroupService studentGroupService;
+    private final int PER_PAGE = 10;
 
     public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService) {
         this.courseRepository = courseRepository;
@@ -98,4 +100,38 @@ public class CourseService {
         bean.setOtherGroup(otherGroup);
         return bean;
     }
+
+    public List<Course> getAllCourses() {
+        return courseRepository.findAllCourses();
+    }
+
+    public CoursePaginationBean getCourseByFilters(int page, String courseName, int hours, int hoursPerCredit, String knowledgeControl,
+                                                   String nameStartingWith, String nameMatches) {
+        int totalPages = 13;
+        PageRequest pageRequest = new PageRequest(page, PER_PAGE);
+        List<Course> items = courseRepository.findAll(CourseSpecification.getCourseWithImportFilters(
+                courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameMatches), pageRequest);
+        return new CoursePaginationBean(totalPages, page, items);
+    }
+
+    //do we need getTotalMethod
+    public CoursePaginationBean getUnusedCourses(int page) {
+        int totalPages = (getTotalOfUnusedCourses() / PER_PAGE) + ((getTotalOfUnusedCourses() % PER_PAGE) == 0 ? 0 : 1);
+        List<Course> items = courseRepository.findUnusedCourses(new PageRequest(page, PER_PAGE));
+        return new CoursePaginationBean(totalPages, page, items);
+    }
+
+    private int getTotalOfUnusedCourses() {
+        return courseRepository.findTotalOfUnusedCourses();
+    }
+
+//    public void deleteCourseByIds(List<Integer> id) {
+//        courseRepository.deleteCourseByIds(id);
+//    }
+
+//    private long getTotalCoursesByFilters(String courseName, int hours, int hoursPerCredit, String knowledgeControl,
+//                                          String nameStartingWith, String nameMatches) {
+//        return courseRepository.countAll(CourseSpecification.getCourseWithImportFilters(
+//                courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameMatches));
+//    }
 }
