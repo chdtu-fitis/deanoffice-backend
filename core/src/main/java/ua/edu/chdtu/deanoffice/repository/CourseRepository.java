@@ -5,6 +5,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
@@ -86,7 +87,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             "and c.id not in (select distinct g.course.id from Grade as g)")
     int findTotalOfUnusedCourses();
 
-//    @Query("delete from Course where id in :id")
-//    void deleteCourseByIds(@Param("id") List<Integer> id);
-
+    @Transactional
+    void deleteByIdIn(List<Integer> ids);
 }
