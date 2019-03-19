@@ -116,6 +116,11 @@ public class DebtorReportService {
                 allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount += specializationDebtorsYearBean.getThreeOrMoreDebtsForBudgetDebtors();
                 allContractDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount += specializationDebtorsYearBean.getThreeOrMoreDebtsForContractDebtors();
             }
+
+            if (allBudgetStudentOfCurrentFacultyCount + allContractStudentOfCurrentFacultyCount == 0) {
+                continue;
+            }
+
             SpecializationDebtorsYearBean specializationDebtorsForFacultyYearBean
                     = new SpecializationDebtorsYearBean(allBudgetStudentOfCurrentFacultyCount, allContractStudentOfCurrentFacultyCount,
                     allBudgetDebtorsOfCurrentFacultyCount, allContractDebtorsOfCurrentFacultyCount,
