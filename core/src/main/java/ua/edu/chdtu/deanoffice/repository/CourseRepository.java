@@ -30,7 +30,7 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             "where course.semester = :semester " +
             "and course.hoursPerCredit = :hoursPerCredits " +
             "order by course.courseName.name, course.knowledgeControl.name, course.hours")
-    List<Course> findAllBySemesterAndCredits(
+    List<Course> findAllBySemesterAndHoursPerCredit(
             @Param("semester") int semester,
             @Param("hoursPerCredits") int hoursPerCredit
     );
