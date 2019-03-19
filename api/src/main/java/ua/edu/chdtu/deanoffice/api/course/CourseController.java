@@ -319,18 +319,18 @@ public class CourseController {
     public ResponseEntity getUnusedCourses(
             @RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
         try {
-            CoursePaginationBean unusedCourses = courseService.getUnusedCourses(page);
+            CoursePaginationBean unusedCourses = courseService.getPaginatedUnusedCourses(page);
             return ResponseEntity.ok(Mapper.strictMap(unusedCourses, CoursePaginationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    @DeleteMapping("/delete/course")
-    public ResponseEntity deleteCourseByIds(@RequestParam List<Integer> ids) {
+    @DeleteMapping("/courses")
+    public ResponseEntity deleteCoursesByIds(@RequestParam List<Integer> ids) {
         try {
-//            courseService.deleteCourseByIds(ids);
-            return (ResponseEntity) ResponseEntity.ok();
+            courseService.deleteCoursesByIds(ids);
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
