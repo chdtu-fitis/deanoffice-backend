@@ -4,6 +4,7 @@ package ua.edu.chdtu.deanoffice.api.document.journalRating;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,10 +38,11 @@ public class FormRatingController extends DocumentResponseController {
     public ResponseEntity<Resource> generateDocumentForStudent(
             @PathVariable Integer year, @PathVariable Integer degreeId,
             @RequestParam("tuitionForm") String tuitionForm,
-            @RequestParam("semester") int semester
+            @RequestParam("semester") int semester,
+            @CurrentUser ApplicationUser user
         ) throws IOException, Docx4JException {
         try {
-            File academicDifferenceReport = formRatingService.formDocument(degreeId,year,tuitionForm,semester);
+            File academicDifferenceReport = formRatingService.formDocument(degreeId,year,user.getFaculty().getId(),tuitionForm,semester);
             return buildDocumentResponseEntity(academicDifferenceReport, academicDifferenceReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
