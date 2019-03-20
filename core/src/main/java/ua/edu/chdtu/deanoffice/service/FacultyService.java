@@ -6,6 +6,8 @@ import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 
+import java.util.List;
+
 @Service
 public class FacultyService {
     private final FacultyRepository facultyRepository;
@@ -43,7 +45,12 @@ public class FacultyService {
     public Faculty getByName(String name) {
         return facultyRepository.findByName(name);
     }
+
     public Faculty getById(Integer id) {
         return facultyRepository.findById(id);
+    }
+
+    public List<Faculty> getAllActive() {
+        return  facultyRepository.findAllActive();
     }
 }

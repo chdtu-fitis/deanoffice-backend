@@ -14,9 +14,9 @@ import java.util.List;
 @Getter
 @Setter
 public class StudentGroupDTO {
-    @JsonView(StudentGroupView.Basic.class)
+    @JsonView({StudentGroupView.Basic.class, StudentGroupView.Short.class})
     private Integer id;
-    @JsonView(StudentGroupView.Basic.class)
+    @JsonView({StudentGroupView.Basic.class, StudentGroupView.Short.class})
     private String name;
     @JsonView(StudentGroupView.AllGroupData.class)
     private boolean active;

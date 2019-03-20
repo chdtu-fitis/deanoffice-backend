@@ -45,10 +45,10 @@ public class StudentDegreeSpecification {
                 Join <StudentExpel ,StudentDegree> studentDegree = root.join("studentDegree");
                 Join <StudentDegree ,Student> student = studentDegree.join("student");
                 if (surname != null && !surname.isEmpty()){
-                    predicates.add(cb.equal(student.get("surname"),surname));
+                    predicates.add(cb.like(cb.lower(student.get("surname")),surname.toLowerCase()+"%"));
                 }
                 if (name != null && !name.isEmpty()){
-                    predicates.add(cb.equal(student.get("name"), name));
+                    predicates.add(cb.like(cb.lower(student.get("name")),name.toLowerCase() +"%"));
                 }
                 Join<StudentDegree, Specialization> specialization = studentDegree.join("specialization");
                 predicates.add(cb.equal(specialization.get("faculty"), facultyId));
