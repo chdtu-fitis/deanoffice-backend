@@ -15,22 +15,22 @@ import java.util.List;
 
 public class CourseSpecification {
     static Specification<Course> getCourseWithImportFilters(
-            String courseName, int hours, int hoursPerCredit, String knowledgeControl,
-            String nameStartingWith, String nameMatches) {
+            String courseName, Integer hours, Integer hoursPerCredit, String knowledgeControl,
+            String nameStartingWith, String nameContains) {
         return (Root<Course> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (courseName != null && !courseName.isEmpty())
                 predicates.add(cb.equal(root.get("courseName").get("name"), courseName));
-            if (hours != 0)
+            if (hours != null)
                 predicates.add(cb.equal(root.get("hours"), hours));
-            if (hoursPerCredit != 0)
+            if (hoursPerCredit != null)
                 predicates.add(cb.equal(root.get("hoursPerCredit"), hoursPerCredit));
             if (knowledgeControl != null && !knowledgeControl.isEmpty())
                 predicates.add(cb.equal(root.get("knowledgeControl"), hoursPerCredit));
             if (nameStartingWith != null && !nameStartingWith.isEmpty())
                 predicates.add(cb.like(root.get("courseName").get("name"), nameStartingWith + "%"));
-            if (nameMatches != null && !nameMatches.isEmpty())
-                predicates.add(cb.like(root.get("courseName").get("name"), "%" + nameMatches + "%"));
+            if (nameContains != null && !nameContains.isEmpty())
+                predicates.add(cb.like(root.get("courseName").get("name"), "%" + nameContains + "%"));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
