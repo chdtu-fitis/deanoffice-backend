@@ -166,11 +166,12 @@ public class CourseController {
         try {
             Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
             int oldCourseId = coursesForGroupHolder.getOldCourseId();
+            boolean academicDifference = coursesForGroupHolder.getAcademicDifference();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             if (courseFromDb != null) {
                 newCourse = courseFromDb;
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
-                updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId);
+                updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId, academicDifference);
             } else {
                 CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
                 newCourse = updateCourseName(courseName, newCourse);
@@ -180,7 +181,7 @@ public class CourseController {
                     newCourse.setId(0);
                     newCourse = courseService.createOrUpdateCourse(newCourse);
                     CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
-                    updateCourseInCoursesForGroupsAndGrade(courseForGroup, newCourse, oldCourseId, groupId);
+                    updateCourseInCoursesForGroupsAndGrade(courseForGroup, newCourse, oldCourseId, groupId, academicDifference);
                 }
             }
             return ResponseEntity.ok(map(newCourse, CourseDTO.class));
@@ -203,6 +204,7 @@ public class CourseController {
 
     private void updateCourseInCoursesForGroupsAndGrade(CourseForGroup courseForGroup, Course newCourse, int oldCourseId, int groupId) {
         courseForGroup.setCourse(newCourse);
+        courseForGroup.setAcademicDifference(academicDifference);
         courseForGroupService.save(courseForGroup);
         List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
         gradeService.saveGradesByCourse(newCourse, grades);
