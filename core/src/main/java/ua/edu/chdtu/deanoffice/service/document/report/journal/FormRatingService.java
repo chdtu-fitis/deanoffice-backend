@@ -45,6 +45,8 @@ public class FormRatingService {
     private static final int FONT_SIZE_14 = 28;
     private static final String FONT_FAMILY = "Times New Roman";
     private static final String KURS= "-kurs";
+    private static final String JOURNAL= "journal-otsinok-";
+
 
     private WordprocessingMLPackage wordMLPackage;
     private ObjectFactory factory;
@@ -78,7 +80,7 @@ public class FormRatingService {
         retrenchments = new HashMap<Integer,String>();
         fillRetrenchments();
         WordprocessingMLPackage resultTemplate = createDocument();
-        String fileName = transliterate("journal-otsinok-"+year+KURS);
+        String fileName = transliterate(JOURNAL+year+KURS);
         return documentIOService.saveDocumentToTemp(resultTemplate, fileName, FileFormatEnum.DOCX);
     }
 
