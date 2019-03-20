@@ -1,6 +1,8 @@
 package ua.edu.chdtu.deanoffice.repository;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -49,40 +51,16 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
                    @Param("hours") int hours,
                    @Param("hours_per_credit") int hoursPerCredit);
 
-    //
-    @Query("select course from Course as course " +
-            "order by course.semester, course.knowledgeControl.name, course.courseName.name")
-    List<Course> findAllCourses();
+    long count(Specification<Course> specification);
+
+    PageImpl findAll(Specification<Course> specification, Pageable pageable);
 
     @Query("select course from Course as course " +
-            "where course.hours = :hours " +
             "order by course.semester, course.knowledgeControl.name, course.courseName.name")
-    List<Course> findCoursesByHours(@Param("hours") int hours);
+    List<Course> findAllCourses(Pageable pageable);
 
-    @Query("select course from Course as course " +
-            "where course.hoursPerCredit = :hours " +
-            "order by course.semester, course.knowledgeControl.name, course.courseName.name")
-    List<Course> findCoursesByHoursPerCredit(@Param("hours") int hours);
-
-    @Query("select course from Course as course " +
-            "where course.knowledgeControl.name = :knowledgeControl " +
-            "order by course.semester, course.knowledgeControl.name, course.courseName.name")
-    List<Course> findCoursesByKnowledgeControl(@Param("knowledgeControl") String knowledgeControl);
-
-    @Query("select course from Course as course " +
-            "where course.courseName.name like :startingWith% " +
-            "order by course.semester, course.knowledgeControl.name, course.courseName.name")
-    List<Course> findCoursesByCourseNameStartingWith(@Param("startingWith") String startingWith);
-
-    @Query(value = "select course from Course as course " +
-            "where course.courseName.name like %:text% " +
-            "order by course.semester, course.knowledgeControl.name, course.courseName.name")
-    List<Course> findCoursesByCourseNameContaining(@Param("text") String text);
-    //
-
-//    long countAll (Specification<Course> specification);
-
-    List<Course> findAll(Specification<Course> specification, Pageable pageable);
+    @Query("select count(course) from Course as course ")
+    int findTotalOfAllCourses();
 
     @Query("select c from Course as c " +
             "where c.id not in" +

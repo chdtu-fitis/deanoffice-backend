@@ -28,6 +28,7 @@ import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.course.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
@@ -312,24 +313,41 @@ public class CourseController {
         }
     }
 
-    @GetMapping("/test")
-    public void test(@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
-                     @RequestParam(required = false, name = "courseName", defaultValue = "") String courseName,
-                     @RequestParam(required = false, name = "hours", defaultValue = "0") Integer hours,
-                     @RequestParam(required = false, name = "hoursPerCredit", defaultValue = "0") Integer hoursPerCredit,
-                     @RequestParam(required = false, name = "knowledgeControl", defaultValue = "") String knowledgeControl,
-                     @RequestParam(required = false, name = "nameStartingWith", defaultValue = "") String nameStartingWith,
-                     @RequestParam(required = false, name = "nameMatches", defaultValue = "") String nameMatches
-    ) {
-        CoursePaginationBean courseByFilters = courseService.getCourseByFilters(
-                page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameMatches);
-        System.out.println("");
+    @GetMapping("/filtered-courses")
+    public ResponseEntity getFilteredCourses(@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
+                                             @RequestParam(required = false, name = "courseName") String courseName,
+                                             @RequestParam(required = false, name = "hours") Integer hours,
+                                             @RequestParam(required = false, name = "hoursPerCredit") Integer hoursPerCredit,
+                                             @RequestParam(required = false, name = "knowledgeControl") String knowledgeControl,
+                                             @RequestParam(required = false, name = "nameStartingWith") String nameStartingWith,
+                                             @RequestParam(required = false, name = "nameContains") String nameContains) {
+        try {
+            validatePageParameter(page);
+            CoursePaginationBean courseByFilters = courseService.getCourseByFilters(
+                    page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains);
+            return ResponseEntity.ok(Mapper.strictMap(courseByFilters, CoursePaginationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+
     }
 
-    @GetMapping("course/unused")
+    @GetMapping("/all-courses")
+    public ResponseEntity getAllCourses(@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
+        try {
+            validatePageParameter(page);
+            CoursePaginationBean allCourses = courseService.getAllCourses(page);
+            return ResponseEntity.ok(Mapper.strictMap(allCourses, CoursePaginationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("/course/unused")
     public ResponseEntity getUnusedCourses(
             @RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
         try {
+            validatePageParameter(page);
             CoursePaginationBean unusedCourses = courseService.getPaginatedUnusedCourses(page);
             return ResponseEntity.ok(Mapper.strictMap(unusedCourses, CoursePaginationDTO.class));
         } catch (Exception exception) {
@@ -340,11 +358,26 @@ public class CourseController {
     @DeleteMapping("/courses")
     public ResponseEntity deleteCoursesByIds(@RequestParam List<Integer> ids) {
         try {
+            validateIdsList(ids);
             courseService.deleteCoursesByIds(ids);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    private void validatePageParameter(Integer page) throws OperationCannotBePerformedException {
+        if (page == null)
+            throw new OperationCannotBePerformedException("Сторінка дорівнє null");
+        if (page <= 0)
+            throw new OperationCannotBePerformedException("Сторінка меньше або дорівнює нулю");
+    }
+
+    private void validateIdsList(List<Integer> ids) throws OperationCannotBePerformedException {
+        if (ids == null || ids.isEmpty())
+            throw new OperationCannotBePerformedException("Немає жодного предмету для обробки");
+        if (ids.contains(null))
+            throw new OperationCannotBePerformedException("Серед предметів є null");
     }
 
     private ResponseEntity handleException(Exception exception) {
