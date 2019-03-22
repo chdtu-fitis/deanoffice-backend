@@ -4,8 +4,6 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.repository.CourseNameRepository;
 
-import javax.xml.crypto.Data;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
