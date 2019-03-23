@@ -11,8 +11,7 @@ public interface CourseNameRepository extends JpaRepository<CourseName, Integer>
 
     @Query(value = "select " +
             "cn.name as name, " +
-            "sg.name as groupName, " +
-            "c.semester as semester " +
+            "sg.name||' Семестр: '||c.semester as message " +
             "from course_name cn " +
             "join course c on c.course_name_id = cn.id " +
             "join courses_for_groups cfg on cfg.course_id = c.id " +
