@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.service;
 
-import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
@@ -33,14 +32,23 @@ public class CourseNameService {
     public Map<String, String> getAllCoursesWhereEngNameIsNullOrEmpty(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
         List<Object[]> coursesName = courseNameRepository.findAllForGraduates(year, facultyId, degreeId);
+        changeCoursesNameListForMapping(coursesName);
         return coursesName
                 .stream()
-                .collect(Collectors.toMap(cn -> (String)cn[0], this::checkNameEng, (e1, e2) -> e1, LinkedHashMap::new));
+                .collect(Collectors.toMap(cn -> (String)cn[0], cn -> (String)cn[1], (e1, e2) -> e2, LinkedHashMap::new));
     }
 
-    private String checkNameEng(Object item[]){
+    private void changeCoursesNameListForMapping (List<Object[]> coursesName) {
+        int i=0;
         String message = "";
-        message += String.format("Група: %s Семестр: %d", (String) item[1], (Integer) item[2]);
-        return message;
+        for(Object courseName[]: coursesName) {
+            if(i == 0 || !courseName[0].equals(coursesName.get(i-1)[0]))
+                message = String.format("Група: %s. ", (String)courseName[1]);
+                else {
+                    message += String.format("Група: %s. ", (String) courseName[1]);
+                    courseName[1] = message;
+                }
+            i++;
+        }
     }
 }
