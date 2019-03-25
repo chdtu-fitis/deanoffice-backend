@@ -91,16 +91,16 @@ public class GradeService {
         return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentsIds, courseIds);
     }
 
-    public Map<StudentDegree, List<Grade>> getGradeMapForStudents(Map<StudentGroup, List<Integer>> groupsWithStudents, Map<StudentGroup, List<Integer>> courseIdsForGroup){
+    public Map<StudentDegree, List<Grade>> getGradeMapForStudents(Map<StudentGroup, List<Integer>> groupsWithStudents, Map<StudentGroup, List<Integer>> courseIdsForGroup) {
         Map<StudentDegree, List<Grade>> result = new HashMap<StudentDegree, List<Grade>>();
-        for (StudentGroup group: groupsWithStudents.keySet()) {
+        for (StudentGroup group : groupsWithStudents.keySet()) {
             List<Integer> studentDegreeIds = groupsWithStudents.get(group);
             List<Integer> courseIds = courseIdsForGroup.get(group);
             Map<StudentDegree, List<Grade>> oneGroupGrades = null;
             if (!studentDegreeIds.isEmpty() && !courseIds.isEmpty())
-                oneGroupGrades = gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds,courseIds).stream()
-                    .sorted((g1,g2) -> new Integer(g1.getCourse().getKnowledgeControl().getId()).compareTo(g2.getCourse().getKnowledgeControl().getId()))
-                    .collect(Collectors.groupingBy(Grade::getStudentDegree,toList()));
+                oneGroupGrades = gradeRepository.findGradesByCourseAndBySemesterForStudents(studentDegreeIds, courseIds).stream()
+                        .sorted((g1, g2) -> new Integer(g1.getCourse().getKnowledgeControl().getId()).compareTo(g2.getCourse().getKnowledgeControl().getId()))
+                        .collect(Collectors.groupingBy(Grade::getStudentDegree, toList()));
             else
                 oneGroupGrades = new HashMap<>();
             result = Stream.concat(result.entrySet().stream(), oneGroupGrades.entrySet().stream()).collect(Collectors.toMap(
@@ -133,4 +133,7 @@ public class GradeService {
         gradeRepository.delete(gradeId);
     }
 
+    public void updateCourseIdByCourseId(int newId, int oldId) {
+        gradeRepository.updateCourseIdByCourseId(newId, oldId);
+    }
 }
