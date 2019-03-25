@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.Course;
@@ -34,5 +35,11 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     @Query("select gr from Grade gr where gr.course.id = :courseId and gr.studentDegree.studentGroup.id = :groupId")
     List<Grade> findByCourseAndGroup(@Param("courseId") int courseId, @Param("groupId") int groupId);
+
+    @Modifying
+    @Query(value = "UPDATE Grade g " +
+            "SET g.academicDifference = :academicDifference " +
+            "WHERE g.id IN :gradeIds")
+    void updateAcademicDifference(@Param("academicDifference") boolean academicDifference, @Param("gradeIds") List<Integer> gradeIds);
 
 }
