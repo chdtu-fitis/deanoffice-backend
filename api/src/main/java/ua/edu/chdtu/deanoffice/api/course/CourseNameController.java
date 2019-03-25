@@ -11,7 +11,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
-import ua.edu.chdtu.deanoffice.service.course.CourseNameService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
 
 import java.util.ArrayList;
 import java.util.List;

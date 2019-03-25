@@ -1,5 +1,6 @@
-package ua.edu.chdtu.deanoffice.service.course;
+package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.repository.CourseNameRepository;
@@ -7,15 +8,19 @@ import ua.edu.chdtu.deanoffice.repository.CourseNameRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseNameService {
+    private final CurrentYearService currentYearService;
     private final CourseNameRepository courseNameRepository;
 
-    public CourseNameService(CourseNameRepository courseNameRepository) {
+    public CourseNameService(CourseNameRepository courseNameRepository, CurrentYearService currentYearService) {
         this.courseNameRepository = courseNameRepository;
+        this.currentYearService = currentYearService;
     }
 
     public List<CourseName> getCourseNames() {
@@ -101,5 +106,13 @@ public class CourseNameService {
             }
         }
         return result;
+    }
+
+    public Map<String, String> getGraduatesCoursesWithEmptyEngName(int facultyId, int degreeId) {
+        int year = currentYearService.getYear();
+        List<Object[]> coursesName = courseNameRepository.findAllForGraduatesWithNoEnglishName(year, facultyId, degreeId);
+        return coursesName
+                .stream()
+                .collect(Collectors.toMap(cn -> (String)cn[0], cn -> cn[1] + "; ", (e1, e2) -> (e1 + e2), LinkedHashMap::new));
     }
 }
