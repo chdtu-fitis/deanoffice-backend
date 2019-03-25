@@ -66,11 +66,11 @@ public class DiplomaSupplementController extends DocumentResponseController {
                                                             @CurrentUser ApplicationUser user){
         try {
             Map<String, String> coursesWithoutEnglishTranslation =
-                    courseNameService.getAllCoursesWhereEngNameIsNullOrEmpty(user.getFaculty().getId(), degreeId);
-            List<CourseNameWithoutEngDTO> courseNameWithoutEngDTOList = new ArrayList<>();
+                    courseNameService.getGraduatesCoursesWithEmptyEngName(user.getFaculty().getId(), degreeId);
+            List<CourseNameWithoutEngDTO> courseNamesWithoutEngDTOList = new ArrayList<>();
             for (Map.Entry<String, String> entry : coursesWithoutEnglishTranslation.entrySet())
-                courseNameWithoutEngDTOList.add(new CourseNameWithoutEngDTO(entry.getKey(), entry.getValue()));
-            return ResponseEntity.ok(courseNameWithoutEngDTOList);
+                courseNamesWithoutEngDTOList.add(new CourseNameWithoutEngDTO(entry.getKey(), entry.getValue()));
+            return ResponseEntity.ok(courseNamesWithoutEngDTOList);
         } catch (Exception e){
             return handleException(e);
         }

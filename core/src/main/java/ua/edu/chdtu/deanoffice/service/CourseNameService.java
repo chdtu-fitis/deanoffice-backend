@@ -29,26 +29,11 @@ public class CourseNameService {
         return this.courseNameRepository.findByName(name);
     }
 
-    public Map<String, String> getAllCoursesWhereEngNameIsNullOrEmpty(int facultyId, int degreeId) {
+    public Map<String, String> getGraduatesCoursesWithEmptyEngName(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
-        List<Object[]> coursesName = courseNameRepository.findAllForGraduates(year, facultyId, degreeId);
-        changeCoursesNameListForMapping(coursesName);
+        List<Object[]> coursesName = courseNameRepository.findAllForGraduatesWithNoEnglishName(year, facultyId, degreeId);
         return coursesName
                 .stream()
-                .collect(Collectors.toMap(cn -> (String)cn[0], cn -> (String)cn[1], (e1, e2) -> e2, LinkedHashMap::new));
-    }
-
-    private void changeCoursesNameListForMapping (List<Object[]> coursesName) {
-        int i=0;
-        String message = "";
-        for(Object courseName[]: coursesName) {
-            if(i == 0 || !courseName[0].equals(coursesName.get(i-1)[0]))
-                message = String.format("Група: %s. ", (String)courseName[1]);
-                else {
-                    message += String.format("Група: %s. ", (String) courseName[1]);
-                    courseName[1] = message;
-                }
-            i++;
-        }
+                .collect(Collectors.toMap(cn -> (String)cn[0], cn -> cn[1] + "; ", (e1, e2) -> (e1 + e2), LinkedHashMap::new));
     }
 }

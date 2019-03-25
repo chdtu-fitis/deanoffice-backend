@@ -22,7 +22,7 @@ public interface CourseNameRepository extends JpaRepository<CourseName, Integer>
             "and s.faculty_id = :faculty_id " +
             "and (cn.name_eng = '' or cn.name_eng is null) " +
             "order by cn.name", nativeQuery = true)
-    List<Object[]> findAllForGraduates(
+    List<Object[]> findAllForGraduatesWithNoEnglishName(
             @Param("year") int year,
             @Param("faculty_id") int facultyId,
             @Param("degree_id") int degreeId
