@@ -105,6 +105,17 @@ public class GroupController {
         }
     }
 
+    @JsonView(StudentGroupView.Short.class)
+    @GetMapping("/groups/filter/specialization/{specializationId}")
+    public ResponseEntity getActiveGroupsBySpecialization(@PathVariable int specializationId){
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getBySpecializationId(specializationId);
+            return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+        } catch (Exception exception){
+            return handleException(exception);
+        }
+    }
+
     @GetMapping("/groups/copy")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroupsForCopy(
