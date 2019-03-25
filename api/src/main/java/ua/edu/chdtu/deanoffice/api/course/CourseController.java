@@ -30,7 +30,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.course.CourseNameService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
