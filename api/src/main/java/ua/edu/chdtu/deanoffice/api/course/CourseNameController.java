@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.service.course.CourseNameService;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/courses-names")
+@RequestMapping("/course-names")
 public class CourseNameController {
     private CourseNameService courseNameService;
 
@@ -57,9 +58,9 @@ public class CourseNameController {
                     currentList.addAll(similarCoursesNames.get(key));
                     mappedList.add(currentList);
                 });
-        List<List<CourseNameDTO>> resultDTOs = new ArrayList<>();
+        List<List<NamedDTO>> resultDTOs = new ArrayList<>();
         for (List<CourseName> list : mappedList) {
-            resultDTOs.add(Mapper.map(list, CourseNameDTO.class));
+            resultDTOs.add(Mapper.map(list, NamedDTO.class));
         }
         return ResponseEntity.ok(resultDTOs);
     }
