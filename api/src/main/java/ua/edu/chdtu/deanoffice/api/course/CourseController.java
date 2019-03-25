@@ -366,11 +366,13 @@ public class CourseController {
         }
     }
 //
-    @PostMapping("/merge")
-    public ResponseEntity mergeCourses(@RequestParam("idToId") Map<Integer, Integer> idToId) {
+    @GetMapping("/merge")
+    public ResponseEntity mergeCourses(
+            //@RequestParam("idToId") HashMap<Integer, Integer> idToId
+             ) {
         try {
-            courseService.mergeCourses(idToId);
-            return ResponseEntity.ok(null);
+            //courseService.mergeCourseNamesByIdToId(idToId);
+            return ResponseEntity.ok().build();
         } catch (Exception exception){
             return handleException(exception);
         }
