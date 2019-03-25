@@ -74,6 +74,10 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             "and c.id not in (select distinct g.course.id from Grade as g)")
     int findTotalOfUnusedCourses();
 
+    @Query("update Course as c set c.courseName.id = : correctId " +
+            "where c.courseName.id = :wrongId")
+    List<Course> updateCourseNameIdInCourse(@Param("correctId") int correctId, @Param("wrongId") int wrongId);
+
     @Transactional
     void deleteByIdIn(List<Integer> ids);
 }
