@@ -51,7 +51,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "WHERE sg.active = TRUE and sd.active=true AND s.degree_id = :degree_id " +
             "AND floor(sg.creation_year + sg.study_years - 0.1) = :year " +
             "AND s.faculty_id = :faculty_id " +
-            "ORDER BY sg.tuition_form DESC, sg.name", nativeQuery = true)
+            "ORDER BY sg.tuition_form DESC, sg.name, st.surname, st.name, st.patronimic", nativeQuery = true)
     List<StudentDegree> findAllGraduates(
             @Param("year") int year,
             @Param("faculty_id") int facultyId,

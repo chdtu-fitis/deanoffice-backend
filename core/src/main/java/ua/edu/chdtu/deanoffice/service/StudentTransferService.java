@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
@@ -40,11 +41,11 @@ public class StudentTransferService {
     }
 
     public Integer getStudyYear(Integer studentGroupId){
-        Integer creationYear = studentGroupRepository.getCreationYearByStudentDegreeId(studentGroupId);
-        Integer beginYears = studentGroupRepository.getBeginYearsByStudentDegreeId(studentGroupId);
+        StudentGroup studentGroup = studentGroupRepository.findOne(studentGroupId);
+        Integer creationYear = studentGroup.getCreationYear();
+        Integer beginYears = studentGroup.getBeginYears();
         Integer currYear = getCurrentYear();
-        Integer studyYear = currYear - creationYear + beginYears;
-        return studyYear;
+        return currYear - creationYear + beginYears;
     }
 
     public Integer getSpecializationIdByStudentDegreeId(Integer studentDegreeId){

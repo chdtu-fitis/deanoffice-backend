@@ -63,7 +63,7 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "and sg.specialization.degree.id = :degree_id " +
             "and :curr_year - sg.creationYear + sg.beginYears = :study_year " +
             "and sg.specialization.faculty.id = :faculty_id " +
-            "and sg.tuitionForm = :tuitionForm "+
+            "and sg.tuitionForm = :tuitionForm " +
             "order by sg.name")
     List<StudentGroup> findGroupsByDegreeAndYearAndTuitionForm(
             @Param("degree_id") Integer degreeId,
@@ -91,20 +91,8 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "where sg.specialization.id = :specialization_id " +
             "and sg.id = :student_group_id " +
             "order by sg.name")
-    List <StudentGroup> findAllBySpecializationIdAndGroupId(
+    List<StudentGroup> findAllBySpecializationIdAndGroupId(
             @Param("specialization_id") Integer specializationId,
-            @Param("student_group_id") Integer studentGroupId
-    );
-
-    @Query("select sg.creationYear from StudentGroup sg " +
-            "where sg.id = :student_group_id")
-    Integer getCreationYearByStudentDegreeId(
-            @Param("student_group_id") Integer studentGroupId
-    );
-
-    @Query("select sg.studyYears from StudentGroup sg " +
-            "where sg.id = :student_group_id")
-    Integer getBeginYearsByStudentDegreeId(
             @Param("student_group_id") Integer studentGroupId
     );
 
@@ -115,4 +103,11 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
 
     @Query(value = "SELECT count(sg.id) FROM student_group sg WHERE sg.id IN (:ids) AND sg.active = false", nativeQuery = true)
     int countInactiveStudentGroupsByIds(@Param("ids") List<Integer> ids);
+
+    @Query("select sg from StudentGroup sg " +
+            "where active = :active and sg.name in " +
+            "(select substring(fg.name,1,length(fg.name) - 2) from StudentGroup fg " +
+            "where fg.specialization.faculty.id = 8 and fg.active = :active)"
+    )
+    List<StudentGroup> findStudentGroupsMatchingForeignGroups(@Param("active") Boolean active);
 }

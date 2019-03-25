@@ -89,4 +89,8 @@ public class StudentGroupService {
         List<StudentGroup> studentGroups = studentGroupRepository.findBySpecializationId(specializationId);
         return (studentGroups.size() > 0) ? studentGroups : null;
     }
+
+    public List<StudentGroup> getGroupsMatchingForeignGroups(Boolean active) {
+        return studentGroupRepository.findStudentGroupsMatchingForeignGroups(active);
+    }
 }
