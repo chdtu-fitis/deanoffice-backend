@@ -38,6 +38,10 @@ public class CourseNameService {
         courseNameRepository.deleteCourseNameById(ids);
     }
 
+    public void deleteCourseNameById(int id) {
+        courseNameRepository.deleteCourseNameById(id);
+    }
+
     public Map<CourseName, List<CourseName>> getSimilarCoursesNames() {
         List<CourseName> courseNames = getCourseNames();
         HashMap<CourseName, List<CourseName>> result = new HashMap<>();
