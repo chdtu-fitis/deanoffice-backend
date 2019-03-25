@@ -20,4 +20,5 @@ public class CourseForGroup extends BaseEntity {
     private Teacher teacher;
     @Temporal(TemporalType.DATE)
     private Date examDate;
+    private boolean academicDifference;
 }
