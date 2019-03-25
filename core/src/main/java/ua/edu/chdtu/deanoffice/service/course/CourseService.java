@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -19,11 +20,13 @@ import java.util.Map;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final StudentGroupService studentGroupService;
+    private final CourseNameService courseNameService;
     private final int ROWS_PER_PAGE = 50;
 
-    public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService) {
+    public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService, CourseNameService courseNameService) {
         this.courseRepository = courseRepository;
         this.studentGroupService = studentGroupService;
+        this.courseNameService = courseNameService;
     }
 
     public Course getCourseByAllAttributes(Course course) {
@@ -35,7 +38,7 @@ public class CourseService {
         return courseRepository.findAllBySemester(semester);
     }
 
-    public List<Course> getCoursesBySemesterAndHoursPerCredit(int semester, int hoursPerCredit){
+    public List<Course> getCoursesBySemesterAndHoursPerCredit(int semester, int hoursPerCredit) {
         return courseRepository.findAllBySemesterAndHoursPerCredit(semester, hoursPerCredit);
     }
 
@@ -144,7 +147,12 @@ public class CourseService {
         courseRepository.deleteByIdIn(ids);
     }
 
-    public void mergeCourses(Map<Integer,Integer> idToId){
-
+    @Transactional
+    public void mergeCourses(Map<Integer, Integer> idToId) {
+        for (Integer correctId : idToId.keySet()) {
+            Integer wrongId = idToId.get(correctId);
+            courseRepository.updateCourseNameIdInCourse(correctId, wrongId);
+            courseNameService.deleteCourseNameById(wrongId);
+        }
     }
 }
