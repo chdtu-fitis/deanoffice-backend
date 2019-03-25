@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
@@ -66,6 +67,22 @@ public class GradeService {
         return gradeRepository.getByStudentDegreeIdAndCoursesAndKCTypes(studentDegree.getId(),
                 courseIds,
                 knowledgeControlTypes);
+    }
+
+    @Transactional
+    public void setAcademicDifferenceByGradeIds(Map<Boolean, List<Integer>> academicDifferenceAndGradeIds){
+        if(academicDifferenceAndGradeIds.size() > 0){
+            if (academicDifferenceAndGradeIds.containsKey(true)){
+                boolean academicDifference = true;
+                List<Integer> gradesIds = (List<Integer>) academicDifferenceAndGradeIds.get(true);
+                gradeRepository.updateAcademicDifference(academicDifference, gradesIds);
+            }
+            if (academicDifferenceAndGradeIds.containsKey(false)){
+                boolean academicDifference = false;
+                List<Integer> gradesIds = (List<Integer>) academicDifferenceAndGradeIds.get(false);
+                gradeRepository.updateAcademicDifference(academicDifference, gradesIds);
+            }
+        }
     }
 
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
