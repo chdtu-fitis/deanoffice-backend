@@ -143,4 +143,8 @@ public class CourseService {
     public void deleteCoursesByIds(List<Integer> ids) {
         courseRepository.deleteByIdIn(ids);
     }
+
+    public void mergeCourses(Map<Integer,Integer> idToId){
+
+    }
 }
