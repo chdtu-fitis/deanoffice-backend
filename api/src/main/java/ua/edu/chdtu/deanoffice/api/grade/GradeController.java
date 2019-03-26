@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.grade;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -57,7 +58,10 @@ public class GradeController {
     }
 
     @PatchMapping
-    public ResponseEntity putAcademicDifference(@RequestBody Map<Boolean,List<Integer>> gradesIds){
+    public ResponseEntity putAcademicDifference(@RequestBody Map<Boolean, List<Integer>> gradesIds){
+        if (gradesIds.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Жоден атрибут академічної різниці не було змінено");
+        }
         try {
             gradeService.setAcademicDifferenceByGradeIds(gradesIds);
             return ResponseEntity.ok().build();
