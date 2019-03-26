@@ -365,15 +365,13 @@ public class CourseController {
             return handleException(exception);
         }
     }
-//
-    @GetMapping("/merge")
-    public ResponseEntity mergeCourses(
-            //@RequestParam("idToId") HashMap<Integer, Integer> idToId
-             ) {
+
+    @PostMapping("/merge")
+    public ResponseEntity mergeCourses(@RequestBody Map<Integer, List<Integer>> idToId) {
         try {
-            //courseService.mergeCourseNamesByIdToId(idToId);
+            courseService.mergeCourseNamesByIdToId(idToId);
             return ResponseEntity.ok().build();
-        } catch (Exception exception){
+        } catch (Exception exception) {
             return handleException(exception);
         }
     }
