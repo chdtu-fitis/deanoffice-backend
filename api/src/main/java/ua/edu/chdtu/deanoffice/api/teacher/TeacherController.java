@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 
 import java.util.List;
@@ -23,9 +25,9 @@ public class TeacherController {
     }
 
     @GetMapping
-    public ResponseEntity getTeachers(@RequestParam List<Integer> teachersIds) {
+    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
         try {
-            return ResponseEntity.ok().body(teacherService.getTeachersByIds(teachersIds));
+            return ResponseEntity.ok().body(teacherService.getTeachersByActive(active));
         } catch (Exception e) {
             return handleException(e);
         }
@@ -33,7 +35,12 @@ public class TeacherController {
 
     @PostMapping
     public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
-        return null;
+        try {
+            teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
 
