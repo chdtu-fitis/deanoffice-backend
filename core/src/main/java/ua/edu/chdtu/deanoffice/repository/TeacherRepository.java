@@ -12,14 +12,16 @@ import java.util.List;
 public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     List<Teacher> findAllByOrderBySurname();
 
-    @Query("SELECT t FROM Teacher t WHERE t.id IN :ids")
-    List<Teacher> findAllByIds(
-            @Param("ids") List<Integer> ids
+    @Query("SELECT t FROM Teacher t WHERE t.active = :active")
+    List<Teacher> findAllByActive(
+            @Param("active") boolean active
     );
 
-    List<Teacher> findById(List<Integer> ids);
 
-    List<Teacher> getTeachersByIdIn(List<Integer> ids);
+
+//    List<Teacher> findById(List<Integer> ids);
+//
+//    List<Teacher> getTeachersByIdIn(List<Integer> ids);
 
     @Transactional
     void deleteByIdIn(List<Integer> ids);
