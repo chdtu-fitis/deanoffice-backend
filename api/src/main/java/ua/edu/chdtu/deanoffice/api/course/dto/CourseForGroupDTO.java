@@ -18,6 +18,5 @@ public class CourseForGroupDTO {
     private PersonFullNameDTO teacher;
     @JsonView(CourseForGroupView.Course.class)
     private Date examDate;
-    @JsonView(CourseForGroupView.Course.class)
     private boolean academicDifference;
 }
