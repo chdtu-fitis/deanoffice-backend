@@ -77,16 +77,13 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     @Query("select c from Course as c " +
             "where c.courseName.id = :id")
-    List<Course> findCourseByCourseNameId(@Param("id") int id);
-
-    @Query("select count(c) from Course as c " +
-            "where c.courseName.id = :id")
-    List<Course> findCountCourseByCourseNameId(@Param("id") int id);
+    List<Course> findCoursesByCourseNameId(@Param("id") int id);
 
     @Modifying
     @Query("update Course as c set c.courseName.id = :correctId " +
-            "where c.courseName.id = :wrongId")
-    void updateCourseNameIdInCourse(@Param("correctId") int correctId, @Param("wrongId") int wrongId);
+            "where c.courseName.id = :wrongId and c.id = :id")
+    void updateCourseNameIdInCourse(@Param("correctId") int correctId, @Param("wrongId") int wrongId,
+                                    @Param("id") int id);
 
     @Transactional
     void deleteByIdIn(List<Integer> ids);
