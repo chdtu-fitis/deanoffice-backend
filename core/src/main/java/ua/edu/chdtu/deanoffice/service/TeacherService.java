@@ -18,4 +18,12 @@ public class TeacherService {
     public List<Teacher> getTeachers(){
         return teacherRepository.findAllByOrderBySurname();
     }
+
+    public List<Teacher> getTeachersByIds(List<Integer> ids) {
+        return teacherRepository.findAllByIds(ids);
+    }
+
+    public void deleteTeachers(List<Integer> ids) {
+        teacherRepository.deleteByIdIn(ids);
+    }
 }
