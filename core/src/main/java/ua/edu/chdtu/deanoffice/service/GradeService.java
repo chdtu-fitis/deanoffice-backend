@@ -132,8 +132,4 @@ public class GradeService {
     public void deleteGradeById(Integer gradeId) {
         gradeRepository.delete(gradeId);
     }
-
-    public void updateCourseIdByCourseId(int newId, int oldId) {
-        gradeRepository.updateCourseIdByCourseId(newId, oldId);
-    }
 }
