@@ -9,7 +9,6 @@ public class CourseForGroupUpdateHolder {
     private int oldCourseId;
     private CourseDTO newCourse;
     private int courseForGroupId;
-    private boolean academicDifference;
 
     public int getCourseForGroupId() {
         return courseForGroupId;
@@ -21,9 +20,5 @@ public class CourseForGroupUpdateHolder {
 
     public CourseDTO getNewCourse() {
         return newCourse;
-    }
-
-    public boolean getAcademicDifference(){
-        return academicDifference;
     }
 }
