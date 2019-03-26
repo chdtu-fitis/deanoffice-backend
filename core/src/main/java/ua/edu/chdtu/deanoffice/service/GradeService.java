@@ -71,17 +71,13 @@ public class GradeService {
 
     @Transactional
     public void setAcademicDifferenceByGradeIds(Map<Boolean, List<Integer>> academicDifferenceAndGradeIds){
-        if(academicDifferenceAndGradeIds.size() > 0){
-            if (academicDifferenceAndGradeIds.containsKey(true)){
-                boolean academicDifference = true;
-                List<Integer> gradesIds = (List<Integer>) academicDifferenceAndGradeIds.get(true);
-                gradeRepository.updateAcademicDifference(academicDifference, gradesIds);
-            }
-            if (academicDifferenceAndGradeIds.containsKey(false)){
-                boolean academicDifference = false;
-                List<Integer> gradesIds = (List<Integer>) academicDifferenceAndGradeIds.get(false);
-                gradeRepository.updateAcademicDifference(academicDifference, gradesIds);
-            }
+        List<Integer> gradesIdsWithAcademicDifference = academicDifferenceAndGradeIds.get(true);
+        if (!gradesIdsWithAcademicDifference.isEmpty()){
+            gradeRepository.updateAcademicDifference(true, gradesIdsWithAcademicDifference);
+        }
+        List<Integer> gradesIdsLessAcademicDifference = academicDifferenceAndGradeIds.get(false);
+        if (!gradesIdsLessAcademicDifference.isEmpty()) {
+            gradeRepository.updateAcademicDifference(false, gradesIdsLessAcademicDifference);
         }
     }
 
