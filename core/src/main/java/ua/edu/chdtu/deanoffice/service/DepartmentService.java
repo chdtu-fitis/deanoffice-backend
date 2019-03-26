@@ -19,11 +19,12 @@ public class DepartmentService {
     public List<Department> getAllByActive(boolean active,int facultyId) {
         return departmentRepository.getAllByActive(active,facultyId);
     }
+
     public Department getById(Integer departmentId) {
         return this.departmentRepository.findOne(departmentId);
     }
-    public void delete(Integer departmentId) {
-        Department department = getById(departmentId);
+
+    public void delete(Department department) {
         department.setActive(false);
         departmentRepository.save(department);
     }

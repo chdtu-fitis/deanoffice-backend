@@ -25,10 +25,7 @@ import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.DegreeService;
-import ua.edu.chdtu.deanoffice.service.DepartmentService;
-import ua.edu.chdtu.deanoffice.service.SpecialityService;
-import ua.edu.chdtu.deanoffice.service.SpecializationService;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.net.URI;
@@ -43,18 +40,21 @@ public class SpecializationController {
     private final SpecialityService specialityService;
     private final DepartmentService departmentService;
     private final DegreeService degreeService;
+    private final DataVerificationService verificationService;
 
     @Autowired
     public SpecializationController(
             SpecializationService specializationService,
             SpecialityService specialityService,
             DepartmentService departmentService,
-            DegreeService degreeService
+            DegreeService degreeService,
+            DataVerificationService verificationService
     ) {
         this.specializationService = specializationService;
         this.specialityService = specialityService;
         this.departmentService = departmentService;
         this.degreeService = degreeService;
+        this.verificationService = verificationService;
     }
 
     @GetMapping
@@ -64,7 +64,7 @@ public class SpecializationController {
             @RequestParam(value = "facultyId", required = false) Integer facultyId,
             @CurrentUser ApplicationUser user
     ) {
-        try{
+        try {
             if (facultyId == null)
                 facultyId = user.getFaculty().getId();
             List<Specialization> specializations = specializationService.getAllByActive(active, facultyId);
@@ -135,21 +135,12 @@ public class SpecializationController {
     }
 
     @DeleteMapping("/{specialization_id}")
-    public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") Integer specializationId) {
+    public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") int specializationId) {
         try {
             Specialization specialization = specializationService.getById(specializationId);
-            if (specialization == null) {
-                return handleException(
-                        new OperationCannotBePerformedException("Освітню програму [" + specializationId + "] не знайдено")
-                );
-            }
-            if (!specialization.isActive()) {
-                return handleException(
-                        new OperationCannotBePerformedException("Освітня програма [" + specializationId + "] не активна в даний час")
-                );
-            }
-            specializationService.delete(specializationId);
-            return ResponseEntity.noContent().build();
+            this.verificationService.specializationInstanceNotNullAndActive(specialization, specializationId);
+            specializationService.delete(specialization);
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }

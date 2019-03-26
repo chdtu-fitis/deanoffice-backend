@@ -5,11 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.dto.DepartmentDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.SpecializationController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -22,10 +24,13 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 @RequestMapping("/departments")
 public class DepartmentController {
     private final DepartmentService departmentService;
+    private final DataVerificationService verificationService;
 
     @Autowired
-    public DepartmentController(DepartmentService departmentService) {
+    public DepartmentController(DepartmentService departmentService,
+                                DataVerificationService verificationService) {
         this.departmentService = departmentService;
+        this.verificationService = verificationService;
     }
 
     @GetMapping
@@ -34,24 +39,15 @@ public class DepartmentController {
             @CurrentUser ApplicationUser user
     ) {
         List<Department> departments = departmentService.getAllByActive(active, user.getFaculty().getId());
-        return ResponseEntity.ok(map(departments, NamedDTO.class));
+        return ResponseEntity.ok(map(departments, DepartmentDTO.class));
     }
 
-    @DeleteMapping("/{department_id}")
-    public ResponseEntity deleteDepartment(@PathVariable("department_id") Integer departmentId) {
-        Department department = departmentService.getById(departmentId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteDepartment(@PathVariable("id") int departmentId) {
         try {
-            if (department == null) {
-                return handleException(
-                        new OperationCannotBePerformedException("Кафедру [" + departmentId + "] не знайдено")
-                );
-            }
-            if (!department.isActive()) {
-                return handleException(
-                        new OperationCannotBePerformedException("Кафедра ["+ departmentId +"] не активна в даний час")
-                );
-            }
-            departmentService.delete(departmentId);
+            Department department = departmentService.getById(departmentId);
+            this.verificationService.departmentInstanceNotNullAndActive(department,departmentId);
+            departmentService.delete(department);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return  handleException(exception);
