@@ -2,21 +2,25 @@ package ua.edu.chdtu.deanoffice.api.studyyear.finish;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.report.debtor.SpecializationDebtorsBean;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.service.study.year.finish.StudyYearFinishService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/study-year-finish")
@@ -53,6 +57,26 @@ public class StudyYearFinishController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/graduate-student-degrees")
+    public ResponseEntity<Map<String, List<StudentDegreeShortDTO>>> getShortGraduateStudentDegree(@RequestParam List<Integer> groupIds) {
+        try {
+            dataVerificationService.areStudentGroupsActiveByIds(groupIds);
+            dataVerificationService.areGroupsGraduate(groupIds);
+
+            Map<String, List<StudentDegreeShortBean>> groupsWithStudents = studentDegreeService.getStudentsShortInfoGroupedByGroupNames(groupIds);
+            Map<String, List<StudentDegreeShortDTO>> groupsWithStudentsDTO = new HashMap<>();
+
+            for (Map.Entry<String, List<StudentDegreeShortBean>> groupWithStudents : groupsWithStudents.entrySet()) {
+                List<StudentDegreeShortDTO> studentsDTO = Mapper.strictMap(groupWithStudents.getValue(), StudentDegreeShortDTO.class);
+                groupsWithStudentsDTO.put(groupWithStudents.getKey(), studentsDTO);
+            }
+
+            return ResponseEntity.ok().body(groupsWithStudentsDTO);
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
     private ResponseEntity handleException(Exception exception) {

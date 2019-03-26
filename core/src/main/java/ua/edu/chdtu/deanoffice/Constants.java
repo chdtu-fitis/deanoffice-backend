@@ -18,4 +18,6 @@ public class Constants {
     public static final Integer ID_SUCCESSFUL_END_BACHELOR = 7;
     public static final Integer ID_SUCCESSFUL_END_SPECIALIST = 8;
     public static final Integer ID_SUCCESSFUL_END_MASTER = 16;
+
+    public static final int MINIMAL_SATISFACTORY_POINTS = 60;
 }

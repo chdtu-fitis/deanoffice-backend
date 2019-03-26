@@ -51,7 +51,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "WHERE sg.active = TRUE and sd.active=true AND s.degree_id = :degree_id " +
             "AND floor(sg.creation_year + sg.study_years - 0.1) = :year " +
             "AND s.faculty_id = :faculty_id " +
-            "ORDER BY sg.tuition_form DESC, sg.name", nativeQuery = true)
+            "ORDER BY sg.tuition_form DESC, sg.name, st.surname, st.name, st.patronimic", nativeQuery = true)
     List<StudentDegree> findAllGraduates(
             @Param("year") int year,
             @Param("faculty_id") int facultyId,
@@ -294,4 +294,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value = "SELECT count(sd.id) FROM student_degree sd WHERE sd.id IN (:ids) AND sd.active = false", nativeQuery = true)
     int countInactiveStudentDegreesByIds(@Param("ids") List<Integer> ids);
+
+    @Query(value =  "SELECT s.surname, s.name AS studentName, s.patronimic, sd.diploma_number, sg.name AS groupName " +
+            "FROM student_degree sd " +
+            "INNER JOIN student s ON sd.student_id = s.id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "WHERE sg.id IN (:studentGroupIds) AND sd.active = true " +
+            "ORDER BY sg.name, s.surname, s.name, s.patronimic", nativeQuery = true)
+    List<Object[]> getStudentDegreeShortFields(@Param("studentGroupIds") List<Integer> studentGroupIds);
 }
