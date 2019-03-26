@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/teacher")
 public class TeacherController {
 
-    TeacherService teacherService;
+    private TeacherService teacherService;
 
     @Autowired
     public TeacherController(TeacherService teacherService) {
