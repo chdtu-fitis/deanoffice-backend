@@ -20,7 +20,7 @@ public interface CourseNameRepository extends JpaRepository<CourseName, Integer>
     List<CourseName> findUnusedCoursesNames();
 
     @Transactional
-    void deleteCourseNameById(List<Integer> ids);
+    void deleteCourseNameByIdIn(List<Integer> ids);
 
     @Transactional
     void deleteCourseNameById(int id);
