@@ -43,7 +43,7 @@ public class AcademicDifferenceService {
     public File formDocument(int studentDegreeId) throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE,studentDegree);
-        String fileName = transliterate("якась назва");
+        String fileName = transliterate("Akademrizn_"+studentDegree.getStudent().getFullNameUkr()+"_"+studentDegree.getStudentGroup().getName());
         return documentIOService.saveDocumentToTemp(resultTemplate, fileName, FileFormatEnum.DOCX);
     }
 
