@@ -377,6 +377,16 @@ public class CourseController {
         }
     }
 
+    @PostMapping("/credits/wrong/update")
+    public ResponseEntity updateWrongCourses(@RequestBody Map<Integer, Integer> idToCredits){
+        try{
+            courseService.updateCoursesCreditsById(idToCredits);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception){
+            return handleException(exception);
+        }
+    }
+
     private void validatePageParameter(Integer page) throws OperationCannotBePerformedException {
         if (page == null)
             throw new OperationCannotBePerformedException("Сторінка дорівнє null");
