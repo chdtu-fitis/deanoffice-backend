@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,4 +77,9 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     @Transactional
     void deleteByIdIn(List<Integer> ids);
+
+    @Modifying
+    @Query("update Course as c set c.credits = :credits " +
+            "where c.id = :id")
+    void updateCourseCreditsById(@Param("id") int id, @Param("credits") int credits);
 }
