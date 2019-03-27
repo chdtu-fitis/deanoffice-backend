@@ -1,8 +1,10 @@
 package ua.edu.chdtu.deanoffice.api.grade;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +24,7 @@ import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -50,6 +53,19 @@ public class GradeController {
             this.gradeService.insertGrades(gradeService.setGradeAndEcts(grades));
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PatchMapping
+    public ResponseEntity putAcademicDifference(@RequestBody Map<Boolean, List<Integer>> gradesIds){
+        if (gradesIds.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Жоден атрибут академічної різниці не було змінено");
+        }
+        try {
+            gradeService.setAcademicDifferenceByGradeIds(gradesIds);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception){
             return handleException(exception);
         }
     }

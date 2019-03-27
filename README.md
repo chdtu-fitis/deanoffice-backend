@@ -52,5 +52,5 @@ Follow next steps:**
 
 Where jwt-token is valid token. To get valid token you can use next command:
 ```
-curl -d "{"""username""":"""test""", """password""":"""test"""}" -H "Content-Type: application/json" -X POST http://localhost:8080/login
+curl -d "{"""username""":"""fitis""", """password""":"""test1"""}" -H "Content-Type: application/json" -X POST http://localhost:8080/login
 ```

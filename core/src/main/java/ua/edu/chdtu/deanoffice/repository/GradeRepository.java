@@ -53,4 +53,10 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     @Query("update Grade as g set g.course.id = :newId " +
             "where g.course.id = :oldId")
     void updateCourseIdByCourseId(@Param("newId") int newId, @Param("oldId") int oldId);
+
+    @Modifying
+    @Query(value = "UPDATE Grade g " +
+            "SET g.academicDifference = :academicDifference " +
+            "WHERE g.id IN :gradeIds")
+    void updateAcademicDifference(@Param("academicDifference") boolean academicDifference, @Param("gradeIds") List<Integer> gradeIds);
 }
