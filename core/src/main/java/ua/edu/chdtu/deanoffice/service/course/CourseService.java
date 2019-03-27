@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.util.ArrayList;
