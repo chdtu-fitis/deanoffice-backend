@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +9,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     List<Teacher> findAllByOrderBySurname();
@@ -17,14 +19,22 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
             @Param("active") boolean active
     );
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE teacher t SET active = false WHERE t.id IN (:ids)", nativeQuery = true)
+    void setTeachersInactiveByIds(@Param("ids") List<Integer> ids);
 
+/*
+    @Modifying
+    @Query(value = "UPDATE student_group sg SET active = false WHERE sg.id IN (:ids)", nativeQuery = true)
+    void setStudentGroupInactiveByIds(@Param("ids") Set<Integer> ids);*/
 
 //    List<Teacher> findById(List<Integer> ids);
 //
 //    List<Teacher> getTeachersByIdIn(List<Integer> ids);
-
+/*
     @Transactional
-    void deleteByIdIn(List<Integer> ids);
+    void deleteByIdIn(List<Integer> ids);*/
 
 
 //    @Query("SELECT sd from StudentDegree sd " +

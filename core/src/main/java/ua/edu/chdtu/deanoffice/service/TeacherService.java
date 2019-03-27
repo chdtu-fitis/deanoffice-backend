@@ -16,9 +16,8 @@ public class TeacherService {
     public Teacher getTeacher(int teacherId) {
         return teacherRepository.findOne(teacherId);
     }
-    public List<Teacher> getTeachers(){
-        return teacherRepository.findAllByOrderBySurname();
-    }
+
+
 
 //    public List<Teacher> getTeachersByIds(List<Integer> ids) {
 //        return teacherRepository.findAllByIds(ids);
@@ -32,7 +31,7 @@ public class TeacherService {
         teacherRepository.save(teacher);
     }
 
-    public void deleteTeachers(List<Integer> ids) {
-        teacherRepository.deleteByIdIn(ids);
+    public void setTeachersInactiveByIds(List<Integer> ids) {
+        teacherRepository.setTeachersInactiveByIds(ids);
     }
 }
