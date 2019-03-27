@@ -367,7 +367,7 @@ public class CourseController {
     }
 
     @PostMapping("/merge")
-    public ResponseEntity mergeCourses(@RequestBody Map<Integer, List<Integer>> idToId) {
+    public ResponseEntity mergeCoursesByName(@RequestBody Map<Integer, List<Integer>> idToId) {
         try {
             courseService.mergeCourseNamesByIdToId(idToId);
             return ResponseEntity.ok().build();
