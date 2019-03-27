@@ -86,7 +86,7 @@ public class CourseController {
 
     @GetMapping("/courses/hours-per-credit")
     public ResponseEntity getCoursesBySemesterAndHoursPerCredit(@RequestParam(value = "semester") int semester,
-                                                         @RequestParam(value = "hoursPerCredit") int hoursPerCredit) {
+                                                                @RequestParam(value = "hoursPerCredit") int hoursPerCredit) {
         try {
             List<Course> courses = courseService.getCoursesBySemesterAndHoursPerCredit(semester, hoursPerCredit);
             return ResponseEntity.ok(map(courses, CourseDTO.class));
@@ -361,6 +361,16 @@ public class CourseController {
         try {
             validateIdsList(ids);
             courseService.deleteCoursesByIds(ids);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PostMapping("/merge")
+    public ResponseEntity mergeCoursesByName(@RequestBody Map<Integer, List<Integer>> idToId) {
+        try {
+            courseService.mergeCourseNamesByIdToId(idToId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
