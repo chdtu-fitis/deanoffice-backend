@@ -367,7 +367,7 @@ public class CourseController {
     }
 
     @GetMapping("/credits/wrong")
-    public ResponseEntity getCoursesWrongCredits() {
+    public ResponseEntity getCoursesWithWrongCredits() {
         try {
             List<Course> coursesWithWrongCredits = courseService.getCoursesWithWrongCredits();
             List<CourseDTO> map = map(coursesWithWrongCredits, CourseDTO.class);
