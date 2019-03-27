@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -161,5 +162,12 @@ public class CourseService {
             }
         }
         return wrong;
+    }
+
+    @Transactional
+    public void updateCoursesCreditsByIds(Map<Integer,Integer> idToCredits){
+        for (Integer id : idToCredits.keySet()) {
+            courseRepository.updateCourseCreditsById(id, idToCredits.get(id));
+        }
     }
 }
