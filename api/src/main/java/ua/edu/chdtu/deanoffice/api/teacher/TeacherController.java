@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
@@ -13,8 +14,9 @@ import ua.edu.chdtu.deanoffice.service.TeacherService;
 
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+
 @RestController
-@RequestMapping("/teacher")
 public class TeacherController {
 
     private TeacherService teacherService;
@@ -24,16 +26,27 @@ public class TeacherController {
         this.teacherService = teacherService;
     }
 
-    @GetMapping
-    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
+    @GetMapping("/teachers-short")
+    public ResponseEntity getAllActiveTeachers(){
         try {
-            return ResponseEntity.ok().body(teacherService.getTeachersByActive(active));
+            List<Teacher> teachers = teacherService.getTeachersByActive(true);
+            return ResponseEntity.ok(map(teachers, PersonFullNameDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
     }
 
-    @PostMapping
+    @GetMapping("/teachers")
+    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
+        try {
+            List<Teacher> teachers = teacherService.getTeachersByActive(active);
+            return ResponseEntity.ok(map(teachers, TeacherDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @PostMapping("/teachers")
     public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
             teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
@@ -44,16 +57,16 @@ public class TeacherController {
     }
 
 
-    @PutMapping
+    @PutMapping("/teachers")
     public ResponseEntity changeTeacher() {
         return null;
     }
 
 
-    @DeleteMapping
+    @DeleteMapping("/teachers")
     public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds) {
         try {
-            teacherService.deleteTeachers(teachersIds);
+            teacherService.setTeachersInactiveByIds(teachersIds);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
