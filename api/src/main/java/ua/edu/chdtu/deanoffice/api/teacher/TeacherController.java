@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 
 import java.util.List;
@@ -49,6 +50,7 @@ public class TeacherController {
     @PostMapping("/teachers")
     public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
+            teacherDTO.setId(0);
             teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -58,8 +60,17 @@ public class TeacherController {
 
 
     @PutMapping("/teachers")
-    public ResponseEntity changeTeacher() {
-        return null;
+    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO) {
+        try {
+            Teacher teacher = teacherService.getTeacher(teacherDTO.getId());
+            if (teacher == null) {
+                throw new OperationCannotBePerformedException("Вчителя з вказаним id - не існує!");
+            }
+            teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
 
