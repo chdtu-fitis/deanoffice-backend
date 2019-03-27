@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
@@ -166,10 +167,13 @@ public class CourseService {
     }
 
     @Transactional
-    public void mergeCourseNamesByIdToId(Map<Integer, List<Integer>> idToId) {
+    public void mergeCourseNamesByIdToId(Map<Integer, List<Integer>> idToId) throws OperationCannotBePerformedException {
         for (Integer correctId : idToId.keySet()) {
             CourseName correctCourseName = courseNameService.getCourseNameById(correctId);
             for (Integer wrongId : idToId.get(correctId)) {
+                if (correctId.equals(wrongId)) {
+                    throw new OperationCannotBePerformedException("id правильної назви предмета дорівнює id неправильної назви предмета");
+                }
                 for (Course wrongCourse : getCoursesByCourseNameId(wrongId)) {
                     Course correctCourse = getCourseByAllAttributes(wrongCourse.getSemester(),
                             wrongCourse.getKnowledgeControl().getId(), correctCourseName.getId(),
