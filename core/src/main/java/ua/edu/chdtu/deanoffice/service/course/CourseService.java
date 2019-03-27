@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ public class CourseService {
         return courseRepository.findAllBySemester(semester);
     }
 
-    public List<Course> getCoursesBySemesterAndHoursPerCredit(int semester, int hoursPerCredit){
+    public List<Course> getCoursesBySemesterAndHoursPerCredit(int semester, int hoursPerCredit) {
         return courseRepository.findAllBySemesterAndHoursPerCredit(semester, hoursPerCredit);
     }
 
@@ -142,5 +143,23 @@ public class CourseService {
 
     public void deleteCoursesByIds(List<Integer> ids) {
         courseRepository.deleteByIdIn(ids);
+    }
+
+    public List<Course> getCoursesWithWrongCredits() {
+        ArrayList<Course> wrong = new ArrayList<>();
+        for (Course course : courseRepository.findAll()) {
+            BigDecimal credits = course.getCredits();
+            Integer hours = course.getHours();
+            Integer hoursPerCredit = course.getHoursPerCredit();
+            if (hoursPerCredit == 0) {
+                wrong.add(course);
+            } else if (hours != 0) {
+                BigDecimal expected = BigDecimal.valueOf(hours / hoursPerCredit);
+                if (credits.equals(expected)) {
+                    wrong.add(course);
+                }
+            }
+        }
+        return wrong;
     }
 }
