@@ -251,6 +251,7 @@ public class CourseController {
                 Teacher teacher = teacherService.getTeacher(updatedCourseForGroup.getTeacher().getId());
                 courseForGroup.setTeacher(teacher);
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
+                courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
                 updatedCoursesForGroup.add(courseForGroup);
             }
             courseForGroupService.addCourseForGroupAndNewChanges(newCoursesForGroup, updatedCoursesForGroup, deleteCoursesIds);

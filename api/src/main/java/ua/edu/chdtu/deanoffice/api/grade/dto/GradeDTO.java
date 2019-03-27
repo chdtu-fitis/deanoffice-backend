@@ -11,4 +11,5 @@ public class GradeDTO {
     private Boolean onTime;
     private Integer courseId;
     private Integer studentDegreeId;
+    private boolean academicDifference;
 }
