@@ -380,7 +380,7 @@ public class CourseController {
     @PostMapping("/credits/wrong/update")
     public ResponseEntity updateWrongCourses(@RequestBody Map<Integer, Integer> idToCredits){
         try{
-            courseService.updateCoursesCreditsById(idToCredits);
+            courseService.updateCoursesCreditsByIds(idToCredits);
             return ResponseEntity.ok().build();
         } catch (Exception exception){
             return handleException(exception);
