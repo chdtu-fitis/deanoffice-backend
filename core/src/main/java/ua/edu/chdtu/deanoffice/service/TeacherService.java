@@ -27,6 +27,18 @@ public class TeacherService {
         return teacherRepository.findAllByActive(active);
     }
 
+    public List<Teacher> getTeachersByActiveAndDepartmentId(boolean active, int departmentId) {
+        return teacherRepository.findAllByActiveAndDepartmentId(active, departmentId);
+    }
+
+    public List<Teacher> getTeachersByActiveAndSurname(boolean active, String surname) {
+        return teacherRepository.findAllByActiveAndSurname(active, surname);
+    }
+
+    public List<Teacher> getTeachersByActiveAndDepartmentIdAndSurname(boolean active, int departmentId, String surname) {
+        return teacherRepository.findAllByActiveAndDepartmentIdAndSurname(active, departmentId, surname);
+    }
+
     public void save(Teacher teacher) {
         teacherRepository.save(teacher);
     }
