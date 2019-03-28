@@ -38,9 +38,25 @@ public class TeacherController {
     }
 
     @GetMapping("/teachers")
-    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
+    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active,
+                                      @RequestParam(required = false) int departmentId,
+                                      @RequestParam(required = false) String surname) {
         try {
-            List<Teacher> teachers = teacherService.getTeachersByActive(active);
+            List<Teacher> teachers;
+            if (departmentId == 0 && surname == null) {
+                teachers = teacherService.getTeachersByActive(active);
+            } else {
+                if (departmentId != 0 && surname != null) {
+                    teachers = teacherService.getTeachersByActiveAndDepartmentIdAndSurname(active, departmentId, surname);
+                } else {
+                    if (departmentId == 0) {
+                        teachers = teacherService.getTeachersByActiveAndSurname(active, surname);
+                    } else {
+                        teachers = teacherService.getTeachersByActiveAndDepartmentId(active, departmentId);
+                    }
+                }
+            }
+
             return ResponseEntity.ok(map(teachers, TeacherDTO.class));
         } catch (Exception e) {
             return handleException(e);
