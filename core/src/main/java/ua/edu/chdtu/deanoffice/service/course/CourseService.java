@@ -147,25 +147,11 @@ public class CourseService {
     }
 
     public List<Course> getCoursesWithWrongCredits() {
-        ArrayList<Course> wrong = new ArrayList<>();
-        for (Course course : courseRepository.findAll()) {
-            BigDecimal credits = course.getCredits();
-            Integer hours = course.getHours();
-            Integer hoursPerCredit = course.getHoursPerCredit();
-            if (hoursPerCredit == 0) {
-                wrong.add(course);
-            } else if (hours != 0) {
-                BigDecimal expected = BigDecimal.valueOf(hours / hoursPerCredit);
-                if (credits.equals(expected)) {
-                    wrong.add(course);
-                }
-            }
-        }
-        return wrong;
+        return courseRepository.findCoursesWithWrongCredits();
     }
 
     @Transactional
-    public void updateCoursesCreditsByIds(Map<Integer,Integer> idToCredits){
+    public void updateCoursesCreditsByIds(Map<Integer, Integer> idToCredits) {
         for (Integer id : idToCredits.keySet()) {
             courseRepository.updateCourseCreditsById(id, idToCredits.get(id));
         }
