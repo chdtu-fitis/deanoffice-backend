@@ -83,9 +83,4 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             "or (round(credits, 2) != round(hours::numeric / hours_per_credit , 2))" +
             "or (hours = 0 and credits != 0)", nativeQuery = true)
     List<Course> findCoursesWithWrongCredits();
-
-    @Modifying
-    @Query("update Course as c set c.credits = :credits " +
-            "where c.id = :id")
-    void updateCourseCreditsById(@Param("id") int id, @Param("credits") int credits);
 }
