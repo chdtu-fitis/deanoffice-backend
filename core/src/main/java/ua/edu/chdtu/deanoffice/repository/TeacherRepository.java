@@ -19,6 +19,25 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
             @Param("active") boolean active
     );
 
+    @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.department.id = :departmentId")
+    List<Teacher> findAllByActiveAndDepartmentId(
+            @Param("active") boolean active,
+            @Param("departmentId") int departmentId
+    );
+
+    @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.surname = :surname")
+    List<Teacher> findAllByActiveAndSurname(
+            @Param("active") boolean active,
+            @Param("surname") String surname
+    );
+
+    @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.department.id = :departmentId AND t.surname = :surname")
+    List<Teacher> findAllByActiveAndDepartmentIdAndSurname(
+            @Param("active") boolean active,
+            @Param("departmentId") int departmentId,
+            @Param("surname") String surname
+    );
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE teacher t SET active = false WHERE t.id IN (:ids)", nativeQuery = true)
