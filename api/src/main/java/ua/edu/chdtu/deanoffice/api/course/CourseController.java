@@ -180,15 +180,19 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
-            Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
+            Course newCourse = map(coursesForGroupHolder.getNewCourse(), Course.class);
             int oldCourseId = coursesForGroupHolder.getOldCourseId();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             if (courseFromDb != null) {
-                newCourse = courseFromDb;
+                double correctCredits = Math.abs((0.0 + courseFromDb.getHours()) / courseFromDb.getHoursPerCredit());
+                if (Math.abs(correctCredits - courseFromDb.getCredits().doubleValue()) > 0.005) {
+                    courseFromDb.setCredits(new BigDecimal(correctCredits));
+                    courseService.createOrUpdateCourse(courseFromDb);
+                }
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
                 updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId);
             } else {
-                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+                CourseName courseName = map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
                 newCourse = updateCourseName(courseName, newCourse);
                 if (courseForGroupService.hasSoleCourse(oldCourseId)) {
                     courseService.createOrUpdateCourse(newCourse);
