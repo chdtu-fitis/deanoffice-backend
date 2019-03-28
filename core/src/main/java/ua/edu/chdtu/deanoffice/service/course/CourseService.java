@@ -150,10 +150,12 @@ public class CourseService {
         return courseRepository.findCoursesWithWrongCredits();
     }
 
-    @Transactional
-    public void updateCoursesCreditsByIds(Map<Integer, Integer> idToCredits) {
-        for (Integer id : idToCredits.keySet()) {
-            courseRepository.updateCourseCreditsById(id, idToCredits.get(id));
+    public void updateCoursesCreditsByIds(List<Integer> ids) {
+        for (Integer id : ids) {
+            Course course = getById(id);
+            double correctCredits = Math.abs((0.0 + course.getHours()) / course.getHoursPerCredit());
+            course.setCredits(new BigDecimal(correctCredits));
+            createOrUpdateCourse(course);
         }
     }
 }
