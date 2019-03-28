@@ -378,11 +378,11 @@ public class CourseController {
     }
 
     @PostMapping("/credits/wrong/update")
-    public ResponseEntity updateWrongCourses(@RequestBody Map<Integer, Integer> idToCredits){
-        try{
-            courseService.updateCoursesCreditsByIds(idToCredits);
+    public ResponseEntity updateCourseCreditsByIds(@RequestParam("ids") List<Integer> ids) {
+        try {
+            courseService.updateCoursesCreditsByIds(ids);
             return ResponseEntity.ok().build();
-        } catch (Exception exception){
+        } catch (Exception exception) {
             return handleException(exception);
         }
     }
