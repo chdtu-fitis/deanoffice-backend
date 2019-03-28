@@ -184,6 +184,7 @@ public class CourseController {
             int oldCourseId = coursesForGroupHolder.getOldCourseId();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             if (courseFromDb != null) {
+                newCourse = courseFromDb;
                 double correctCredits = Math.abs((0.0 + courseFromDb.getHours()) / courseFromDb.getHoursPerCredit());
                 if (Math.abs(correctCredits - courseFromDb.getCredits().doubleValue()) > 0.005) {
                     courseFromDb.setCredits(new BigDecimal(correctCredits));
