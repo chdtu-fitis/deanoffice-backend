@@ -78,9 +78,10 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     @Transactional
     void deleteByIdIn(List<Integer> ids);
 
-    @Query(value = "select * from course " +
-            "where (hours_per_credit = 0) " +
-            "or (round(credits, 2) != round(hours::numeric / hours_per_credit , 2))" +
-            "or (hours = 0 and credits != 0)", nativeQuery = true)
+    @Query(value = "select c.* from course c " +
+            "where (c.hours_per_credit = 0) " +
+            "or (round(c.credits, 2) != round((cast (c.hours as numeric (8,2)) / c.hours_per_credit), 2))" +
+            "or (c.hours = 0 and c.credits != 0) " +
+            "order by c.id", nativeQuery = true)
     List<Course> findCoursesWithWrongCredits();
 }
