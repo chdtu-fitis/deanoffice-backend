@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -163,6 +164,19 @@ public class CourseService {
         courseRepository.deleteByIdIn(ids);
     }
 
+    public List<Course> getCoursesWithWrongCredits() {
+        return courseRepository.findCoursesWithWrongCredits();
+    }
+
+    public void updateCoursesCreditsByIds(List<Integer> ids) {
+        for (Integer id : ids) {
+            Course course = getById(id);
+            double correctCredits = Math.abs((0.0 + course.getHours()) / course.getHoursPerCredit());
+            course.setCredits(new BigDecimal(correctCredits));
+            createOrUpdateCourse(course);
+        }
+    }
+  
     public List<Course> getCoursesByCourseNameId(int id) {
         return courseRepository.findCoursesByCourseNameId(id);
     }

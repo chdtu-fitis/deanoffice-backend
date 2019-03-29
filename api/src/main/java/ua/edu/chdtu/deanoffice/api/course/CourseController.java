@@ -372,6 +372,26 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/credits/wrong")
+    public ResponseEntity getCoursesWithWrongCredits() {
+        try {
+            List<Course> coursesWithWrongCredits = courseService.getCoursesWithWrongCredits();
+            return ResponseEntity.ok(map(coursesWithWrongCredits, CourseDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PutMapping("/credits/wrong")
+    public ResponseEntity updateCourseCreditsByIds(@RequestParam("ids") List<Integer> ids) {
+        try {
+            courseService.updateCoursesCreditsByIds(ids);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+  
     @PostMapping("/merge")
     public ResponseEntity mergeCoursesByName(@RequestBody Map<Integer, List<Integer>> idToId) {
         try {
