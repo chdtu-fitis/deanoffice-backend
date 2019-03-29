@@ -1,16 +1,18 @@
 package ua.edu.chdtu.deanoffice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseNameRepository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,12 +42,20 @@ public class CourseNameService {
     }
 
     public void deleteCoursesNamesByIds(List<Integer> ids) {
-        courseNameRepository.deleteCourseNameById(ids);
+        courseNameRepository.deleteCourseNameByIdIn(ids);
+    }
+
+    public void deleteCourseNameById(int id) {
+        courseNameRepository.deleteCourseNameById(id);
+    }
+
+    public CourseName getCourseNameById(int id) {
+        return courseNameRepository.findCourseNameById(id);
     }
 
     public Map<CourseName, List<CourseName>> getSimilarCoursesNames() {
         List<CourseName> courseNames = getCourseNames();
-        HashMap<CourseName, List<CourseName>> result = new HashMap<>();
+        TreeMap<CourseName, List<CourseName>> result = new TreeMap<>(Comparator.comparing(NameEntity::getName));
         HashSet<CourseName> repeatedValues = new HashSet<>();
         int i = 0;
         for (CourseName globalCourseName : courseNames) {

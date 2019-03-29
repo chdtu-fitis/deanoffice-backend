@@ -73,15 +73,19 @@ public class CourseForGroupService {
         }
     }
 
-    public void save(CourseForGroup courseForGroup){
+    public void save(CourseForGroup courseForGroup) {
         this.courseForGroupRepository.save(courseForGroup);
     }
 
-    public boolean hasSoleCourse(int courseId){
+    public boolean hasSoleCourse(int courseId) {
         int count = courseForGroupRepository.countByCourseId(courseId);
         if (count == 1)
             return true;
         else
             return false;
+    }
+
+    public void updateCourseIdById(int newId, int oldId) {
+        courseForGroupRepository.updateCourseIdByCourseId(newId, oldId);
     }
 }

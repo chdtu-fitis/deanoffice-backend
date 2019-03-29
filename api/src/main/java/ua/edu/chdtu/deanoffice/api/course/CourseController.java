@@ -180,15 +180,20 @@ public class CourseController {
     @JsonView(CourseForGroupView.Course.class)
     public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
         try {
-            Course newCourse = (Course) map(coursesForGroupHolder.getNewCourse(), Course.class);
+            Course newCourse = map(coursesForGroupHolder.getNewCourse(), Course.class);
             int oldCourseId = coursesForGroupHolder.getOldCourseId();
             Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
             if (courseFromDb != null) {
                 newCourse = courseFromDb;
+                double correctCredits = Math.abs((0.0 + courseFromDb.getHours()) / courseFromDb.getHoursPerCredit());
+                if (Math.abs(correctCredits - courseFromDb.getCredits().doubleValue()) > 0.005) {
+                    courseFromDb.setCredits(new BigDecimal(correctCredits));
+                    courseService.createOrUpdateCourse(courseFromDb);
+                }
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
                 updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId);
             } else {
-                CourseName courseName = (CourseName) map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+                CourseName courseName = map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
                 newCourse = updateCourseName(courseName, newCourse);
                 if (courseForGroupService.hasSoleCourse(oldCourseId)) {
                     courseService.createOrUpdateCourse(newCourse);
@@ -251,6 +256,7 @@ public class CourseController {
                 Teacher teacher = teacherService.getTeacher(updatedCourseForGroup.getTeacher().getId());
                 courseForGroup.setTeacher(teacher);
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
+                courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
                 updatedCoursesForGroup.add(courseForGroup);
             }
             courseForGroupService.addCourseForGroupAndNewChanges(newCoursesForGroup, updatedCoursesForGroup, deleteCoursesIds);
@@ -380,6 +386,16 @@ public class CourseController {
     public ResponseEntity updateCourseCreditsByIds(@RequestParam("ids") List<Integer> ids) {
         try {
             courseService.updateCoursesCreditsByIds(ids);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+  
+    @PostMapping("/merge")
+    public ResponseEntity mergeCoursesByName(@RequestBody Map<Integer, List<Integer>> idToId) {
+        try {
+            courseService.mergeCourseNamesByIdToId(idToId);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);

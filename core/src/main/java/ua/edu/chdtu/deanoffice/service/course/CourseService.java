@@ -7,8 +7,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
+import ua.edu.chdtu.deanoffice.repository.GradeRepository;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.math.BigDecimal;
@@ -21,16 +26,29 @@ import java.util.Map;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final StudentGroupService studentGroupService;
+    private final CourseNameService courseNameService;
+    private final CourseForGroupService courseForGroupService;
+    private final GradeRepository gradeRepository;
     private final int ROWS_PER_PAGE = 50;
 
-    public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService) {
+    public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService,
+                         CourseNameService courseNameService, CourseForGroupService courseForGroupService,
+                         GradeRepository gradeRepository) {
         this.courseRepository = courseRepository;
         this.studentGroupService = studentGroupService;
+        this.courseNameService = courseNameService;
+        this.courseForGroupService = courseForGroupService;
+        this.gradeRepository = gradeRepository;
     }
 
     public Course getCourseByAllAttributes(Course course) {
         return courseRepository.findOne(course.getSemester(), course.getKnowledgeControl().getId(), course.getCourseName().getId(),
                 course.getHours(), course.getHoursPerCredit());
+    }
+
+    public Course getCourseByAllAttributes(int semester, int knowledgeControlId, int courseNameId,
+                                           int hours, int hoursPerCredit) {
+        return courseRepository.findOne(semester, knowledgeControlId, courseNameId, hours, hoursPerCredit);
     }
 
     public List<Course> getCoursesBySemester(int semester) {
@@ -156,6 +174,35 @@ public class CourseService {
             double correctCredits = Math.abs((0.0 + course.getHours()) / course.getHoursPerCredit());
             course.setCredits(new BigDecimal(correctCredits));
             createOrUpdateCourse(course);
+        }
+    }
+  
+    public List<Course> getCoursesByCourseNameId(int id) {
+        return courseRepository.findCoursesByCourseNameId(id);
+    }
+
+    @Transactional
+    public void mergeCourseNamesByIdToId(Map<Integer, List<Integer>> idToId) throws OperationCannotBePerformedException {
+        for (Integer correctId : idToId.keySet()) {
+            CourseName correctCourseName = courseNameService.getCourseNameById(correctId);
+            for (Integer wrongId : idToId.get(correctId)) {
+                if (correctId.equals(wrongId)) {
+                    throw new OperationCannotBePerformedException("id правильної назви предмета дорівнює id неправильної назви предмета");
+                }
+                for (Course wrongCourse : getCoursesByCourseNameId(wrongId)) {
+                    Course correctCourse = getCourseByAllAttributes(wrongCourse.getSemester(),
+                            wrongCourse.getKnowledgeControl().getId(), correctCourseName.getId(),
+                            wrongCourse.getHours(), wrongCourse.getHoursPerCredit());
+                    if (correctCourse != null) {
+                        courseForGroupService.updateCourseIdById(correctCourse.getId(), wrongCourse.getId());
+                        gradeRepository.updateCourseIdByCourseId(correctCourse.getId(), wrongCourse.getId());
+                        courseRepository.delete(wrongCourse.getId());
+                    } else {
+                        courseRepository.updateCourseNameIdInCourse(correctId, wrongId, wrongCourse.getId());
+                    }
+                }
+                courseNameService.deleteCourseNameById(wrongId);
+            }
         }
     }
 }

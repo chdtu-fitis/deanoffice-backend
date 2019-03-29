@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +71,16 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             "where c.id not in(select distinct cfg.course.id from CourseForGroup as cfg) " +
             "and c.id not in (select distinct g.course.id from Grade as g)")
     int findTotalOfUnusedCourses();
+
+    @Query("select c from Course as c " +
+            "where c.courseName.id = :id")
+    List<Course> findCoursesByCourseNameId(@Param("id") int id);
+
+    @Modifying
+    @Query("update Course as c set c.courseName.id = :correctId " +
+            "where c.courseName.id = :wrongId and c.id = :id")
+    void updateCourseNameIdInCourse(@Param("correctId") int correctId, @Param("wrongId") int wrongId,
+                                    @Param("id") int id);
 
     @Transactional
     void deleteByIdIn(List<Integer> ids);
