@@ -370,14 +370,13 @@ public class CourseController {
     public ResponseEntity getCoursesWithWrongCredits() {
         try {
             List<Course> coursesWithWrongCredits = courseService.getCoursesWithWrongCredits();
-            List<CourseDTO> map = map(coursesWithWrongCredits, CourseDTO.class);
-            return ResponseEntity.ok(map);
+            return ResponseEntity.ok(map(coursesWithWrongCredits, CourseDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    @PostMapping("/credits/wrong/update")
+    @PutMapping("/credits/wrong")
     public ResponseEntity updateCourseCreditsByIds(@RequestParam("ids") List<Integer> ids) {
         try {
             courseService.updateCoursesCreditsByIds(ids);
