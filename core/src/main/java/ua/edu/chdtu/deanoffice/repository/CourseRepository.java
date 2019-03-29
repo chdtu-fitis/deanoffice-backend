@@ -2,17 +2,13 @@ package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Integer> {
@@ -79,9 +75,10 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     void deleteByIdIn(List<Integer> ids);
 
     @Query(value = "select c.* from course c " +
+            "inner join course_name cn on c.course_name_id = cn.id " +
             "where (c.hours_per_credit = 0) " +
             "or (round(c.credits, 2) != round((cast (c.hours as numeric (8,2)) / c.hours_per_credit), 2))" +
             "or (c.hours = 0 and c.credits != 0) " +
-            "order by c.id", nativeQuery = true)
+            "order by c.semester, cn.name", nativeQuery = true)
     List<Course> findCoursesWithWrongCredits();
 }
