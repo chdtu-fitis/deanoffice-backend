@@ -19,6 +19,7 @@ class DiplomaSheetData{
 
     void assignHeader(String pattern, String columnName) {
         columnName = removeDigits(columnName);
+        pattern = pattern.toLowerCase();
         switch (pattern){
             case DiplomaHeaderPatterns.FIRST_NAME:
                 headerData.setFirstName(columnName);
