@@ -246,15 +246,19 @@ public class CourseController {
                 courseForGroup.setCourse(course);
                 StudentGroup studentGroup = studentGroupService.getById(groupId);
                 courseForGroup.setStudentGroup(studentGroup);
-                Teacher teacher = teacherService.getTeacher(newCourseForGroup.getTeacher().getId());
-                courseForGroup.setTeacher(teacher);
+                if (newCourseForGroup.getTeacher().getId() != 0) {
+                    Teacher teacher = teacherService.getTeacher(newCourseForGroup.getTeacher().getId());
+                    courseForGroup.setTeacher(teacher);
+                }
                 courseForGroup.setExamDate(newCourseForGroup.getExamDate());
                 newCoursesForGroup.add(courseForGroup);
             }
             for (CourseForGroupDTO updatedCourseForGroup : updatedCourses) {
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(updatedCourseForGroup.getId());
-                Teacher teacher = teacherService.getTeacher(updatedCourseForGroup.getTeacher().getId());
-                courseForGroup.setTeacher(teacher);
+                if (updatedCourseForGroup.getTeacher().getId() != 0) {
+                    Teacher teacher = teacherService.getTeacher(updatedCourseForGroup.getTeacher().getId());
+                    courseForGroup.setTeacher(teacher);
+                }
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
                 courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
                 updatedCoursesForGroup.add(courseForGroup);
