@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.service.document.report.graduates.group.GraduatesGroupReportService;
@@ -13,7 +14,7 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/document/")
-public class GraduatesGroupReportController {
+public class GraduatesGroupReportController extends DocumentResponseController {
     private GraduatesGroupReportService graduatesGroupReportService;
 
     public GraduatesGroupReportController(GraduatesGroupReportService graduatesGroupReportService) {
@@ -23,8 +24,8 @@ public class GraduatesGroupReportController {
     @GetMapping("/graduates/{groupId}/report")
     public ResponseEntity getGraduatesReportForGroupPdf(@PathVariable int groupId) {
         try {
-            File file = graduatesGroupReportService.getGraduatesReportForGroupPdf(groupId);
-            return null;
+            File file = graduatesGroupReportService.createGraduatesReportForGroupPdf(groupId);
+            return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception exception) {
             return handleException(exception);
         }
