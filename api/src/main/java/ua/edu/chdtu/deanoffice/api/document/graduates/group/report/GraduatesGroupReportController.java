@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.graduates_group_report;
+package ua.edu.chdtu.deanoffice.api.document.graduates.group.report;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
