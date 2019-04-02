@@ -7,6 +7,8 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,6 +19,7 @@ import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTime;
 
@@ -42,12 +45,12 @@ public class GraduatesGroupReportService {
             BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             Font basefont = new Font(baseFont, 14);
             document.add(getCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", basefont, 0));
-            document.add(getCenterAlignedParagraph("ФАКУЛЬТЕТ ЕЛЕКТРОННИХ ТЕХНОЛОГІЙ І РОБОТОТЕХНІКИ", basefont, 100));
+            document.add(getCenterAlignedParagraph("ФАКУЛЬТЕТ ЕЛЕКТРОННИХ ТЕХНОЛОГІЙ І РОБОТОТЕХНІКИ", basefont, 50));
             document.add(getCenterAlignedParagraph("ВІДОМІСТЬ", new Font(baseFont, 14, Font.BOLD), 0));
             document.add(getCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", basefont, 0));
             document.add(getCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", basefont, 0));
             document.add(getCenterAlignedParagraph("за період навчання", basefont, 30));
-
+            document.add(createGroupAttributeTable(basefont));
 //            document.add(addContent(group));
         } finally {
             if (document != null)
@@ -63,9 +66,27 @@ public class GraduatesGroupReportService {
         return element;
     }
 
-    private Element createTable() {
-
-
-        return null;
+    private PdfPTable createGroupAttributeTable(Font font) throws DocumentException {
+        PdfPTable mainTable = new PdfPTable(2);
+        mainTable.setTotalWidth(new float[]{130, 250});
+        mainTable.setLockedWidth(true);
+        ArrayList<PdfPCell> cells = new ArrayList<>();
+        cells.add(new PdfPCell(new Paragraph("Освітній рівень:", font)));
+        cells.add(new PdfPCell(new Paragraph("бакалаврський", font)));
+        cells.add(new PdfPCell(new Paragraph("Строк навчання:", font)));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("01.09.2015-30.06.2019", font))));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("Спеціальність:", font))));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("172 Телекомунікації та радіотехніка", font))));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("Освітня програма:", font))));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("Телекомунікації", font))));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("Академічна група:", font))));
+        cells.add(new PdfPCell(new Paragraph(new Paragraph("ТК-56", font))));
+        for (PdfPCell cell : cells) {
+            cell.setBorder(0);
+            mainTable.addCell(cell);
+        }
+        mainTable.setHorizontalAlignment(Element.ALIGN_LEFT);
+        mainTable.setSpacingBefore(10);
+        return mainTable;
     }
 }
