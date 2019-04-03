@@ -56,7 +56,7 @@ public class GroupController {
         this.environment = environment;
     }
 
-    @JsonView(StudentGroupView.WithStudents.class)
+    @JsonView(StudentGroupView.WithExtendedStudentData.class)
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId, @CurrentUser ApplicationUser user) {
         try {

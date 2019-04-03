@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 
+import java.util.Date;
+
 @Getter
 @Setter
 public class StudentDegreeFullNameDTO {
@@ -14,6 +16,8 @@ public class StudentDegreeFullNameDTO {
     private PersonFullNameDTO student;
     @JsonView(StudentGroupView.WithStudents.class)
     private String recordBookNumber;
-    @JsonView(StudentGroupView.WithStudents.class)
+    @JsonView(StudentGroupView.WithExtendedStudentData.class)
     private String diplomaNumber;
+    @JsonView(StudentGroupView.WithExtendedStudentData.class)
+    private Date diplomaDate;
 }
