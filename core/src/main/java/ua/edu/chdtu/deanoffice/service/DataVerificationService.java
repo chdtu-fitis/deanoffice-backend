@@ -71,14 +71,8 @@ public class DataVerificationService {
         }
     }
 
-    public void isCorrectTeacher(Teacher teacher) throws OperationCannotBePerformedException {
+    public void isCorrectTeacherFromDTO(Teacher teacher) throws OperationCannotBePerformedException {
         String errorMassage = null;
-        if (teacher == null)
-            errorMassage = "Не отримані дані для збереження!";
-
-        if (teacher.getId() != 0)
-            errorMassage = "Неправильно всказано id!";
-
         if (teacher.getName() == null)
             errorMassage = "Не вказано ім'я!";
 
