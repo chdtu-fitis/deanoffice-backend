@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -68,5 +69,38 @@ public class DataVerificationService {
                 throw new OperationCannotBePerformedException("Не всі дані групи є випускні");
             }
         }
+    }
+
+    public void isCorrectTeacher(Teacher teacher) throws OperationCannotBePerformedException {
+        String errorMassage = null;
+        if (teacher == null)
+            errorMassage = "Не отримані дані для збереження!";
+
+        if (teacher.getId() != 0)
+            errorMassage = "Неправильно всказано id!";
+
+        if (teacher.getName() == null)
+            errorMassage = "Не вказано ім'я!";
+
+        if (teacher.getSex() == null)
+            errorMassage = "Не вказана стать!";
+
+        if (teacher.getSurname() == null)
+            errorMassage = "Не вказано прізвище!";
+
+        if (teacher.getDepartment() == null)
+            errorMassage = "Не вказана кафедра!";
+
+        if (teacher.getDepartment().getId() == 0)
+            errorMassage = "Вказана неіснуюча кафедра!";//Можливо зробити щоб була перевірка на всі неіснуючі кафедри, а не тільки на 0
+
+        if (teacher.getPosition() == null)
+            errorMassage = "Не сказана позиція!";
+
+        if (teacher.getPosition().getId() == 0)
+            errorMassage = "Вказана неіснуюча позиція!";
+
+        if (errorMassage != null)
+            throw new OperationCannotBePerformedException(errorMassage);
     }
 }
