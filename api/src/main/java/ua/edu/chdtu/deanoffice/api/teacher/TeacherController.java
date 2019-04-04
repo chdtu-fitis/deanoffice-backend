@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 
 import java.util.List;
@@ -21,10 +22,12 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 public class TeacherController {
 
     private TeacherService teacherService;
+    private DataVerificationService dataVerificationService;
 
     @Autowired
-    public TeacherController(TeacherService teacherService) {
+    public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService) {
         this.teacherService = teacherService;
+        this.dataVerificationService = dataVerificationService;
     }
 
     @GetMapping("/teachers-short")
@@ -50,32 +53,9 @@ public class TeacherController {
     @PostMapping("/teachers")
     public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
-            String errorMassage = null;
-            if (teacherDTO == null)
-                errorMassage = "Не отримані дані для збереження!";
-
-            if (teacherDTO.getId() != 0)
-                errorMassage = "Неправильно всказано id!";
-
-            if (teacherDTO.getName() == null)
-                errorMassage = "Не вказано ім'я!";
-
-            if (teacherDTO.getSex() == null)
-                errorMassage = "Не вказана стать!";
-
-            if (teacherDTO.getSurname() == null)
-                errorMassage = "Не вказано прізвище!";
-
-            if (teacherDTO.getDepartment() == null)
-                errorMassage = "Не вказана кафедра!";
-
-            if (teacherDTO.getDepartment().getId() == 0)
-                errorMassage = "Неправильно вказана кафедра!";//Можливо зробити щоб була перевірка на всі неіснуючі кафедри, а не тільки на 0
-
-            if (errorMassage != null)
-                throw new OperationCannotBePerformedException(errorMassage);
-
-            teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
+            Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
+            dataVerificationService.isCorrectTeacher(teacher);
+            teacherService.save(teacher);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
