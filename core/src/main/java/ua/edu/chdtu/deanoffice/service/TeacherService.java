@@ -43,7 +43,7 @@ public class TeacherService {
         teacherRepository.save(teacher);
     }
 
-    public void setTeachersInactiveByIds(List<Integer> ids) {
+    public void deleteByIds(List<Integer> ids) {
         teacherRepository.setTeachersInactiveByIds(ids);
     }
 }
