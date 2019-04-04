@@ -50,9 +50,31 @@ public class TeacherController {
     @PostMapping("/teachers")
     public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
-            if (teacherDTO.getId() != 0) {
-                throw new OperationCannotBePerformedException("Неправильно всказано id!");
-            }
+            String errorMassage = null;
+            if (teacherDTO == null)
+                errorMassage = "Не отримані дані для збереження!";
+
+            if (teacherDTO.getId() != 0)
+                errorMassage = "Неправильно всказано id!";
+
+            if (teacherDTO.getName() == null)
+                errorMassage = "Не вказано ім'я!";
+
+            if (teacherDTO.getSex() == null)
+                errorMassage = "Не вказана стать!";
+
+            if (teacherDTO.getSurname() == null)
+                errorMassage = "Не вказано прізвище!";
+
+            if (teacherDTO.getDepartment() == null)
+                errorMassage = "Не вказана кафедра!";
+
+            if (teacherDTO.getDepartment().getId() == 0)
+                errorMassage = "Неправильно вказана кафедра!";//Можливо зробити щоб була перевірка на всі неіснуючі кафедри, а не тільки на 0
+
+            if (errorMassage != null)
+                throw new OperationCannotBePerformedException(errorMassage);
+
             teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
