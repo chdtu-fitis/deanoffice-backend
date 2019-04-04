@@ -77,7 +77,7 @@ public class TeacherController {
     @DeleteMapping("/teachers")
     public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds) {
         try {
-            teacherService.setTeachersInactiveByIds(teachersIds);
+            teacherService.deleteByIds(teachersIds);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
