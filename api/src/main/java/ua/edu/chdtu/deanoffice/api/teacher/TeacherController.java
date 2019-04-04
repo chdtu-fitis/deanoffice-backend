@@ -53,8 +53,12 @@ public class TeacherController {
     @PostMapping("/teachers")
     public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
+            if (teacherDTO == null)
+                throw new OperationCannotBePerformedException("Не отримані дані для збереження!");
+            if (teacherDTO.getId() != 0)
+                throw new OperationCannotBePerformedException("Неправильно всказано id, id повинно бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            dataVerificationService.isCorrectTeacher(teacher);
+            dataVerificationService.isCorrectTeacherFromDTO(teacher);
             teacherService.save(teacher);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -65,10 +69,14 @@ public class TeacherController {
     @PutMapping("/teachers")
     public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
-            Teacher teacher = teacherService.getTeacher(teacherDTO.getId());
-            if (teacher == null) {
+            if (teacherDTO == null)
+                throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
+            Teacher teacherFromDB = teacherService.getTeacher(teacherDTO.getId());
+            if (teacherFromDB == null) {
                 throw new OperationCannotBePerformedException("Викладача з вказаним id не існує!");
             }
+            Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
+            dataVerificationService.isCorrectTeacherFromDTO(teacher);
             teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
