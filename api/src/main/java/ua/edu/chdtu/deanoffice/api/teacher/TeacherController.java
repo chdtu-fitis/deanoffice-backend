@@ -79,6 +79,8 @@ public class TeacherController {
     @DeleteMapping("/teachers")
     public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds) {
         try {
+            if (teachersIds.size() == 0)
+                throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
             teacherService.deleteByIds(teachersIds);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
