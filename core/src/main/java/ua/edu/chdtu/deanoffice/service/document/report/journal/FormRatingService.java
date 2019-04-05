@@ -57,11 +57,7 @@ public class FormRatingService {
     @Autowired
     private StudentGroupService groupService;
     private ComparatorCourses comparator;
-    private List<String> namesStudents;
-    private List<String> namesCourses;
-    private int columnWidth;
-    private List<StudentGroup> studentGroups;
-    private Integer semester;
+
     private HashMap<Integer,String> retrenchments;
 
     public File formDocument(
@@ -71,37 +67,36 @@ public class FormRatingService {
         String tuitionFormText,
         Integer semester
     ) throws Docx4JException, IOException {
-        namesStudents = new ArrayList<>();
-        namesCourses = new ArrayList<>();
         TuitionForm tuitionForm = TuitionForm.valueOf(tuitionFormText);
-        studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId,year,facultyId,tuitionForm);
-        this.semester = semester;
+        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId,year,facultyId,tuitionForm);
         comparator = new ComparatorCourses();
         retrenchments = new HashMap<Integer,String>();
         fillRetrenchments();
-        WordprocessingMLPackage resultTemplate = createDocument();
+        WordprocessingMLPackage resultTemplate = createDocument(semester,studentGroups);
         String fileName = transliterate(JOURNAL+year+KURS);
         return documentIOService.saveDocumentToTemp(resultTemplate, fileName, FileFormatEnum.DOCX);
     }
 
-    private WordprocessingMLPackage createDocument()
+    private WordprocessingMLPackage createDocument(Integer semester, List<StudentGroup> studentGroups)
             throws Docx4JException {
-        WordprocessingMLPackage wordMLPackage = createTables();
+        WordprocessingMLPackage wordMLPackage = createTables(semester,studentGroups);
         return wordMLPackage;
     }
 
-    private WordprocessingMLPackage createTables() throws InvalidFormatException {
+    private WordprocessingMLPackage createTables(Integer semester,List<StudentGroup> studentGroups) throws InvalidFormatException {
+        List<String> namesStudents = new ArrayList<>();
+        List<String> namesCourses = new ArrayList<>();
         wordMLPackage = WordprocessingMLPackage.createPackage(PageSizePaper.A4,true);
         for(StudentGroup studentGroup:studentGroups) {
-            getDataFromDataBase(studentGroup.getId());
+            getDataFromDataBase(studentGroup,semester,namesStudents,namesCourses);
             if(namesCourses.size() != 0) {
-                calculateColumnWidth(wordMLPackage);
+                int columnWidth = calculateColumnWidth(wordMLPackage,namesCourses);
                 factory = Context.getWmlObjectFactory();
                 setTitle(wordMLPackage,studentGroup);
                 Tbl table = factory.createTbl();
                 addBorders(table);
-                setHeaders(table);
-                setRows(table);
+                setHeaders(table,namesCourses,columnWidth);
+                setRows(table,namesStudents,namesCourses,columnWidth);
                 wordMLPackage.getMainDocumentPart().addObject(table);
             }
         }
@@ -112,7 +107,7 @@ public class FormRatingService {
         wordMLPackage.getMainDocumentPart().addObject(getTextWithStyle(studentGroup.getName(),true));
     }
 
-    private void setRows(Tbl table) {
+    private void setRows(Tbl table, List<String> namesStudents, List<String> namesCourses,int columnWidth) {
         int number = 1;
         for (String name:namesStudents){
             Tr tr = factory.createTr();
@@ -126,7 +121,7 @@ public class FormRatingService {
         }
     }
 
-    private void setHeaders(Tbl table) {
+    private void setHeaders(Tbl table, List<String> namesCourses,int columnWidth) {
         Tr tr = factory.createTr();
         addTableCellWithWidth(tr, "", WIDTH_NUMBER_COLUMN);
         addTableCellWithWidth(tr, "", WIDTH_NAME_COLUMN);
@@ -169,14 +164,13 @@ public class FormRatingService {
         return  p;
     }
 
-    private void getDataFromDataBase(int groupId) {
-        StudentGroup studentGroup = groupService.getById(groupId);
+    private void getDataFromDataBase(StudentGroup studentGroup, Integer semester, List<String> namesStudents, List<String> namesCourses) {
         namesStudents.clear();
         namesCourses.clear();
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
         List<StudentDegree> students = studentGroup.getStudentDegrees();
-        prepareCourses(courseForGroups);
-        prepareNames(students);
+        prepareCourses(courseForGroups,namesCourses);
+        prepareNames(students,namesStudents);
     }
 
     private void setRowHeight(Tr tr,int height){
@@ -223,17 +217,17 @@ public class FormRatingService {
         table.getTblPr().setTblBorders(borders);
     }
 
-    private void calculateColumnWidth(WordprocessingMLPackage wordMLPackage){
+    private int calculateColumnWidth(WordprocessingMLPackage wordMLPackage, List<String> namesCourses){
         int allowableTableWidth = wordMLPackage.
         getDocumentModel().
         getSections().
         get(0).
         getPageDimensions().
         getWritableWidthTwips();
-        columnWidth = (allowableTableWidth-WIDTH_NAME_COLUMN-WIDTH_NUMBER_COLUMN)/namesCourses.size();
+        return  (allowableTableWidth-WIDTH_NAME_COLUMN-WIDTH_NUMBER_COLUMN)/namesCourses.size();
     }
 
-    private void prepareCourses(List<CourseForGroup> courseForGroups){
+    private void prepareCourses(List<CourseForGroup> courseForGroups, List<String> namesCourses){
         courseForGroups.sort(comparator);
         for(CourseForGroup courseForGroup:courseForGroups) {
             Integer kcId = Integer.valueOf(courseForGroup.getCourse().getKnowledgeControl().getId());
@@ -245,7 +239,7 @@ public class FormRatingService {
         }
     }
 
-    private void prepareNames(List<StudentDegree> students){
+    private void prepareNames(List<StudentDegree> students, List<String> namesStudents){
         for(StudentDegree studentDegree:students){
             if(studentDegree.getPayment() == Payment.CONTRACT){
                 namesStudents.add(studentDegree.getStudent().getInitialsUkr()+" (к)");
