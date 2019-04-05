@@ -95,14 +95,16 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteDepartment(@PathVariable("id") int departmentId) {
+    public ResponseEntity deleteDepartment(@PathVariable("id") int departmentId,
+                                           @CurrentUser ApplicationUser user) {
         try {
             Department department = departmentService.getById(departmentId);
-            this.verificationService.departmentInstanceNotNullAndActive(department,departmentId);
+            this.verificationService.departmentInstanceNotNullAndActive(department, departmentId);
+            this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
             departmentService.delete(department);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
-            return  handleException(exception);
+            return handleException(exception);
         }
 
     }
