@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -55,7 +56,7 @@ public class GroupController {
         this.environment = environment;
     }
 
-    @JsonView(StudentGroupView.WithStudents.class)
+    @JsonView(StudentGroupView.WithExtendedStudentData.class)
     @GetMapping("/groups/graduates")
     public ResponseEntity getGraduateGroups(@RequestParam int degreeId, @CurrentUser ApplicationUser user) {
         try {
@@ -183,7 +184,7 @@ public class GroupController {
     }
 
     @DeleteMapping("/groups/{group_ids}")
-    public ResponseEntity deleteGroup(@PathVariable("group_ids") Integer[] groupIds,
+    public ResponseEntity deleteGroup(@PathVariable("group_ids") List<Integer> groupIds,
                                       @CurrentUser ApplicationUser user) {
         try {
             List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
@@ -258,11 +259,11 @@ public class GroupController {
         return studentGroup;
     }
 
-    private void validateDeleteGroupBody(Integer[] groupIds, List<StudentGroup> studentGroups)
+    private void validateDeleteGroupBody(List<Integer> groupIds, List<StudentGroup> studentGroups)
             throws NotFoundException, OperationCannotBePerformedException {
-        if (studentGroups.size() != groupIds.length) {
+        if (studentGroups.size() != groupIds.size()) {
             throw new NotFoundException("Групи не були знайдені "
-                        + Arrays.toString(findNotFoundStudentGroups(studentGroups, asList(groupIds))));
+                        + Arrays.toString(findNotFoundStudentGroups(studentGroups, groupIds)));
         }
 
         if (hasInactiveStudentGroups(studentGroups)) {

@@ -1,10 +1,10 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             " inner join student s ON s.id = sd.student_id" +
             " inner join student_group sg ON sg.id = sd.student_group_id" +
             " inner join courses_for_groups cfg ON cfg.course_id = c.id and sg.id=cfg.student_group_id" +
-            " where g.student_degree_id = :studentDegreeId and (g.points is null or g.points < " + Constants.MINIMAL_SATISFACTORY_POINTS +")" +
+            " where g.student_degree_id = :studentDegreeId and (g.points is null or g.points < " + Constants.MINIMAL_SATISFACTORY_POINTS + ")" +
             " order by c.semester, cn.name", nativeQuery = true)
     List<Grade> getByCheckStudentGradesForSupplement(
             @Param("studentDegreeId") Integer studentDegreeId
@@ -49,4 +49,14 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     @Query("select gr from Grade gr where gr.course.id = :courseId and gr.studentDegree.studentGroup.id = :groupId")
     List<Grade> findByCourseAndGroup(@Param("courseId") int courseId, @Param("groupId") int groupId);
 
+    @Modifying
+    @Query("update Grade as g set g.course.id = :newId " +
+            "where g.course.id = :oldId")
+    void updateCourseIdByCourseId(@Param("newId") int newId, @Param("oldId") int oldId);
+
+    @Modifying
+    @Query(value = "UPDATE Grade g " +
+            "SET g.academicDifference = :academicDifference " +
+            "WHERE g.id IN :gradeIds")
+    void updateAcademicDifference(@Param("academicDifference") boolean academicDifference, @Param("gradeIds") List<Integer> gradeIds);
 }

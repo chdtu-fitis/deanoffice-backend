@@ -24,6 +24,7 @@ public class Grade extends BaseEntity {
     @Column(name = "ects", length = 2)
     @Enumerated(value = EnumType.STRING)
     private EctsGrade ects;
+    private boolean academicDifference;
 
     public String getNationalGradeUkr() {
         if (ects == null) {

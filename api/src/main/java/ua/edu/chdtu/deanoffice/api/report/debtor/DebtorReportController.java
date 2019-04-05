@@ -5,6 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
+import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.studyyear.finish.StudyYearFinishController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.report.debtor.DebtorReportService;
 import ua.edu.chdtu.deanoffice.service.report.debtor.SpecializationDebtorsBean;
@@ -39,8 +42,11 @@ public class DebtorReportController {
 
             return ResponseEntity.ok().body(debtorsReportDTO);
         } catch (Exception e) {
-            e.printStackTrace();
+            return handleException(e);
         }
-        return null;
+    }
+
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, DebtorReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

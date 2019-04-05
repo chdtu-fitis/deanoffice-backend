@@ -8,12 +8,12 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +26,15 @@ public class DiplomaSupplementController extends DocumentResponseController {
     private DiplomaSupplementService diplomaSupplementService;
     private FacultyService facultyService;
     private StudentDegreeService studentDegreeService;
+    private CourseNameService courseNameService;
 
     public DiplomaSupplementController(DiplomaSupplementService diplomaSupplementService,
                                        FacultyService facultyService,
-                                       StudentDegreeService studentDegreeService) {
+                                       StudentDegreeService studentDegreeService, CourseNameService courseNameService) {
         this.diplomaSupplementService = diplomaSupplementService;
         this.facultyService = facultyService;
         this.studentDegreeService = studentDegreeService;
+        this.courseNameService = courseNameService;
     }
 
     @GetMapping("/degrees/{studentDegreeId}/docx")
@@ -55,6 +57,21 @@ public class DiplomaSupplementController extends DocumentResponseController {
             File studentDiplomaSupplement = diplomaSupplementService.formDiplomaSupplement(studentDegreeId, FileFormatEnum.PDF);
             return buildDocumentResponseEntity(studentDiplomaSupplement, studentDiplomaSupplement.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/check-courses-translation")
+    public ResponseEntity checkEnglishTranslationForCourses(@RequestParam Integer degreeId,
+                                                            @CurrentUser ApplicationUser user){
+        try {
+            Map<String, String> coursesWithoutEnglishTranslation =
+                    courseNameService.getGraduatesCoursesWithEmptyEngName(user.getFaculty().getId(), degreeId);
+            List<CourseNameWithoutEngDTO> courseNamesWithoutEngDTOList = new ArrayList<>();
+            for (Map.Entry<String, String> entry : coursesWithoutEnglishTranslation.entrySet())
+                courseNamesWithoutEngDTOList.add(new CourseNameWithoutEngDTO(entry.getKey(), entry.getValue()));
+            return ResponseEntity.ok(courseNamesWithoutEngDTOList);
+        } catch (Exception e){
             return handleException(e);
         }
     }

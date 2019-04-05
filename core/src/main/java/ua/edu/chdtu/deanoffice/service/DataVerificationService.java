@@ -14,11 +14,14 @@ public class DataVerificationService {
 
     private StudentDegreeRepository studentDegreeRepository;
     private final StudentGroupRepository studentGroupRepository;
+    private CurrentYearService currentYearService;
 
     public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
-                                   StudentGroupRepository studentGroupRepository) {
+                                   StudentGroupRepository studentGroupRepository,
+                                   CurrentYearService currentYearService) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentGroupRepository = studentGroupRepository;
+        this.currentYearService = currentYearService;
     }
 
     public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
@@ -48,7 +51,12 @@ public class DataVerificationService {
         }
     }
 
-
+    public void areStudentGroupsActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
+        int countInactiveStudentGroup = studentGroupRepository.countInactiveStudentGroupsByIds(ids);
+        if (countInactiveStudentGroup != 0) {
+            throw new OperationCannotBePerformedException("Серед даних груп є неактивні");
+        }
+    }
 
     public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
         for (StudentDegree activeStudentDegree : activeStudentDegrees) {
@@ -69,6 +77,15 @@ public class DataVerificationService {
     public void validateTransferAfterSave(StudentTransfer studentTransferSaving) throws OperationCannotBePerformedException {
         if (studentTransferSaving == null) {
             throw new OperationCannotBePerformedException("Дані про переведення студента не вдалося зберегти");
+        }
+    }
+
+    public void areGroupsGraduate(List<Integer> groupIds) throws OperationCannotBePerformedException {
+        List<StudentGroup> studentGroups = studentGroupRepository.findAllByIds(groupIds);
+        for (StudentGroup studentGroup : studentGroups) {
+            if (currentYearService.getYear() != studentGroup.getCreationYear() + studentGroup.getStudyYears().intValue()) {
+                throw new OperationCannotBePerformedException("Не всі дані групи є випускні");
+            }
         }
     }
 }

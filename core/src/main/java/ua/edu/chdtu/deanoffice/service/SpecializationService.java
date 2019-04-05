@@ -21,6 +21,9 @@ public class SpecializationService {
     public List<Specialization> getAllByActive(boolean active, int facultyId) {
         return specializationRepository.findAllByActive(active, facultyId);
     }
+    public List<Specialization> getAllByActiveAndDegree(boolean active, int facultyId, int degreeId) {
+        return specializationRepository.findAllByActiveAndDegree(active,facultyId,degreeId);
+    }
 
     public Specialization save(Specialization specialization) {
         return specializationRepository.save(specialization);
