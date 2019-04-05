@@ -76,8 +76,6 @@ public class GraduatesGroupReportService {
         ArrayList<PdfPCell> cells = new ArrayList<>();
         cells.add(new PdfPCell(new Paragraph("   Освітній рівень:", font)));
         cells.add(new PdfPCell(new Paragraph(bean.getDegree(), font)));
-        cells.add(new PdfPCell(new Paragraph("   Строк навчання:", font)));
-        cells.add(new PdfPCell(new Paragraph(new Paragraph(bean.getStudyTerm(), font))));
         cells.add(new PdfPCell(new Paragraph(new Paragraph("   Спеціальність:", font))));
         cells.add(new PdfPCell(new Paragraph(new Paragraph(bean.getSpeciality(), font))));
         cells.add(new PdfPCell(new Paragraph(new Paragraph("   Освітня програма:", font))));
@@ -100,9 +98,6 @@ public class GraduatesGroupReportService {
         bean.setDegree(specialization.getDegree().getName());
         bean.setSpeciality(specialization.getSpeciality().getName());
         bean.setAcademicGroup(group.getName());
-
-        bean.setStudyTerm("deprecated");
-
         return bean;
     }
 

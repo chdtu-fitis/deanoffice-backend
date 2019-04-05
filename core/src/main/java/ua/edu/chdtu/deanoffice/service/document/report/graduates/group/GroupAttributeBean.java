@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 public class GroupAttributeBean {
     private String degree;
-    private String studyTerm;
     private String speciality;
     private String specialization;
     private String academicGroup;
