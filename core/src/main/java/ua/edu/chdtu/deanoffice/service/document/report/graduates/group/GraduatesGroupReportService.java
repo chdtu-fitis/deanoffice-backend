@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.service.document.report.graduates.group;
 
-import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -15,14 +14,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
-import javax.swing.border.Border;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTime;
 
@@ -53,8 +53,8 @@ public class GraduatesGroupReportService {
             document.add(getCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", basefont, 0));
             document.add(getCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", basefont, 0));
             document.add(getCenterAlignedParagraph("за період навчання", basefont, 30));
-            document.add(createGroupAttributeTable(basefont, createGroupAttributeBean(groupId)));
-            document.add(createTable(new Font(baseFont, 10)));
+            document.add(createGroupAttributeTable(basefont, createGroupAttributeBean(group)));
+            document.add(createMainTable(new Font(baseFont, 10), group.getActiveStudents()));
         } finally {
             if (document != null)
                 document.close();
@@ -90,9 +90,8 @@ public class GraduatesGroupReportService {
         return mainTable;
     }
 
-    private GroupAttributeBean createGroupAttributeBean(int groupId) {
+    private GroupAttributeBean createGroupAttributeBean(StudentGroup group) {
         GroupAttributeBean bean = new GroupAttributeBean();
-        StudentGroup group = studentGroupService.getById(groupId);
         Specialization specialization = group.getSpecialization();
         bean.setSpecialization(specialization.getName());
         bean.setDegree(specialization.getDegree().getName());
@@ -101,88 +100,57 @@ public class GraduatesGroupReportService {
         return bean;
     }
 
-    private PdfPTable createTable(Font font) throws DocumentException {
+    private PdfPTable createMainTable(Font font, List<Student> list) throws DocumentException {
         PdfPTable mainTable = new PdfPTable(4);
         mainTable.setSpacingBefore(10);
-        float[] columnWidths = {1f, 10f, 2f, 10f};
-        mainTable.setWidths(columnWidths);
+        mainTable.setWidths(new float[]{1f, 10f, 2f, 10f});
         mainTable.setWidthPercentage(100);
-        PdfPCell number = new PdfPCell();
-        Paragraph numberParagraph = new Paragraph("№ з/п", font);
-        numberParagraph.setAlignment(Element.ALIGN_CENTER);
-        number.addElement(numberParagraph);
-        mainTable.addCell(number);
-        PdfPCell pip = new PdfPCell();
-        Paragraph pipParagraph = new Paragraph("ПІБ здобувача", font);
-        pipParagraph.setAlignment(Element.ALIGN_CENTER);
-        pip.addElement(pipParagraph);
-        mainTable.addCell(pip);
-        PdfPCell eBook = new PdfPCell();
-        Paragraph eBookParagraph = new Paragraph("№ залікової книжки", font);
-        eBookParagraph.setAlignment(Element.ALIGN_CENTER);
-        eBook.addElement(eBookParagraph);
-        mainTable.addCell(eBook);
+        mainTable.addCell(createCell("№ з/п", font, 20));
+        mainTable.addCell(createCell("ПІБ здобувача", font, 30));
+        mainTable.addCell(createCell("№ залікової книжки", font, 20));
+        mainTable.addCell(createAchievementsTable(font));
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-        PdfPTable achievements = new PdfPTable(2);
-        achievements.setWidths(new float[]{3f, 0.9f});
-        achievements.setWidthPercentage(100);
 
-        PdfPCell achievementCell = new PdfPCell();
-        Paragraph achievementParagraph = new Paragraph("Навчальні досягнення здобувача", font);
-        achievementParagraph.setAlignment(Element.ALIGN_CENTER);
-        achievementCell.addElement(achievementParagraph);
-        achievementCell.setColspan(2);
-        achievementCell.setBorder(0);
-        achievements.addCell(achievementCell);
+        return mainTable;
+    }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+    private PdfPCell createCell(String text, Font font, int paddingTop) {
+        PdfPCell cell = new PdfPCell();
+        Paragraph paragraph = new Paragraph(text, font);
+        paragraph.setAlignment(Element.ALIGN_CENTER);
+        cell.addElement(paragraph);
+        cell.setPaddingTop(paddingTop);
+        return cell;
+    }
+
+    private PdfPCell createAchievementsTable(Font font) throws DocumentException {
+        PdfPCell coverForAchievements = new PdfPCell();
+        coverForAchievements.setPadding(0);
+        PdfPTable achievementsTable = new PdfPTable(2);
+        achievementsTable.setWidths(new float[]{3f, 0.9f});
+        achievementsTable.setWidthPercentage(100);
+        achievementsTable.addCell(createAchievementsCell("Навчальні досягнення здобувача", font, 2,
+                PdfPCell.NO_BORDER, 25));
         PdfPTable grades = new PdfPTable(3);
         grades.setWidthPercentage(100);
-        grades.setSplitRows(false);
+        PdfPCell coverForGrades = new PdfPCell();
+        coverForGrades.setPadding(0);
+        grades.addCell(createAchievementsCell("Розподіл оцінок", font, 3, PdfPCell.NO_BORDER, 25));
+        grades.addCell(createCell("Відмінно,   %", font, 0));
+        grades.addCell(createCell("Добре,      %", font, 0));
+        grades.addCell(createCell("Задовільно, %", font, 0));
+        coverForGrades.addElement(grades);
+        achievementsTable.addCell(coverForGrades);
+        achievementsTable.addCell(createCell("Середній бал", font, 1));
+        coverForAchievements.addElement(achievementsTable);
+        return coverForAchievements;
+    }
 
-        PdfPCell dividingGrades = new PdfPCell();
-        Paragraph dividingGradesParagraph = new Paragraph("Розподіл оцінок", font);
-        dividingGradesParagraph.setAlignment(Element.ALIGN_CENTER);
-        dividingGrades.addElement(dividingGradesParagraph);
-        dividingGrades.setColspan(3);
-        dividingGrades.setBorder(0);
-
-        grades.addCell(dividingGrades);
-
-        PdfPCell a = new PdfPCell();
-        Paragraph aParagraph = new Paragraph("Відмінно, %", font);
-        aParagraph.setAlignment(Element.ALIGN_CENTER);
-        a.addElement(aParagraph);
-        PdfPCell b = new PdfPCell();
-        Paragraph bParagraph = new Paragraph("Добре, %", font);
-        bParagraph.setAlignment(Element.ALIGN_CENTER);
-        b.addElement(bParagraph);
-        PdfPCell e = new PdfPCell();
-        Paragraph eParagraph = new Paragraph("Задовільно, %", font);
-        eParagraph.setAlignment(Element.ALIGN_CENTER);
-        e.addElement(eParagraph);
-
-        grades.addCell(a);
-        grades.addCell(b);
-        grades.addCell(e);
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-        PdfPCell tt1 = new PdfPCell();
-        tt1.setPadding(0);
-        tt1.addElement(grades);
-        achievements.addCell(tt1);
-
-        PdfPCell middleScore = new PdfPCell();
-        Paragraph middleScoreParagraph = new Paragraph("Середній бал", font);
-        middleScoreParagraph.setAlignment(Element.ALIGN_CENTER);
-        middleScore.addElement(middleScoreParagraph);
-        achievements.addCell(middleScore);
-
-        PdfPCell tt = new PdfPCell();
-        tt.setPadding(0);
-        tt.addElement(achievements);
-        mainTable.addCell(tt);
-        return mainTable;
+    private PdfPCell createAchievementsCell(String text, Font font, int colspan, int border, int fixedHeight) {
+        PdfPCell achievementCell = createCell(text, font, 0);
+        achievementCell.setColspan(colspan);
+        achievementCell.setBorder(border);
+        achievementCell.setFixedHeight(fixedHeight);
+        return achievementCell;
     }
 }
