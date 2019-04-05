@@ -109,7 +109,11 @@ public class DepartmentController {
 
     }
 
-
+    private Department create(DepartmentDTO departmentDTO, Faculty faculty) {
+        Department department = Mapper.strictMap(departmentDTO, Department.class);
+        department.setFaculty(faculty);
+        return department;
+    }
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, SpecializationController.class, ExceptionToHttpCodeMapUtil.map(exception));
