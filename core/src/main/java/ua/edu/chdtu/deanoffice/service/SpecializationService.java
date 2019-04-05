@@ -46,8 +46,7 @@ public class SpecializationService {
             return null;
     }
 
-    public void delete(Integer specializationId) {
-        Specialization specialization = getById(specializationId);
+    public void delete(Specialization specialization) {
         specialization.setActive(false);
         specializationRepository.save(specialization);
     }
