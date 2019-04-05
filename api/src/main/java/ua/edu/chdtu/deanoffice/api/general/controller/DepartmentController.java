@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.DepartmentDTO;
-import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.specialization.SpecializationController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
@@ -99,7 +98,7 @@ public class DepartmentController {
                                            @CurrentUser ApplicationUser user) {
         try {
             Department department = departmentService.getById(departmentId);
-            this.verificationService.departmentInstanceNotNullAndActive(department, departmentId);
+            this.verificationService.departmentNotNullAndActive(department, departmentId);
             this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
             departmentService.delete(department);
             return ResponseEntity.ok().build();

@@ -28,7 +28,6 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
-import java.net.URI;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
@@ -138,7 +137,7 @@ public class SpecializationController {
     public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") int specializationId) {
         try {
             Specialization specialization = specializationService.getById(specializationId);
-            this.verificationService.specializationInstanceNotNullAndActive(specialization, specializationId);
+            this.verificationService.specializationNotNullAndActive(specialization, specializationId);
             specializationService.delete(specialization);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {

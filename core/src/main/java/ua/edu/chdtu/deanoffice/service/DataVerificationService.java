@@ -28,8 +28,8 @@ public class DataVerificationService {
         }
     }
 
-    public void departmentInstanceNotNullAndActive(Department department,
-                                                int departmentId) throws OperationCannotBePerformedException {
+    public void departmentNotNullAndActive(Department department,
+                                           int departmentId) throws OperationCannotBePerformedException {
         if (department == null) {
             throw new OperationCannotBePerformedException("Кафедру [" + departmentId + "] не знайдено");
         }
@@ -38,8 +38,8 @@ public class DataVerificationService {
         }
     }
 
-    public void specializationInstanceNotNullAndActive(Specialization specialization,
-                                                       int specializationId) throws OperationCannotBePerformedException {
+    public void specializationNotNullAndActive(Specialization specialization,
+                                               int specializationId) throws OperationCannotBePerformedException {
         if (specialization == null) {
             throw new OperationCannotBePerformedException("Освітню програму [" + specializationId + "] не знайдено");
         }
