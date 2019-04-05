@@ -24,6 +24,10 @@ public class DepartmentService {
         return this.departmentRepository.findOne(departmentId);
     }
 
+    public Department save(Department department) {
+        return departmentRepository.save(department);
+    }
+
     public void delete(Department department) {
         department.setActive(false);
         departmentRepository.save(department);
