@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -242,14 +243,46 @@ public class StudentSummary {
         this.grades = grades;
     }
 
+    public StudentGradesSummary getStudentGradesStatistic() {
+        StudentGradesSummary studentGradesSummary = new StudentGradesSummary();
+        int grade3 = 0;
+        int grade4 = 0;
+        int grade5 = 0;
+        int totalGrades = 0;
+        int gradesAmount = 0;
+        for (int i = 0; i < grades.size() - 1; i++) {
+            for (Grade grade : grades.get(i)) {
+                if (grade.getCourse().getKnowledgeControl().isGraded()) {
+                    Integer points = grade.getPoints();
+                    if (points == 3) {
+                        grade3++;
+                    } else if (points == 4) {
+                        grade4++;
+                    } else {
+                        grade5++;
+                    }
+                    totalGrades += points;
+                    gradesAmount++;
+                }
+            }
+        }
+        studentGradesSummary.setGrade3(getPercentForValue(gradesAmount, grade3));
+        studentGradesSummary.setGrade4(getPercentForValue(gradesAmount, grade4));
+        studentGradesSummary.setGrade5(getPercentForValue(gradesAmount, grade5));
+        studentGradesSummary.setGradeAverage(totalGrades / gradesAmount);
+        return studentGradesSummary;
+    }
 
+    private int getPercentForValue(int total, int value) {
+        return Math.round(value / total * 100);
+    }
 
     @Setter
     @Getter
-    public class StudentGradesStatistic{
-        private int a;
-        private int b;
-        private int c;
+    public class StudentGradesSummary {
+        private int grade3;
+        private int grade4;
+        private int grade5;
         private float gradeAverage;
     }
 }
