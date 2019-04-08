@@ -49,6 +49,18 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     @Query(value = "UPDATE teacher t SET active = false WHERE t.id IN (:ids)", nativeQuery = true)
     void setTeachersInactiveByIds(@Param("ids") List<Integer> ids);
 
+    @Query(value = "SELECT t.id FROM teacher t INNER JOIN department d ON t.department_id = d.id " +
+            "WHERE t.id IN (:teacherIds) AND d.faculty_id <> :facultyId", nativeQuery = true)
+    List<Integer> findIdsEveryoneWhoDoesNotBelongToThisFacultyId(
+            @Param("facultyId") int facultyId,
+            @Param("teacherIds") List<Integer> teacherIds
+    );
+
+    @Query(value = "SELECT count(t.id) FROM teacher t WHERE t.id IN (:teacherIds) AND t.active = false", nativeQuery = true)
+    int countInactiveTeachersByIds(
+            @Param("teacherIds") List<Integer> teacherIds
+    );
+
 /*
     @Modifying
     @Query(value = "UPDATE student_group sg SET active = false WHERE sg.id IN (:ids)", nativeQuery = true)
