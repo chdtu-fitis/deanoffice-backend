@@ -241,4 +241,16 @@ public class StudentSummary {
     protected void setGrades(List<List<Grade>> grades) {
         this.grades = grades;
     }
+
+
+
+    @Setter
+    @Getter
+    public class StudentGradesStatistic{
+        private int a;
+        private int b;
+        private int c;
+        private float gradeAverage;
+    }
 }
+
