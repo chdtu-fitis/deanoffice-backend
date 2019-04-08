@@ -47,16 +47,16 @@ public class GraduatesGroupReportService {
         try {
             document.open();
             BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            Font basefont = new Font(baseFont, 14);
-            document.add(createCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", basefont, 0));
+            Font font = new Font(baseFont, 14);
+            document.add(createCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", font, 0));
             String facultyName = group.getSpecialization().getFaculty().getName().toUpperCase();
-            document.add(createCenterAlignedParagraph(facultyName, basefont, 50));
+            document.add(createCenterAlignedParagraph(facultyName, font, 50));
             document.add(createCenterAlignedParagraph("ВІДОМІСТЬ", new Font(baseFont, 14, Font.BOLD), 0));
-            document.add(createCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", basefont, 0));
-            document.add(createCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", basefont, 0));
-            document.add(createCenterAlignedParagraph("за період навчання", basefont, 30));
-            document.add(createGroupAttributeTable(basefont, createGroupAttributeBean(group)));
-            document.add(createMainTable(new Font(baseFont, 10), group.getActiveStudents()));
+            document.add(createCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", font, 0));
+            document.add(createCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", font, 0));
+            document.add(createCenterAlignedParagraph("за період навчання", font, 30));
+            document.add(createGroupAttributeTable(font, createGroupAttributeBean(group)));
+            document.add(createMainTable(baseFont, group.getActiveStudents()));
             document = createAssignment(baseFont, document);
         } finally {
             if (document != null)
@@ -103,16 +103,17 @@ public class GraduatesGroupReportService {
         return bean;
     }
 
-    private PdfPTable createMainTable(Font font, List<Student> list) throws DocumentException {
+    private PdfPTable createMainTable(BaseFont baseFont, List<Student> list) throws DocumentException {
+        Font font = new Font(baseFont, 10);
         PdfPTable mainTable = new PdfPTable(4);
         mainTable.setSpacingBefore(10);
-        mainTable.setWidths(new float[]{1f, 9f, 2f, 10f});
+        mainTable.setWidths(new float[]{1f, 9f, 3f, 10f});
         mainTable.setWidthPercentage(100);
         mainTable.addCell(createCell("№ з/п", font, 20));
         mainTable.addCell(createCell("ПІБ здобувача", font, 30));
         mainTable.addCell(createCell("№ залікової книжки", font, 20));
         mainTable.addCell(createAchievementsTable(font));
-        return fillTable(mainTable, font, list);
+        return fillTable(mainTable, baseFont, list);
     }
 
     private PdfPCell createCell(String text, Font font, int paddingTop) {
@@ -155,7 +156,8 @@ public class GraduatesGroupReportService {
         return achievementCell;
     }
 
-    private PdfPTable fillTable(PdfPTable table, Font font, List<Student> list) throws DocumentException {
+    private PdfPTable fillTable(PdfPTable table, BaseFont baseFont, List<Student> list) throws DocumentException {
+        Font font = new Font(baseFont, 12);
         int count = 1;
         if (list.size() == 0) {
             System.out.println("empty");
