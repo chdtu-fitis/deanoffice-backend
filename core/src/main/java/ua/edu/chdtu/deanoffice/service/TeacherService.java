@@ -27,6 +27,10 @@ public class TeacherService {
         return teacherRepository.findAllByActive(active);
     }
 
+    public List<Teacher> getTeachersByActiveAndFacultyId(boolean active, int facultyId) {
+        return teacherRepository.findAllByActiveAndFacultyId(active, facultyId);
+    }
+
     public List<Teacher> getTeachersByActiveAndDepartmentId(boolean active, int departmentId) {
         return teacherRepository.findAllByActiveAndDepartmentId(active, departmentId);
     }
