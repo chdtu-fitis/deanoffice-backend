@@ -10,8 +10,12 @@ import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
+import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -25,11 +29,16 @@ public class TeacherController {
 
     private TeacherService teacherService;
     private DataVerificationService dataVerificationService;
+    private DepartmentRepository departmentRepository;
+    private PositionRepository positionRepository;
 
     @Autowired
-    public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService) {
+    public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService,
+                             DepartmentRepository departmentRepository, PositionRepository positionRepository) {
         this.teacherService = teacherService;
         this.dataVerificationService = dataVerificationService;
+        this.departmentRepository = departmentRepository;
+        this.positionRepository = positionRepository;
     }
 
     @GetMapping("/teachers-short")
@@ -63,11 +72,32 @@ public class TeacherController {
                 throw new OperationCannotBePerformedException("Неправильно всказано id, id повинно бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacherFromDTO(teacher);
+
+            existDepartmentAndPositionInDataBase(teacher);
+
             teacherService.save(teacher);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
         }
+    }
+
+    private void existDepartmentAndPositionInDataBase(Teacher teacher) throws OperationCannotBePerformedException {
+        String errorMassage = null;
+        Department department = departmentRepository.findOne(teacher.getDepartment().getId());
+        if (department == null)
+            errorMassage = "Вказана неіснуюча кафедра!";
+        Position position = positionRepository.findOne(teacher.getPosition().getId());
+        if (position == null)
+            errorMassage = "Вказана неіснуюча позиція!";
+        if (errorMassage != null)
+            throw new OperationCannotBePerformedException(errorMassage);
+        setCorrectDepartmentAndPositionFromDataBase(teacher, department, position);
+    }
+
+    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, Department department, Position position) {
+        teacher.setDepartment(department);
+        teacher.setPosition(position);
     }
 
     @PutMapping("/teachers")
@@ -82,6 +112,9 @@ public class TeacherController {
             }
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacherFromDTO(teacher);
+
+            existDepartmentAndPositionInDataBase(teacher);
+
             teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
