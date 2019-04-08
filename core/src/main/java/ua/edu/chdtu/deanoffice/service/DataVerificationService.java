@@ -3,10 +3,7 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
-import ua.edu.chdtu.deanoffice.repository.PositionRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
+import ua.edu.chdtu.deanoffice.repository.*;
 
 import java.util.List;
 
@@ -18,17 +15,20 @@ public class DataVerificationService {
     private CurrentYearService currentYearService;
     private DepartmentRepository departmentRepository;
     private PositionRepository positionRepository;
+    private TeacherRepository teacherRepository;
 
     public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
                                    StudentGroupRepository studentGroupRepository,
                                    CurrentYearService currentYearService,
                                    DepartmentRepository departmentRepository,
-                                   PositionRepository positionRepository) {
+                                   PositionRepository positionRepository,
+                                   TeacherRepository teacherRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentGroupRepository = studentGroupRepository;
         this.currentYearService = currentYearService;
         this.departmentRepository = departmentRepository;
         this.positionRepository = positionRepository;
+        this.teacherRepository = teacherRepository;
     }
 
     public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
@@ -43,6 +43,12 @@ public class DataVerificationService {
         if (countInactiveStudentGroup != 0) {
             throw new OperationCannotBePerformedException("Серед даних груп є неактивні");
         }
+    }
+
+    public void areTheseTeachersActive(List<Integer> teacherIds) throws OperationCannotBePerformedException {
+        int countInactiveTeachers = teacherRepository.countInactiveTeachersByIds(teacherIds);
+        if (countInactiveTeachers != 0)
+            throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
     }
 
     public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
