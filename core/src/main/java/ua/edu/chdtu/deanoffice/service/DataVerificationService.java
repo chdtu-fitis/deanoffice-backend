@@ -1,12 +1,11 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
+import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.util.List;
@@ -17,13 +16,19 @@ public class DataVerificationService {
     private StudentDegreeRepository studentDegreeRepository;
     private final StudentGroupRepository studentGroupRepository;
     private CurrentYearService currentYearService;
+    private DepartmentRepository departmentRepository;
+    private PositionRepository positionRepository;
 
     public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
                                    StudentGroupRepository studentGroupRepository,
-                                   CurrentYearService currentYearService) {
+                                   CurrentYearService currentYearService,
+                                   DepartmentRepository departmentRepository,
+                                   PositionRepository positionRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentGroupRepository = studentGroupRepository;
         this.currentYearService = currentYearService;
+        this.departmentRepository = departmentRepository;
+        this.positionRepository = positionRepository;
     }
 
     public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
@@ -88,10 +93,20 @@ public class DataVerificationService {
         if (teacher.getDepartment().getId() == 0)
             errorMassage = "Вказана неіснуюча кафедра!";//Можливо зробити щоб була перевірка на всі неіснуючі кафедри, а не тільки на 0
 
+        Department department = departmentRepository.findOne(teacher.getDepartment().getId());
+
+        if (department == null)
+            errorMassage = "Вказана неіснуюча кафедра!";
+
         if (teacher.getPosition() == null)
             errorMassage = "Не сказана позиція!";
 
         if (teacher.getPosition().getId() == 0)
+            errorMassage = "Вказана неіснуюча позиція!";
+
+        Position position = positionRepository.findOne(teacher.getPosition().getId());
+
+        if (position == null)
             errorMassage = "Вказана неіснуюча позиція!";
 
         if (errorMassage != null)
