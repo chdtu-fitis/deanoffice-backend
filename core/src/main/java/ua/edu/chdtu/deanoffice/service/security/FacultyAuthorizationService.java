@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 
 import java.util.List;
 
@@ -15,11 +16,14 @@ import java.util.List;
 public class FacultyAuthorizationService {
     private final StudentDegreeRepository studentDegreeRepository;
     private final DepartmentRepository departmentRepository;
+    private final TeacherRepository teacherRepository;
 
     public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository,
-                                       DepartmentRepository departmentRepository) {
+                                       DepartmentRepository departmentRepository,
+                                       TeacherRepository teacherRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.departmentRepository = departmentRepository;
+        this.teacherRepository = teacherRepository;
     }
 
     public void verifyAccessibilityOfStudentGroup(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
@@ -49,8 +53,14 @@ public class FacultyAuthorizationService {
 
     }
 
-    public void verifyAccessibilityOfDepartments(ApplicationUser user, Department department) throws UnauthorizedFacultyDataException {
+    public void verifyAccessibilityOfDepartment(ApplicationUser user, Department department) throws UnauthorizedFacultyDataException {
         if (user.getFaculty().getId() != department.getFaculty().getId())
             throw new UnauthorizedFacultyDataException("Вибрана кафедра є недоступною для даного користувача!");
+    }
+
+    public void verifyAccessibilityOfDepartments(ApplicationUser user, List<Integer> teacherIds) throws UnauthorizedFacultyDataException {
+        List<Integer> teacherIdsFromDb = teacherRepository.findIdsEveryoneWhoDoesNotBelongToThisFacultyId(user.getFaculty().getId(), teacherIds);
+        if (teacherIdsFromDb.size() != 0)
+            throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");
     }
 }
