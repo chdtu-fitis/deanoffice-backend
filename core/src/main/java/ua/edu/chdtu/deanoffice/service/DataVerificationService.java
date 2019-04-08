@@ -79,7 +79,7 @@ public class DataVerificationService {
     public void isCorrectTeacherFromDTO(Teacher teacher) throws OperationCannotBePerformedException {
         String errorMassage = null;
         if (teacher.getName() == null)
-            errorMassage = "Не вказано ім'я!";
+            errorMassage = "Не вказано ім'я!";//можна зробити краще, наприклад, робити перевірку через регулярні вирази, щоб там було як мінімум одна велика і маленька літери
 
         if (teacher.getSex() == null)
             errorMassage = "Не вказана стать!";
@@ -91,12 +91,12 @@ public class DataVerificationService {
             errorMassage = "Не вказана кафедра!";
 
         if (teacher.getDepartment().getId() == 0)
-            errorMassage = "Вказана неіснуюча кафедра!";//Можливо зробити щоб була перевірка на всі неіснуючі кафедри, а не тільки на 0
+            errorMassage = "Вказана неіснуюча кафедра!";
 
-        Department department = departmentRepository.findOne(teacher.getDepartment().getId());
+        /*Department department = departmentRepository.findOne(teacher.getDepartment().getId());
 
         if (department == null)
-            errorMassage = "Вказана неіснуюча кафедра!";
+            errorMassage = "Вказана неіснуюча кафедра!";*/
 
         if (teacher.getPosition() == null)
             errorMassage = "Не сказана позиція!";
@@ -104,10 +104,10 @@ public class DataVerificationService {
         if (teacher.getPosition().getId() == 0)
             errorMassage = "Вказана неіснуюча позиція!";
 
-        Position position = positionRepository.findOne(teacher.getPosition().getId());
+        /*Position position = positionRepository.findOne(teacher.getPosition().getId());
 
         if (position == null)
-            errorMassage = "Вказана неіснуюча позиція!";
+            errorMassage = "Вказана неіснуюча позиція!";*/
 
         if (errorMassage != null)
             throw new OperationCannotBePerformedException(errorMassage);
