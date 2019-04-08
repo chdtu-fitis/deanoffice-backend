@@ -96,6 +96,7 @@ public class TeacherController {
             }
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacherFromDTO(teacher);
+            facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
             existDepartmentAndPositionInDataBase(teacher);
             teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
