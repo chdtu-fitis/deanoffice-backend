@@ -23,6 +23,10 @@ public class TeacherService {
 //        return teacherRepository.findAllByIds(ids);
 //    }
 
+    public List<Teacher> getTeachers(List<Integer> ids) {
+        return teacherRepository.findAll(ids);
+    }
+
     public List<Teacher> getTeachersByActive(boolean active) {
         return teacherRepository.findAllByActive(active);
     }
