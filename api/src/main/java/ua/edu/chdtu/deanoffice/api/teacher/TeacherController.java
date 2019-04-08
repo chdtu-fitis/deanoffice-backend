@@ -8,7 +8,6 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Position;
@@ -18,6 +17,7 @@ import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
@@ -31,14 +31,17 @@ public class TeacherController {
     private DataVerificationService dataVerificationService;
     private DepartmentRepository departmentRepository;
     private PositionRepository positionRepository;
+    private FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService,
-                             DepartmentRepository departmentRepository, PositionRepository positionRepository) {
+                             DepartmentRepository departmentRepository, PositionRepository positionRepository,
+                             FacultyAuthorizationService facultyAuthorizationService) {
         this.teacherService = teacherService;
         this.dataVerificationService = dataVerificationService;
         this.departmentRepository = departmentRepository;
         this.positionRepository = positionRepository;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @GetMapping("/teachers-short")
@@ -72,10 +75,30 @@ public class TeacherController {
                 throw new OperationCannotBePerformedException("Неправильно всказано id, id повинно бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacherFromDTO(teacher);
-
+            facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
             existDepartmentAndPositionInDataBase(teacher);
-
             teacherService.save(teacher);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @PutMapping("/teachers")
+    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO,
+                                        @CurrentUser ApplicationUser user) {
+        try {
+            if (teacherDTO == null)
+                throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
+            Teacher teacherFromDB = teacherService.getTeacher(teacherDTO.getId());
+            if (teacherFromDB == null) {
+                throw new OperationCannotBePerformedException("Викладача з вказаним id не існує!");
+            }
+            Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
+            dataVerificationService.isCorrectTeacherFromDTO(teacher);
+            facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
+            existDepartmentAndPositionInDataBase(teacher);
+            teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
@@ -100,34 +123,17 @@ public class TeacherController {
         teacher.setPosition(position);
     }
 
-    @PutMapping("/teachers")
-    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO,
-                                        @CurrentUser ApplicationUser user) {
-        try {
-            if (teacherDTO == null)
-                throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
-            Teacher teacherFromDB = teacherService.getTeacher(teacherDTO.getId());
-            if (teacherFromDB == null) {
-                throw new OperationCannotBePerformedException("Викладача з вказаним id не існує!");
-            }
-            Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            dataVerificationService.isCorrectTeacherFromDTO(teacher);
-
-            existDepartmentAndPositionInDataBase(teacher);
-
-            teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
     @DeleteMapping("/teachers")
     public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds,
                                          @CurrentUser ApplicationUser user) {
         try {
             if (teachersIds.size() == 0)
                 throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
+            List<Teacher> teachers = teacherService.getTeachers(teachersIds);
+            if (teachers.size() != teachersIds.size())
+                throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
+            dataVerificationService.areTheseTeachersActive(teachersIds);
+            facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachersIds);
             teacherService.deleteByIds(teachersIds);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
