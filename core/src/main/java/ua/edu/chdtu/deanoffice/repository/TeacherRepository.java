@@ -19,6 +19,12 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
             @Param("active") boolean active
     );
 
+    @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.department.faculty.id = :facultyId")
+    List<Teacher> findAllByActiveAndFacultyId(
+            @Param("active") boolean active,
+            @Param("facultyId") int facultyId
+    );
+
     @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.department.id = :departmentId")
     List<Teacher> findAllByActiveAndDepartmentId(
             @Param("active") boolean active,
