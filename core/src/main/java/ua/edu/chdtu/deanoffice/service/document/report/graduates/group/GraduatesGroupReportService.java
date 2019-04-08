@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
@@ -47,14 +48,16 @@ public class GraduatesGroupReportService {
             document.open();
             BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             Font basefont = new Font(baseFont, 14);
-            document.add(getCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", basefont, 0));
-            document.add(getCenterAlignedParagraph("ФАКУЛЬТЕТ ЕЛЕКТРОННИХ ТЕХНОЛОГІЙ І РОБОТОТЕХНІКИ", basefont, 50));
-            document.add(getCenterAlignedParagraph("ВІДОМІСТЬ", new Font(baseFont, 14, Font.BOLD), 0));
-            document.add(getCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", basefont, 0));
-            document.add(getCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", basefont, 0));
-            document.add(getCenterAlignedParagraph("за період навчання", basefont, 30));
+            document.add(createCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", basefont, 0));
+            String facultyName = group.getSpecialization().getFaculty().getName().toUpperCase();
+            document.add(createCenterAlignedParagraph(facultyName, basefont, 50));
+            document.add(createCenterAlignedParagraph("ВІДОМІСТЬ", new Font(baseFont, 14, Font.BOLD), 0));
+            document.add(createCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", basefont, 0));
+            document.add(createCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", basefont, 0));
+            document.add(createCenterAlignedParagraph("за період навчання", basefont, 30));
             document.add(createGroupAttributeTable(basefont, createGroupAttributeBean(group)));
             document.add(createMainTable(new Font(baseFont, 10), group.getActiveStudents()));
+            document = createAssignment(baseFont, document);
         } finally {
             if (document != null)
                 document.close();
@@ -62,7 +65,7 @@ public class GraduatesGroupReportService {
         return file;
     }
 
-    private Paragraph getCenterAlignedParagraph(String text, Font font, int spacingAfter) {
+    private Paragraph createCenterAlignedParagraph(String text, Font font, int spacingAfter) {
         Paragraph element = new Paragraph(text, font);
         element.setAlignment(Element.ALIGN_CENTER);
         element.setSpacingAfter(spacingAfter);
@@ -103,15 +106,13 @@ public class GraduatesGroupReportService {
     private PdfPTable createMainTable(Font font, List<Student> list) throws DocumentException {
         PdfPTable mainTable = new PdfPTable(4);
         mainTable.setSpacingBefore(10);
-        mainTable.setWidths(new float[]{1f, 10f, 2f, 10f});
+        mainTable.setWidths(new float[]{1f, 9f, 2f, 10f});
         mainTable.setWidthPercentage(100);
         mainTable.addCell(createCell("№ з/п", font, 20));
         mainTable.addCell(createCell("ПІБ здобувача", font, 30));
         mainTable.addCell(createCell("№ залікової книжки", font, 20));
         mainTable.addCell(createAchievementsTable(font));
-
-
-        return mainTable;
+        return fillTable(mainTable, font, list);
     }
 
     private PdfPCell createCell(String text, Font font, int paddingTop) {
@@ -137,7 +138,7 @@ public class GraduatesGroupReportService {
         coverForGrades.setPadding(0);
         grades.addCell(createAchievementsCell("Розподіл оцінок", font, 3, PdfPCell.NO_BORDER, 25));
         grades.addCell(createCell("Відмінно,   %", font, 0));
-        grades.addCell(createCell("Добре,      %", font, 0));
+        grades.addCell(createCell("Добре,       %", font, 0));
         grades.addCell(createCell("Задовільно, %", font, 0));
         coverForGrades.addElement(grades);
         achievementsTable.addCell(coverForGrades);
@@ -152,5 +153,72 @@ public class GraduatesGroupReportService {
         achievementCell.setBorder(border);
         achievementCell.setFixedHeight(fixedHeight);
         return achievementCell;
+    }
+
+    private PdfPTable fillTable(PdfPTable table, Font font, List<Student> list) throws DocumentException {
+        int count = 1;
+        if (list.size() == 0) {
+            System.out.println("empty");
+        }
+        for (Student student : list) {
+            table.addCell(createCell(count + "", font, 0));
+            table.addCell(createCell(student.getSurname() + " " + student.getName() + " " + student.getPatronimic(),
+                    font, 0));
+            String recordBookNumber = "";
+
+            for (StudentDegree studentDegree : student.getDegrees()) {
+                recordBookNumber = studentDegree.getRecordBookNumber();
+            }
+            table.addCell(createCell(recordBookNumber, font, 0));
+            table.addCell(createGradeCell(student, font));
+            count++;
+        }
+        return table;
+    }
+
+    /////////students grades
+    private PdfPCell createGradeCell(Student student, Font font) throws DocumentException {
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(0);
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1f, 1f, 1f, 0.9f});
+
+        table.addCell(createCell("20", font, 0));
+        table.addCell(createCell("20", font, 0));
+        table.addCell(createCell("20", font, 0));
+        table.addCell(createCell("4.4", font, 0));
+        cell.addElement(table);
+        return cell;
+    }
+
+    //end of document
+    private Document createAssignment(BaseFont baseFont, Document document) throws DocumentException {
+
+        Font font14 = new Font(baseFont, 14);
+        Font font10 = new Font(baseFont, 10);
+
+        String text = "   Декан факультету ______________ ______________";
+        String sign = "підпис";
+        String pip = "                                ПІБ";
+
+        Paragraph textParagraph = new Paragraph(text, font14);
+        textParagraph.setSpacingBefore(20f);
+        textParagraph.setSpacingAfter(0);
+        document.add(textParagraph);
+
+        Paragraph signParagraph = new Paragraph(sign, font10);
+        signParagraph.setIndentationLeft(175f);
+        signParagraph.add(pip);
+        document.add(signParagraph);
+
+        Paragraph dateParagraph = new Paragraph("   «___»_______20 __ р.", font14);
+        dateParagraph.setSpacingBefore(5f);
+        document.add(dateParagraph);
+
+        Paragraph mpParagraph = new Paragraph("           МП", font14);
+        mpParagraph.setSpacingBefore(10f);
+        document.add(mpParagraph);
+        return document;
     }
 }
