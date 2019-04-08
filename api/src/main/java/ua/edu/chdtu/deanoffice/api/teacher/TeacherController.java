@@ -44,7 +44,7 @@ public class TeacherController {
     @GetMapping("/teachers-short")
     public ResponseEntity getAllActiveTeachers(@CurrentUser ApplicationUser user){
         try {
-            List<Teacher> teachers = teacherService.getTeachersByActive(true);
+            List<Teacher> teachers = teacherService.getTeachersByActiveAndFacultyId(true, user.getFaculty().getId());
             return ResponseEntity.ok(map(teachers, PersonFullNameDTO.class));
         } catch (Exception e) {
             return handleException(e);
@@ -55,7 +55,7 @@ public class TeacherController {
     public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active,
                                       @CurrentUser ApplicationUser user) {
         try {
-            List<Teacher> teachers = teacherService.getTeachersByActive(active);
+            List<Teacher> teachers = teacherService.getTeachersByActiveAndFacultyId(active, user.getFaculty().getId());
             return ResponseEntity.ok(map(teachers, TeacherDTO.class));
         } catch (Exception e) {
             return handleException(e);
