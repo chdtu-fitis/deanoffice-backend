@@ -80,7 +80,6 @@ public class DiplomaSupplementController extends DocumentResponseController {
     public ResponseEntity checkDataAvailability(@RequestParam Integer degreeId,
                                                 @CurrentUser ApplicationUser user) {
         try {
-            facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
             Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesData(user.getFaculty().getId(), degreeId);
             List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<>();
 
@@ -105,7 +104,6 @@ public class DiplomaSupplementController extends DocumentResponseController {
     public ResponseEntity checkGradeAvailability(@RequestParam Integer degreeId,
                                                 @CurrentUser ApplicationUser user) {
         try {
-            facultyService.checkStudentDegree(degreeId, user.getFaculty().getId());
             Map<StudentDegree, String> studentDegreesWithEmpty = studentDegreeService.checkAllGraduatesGrades(user.getFaculty().getId(), degreeId);
             List<StudentDataCheckDto> studentDataCheckDtoList = new ArrayList<>();
             for (Map.Entry<StudentDegree, String> entry: studentDegreesWithEmpty.entrySet()) {
