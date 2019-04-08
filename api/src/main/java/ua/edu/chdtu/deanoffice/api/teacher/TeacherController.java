@@ -9,10 +9,12 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.report.debtor.DebtorReportController;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class TeacherController {
     }
 
     @GetMapping("/teachers-short")
-    public ResponseEntity getAllActiveTeachers(){
+    public ResponseEntity getAllActiveTeachers(@CurrentUser ApplicationUser user){
         try {
             List<Teacher> teachers = teacherService.getTeachersByActive(true);
             return ResponseEntity.ok(map(teachers, PersonFullNameDTO.class));
@@ -41,7 +43,8 @@ public class TeacherController {
     }
 
     @GetMapping("/teachers")
-    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
+    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active,
+                                      @CurrentUser ApplicationUser user) {
         try {
             List<Teacher> teachers = teacherService.getTeachersByActive(active);
             return ResponseEntity.ok(map(teachers, TeacherDTO.class));
@@ -51,7 +54,8 @@ public class TeacherController {
     }
 
     @PostMapping("/teachers")
-    public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
+    public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO,
+                                     @CurrentUser ApplicationUser user) {
         try {
             if (teacherDTO == null)
                 throw new OperationCannotBePerformedException("Не отримані дані для збереження!");
@@ -67,7 +71,8 @@ public class TeacherController {
     }
 
     @PutMapping("/teachers")
-    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO) {
+    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO,
+                                        @CurrentUser ApplicationUser user) {
         try {
             if (teacherDTO == null)
                 throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
@@ -85,7 +90,8 @@ public class TeacherController {
     }
 
     @DeleteMapping("/teachers")
-    public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds) {
+    public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds,
+                                         @CurrentUser ApplicationUser user) {
         try {
             if (teachersIds.size() == 0)
                 throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
