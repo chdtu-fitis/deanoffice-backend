@@ -2,9 +2,11 @@ package ua.edu.chdtu.deanoffice.service.security;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
+import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.util.List;
@@ -12,9 +14,12 @@ import java.util.List;
 @Service
 public class FacultyAuthorizationService {
     private final StudentDegreeRepository studentDegreeRepository;
+    private final DepartmentRepository departmentRepository;
 
-    public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository) {
+    public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository,
+                                       DepartmentRepository departmentRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     public void verifyAccessibilityOfStudentGroup(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
@@ -42,5 +47,10 @@ public class FacultyAuthorizationService {
         if (studentDegreeIdFromDb.size() != 0)
             throw new UnauthorizedFacultyDataException("Вибрані студенти навчаються на недоступному для користувача факультеті");
 
+    }
+
+    public void verifyAccessibilityOfDepartments(ApplicationUser user, Department department) throws UnauthorizedFacultyDataException {
+        if (user.getFaculty().getId() != department.getFaculty().getId())
+            throw new UnauthorizedFacultyDataException("Вибрана кафедра є недоступною для даного користувача!");
     }
 }
