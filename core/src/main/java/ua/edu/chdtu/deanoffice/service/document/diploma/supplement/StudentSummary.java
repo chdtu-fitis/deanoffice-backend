@@ -265,21 +265,21 @@ public class StudentSummary {
         studentGradesSummary.setGrade3(getPercentForValue(gradesAmount, grade3Count));
         studentGradesSummary.setGrade4(getPercentForValue(gradesAmount, grade4Count));
         studentGradesSummary.setGrade5(getPercentForValue(gradesAmount, grade5Count));
-        studentGradesSummary.setGradeAverage((float) ((double) sumGrades / gradesAmount));
+        studentGradesSummary.setGradeAverage(((double) sumGrades / gradesAmount));
         return studentGradesSummary;
     }
 
-    private float getPercentForValue(int count, int value) {
-        return (float) (((double) value / count) * 100);
+    private double getPercentForValue(int count, int value) {
+        return (((double) value / count) * 100);
     }
 
     @Setter
     @Getter
     public class StudentGradesSummary {
-        private float grade3;
-        private float grade4;
-        private float grade5;
-        private float gradeAverage;
+        private double grade3;
+        private double grade4;
+        private double grade5;
+        private double gradeAverage;
     }
 }
 
