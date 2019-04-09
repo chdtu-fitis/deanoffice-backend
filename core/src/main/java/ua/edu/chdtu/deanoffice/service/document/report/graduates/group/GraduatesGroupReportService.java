@@ -13,11 +13,14 @@ import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,22 +29,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTime;
+import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getJavaTempDirectory;
 
 @Service
 public class GraduatesGroupReportService {
     private StudentGroupService studentGroupService;
+    private GradeService gradeService;
+    private final int ROWS_PER_PAGE = 15;
+    private final int POSSIBLE_ROWS_ON_SECOND_PAGE = 20;
+    private final float NUMBER_CELL_WIDTH = 1f;
+    private final float PIP_CELL_WIDTH = 8.5f;
+    private final float STUDENT_BOOK_CELL_WIDTH = 3f;
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
-    public GraduatesGroupReportService(StudentGroupService studentGroupService) {
+    public GraduatesGroupReportService(StudentGroupService studentGroupService, GradeService gradeService) {
         this.studentGroupService = studentGroupService;
+        this.gradeService = gradeService;
     }
 
     public File createGraduatesReportForGroupPdf(int groupId) throws IOException, DocumentException {
         StudentGroup group = studentGroupService.getById(groupId);
         Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
-//        String filePath = getJavaTempDirectory() + "/" + "vidomist_vypusknykiv_" + group.getName() +"_" + getFileCreationDateAndTime() + ".pdf";
-        String filePath = "D:/deanoffice/deanoffice-backend" + "/" + "vidomist_vypusknykiv_" + group.getName() + "_" + getFileCreationDateAndTime() + ".pdf";
+        String filePath = getJavaTempDirectory() + "/" + "vidomist_vypusknykiv_" + group.getName() + "_" + getFileCreationDateAndTime() + ".pdf";
         File file = new File(filePath);
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
@@ -49,15 +59,15 @@ public class GraduatesGroupReportService {
             BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             Font font = new Font(baseFont, 14);
             document.add(createCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", font, 0));
-            String facultyName = group.getSpecialization().getFaculty().getName().toUpperCase();
-            document.add(createCenterAlignedParagraph(facultyName, font, 50));
+            document.add(createCenterAlignedParagraph(group.getSpecialization().getFaculty().getName().toUpperCase(), font, 50));
             document.add(createCenterAlignedParagraph("ВІДОМІСТЬ", new Font(baseFont, 14, Font.BOLD), 0));
             document.add(createCenterAlignedParagraph("навчальних досягнень здобувачів вищої освіти,", font, 0));
             document.add(createCenterAlignedParagraph("які виконали усі вимоги навчального плану освітньої програми", font, 0));
             document.add(createCenterAlignedParagraph("за період навчання", font, 30));
             document.add(createGroupAttributeTable(font, createGroupAttributeBean(group)));
-            document.add(createMainTable(baseFont, group.getActiveStudents()));
-            document = createAssignment(baseFont, document);
+            document.add(createMainTable(baseFont));
+            document.add(fillTable(baseFont, group));
+            createAssignment(baseFont, document);
         } finally {
             if (document != null)
                 document.close();
@@ -73,9 +83,9 @@ public class GraduatesGroupReportService {
     }
 
     private PdfPTable createGroupAttributeTable(Font font, GroupAttributeBean bean) throws DocumentException {
-        PdfPTable mainTable = new PdfPTable(2);
-        mainTable.setTotalWidth(new float[]{150, 250});
-        mainTable.setLockedWidth(true);
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setTotalWidth(new float[]{1f, 3f});
         ArrayList<PdfPCell> cells = new ArrayList<>();
         cells.add(new PdfPCell(new Paragraph("   Освітній рівень:", font)));
         cells.add(new PdfPCell(new Paragraph(bean.getDegree(), font)));
@@ -87,10 +97,10 @@ public class GraduatesGroupReportService {
         cells.add(new PdfPCell(new Paragraph(new Paragraph(bean.getAcademicGroup(), font))));
         for (PdfPCell cell : cells) {
             cell.setBorder(0);
-            mainTable.addCell(cell);
+            table.addCell(cell);
         }
-        mainTable.setHorizontalAlignment(Element.ALIGN_LEFT);
-        return mainTable;
+        table.setHorizontalAlignment(Element.ALIGN_LEFT);
+        return table;
     }
 
     private GroupAttributeBean createGroupAttributeBean(StudentGroup group) {
@@ -103,17 +113,17 @@ public class GraduatesGroupReportService {
         return bean;
     }
 
-    private PdfPTable createMainTable(BaseFont baseFont, List<Student> list) throws DocumentException {
+    private PdfPTable createMainTable(BaseFont baseFont) throws DocumentException {
         Font font = new Font(baseFont, 10);
-        PdfPTable mainTable = new PdfPTable(4);
-        mainTable.setSpacingBefore(10);
-        mainTable.setWidths(new float[]{1f, 9f, 3f, 10f});
-        mainTable.setWidthPercentage(100);
-        mainTable.addCell(createCell("№ з/п", font, 20));
-        mainTable.addCell(createCell("ПІБ здобувача", font, 30));
-        mainTable.addCell(createCell("№ залікової книжки", font, 20));
-        mainTable.addCell(createAchievementsTable(font));
-        return fillTable(mainTable, baseFont, list);
+        PdfPTable table = new PdfPTable(4);
+        table.setSpacingBefore(10);
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, STUDENT_BOOK_CELL_WIDTH, 10f});
+        table.setWidthPercentage(100);
+        table.addCell(createCell("№ з/п", font, 20));
+        table.addCell(createCell("ПІБ здобувача", font, 30));
+        table.addCell(createCell("№ залікової книжки", font, 20));
+        table.addCell(createAchievementsTable(font));
+        return table;
     }
 
     private PdfPCell createCell(String text, Font font, int paddingTop) {
@@ -156,71 +166,69 @@ public class GraduatesGroupReportService {
         return achievementCell;
     }
 
-    private PdfPTable fillTable(PdfPTable table, BaseFont baseFont, List<Student> list) throws DocumentException {
+    private PdfPTable fillTable(BaseFont baseFont, StudentGroup group) throws DocumentException {
+        PdfPTable table = new PdfPTable(7);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, STUDENT_BOOK_CELL_WIDTH, 2.57f, 2.57f, 2.57f, 2.299f});
         Font font = new Font(baseFont, 12);
-        int count = 1;
-        if (list.size() == 0) {
-            System.out.println("empty");
-        }
-        for (Student student : list) {
-            table.addCell(createCell(count + "", font, 0));
-            table.addCell(createCell(student.getSurname() + " " + student.getName() + " " + student.getPatronimic(),
-                    font, 0));
-            String recordBookNumber = "";
-
-            for (StudentDegree studentDegree : student.getDegrees()) {
-                recordBookNumber = studentDegree.getRecordBookNumber();
+        int count = 1, studentsCount = 0;
+        List<StudentDegree> studentDegrees = group.getStudentDegrees();
+        for (StudentDegree studentDegree : studentDegrees) {
+            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            if (!isStudentDebtor(grades)) {
+                Student student = studentDegree.getStudent();
+                table.addCell(createCell(count + "", font, 0));
+                String studentName = student.getSurname() + " " + student.getName() + " " + student.getPatronimic();
+                table.addCell(new PdfPCell(new Paragraph(studentName, font)));
+                table.addCell(createCell(studentDegree.getRecordBookNumber(), font, 0));
+                StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
+                StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
+                table.addCell(createCell(String.format("%.2f", gradesStatistic.getGrade5()), font, 0));
+                table.addCell(createCell(String.format("%.2f", gradesStatistic.getGrade4()), font, 0));
+                table.addCell(createCell(String.format("%.2f", gradesStatistic.getGrade3()), font, 0));
+                table.addCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0));
+                count++;
+                studentsCount++;
             }
-            table.addCell(createCell(recordBookNumber, font, 0));
-            table.addCell(createGradeCell(student, font));
-            count++;
+        }
+        if (studentsCount >= ROWS_PER_PAGE) {
+            for (int i = 0; i < POSSIBLE_ROWS_ON_SECOND_PAGE - (studentsCount - ROWS_PER_PAGE); i++) {
+                table.addCell(createCell(count + "", font, 0));
+                for (int j = 1; j < 7; j++) {
+                    table.addCell(createCell("", font, 0));
+                }
+                count++;
+            }
         }
         return table;
     }
 
-    /////////students grades
-    private PdfPCell createGradeCell(Student student, Font font) throws DocumentException {
-        PdfPCell cell = new PdfPCell();
-        cell.setPadding(0);
-        PdfPTable table = new PdfPTable(4);
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{1f, 1f, 1f, 0.9f});
-
-        table.addCell(createCell("20", font, 0));
-        table.addCell(createCell("20", font, 0));
-        table.addCell(createCell("20", font, 0));
-        table.addCell(createCell("4.4", font, 0));
-        cell.addElement(table);
-        return cell;
+    private boolean isStudentDebtor(List<List<Grade>> grades) {
+        for (int i = 0; i < grades.size() - 1; i++) {
+            for (Grade grade : grades.get(i)) {
+                Integer points = grade.getPoints();
+                if (points == null || points < 60) return true;
+            }
+        }
+        return false;
     }
 
-    //end of document
-    private Document createAssignment(BaseFont baseFont, Document document) throws DocumentException {
-
+    private void createAssignment(BaseFont baseFont, Document document) throws DocumentException {
         Font font14 = new Font(baseFont, 14);
         Font font10 = new Font(baseFont, 10);
-
-        String text = "   Декан факультету ______________ ______________";
-        String sign = "підпис";
-        String pip = "                                ПІБ";
-
-        Paragraph textParagraph = new Paragraph(text, font14);
+        Paragraph textParagraph = new Paragraph("   Декан факультету ______________ ______________", font14);
         textParagraph.setSpacingBefore(20f);
         textParagraph.setSpacingAfter(0);
         document.add(textParagraph);
-
-        Paragraph signParagraph = new Paragraph(sign, font10);
+        Paragraph signParagraph = new Paragraph("підпис", font10);
         signParagraph.setIndentationLeft(175f);
-        signParagraph.add(pip);
+        signParagraph.add("                                ПІБ");
         document.add(signParagraph);
-
         Paragraph dateParagraph = new Paragraph("   «___»_______20 __ р.", font14);
         dateParagraph.setSpacingBefore(5f);
         document.add(dateParagraph);
-
         Paragraph mpParagraph = new Paragraph("           МП", font14);
         mpParagraph.setSpacingBefore(10f);
         document.add(mpParagraph);
-        return document;
     }
 }
