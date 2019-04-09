@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -241,4 +242,44 @@ public class StudentSummary {
     protected void setGrades(List<List<Grade>> grades) {
         this.grades = grades;
     }
+
+    public StudentGradesSummary getStudentGradesSummary() {
+        StudentGradesSummary studentGradesSummary = new StudentGradesSummary();
+        int grade3Count = 0, grade4Count = 0, grade5Count = 0, sumGrades = 0, gradesAmount = 0;
+        for (int i = 0; i < grades.size() - 1; i++) {
+            for (Grade grade : grades.get(i)) {
+                if (grade.getCourse().getKnowledgeControl().isGraded()) {
+                    Integer currentGrade = grade.getGrade();
+                    if (currentGrade == 3) {
+                        grade3Count++;
+                    } else if (currentGrade == 4) {
+                        grade4Count++;
+                    } else if (currentGrade == 5) {
+                        grade5Count++;
+                    }
+                    sumGrades += currentGrade;
+                    gradesAmount++;
+                }
+            }
+        }
+        studentGradesSummary.setGrade3(getPercentForValue(gradesAmount, grade3Count));
+        studentGradesSummary.setGrade4(getPercentForValue(gradesAmount, grade4Count));
+        studentGradesSummary.setGrade5(getPercentForValue(gradesAmount, grade5Count));
+        studentGradesSummary.setGradeAverage(((double) sumGrades / gradesAmount));
+        return studentGradesSummary;
+    }
+
+    private double getPercentForValue(int count, int value) {
+        return (((double) value / count) * 100);
+    }
+
+    @Setter
+    @Getter
+    public class StudentGradesSummary {
+        private double grade3;
+        private double grade4;
+        private double grade5;
+        private double gradeAverage;
+    }
 }
+
