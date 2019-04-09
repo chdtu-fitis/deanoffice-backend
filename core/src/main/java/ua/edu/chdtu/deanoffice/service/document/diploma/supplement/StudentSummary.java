@@ -243,46 +243,42 @@ public class StudentSummary {
         this.grades = grades;
     }
 
-    public StudentGradesSummary getStudentGradesStatistic() {
+    public StudentGradesSummary getStudentGradesSummary() {
         StudentGradesSummary studentGradesSummary = new StudentGradesSummary();
-        int grade3 = 0;
-        int grade4 = 0;
-        int grade5 = 0;
-        int totalGrades = 0;
-        int gradesAmount = 0;
+        int grade3Count = 0, grade4Count = 0, grade5Count = 0, sumGrades = 0, gradesAmount = 0;
         for (int i = 0; i < grades.size() - 1; i++) {
             for (Grade grade : grades.get(i)) {
                 if (grade.getCourse().getKnowledgeControl().isGraded()) {
-                    Integer points = grade.getPoints();
-                    if (points == 3) {
-                        grade3++;
-                    } else if (points == 4) {
-                        grade4++;
-                    } else {
-                        grade5++;
+                    Integer currentGrade = grade.getGrade();
+                    if (currentGrade == 3) {
+                        grade3Count++;
+                    } else if (currentGrade == 4) {
+                        grade4Count++;
+                    } else if (currentGrade == 5) {
+                        grade5Count++;
                     }
-                    totalGrades += points;
+                    sumGrades += currentGrade;
                     gradesAmount++;
                 }
             }
         }
-        studentGradesSummary.setGrade3(getPercentForValue(gradesAmount, grade3));
-        studentGradesSummary.setGrade4(getPercentForValue(gradesAmount, grade4));
-        studentGradesSummary.setGrade5(getPercentForValue(gradesAmount, grade5));
-        studentGradesSummary.setGradeAverage(totalGrades / gradesAmount);
+        studentGradesSummary.setGrade3(getPercentForValue(gradesAmount, grade3Count));
+        studentGradesSummary.setGrade4(getPercentForValue(gradesAmount, grade4Count));
+        studentGradesSummary.setGrade5(getPercentForValue(gradesAmount, grade5Count));
+        studentGradesSummary.setGradeAverage((float) ((double) sumGrades / gradesAmount));
         return studentGradesSummary;
     }
 
-    private int getPercentForValue(int total, int value) {
-        return Math.round(value / total * 100);
+    private float getPercentForValue(int count, int value) {
+        return (float) (((double) value / count) * 100);
     }
 
     @Setter
     @Getter
     public class StudentGradesSummary {
-        private int grade3;
-        private int grade4;
-        private int grade5;
+        private float grade3;
+        private float grade4;
+        private float grade5;
         private float gradeAverage;
     }
 }
