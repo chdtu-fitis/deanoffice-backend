@@ -50,9 +50,6 @@ public class DataVerificationService {
             if (teacher.isActive() == false)
                 throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
         }
-        /*int countInactiveTeachers = teacherRepository.countInactiveTeachersByIds(teacherIds);
-        if (countInactiveTeachers != 0)
-            throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");*/
     }
 
     public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
@@ -98,16 +95,10 @@ public class DataVerificationService {
             errorMassage = "Не вказана кафедра!";
         if (teacher.getDepartment().getId() == 0)
             errorMassage = "Вказана неіснуюча кафедра!";
-        /*Department department = departmentRepository.findOne(teacher.getDepartment().getId());
-        if (department == null)
-            errorMassage = "Вказана неіснуюча кафедра!";*/
         if (teacher.getPosition() == null)
             errorMassage = "Не сказана посада!";
         if (teacher.getPosition().getId() == 0)
             errorMassage = "Вказана неіснуюча посада!";
-        /*Position position = positionRepository.findOne(teacher.getPosition().getId());
-        if (position == null)
-            errorMassage = "Вказана неіснуюча позиція!";*/
         if (errorMassage != null)
             throw new OperationCannotBePerformedException(errorMassage);
     }

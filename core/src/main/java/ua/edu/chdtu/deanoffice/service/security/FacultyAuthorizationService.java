@@ -59,8 +59,5 @@ public class FacultyAuthorizationService {
         for (Teacher teacher: teachers)
             if (teacher.getDepartment().getFaculty().getId() != user.getFaculty().getId())
                 throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");
-        /*List<Integer> teacherIdsFromDb = teacherRepository.findIdsEveryoneWhoDoesNotBelongToThisFacultyId(user.getFaculty().getId(), teacherIds);
-        if (teacherIdsFromDb.size() != 0)
-            throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");*/
     }
 }
