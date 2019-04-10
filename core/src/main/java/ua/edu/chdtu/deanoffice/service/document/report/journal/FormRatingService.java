@@ -1,12 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.report.journal;
 
 import org.docx4j.UnitsOfMeasurement;
-import org.docx4j.XmlUtils;
-import org.docx4j.dml.CTTableCell;
-import org.docx4j.fonts.IdentityPlusMapper;
-import org.docx4j.fonts.Mapper;
-import org.docx4j.fonts.PhysicalFont;
-import org.docx4j.fonts.PhysicalFonts;
 import org.docx4j.jaxb.Context;
 import org.docx4j.model.properties.table.tr.TrHeight;
 import org.docx4j.model.structure.PageSizePaper;
@@ -22,19 +16,15 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.service.document.report.academicdifference.UnpassedCourse;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
@@ -46,19 +36,14 @@ public class FormRatingService {
     private static final String FONT_FAMILY = "Times New Roman";
     private static final String KURS= "-kurs";
     private static final String JOURNAL= "journal-otsinok-";
-
-
-    private WordprocessingMLPackage wordMLPackage;
     private ObjectFactory factory;
+
     @Autowired
     private DocumentIOService documentIOService;
     @Autowired
     private CourseForGroupService courseForGroupService;
     @Autowired
     private StudentGroupService groupService;
-    private ComparatorCourses comparator;
-
-    private HashMap<Integer,String> retrenchments;
 
     public File formDocument(
         Integer degreeId,
@@ -68,11 +53,8 @@ public class FormRatingService {
         Integer semester
     ) throws Docx4JException, IOException {
         TuitionForm tuitionForm = TuitionForm.valueOf(tuitionFormText);
-        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId,year,facultyId,tuitionForm);
-        comparator = new ComparatorCourses();
-        retrenchments = new HashMap<Integer,String>();
-        fillRetrenchments();
-        WordprocessingMLPackage resultTemplate = createDocument(semester,studentGroups);
+        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, year, facultyId, tuitionForm);
+        WordprocessingMLPackage resultTemplate = createDocument(semester, studentGroups);
         String fileName = transliterate(JOURNAL+year+KURS);
         return documentIOService.saveDocumentToTemp(resultTemplate, fileName, FileFormatEnum.DOCX);
     }
@@ -83,14 +65,14 @@ public class FormRatingService {
         return wordMLPackage;
     }
 
-    private WordprocessingMLPackage createTables(Integer semester,List<StudentGroup> studentGroups) throws InvalidFormatException {
+    private WordprocessingMLPackage createTables(Integer semester, List<StudentGroup> studentGroups) throws InvalidFormatException {
         List<String> namesStudents = new ArrayList<>();
         List<String> namesCourses = new ArrayList<>();
-        wordMLPackage = WordprocessingMLPackage.createPackage(PageSizePaper.A4,true);
-        for(StudentGroup studentGroup:studentGroups) {
-            getDataFromDataBase(studentGroup,semester,namesStudents,namesCourses);
+        WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage(PageSizePaper.A4,true);
+        for(StudentGroup studentGroup: studentGroups) {
+            getDataFromDataBase(studentGroup, semester, namesStudents, namesCourses);
             if(namesCourses.size() != 0) {
-                int columnWidth = calculateColumnWidth(wordMLPackage,namesCourses);
+                int columnWidth = calculateColumnWidth(wordMLPackage, namesCourses);
                 factory = Context.getWmlObjectFactory();
                 setTitle(wordMLPackage,studentGroup);
                 Tbl table = factory.createTbl();
@@ -169,11 +151,11 @@ public class FormRatingService {
         namesCourses.clear();
         List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
         List<StudentDegree> students = studentGroup.getStudentDegrees();
-        prepareCourses(courseForGroups,namesCourses);
-        prepareNames(students,namesStudents);
+        prepareCourses(courseForGroups, namesCourses);
+        prepareNames(students, namesStudents);
     }
 
-    private void setRowHeight(Tr tr,int height){
+    private void setRowHeight(Tr tr, int height){
         TrPr trPr = Context.getWmlObjectFactory().createTrPr();
         tr.setTrPr(trPr);
         TrHeight thr = new TrHeight();
@@ -228,11 +210,12 @@ public class FormRatingService {
     }
 
     private void prepareCourses(List<CourseForGroup> courseForGroups, List<String> namesCourses){
-        courseForGroups.sort(comparator);
+        courseForGroups.sort(new ComparatorCourses());
+        Map<Integer,String> retrenchments = createRetrenchments();
         for(CourseForGroup courseForGroup:courseForGroups) {
             Integer kcId = Integer.valueOf(courseForGroup.getCourse().getKnowledgeControl().getId());
             if (retrenchments.containsKey(kcId)){
-                namesCourses.add(courseForGroup.getCourse().getCourseName().getName()+retrenchments.get(kcId));
+                namesCourses.add(courseForGroup.getCourse().getCourseName().getName() + retrenchments.get(kcId));
             } else {
                 namesCourses.add(courseForGroup.getCourse().getCourseName().getName());
             }
@@ -249,7 +232,8 @@ public class FormRatingService {
         }
     }
 
-    private void fillRetrenchments(){
+    private Map<Integer,String> createRetrenchments(){
+        HashMap<Integer,String> retrenchments = new HashMap<>();
         retrenchments.put(Constants.EXAM," (ісп)");
         retrenchments.put(Constants.CREDIT," (з)");
         retrenchments.put(Constants.COURSEWORK,"(КР)");
@@ -259,5 +243,6 @@ public class FormRatingService {
         retrenchments.put(Constants.ATTESTATION," (а)");
         retrenchments.put(Constants.INTERNSHIP," (П)");
         retrenchments.put(Constants.NON_GRADED_INTERNSHIP," (пз)");
+        return retrenchments;
     }
 }
