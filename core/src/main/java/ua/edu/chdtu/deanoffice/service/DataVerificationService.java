@@ -90,35 +90,24 @@ public class DataVerificationService {
         String errorMassage = null;
         if (teacher.getName() == null)
             errorMassage = "Не вказано ім'я!";//можна зробити краще, наприклад, робити перевірку через регулярні вирази, щоб там було як мінімум одна велика і маленька літери
-
         if (teacher.getSex() == null)
             errorMassage = "Не вказана стать!";
-
         if (teacher.getSurname() == null)
             errorMassage = "Не вказано прізвище!";
-
         if (teacher.getDepartment() == null)
             errorMassage = "Не вказана кафедра!";
-
         if (teacher.getDepartment().getId() == 0)
             errorMassage = "Вказана неіснуюча кафедра!";
-
         /*Department department = departmentRepository.findOne(teacher.getDepartment().getId());
-
         if (department == null)
             errorMassage = "Вказана неіснуюча кафедра!";*/
-
         if (teacher.getPosition() == null)
             errorMassage = "Не сказана посада!";
-
         if (teacher.getPosition().getId() == 0)
             errorMassage = "Вказана неіснуюча посада!";
-
         /*Position position = positionRepository.findOne(teacher.getPosition().getId());
-
         if (position == null)
             errorMassage = "Вказана неіснуюча позиція!";*/
-
         if (errorMassage != null)
             throw new OperationCannotBePerformedException(errorMassage);
     }
