@@ -82,7 +82,7 @@ public class DataVerificationService {
         }
     }
 
-    public void isCorrectTeacherFromDTO(Teacher teacher) throws OperationCannotBePerformedException {
+    public void isCorrectTeacher(Teacher teacher) throws OperationCannotBePerformedException {
         String errorMassage = null;
         if (teacher.getName() == null)
             errorMassage = "Не вказано ім'я!";//можна зробити краще, наприклад, робити перевірку через регулярні вирази, щоб там було як мінімум одна велика і маленька літери

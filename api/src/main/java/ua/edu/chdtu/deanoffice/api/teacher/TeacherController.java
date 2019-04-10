@@ -13,8 +13,6 @@ import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
-import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.PositionService;
@@ -76,7 +74,7 @@ public class TeacherController {
             if (teacherDTO.getId() != 0)
                 throw new OperationCannotBePerformedException("Неправильно всказано id, id повинно бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            dataVerificationService.isCorrectTeacherFromDTO(teacher);
+            dataVerificationService.isCorrectTeacher(teacher);
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
             existDepartmentAndPositionInDataBase(teacher);
             teacherService.save(teacher);
@@ -97,7 +95,7 @@ public class TeacherController {
                 throw new OperationCannotBePerformedException("Викладача з вказаним id не існує!");
             }
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            dataVerificationService.isCorrectTeacherFromDTO(teacher);
+            dataVerificationService.isCorrectTeacher(teacher);
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
             existDepartmentAndPositionInDataBase(teacher);
