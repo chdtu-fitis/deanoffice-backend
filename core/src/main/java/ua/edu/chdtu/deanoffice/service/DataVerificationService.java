@@ -109,10 +109,10 @@ public class DataVerificationService {
             errorMassage = "Вказана неіснуюча кафедра!";*/
 
         if (teacher.getPosition() == null)
-            errorMassage = "Не сказана позиція!";
+            errorMassage = "Не сказана посада!";
 
         if (teacher.getPosition().getId() == 0)
-            errorMassage = "Вказана неіснуюча позиція!";
+            errorMassage = "Вказана неіснуюча посада!";
 
         /*Position position = positionRepository.findOne(teacher.getPosition().getId());
 

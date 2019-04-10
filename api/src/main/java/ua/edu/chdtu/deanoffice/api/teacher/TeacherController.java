@@ -72,7 +72,7 @@ public class TeacherController {
             if (teacherDTO == null)
                 throw new OperationCannotBePerformedException("Не отримані дані для збереження!");
             if (teacherDTO.getId() != 0)
-                throw new OperationCannotBePerformedException("Неправильно всказано id, id повинно бути 0!");
+                throw new OperationCannotBePerformedException("Неправильно всказаний ідентифікатор, ідентифікатор повинен бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacher(teacher);
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
@@ -92,7 +92,7 @@ public class TeacherController {
                 throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
             Teacher teacherFromDB = teacherService.getTeacher(teacherDTO.getId());
             if (teacherFromDB == null) {
-                throw new OperationCannotBePerformedException("Викладача з вказаним id не існує!");
+                throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
             }
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacher(teacher);
@@ -113,7 +113,7 @@ public class TeacherController {
             errorMassage = "Вказана неіснуюча кафедра!";
         Position position = positionService.getById(teacher.getPosition().getId());
         if (position == null)
-            errorMassage = "Вказана неіснуюча позиція!";
+            errorMassage = "Вказана неіснуюча посада!";
         if (errorMassage != null)
             throw new OperationCannotBePerformedException(errorMassage);
         setCorrectDepartmentAndPositionFromDataBase(teacher, department, position);
