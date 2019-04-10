@@ -45,10 +45,14 @@ public class DataVerificationService {
         }
     }
 
-    public void areTheseTeachersActive(List<Integer> teacherIds) throws OperationCannotBePerformedException {
-        int countInactiveTeachers = teacherRepository.countInactiveTeachersByIds(teacherIds);
+    public void areTheseTeachersActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
+        for (Teacher teacher: teachers) {
+            if (teacher.isActive() == false)
+                throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
+        }
+        /*int countInactiveTeachers = teacherRepository.countInactiveTeachersByIds(teacherIds);
         if (countInactiveTeachers != 0)
-            throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
+            throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");*/
     }
 
     public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
