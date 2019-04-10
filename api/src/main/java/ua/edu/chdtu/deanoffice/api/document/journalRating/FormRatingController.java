@@ -32,7 +32,7 @@ public class FormRatingController extends DocumentResponseController {
             @CurrentUser ApplicationUser user
         ) {
         try {
-            File gradeJournalForm = formRatingService.formDocument(degreeId, year, user.getFaculty().getId(), tuitionForm, semester);
+            File gradeJournalForm = formRatingService.formDocument(degreeId, year, user.getFaculty().getId(), tuitionForm, (year-1)*2+semester);
             return buildDocumentResponseEntity(gradeJournalForm, gradeJournalForm.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
