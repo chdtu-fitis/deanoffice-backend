@@ -133,7 +133,7 @@ public class TeacherController {
             List<Teacher> teachers = teacherService.getTeachers(teachersIds);
             if (teachers.size() != teachersIds.size())
                 throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
-            dataVerificationService.areTheseTeachersActive(teachersIds);
+            dataVerificationService.areTheseTeachersActive(teachers);
             facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachersIds);
             teacherService.deleteByIds(teachersIds);
             return ResponseEntity.noContent().build();
