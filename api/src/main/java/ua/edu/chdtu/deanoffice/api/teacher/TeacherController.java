@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
+import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -29,17 +30,17 @@ public class TeacherController {
 
     private TeacherService teacherService;
     private DataVerificationService dataVerificationService;
-    private DepartmentRepository departmentRepository;
+    private DepartmentService departmentService;
     private PositionRepository positionRepository;
     private FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService,
-                             DepartmentRepository departmentRepository, PositionRepository positionRepository,
+                             DepartmentService departmentService, PositionRepository positionRepository,
                              FacultyAuthorizationService facultyAuthorizationService) {
         this.teacherService = teacherService;
         this.dataVerificationService = dataVerificationService;
-        this.departmentRepository = departmentRepository;
+        this.departmentService = departmentService;
         this.positionRepository = positionRepository;
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
@@ -108,7 +109,7 @@ public class TeacherController {
 
     private void existDepartmentAndPositionInDataBase(Teacher teacher) throws OperationCannotBePerformedException {
         String errorMassage = null;
-        Department department = departmentRepository.findOne(teacher.getDepartment().getId());
+        Department department = departmentService.getById(teacher.getDepartment().getId());
         if (department == null)
             errorMassage = "Вказана неіснуюча кафедра!";
         Position position = positionRepository.findOne(teacher.getPosition().getId());
