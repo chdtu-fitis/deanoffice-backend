@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
+import ua.edu.chdtu.deanoffice.service.PositionService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -31,17 +32,17 @@ public class TeacherController {
     private TeacherService teacherService;
     private DataVerificationService dataVerificationService;
     private DepartmentService departmentService;
-    private PositionRepository positionRepository;
+    private PositionService positionService;
     private FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService,
-                             DepartmentService departmentService, PositionRepository positionRepository,
+                             DepartmentService departmentService, PositionService positionService,
                              FacultyAuthorizationService facultyAuthorizationService) {
         this.teacherService = teacherService;
         this.dataVerificationService = dataVerificationService;
         this.departmentService = departmentService;
-        this.positionRepository = positionRepository;
+        this.positionService = positionService;
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
@@ -112,7 +113,7 @@ public class TeacherController {
         Department department = departmentService.getById(teacher.getDepartment().getId());
         if (department == null)
             errorMassage = "Вказана неіснуюча кафедра!";
-        Position position = positionRepository.findOne(teacher.getPosition().getId());
+        Position position = positionService.getById(teacher.getPosition().getId());
         if (position == null)
             errorMassage = "Вказана неіснуюча позиція!";
         if (errorMassage != null)
