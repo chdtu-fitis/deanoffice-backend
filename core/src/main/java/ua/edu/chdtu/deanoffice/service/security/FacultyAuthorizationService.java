@@ -1,10 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.security;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
@@ -58,9 +55,12 @@ public class FacultyAuthorizationService {
             throw new UnauthorizedFacultyDataException("Вибрана кафедра є недоступною для даного користувача!");
     }
 
-    public void verifyAccessibilityOfDepartments(ApplicationUser user, List<Integer> teacherIds) throws UnauthorizedFacultyDataException {
-        List<Integer> teacherIdsFromDb = teacherRepository.findIdsEveryoneWhoDoesNotBelongToThisFacultyId(user.getFaculty().getId(), teacherIds);
+    public void verifyAccessibilityOfDepartments(ApplicationUser user, List<Teacher> teachers) throws UnauthorizedFacultyDataException {
+        for (Teacher teacher: teachers)
+            if (teacher.getDepartment().getFaculty().getId() != user.getFaculty().getId())
+                throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");
+        /*List<Integer> teacherIdsFromDb = teacherRepository.findIdsEveryoneWhoDoesNotBelongToThisFacultyId(user.getFaculty().getId(), teacherIds);
         if (teacherIdsFromDb.size() != 0)
-            throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");
+            throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");*/
     }
 }
