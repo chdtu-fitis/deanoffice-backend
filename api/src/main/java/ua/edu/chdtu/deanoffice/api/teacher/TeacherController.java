@@ -91,9 +91,8 @@ public class TeacherController {
             if (teacherDTO == null)
                 throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
             Teacher teacherFromDB = teacherService.getTeacher(teacherDTO.getId());
-            if (teacherFromDB == null) {
+            if (teacherFromDB == null)
                 throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
-            }
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             dataVerificationService.isCorrectTeacher(teacher);
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
