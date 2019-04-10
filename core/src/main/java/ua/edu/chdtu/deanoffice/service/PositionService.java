@@ -1,0 +1,15 @@
+package ua.edu.chdtu.deanoffice.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.repository.PositionRepository;
+
+@Service
+public class PositionService {
+    private final PositionRepository positionRepository;
+
+    @Autowired
+    public PositionService(PositionRepository positionRepository) {
+        this.positionRepository = positionRepository;
+    }
+}
