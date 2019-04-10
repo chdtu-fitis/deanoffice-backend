@@ -98,7 +98,7 @@ public class TeacherController {
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
             facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
             existDepartmentAndPositionInDataBase(teacher);
-            teacherService.save(Mapper.strictMap(teacherDTO, Teacher.class));
+            teacherService.save(teacher);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
