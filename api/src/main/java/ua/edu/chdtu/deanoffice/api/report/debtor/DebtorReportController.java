@@ -1,32 +1,33 @@
 package ua.edu.chdtu.deanoffice.api.report.debtor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.api.studyyear.finish.StudyYearFinishController;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.service.report.debtor.DebtorReportExport;
 import ua.edu.chdtu.deanoffice.service.report.debtor.DebtorReportService;
 import ua.edu.chdtu.deanoffice.service.report.debtor.SpecializationDebtorsBean;
-import ua.edu.chdtu.deanoffice.service.report.debtor.SpecializationDebtorsYearBean;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 
+import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/report/debtor")
-public class DebtorReportController {
+public class DebtorReportController extends DocumentResponseController {
 
     private DebtorReportService debtorReportService;
+    private DebtorReportExport debtorReportExport;
 
-    @Autowired
-    public DebtorReportController(DebtorReportService debtorReportService) {
+    public DebtorReportController(DebtorReportService debtorReportService, DebtorReportExport debtorReportExport) {
         this.debtorReportService = debtorReportService;
+        this.debtorReportExport = debtorReportExport;
     }
 
     @GetMapping
@@ -34,7 +35,7 @@ public class DebtorReportController {
         try {
             Map<String, SpecializationDebtorsBean> debtorsReport = debtorReportService.calculateDebtorsReportData(user.getFaculty());
             Map<String, SpecializationDebtorStatisticsDto> debtorsReportDTO = new TreeMap<>();
-            for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry: debtorsReport.entrySet()) {
+            for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry : debtorsReport.entrySet()) {
                 SpecializationDebtorStatisticsDto sds = new SpecializationDebtorStatisticsDto();
                 Mapper.strictMap(specializationDebtorsBeanEntry.getValue(), sds);
                 debtorsReportDTO.put(specializationDebtorsBeanEntry.getKey(), sds);
@@ -43,6 +44,16 @@ public class DebtorReportController {
             return ResponseEntity.ok().body(debtorsReportDTO);
         } catch (Exception e) {
             return handleException(e);
+        }
+    }
+
+    @GetMapping("/export/")
+    public ResponseEntity getDebtorReportDocx() {
+        try {
+            File file = debtorReportExport.formDocument(null);
+            return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception exception) {
+            return handleException(exception);
         }
     }
 
