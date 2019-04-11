@@ -3,8 +3,14 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 
 import java.util.List;
 
@@ -12,6 +18,10 @@ import java.util.List;
 public class TeacherService {
     @Autowired
     private TeacherRepository teacherRepository;
+    private DataVerificationService dataVerificationService;
+    private FacultyAuthorizationService facultyAuthorizationService;
+    private DepartmentService departmentService;
+    private PositionService positionService;
 
     public Teacher getTeacher(int teacherId) {
         return teacherRepository.findOne(teacherId);
@@ -53,5 +63,38 @@ public class TeacherService {
 
     public void deleteByIds(List<Integer> ids) {
         teacherRepository.setTeachersInactiveByIds(ids);
+    }
+
+    public void checkAndSaveTeacher(ApplicationUser user, Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+        dataVerificationService.isCorrectTeacher(teacher);
+        facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
+        existDepartmentAndPositionInDataBase(teacher);
+        this.save(teacher);
+    }
+
+    public void checkAndUpdateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+        dataVerificationService.isCorrectTeacher(teacher);
+        facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
+        facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
+        existDepartmentAndPositionInDataBase(teacher);
+        this.save(teacher);
+    }
+
+    private void existDepartmentAndPositionInDataBase(Teacher teacher) throws OperationCannotBePerformedException {
+        String errorMassage = null;
+        Department department = departmentService.getById(teacher.getDepartment().getId());
+        if (department == null)
+            errorMassage = "Вказана неіснуюча кафедра!";
+        Position position = positionService.getById(teacher.getPosition().getId());
+        if (position == null)
+            errorMassage = "Вказана неіснуюча посада!";
+        if (errorMassage != null)
+            throw new OperationCannotBePerformedException(errorMassage);
+        setCorrectDepartmentAndPositionFromDataBase(teacher, department, position);
+    }
+
+    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, Department department, Position position) {
+        teacher.setDepartment(department);
+        teacher.setPosition(position);
     }
 }
