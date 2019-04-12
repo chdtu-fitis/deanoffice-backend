@@ -6,13 +6,13 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,54 +20,56 @@ import java.util.Map;
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
-import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
+import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTime;
 
 @Service
 public class DebtorReportExport {
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "StudentPerformanceAnalysis.docx";
-    private DebtorReportService debtorReportService;
+    private final String WINTER_SEASON = "зимової";
+    private final String SPRING_SEASON = "весняної";
     private DocumentIOService documentIOService;
-    private FacultyService facultyService;
 
-    public DebtorReportExport(DebtorReportService debtorReportService, DocumentIOService documentIOService, FacultyService facultyService) {
-        this.debtorReportService = debtorReportService;
+    public DebtorReportExport(DocumentIOService documentIOService) {
         this.documentIOService = documentIOService;
-        this.facultyService = facultyService;
     }
 
-    public File formDocument(Map<String, SpecializationDebtorsBean> debtorsReport) throws Docx4JException, IOException, JAXBException {
+    public File formDocument(Map<String, SpecializationDebtorsBean> debtorsReport) throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
-
-        generateTables(template, debtorReportService.calculateDebtorsReportData(facultyService.getById(1)));
-
-        return documentIOService.saveDocumentToTemp(template, transliterate("look"), FileFormatEnum.DOCX);
+        generateTables(template, debtorsReport);
+        String fileName = "statystyka_borzhnykiv_" + getFileCreationDateAndTime() + ".docx";
+        return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
     }
 
     private void generateTables(WordprocessingMLPackage template, Map<String, SpecializationDebtorsBean> debtorsReport) {
-        Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+        List<Object> documentTables = getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class);
+        Tbl specialityTable = (Tbl) documentTables.get(0);
+        Tbl performanceTable = (Tbl) documentTables.get(1);
         for (String speciality : debtorsReport.keySet()) {
-            Map<Integer, SpecializationDebtorsYearBean> specializationDebtorsYearBeanMap =
-                    debtorsReport.get(speciality).getSpecializationDebtorsYearBeanMap();
-            for (Integer course : specializationDebtorsYearBeanMap.keySet()) {
-                SpecializationDebtorsYearBean specializationDebtorsYearBean = specializationDebtorsYearBeanMap.get(course);
-                Tbl table = XmlUtils.deepCopy(templateTable);
-                fillRows(table, course, specializationDebtorsYearBean);
-                template.getMainDocumentPart().addObject(table);
+            Tbl specialityTableCopy = XmlUtils.deepCopy(specialityTable);
+            fillSpecialityTableRows(specialityTableCopy, speciality);
+            template.getMainDocumentPart().addObject(specialityTableCopy);
+            Map<Integer, SpecializationDebtorsYearBean> specializationDebtorsYearBeanMap = debtorsReport.get(speciality).getSpecializationDebtorsYearBeanMap();
+            for (Integer year : specializationDebtorsYearBeanMap.keySet()) {
+                SpecializationDebtorsYearBean specializationDebtorsYearBean = specializationDebtorsYearBeanMap.get(year);
+                Tbl performanceTableCopy = XmlUtils.deepCopy(performanceTable);
+                fillPerformanceTableRows(performanceTableCopy, year, specializationDebtorsYearBean);
+                template.getMainDocumentPart().addObject(performanceTableCopy);
             }
         }
-        template.getMainDocumentPart().getContent().remove(4);
+        template.getMainDocumentPart().getContent().remove(0);
+        template.getMainDocumentPart().getContent().remove(1);
     }
 
-    private void fillRows(Tbl table, int course, SpecializationDebtorsYearBean bean) {
+    private void fillPerformanceTableRows(Tbl table, int course, SpecializationDebtorsYearBean bean) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         Map<String, String> map = new HashMap<>();
         if (course == 7)
-            map.put("c", "Всього");
+            map.put("year", "Всього");
         else {
-            map.put("c", "по " + course + " курсу");
-            map.put("ac", "по " + course + " курсу");
+            map.put("year", "по " + course + " курсу");
+            map.put("ayear", "по " + course + " курсу");
         }
-        fillFirstRows(tableRows, map);
+        fillFirsAndSecondRows(tableRows, map);
         map.put("ts", (bean.getBudgetStudents() + bean.getContractStudents()) + "");
         map.put("bs", bean.getBudgetStudents() + "");
         map.put("cs", bean.getContractStudents() + "");
@@ -82,8 +84,26 @@ public class DebtorReportExport {
         replaceInRow(tableRows.get(3), map);
     }
 
-    private void fillFirstRows(List<Tr> tableRows, Map<String, String> map) {
+    private void fillFirsAndSecondRows(List<Tr> tableRows, Map<String, String> map) {
         replaceInRow(tableRows.get(0), map);
         replaceInRow(tableRows.get(1), map);
     }
+
+    private void fillSpecialityTableRows(Tbl table, String speciality) {
+        Map<String, String> map = new HashMap<>();
+        map.put("speciality", speciality);
+        map.put("season", getSeason());
+        map.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+        replaceInRow((Tr) getAllElementsFromObject(table, Tr.class).get(0), map);
+    }
+
+    private String getSeason() {
+        LocalDate winterSessionStarts = LocalDate.of(LocalDate.now().getYear(), 12, 15);
+        LocalDate winterSessionEnds = LocalDate.of(LocalDate.now().getYear(), 6, 10);
+        if (LocalDate.now().isAfter(winterSessionEnds) && LocalDate.now().isBefore(winterSessionStarts))
+            return SPRING_SEASON;
+        else
+            return WINTER_SEASON;
+    }
+
 }
