@@ -40,17 +40,17 @@ public class DebtorReportController extends DocumentResponseController {
                 Mapper.strictMap(specializationDebtorsBeanEntry.getValue(), sds);
                 debtorsReportDTO.put(specializationDebtorsBeanEntry.getKey(), sds);
             }
-
             return ResponseEntity.ok().body(debtorsReportDTO);
         } catch (Exception e) {
             return handleException(e);
         }
     }
 
-    @GetMapping("/export/")
-    public ResponseEntity getDebtorReportDocx() {
+    @GetMapping("/export")
+    public ResponseEntity getDebtorReportDocx(@CurrentUser ApplicationUser user) {
         try {
-            File file = debtorReportExport.formDocument(null);
+            Map<String, SpecializationDebtorsBean> map = debtorReportService.calculateDebtorsReportData(user.getFaculty());
+            File file = debtorReportExport.formDocument(map);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
