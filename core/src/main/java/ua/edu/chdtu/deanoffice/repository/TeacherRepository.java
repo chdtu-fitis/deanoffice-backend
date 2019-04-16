@@ -13,7 +13,8 @@ import java.util.Set;
 
 public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
 
-    @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.department.faculty.id = :facultyId")
+    @Query("SELECT t FROM Teacher t WHERE t.active = :active AND t.department.faculty.id = :facultyId " +
+            "ORDER BY t.surname, t.name, t.patronimic")
     List<Teacher> findAllByActiveAndFacultyId(
             @Param("active") boolean active,
             @Param("facultyId") int facultyId
