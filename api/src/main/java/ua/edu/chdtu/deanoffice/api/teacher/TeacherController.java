@@ -98,24 +98,6 @@ public class TeacherController {
         }
     }
 
-    private void existDepartmentAndPositionInDataBase(Teacher teacher) throws OperationCannotBePerformedException {
-        String errorMassage = null;
-        Department department = departmentService.getById(teacher.getDepartment().getId());
-        if (department == null)
-            errorMassage = "Вказана неіснуюча кафедра!";
-        Position position = positionService.getById(teacher.getPosition().getId());
-        if (position == null)
-            errorMassage = "Вказана неіснуюча посада!";
-        if (errorMassage != null)
-            throw new OperationCannotBePerformedException(errorMassage);
-        setCorrectDepartmentAndPositionFromDataBase(teacher, department, position);
-    }
-
-    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, Department department, Position position) {
-        teacher.setDepartment(department);
-        teacher.setPosition(position);
-    }
-
     @DeleteMapping("/teachers")
     public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds,
                                          @CurrentUser ApplicationUser user) {
