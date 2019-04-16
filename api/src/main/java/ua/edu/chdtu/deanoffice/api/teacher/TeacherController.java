@@ -72,7 +72,7 @@ public class TeacherController {
             if (teacherDTO.getId() != 0)
                 throw new OperationCannotBePerformedException("Неправильно всказаний ідентифікатор, ідентифікатор повинен бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            teacherService.checkAndSaveTeacher(user, teacher);
+            teacherService.saveTeacher(user, teacher);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
@@ -89,7 +89,7 @@ public class TeacherController {
             if (teacherFromDB == null)
                 throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            teacherService.checkAndUpdateTeacher(user, teacher, teacherFromDB);
+            teacherService.updateTeacher(user, teacher, teacherFromDB);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);

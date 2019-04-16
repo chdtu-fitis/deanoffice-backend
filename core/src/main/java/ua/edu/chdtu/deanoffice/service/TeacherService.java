@@ -65,14 +65,14 @@ public class TeacherService {
         teacherRepository.setTeachersInactiveByIds(ids);
     }
 
-    public void checkAndSaveTeacher(ApplicationUser user, Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+    public void saveTeacher(ApplicationUser user, Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
         existDepartmentAndPositionInDataBase(teacher);
         this.save(teacher);
     }
 
-    public void checkAndUpdateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+    public void updateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
