@@ -1,8 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Position;
@@ -56,34 +54,27 @@ public class TeacherService {
     }
 
     public void saveTeacher(ApplicationUser user, Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+        setCorrectDepartmentAndPositionFromDataBase(teacher);
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
-        existDepartmentAndPositionInDataBase(teacher);
         teacherRepository.save(teacher);
     }
 
     public void updateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+        setCorrectDepartmentAndPositionFromDataBase(teacher);
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
-        existDepartmentAndPositionInDataBase(teacher);
         teacherRepository.save(teacher);
     }
 
-    private void existDepartmentAndPositionInDataBase(Teacher teacher) throws OperationCannotBePerformedException {
-        String errorMassage = null;
+    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher) throws OperationCannotBePerformedException {
         Department department = departmentService.getById(teacher.getDepartment().getId());
         if (department == null)
-            errorMassage = "Вказана неіснуюча кафедра!";
+            throw new OperationCannotBePerformedException("Вказана неіснуюча кафедра!");
         Position position = positionService.getById(teacher.getPosition().getId());
         if (position == null)
-            errorMassage = "Вказана неіснуюча посада!";
-        if (errorMassage != null)
-            throw new OperationCannotBePerformedException(errorMassage);
-        setCorrectDepartmentAndPositionFromDataBase(teacher, department, position);
-    }
-
-    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, Department department, Position position) {
+            throw new OperationCannotBePerformedException("Вказана неіснуюча посада!");
         teacher.setDepartment(department);
         teacher.setPosition(position);
     }
