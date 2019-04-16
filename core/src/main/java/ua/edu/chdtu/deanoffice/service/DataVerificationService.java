@@ -85,20 +85,13 @@ public class DataVerificationService {
 
     public void isCorrectTeacher(Teacher teacher) throws OperationCannotBePerformedException {
         String errorMassage = null;
-        if (teacher.getName() == null)
-            errorMassage = "Не вказано ім'я!";//можна зробити краще, наприклад, робити перевірку через регулярні вирази, щоб там було як мінімум одна велика і маленька літери
-        if (teacher.getSex() == null)
-            errorMassage = "Не вказана стать!";
-        if (teacher.getSurname() == null)
-            errorMassage = "Не вказано прізвище!";
-        if (teacher.getDepartment() == null)
-            errorMassage = "Не вказана кафедра!";
-        if (teacher.getDepartment().getId() == 0)
-            errorMassage = "Вказана неіснуюча кафедра!";
-        if (teacher.getPosition() == null)
-            errorMassage = "Не вказана посада!";
-        if (teacher.getPosition().getId() == 0)
-            errorMassage = "Вказана неіснуюча посада!";
+        errorMassage = (teacher.getName() == null) ? "Не вказано ім'я!" : errorMassage;
+        errorMassage = (teacher.getSex() == null) ? "Не вказана стать!" : errorMassage;
+        errorMassage = (teacher.getSurname() == null) ? "Не вказано прізвище!" : errorMassage;
+        errorMassage = (teacher.getDepartment() == null) ? "Не вказана кафедра!" : errorMassage;
+        errorMassage = (teacher.getDepartment().getId() == 0) ? "Вказана неіснуюча кафедра!" : errorMassage;
+        errorMassage = (teacher.getPosition() == null) ? "Не вказана посада!" : errorMassage;
+        errorMassage = (teacher.getPosition().getId() == 0) ? "Вказана неіснуюча посада!" : errorMassage;
         if (errorMassage != null)
             throw new OperationCannotBePerformedException(errorMassage);
     }
