@@ -16,12 +16,21 @@ import java.util.List;
 
 @Service
 public class TeacherService {
-    @Autowired
     private TeacherRepository teacherRepository;
     private DataVerificationService dataVerificationService;
     private FacultyAuthorizationService facultyAuthorizationService;
     private DepartmentService departmentService;
     private PositionService positionService;
+
+    public TeacherService(TeacherRepository teacherRepository, DataVerificationService dataVerificationService,
+                          FacultyAuthorizationService facultyAuthorizationService, DepartmentService departmentService,
+                          PositionService positionService) {
+        this.teacherRepository = teacherRepository;
+        this.dataVerificationService = dataVerificationService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
+        this.departmentService = departmentService;
+        this.positionService = positionService;
+    }
 
     public Teacher getTeacher(int teacherId) {
         return teacherRepository.findOne(teacherId);
