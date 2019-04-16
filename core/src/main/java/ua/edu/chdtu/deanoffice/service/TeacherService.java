@@ -35,10 +35,6 @@ public class TeacherService {
         return teacherRepository.findAllByActiveAndFacultyId(active, facultyId);
     }
 
-    public void save(Teacher teacher) {
-        teacherRepository.save(teacher);
-    }
-
     public void deleteByIds(ApplicationUser user, List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (ids.size() == 0)
             throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
@@ -54,7 +50,7 @@ public class TeacherService {
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
         existDepartmentAndPositionInDataBase(teacher);
-        this.save(teacher);
+        teacherRepository.save(teacher);
     }
 
     public void updateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
@@ -62,7 +58,7 @@ public class TeacherService {
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
         existDepartmentAndPositionInDataBase(teacher);
-        this.save(teacher);
+        teacherRepository.save(teacher);
     }
 
     private void existDepartmentAndPositionInDataBase(Teacher teacher) throws OperationCannotBePerformedException {
