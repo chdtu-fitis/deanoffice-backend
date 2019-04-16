@@ -96,7 +96,7 @@ public class DataVerificationService {
         if (teacher.getDepartment().getId() == 0)
             errorMassage = "Вказана неіснуюча кафедра!";
         if (teacher.getPosition() == null)
-            errorMassage = "Не сказана посада!";
+            errorMassage = "Не вказана посада!";
         if (teacher.getPosition().getId() == 0)
             errorMassage = "Вказана неіснуюча посада!";
         if (errorMassage != null)
