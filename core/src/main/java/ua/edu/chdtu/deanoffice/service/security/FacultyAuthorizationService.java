@@ -3,24 +3,16 @@ package ua.edu.chdtu.deanoffice.service.security;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
-import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 
 import java.util.List;
 
 @Service
 public class FacultyAuthorizationService {
     private final StudentDegreeRepository studentDegreeRepository;
-    private final DepartmentRepository departmentRepository;
-    private final TeacherRepository teacherRepository;
 
-    public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository,
-                                       DepartmentRepository departmentRepository,
-                                       TeacherRepository teacherRepository) {
+    public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
-        this.departmentRepository = departmentRepository;
-        this.teacherRepository = teacherRepository;
     }
 
     public void verifyAccessibilityOfStudentGroup(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
