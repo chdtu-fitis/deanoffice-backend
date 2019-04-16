@@ -2,11 +2,13 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
+import ua.edu.chdtu.deanoffice.repository.PositionRepository;
+import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
-
 import java.util.List;
 
 @Service
@@ -15,13 +17,22 @@ public class DataVerificationService {
     private StudentDegreeRepository studentDegreeRepository;
     private final StudentGroupRepository studentGroupRepository;
     private CurrentYearService currentYearService;
+    private DepartmentRepository departmentRepository;
+    private PositionRepository positionRepository;
+    private TeacherRepository teacherRepository;
 
     public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
                                    StudentGroupRepository studentGroupRepository,
-                                   CurrentYearService currentYearService) {
+                                   CurrentYearService currentYearService,
+                                   DepartmentRepository departmentRepository,
+                                   PositionRepository positionRepository,
+                                   TeacherRepository teacherRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentGroupRepository = studentGroupRepository;
         this.currentYearService = currentYearService;
+        this.departmentRepository = departmentRepository;
+        this.positionRepository = positionRepository;
+        this.teacherRepository = teacherRepository;
     }
 
     public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
@@ -58,6 +69,13 @@ public class DataVerificationService {
         }
     }
 
+    public void areTeachersActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
+        for (Teacher teacher: teachers) {
+            if (teacher.isActive() == false)
+                throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
+        }
+    }
+
     public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
         for (StudentDegree activeStudentDegree : activeStudentDegrees) {
             if (activeStudentDegree.getStudentGroup().isActive() == false) {
@@ -87,5 +105,18 @@ public class DataVerificationService {
                 throw new OperationCannotBePerformedException("Не всі дані групи є випускні");
             }
         }
+    }
+
+    public void isCorrectTeacher(Teacher teacher) throws OperationCannotBePerformedException {
+        String errorMessage = null;
+        errorMessage = (teacher.getName() == null) ? "Не вказано ім'я!" : errorMessage;
+        errorMessage = (teacher.getSex() == null) ? "Не вказана стать!" : errorMessage;
+        errorMessage = (teacher.getSurname() == null) ? "Не вказано прізвище!" : errorMessage;
+        errorMessage = (teacher.getDepartment() == null) ? "Не вказана кафедра!" : errorMessage;
+        errorMessage = (teacher.getDepartment().getId() == 0) ? "Вказана неіснуюча кафедра!" : errorMessage;
+        errorMessage = (teacher.getPosition() == null) ? "Не вказана посада!" : errorMessage;
+        errorMessage = (teacher.getPosition().getId() == 0) ? "Вказана неіснуюча посада!" : errorMessage;
+        if (errorMessage != null)
+            throw new OperationCannotBePerformedException(errorMessage);
     }
 }

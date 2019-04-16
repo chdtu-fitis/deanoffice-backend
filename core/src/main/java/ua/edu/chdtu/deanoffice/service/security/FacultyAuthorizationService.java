@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
@@ -48,5 +49,16 @@ public class FacultyAuthorizationService {
         if (studentDegreeIdFromDb.size() != 0)
             throw new UnauthorizedFacultyDataException("Вибрані студенти навчаються на недоступному для користувача факультеті");
 
+    }
+
+    public void verifyAccessibilityOfDepartment(ApplicationUser user, Department department) throws UnauthorizedFacultyDataException {
+        if (user.getFaculty().getId() != department.getFaculty().getId())
+            throw new UnauthorizedFacultyDataException("Вибрана кафедра є недоступною для даного користувача!");
+    }
+
+    public void verifyAccessibilityOfDepartments(ApplicationUser user, List<Teacher> teachers) throws UnauthorizedFacultyDataException {
+        for (Teacher teacher: teachers)
+            if (teacher.getDepartment().getFaculty().getId() != user.getFaculty().getId())
+                throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");
     }
 }
