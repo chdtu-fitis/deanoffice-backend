@@ -39,7 +39,14 @@ public class TeacherService {
         teacherRepository.save(teacher);
     }
 
-    public void deleteByIds(List<Integer> ids) {
+    public void deleteByIds(ApplicationUser user, List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+        if (ids.size() == 0)
+            throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
+        List<Teacher> teachers = getTeachers(ids);
+        if (teachers.size() != ids.size())
+            throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
+        dataVerificationService.areTeachersActive(teachers);
+        facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachers);
         teacherRepository.setTeachersInactiveByIds(ids);
     }
 

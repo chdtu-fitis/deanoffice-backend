@@ -100,14 +100,7 @@ public class TeacherController {
     public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds,
                                          @CurrentUser ApplicationUser user) {
         try {
-            if (teachersIds.size() == 0)
-                throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
-            List<Teacher> teachers = teacherService.getTeachers(teachersIds);
-            if (teachers.size() != teachersIds.size())
-                throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
-            dataVerificationService.areTeachersActive(teachers);
-            facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachers);
-            teacherService.deleteByIds(teachersIds);
+            teacherService.deleteByIds(user, teachersIds);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
