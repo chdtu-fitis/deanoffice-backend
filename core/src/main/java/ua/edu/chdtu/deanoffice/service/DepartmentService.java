@@ -16,12 +16,20 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-
-    public Department getById(Integer departmentId) {
-        return departmentRepository.findOne(departmentId);
+    public List<Department> getAllByActive(boolean active,int facultyId) {
+        return departmentRepository.getAllByActive(active,facultyId);
     }
 
-    public List<Department> getAll(int facultyId) {
-        return departmentRepository.getAllByFaculty(facultyId);
+    public Department getById(Integer departmentId) {
+        return this.departmentRepository.findOne(departmentId);
+    }
+
+    public Department save(Department department) {
+        return departmentRepository.save(department);
+    }
+
+    public void delete(Department department) {
+        department.setActive(false);
+        departmentRepository.save(department);
     }
 }

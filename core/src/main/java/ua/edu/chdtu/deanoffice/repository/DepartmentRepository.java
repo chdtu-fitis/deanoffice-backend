@@ -10,7 +10,10 @@ import java.util.List;
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
 
     @Query("select d from Department d " +
-            "where d.faculty.id = :faculty_id " +
+            "where d.active = :active " +
+            "and d.faculty.id = :faculty_id " +
             "order by d.name")
-    List<Department> getAllByFaculty(@Param("faculty_id") int facultyId);
+    List<Department> getAllByActive(@Param("active") boolean active,@Param("faculty_id") int facultyId);
+
+
 }

@@ -1,7 +1,11 @@
 package ua.edu.chdtu.deanoffice.service.security;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
@@ -18,6 +22,11 @@ public class FacultyAuthorizationService {
     public void verifyAccessibilityOfStudentGroup(ApplicationUser user, StudentGroup studentGroup) throws UnauthorizedFacultyDataException {
         if (user.getFaculty().getId() != studentGroup.getSpecialization().getFaculty().getId()) {
             throw new UnauthorizedFacultyDataException("Група знаходить в недоступному факультеті для поточного користувача");
+        }
+    }
+    public void verifyAccessibilityOfDepartment(ApplicationUser user, Department department) throws UnauthorizedFacultyDataException {
+        if(user.getFaculty().getId() != department.getFaculty().getId()) {
+            throw new UnauthorizedFacultyDataException("Кафедра знаходиться в недоступному факультеті для поточного користувача");
         }
     }
 
