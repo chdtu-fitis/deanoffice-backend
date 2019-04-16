@@ -24,11 +24,6 @@ public class FacultyAuthorizationService {
             throw new UnauthorizedFacultyDataException("Група знаходить в недоступному факультеті для поточного користувача");
         }
     }
-    public void verifyAccessibilityOfDepartment(ApplicationUser user, Department department) throws UnauthorizedFacultyDataException {
-        if(user.getFaculty().getId() != department.getFaculty().getId()) {
-            throw new UnauthorizedFacultyDataException("Кафедра знаходиться в недоступному факультеті для поточного користувача");
-        }
-    }
 
     public void verifyAccessibilityOfGroupAndStudents(
             ApplicationUser user, List<StudentDegree> studentDegrees,
