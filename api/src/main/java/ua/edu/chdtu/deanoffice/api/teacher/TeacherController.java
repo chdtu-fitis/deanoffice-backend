@@ -9,8 +9,6 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
@@ -107,7 +105,7 @@ public class TeacherController {
             List<Teacher> teachers = teacherService.getTeachers(teachersIds);
             if (teachers.size() != teachersIds.size())
                 throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
-            dataVerificationService.areTheseTeachersActive(teachers);
+            dataVerificationService.areTeachersActive(teachers);
             facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachers);
             teacherService.deleteByIds(teachersIds);
             return ResponseEntity.noContent().build();

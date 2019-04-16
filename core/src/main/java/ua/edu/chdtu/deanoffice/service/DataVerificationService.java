@@ -45,7 +45,7 @@ public class DataVerificationService {
         }
     }
 
-    public void areTheseTeachersActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
+    public void areTeachersActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
         for (Teacher teacher: teachers) {
             if (teacher.isActive() == false)
                 throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
