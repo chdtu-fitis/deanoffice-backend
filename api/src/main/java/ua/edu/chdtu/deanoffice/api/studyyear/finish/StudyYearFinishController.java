@@ -44,6 +44,16 @@ public class StudyYearFinishController {
     @PostMapping
     public ResponseEntity finishStudyYear(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user){
         try {
+            if (studyYearFinishDTO == null)
+                throw new OperationCannotBePerformedException("Не передана форма");
+            if (studyYearFinishDTO.getIds().size() == 0)
+                throw new OperationCannotBePerformedException("Не вказані ідентифікатори");
+            if (studyYearFinishDTO.getExpelDate() == null)
+                throw new OperationCannotBePerformedException("Не вказана дата відрахування");
+            if (studyYearFinishDTO.getOrderDate() == null)
+                throw new OperationCannotBePerformedException("Не вказана дата наказу");
+            if (studyYearFinishDTO.getOrderNumber() == "")
+                throw new OperationCannotBePerformedException("Номер наказу");
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(studyYearFinishDTO.getIds(), user);
             dataVerificationService.isStudentDegreesActiveByIds(studyYearFinishDTO.getIds());
             List<StudentDegree> studentDegrees = studentDegreeService.getByIds(studyYearFinishDTO.getIds());
