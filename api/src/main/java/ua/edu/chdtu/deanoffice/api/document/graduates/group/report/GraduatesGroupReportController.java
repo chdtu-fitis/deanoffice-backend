@@ -13,7 +13,7 @@ import ua.edu.chdtu.deanoffice.service.document.report.graduates.group.Graduates
 import java.io.File;
 
 @RestController
-@RequestMapping("/document/")
+@RequestMapping("/documents")
 public class GraduatesGroupReportController extends DocumentResponseController {
     private GraduatesGroupReportService graduatesGroupReportService;
 
