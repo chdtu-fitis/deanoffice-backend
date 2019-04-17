@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.entity;
 
 public enum TuitionForm {
     FULL_TIME("Денна"),
-    EXTRAMURAL("Скорочена");
+    EXTRAMURAL("Заочна");
 
     private final String nameUkr;
 
