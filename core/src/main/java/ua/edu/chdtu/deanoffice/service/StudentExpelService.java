@@ -64,7 +64,7 @@ public class StudentExpelService {
     }
 
     @Transactional
-    public void expelStudents(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) throws Exception {
+    public void expelStudents(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) {
         List<StudentExpel> studentExpels = new ArrayList<>();
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
         studentDegreeRepository.save(studentDegrees);
