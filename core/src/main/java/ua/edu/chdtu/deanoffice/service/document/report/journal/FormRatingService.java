@@ -46,11 +46,11 @@ public class FormRatingService {
     private StudentGroupService groupService;
 
     public File formDocument(
-        Integer degreeId,
-        Integer year,
-        int facultyId,
-        String tuitionFormText,
-        Integer semester
+            Integer degreeId,
+            Integer year,
+            int facultyId,
+            String tuitionFormText,
+            Integer semester
     ) throws Docx4JException, IOException {
         TuitionForm tuitionForm = TuitionForm.valueOf(tuitionFormText);
         List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, year, facultyId, tuitionForm);
@@ -127,6 +127,7 @@ public class FormRatingService {
     private P getTextWithStyle(String text,Boolean isBold) {
         P p = factory.createP();
         R r = factory.createR();
+        PPr ppr = factory.createPPr();
         RPr rPr = factory.createRPr();
         HpsMeasure size = new HpsMeasure();
         size.setVal(BigInteger.valueOf(FONT_SIZE_14));
@@ -137,9 +138,16 @@ public class FormRatingService {
         RFonts rfonts = Context.getWmlObjectFactory().createRFonts();
         rfonts.setAscii(FONT_FAMILY);
         rfonts.setHAnsi(FONT_FAMILY);
+        PPrBase.Spacing sp = factory.createPPrBaseSpacing();
+        sp.setAfter(BigInteger.ZERO);
+        sp.setBefore(BigInteger.ZERO);
+        sp.setLine(BigInteger.valueOf(200));
+        sp.setLineRule(STLineSpacingRule.AUTO);
         rPr.setRFonts(rfonts);
+        ppr.setSpacing(sp);
         r.setRPr(rPr);
         p.getContent().add(r);
+        p.setPPr(ppr);
         org.docx4j.wml.Text  t = factory.createText();
         t.setValue(text);
         r.getContent().add(t);
@@ -201,11 +209,11 @@ public class FormRatingService {
 
     private int calculateColumnWidth(WordprocessingMLPackage wordMLPackage, List<String> namesCourses){
         int allowableTableWidth = wordMLPackage.
-        getDocumentModel().
-        getSections().
-        get(0).
-        getPageDimensions().
-        getWritableWidthTwips();
+                getDocumentModel().
+                getSections().
+                get(0).
+                getPageDimensions().
+                getWritableWidthTwips();
         return  (allowableTableWidth-WIDTH_NAME_COLUMN-WIDTH_NUMBER_COLUMN)/namesCourses.size();
     }
 
