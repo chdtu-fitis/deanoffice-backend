@@ -131,8 +131,8 @@ public class CourseService {
     public CoursePaginationBean getAllCourses(int page) {
         int totalOfAllCourses = courseRepository.findTotalOfAllCourses();
         int totalPages = (totalOfAllCourses / ROWS_PER_PAGE) + ((totalOfAllCourses % ROWS_PER_PAGE) == 0 ? 0 : 1);
-        List<Course> items = courseRepository.findAllCourses(new PageRequest(page, ROWS_PER_PAGE));
-        return new CoursePaginationBean(totalPages, page - 1, items);
+        List<Course> items = courseRepository.findAllCourses(new PageRequest(page - 1, ROWS_PER_PAGE));
+        return new CoursePaginationBean(totalPages, page, items);
     }
 
     public CoursePaginationBean getCourseByFilters(int page,
@@ -176,7 +176,7 @@ public class CourseService {
             createOrUpdateCourse(course);
         }
     }
-  
+
     public List<Course> getCoursesByCourseNameId(int id) {
         return courseRepository.findCoursesByCourseNameId(id);
     }
