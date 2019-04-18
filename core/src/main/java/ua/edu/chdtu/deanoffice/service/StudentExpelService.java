@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
@@ -62,6 +63,7 @@ public class StudentExpelService {
         return studentExpelRepository.save(studentExpels);
     }
 
+    @Transactional
     public void expelStudents(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) throws Exception {
         List<StudentExpel> studentExpels = new ArrayList<>();
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
