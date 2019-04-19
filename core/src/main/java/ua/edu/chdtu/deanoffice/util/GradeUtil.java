@@ -24,6 +24,13 @@ public class GradeUtil {
         return 0;
     }
 
+    public static int getCreditFromPoints(int points){
+        if (points >= 60 ){
+            return 1;
+        }
+        return 0;
+    }
+
     public static boolean isEnoughToPass(Integer points) {
         return (points == null || points < 60) ? false : true;
     }
