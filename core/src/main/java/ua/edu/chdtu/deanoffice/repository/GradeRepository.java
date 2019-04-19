@@ -59,4 +59,34 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             "SET g.academicDifference = :academicDifference " +
             "WHERE g.id IN :gradeIds")
     void updateAcademicDifference(@Param("academicDifference") boolean academicDifference, @Param("gradeIds") List<Integer> gradeIds);
+
+    @Modifying
+    @Query(value = "UPDATE Grade AS gr " +
+            "set grade = " +
+            "case "  +
+            "when points < 60 or points = null or points = 0 then 0 " +
+            "when points >= 60 and points <= 73 then 3 " +
+            "when points >= 74 and points <= 89 then 4 " +
+            "else 5 " +
+            "END " +
+            "from student_degree sd " +
+            "inner join student_group sg on sd.student_group_id = sg.id " +
+            "where gr.course_id = :courseId and gr.student_degree_id = :studentDegreeId  and  sg.id = sd.student_group_id ", nativeQuery = true)
+    void updateGradeByCourseIdAndGradedTrue(@Param("courseId") int courseId,  @Param("studentDegreeId") int studentDegreeId);
+
+    @Modifying
+    @Query(value = "UPDATE Grade AS gr " +
+            "set grade = " +
+            "case " +
+            "when points >= 60 then 1 " +
+            "else 0 " +
+            "END " +
+            "from student_degree sd " +
+            "inner join student_group sg on (sd.student_group_id = sg.id) " +
+            "where gr.course_id = :courseId and gr.student_degree_id = :studentDegreeId and  sg.id = sd.student_group_id ", nativeQuery = true)
+    void updateGradeByCourseIdAndGradedFalse(@Param("courseId") int courseId, @Param("studentDegreeId") int studentDegreeId);
+
+    @Query(value = "select gr.student_degree_id from Grade as gr " +
+            "where gr.course_id = :courseId ",nativeQuery = true)
+     List <Integer> getStudentDegreeIdByCourseId(@Param("courseId") int courseId);
 }
