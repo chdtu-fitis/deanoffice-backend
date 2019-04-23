@@ -19,10 +19,10 @@ public class StudentSurnameChange extends BaseEntity {
     String orderNumber;
 
     @ManyToOne
-    Faculty facultyId;
+    Faculty faculty;
 
     @ManyToOne
-    StudentDegree studentDegreeId;
+    StudentDegree studentDegree;
 
     @Column(nullable = false)
     Date surnameChangeDate;
@@ -30,10 +30,13 @@ public class StudentSurnameChange extends BaseEntity {
     @Column(nullable = false)
     String specialityName;
 
+    @Column/*(nullable = false)*/
+    String facultyName;
+
     @Column(nullable = false)
     String specializationName;
 
-    @Column(nullable = false)
+    @Column/*(nullable = false)*/
     Integer studentYear;
 
     @Column(nullable = false)
