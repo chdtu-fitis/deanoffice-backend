@@ -127,7 +127,7 @@ public class FormRatingService {
     private P getTextWithStyle(String text,Boolean isBold) {
         P p = factory.createP();
         R r = factory.createR();
-        PPr ppr = factory.createPPr();
+//        PPr ppr = factory.createPPr();
         RPr rPr = factory.createRPr();
         HpsMeasure size = new HpsMeasure();
         size.setVal(BigInteger.valueOf(FONT_SIZE_14));
@@ -138,16 +138,16 @@ public class FormRatingService {
         RFonts rfonts = Context.getWmlObjectFactory().createRFonts();
         rfonts.setAscii(FONT_FAMILY);
         rfonts.setHAnsi(FONT_FAMILY);
-        PPrBase.Spacing sp = factory.createPPrBaseSpacing();
-        sp.setAfter(BigInteger.ZERO);
-        sp.setBefore(BigInteger.ZERO);
-        sp.setLine(BigInteger.valueOf(200));
-        sp.setLineRule(STLineSpacingRule.AUTO);
+//        PPrBase.Spacing sp = factory.createPPrBaseSpacing();
+//        sp.setAfter(BigInteger.ZERO);
+//        sp.setBefore(BigInteger.ZERO);
+//        sp.setLine(BigInteger.valueOf(200));
+//        sp.setLineRule(STLineSpacingRule.AUTO);
+//        ppr.setSpacing(sp);
         rPr.setRFonts(rfonts);
-        ppr.setSpacing(sp);
         r.setRPr(rPr);
         p.getContent().add(r);
-        p.setPPr(ppr);
+//        p.setPPr(ppr);
         org.docx4j.wml.Text  t = factory.createText();
         t.setValue(text);
         r.getContent().add(t);
