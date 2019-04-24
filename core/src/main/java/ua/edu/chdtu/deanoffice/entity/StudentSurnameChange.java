@@ -30,13 +30,13 @@ public class StudentSurnameChange extends BaseEntity {
     @Column(nullable = false)
     String specialityName;
 
-    @Column/*(nullable = false)*/
+    @Column
     String facultyName;
 
     @Column(nullable = false)
     String specializationName;
 
-    @Column/*(nullable = false)*/
+    @Column
     Integer studentYear;
 
     @Column(nullable = false)
