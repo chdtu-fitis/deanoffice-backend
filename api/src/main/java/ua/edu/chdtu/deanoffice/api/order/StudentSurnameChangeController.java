@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.order.dto.StudentSurnameChangeInputDTO;
+import ua.edu.chdtu.deanoffice.api.order.dto.StudentSurnameChangeOutputDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentSurnameChange;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
@@ -18,6 +18,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 @RestController
 @RequestMapping("/order/student-surname-change")
@@ -38,18 +39,19 @@ public class StudentSurnameChangeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentSurnameChange>> getAllForUserWhichHasEqualsSurname() {
-        return ResponseEntity.ok(studentSurnameChangeService.getAll());
+    public ResponseEntity getAllForUserWhichHasEqualsSurname( @CurrentUser ApplicationUser user) {
+        List<StudentSurnameChange> all = studentSurnameChangeService.getAll();
+        return ResponseEntity.ok(strictMap(all, StudentSurnameChangeOutputDTO.class));
     }
 
     @PostMapping
     public ResponseEntity addStudentSurnameChange(@RequestBody StudentSurnameChangeInputDTO studentSurnameChangeInputDTO,
-                                                  @CurrentUser ApplicationUser user) throws OperationCannotBePerformedException {
+                                                  @CurrentUser ApplicationUser user) {
 
         try {
             if (isNull(studentSurnameChangeInputDTO))
                 throw new OperationCannotBePerformedException("");
-            StudentSurnameChange studentSurnameChange = Mapper.strictMap(studentSurnameChangeInputDTO, StudentSurnameChange.class);
+            StudentSurnameChange studentSurnameChange = strictMap(studentSurnameChangeInputDTO, StudentSurnameChange.class);
 
 
             studentSurnameChange.setFaculty(facultyService.getById(verifyByNull(studentSurnameChangeInputDTO.getFacultyId())));

@@ -16,6 +16,7 @@ public class StudentSurnameChangeOutputDTO {
     private FacultyDTO faculty;
     private StudentDegreeDTO studentDegreeId;
     private Date surnameChangeDate;
+    private String facultyName;
     private String specialityName;
     private String specializationName;
     private Integer studentYear;

@@ -64,10 +64,6 @@ public class StudentSurnameChangeService {
         return studentSurnameChangeRepository.save(studentSurnameChange);
     }
 
-    private boolean isActiveStudent(StudentSurnameChange studentSurnameChange) {
-        return studentSurnameChange.getStudentDegree().isActive();
-    }
-
     private int getStudentYear(StudentDegree studentDegree) {
         return getCurrentYear() -
                 studentDegree.getStudentGroup().getCreationYear() +
