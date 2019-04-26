@@ -248,7 +248,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN course_name ON course.course_name_id = course_name.id " +
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
-            "       LEFT JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
+            "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
             "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
@@ -277,7 +277,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN course_name ON course.course_name_id = course_name.id " +
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
-            "       LEFT JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
+            "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
             "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
