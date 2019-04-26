@@ -34,8 +34,8 @@ public class StudentSurnameChangeService {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
-    public List<StudentSurnameChange> getAll() {
-        return studentSurnameChangeRepository.findAll();
+    public List<StudentSurnameChange> getAllByFacultyId(int id) {
+        return studentSurnameChangeRepository.findAllByFacultyId(id);
     }
 
     @Transactional
@@ -43,10 +43,12 @@ public class StudentSurnameChangeService {
                                                          StudentSurnameChange studentSurnameChange) throws
             OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (isNull(studentSurnameChange))
-            throw new OperationCannotBePerformedException("");
+            throw new OperationCannotBePerformedException("Відсутня інформація для проведення операції зміни прізвища");
         facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(user, Collections.singletonList(studentSurnameChange.getStudentDegree()));
 
-        studentSurnameChange.setSpecialityName(studentSurnameChange.getStudentDegree().getSpecialization().getSpeciality().getName());
+        studentSurnameChange.setSpecialityName(
+                studentSurnameChange.getStudentDegree().getSpecialization().getSpeciality().getCode() + " " +
+                        studentSurnameChange.getStudentDegree().getSpecialization().getSpeciality().getName());
         studentSurnameChange.setFacultyName(studentSurnameChange.getFaculty().getName());
         studentSurnameChange.setSpecializationName(studentSurnameChange.getStudentDegree().getSpecialization().getName());
 

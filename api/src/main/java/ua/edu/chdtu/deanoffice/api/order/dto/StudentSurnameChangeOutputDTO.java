@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.api.order.dto;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.FacultyDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 
 import java.util.Date;
 
@@ -14,7 +13,7 @@ public class StudentSurnameChangeOutputDTO {
     private Date orderDate;
     private String orderNumber;
     private FacultyDTO faculty;
-    private StudentDegreeDTO studentDegreeId;
+    private StudentDegreeDTO studentDegree;
     private Date surnameChangeDate;
     private String facultyName;
     private String specialityName;
@@ -27,4 +26,5 @@ public class StudentSurnameChangeOutputDTO {
     private String applicationBasedOn;
     private String oldSurname;
     private String newSurname;
+
 }

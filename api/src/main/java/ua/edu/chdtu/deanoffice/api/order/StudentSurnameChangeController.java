@@ -39,9 +39,13 @@ public class StudentSurnameChangeController {
     }
 
     @GetMapping
-    public ResponseEntity getAllForUserWhichHasEqualsSurname( @CurrentUser ApplicationUser user) {
-        List<StudentSurnameChange> all = studentSurnameChangeService.getAll();
-        return ResponseEntity.ok(strictMap(all, StudentSurnameChangeOutputDTO.class));
+    public ResponseEntity getAllForUserWhichHasEqualsSurname(@CurrentUser ApplicationUser user) {
+        try {
+            List<StudentSurnameChange> allOrder = studentSurnameChangeService.getAllByFacultyId(user.getFaculty().getId());
+            return ResponseEntity.ok(strictMap(allOrder, StudentSurnameChangeOutputDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
     }
 
     @PostMapping
@@ -50,12 +54,11 @@ public class StudentSurnameChangeController {
 
         try {
             if (isNull(studentSurnameChangeInputDTO))
-                throw new OperationCannotBePerformedException("");
+                throw new OperationCannotBePerformedException("Відсутня інформація для проведення операції зміни прізвища");
             StudentSurnameChange studentSurnameChange = strictMap(studentSurnameChangeInputDTO, StudentSurnameChange.class);
 
-
-            studentSurnameChange.setFaculty(facultyService.getById(verifyByNull(studentSurnameChangeInputDTO.getFacultyId())));
-            studentSurnameChange.setStudentDegree(studentDegree.getById(verifyByNull(studentSurnameChangeInputDTO.getStudentDegreeId())));
+            studentSurnameChange.setFaculty(facultyService.getById(validateByNull(studentSurnameChangeInputDTO.getFacultyId())));
+            studentSurnameChange.setStudentDegree(studentDegree.getById(validateByNull(studentSurnameChangeInputDTO.getStudentDegreeId())));
             studentSurnameChangeService.saveStudentSurnameChange(user, studentSurnameChange);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -63,16 +66,15 @@ public class StudentSurnameChangeController {
         }
     }
 
-
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception,
                 StudentSurnameChangeController.class,
                 ExceptionToHttpCodeMapUtil.map(exception));
     }
 
-    private Integer verifyByNull(Integer id) throws OperationCannotBePerformedException {
-        if (isNull(id)) {
-            throw new OperationCannotBePerformedException("");
+    private Integer validateByNull(Integer id) throws OperationCannotBePerformedException {
+        if (isNull(id) || id == 0) {
+            throw new OperationCannotBePerformedException("Відсутній id");
         }
         return id;
     }
