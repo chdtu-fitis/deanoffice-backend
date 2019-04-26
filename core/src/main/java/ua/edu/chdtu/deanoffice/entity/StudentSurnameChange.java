@@ -7,7 +7,6 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import javax.persistence.*;
 import java.util.Date;
 
-
 @Getter
 @Setter
 @Entity

@@ -29,7 +29,6 @@ CREATE TABLE student_surname_change
   application_based_on varchar(255) NOT NULL,
   old_surname          varchar(25)  NOT NULL,
   new_surname          varchar(25)  NOT NULL
-
 );
 
 --

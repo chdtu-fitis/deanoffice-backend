@@ -8,7 +8,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentSurnameChangeInputDTO {
-
     private Date orderDate;
     private String orderNumber;
     private Integer facultyId;

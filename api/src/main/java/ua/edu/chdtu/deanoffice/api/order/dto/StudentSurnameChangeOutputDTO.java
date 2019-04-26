@@ -26,5 +26,4 @@ public class StudentSurnameChangeOutputDTO {
     private String applicationBasedOn;
     private String oldSurname;
     private String newSurname;
-
 }

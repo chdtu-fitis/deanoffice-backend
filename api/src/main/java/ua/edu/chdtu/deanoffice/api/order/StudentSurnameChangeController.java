@@ -28,7 +28,6 @@ public class StudentSurnameChangeController {
     private final FacultyService facultyService;
     private final StudentDegreeService studentDegree;
 
-
     @Autowired
     public StudentSurnameChangeController(StudentSurnameChangeService studentSurnameChangeService,
                                           FacultyService facultyService,
@@ -41,8 +40,8 @@ public class StudentSurnameChangeController {
     @GetMapping
     public ResponseEntity getAllForUserWhichHasEqualsSurname(@CurrentUser ApplicationUser user) {
         try {
-            List<StudentSurnameChange> allOrder = studentSurnameChangeService.getAllByFacultyId(user.getFaculty().getId());
-            return ResponseEntity.ok(strictMap(allOrder, StudentSurnameChangeOutputDTO.class));
+            List<StudentSurnameChange> allOrders = studentSurnameChangeService.getAllByFacultyId(user.getFaculty().getId());
+            return ResponseEntity.ok(strictMap(allOrders, StudentSurnameChangeOutputDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
@@ -51,7 +50,6 @@ public class StudentSurnameChangeController {
     @PostMapping
     public ResponseEntity addStudentSurnameChange(@RequestBody StudentSurnameChangeInputDTO studentSurnameChangeInputDTO,
                                                   @CurrentUser ApplicationUser user) {
-
         try {
             if (isNull(studentSurnameChangeInputDTO))
                 throw new OperationCannotBePerformedException("Відсутня інформація для проведення операції зміни прізвища");
