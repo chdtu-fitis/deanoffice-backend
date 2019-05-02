@@ -1,29 +1,14 @@
---
--- PostgreSQL database dump
---
+ALTER TABLE student ALTER COLUMN photo type character varying(250);
+ALTER TABLE student rename column photo TO photo_url;
 
--- Dumped from database version 9.6.3
--- Dumped by pg_dump version 9.6.3
+ALTER TABLE renewed_expelled_student
+  ADD COLUMN order_date date default '1980-01-01' NOT NULL;
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
+ALTER TABLE renewed_expelled_student
+  ADD COLUMN order_number character varying(15) DEFAULT ''::character varying NOT NULL;
 
-SET search_path = public, pg_catalog;
+ALTER TABLE renewed_academic_vacation_student
+  ADD COLUMN order_date date default '1980-01-01'  NOT NULL;
 
-
-alter table student alter column photo type character varying(250);
-alter table student rename column photo to photo_url;
-
-alter table renewed_expelled_student
-  add column order_date date NOT NULL default '1980-01-01',
-  add column order_number character varying(15) NOT NULL default '';
-
-alter table renewed_academic_vacation_student
-  add column order_date date NOT NULL default '1980-01-01',
-  add column order_number character varying(15) NOT NULL default '';
+ALTER TABLE renewed_academic_vacation_student
+  ADD COLUMN order_number character varying(15) DEFAULT ''::character varying NOT NULL;

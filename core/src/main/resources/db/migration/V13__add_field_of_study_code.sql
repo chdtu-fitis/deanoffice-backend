@@ -1,2 +1,2 @@
-ALTER TABLE public.speciality
+ALTER TABLE speciality
     ADD COLUMN field_of_study_code character varying(15);

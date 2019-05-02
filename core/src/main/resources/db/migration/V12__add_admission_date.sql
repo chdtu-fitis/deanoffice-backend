@@ -1,1 +1,2 @@
-alter table student_degree add column admission_date date;
+ALTER TABLE student_degree
+    ADD COLUMN admission_date date;

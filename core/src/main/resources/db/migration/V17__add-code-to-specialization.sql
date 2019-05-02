@@ -1,2 +1,2 @@
-ALTER TABLE public.specialization
-  ADD COLUMN code character varying(15);
+ALTER TABLE specialization
+    ADD COLUMN code character varying(15);
