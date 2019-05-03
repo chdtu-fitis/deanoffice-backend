@@ -35,6 +35,10 @@ public class TeacherService {
         return teacherRepository.findAllByActiveAndFacultyId(active, facultyId);
     }
 
+    public List<Teacher> getTeachersByActive(boolean active){
+        return teacherRepository.findAllByActive(active);
+    }
+
     public void deleteByIds(ApplicationUser user, List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (ids.size() == 0)
             throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
