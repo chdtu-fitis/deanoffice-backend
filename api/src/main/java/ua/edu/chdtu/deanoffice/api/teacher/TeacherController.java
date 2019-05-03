@@ -1,7 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.teacher;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -28,20 +28,15 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 public class TeacherController {
 
     private TeacherService teacherService;
-    private DataVerificationService dataVerificationService;
     private DepartmentService departmentService;
     private PositionService positionService;
-    private FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
-    public TeacherController(TeacherService teacherService, DataVerificationService dataVerificationService,
-                             DepartmentService departmentService, PositionService positionService,
-                             FacultyAuthorizationService facultyAuthorizationService) {
+    public TeacherController(TeacherService teacherService,
+                             DepartmentService departmentService, PositionService positionService) {
         this.teacherService = teacherService;
-        this.dataVerificationService = dataVerificationService;
         this.departmentService = departmentService;
         this.positionService = positionService;
-        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @GetMapping("/teachers-short")
@@ -75,8 +70,9 @@ public class TeacherController {
                 throw new OperationCannotBePerformedException("Неправильно всказаний ідентифікатор, ідентифікатор повинен бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
-            teacherService.saveTeacher(user, teacher);
-            return ResponseEntity.noContent().build();
+            Teacher teacherAfterSave = teacherService.saveTeacher(user, teacher);
+            TeacherDTO teacherAfterSaveDTO = map(teacherAfterSave, TeacherDTO.class);
+            return new ResponseEntity(teacherAfterSaveDTO, HttpStatus.CREATED);
         } catch (Exception e) {
             return handleException(e);
         }
