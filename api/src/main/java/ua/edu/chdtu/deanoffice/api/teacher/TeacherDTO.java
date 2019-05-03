@@ -19,4 +19,6 @@ public class TeacherDTO {
     private String scientificDegree;
     private DepartmentDTO department;
     private NamedDTO position;
+    private int departmentId;
+    private int positionId;
 }

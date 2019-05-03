@@ -54,28 +54,16 @@ public class TeacherService {
     }
 
     public void saveTeacher(ApplicationUser user, Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        setCorrectDepartmentAndPositionFromDataBase(teacher);
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
         teacherRepository.save(teacher);
     }
 
     public void updateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        setCorrectDepartmentAndPositionFromDataBase(teacher);
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
         teacherRepository.save(teacher);
     }
 
-    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher) throws OperationCannotBePerformedException {
-        Department department = departmentService.getById(teacher.getDepartment().getId());
-        if (department == null)
-            throw new OperationCannotBePerformedException("Вказана неіснуюча кафедра!");
-        Position position = positionService.getById(teacher.getPosition().getId());
-        if (position == null)
-            throw new OperationCannotBePerformedException("Вказана неіснуюча посада!");
-        teacher.setDepartment(department);
-        teacher.setPosition(position);
-    }
 }

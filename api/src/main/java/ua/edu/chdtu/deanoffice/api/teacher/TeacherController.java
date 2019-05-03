@@ -9,6 +9,8 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
@@ -72,6 +74,7 @@ public class TeacherController {
             if (teacherDTO.getId() != 0)
                 throw new OperationCannotBePerformedException("Неправильно всказаний ідентифікатор, ідентифікатор повинен бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
+            setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
             teacherService.saveTeacher(user, teacher);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -89,6 +92,7 @@ public class TeacherController {
             if (teacherFromDB == null)
                 throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
+            setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
             teacherService.updateTeacher(user, teacher, teacherFromDB);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -109,5 +113,16 @@ public class TeacherController {
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, TeacherController.class, ExceptionToHttpCodeMapUtil.map(exception));
+    }
+
+    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, TeacherDTO teacherDTO) throws OperationCannotBePerformedException {
+        Department department = departmentService.getById(teacherDTO.getDepartmentId());
+        if (department == null)
+            throw new OperationCannotBePerformedException("Вказана неіснуюча кафедра!");
+        Position position = positionService.getById(teacherDTO.getPositionId());
+        if (position == null)
+            throw new OperationCannotBePerformedException("Вказана неіснуюча посада!");
+        teacher.setDepartment(department);
+        teacher.setPosition(position);
     }
 }
