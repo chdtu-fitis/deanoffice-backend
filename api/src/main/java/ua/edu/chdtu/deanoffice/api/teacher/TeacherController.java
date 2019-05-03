@@ -96,8 +96,8 @@ public class TeacherController {
         }
     }
 
-    @DeleteMapping("/teachers")
-    public ResponseEntity deleteTeachers(@RequestParam List<Integer> teachersIds,
+    @DeleteMapping("/teachers/{teachersIds}")
+    public ResponseEntity deleteTeachers(@PathVariable List<Integer> teachersIds,
                                          @CurrentUser ApplicationUser user) {
         try {
             teacherService.deleteByIds(user, teachersIds);
