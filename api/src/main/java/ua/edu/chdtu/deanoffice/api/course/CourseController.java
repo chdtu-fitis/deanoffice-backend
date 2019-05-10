@@ -196,8 +196,10 @@ public class CourseController {
                 CourseName courseName = map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
                 newCourse = updateCourseName(courseName, newCourse);
                 if (courseForGroupService.hasSoleCourse(oldCourseId)) {
+                    int oldKnowledgeControlId = oldCourse.getKnowledgeControl().getId();
+                    int newKnowledgeControlId = newCourse.getKnowledgeControl().getId();
                     courseService.createOrUpdateCourse(newCourse);
-                    adjustmentNationalGrade(oldCourse.getKnowledgeControl().getId(),newCourse.getKnowledgeControl().getId(),newCourse.getId());
+                    adjustNationalGrade(oldKnowledgeControlId, newKnowledgeControlId, newCourse.getId());
                 } else {
                     newCourse.setId(0);
                     newCourse = courseService.createOrUpdateCourse(newCourse);
@@ -211,13 +213,12 @@ public class CourseController {
         }
     }
 
-    private void adjustmentNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
-        List <Boolean> gradeDefinition;
-        gradeDefinition = gradeService.definitionGraded(oldKnowledgeControlId, newKnowledgeControlId);
-        if (gradeDefinition.size()>0){
-            if(gradeDefinition.get(0)){
+    private void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
+        Map<String, Boolean> gradeDefinition = gradeService.evaluateGradedChange(oldKnowledgeControlId, newKnowledgeControlId);
+        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null){
+            if(gradeDefinition.get(GradeService.NEW_GRADED_VALUE)){
                 gradeService.updateNationalGradeByCourseIdAndGradedTrue(newCourseId);
-            } else if (!gradeDefinition.get(0)){
+            } else {
                 gradeService.updateNationalGradeByCourseIdAndGradedFalse(newCourseId);
             }
         }
@@ -236,12 +237,11 @@ public class CourseController {
     }
 
     private void updateCourseInCoursesForGroupsAndGrade(CourseForGroup courseForGroup, Course newCourse, int oldCourseId, int groupId, int oldKnowledgeControlId) {
-        List <Boolean> gradedDefinition;
         courseForGroup.setCourse(newCourse);
         courseForGroupService.save(courseForGroup);
         List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
-        gradedDefinition = gradeService.definitionGraded(oldKnowledgeControlId,newCourse.getKnowledgeControl().getId());
-        gradeService.saveGradesByCourse(newCourse, grades, gradedDefinition);
+        Map<String, Boolean> gradedChange = gradeService.evaluateGradedChange(oldKnowledgeControlId, newCourse.getKnowledgeControl().getId());
+        gradeService.saveGradesByCourse(newCourse, grades, gradedChange);
     }
 
     @PostMapping("/groups/{groupId}/courses")

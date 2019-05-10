@@ -24,6 +24,7 @@ public class GradeService {
     private static final Integer[] KNOWLEDGE_CONTROL_PART2 = {Constants.COURSEWORK, Constants.COURSE_PROJECT};
     private static final Integer[] KNOWLEDGE_CONTROL_PART3 = {Constants.INTERNSHIP, Constants.NON_GRADED_INTERNSHIP};
     private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {Constants.ATTESTATION, Constants.STATE_EXAM};
+    public static final String NEW_GRADED_VALUE = "new graded";
 
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
@@ -138,13 +139,14 @@ public class GradeService {
         return gradeRepository.findByCourseAndGroup(courseId, groupId);
     }
 
-    public void saveGradesByCourse(Course course, List<Grade> grades, List <Boolean> gradedDefinition) {
+    public void saveGradesByCourse(Course course, List<Grade> grades, Map<String, Boolean> gradedDefinition) {
         for (Grade grade : grades) {
             grade.setCourse(course);
-            if (gradedDefinition.size()> 0){
-                if (gradedDefinition.get(0)){
+            Boolean newGradedValue = gradedDefinition.get(NEW_GRADED_VALUE);
+            if (newGradedValue != null){
+                if (newGradedValue){
                     grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
-                } else if (!gradedDefinition.get(0)) {
+                } else {
                     grade.setGrade(GradeUtil.getCreditFromPoints(grade.getPoints()));
                 }
             }
@@ -158,27 +160,27 @@ public class GradeService {
 
     @Transactional
     public void updateNationalGradeByCourseIdAndGradedFalse(int courseId){
-        List <Integer> studentDegreeId = gradeRepository.getStudentDegreeIdByCourseId(courseId);
-        for (Integer i: studentDegreeId) {
-            gradeRepository.updateGradeByCourseIdAndGradedFalse(courseId, i);
+        List <Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
+        for (Integer studentDegreeId: studentDegreeIds) {
+            gradeRepository.updateGradeByCourseIdAndGradedFalse(courseId, studentDegreeId);
         }
     }
 
     @Transactional
     public void updateNationalGradeByCourseIdAndGradedTrue(int courseId){
-        List <Integer> studentDegreeId = gradeRepository.getStudentDegreeIdByCourseId(courseId);
-        for (Integer i: studentDegreeId) {
-            gradeRepository.updateGradeByCourseIdAndGradedTrue(courseId, i);
+        List <Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
+        for (Integer studentDegreeId: studentDegreeIds) {
+            gradeRepository.updateGradeByCourseIdAndGradedTrue(courseId, studentDegreeId);
         }
     }
 
-    public List <Boolean> definitionGraded(int oldKnowledgeControlId, int newKnowledgeControlId) {
-        List <Boolean> gradeDefinition = new ArrayList<>();
+    public Map<String, Boolean> evaluateGradedChange(int oldKnowledgeControlId, int newKnowledgeControlId) {
+        Map<String, Boolean> gradeDefinition = new HashMap<>();
         if (oldKnowledgeControlId != newKnowledgeControlId) {
             boolean oldGraded = knowledgeControlService.getGradedByKnowledgeControlId(oldKnowledgeControlId);
             boolean newGraded = knowledgeControlService.getGradedByKnowledgeControlId(newKnowledgeControlId);
             if (oldGraded != newGraded) {
-                gradeDefinition.add(newGraded);
+                gradeDefinition.put(NEW_GRADED_VALUE, newGraded);
             }
         }
         return gradeDefinition;

@@ -82,8 +82,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             "else 0 " +
             "END " +
             "from student_degree sd " +
-            "inner join student_group sg on (sd.student_group_id = sg.id) " +
-            "where gr.course_id = :courseId and gr.student_degree_id = :studentDegreeId and  sg.id = sd.student_group_id ", nativeQuery = true)
+            "where gr.course_id = :courseId and gr.student_degree_id = :studentDegreeId", nativeQuery = true)
     void updateGradeByCourseIdAndGradedFalse(@Param("courseId") int courseId, @Param("studentDegreeId") int studentDegreeId);
 
     @Query(value = "select gr.student_degree_id from Grade as gr " +
