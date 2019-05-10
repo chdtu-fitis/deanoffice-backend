@@ -19,4 +19,8 @@ public class KnowledgeControlService {
     public List<KnowledgeControl> getAllKnowledgeControls() {
         return this.knowledgeControlRepository.findAll();
     }
+
+    public boolean getGradedByKnowledgeControlId(int knowledgeControlId){
+        return knowledgeControlRepository.findGradedByKnowledgeControlId(knowledgeControlId);
+    }
 }
