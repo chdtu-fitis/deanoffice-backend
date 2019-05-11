@@ -90,7 +90,7 @@ public class TeacherController {
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
             Teacher savedTeacher = teacherService.updateTeacher(user, teacher, teacherFromDB);
-            return new ResponseEntity(Mapper.strictMap(savedTeacher, TeacherDTO.class), HttpStatus.OK);
+            return new ResponseEntity(map(savedTeacher, TeacherDTO.class), HttpStatus.OK);
         } catch (Exception e) {
             return handleException(e);
         }
