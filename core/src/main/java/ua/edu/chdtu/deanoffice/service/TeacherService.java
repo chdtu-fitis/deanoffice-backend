@@ -56,10 +56,10 @@ public class TeacherService {
         return teacherRepository.save(teacher);
     }
 
-    public void updateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+    public Teacher updateTeacher(ApplicationUser user, Teacher teacher, Teacher teacherFromDB) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         dataVerificationService.isCorrectTeacher(teacher);
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacherFromDB.getDepartment());
         facultyAuthorizationService.verifyAccessibilityOfDepartment(user, teacher.getDepartment());
-        teacherRepository.save(teacher);
+        return teacherRepository.save(teacher);
     }
 }
