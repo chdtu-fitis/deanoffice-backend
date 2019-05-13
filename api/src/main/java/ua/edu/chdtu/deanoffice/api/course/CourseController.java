@@ -266,6 +266,7 @@ public class CourseController {
                     courseForGroup.setTeacher(teacher);
                 }
                 courseForGroup.setExamDate(newCourseForGroup.getExamDate());
+                courseForGroup.setAcademicDifference(newCourseForGroup.isAcademicDifference());
                 newCoursesForGroup.add(courseForGroup);
             }
             for (CourseForGroupDTO updatedCourseForGroup : updatedCourses) {
