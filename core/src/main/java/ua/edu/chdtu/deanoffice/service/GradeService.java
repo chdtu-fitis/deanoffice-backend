@@ -10,6 +10,7 @@ import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,19 +24,22 @@ public class GradeService {
     private static final Integer[] KNOWLEDGE_CONTROL_PART2 = {Constants.COURSEWORK, Constants.COURSE_PROJECT};
     private static final Integer[] KNOWLEDGE_CONTROL_PART3 = {Constants.INTERNSHIP, Constants.NON_GRADED_INTERNSHIP};
     private static final Integer[] KNOWLEDGE_CONTROL_PART4 = {Constants.ATTESTATION, Constants.STATE_EXAM};
+    public static final String NEW_GRADED_VALUE = "new graded";
 
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
     private final StudentDegreeRepository studentDegreeRepository;
     private CourseService courseService;
+    private KnowledgeControlService knowledgeControlService;
 
     @Autowired
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
-                        StudentDegreeRepository studentDegreeRepository, CourseService courseService) {
+                        StudentDegreeRepository studentDegreeRepository, CourseService courseService, KnowledgeControlService knowledgeControlService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.courseService = courseService;
+        this.knowledgeControlService = knowledgeControlService;
     }
 
     public List<List<Grade>> getGradesByStudentDegreeId(Integer studentDegreeId) {
@@ -135,14 +139,50 @@ public class GradeService {
         return gradeRepository.findByCourseAndGroup(courseId, groupId);
     }
 
-    public void saveGradesByCourse(Course course, List<Grade> grades) {
+    public void saveGradesByCourse(Course course, List<Grade> grades, Map<String, Boolean> gradedDefinition) {
         for (Grade grade : grades) {
             grade.setCourse(course);
+            Boolean newGradedValue = gradedDefinition.get(NEW_GRADED_VALUE);
+            if (newGradedValue != null){
+                if (newGradedValue){
+                    grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
+                } else {
+                    grade.setGrade(GradeUtil.getCreditFromPoints(grade.getPoints()));
+                }
+            }
             gradeRepository.save(grade);
         }
     }
 
     public void deleteGradeById(Integer gradeId) {
         gradeRepository.delete(gradeId);
+    }
+
+    @Transactional
+    public void updateNationalGradeByCourseIdAndGradedFalse(int courseId){
+        List <Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
+        for (Integer studentDegreeId: studentDegreeIds) {
+            gradeRepository.updateGradeByCourseIdAndGradedFalse(courseId, studentDegreeId);
+        }
+    }
+
+    @Transactional
+    public void updateNationalGradeByCourseIdAndGradedTrue(int courseId){
+        List <Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
+        for (Integer studentDegreeId: studentDegreeIds) {
+            gradeRepository.updateGradeByCourseIdAndGradedTrue(courseId, studentDegreeId);
+        }
+    }
+
+    public Map<String, Boolean> evaluateGradedChange(int oldKnowledgeControlId, int newKnowledgeControlId) {
+        Map<String, Boolean> gradeDefinition = new HashMap<>();
+        if (oldKnowledgeControlId != newKnowledgeControlId) {
+            boolean oldGraded = knowledgeControlService.getGradedByKnowledgeControlId(oldKnowledgeControlId);
+            boolean newGraded = knowledgeControlService.getGradedByKnowledgeControlId(newKnowledgeControlId);
+            if (oldGraded != newGraded) {
+                gradeDefinition.put(NEW_GRADED_VALUE, newGraded);
+            }
+        }
+        return gradeDefinition;
     }
 }

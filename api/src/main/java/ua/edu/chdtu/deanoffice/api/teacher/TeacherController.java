@@ -89,8 +89,8 @@ public class TeacherController {
                 throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
-            teacherService.updateTeacher(user, teacher, teacherFromDB);
-            return ResponseEntity.noContent().build();
+            Teacher savedTeacher = teacherService.updateTeacher(user, teacher, teacherFromDB);
+            return new ResponseEntity(map(savedTeacher, TeacherDTO.class), HttpStatus.OK);
         } catch (Exception e) {
             return handleException(e);
         }
