@@ -26,6 +26,7 @@ public class FormRatingPDFService extends FormRatingBase {
     private final int WIDTH_FIRST_ROW = 2;
     private final int WIDTH_SECOND_ROW = 13;
     private final int PADDING_BOTTOM = 4;
+    private final int PADDING_TOP = 1;
     private Font FONT;
     private Font FONT_TITLE;
     @Value(value = "classpath:fonts/timesnewroman/times.ttf")
@@ -92,6 +93,7 @@ public class FormRatingPDFService extends FormRatingBase {
             PdfPCell cell = new PdfPCell(new Phrase((i+1)+".",FONT));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setPaddingBottom(PADDING_BOTTOM);
+            cell.setPaddingTop(PADDING_TOP);
             table.addCell(cell);
             cell = new PdfPCell(new Phrase(namesStudents.get(i),FONT));
             cell.setHorizontalAlignment(Element.ALIGN_LEFT);

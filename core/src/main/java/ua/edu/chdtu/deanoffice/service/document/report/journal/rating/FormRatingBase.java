@@ -47,9 +47,9 @@ public abstract class FormRatingBase {
         for(CourseForGroup courseForGroup:courseForGroups) {
             Integer kcId = Integer.valueOf(courseForGroup.getCourse().getKnowledgeControl().getId());
             if (retrenchments.containsKey(kcId)){
-                namesCourses.add(courseForGroup.getCourse().getCourseName().getName() +"("+courseForGroup.getCourse().getHours()+")" + retrenchments.get(kcId));
+                namesCourses.add(courseForGroup.getCourse().getCourseName().getName() +" ("+courseForGroup.getCourse().getHours()+")" + retrenchments.get(kcId));
             } else {
-                namesCourses.add(courseForGroup.getCourse().getCourseName().getName() +"("+courseForGroup.getCourse().getHours()+")");
+                namesCourses.add(courseForGroup.getCourse().getCourseName().getName() +" ("+courseForGroup.getCourse().getHours()+")");
             }
         }
     }
