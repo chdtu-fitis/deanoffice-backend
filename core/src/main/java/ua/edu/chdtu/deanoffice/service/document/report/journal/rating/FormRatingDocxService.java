@@ -32,7 +32,7 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
 public class FormRatingDocxService extends FormRatingBase{
-
+    private static final int TABLE_WIDTH = 13959;
 
     public File formDocument(
             Integer degreeId,
@@ -77,7 +77,7 @@ public class FormRatingDocxService extends FormRatingBase{
         for (String name:namesStudents){
             Tr tr = factory.createTr();
             table.getContent().add(tr);
-            addTableCellWithWidth(tr,"",WIDTH_NUMBER_COLUMN);
+            addTableCellWithWidth(tr,number+".",WIDTH_NUMBER_COLUMN);
             addTableCellWithWidth(tr,name,WIDTH_NAME_COLUMN);
             for(int i=1;i<=namesCourses.size();i++){
                 addTableCellWithWidth(tr,"",columnWidth);
@@ -182,12 +182,6 @@ public class FormRatingDocxService extends FormRatingBase{
     }
 
     private int calculateColumnWidth(WordprocessingMLPackage wordMLPackage, List<String> namesCourses){
-        int allowableTableWidth = wordMLPackage.
-                getDocumentModel().
-                getSections().
-                get(0).
-                getPageDimensions().
-                getWritableWidthTwips();
-        return  (allowableTableWidth-WIDTH_NAME_COLUMN-WIDTH_NUMBER_COLUMN)/namesCourses.size();
+        return  (TABLE_WIDTH-WIDTH_NAME_COLUMN-WIDTH_NUMBER_COLUMN)/namesCourses.size();
     }
 }
