@@ -13,26 +13,20 @@ import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.service.document.report.journal.ComparatorCourses;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
 public class FormRatingDocxService extends FormRatingBase{
-    private static final int TABLE_WIDTH = 13959;
+    private static final int COLUMN_WIDTH= 20000;
 
     public File formDocument(
             Integer degreeId,
@@ -55,13 +49,12 @@ public class FormRatingDocxService extends FormRatingBase{
         for(StudentGroup studentGroup: studentGroups) {
             getDataFromDataBase(studentGroup, semester, namesStudents, namesCourses);
             if(namesCourses.size() != 0) {
-                int columnWidth = calculateColumnWidth(wordMLPackage, namesCourses);
                 factory = Context.getWmlObjectFactory();
                 setTitle(wordMLPackage,studentGroup);
                 Tbl table = factory.createTbl();
                 addBorders(table);
-                setHeaders(table,namesCourses,columnWidth);
-                setRows(table,namesStudents,namesCourses,columnWidth);
+                setHeaders(table,namesCourses);
+                setRows(table,namesStudents,namesCourses);
                 wordMLPackage.getMainDocumentPart().addObject(table);
             }
         }
@@ -72,7 +65,7 @@ public class FormRatingDocxService extends FormRatingBase{
         wordMLPackage.getMainDocumentPart().addObject(getTextWithStyle(studentGroup.getName(),true));
     }
 
-    private void setRows(Tbl table, List<String> namesStudents, List<String> namesCourses,int columnWidth) {
+    private void setRows(Tbl table, List<String> namesStudents, List<String> namesCourses) {
         int number = 1;
         for (String name:namesStudents){
             Tr tr = factory.createTr();
@@ -80,13 +73,13 @@ public class FormRatingDocxService extends FormRatingBase{
             addTableCellWithWidth(tr,number+".",WIDTH_NUMBER_COLUMN);
             addTableCellWithWidth(tr,name,WIDTH_NAME_COLUMN);
             for(int i=1;i<=namesCourses.size();i++){
-                addTableCellWithWidth(tr,"",columnWidth);
+                addTableCellWithWidth(tr,"",COLUMN_WIDTH);
             }
             number++;
         }
     }
 
-    private void setHeaders(Tbl table, List<String> namesCourses,int columnWidth) {
+    private void setHeaders(Tbl table, List<String> namesCourses) {
         Tr tr = factory.createTr();
         addTableCellWithWidth(tr, "", WIDTH_NUMBER_COLUMN);
         addTableCellWithWidth(tr, "", WIDTH_NAME_COLUMN);
@@ -96,7 +89,7 @@ public class FormRatingDocxService extends FormRatingBase{
             tableCell.getContent().add(getTextWithStyle(nameCourse,false));
             TcPr tableCellProperties = new TcPr();
             TblWidth tableWidth = new TblWidth();
-            tableWidth.setW(BigInteger.valueOf(columnWidth));
+            tableWidth.setW(BigInteger.valueOf(COLUMN_WIDTH));
             TextDirection td = new TextDirection();
             td.setVal("btLr");
             tableCellProperties.setTextDirection(td);
@@ -122,8 +115,8 @@ public class FormRatingDocxService extends FormRatingBase{
         rfonts.setAscii(FONT_FAMILY);
         rfonts.setHAnsi(FONT_FAMILY);
         PPrBase.Spacing sp = factory.createPPrBaseSpacing();
-        sp.setAfter(BigInteger.ZERO);
-        sp.setBefore(BigInteger.ZERO);
+        sp.setAfter(BigInteger.valueOf(100));
+        sp.setBefore(BigInteger.valueOf(100));
         sp.setLine(BigInteger.valueOf(200));
         sp.setLineRule(STLineSpacingRule.AUTO);
         rPr.setRFonts(rfonts);
@@ -179,9 +172,5 @@ public class FormRatingDocxService extends FormRatingBase{
         borders.setInsideH(border);
         borders.setInsideV(border);
         table.getTblPr().setTblBorders(borders);
-    }
-
-    private int calculateColumnWidth(WordprocessingMLPackage wordMLPackage, List<String> namesCourses){
-        return  (TABLE_WIDTH-WIDTH_NAME_COLUMN-WIDTH_NUMBER_COLUMN)/namesCourses.size();
     }
 }
