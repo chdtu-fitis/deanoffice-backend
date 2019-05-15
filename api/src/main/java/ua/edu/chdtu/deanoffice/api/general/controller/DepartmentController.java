@@ -84,6 +84,7 @@ public class DepartmentController {
                 throw new OperationCannotBePerformedException("Не можна змінювати не активну кафедру");
             }
             Department department = Mapper.strictMap(departmentDTO, Department.class);
+            department.setFaculty(departmentService.getById(department.getId()).getFaculty());
             this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
             Department departmentAfterSave = departmentService.save(department);
             DepartmentDTO departmentSavedDTO = Mapper.strictMap(departmentAfterSave, DepartmentDTO.class);
