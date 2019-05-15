@@ -141,9 +141,10 @@ public class CourseService {
                                                    Integer hoursPerCredit,
                                                    String knowledgeControl,
                                                    String nameStartingWith,
-                                                   String nameContains) {
+                                                   String nameContains,
+                                                   Integer semester) {
         Specification<Course> specification = CourseSpecification.getCourseWithImportFilters(
-                courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains);
+                courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains, semester);
         int totalOfFilteredCourses = (int) courseRepository.count(specification);
         int totalPages = (totalOfFilteredCourses / ROWS_PER_PAGE) + ((totalOfFilteredCourses % ROWS_PER_PAGE) == 0 ? 0 : 1);
         Sort orders = new Sort(Sort.Direction.ASC, "semester")

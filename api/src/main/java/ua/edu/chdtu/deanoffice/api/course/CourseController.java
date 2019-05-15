@@ -215,8 +215,8 @@ public class CourseController {
 
     private void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
         Map<String, Boolean> gradeDefinition = gradeService.evaluateGradedChange(oldKnowledgeControlId, newKnowledgeControlId);
-        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null){
-            if(gradeDefinition.get(GradeService.NEW_GRADED_VALUE)){
+        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null) {
+            if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE)) {
                 gradeService.updateNationalGradeByCourseIdAndGradedTrue(newCourseId);
             } else {
                 gradeService.updateNationalGradeByCourseIdAndGradedFalse(newCourseId);
@@ -346,11 +346,13 @@ public class CourseController {
                                              @RequestParam(required = false, name = "hoursPerCredit") Integer hoursPerCredit,
                                              @RequestParam(required = false, name = "knowledgeControl") String knowledgeControl,
                                              @RequestParam(required = false, name = "nameStartingWith") String nameStartingWith,
-                                             @RequestParam(required = false, name = "nameContains") String nameContains) {
+                                             @RequestParam(required = false, name = "nameContains") String nameContains,
+                                             @RequestParam(required = false, name = "semester") Integer semester
+    ) {
         try {
             validatePageParameter(page);
             CoursePaginationBean courseByFilters = courseService.getCourseByFilters(
-                    page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains);
+                    page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains, semester);
             return ResponseEntity.ok(Mapper.strictMap(courseByFilters, CoursePaginationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
