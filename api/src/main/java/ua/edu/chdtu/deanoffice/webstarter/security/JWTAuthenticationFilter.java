@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.webstarter.security;
 
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.webstarter.security.SecurityConstants.EXPIRATION_TIME;
 import static ua.edu.chdtu.deanoffice.webstarter.security.SecurityConstants.TOKEN_PREFIX;
@@ -56,6 +58,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String token = Jwts.builder()
                 .setSubject(((User) auth.getPrincipal()).getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .claim("rol", ((User) auth.getPrincipal()).getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .compact();
         int facultyId = ((CurrentUserDetails) auth.getPrincipal()).getCurrentUser().getFaculty().getId();
