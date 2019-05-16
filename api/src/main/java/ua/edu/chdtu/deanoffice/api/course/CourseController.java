@@ -276,7 +276,11 @@ public class CourseController {
                     courseForGroup.setTeacher(teacher);
                 }
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
+                boolean oldAcademicDifference = courseForGroup.isAcademicDifference();
                 courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
+                if (oldAcademicDifference != updatedCourseForGroup.isAcademicDifference()) {
+                    gradeService.setAcademicDifferenceByCoueseId(updatedCourseForGroup.isAcademicDifference(), updatedCourseForGroup.getCourse().getId());
+                }
                 updatedCoursesForGroup.add(courseForGroup);
             }
             courseForGroupService.addCourseForGroupAndNewChanges(newCoursesForGroup, updatedCoursesForGroup, deleteCoursesIds);
