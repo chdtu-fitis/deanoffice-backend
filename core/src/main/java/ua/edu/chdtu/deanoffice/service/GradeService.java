@@ -85,6 +85,13 @@ public class GradeService {
         }
     }
 
+    @Transactional
+    public void setAcademicDifferenceByCoueseId(boolean academicDifferencem, int courseId){
+        if (courseId > 0) {
+            gradeRepository.updateAcademicDifferenceByCourseId(academicDifferencem, courseId);
+        }
+    }
+
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
         grades.forEach(grade -> {
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
@@ -102,6 +109,7 @@ public class GradeService {
                 .stream().map(BaseEntity::getId).collect(Collectors.toList());
         return new ArrayList<>(getGrades(studentDegree, courseIds, knowledgeControlTypes));
     }
+
 
     public List<Grade> getGradesForStudents(List<Integer> studentsIds, List<Integer> courseIds) {
         if (studentsIds.isEmpty() || courseIds.isEmpty()) return new ArrayList<>();
