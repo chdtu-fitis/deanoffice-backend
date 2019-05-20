@@ -59,7 +59,7 @@ public class GradeController {
 
     @PutMapping
     public ResponseEntity putAcademicDifference(@RequestBody Map<Boolean, List<Integer>> gradesIds){
-        if (gradesIds.isEmpty()){
+        if (gradesIds == null || gradesIds.isEmpty()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Жоден атрибут академічної різниці не було змінено");
         }
         try {
