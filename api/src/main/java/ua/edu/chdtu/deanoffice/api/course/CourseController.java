@@ -254,7 +254,10 @@ public class CourseController {
             List<Integer> deleteCoursesIds = coursesForGroupHolder.getDeleteCoursesIds();
 
             Set<CourseForGroup> newCoursesForGroup = new HashSet<>();
-            Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
+            Set<CourseForGroup> courseForGroupWithNewAcademicDifference = new HashSet<>();
+            Set<CourseForGroup> courseForGroupWithOldAcademicDifference = new HashSet<>();
+            //Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
+            Map<Boolean, Set<CourseForGroup>> updatedCoursesForGroup = new HashMap<>();
             for (CourseForGroupDTO newCourseForGroup : newCourses) {
                 CourseForGroup courseForGroup = new CourseForGroup();
                 Course course = courseService.getById(newCourseForGroup.getCourse().getId());
@@ -269,6 +272,7 @@ public class CourseController {
                 courseForGroup.setAcademicDifference(newCourseForGroup.isAcademicDifference());
                 newCoursesForGroup.add(courseForGroup);
             }
+
             for (CourseForGroupDTO updatedCourseForGroup : updatedCourses) {
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(updatedCourseForGroup.getId());
                 if (updatedCourseForGroup.getTeacher().getId() != 0) {
@@ -276,13 +280,18 @@ public class CourseController {
                     courseForGroup.setTeacher(teacher);
                 }
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
-                boolean oldAcademicDifference = courseForGroup.isAcademicDifference();
+                boolean academicDifference = courseForGroup.isAcademicDifference();
                 courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
-                if (oldAcademicDifference != updatedCourseForGroup.isAcademicDifference()) {
-                    gradeService.setAcademicDifferenceByCoueseId(updatedCourseForGroup.isAcademicDifference(), updatedCourseForGroup.getCourse().getId());
+                if (academicDifference != updatedCourseForGroup.isAcademicDifference()) {
+                    courseForGroupWithNewAcademicDifference.add(courseForGroup);
+                    //gradeService.setAcademicDifferenceByCoueseId(updatedCourseForGroup.isAcademicDifference(), updatedCourseForGroup.getCourse().getId());
+                } else {
+                    courseForGroupWithOldAcademicDifference.add(courseForGroup);
                 }
-                updatedCoursesForGroup.add(courseForGroup);
+//                updatedCoursesForGroup.put(academicDifference,courseForGroup);
             }
+            updatedCoursesForGroup.put(true, courseForGroupWithNewAcademicDifference);
+            updatedCoursesForGroup.put(false, courseForGroupWithOldAcademicDifference);
             courseForGroupService.addCourseForGroupAndNewChanges(newCoursesForGroup, updatedCoursesForGroup, deleteCoursesIds);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {

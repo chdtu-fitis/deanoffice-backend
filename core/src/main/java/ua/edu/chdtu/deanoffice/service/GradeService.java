@@ -86,9 +86,9 @@ public class GradeService {
     }
 
     @Transactional
-    public void setAcademicDifferenceByCoueseId(boolean academicDifferencem, int courseId){
+    public void setAcademicDifferenceByCoueseId(boolean academicDifferencem, int groupId, int courseId){
         if (courseId > 0) {
-            gradeRepository.updateAcademicDifferenceByCourseId(academicDifferencem, courseId);
+            gradeRepository.updateAcademicDifferenceByCourseIdAndGroupId(academicDifferencem, groupId, courseId);
         }
     }
 

@@ -90,8 +90,10 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
      List <Integer> getStudentDegreeIdByCourseId(@Param("courseId") int courseId);
 
     @Modifying
-    @Query(value = "UPDATE Grade AS g " +
-            "SET g.academicDifference = :academicDifference " +
-            "WHERE g.course.id = :courseId")
-    void updateAcademicDifferenceByCourseId(@Param("academicDifference") boolean academicDifference, @Param("courseId") int courseId);
+    @Query(value = "UPDATE grade " +
+            "SET academic_difference = :academicDifference " +
+            "from grade g " +
+            "inner join student_degree sd on sd.id = g.student_degree_id " +
+            "where g.course_id = :courseId and sd.student_group_id = groupId", nativeQuery = true)
+    void updateAcademicDifferenceByCourseIdAndGroupId(@Param("academicDifference") boolean academicDifference, @Param("groupId") int groupId, @Param("courseId") int courseId);
 }
