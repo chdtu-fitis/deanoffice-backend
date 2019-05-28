@@ -22,9 +22,9 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     @GetMapping("/students")
-    public ResponseEntity getStudentGroupFile(@RequestParam int degreeId, @RequestParam int year, @CurrentUser ApplicationUser user){
+    public ResponseEntity getStudentGroupFile(@RequestParam int degreeId, @RequestParam int year, @RequestParam(required = false, defaultValue = "0") int groupId, @CurrentUser ApplicationUser user){
         try {
-            File file = gradesJournalService.createStudentsListsPdf(degreeId, year, user.getFaculty().getId());
+            File file = gradesJournalService.createStudentsListsPdf(degreeId, year, user.getFaculty().getId(), groupId);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e){
             return handleException(e);
