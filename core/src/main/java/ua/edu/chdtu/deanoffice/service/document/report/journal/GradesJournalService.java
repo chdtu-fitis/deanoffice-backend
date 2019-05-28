@@ -60,8 +60,12 @@ public class GradesJournalService {
         return System.getProperty("java.io.tmpdir");
     }
 
-    public File createStudentsListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+    public File createStudentsListsPdf(int degreeId, int year, int facultyId, int groupId) throws IOException, DocumentException {
+        List<StudentGroup> studentGroups = null;
+        if (groupId == 0)
+            studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+        else
+            studentGroups.add(studentGroupService.getById(groupId));
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
             String filePath = getJavaTempDirectory() + "/" + "StudentyJurnalOtsinok-" + year +
