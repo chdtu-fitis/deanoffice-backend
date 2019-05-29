@@ -13,14 +13,13 @@ dependencies {
 	compile group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'
 	
 	compile (
-			"com.zaxxer:HikariCP:${hikariVersion}",
-			"postgresql:postgresql:${postgresqlDriverVersion}"
+			"com.zaxxer:HikariCP:${hikariVersion}"
 	)
 	testCompile(
 			"org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
 	)
 
-	runtime("org.postgresql:postgresql:${postgresqlVersion}")
+	runtime("org.postgresql:postgresql:${postgresqlDriverVersion}")
 }
 
 processResources {
