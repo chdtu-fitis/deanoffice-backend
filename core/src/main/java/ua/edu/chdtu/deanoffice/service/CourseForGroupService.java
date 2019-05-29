@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,7 +71,7 @@ public class CourseForGroupService {
             );
         }
     }
-
+    @Transactional
     public void addCourseForGroupAndNewChanges(
             Set<CourseForGroup> newCourses,
             Map<Boolean, Set<CourseForGroup>> updatedCourses,
