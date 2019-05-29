@@ -89,7 +89,6 @@ public class CourseForGroupService {
         Set<CourseForGroup> coursesWithChangedAcademicDifference = courses.get(true);
         Set<CourseForGroup> coursesLessChangedAcademicDifference = courses.get(false);
         for (CourseForGroup courseForGroup: coursesWithChangedAcademicDifference){
-            int i = courseForGroup.getStudentGroup().getId();
             gradeRepository.updateAcademicDifferenceByCourseIdAndGroupId(courseForGroup.isAcademicDifference(), courseForGroup.getStudentGroup().getId(), courseForGroup.getCourse().getId());
         }
         courseForGroupRepository.save(coursesWithChangedAcademicDifference);

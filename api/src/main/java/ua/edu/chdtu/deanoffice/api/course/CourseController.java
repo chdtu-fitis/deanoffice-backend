@@ -256,7 +256,6 @@ public class CourseController {
             Set<CourseForGroup> newCoursesForGroup = new HashSet<>();
             Set<CourseForGroup> courseForGroupWithNewAcademicDifference = new HashSet<>();
             Set<CourseForGroup> courseForGroupWithOldAcademicDifference = new HashSet<>();
-            //Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
             Map<Boolean, Set<CourseForGroup>> updatedCoursesForGroup = new HashMap<>();
             for (CourseForGroupDTO newCourseForGroup : newCourses) {
                 CourseForGroup courseForGroup = new CourseForGroup();
@@ -280,15 +279,15 @@ public class CourseController {
                     courseForGroup.setTeacher(teacher);
                 }
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
+
                 boolean academicDifference = courseForGroup.isAcademicDifference();
                 courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
+
                 if (academicDifference != updatedCourseForGroup.isAcademicDifference()) {
                     courseForGroupWithNewAcademicDifference.add(courseForGroup);
-                    //gradeService.setAcademicDifferenceByCoueseId(updatedCourseForGroup.isAcademicDifference(), updatedCourseForGroup.getCourse().getId());
                 } else {
                     courseForGroupWithOldAcademicDifference.add(courseForGroup);
                 }
-//                updatedCoursesForGroup.put(academicDifference,courseForGroup);
             }
             updatedCoursesForGroup.put(true, courseForGroupWithNewAcademicDifference);
             updatedCoursesForGroup.put(false, courseForGroupWithOldAcademicDifference);
