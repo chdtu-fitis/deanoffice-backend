@@ -61,11 +61,13 @@ public class GradesJournalService {
     }
 
     public File createStudentsListsPdf(int degreeId, int year, int facultyId, int groupId) throws IOException, DocumentException {
-        List<StudentGroup> studentGroups = null;
+        List<StudentGroup> studentGroups;
         if (groupId == 0)
             studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
-        else
+        else {
+            studentGroups = new ArrayList<>();
             studentGroups.add(studentGroupService.getById(groupId));
+        }
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
             String filePath = getJavaTempDirectory() + "/" + "StudentyJurnalOtsinok-" + year +
