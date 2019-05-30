@@ -85,13 +85,6 @@ public class GradeService {
         }
     }
 
-    @Transactional
-    public void setAcademicDifferenceByCourseId(boolean academicDifferencem, int groupId, int courseId){
-        if (courseId > 0) {
-            gradeRepository.updateAcademicDifferenceByCourseIdAndGroupId(academicDifferencem, groupId, courseId);
-        }
-    }
-
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
         grades.forEach(grade -> {
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
