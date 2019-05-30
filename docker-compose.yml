@@ -1,0 +1,11 @@
+version: '3'
+services:
+  db:
+    image: "postgres:9.6"
+    restart: on-failure
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=deanoffice
+    ports:
+      - 5432:5432
