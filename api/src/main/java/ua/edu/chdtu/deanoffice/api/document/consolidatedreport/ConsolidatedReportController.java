@@ -106,7 +106,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         try {
             Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
             courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupId) -> {
-                List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId.toArray(new Integer[0]));
+                List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId);
                 courseForGroupToGroup.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
             });
             Map<CourseForGroup, List<StudentGroup>> courseToStudentGroupsForCreate = new HashMap<>();
