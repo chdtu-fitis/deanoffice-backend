@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
@@ -10,8 +9,6 @@ import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +76,6 @@ public class CourseForGroupService {
     ) {
         courseForGroupRepository.save(newCourses);
         saveUpdatedCoursesForGroup(updatedCourses);
-//        courseForGroupRepository.save(updatedCourses);
         for (Integer courseId : deleteCoursesIds) {
             courseForGroupRepository.delete(courseId);
         }
