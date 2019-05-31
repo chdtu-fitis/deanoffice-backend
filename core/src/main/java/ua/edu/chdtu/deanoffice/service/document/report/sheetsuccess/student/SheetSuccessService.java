@@ -8,12 +8,19 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.List;
 
 @Service
 public class SheetSuccessService {
-    public static final String TEMPLATES_PATH = "C:/Projects/deanoffice/SheetSuccessFrontSide.pdf";
     public static final int COUNTCOLUMNS = 5;
     public static final float PAGE_MARGIN = 36f;
+    public static final float HEIGHT_TABLE_PAGE = 250;
+    public static final float HEIGHT_FIXED = 50;
+    public static final float UNDERLINE_THICKNESS = 0.7f;
+    public static final float FONT_SIZE_14 = 14f;
+    public static final float FONT_SIZE_12 = 12f;
+    public static final float FONT_SIZE_10 = 10f;
+    public static final float PADDING_BOTTOM = 5;
     private Font FONT_14;
     private Font FONT_14_BOLD;
     private Font FONT_12;
@@ -25,13 +32,13 @@ public class SheetSuccessService {
     @Autowired
     public void setFont() throws IOException, DocumentException {
         baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        FONT_14 = new Font(baseFont, 14, Font.NORMAL);
-        FONT_14_BOLD = new Font(baseFont, 14, Font.BOLD);
-        FONT_10 = new Font(baseFont,10,Font.NORMAL);
-        FONT_12 = new Font(baseFont, 12, Font.NORMAL);
+        FONT_14 = new Font(baseFont, FONT_SIZE_14, Font.NORMAL);
+        FONT_14_BOLD = new Font(baseFont, FONT_SIZE_14, Font.BOLD);
+        FONT_10 = new Font(baseFont,FONT_SIZE_10,Font.NORMAL);
+        FONT_12 = new Font(baseFont, FONT_SIZE_12, Font.NORMAL);
     }
 
-    public File formDocument() throws IOException, DocumentException {
+    public File formDocument(List<Integer> groupIds) throws IOException, DocumentException {
         setFont();
         Document document = new Document(PageSize.A4, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN);
         String filePath = getJavaTempDirectory() + "/" + "name" +".pdf";
@@ -39,7 +46,7 @@ public class SheetSuccessService {
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
             document.open();
-            fillDocument(document);
+            fillDocument(document,groupIds);
         } finally {
             if (document != null)
                 document.close();
@@ -47,50 +54,79 @@ public class SheetSuccessService {
         return file;
     }
 
-    private void fillDocument(Document document) throws DocumentException {
+    private void fillDocument(Document document, List<Integer> groupIds) throws DocumentException {
         PdfPTable table = new PdfPTable(1);
         table.setWidthPercentage(100);
-        PdfPCell pdfPCell = new PdfPCell();
-        addFrontForm(pdfPCell);
-        table.addCell(pdfPCell);
-        pdfPCell = new PdfPCell();
-        addBackForm(pdfPCell);
-        table.addCell(pdfPCell);
-        pdfPCell = new PdfPCell();
-        addFrontForm(pdfPCell);
-        table.addCell(pdfPCell);
+        PdfPCell cell = new PdfPCell();
+        //cell.setBorder(Rectangle.NO_BORDER);
+        boolean isFrontSideActive = true;
+        int numberForm = 1;
+        int positionStart = -1;
+        int positionEnd = 3;
+        for (int i = 0; i < 9;i++){
+            if(isFrontSideActive){
+                addFrontForm(cell);
+            } else {
+                addBackForm(cell);
+            }
+            numberForm++;
+            table.addCell(cell);
+            cell = new PdfPCell();
+            cell.setFixedHeight(HEIGHT_TABLE_PAGE);
+            cell.setBorder(Rectangle.NO_BORDER);
+
+            if(numberForm > 3 || i == 9-1){
+                if(isFrontSideActive) {
+                    isFrontSideActive = !isFrontSideActive;
+                    positionEnd = i;
+                    i = positionStart;
+                    if(numberForm == 2){
+                        table.addCell(cell);
+                        table.addCell(cell);
+                    }
+                    if(numberForm == 3){
+                        table.addCell(cell);
+                    }
+                } else {
+                    isFrontSideActive = !isFrontSideActive;
+                    positionStart = positionEnd;
+                    i = positionEnd;
+                }
+                numberForm = 1;
+            }
+        }
         document.add(table);
     }
 
     private void addFrontForm(PdfPCell cell) throws DocumentException {
         cell.setPadding(0);
-        Paragraph paragraph = new Paragraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ",FONT_14);
+        Paragraph paragraph = new Paragraph(FrontFormConfig.CHDTU_NAME,FONT_14);
         paragraph.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(paragraph);
-        paragraph = new Paragraph(addPhraseWithLine("Факультет",34,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" Навчальний рік",2,"",FONT_14));
+        paragraph = new Paragraph(addPhraseWithLine(FrontFormConfig.FACULTY,FrontFormConfig.LENGTH_FACULTY,"",FONT_14));
+        paragraph.add(addPhraseWithLine(FrontFormConfig.STUDY_YEAR,FrontFormConfig.LENGTH_STUDY_YEAR,"",FONT_14));
         paragraph.add(addPhraseWithLine("/",2,"",FONT_14));
         cell.addElement(paragraph);
-        paragraph = new Paragraph(addPhraseWithLine("Курс",3,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" Семестр",3,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" Група",10,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" Форма контролю",25,"",FONT_14));
+        paragraph = new Paragraph(addPhraseWithLine(FrontFormConfig.YEAR,FrontFormConfig.LENGTH_YEAR,"",FONT_14));
+        paragraph.add(addPhraseWithLine(FrontFormConfig.SEMESTER,FrontFormConfig.LENGTH_SEMESTER,"",FONT_14));
+        paragraph.add(addPhraseWithLine(FrontFormConfig.GROUP,FrontFormConfig.LENGTH_GROUP,"",FONT_14));
+        paragraph.add(addPhraseWithLine(FrontFormConfig.KNOWLEDGE_CONTROL,FrontFormConfig.LENGTH_KNOWLEDGE_CONTROL,"",FONT_14));
         cell.addElement(paragraph);
         cell.addElement(new Paragraph(" ",FONT_14));
-        paragraph = new Paragraph(addPhraseWithLine("АРКУШ УСПІШНОСТІ СТУДЕНТА №",7,"",FONT_14_BOLD));
+        paragraph = new Paragraph(addPhraseWithLine(FrontFormConfig.TITLE,FrontFormConfig.LENGTH_TITLE,"",FONT_14_BOLD));
         paragraph.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(paragraph);
         cell.addElement(new Paragraph(" ",FONT_14));
-        cell.addElement(addPhraseWithLine("Студент",79,"",FONT_12));
-        paragraph = new Paragraph("                                                                      прізвище та ініціали студента",FONT_10);
+        cell.addElement(addPhraseWithLine(FrontFormConfig.SRUDENT,FrontFormConfig.LENGTH_SRUDENT,"",FONT_12));
+        paragraph = new Paragraph(FrontFormConfig.BY_LINE_SRUDENT,FONT_10);
         cell.addElement(paragraph);
-        cell.addElement(addPhraseWithLine("Навчальна дисципліна",67,"",FONT_12));
-        paragraph = new Paragraph("                                                                      назва навчальної дисципліни",FONT_10);
+        cell.addElement(addPhraseWithLine(FrontFormConfig.COURSE,FrontFormConfig.LENGTH_COURSE,"",FONT_12));
+        paragraph = new Paragraph(FrontFormConfig.BY_LINE_COURSE,FONT_10);
         cell.addElement(paragraph);
-        cell.addElement(addPhraseWithLine("Викладач",78,"",FONT_12));
-        paragraph = new Paragraph("                                                                      вчене звання, прізвище та ініціали",FONT_10);
+        cell.addElement(addPhraseWithLine(FrontFormConfig.TEACHER,FrontFormConfig.LENGTH_TEACHER,"",FONT_12));
+        paragraph = new Paragraph(FrontFormConfig.BY_LINE_TEACHER,FONT_10);
         cell.addElement(paragraph);
-        cell.setFixedHeight(250);
+        cell.setFixedHeight(HEIGHT_TABLE_PAGE);
     }
 
     private Phrase addPhraseWithLine(String text, int length, String textLine,Font font) {
@@ -106,8 +142,8 @@ public class SheetSuccessService {
         Phrase phrase = new Phrase(text,font);
         Chunk chunk = new Chunk(underlineText);
         chunk.setFont(font);
-        float yPosition = font.getSize() == 14 ? -2.9f : -2.2f;
-        chunk.setUnderline(0.7f, yPosition);
+        float yPosition = font.getSize() == FONT_SIZE_14 ? -2.9f : -2.2f;
+        chunk.setUnderline(UNDERLINE_THICKNESS, yPosition);
         phrase.add(new Phrase(chunk));
         return phrase;
     }
@@ -122,51 +158,51 @@ public class SheetSuccessService {
         fillTable(table);
         cell.addElement(table);
         cell.addElement(new Paragraph(" ",FONT_12));
-        Paragraph paragraph = new Paragraph(addPhraseWithLine("Причина перенесення підсумкового контролю  ",33,"",FONT_14));
+        Paragraph paragraph = new Paragraph(addPhraseWithLine(BackFormConfig.REASON,BackFormConfig.LENGTH_REASON,"",FONT_14));
         cell.addElement(paragraph);
-        paragraph = new Paragraph(addPhraseWithLine("Аркуш успішності дійсний до “",3,"",FONT_14));
-        paragraph.add(addPhraseWithLine("” ",15,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" 20",2,"",FONT_14));
-        paragraph.add(new Phrase(" р.",FONT_14));
+        paragraph = new Paragraph(addPhraseWithLine(BackFormConfig.SHEET,BackFormConfig.LENGTH_SHEET,"",FONT_14));
+        paragraph.add(addPhraseWithLine(BackFormConfig.SHEET_END,BackFormConfig.LENGTH_SHEET_END,"",FONT_14));
+        paragraph.add(addPhraseWithLine(BackFormConfig.YEAR,BackFormConfig.LENGTH_YEAR,"",FONT_14));
+        paragraph.add(new Phrase(BackFormConfig.YEAR_MARK,FONT_14));
         cell.addElement(paragraph);
         cell.addElement(new Paragraph("",FONT_12));
-        paragraph = new Paragraph(addPhraseWithLine("Декан факультету",15,"      ",FONT_14));
-        paragraph.add(addPhraseWithLine(" ",22,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" “",3,"",FONT_14));
-        paragraph.add(addPhraseWithLine("” ",10,"",FONT_14));
-        paragraph.add(addPhraseWithLine(" 20",2,"",FONT_14));
-        paragraph.add(new Phrase(" р.",FONT_14));
+        paragraph = new Paragraph(addPhraseWithLine(BackFormConfig.DEAN,BackFormConfig.LENGTH_DEAN,"      ",FONT_14));
+        paragraph.add(addPhraseWithLine(" ",BackFormConfig.LENGTH_SPACE,"",FONT_14));
+        paragraph.add(addPhraseWithLine(BackFormConfig.BRACKET_OPEN,BackFormConfig.LENGTH_BRACKET_OPEN,"",FONT_14));
+        paragraph.add(addPhraseWithLine(BackFormConfig.BRACKET_CLOSE,BackFormConfig.LENGTH_BRACKET_CLOSE,"",FONT_14));
+        paragraph.add(addPhraseWithLine(BackFormConfig.YEAR,BackFormConfig.LENGTH_YEAR,"",FONT_14));
+        paragraph.add(new Phrase(BackFormConfig.YEAR_MARK,FONT_14));
         cell.addElement(paragraph);
-        paragraph = new Paragraph("                                   (підпис)        (прізвище та ініціали)",FONT_14);
+        paragraph = new Paragraph(BackFormConfig.BY_LINE,FONT_14);
         paragraph.setLeading(15);
         cell.addElement(paragraph);
-        cell.setFixedHeight(300);
+        cell.setFixedHeight(HEIGHT_TABLE_PAGE);
     }
 
     private void fillTable(PdfPTable table) throws DocumentException {
-        table.addCell(fillCell("ПІБ студента"));
-        table.addCell(fillCell("Номер залікової книжки"));
+        table.addCell(fillCell(BackFormConfig.INITIALS));
+        table.addCell(fillCell(BackFormConfig.NUMBER));
         PdfPCell cell = new PdfPCell(fillInternalTable());
         cell.setPadding(0);
         cell.setFixedHeight(70);
         table.addCell(cell);
-        table.addCell(fillCell("Дата"));
-        table.addCell(fillCell("Підпис викладача"));
+        table.addCell(fillCell(BackFormConfig.DATE));
+        table.addCell(fillCell(BackFormConfig.SIGN));
     }
 
     private PdfPTable fillInternalTable() throws DocumentException {
         PdfPTable table = new PdfPTable(1);
-        PdfPCell cell = fillCell("Оцінка");
-        cell.setPaddingBottom(5);
+        PdfPCell cell = fillCell(BackFormConfig.GRADE);
+        cell.setPaddingBottom(PADDING_BOTTOM);
         table.addCell(cell);
         PdfPTable iternalTable = new PdfPTable(3);
         float[] arrayWidthColumns = {50,25,25};
         iternalTable.setTotalWidth(arrayWidthColumns);
-        iternalTable.addCell(fillCell("за національною шкалою"));
-        iternalTable.addCell(fillCell("100-бальна шкала"));
-        iternalTable.addCell(fillCell("ЄКТС"));
+        iternalTable.addCell(fillCell(BackFormConfig.NATIONAL));
+        iternalTable.addCell(fillCell(BackFormConfig.HUNDRED_SCALE));
+        iternalTable.addCell(fillCell(BackFormConfig.ECTS));
         cell = new PdfPCell(iternalTable);
-        cell.setFixedHeight(50);
+        cell.setFixedHeight(HEIGHT_FIXED);
         cell.setPadding(0);
         table.addCell(cell);
         return table;
