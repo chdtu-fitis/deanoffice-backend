@@ -229,5 +229,13 @@ public class StudentDegreeService {
             return  1;
     }
 
-
+    public int getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(int specializationId,
+                                                                               int studyYear,
+                                                                               TuitionForm tuitionForm,
+                                                                               Payment payment,
+                                                                               int degreeId) {
+        int semester = getCurrentSemester();
+        return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId,
+                currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
+    }
 }
