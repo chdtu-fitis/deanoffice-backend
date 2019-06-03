@@ -314,7 +314,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
             "AND s.degree_id = :degreeId " +
             "AND sg.tuition_form = :tuitionForm " +
-            "AND course.semester = ((:studyYear * 2) + :semester) " +
+            "AND course.semester = (((:studyYear - 1) * 2) + :semester) " +
             "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
     int[] findAllActiveDebtorsWithThreeOrMoreDebts(
             @Param("specializationId") int specializationId,
@@ -337,7 +337,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
             "AND sg.tuition_form = :tuitionForm " +
             "AND s.degree_id = :degreeId " +
-            "AND course.semester = ((:studyYear * 2) + :semester) " +
+            "AND course.semester = (((:studyYear - 1) * 2) + :semester) " +
             "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
     int[] findAllActiveDebtorsWithLessThanThreeDebs(
             @Param("specializationId") int specializationId,
