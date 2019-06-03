@@ -302,4 +302,27 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "WHERE sg.id IN (:studentGroupIds) AND sd.active = true " +
             "ORDER BY sg.name, s.surname, s.name, s.patronimic", nativeQuery = true)
     List<Object[]> getStudentDegreeShortFields(@Param("studentGroupIds") List<Integer> studentGroupIds);
+
+    @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
+            "INNER JOIN grade g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN specialization s ON sd.specialization_id = s.id " +
+            "INNER JOIN course on g.course_id = course.id "+
+            "WHERE (g.points is null OR points < 60) AND sd.payment = :payment AND sd.active = true " +
+            "AND sd.specialization_id = :specializationId " +
+            "AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
+            "AND s.degree_id = :degreeId " +
+            "AND sg.tuition_form = :tuitionForm " +
+            "AND course.semester = ((:studyYear * 2) + :semester) " +
+            "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
+    int[] findAllActiveDebtorsWithThreeOrMoreDebts (
+            @Param("specializationId") int specializationId,
+            @Param("currentYear") int currentYear,
+            @Param("studyYear") int studyYear,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("payment")String payment,
+            @Param("degreeId") int degreeId,
+            @Param("semester") int semester
+    );
 }
