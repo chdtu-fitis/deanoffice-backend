@@ -103,6 +103,7 @@ public class GradeService {
         return new ArrayList<>(getGrades(studentDegree, courseIds, knowledgeControlTypes));
     }
 
+
     public List<Grade> getGradesForStudents(List<Integer> studentsIds, List<Integer> courseIds) {
         if (studentsIds.isEmpty() || courseIds.isEmpty()) return new ArrayList<>();
         return gradeRepository.findGradesByCourseAndBySemesterForStudents(studentsIds, courseIds);

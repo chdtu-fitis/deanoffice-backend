@@ -1,22 +1,30 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
+import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
 public class CourseForGroupService {
     private final CourseForGroupRepository courseForGroupRepository;
     private final StudentGroupRepository studentGroupRepository;
+    private final GradeRepository gradeRepository;
 
-    public CourseForGroupService(CourseForGroupRepository courseForGroupRepository, StudentGroupRepository studentGroupRepository) {
+    @Autowired
+    public CourseForGroupService(CourseForGroupRepository courseForGroupRepository, StudentGroupRepository studentGroupRepository,
+                                 GradeRepository gradeRepository) {
         this.courseForGroupRepository = courseForGroupRepository;
         this.studentGroupRepository = studentGroupRepository;
+        this.gradeRepository = gradeRepository;
     }
 
     public CourseForGroup getCourseForGroup(int id) {
@@ -60,17 +68,27 @@ public class CourseForGroupService {
             );
         }
     }
-
+    @Transactional
     public void addCourseForGroupAndNewChanges(
             Set<CourseForGroup> newCourses,
-            Set<CourseForGroup> updatedCourses,
+            Map<Boolean, Set<CourseForGroup>> updatedCourses,
             List<Integer> deleteCoursesIds
     ) {
         courseForGroupRepository.save(newCourses);
-        courseForGroupRepository.save(updatedCourses);
+        saveUpdatedCoursesForGroup(updatedCourses);
         for (Integer courseId : deleteCoursesIds) {
             courseForGroupRepository.delete(courseId);
         }
+    }
+
+    private void saveUpdatedCoursesForGroup(Map<Boolean, Set<CourseForGroup>> courses){
+        Set<CourseForGroup> coursesWithChangedAcademicDifference = courses.get(true);
+        Set<CourseForGroup> coursesLessChangedAcademicDifference = courses.get(false);
+        for (CourseForGroup courseForGroup: coursesWithChangedAcademicDifference){
+            gradeRepository.updateAcademicDifferenceByCourseIdAndGroupId(courseForGroup.isAcademicDifference(), courseForGroup.getStudentGroup().getId(), courseForGroup.getCourse().getId());
+        }
+        courseForGroupRepository.save(coursesWithChangedAcademicDifference);
+        courseForGroupRepository.save(coursesLessChangedAcademicDifference);
     }
 
     public void save(CourseForGroup courseForGroup) {
