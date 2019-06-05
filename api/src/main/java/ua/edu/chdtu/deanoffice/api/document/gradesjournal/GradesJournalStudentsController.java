@@ -37,9 +37,9 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     @GetMapping("/courses/pdf")
     public ResponseEntity getSubjectsFile(@RequestParam int degreeId, @RequestParam int year,
                                           @RequestParam(required = false, defaultValue = "0") int semester,
-                                          @RequestParam(required = false, defaultValue = "null") TuitionForm tuitionForm,
+                                          @RequestParam(required = false, defaultValue = "FULL_TIME") TuitionForm tuitionForm,
                                           @RequestParam(required = false, defaultValue = "0") int groupId,
-                                          @CurrentUser ApplicationUser user){
+                                          @CurrentUser ApplicationUser user) {
         try{
             File file = gradesJournalService.createCoursesListsPdf(degreeId, year, semester, tuitionForm, groupId, user.getFaculty().getId());
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
