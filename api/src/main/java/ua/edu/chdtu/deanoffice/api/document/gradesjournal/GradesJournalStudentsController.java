@@ -37,7 +37,7 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     @GetMapping("/courses/pdf")
     public ResponseEntity getSubjectsFile(@RequestParam int degreeId, @RequestParam int year,
                                           @RequestParam(required = false, defaultValue = "0") int semester,
-                                          @RequestParam(required = false, defaultValue = "FULL_TIME") TuitionForm tuitionForm,
+                                          @RequestParam(required = false) TuitionForm tuitionForm,
                                           @RequestParam(required = false, defaultValue = "0") int groupId,
                                           @CurrentUser ApplicationUser user) {
         try{
