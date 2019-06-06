@@ -24,7 +24,8 @@ public class StudentGroupSpecification {
             predicates.add(cb.equal(root.get("specialization").get("degree").get("id"), degreeId));
             predicates.add(cb.equal(cb.sum(cb.diff(currentYear, root.get("creationYear")), root.get("beginYears")), year));
             predicates.add(cb.equal(root.get("specialization").get("faculty").get("id"), facultyId));
-            predicates.add(cb.equal(root.get("tuitionForm"), tuitionForm));
+            if (tuitionForm != null)
+                predicates.add(cb.equal(root.get("tuitionForm"), tuitionForm));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
