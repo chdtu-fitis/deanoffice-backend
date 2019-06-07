@@ -309,17 +309,19 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Modifying
     @Query(value = "UPDATE ExtraPoints ep " +
             "SET ep.points = :points " +
-            "where ep.studentDegree.id = :studentDegreeId AND ep.semester = :semester ")
+            "where ep.studentDegree.id = :studentDegreeId AND ep.semester = :semester " )
     void updateExtraPoints(
             @Param("studentDegreeId") Integer studentDegreeId,
-            @Param("points") Integer points,
-            @Param("semester") Integer semester
+            @Param("semester") Integer semester,
+            @Param("points") Integer points
     );
 
     @Query(value = "select ep from ExtraPoints ep " +
-            "where ep.studentDegree.id = :studentDegreeId ")
+            "where ep.studentDegree.id = :studentDegreeId " +
+            "and ep.sesmester = :semester ")
     List <ExtraPoints> getExtraPointsByStudentDegreeId(
-            @Param("studentDegreeId") Integer studentDegreeId
+            @Param("studentDegreeId") Integer studentDegreeId,
+            @Param("semester") Integer semester
     );
 
     ExtraPoints save(ExtraPoints extraPoints);

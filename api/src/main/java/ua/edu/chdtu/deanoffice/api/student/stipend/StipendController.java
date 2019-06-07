@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -75,21 +76,21 @@ public class StipendController {
     }
 
     @PostMapping("/extra-points-update")
-    public void updateExtraPointsByStudentDegreeId(Integer studentDegreeId, Integer points){
-        List <ExtraPoints> extraPoints = stipendService.getExtraPoints(studentDegreeId);
-        if (extraPoints.size()==0){
-            ExtraPoints newExtraPoints = create(studentDegreeId, points);
-            stipendService.saveExtraPoints(newExtraPoints);
-        } else
-            stipendService.updateExtraPoints(studentDegreeId, points);
+    public void updateExtraPoints(List <ExtraPointsDTO> extraPointsDTO){
+        for (ExtraPointsDTO extraPoints : extraPointsDTO){
+            StudentDegree studentDegree = studentDegreeService.getById(extraPoints.getStudentDegreeId());
+            Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
+            List <ExtraPoints> listExtraPoints = stipendService.getExtraPoints(studentDegree.getId(),semester);
+            if (listExtraPoints.size()==0){
+                ExtraPoints newExtraPoints = create(studentDegree, semester , extraPoints.getPoints());
+                stipendService.saveExtraPoints(newExtraPoints);
+            } else
+                stipendService.updateExtraPoints(studentDegree.getId(), semester, extraPoints.getPoints());
+        }
     }
 
-
-
-    private ExtraPoints create(Integer studentDegreeId, Integer points){
+    private ExtraPoints create(StudentDegree studentDegree, Integer semester, Integer points){
         ExtraPoints extraPoints = new ExtraPoints();
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
         extraPoints.setStudentDegree(studentDegree);
         extraPoints.setSemester(semester);
         extraPoints.setPoints(points);

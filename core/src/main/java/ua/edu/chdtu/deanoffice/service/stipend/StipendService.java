@@ -80,14 +80,12 @@ public class StipendService {
     }
 
     @Transactional
-    public void updateExtraPoints(Integer studentDegreeId, Integer points){
-        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
-        Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
-        studentDegreeRepository.updateExtraPoints(studentDegreeId, points, semester);
+    public void updateExtraPoints(Integer studentDegreeId, Integer semester, Integer points){
+        studentDegreeRepository.updateExtraPoints(studentDegreeId, semester, points);
     }
 
-    public List<ExtraPoints> getExtraPoints(Integer studentDegreeId){
-        return studentDegreeRepository.getExtraPointsByStudentDegreeId(studentDegreeId);
+    public List<ExtraPoints> getExtraPoints(Integer studentDegreeId, Integer semester){
+        return studentDegreeRepository.getExtraPointsByStudentDegreeId(studentDegreeId, semester);
     }
 
     public ExtraPoints saveExtraPoints(ExtraPoints extraPoints){
