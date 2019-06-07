@@ -318,7 +318,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value = "select ep from ExtraPoints ep " +
             "where ep.studentDegree.id = :studentDegreeId " +
-            "and ep.sesmester = :semester ")
+            "and ep.semester = :semester ")
     List <ExtraPoints> getExtraPointsByStudentDegreeId(
             @Param("studentDegreeId") Integer studentDegreeId,
             @Param("semester") Integer semester
