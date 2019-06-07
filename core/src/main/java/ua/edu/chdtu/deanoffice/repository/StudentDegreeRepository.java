@@ -265,7 +265,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       2018 - student_group.creation_year + student_group.begin_years as year, " +
             "       student_group.tuition_term as tuitionTerm, speciality.code as specialityCode, " +
             "       speciality.name as specialityName, specialization.name as specializationName, " +
-            "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade " +
+            "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade, " +
+                    " extra_points.points as extraPoints " +
             "FROM student " +
             "       INNER JOIN student_degree ON student_degree.student_id = student.id " +
             "       INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
@@ -278,15 +279,17 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
             "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
+                    " FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
             "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
             "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
             "  AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
+//                    " AND extra_points.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
             "  AND knowledge_control.graded = true " +
             "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
-            "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation " +
+            "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, extraPoints " +
             "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic", nativeQuery = true)
     List<Object[]> findNoDebtStudentDegreesRaw(
             @Param("facultyId") int facultyId,
@@ -302,4 +305,22 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "WHERE sg.id IN (:studentGroupIds) AND sd.active = true " +
             "ORDER BY sg.name, s.surname, s.name, s.patronimic", nativeQuery = true)
     List<Object[]> getStudentDegreeShortFields(@Param("studentGroupIds") List<Integer> studentGroupIds);
+
+    @Modifying
+    @Query(value = "UPDATE ExtraPoints ep " +
+            "SET ep.points = :points " +
+            "where ep.studentDegree.id = :studentDegreeId AND ep.semester = :semester ")
+    void updateExtraPoints(
+            @Param("studentDegreeId") Integer studentDegreeId,
+            @Param("points") Integer points,
+            @Param("semester") Integer semester
+    );
+
+    @Query(value = "select ep from ExtraPoints ep " +
+            "where ep.studentDegree.id = :studentDegreeId ")
+    List <ExtraPoints> getExtraPointsByStudentDegreeId(
+            @Param("studentDegreeId") Integer studentDegreeId
+    );
+
+    ExtraPoints save(ExtraPoints extraPoints);
 }

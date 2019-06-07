@@ -2,7 +2,11 @@ package ua.edu.chdtu.deanoffice.service.stipend;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,10 +17,12 @@ import java.util.Set;
 @Service
 public class StipendService {
     private final StudentDegreeRepository studentDegreeRepository;
+    private final StudentGroupRepository studentGroupRepository;
 
     @Autowired
-    public StipendService(StudentDegreeRepository studentDegreeRepository) {
+    public StipendService(StudentDegreeRepository studentDegreeRepository, StudentGroupRepository studentGroupRepository) {
         this.studentDegreeRepository = studentDegreeRepository;
+        this.studentGroupRepository = studentGroupRepository;
     }
 
     public void getDebtorStudents() {
@@ -67,8 +73,24 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                (BigDecimal)item[12]/*averageGradee*/
+                (BigDecimal)item[12]/*averageGrade*/,
+                (Integer)item[13]/*extraPoints*/
         )));
         return debtorStudentDegreesBeans;
+    }
+
+    @Transactional
+    public void updateExtraPoints(Integer studentDegreeId, Integer points){
+        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
+        Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
+        studentDegreeRepository.updateExtraPoints(studentDegreeId, points, semester);
+    }
+
+    public List<ExtraPoints> getExtraPoints(Integer studentDegreeId){
+        return studentDegreeRepository.getExtraPointsByStudentDegreeId(studentDegreeId);
+    }
+
+    public ExtraPoints saveExtraPoints(ExtraPoints extraPoints){
+        return studentDegreeRepository.save(extraPoints);
     }
 }
