@@ -2,7 +2,7 @@ CREATE TABLE extra_points (
     id                            SERIAL PRIMARY KEY,
     student_degree_id             integer      NOT NULL,
     semester                      integer      NOT NULL,
-    points                        integer
+    points                        integer      NOT NULL
 );
 
 ALTER TABLE extra_points
