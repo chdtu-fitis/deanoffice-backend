@@ -49,9 +49,13 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     @GetMapping("/courses/docx")
-    public ResponseEntity getCoursesInDocxFile(@RequestParam int degreeId, @RequestParam int year, @CurrentUser ApplicationUser user){
+    public ResponseEntity getCoursesInDocxFile(@RequestParam int degreeId, @RequestParam int year,
+                                               @RequestParam(required = false, defaultValue = "0") int semester,
+                                               @RequestParam(required = false) TuitionForm tuitionForm,
+                                               @RequestParam(required = false, defaultValue = "0") int groupId,
+                                               @CurrentUser ApplicationUser user) {
         try{
-            File file = gradesJournalService.createCoursesListsDocx(degreeId, year, user.getFaculty().getId());
+            File file = gradesJournalService.createCoursesListsDocx(degreeId, year, semester, tuitionForm, groupId, user.getFaculty().getId());
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e){
             return handleException(e);
