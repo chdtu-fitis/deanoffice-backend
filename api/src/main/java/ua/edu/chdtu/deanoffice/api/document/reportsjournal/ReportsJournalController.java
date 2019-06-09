@@ -39,7 +39,7 @@ public class ReportsJournalController extends DocumentResponseController {
     }
 
     @GetMapping("/year/{year}/degree/{degreeId}")
-    public ResponseEntity<Resource> generateForYear(@PathVariable Integer year, @PathVariable Integer degreeId,
+    public ResponseEntity<Resource> generateForYear(@PathVariable int year, @PathVariable int degreeId,
                                                     @RequestParam("semester") int semester,
                                                     @RequestParam(required = false) TuitionForm tuitionForm,
                                                     @RequestParam(required = false, defaultValue = "0") int groupId,
