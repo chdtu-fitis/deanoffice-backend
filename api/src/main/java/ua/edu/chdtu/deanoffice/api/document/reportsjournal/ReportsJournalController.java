@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.document.report.journal.ReportsCoursesService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -40,9 +41,11 @@ public class ReportsJournalController extends DocumentResponseController {
     @GetMapping("/year/{year}/degree/{degreeId}")
     public ResponseEntity<Resource> generateForYear(@PathVariable Integer year, @PathVariable Integer degreeId,
                                                     @RequestParam("semester") int semester,
+                                                    @RequestParam(required = false) TuitionForm tuitionForm,
+                                                    @RequestParam(required = false, defaultValue = "0") int groupId,
                                                     @CurrentUser ApplicationUser user)  {
         try {
-            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId, year, semester, user.getFaculty().getId());
+            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId, year, semester, tuitionForm, groupId, user.getFaculty().getId());
             return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
