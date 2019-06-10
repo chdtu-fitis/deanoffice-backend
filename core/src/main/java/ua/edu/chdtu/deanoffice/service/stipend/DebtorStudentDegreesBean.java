@@ -89,9 +89,6 @@ public class DebtorStudentDegreesBean {
         this.specializationName = specializationName;
         this.departmentAbbreviation = departmentAbbreviation;
         this.averageGrade = averageGrade;
-//        if (extraPoints == null) {
-//            extraPoints = 0;
-//        }
         this.extraPoints = extraPoints;
     }
 }
