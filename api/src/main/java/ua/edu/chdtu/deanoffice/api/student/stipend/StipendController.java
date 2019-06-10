@@ -1,10 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.student.stipend;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -17,12 +14,15 @@ import ua.edu.chdtu.deanoffice.service.stipend.DebtorStudentDegreesBean;
 import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 @RequestMapping("/student-degree/stipend")
@@ -76,16 +76,22 @@ public class StipendController {
     }
 
     @PostMapping("/extra-points-update")
-    public void updateExtraPoints(List <ExtraPointsDTO> extraPointsDTO){
-        for (ExtraPointsDTO extraPoints : extraPointsDTO){
-            StudentDegree studentDegree = studentDegreeService.getById(extraPoints.getStudentDegreeId());
-            Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
-            List <ExtraPoints> listExtraPoints = stipendService.getExtraPoints(studentDegree.getId(),semester);
-            if (listExtraPoints.size()==0){
-                ExtraPoints newExtraPoints = create(studentDegree, semester , extraPoints.getPoints());
-                stipendService.saveExtraPoints(newExtraPoints);
-            } else
-                stipendService.updateExtraPoints(studentDegree.getId(), semester, extraPoints.getPoints());
+    public ResponseEntity updateExtraPoints(@RequestBody List <ExtraPointsDTO> extraPointsDTO){
+        try {
+            for (ExtraPointsDTO extraPoints : extraPointsDTO){
+                StudentDegree studentDegree = studentDegreeService.getById(extraPoints.getStudentDegreeId());
+                Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
+                List <ExtraPoints> listExtraPoints = stipendService.getExtraPoints(studentDegree.getId(),semester);
+                if (listExtraPoints.size()==0){
+                    ExtraPoints newExtraPoints = create(studentDegree, semester , extraPoints.getPoints());
+                    stipendService.saveExtraPoints(newExtraPoints);
+                } else
+                    stipendService.updateExtraPoints(studentDegree.getId(), semester, extraPoints.getPoints());
+            }
+            URI location = getNewResourceLocation(extraPointsDTO.get(0).getStudentDegreeId());
+            return ResponseEntity.created(location).build();
+        } catch (Exception e){
+            return handleException(e);
         }
     }
 

@@ -7,10 +7,5 @@ import lombok.Setter;
 @Setter
 public class ExtraPointsDTO {
     private Integer studentDegreeId;
-    private int points;
-
-    public ExtraPointsDTO(Integer studentDegreeId, int points){
-        this.studentDegreeId = studentDegreeId;
-        this.points = points;
-    }
+    private Integer points;
 }
