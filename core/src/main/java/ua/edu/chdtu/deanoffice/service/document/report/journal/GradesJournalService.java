@@ -175,7 +175,7 @@ public class GradesJournalService {
                                       int groupId, int facultyId) throws IOException, DocumentException {
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
                 degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySpecification(specification);
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
             String filePath = getJavaTempDirectory() + "/" + "Predmeti-dlya-zhurnalu -" + year +
@@ -321,7 +321,7 @@ public class GradesJournalService {
                                                     int groupId, int facultyId) throws Docx4JException, IOException {
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
                 degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySpecification(specification);
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
         if (studentGroups != null && studentGroups.size() != 0) {
             return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year, semester),
                     "Predmeti-dlya-zhurnalu -" + year +

@@ -93,7 +93,7 @@ public class ReportsCoursesService {
                                                   int facultyId) throws Docx4JException, IOException {
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
                 degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
-        List<StudentGroup> studentGroups = groupService.getGroupsBySpecification(specification);
+        List<StudentGroup> studentGroups = groupService.getGroupsBySelectionCriteria(specification);
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
         for(StudentGroup groups:studentGroups){
             List<CourseReport> courseReports = prepareGroup(groups.getId(),(int)semesterId);

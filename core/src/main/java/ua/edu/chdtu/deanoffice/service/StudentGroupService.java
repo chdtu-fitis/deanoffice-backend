@@ -94,7 +94,7 @@ public class StudentGroupService {
         return studentGroupRepository.findStudentGroupsMatchingForeignGroups(active);
     }
 
-    public List<StudentGroup> getGroupsBySpecification(Specification<StudentGroup> specification) {
+    public List<StudentGroup> getGroupsBySelectionCriteria(Specification<StudentGroup> specification) {
         return studentGroupRepository.findAll(specification);
     }
 }
