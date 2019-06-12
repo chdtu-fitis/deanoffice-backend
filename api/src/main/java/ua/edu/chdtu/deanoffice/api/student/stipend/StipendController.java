@@ -5,11 +5,9 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.service.stipend.DebtorStudentDegreesBean;
 import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -20,7 +18,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -29,10 +26,12 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 public class StipendController {
     private StipendService stipendService;
     private StudentDegreeService studentDegreeService;
+    private FacultyAuthorizationService facultyAuthorizationService;
 
-    public StipendController(StipendService stipendService, StudentDegreeService studentDegreeService) {
+    public StipendController(StipendService stipendService, StudentDegreeService studentDegreeService, FacultyAuthorizationService facultyAuthorizationService) {
         this.stipendService = stipendService;
         this.studentDegreeService = studentDegreeService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @GetMapping
@@ -76,31 +75,23 @@ public class StipendController {
     }
 
     @PostMapping("/extra-points-update")
-    public ResponseEntity updateExtraPoints(@RequestBody List <ExtraPointsDTO> extraPointsDTO){
+    public ResponseEntity updateExtraPoints(@RequestBody List <ExtraPointsDTO> extraPointsDTO,
+                                            @CurrentUser ApplicationUser user){
         try {
+            List <Integer> degreesIds = new ArrayList<>();
             for (ExtraPointsDTO extraPoints : extraPointsDTO){
-                StudentDegree studentDegree = studentDegreeService.getById(extraPoints.getStudentDegreeId());
-                Integer semester = (2018 - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())* 2 - 1;
-                List <ExtraPoints> listExtraPoints = stipendService.getExtraPoints(studentDegree.getId(),semester);
-                if (listExtraPoints.size()==0){
-                    ExtraPoints newExtraPoints = create(studentDegree, semester , extraPoints.getPoints());
-                    stipendService.saveExtraPoints(newExtraPoints);
-                } else
-                    stipendService.updateExtraPoints(studentDegree.getId(), semester, extraPoints.getPoints());
+                degreesIds.add(extraPoints.getStudentDegreeId());
+            }
+            facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(degreesIds, user);
+            for (ExtraPointsDTO extraPoints : extraPointsDTO){
+                Integer semester = stipendService.getSemester(extraPoints.getStudentDegreeId());
+                stipendService.putExtraPoints(extraPoints.getStudentDegreeId(), semester, extraPoints.getPoints());
             }
             URI location = getNewResourceLocation(extraPointsDTO.get(0).getStudentDegreeId());
             return ResponseEntity.created(location).build();
         } catch (Exception e){
             return handleException(e);
         }
-    }
-
-    private ExtraPoints create(StudentDegree studentDegree, Integer semester, Integer points){
-        ExtraPoints extraPoints = new ExtraPoints();
-        extraPoints.setStudentDegree(studentDegree);
-        extraPoints.setSemester(semester);
-        extraPoints.setPoints(points);
-        return extraPoints;
     }
 
     private ResponseEntity handleException(Exception exception) {
