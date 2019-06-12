@@ -284,9 +284,9 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
+                    "AND grade.academic_difference = false " +
             "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
             "  AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
-//                    " AND extra_points.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
             "  AND knowledge_control.graded = true " +
             "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
             "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, extraPoints " +
@@ -306,23 +306,18 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "ORDER BY sg.name, s.surname, s.name, s.patronimic", nativeQuery = true)
     List<Object[]> getStudentDegreeShortFields(@Param("studentGroupIds") List<Integer> studentGroupIds);
 
-    @Modifying
-    @Query(value = "UPDATE ExtraPoints ep " +
-            "SET ep.points = :points " +
-            "where ep.studentDegree.id = :studentDegreeId AND ep.semester = :semester " )
-    void updateExtraPoints(
-            @Param("studentDegreeId") Integer studentDegreeId,
-            @Param("semester") Integer semester,
-            @Param("points") Integer points
-    );
-
     @Query(value = "select ep from ExtraPoints ep " +
             "where ep.studentDegree.id = :studentDegreeId " +
             "and ep.semester = :semester ")
-    List <ExtraPoints> getExtraPointsByStudentDegreeId(
+    ExtraPoints getExtraPointsByStudentDegreeId(
             @Param("studentDegreeId") Integer studentDegreeId,
             @Param("semester") Integer semester
     );
+
+    @Query(value = "select (:currYear - sd.studentGroup.creationYear + sd.studentGroup.beginYears)*2-1 from StudentDegree sd " +
+            "where sd.id = :studentDegreeId ")
+    Integer getSemester(@Param("currYear") Integer currYear,
+                        @Param("studentDegreeId") Integer studentDegreeId);
 
     ExtraPoints save(ExtraPoints extraPoints);
 }
