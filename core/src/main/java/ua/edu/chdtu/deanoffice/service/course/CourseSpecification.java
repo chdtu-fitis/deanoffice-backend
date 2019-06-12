@@ -23,7 +23,7 @@ public class CourseSpecification {
             if (hoursPerCredit != null)
                 predicates.add(cb.equal(root.get("hoursPerCredit"), hoursPerCredit));
             if (knowledgeControl != null && !knowledgeControl.isEmpty())
-                predicates.add(cb.equal(root.get("knowledgeControl"), hoursPerCredit));
+                predicates.add(cb.equal(root.get("knowledgeControl").get("name"), knowledgeControl.toLowerCase()));
             if (nameStartingWith != null && !nameStartingWith.isEmpty())
                 predicates.add(cb.like(root.get("courseName").get("name"), nameStartingWith + "%"));
             if (nameContains != null && !nameContains.isEmpty())

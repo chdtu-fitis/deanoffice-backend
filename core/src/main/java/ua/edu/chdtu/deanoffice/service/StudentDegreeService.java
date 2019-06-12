@@ -2,18 +2,23 @@ package ua.edu.chdtu.deanoffice.service;
 
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import org.springframework.transaction.annotation.Transactional;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,8 +119,8 @@ public class StudentDegreeService {
     }
 
     @Transactional
-    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng, String fullSupervisor){
-        studentDegreeRepository.updateThesis(idStudentDegree,thesisName, thesisNameEng, fullSupervisor);
+    public void updateThesisName(int idStudentDegree, String thesisName, String thesisNameEng, String fullSupervisor) {
+        studentDegreeRepository.updateThesis(idStudentDegree, thesisName, thesisNameEng, fullSupervisor);
     }
 
     @Transactional
@@ -142,12 +147,12 @@ public class StudentDegreeService {
         studentDegreeIdsAndRecordBooksNumbers.forEach(studentDegreeRepository::assignRecordBookNumbersToStudents);
     }
 
-    public StudentDegree getByStudentFullNameAndGroupId(String fullName, int groupId){
+    public StudentDegree getByStudentFullNameAndGroupId(String fullName, int groupId) {
         List<StudentDegree> studentDegrees = this.studentDegreeRepository.findByFullNameAndGroupId(fullName, groupId);
         return (studentDegrees.size() > 1 || studentDegrees.size() == 0) ? null : studentDegrees.get(0);
     }
 
-    public List<StudentDegree> getActiveByIdsAndFaculty(List<Integer> ids, int facultyId){
+    public List<StudentDegree> getActiveByIdsAndFaculty(List<Integer> ids, int facultyId) {
         if (ids == null || ids.size() == 0)
             return new ArrayList<>();
         return studentDegreeRepository.findActiveByIdsAndFacultyId(ids, facultyId);
@@ -165,7 +170,7 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
     }
 
-    public int getCountAllActiveDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear,  TuitionForm tuitionForm, Payment payment, int degreeId) {
+    public int getCountAllActiveDebtorsWithThreeOrMoreDebts(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
         return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
     }
 
@@ -197,11 +202,46 @@ public class StudentDegreeService {
 
     private List<StudentDegreeShortBean> mapToStudentDegreeShortBeans(List<Object[]> studentDegreesShortFields) {
         List<StudentDegreeShortBean> studentDegreeShortBeans = new ArrayList<>(studentDegreesShortFields.size());
-        for (Object[] studentDegreeShortFields : studentDegreesShortFields ) {
-            studentDegreeShortBeans.add(new StudentDegreeShortBean( (String)studentDegreeShortFields[0], (String)studentDegreeShortFields[1],
-                                                                    (String)studentDegreeShortFields[2], (String)studentDegreeShortFields[3],
-                                                                    (String)studentDegreeShortFields[4]));
+        for (Object[] studentDegreeShortFields : studentDegreesShortFields) {
+            studentDegreeShortBeans.add(new StudentDegreeShortBean((String) studentDegreeShortFields[0], (String) studentDegreeShortFields[1],
+                    (String) studentDegreeShortFields[2], (String) studentDegreeShortFields[3],
+                    (String) studentDegreeShortFields[4]));
         }
         return studentDegreeShortBeans;
+    }
+
+    public int getCountAllActiveDebtorsWithThreeOrMoreDebtsForCurrentSemester(int specializationId,
+                                                                              int studyYear,
+                                                                              TuitionForm tuitionForm,
+                                                                              Payment payment,
+                                                                              int degreeId) {
+        int semester = getCurrentSemester();
+        return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId,
+                currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
+    }
+
+    private int getCurrentSemester(){
+        LocalDate winterSessionStarts = LocalDate.of(LocalDate.now().getYear(), 12, 20);
+        LocalDate winterSessionEnds = LocalDate.of(LocalDate.now().getYear(), 6, 20);
+        if (LocalDate.now().isAfter(winterSessionEnds) && LocalDate.now().isBefore(winterSessionStarts))
+            return  2;
+        else
+            return  1;
+    }
+
+    public int getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(int specializationId,
+                                                                               int studyYear,
+                                                                               TuitionForm tuitionForm,
+                                                                               Payment payment,
+                                                                               int degreeId) {
+        int semester = getCurrentSemester();
+        return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId,
+                currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
+    }
+
+    public int getCountAllActiveDebtorsForCurrentSemester(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
+        int semester = getCurrentSemester();
+        return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId,
+                currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester);
     }
 }
