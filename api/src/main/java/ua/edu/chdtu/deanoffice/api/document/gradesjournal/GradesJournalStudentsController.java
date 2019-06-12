@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.document.report.journal.GradesJournalService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -22,9 +23,11 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     @GetMapping("/students")
-    public ResponseEntity getStudentGroupFile(@RequestParam int degreeId, @RequestParam int year, @CurrentUser ApplicationUser user){
+    public ResponseEntity getStudentGroupFile(@RequestParam int degreeId, @RequestParam int year,
+                                              @RequestParam(required = false, defaultValue = "0") int groupId,
+                                              @CurrentUser ApplicationUser user){
         try {
-            File file = gradesJournalService.createStudentsListsPdf(degreeId, year, user.getFaculty().getId());
+            File file = gradesJournalService.createStudentsListsPdf(degreeId, year, user.getFaculty().getId(), groupId);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e){
             return handleException(e);
@@ -32,9 +35,13 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     @GetMapping("/courses/pdf")
-    public ResponseEntity getSubjectsFile(@RequestParam int degreeId, @RequestParam int year, @CurrentUser ApplicationUser user){
+    public ResponseEntity getSubjectsFile(@RequestParam int degreeId, @RequestParam int year,
+                                          @RequestParam(required = false, defaultValue = "0") int semester,
+                                          @RequestParam(required = false) TuitionForm tuitionForm,
+                                          @RequestParam(required = false, defaultValue = "0") int groupId,
+                                          @CurrentUser ApplicationUser user) {
         try{
-            File file = gradesJournalService.createCoursesListsPdf(degreeId, year, user.getFaculty().getId());
+            File file = gradesJournalService.createCoursesListsPdf(degreeId, year, semester, tuitionForm, groupId, user.getFaculty().getId());
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e){
             return handleException(e);
@@ -42,9 +49,13 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     @GetMapping("/courses/docx")
-    public ResponseEntity getCoursesInDocxFile(@RequestParam int degreeId, @RequestParam int year, @CurrentUser ApplicationUser user){
+    public ResponseEntity getCoursesInDocxFile(@RequestParam int degreeId, @RequestParam int year,
+                                               @RequestParam(required = false, defaultValue = "0") int semester,
+                                               @RequestParam(required = false) TuitionForm tuitionForm,
+                                               @RequestParam(required = false, defaultValue = "0") int groupId,
+                                               @CurrentUser ApplicationUser user) {
         try{
-            File file = gradesJournalService.createCoursesListsDocx(degreeId, year, user.getFaculty().getId());
+            File file = gradesJournalService.createCoursesListsDocx(degreeId, year, semester, tuitionForm, groupId, user.getFaculty().getId());
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e){
             return handleException(e);
