@@ -26,6 +26,7 @@ public class DebtorStudentDegreesBean {
     private String courseName;
     private String knowledgeControlName;
     private int semester;
+    private Integer extraPoints;
 
     public DebtorStudentDegreesBean(Integer id,
                                     String surname,
@@ -73,7 +74,8 @@ public class DebtorStudentDegreesBean {
                                     String specialityName,
                                     String specializationName,
                                     String departmentAbbreviation,
-                                    BigDecimal averageGrade) {
+                                    BigDecimal averageGrade,
+                                    Integer extraPoints ) {
         this.id = id;
         this.surname = surname;
         this.name = name;
@@ -87,5 +89,6 @@ public class DebtorStudentDegreesBean {
         this.specializationName = specializationName;
         this.departmentAbbreviation = departmentAbbreviation;
         this.averageGrade = averageGrade;
+        this.extraPoints = extraPoints;
     }
 }

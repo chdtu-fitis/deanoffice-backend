@@ -23,6 +23,7 @@ public class StudentInfoForStipendDTO {
     private String specializationName;
     private String departmentAbbreviation;
     private double averageGrade;
+    private Integer extraPoints;
     List<CourseForStipendDTO> debtCourses = new ArrayList<>();
 
     @Override
@@ -39,6 +40,7 @@ public class StudentInfoForStipendDTO {
                 degreeName.equals(that.degreeName) &&
                 Objects.equals(groupName, that.groupName) &&
                 tuitionTerm.equals(that.tuitionTerm) &&
+                extraPoints == that.extraPoints &&
                 specialityCode.equals(that.specialityCode) &&
                 specialityName.equals(that.specialityName) &&
                 specializationName.equals(that.specializationName) &&
@@ -47,6 +49,6 @@ public class StudentInfoForStipendDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, surname, name, patronimic, degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, averageGrade);
+        return Objects.hash(id, surname, name, patronimic, degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, averageGrade, extraPoints);
     }
 }

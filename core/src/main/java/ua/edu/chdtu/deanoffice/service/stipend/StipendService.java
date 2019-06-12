@@ -2,7 +2,11 @@ package ua.edu.chdtu.deanoffice.service.stipend;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,10 +17,16 @@ import java.util.Set;
 @Service
 public class StipendService {
     private final StudentDegreeRepository studentDegreeRepository;
+    private final CurrentYearService currentYearService;
+    private final StudentDegreeService studentDegreeService;
 
     @Autowired
-    public StipendService(StudentDegreeRepository studentDegreeRepository) {
+    public StipendService(StudentDegreeRepository studentDegreeRepository,
+                          StudentDegreeService studentDegreeService,
+                          CurrentYearService currentYearService ) {
         this.studentDegreeRepository = studentDegreeRepository;
+        this.studentDegreeService = studentDegreeService;
+        this.currentYearService = currentYearService;
     }
 
     public void getDebtorStudents() {
@@ -67,8 +77,46 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                (BigDecimal)item[12]/*averageGradee*/
+                (BigDecimal)item[12]/*averageGrade*/,
+                (Integer)item[13]/*extraPoints*/
         )));
         return debtorStudentDegreesBeans;
+    }
+
+    public ExtraPoints getExtraPoints(Integer studentDegreeId, Integer semester){
+        return studentDegreeRepository.getExtraPointsByStudentDegreeId(studentDegreeId, semester);
+    }
+
+    public void putExtraPoints(Integer studentDegreeId, Integer semester, Integer points){
+        ExtraPoints extraPointsFromDB = getExtraPoints(studentDegreeId,semester);
+        if (extraPointsFromDB == null){
+            StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+            ExtraPoints newExtraPoints = create(studentDegree, semester , points);
+            saveExtraPoints(newExtraPoints);
+        } else{
+            if(extraPointsFromDB.getPoints()!= points){
+                extraPointsFromDB.setPoints(points);
+                saveExtraPoints(extraPointsFromDB);
+            }
+        }
+    }
+
+    private ExtraPoints create(StudentDegree studentDegree, Integer semester, Integer points){
+        ExtraPoints extraPoints = new ExtraPoints();
+        extraPoints.setStudentDegree(studentDegree);
+        extraPoints.setSemester(semester);
+        extraPoints.setPoints(points);
+        return extraPoints;
+    }
+
+
+    public Integer getSemester(Integer studentDegreeId){
+        Integer currYear = currentYearService.getYear();
+        Integer semester = studentDegreeRepository.getSemester(currYear, studentDegreeId);
+     return semester;
+    }
+
+    public ExtraPoints saveExtraPoints(ExtraPoints extraPoints){
+        return studentDegreeRepository.save(extraPoints);
     }
 }
