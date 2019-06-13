@@ -63,7 +63,7 @@ public class StipendController {
                     .thenComparing(StudentInfoForStipendDTO::getSpecializationName)
                     .thenComparing(StudentInfoForStipendDTO::getGroupName)
                     //.thenComparing(StudentInfoForStipendDTO::getExtraPoints)
-                    .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipendDTO::getAverageGrade)))
+                    .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipendDTO::getFinalGrade)))
                     .thenComparing(StudentInfoForStipendDTO::getSurname)
                     .thenComparing(StudentInfoForStipendDTO::getName)
                     .thenComparing(StudentInfoForStipendDTO::getPatronimic)

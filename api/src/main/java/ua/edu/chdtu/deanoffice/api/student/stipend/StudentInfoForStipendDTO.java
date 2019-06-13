@@ -51,4 +51,11 @@ public class StudentInfoForStipendDTO {
     public int hashCode() {
         return Objects.hash(id, surname, name, patronimic, degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, averageGrade, extraPoints);
     }
+
+    public double getFinalGrade() {
+        if (extraPoints != null)
+            return averageGrade * 0.9 + extraPoints;
+        else
+            return averageGrade * 0.9;
+    }
 }
