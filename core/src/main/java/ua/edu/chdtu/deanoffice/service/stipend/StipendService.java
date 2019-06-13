@@ -30,12 +30,9 @@ public class StipendService {
         this.currentYearService = currentYearService;
     }
 
-    public void getDebtorStudents() {
-
-    }
-
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
-        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId, SemesterUtil.getCurrentSemester());
+        int currentYear = currentYearService.getYear();
+        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
@@ -63,8 +60,8 @@ public class StipendService {
             debtorStudentDegreeIds = new HashSet();
             debtorStudentDegreeIds.add(0);
         }
-
-        List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(facultyId, debtorStudentDegreeIds, SemesterUtil.getCurrentSemester());
+        int currentYear = currentYearService.getYear();
+        List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(facultyId, debtorStudentDegreeIds, SemesterUtil.getCurrentSemester(), currentYear);
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,

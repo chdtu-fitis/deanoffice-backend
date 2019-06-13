@@ -209,7 +209,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "       student.patronimic, " +
                     "       degree.name                                                    as degreeName, " +
                     "       student_group.name                                             as groupName, " +
-                    "       2018 - student_group.creation_year + student_group.begin_years as year, " +
+                    "       :currentYear - student_group.creation_year + student_group.begin_years as year, " +
                     "       student_group.tuition_term                                     as tuitionTerm, " +
                     "       speciality.code                                                as specialityCode, " +
                     "       speciality.name                                                as specialityName, " +
@@ -235,18 +235,19 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "  AND student_degree.active = true " +
                     "  AND student_group.tuition_form = 'FULL_TIME' " +
                     "  AND student_degree.payment = 'BUDGET' " +
-                    "  AND (grade.points IS NULL OR grade.points < 60 OR (grade.on_time = false AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester)) " +
+                    "  AND (grade.points IS NULL OR grade.points < 60 OR (grade.on_time = false AND course.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester)) " +
                     "  AND grade.academic_difference = false " +
-                    "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
+                    "  AND course.semester <= (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
                     "ORDER BY degree.id, speciality.code, student_group.name, student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
     List<Object[]> findDebtorStudentDegreesRaw(
             @Param("facultyId") int facultyId,
-            @Param("semester") int semester);
+            @Param("semester") int semester,
+            @Param("currentYear") int currentYear);
 
     @Query(value =
             "SELECT student_degree.id, student.surname, student.name, student.patronimic, " +
             "       degree.name as degreeName, student_group.name as groupName, " +
-            "       2018 - student_group.creation_year + student_group.begin_years as year, " +
+            "       :currentYear - student_group.creation_year + student_group.begin_years as year, " +
             "       student_group.tuition_term as tuitionTerm, speciality.code as specialityCode, " +
             "       speciality.name as specialityName, specialization.name as specializationName, " +
             "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade, " +
@@ -263,13 +264,13 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
             "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
-            "       FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
+            "       FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
             "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
             "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
-            "  AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
+            "  AND course.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
             "  AND knowledge_control.graded = true " +
             "  AND grade.academic_difference = false " +
             "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
@@ -278,7 +279,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     List<Object[]> findNoDebtStudentDegreesRaw(
             @Param("facultyId") int facultyId,
             @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds,
-            @Param("semester") int semester);
+            @Param("semester") int semester,
+            @Param("currentYear") int currentYear);
 
     @Query(value = "SELECT count(sd.id) FROM student_degree sd WHERE sd.id IN (:ids) AND sd.active = false", nativeQuery = true)
     int countInactiveStudentDegreesByIds(@Param("ids") List<Integer> ids);
