@@ -12,6 +12,8 @@ import ua.edu.chdtu.deanoffice.service.document.report.sheetsuccess.student.Shee
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.util.List;
+
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 
 @RestController
@@ -24,12 +26,13 @@ public class SheetSuccessController extends DocumentResponseController{
         this.facultyService = facultyService;
         this.sheetSuccessService = sheetSuccessService;
     }
-    @GetMapping("/groups")
-    public ResponseEntity<Resource> generateForGroup(
+    @GetMapping("/students/{student_ids}/courses/{course_ids}")
+    public ResponseEntity<Resource> generateForGroup(@PathVariable("student_ids") List<Integer> studentIds,
+                                                     @PathVariable("course_ids") List<Integer> courseIds,
                                                      @CurrentUser ApplicationUser user) {
         try {
             //facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File groupDiplomaSupplements = sheetSuccessService.formDocument();
+            File groupDiplomaSupplements = sheetSuccessService.formDocument(studentIds,courseIds);
             return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
             return handleException(e);
