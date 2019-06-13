@@ -235,7 +235,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "  AND student_degree.active = true " +
                     "  AND student_group.tuition_form = 'FULL_TIME' " +
                     "  AND student_degree.payment = 'BUDGET' " +
-                    "  AND (grade.points IS NULL OR grade.points < 60) " +
+                    "  AND (grade.points IS NULL OR grade.points < 60 OR (grade.on_time = false AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester)) " +
                     "  AND grade.academic_difference = false " +
                     "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
                     "ORDER BY degree.id, speciality.code, student_group.name, student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
