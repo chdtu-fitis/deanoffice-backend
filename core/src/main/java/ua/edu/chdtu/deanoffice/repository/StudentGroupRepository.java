@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.repository;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -110,4 +111,6 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "where fg.specialization.faculty.id = 8 and fg.active = :active)"
     )
     List<StudentGroup> findStudentGroupsMatchingForeignGroups(@Param("active") Boolean active);
+
+    List<StudentGroup> findAll(Specification<StudentGroup> specification);
 }

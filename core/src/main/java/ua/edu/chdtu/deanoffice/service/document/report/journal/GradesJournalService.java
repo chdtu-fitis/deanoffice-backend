@@ -13,9 +13,11 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import org.springframework.core.io.Resource;
@@ -45,23 +47,32 @@ public class GradesJournalService {
   
     private StudentGroupService studentGroupService;
     private CourseForGroupService courseForGroupService;
+    private CurrentYearService currentYearService;
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
     public GradesJournalService(StudentGroupService studentGroupService,
                                 CourseForGroupService courseForGroupService,
-                                DocumentIOService documentIOService) {
+                                DocumentIOService documentIOService,
+                                CurrentYearService currentYearService) {
         this.studentGroupService = studentGroupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
+        this.currentYearService = currentYearService;
     }
 
     private String getJavaTempDirectory() {
         return System.getProperty("java.io.tmpdir");
     }
 
-    public File createStudentsListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+    public File createStudentsListsPdf(int degreeId, int year, int facultyId, int groupId) throws IOException, DocumentException {
+        List<StudentGroup> studentGroups;
+        if (groupId == 0)
+            studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+        else {
+            studentGroups = new ArrayList<>();
+            studentGroups.add(studentGroupService.getById(groupId));
+        }
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
             String filePath = getJavaTempDirectory() + "/" + "StudentyJurnalOtsinok-" + year +
@@ -160,8 +171,11 @@ public class GradesJournalService {
         return new SimpleDateFormat(" dd-MM-yyyy HH-mm").format(new Date());
     }
 
-    public File createCoursesListsPdf(int degreeId, int year, int facultyId) throws IOException, DocumentException {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+    public File createCoursesListsPdf(int degreeId, int year, int semester, TuitionForm tuitionForm,
+                                      int groupId, int facultyId) throws IOException, DocumentException {
+        Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
             String filePath = getJavaTempDirectory() + "/" + "Predmeti-dlya-zhurnalu -" + year +
@@ -170,7 +184,7 @@ public class GradesJournalService {
             PdfWriter.getInstance(document, new FileOutputStream(file));
             try {
                 document.open();
-                document.add(addCoursesOnTable(studentGroups, document, year));
+                document.add(addCoursesOnTable(studentGroups, semester, year));
             } finally {
                 if (document != null)
                     document.close();
@@ -195,7 +209,7 @@ public class GradesJournalService {
         return pdfPTable;
     }
 
-    private PdfPTable addCoursesOnTable(List<StudentGroup> studentGroups, Document document, int year) throws DocumentException, IOException {
+    private PdfPTable addCoursesOnTable(List<StudentGroup> studentGroups, int semester, int year) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
@@ -203,6 +217,12 @@ public class GradesJournalService {
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(562);
         int finishedCells = 0;
+        boolean isOneSemesterOnly = false;
+        if (semester == 1 || semester == 2) {
+            isOneSemesterOnly = true;
+            semester = year * 2 - 2 + semester;
+        } else
+            semester = year * 2 - 1;
         for (StudentGroup studentGroup : studentGroups) {
             PdfPCell cell = createPdfPCellForTableCoursesMain();
             PdfPTable table = createPdfPTableForCellsOfTableCoursesMain();
@@ -213,7 +233,6 @@ public class GradesJournalService {
             groupNameCell.setBorder(0);
             groupNameCell.setFixedHeight(14);
             table.addCell(groupNameCell);
-            int semester = year * 2 - 1;
             for (int j = 0; j < 2; j++) {
                 table.addCell(emptyCell);
                 PdfPCell semesterCell = new PdfPCell(new Phrase("Семестр " + semester, font1));
@@ -237,8 +256,12 @@ public class GradesJournalService {
                     courseNameCell.setFixedHeight(28);
                     table.addCell(courseNameCell);
                 }
+                if(isOneSemesterOnly)
+                    break;
                 semester++;
             }
+            if(!isOneSemesterOnly)
+                semester = semester - 2;
             cell.addElement(table);
             tableMain.addCell(cell);
             finishedCells++;
@@ -294,23 +317,26 @@ public class GradesJournalService {
         }
     }
 
-    public synchronized File createCoursesListsDocx(int degreeId, int year, int facultyId) throws Docx4JException, IOException {
-        List<StudentGroup> studentGroups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, facultyId);
+    public synchronized File createCoursesListsDocx(int degreeId, int year, int semester, TuitionForm tuitionForm,
+                                                    int groupId, int facultyId) throws Docx4JException, IOException {
+        Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
         if (studentGroups != null && studentGroups.size() != 0) {
-            return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year),
+            return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year, semester),
                     "Predmeti-dlya-zhurnalu -" + year +
                             "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
         }
         return null;
     }
 
-    private WordprocessingMLPackage prepareTemplate(String templateName, List<StudentGroup> studentGroups, int year) throws IOException, Docx4JException {
+    private WordprocessingMLPackage prepareTemplate(String templateName, List<StudentGroup> studentGroups, int year, int semester) throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
-        formTable(template, studentGroups, year);
+        formTable(template, studentGroups, year, semester);
         return template;
     }
 
-    private void formTable(WordprocessingMLPackage template, List<StudentGroup> studentGroups, int year) {
+    private void formTable(WordprocessingMLPackage template, List<StudentGroup> studentGroups, int year, int semester) {
         Tbl tempTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
         if (tempTable == null) {
             return;
@@ -324,31 +350,41 @@ public class GradesJournalService {
         int numberRowBlocksForGroups = studentGroups.size() / THE_LAST_CELL_OF_ROW + ((studentGroups.size() % THE_LAST_CELL_OF_ROW != 0) ? 1 : 0);
 
         int rowToAddIndex = 3;
+        int currentSemester;
+        boolean isOneSemesterOnly = false;
+        if (semester == 1 || semester == 2) {
+            isOneSemesterOnly = true;
+            currentSemester = year * 2 - 2 + semester;
+        } else
+            currentSemester = year * 2 - 1;
         for (int i = 0; i < numberRowBlocksForGroups; i++) {
             addRowToTable(tempTable, patternGroupNameRow, rowToAddIndex);
             rowToAddIndex++;
-            int semester = year * 2 - 1;
             for (int j = 0; j < 2; j++) {
                 addRowToTable(tempTable, patternSemesterRow, rowToAddIndex);
                 rowToAddIndex++;
 
-                int maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, semester, i);
+                int maximumNumberOfCourses = determineTheMaximumNumberOfCourses(studentGroups, currentSemester, i);
 
                 for (int k = 0; k < maximumNumberOfCourses; k++) {
                     addRowToTable(tempTable, patternCourseRow, rowToAddIndex);
                     rowToAddIndex++;
                 }
-                semester++;
+                if(isOneSemesterOnly)
+                    break;
+                currentSemester++;
             }
+            if(!isOneSemesterOnly)
+                currentSemester = currentSemester - 2;
         }
         tempTable.getContent().remove(patternGroupNameRow);
         tempTable.getContent().remove(patternSemesterRow);
         tempTable.getContent().remove(patternCourseRow);
 
-        fillTable(tempTable, studentGroups, year);
+        fillTable(tempTable, studentGroups, year, semester);
     }
 
-    private void fillTable(Tbl tempTable, List<StudentGroup> studentGroups, int year) {
+    private void fillTable(Tbl tempTable, List<StudentGroup> studentGroups, int year, int semester) {
         List<Object> tableRows = getAllElementsFromObject(tempTable, Tr.class);
 
         int numberOfRow = 0;
@@ -357,13 +393,19 @@ public class GradesJournalService {
         int count = 0;
         int maximumNumberOfCourses;
 
+        boolean isOneSemesterOnly = false;
+        if (semester == 1 || semester == 2) {
+            isOneSemesterOnly = true;
+            semester = year * 2 - 2 + semester;
+        } else
+            semester = year * 2 - 1;
+
         for (StudentGroup studentGroup : studentGroups) {
             numberOfRow = numberOfRow - endOfGroup;
             endOfGroup = 0;
             replaceTextInCell(tableRows, numberOfRow, numberOfCell, "Name", studentGroup.getName());
             numberOfRow++;
             endOfGroup++;
-            int semester = year * 2 - 1;
 
             for (int i = 0; i < 2; i++) {
                 replaceTextInCell(tableRows, numberOfRow, numberOfCell, "Semester", "Семестер № " + String.valueOf(semester));
@@ -380,14 +422,21 @@ public class GradesJournalService {
                     numberOfRow++;
                     endOfGroup++;
                 }
+                if(isOneSemesterOnly)
+                    break;
                 semester++;
             }
+            if(!isOneSemesterOnly)
+                semester = semester - 2;
             numberOfCell++;
 
             if (numberOfCell == THE_LAST_CELL_OF_ROW) {
                 numberOfCell = 0;
-                numberOfRow += 1 + 2 + determineTheMaximumNumberOfCourses(studentGroups, year * 2 - 1, count) +
+                if(!isOneSemesterOnly)
+                    numberOfRow += 1 + 2 + determineTheMaximumNumberOfCourses(studentGroups, year * 2 - 1, count) +
                         determineTheMaximumNumberOfCourses(studentGroups, year * 2, count);
+                else
+                    numberOfRow += 1 + 1 + determineTheMaximumNumberOfCourses(studentGroups, semester, count);
                 count++;
             }
         }

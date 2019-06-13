@@ -76,12 +76,12 @@ public class GradeService {
     @Transactional
     public void setAcademicDifferenceByGradeIds(Map<Boolean, List<Integer>> academicDifferenceAndGradeIds){
         List<Integer> gradesIdsWithAcademicDifference = academicDifferenceAndGradeIds.get(true);
-        if (!gradesIdsWithAcademicDifference.isEmpty()){
+        if (gradesIdsWithAcademicDifference != null && !gradesIdsWithAcademicDifference.isEmpty()){
             gradeRepository.updateAcademicDifference(true, gradesIdsWithAcademicDifference);
         }
-        List<Integer> gradesIdsLessAcademicDifference = academicDifferenceAndGradeIds.get(false);
-        if (!gradesIdsLessAcademicDifference.isEmpty()) {
-            gradeRepository.updateAcademicDifference(false, gradesIdsLessAcademicDifference);
+        List<Integer> gradesIdsWithoutAcademicDifference = academicDifferenceAndGradeIds.get(false);
+        if (gradesIdsWithoutAcademicDifference != null && !gradesIdsWithoutAcademicDifference.isEmpty()) {
+            gradeRepository.updateAcademicDifference(false, gradesIdsWithoutAcademicDifference);
         }
     }
 
@@ -102,6 +102,7 @@ public class GradeService {
                 .stream().map(BaseEntity::getId).collect(Collectors.toList());
         return new ArrayList<>(getGrades(studentDegree, courseIds, knowledgeControlTypes));
     }
+
 
     public List<Grade> getGradesForStudents(List<Integer> studentsIds, List<Integer> courseIds) {
         if (studentsIds.isEmpty() || courseIds.isEmpty()) return new ArrayList<>();
