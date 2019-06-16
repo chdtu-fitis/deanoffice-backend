@@ -15,10 +15,6 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -94,7 +90,6 @@ public class SheetSuccessService {
             cell = new PdfPCell();
             cell.setFixedHeight(HEIGHT_TABLE_PAGE);
             cell.setBorder(Rectangle.NO_BORDER);
-
             if(numberForm > 3 || i == 9-1){
                 if(isFrontSideActive) {
                     isFrontSideActive = !isFrontSideActive;
@@ -122,7 +117,6 @@ public class SheetSuccessService {
         StudentDegree student = studentDegreeService.getById(studentId);
         Course course = courseService.getById(courseId);
         CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(student.getStudentGroup().getId(),courseId);
-
         cell.setPadding(0);
         Paragraph paragraph = new Paragraph(FrontFormConfig.CHDTU_NAME,FONT_14);
         paragraph.setAlignment(Element.ALIGN_CENTER);
@@ -182,8 +176,6 @@ public class SheetSuccessService {
 
     private void addBackForm(PdfPCell cell, Integer studentId, Integer courseId) throws DocumentException {
         StudentDegree student = studentDegreeService.getById(studentId);
-        Course course = courseService.getById(courseId);
-
         cell.setPadding(0);
         float[] arrayWidthColumns = new float[COUNTCOLUMNS];
         setWidthColumns(arrayWidthColumns);
@@ -231,27 +223,8 @@ public class SheetSuccessService {
         cell.setFixedHeight(70);
         table.addCell(cell);
 
-        table.addCell(fillCell(getDate()));
-        table.addCell(fillCell(BackFormConfig.SIGN));
-        /*cell = new PdfPCell(new Phrase(student.getStudent().getName()));
-        cell.setPadding(0);
-        cell.setFixedHeight(70);
-        table.addCell(cell);
-        table.addCell(student.getRecordBookNumber());
-        cell = new PdfPCell(fillInternalTwoRowTable());
-        cell.setPadding(0);
-        cell.setFixedHeight(70);
-        table.addCell(student.getRecordBookNumber());
-        table.addCell(fillInternalTwoRowTable());*/
-
-    }
-
-    private String getDate() {
-        DateFormat dateFormat = new SimpleDateFormat("MM.dd.yyyy");
-        Calendar cal = Calendar.getInstance();
-        Date date = cal.getTime();
-        String todaysdate = dateFormat.format(date);
-        return todaysdate;
+        table.addCell("");
+        table.addCell("");
     }
 
     private PdfPTable fillInternalTwoRowTable() throws DocumentException {
