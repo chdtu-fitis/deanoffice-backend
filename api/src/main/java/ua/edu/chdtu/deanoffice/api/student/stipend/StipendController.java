@@ -84,7 +84,7 @@ public class StipendController {
             }
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(degreesIds, user);
             for (ExtraPointsDTO extraPoints : extraPointsDTO){
-                Integer semester = stipendService.getSemester(extraPoints.getStudentDegreeId());
+                Integer semester = stipendService.getStudentSemester(extraPoints.getStudentDegreeId());
                 stipendService.putExtraPoints(extraPoints.getStudentDegreeId(), semester, extraPoints.getPoints());
             }
             URI location = getNewResourceLocation(extraPointsDTO.get(0).getStudentDegreeId());

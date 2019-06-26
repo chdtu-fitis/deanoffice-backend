@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class StipendService {
     }
 
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
-        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId);
+        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId, SemesterUtil.getCurrentSemester());
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
@@ -62,7 +63,8 @@ public class StipendService {
             debtorStudentDegreeIds = new HashSet();
             debtorStudentDegreeIds.add(0);
         }
-        List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(facultyId, debtorStudentDegreeIds);
+
+        List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(facultyId, debtorStudentDegreeIds, SemesterUtil.getCurrentSemester());
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
@@ -109,11 +111,9 @@ public class StipendService {
         return extraPoints;
     }
 
-
-    public Integer getSemester(Integer studentDegreeId){
+    public Integer getStudentSemester(Integer studentDegreeId){
         Integer currYear = currentYearService.getYear();
-        Integer semester = studentDegreeRepository.getSemester(currYear, studentDegreeId);
-     return semester;
+        return studentDegreeRepository.getSemester(currYear, studentDegreeId, SemesterUtil.getCurrentSemester());
     }
 
     public ExtraPoints saveExtraPoints(ExtraPoints extraPoints){

@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -174,12 +175,6 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId, currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId).length;
     }
 
-    public void setStudentDegreesInactive(List<Integer> ids) {
-        if (ids.size() != 0) {
-            studentDegreeRepository.setStudentDegreesInactive(ids);
-        }
-    }
-
     public Map<String, List<StudentDegreeShortBean>> getStudentsShortInfoGroupedByGroupNames(List<Integer> studentGroupIds) {
         List<Object[]> studentDegreesShortFields = studentDegreeRepository.getStudentDegreeShortFields(studentGroupIds);
         List<StudentDegreeShortBean> studentDegreeShortBeans = mapToStudentDegreeShortBeans(studentDegreesShortFields);
@@ -215,18 +210,9 @@ public class StudentDegreeService {
                                                                               TuitionForm tuitionForm,
                                                                               Payment payment,
                                                                               int degreeId) {
-        int semester = getCurrentSemester();
+        int semester = SemesterUtil.getCurrentSemester();
         return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
-    }
-
-    private int getCurrentSemester(){
-        LocalDate winterSessionStarts = LocalDate.of(LocalDate.now().getYear(), 12, 20);
-        LocalDate winterSessionEnds = LocalDate.of(LocalDate.now().getYear(), 6, 20);
-        if (LocalDate.now().isAfter(winterSessionEnds) && LocalDate.now().isBefore(winterSessionStarts))
-            return  2;
-        else
-            return  1;
     }
 
     public int getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(int specializationId,
@@ -234,13 +220,13 @@ public class StudentDegreeService {
                                                                                TuitionForm tuitionForm,
                                                                                Payment payment,
                                                                                int degreeId) {
-        int semester = getCurrentSemester();
+        int semester = SemesterUtil.getCurrentSemester();
         return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
     }
 
     public int getCountAllActiveDebtorsForCurrentSemester(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
-        int semester = getCurrentSemester();
+        int semester = SemesterUtil.getCurrentSemester();
         return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester);
     }

@@ -165,24 +165,6 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "and sd.active = true")
     List<StudentDegree> findByFullNameAndGroupId(@Param("full_name") String fullName, @Param("group_id") int groupId);
 
-    @Query(value = "SELECT student_degree.id, student.surname, student.name, student.patronimic, " +
-            "student_group.name, speciality.code, speciality.name, specialization.name, " +
-            "course_name.name, knowledge_control.name, course.semester,  " +
-            "grade.points, grade.grade, grade.ects " +
-            "FROM student " +
-            "INNER JOIN student_degree ON student_degree.student_id = student.id " +
-            "INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
-            "INNER JOIN speciality ON specialization.speciality_id = speciality.id " +
-            "INNER JOIN student_group ON student_degree.student_group_id = student_group.id " +
-            "INNER JOIN courses_for_groups ON courses_for_groups.student_group_id = student_group.id " +
-            "INNER JOIN course ON courses_for_groups.course_id = course.id " +
-            "INNER JOIN course_name ON course.course_name_id = course_name.id " +
-            "INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
-            "LEFT JOIN  grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
-            "WHERE student_group.id = 421 and student_degree.active=true and student_degree.payment='BUDGET' and (grade.points is null OR grade.points<60) " +
-            "order by student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
-    List<Grade> findDebtorStudentDegrees(@Param("degreeId") int degreeId);
-
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.thesisName = :thesisName, sd.thesisNameEng = :thesisNameEng, sd.thesisSupervisor = :thesisSupervisor WHERE sd.id = :idStudentDegree")
@@ -254,10 +236,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "  AND student_group.tuition_form = 'FULL_TIME' " +
                     "  AND student_degree.payment = 'BUDGET' " +
                     "  AND (grade.points IS NULL OR grade.points < 60) " +
-                    "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
+                    "  AND grade.academic_difference = false " +
+                    "  AND course.semester <= (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
                     "ORDER BY degree.id, speciality.code, student_group.name, student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
     List<Object[]> findDebtorStudentDegreesRaw(
-            @Param("facultyId") int facultyId);
+            @Param("facultyId") int facultyId,
+            @Param("semester") int semester);
 
     @Query(value =
             "SELECT student_degree.id, student.surname, student.name, student.patronimic, " +
@@ -266,7 +250,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       student_group.tuition_term as tuitionTerm, speciality.code as specialityCode, " +
             "       speciality.name as specialityName, specialization.name as specializationName, " +
             "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade, " +
-                    " extra_points.points as extraPoints " +
+            "       extra_points.points as extraPoints " +
             "FROM student " +
             "       INNER JOIN student_degree ON student_degree.student_id = student.id " +
             "       INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
@@ -279,21 +263,22 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
             "       INNER JOIN department ON specialization.department_id = department.id " +
             "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
-                    " FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
+            "       FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
             "WHERE specialization.faculty_id = :facultyId " +
             "  AND student_degree.active = true " +
             "  AND student_group.tuition_form = 'FULL_TIME' " +
             "  AND student_degree.payment = 'BUDGET' " +
-                    "AND grade.academic_difference = false " +
             "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
-            "  AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 1 " +
+            "  AND course.semester = (2018 - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
             "  AND knowledge_control.graded = true " +
+            "  AND grade.academic_difference = false " +
             "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
             "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, extraPoints " +
             "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic", nativeQuery = true)
     List<Object[]> findNoDebtStudentDegreesRaw(
             @Param("facultyId") int facultyId,
-            @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds);
+            @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds,
+            @Param("semester") int semester);
 
     @Query(value = "SELECT count(sd.id) FROM student_degree sd WHERE sd.id IN (:ids) AND sd.active = false", nativeQuery = true)
     int countInactiveStudentDegreesByIds(@Param("ids") List<Integer> ids);
@@ -314,10 +299,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("semester") Integer semester
     );
 
-    @Query(value = "select (:currYear - sd.studentGroup.creationYear + sd.studentGroup.beginYears)*2-1 from StudentDegree sd " +
+    @Query(value = "select (:currYear - sd.studentGroup.creationYear + sd.studentGroup.beginYears)*2-2+:semester from StudentDegree sd " +
             "where sd.id = :studentDegreeId ")
     Integer getSemester(@Param("currYear") Integer currYear,
-                        @Param("studentDegreeId") Integer studentDegreeId);
+                        @Param("studentDegreeId") Integer studentDegreeId,
+                        @Param("semester") int semester);
 
     ExtraPoints save(ExtraPoints extraPoints);
 
