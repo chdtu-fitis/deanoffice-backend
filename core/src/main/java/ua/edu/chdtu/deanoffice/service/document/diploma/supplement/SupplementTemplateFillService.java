@@ -35,7 +35,6 @@ import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +49,7 @@ public class SupplementTemplateFillService {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
     private static final int FOREIGN_STUDENTS_FACULTY_ID = 8;
+    private static final String STATE_EXAM = "Кваліфікаційний іспит.";
     private final DocumentIOService documentIOService;
     private QualificationForSpecializationService qualificationForSpecializationService;
     private AcquiredCompetenciesService acquiredCompetenciesService;
@@ -101,8 +101,8 @@ public class SupplementTemplateFillService {
                     && (courseNameUkr.contains("іспит") || courseNameUkr.contains("екзамен")));
         })
                 ) {
-            certificationName = "Державний іспит.";
-            certificationNameEng = "State exam.";
+            certificationName = STATE_EXAM;
+            certificationNameEng = "Qualification exam.";
         } else {
             String degreeName = "";
             String degreeNameEng = "";
@@ -349,7 +349,7 @@ public class SupplementTemplateFillService {
         result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
         result.putAll(getCertificationType(studentSummary));
-        if (!result.get("CertificationName").equals("Державний іспит.")) {
+        if (!result.get("CertificationName").equals(STATE_EXAM)) {
             result.put("ThesisNameUkr", "«" + TemplateUtil.getValueSafely(studentDegree.getThesisName()) + "»");
             result.put("ThesisNameEng", "\"" + TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()) + "\"");
         }
