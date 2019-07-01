@@ -103,8 +103,10 @@ public class StudentSummary {
         }
         Grade resultingGrade;
         Integer hoursSum = 0;
+        BigDecimal creditsSum = new BigDecimal(0);
         for (Grade g : grades) {
             hoursSum += g.getCourse().getHours();
+            creditsSum = creditsSum.add(g.getCourse().getCredits());
         }
         if (grades.size() == 1) {
             return grades.get(0);
@@ -134,7 +136,7 @@ public class StudentSummary {
             }
         }
         resultingGrade.getCourse().setHours(hoursSum);
-        resultingGrade.getCourse().setCredits(new BigDecimal((double) hoursSum / resultingGrade.getCourse().getHoursPerCredit()));
+        resultingGrade.getCourse().setCredits(creditsSum);
         return resultingGrade;
     }
 
