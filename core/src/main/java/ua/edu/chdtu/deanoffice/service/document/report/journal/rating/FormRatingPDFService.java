@@ -32,7 +32,7 @@ public class FormRatingPDFService extends FormRatingBase {
     @Value(value = "classpath:fonts/timesnewroman/times.ttf")
     private Resource ttf;
 
-    @Autowired
+//    @Autowired
     public void setFont() throws IOException, DocumentException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         FONT = new Font(baseFont, FONT_SIZE, Font.NORMAL);

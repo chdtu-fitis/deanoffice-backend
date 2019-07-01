@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -104,5 +105,9 @@ public class StudentGroupService {
 
     public List<StudentGroup> getGroupsMatchingForeignGroups(Boolean active) {
         return studentGroupRepository.findStudentGroupsMatchingForeignGroups(active);
+    }
+
+    public List<StudentGroup> getGroupsBySelectionCriteria(Specification<StudentGroup> specification) {
+        return studentGroupRepository.findAll(specification);
     }
 }
