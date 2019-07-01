@@ -78,13 +78,13 @@ public class StudentGroupService {
         studentGroupRepository.save(studentGroups);
     }
 
-    public List<StudentGroup> getGroupsThatAreStudyingSameCourseTo(Integer courseIds, Integer facultyId) {
-        return studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseIds, facultyId);
+    public List<StudentGroup> getGroupsThatAreStudyingSameCourseTo(Integer courseIds, Integer facultyId, Integer degreeId) {
+        return studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseIds, facultyId, degreeId);
     }
 
-    public Map<Integer, List<StudentGroup>> getGroupsThatAreStudyingSameCoursesTo(List<Integer> courseIds, Integer facultyId) {
+    public Map<Integer, List<StudentGroup>> getGroupsThatAreStudyingSameCoursesTo(List<Integer> courseIds, Integer facultyId, Integer degreeId) {
         Map<Integer, List<StudentGroup>> map = new HashMap<>();
-        courseIds.forEach(courseId -> map.put(courseId, studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseId, facultyId)));
+        courseIds.forEach(courseId -> map.put(courseId, studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseId, facultyId, degreeId)));
         return map;
     }
 

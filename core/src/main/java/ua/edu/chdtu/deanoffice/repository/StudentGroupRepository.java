@@ -79,23 +79,25 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     List<StudentGroup> findAllByIds(@Param("group_ids") List<Integer> groupIds);
 
     @Query(value =
-            "SELECT * " +
-                    "FROM student_group " +
-                    "   INNER JOIN courses_for_groups cfg ON student_group.id = cfg.student_group_id " +
-                    "   INNER JOIN specialization sp ON specialization_id = sp.id " +
-                    "   INNER JOIN course c ON cfg.course_id = c.id " +
-                    "WHERE cfg.course_id IN (SELECT course.id " +
-                    "                       FROM course " +
-                    "                       WHERE course.hours IN (SELECT c2.hours FROM course c2 WHERE c2.id = :course_id) " +
-                    "                           AND course.course_name_id IN " +
-                    "                               (SELECT c3.course_name_id FROM course c3 WHERE c3.id = :course_id) " +
-                    "                           AND course.kc_id IN (SELECT c4.kc_id FROM course c4 WHERE c4.id = :course_id)) " +
-                    "   AND sp.faculty_id = :faculty_id " +
-                    "   AND c.semester = ((((SELECT curr_year FROM current_year) - student_group.creation_year) * 2 + 1) + " +
-                    "       cast((NOT date_part('year', CURRENT_DATE) = (SELECT curr_year FROM current_year)) AS int))", nativeQuery = true)
+            "SELECT *\n" +
+                    "FROM student_group\n" +
+                    "       INNER JOIN courses_for_groups cfg ON student_group.id = cfg.student_group_id\n" +
+                    "       INNER JOIN specialization sp ON specialization_id = sp.id\n" +
+                    "       INNER JOIN course c ON cfg.course_id = c.id\n" +
+                    "WHERE cfg.course_id IN (SELECT course.id\n" +
+                    "                        FROM course\n" +
+                    "                        WHERE course.hours IN (SELECT c2.hours FROM course c2 WHERE c2.id = :course_id)\n" +
+                    "                          AND\n" +
+                    "                            course.course_name_id IN (SELECT c3.course_name_id FROM course c3 WHERE c3.id = :course_id)\n" +
+                    "                          AND course.kc_id IN (SELECT c4.kc_id FROM course c4 WHERE c4.id = :course_id))\n" +
+                    "  AND sp.faculty_id = :faculty_id\n" +
+                    "  AND sp.degree_id = :degree_id\n" +
+                    "  AND c.semester = ((((SELECT curr_year FROM current_year) - student_group.creation_year) * 2 + 1) +\n" +
+                    "                    cast((NOT date_part('year', CURRENT_DATE) = (SELECT curr_year FROM current_year)) AS int))", nativeQuery = true)
     List<StudentGroup> findGroupsThatAreStudyingSameCourseTo(
             @Param("course_id") Integer courseId,
-            @Param("faculty_id") Integer facultyId
+            @Param("faculty_id") Integer facultyId,
+            @Param("degree_id") Integer degreeId
     );
 
     @Query("SELECT sg from StudentGroup sg " +

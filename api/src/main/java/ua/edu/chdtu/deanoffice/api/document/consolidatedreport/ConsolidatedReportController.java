@@ -68,12 +68,15 @@ public class ConsolidatedReportController extends DocumentResponseController {
     }
 
     @PostMapping("/groups/subjects")
-    public ResponseEntity getGroupsThatAreStudyingSameCourseTo(
+    public ResponseEntity<Map<Integer, List<StudentGroupDTO>>> getGroupsThatAreStudyingSameCourseTo(
             @RequestBody List<Integer> courseIds,
+            @RequestParam Integer degreeId,
             @CurrentUser ApplicationUser user) {
         try {
             Map<Integer, List<StudentGroup>> mapWithStudentGroup =
-                    studentGroupService.getGroupsThatAreStudyingSameCoursesTo(courseIds, user.getFaculty().getId());
+                    studentGroupService.getGroupsThatAreStudyingSameCoursesTo(
+                            courseIds, user.getFaculty().getId(), degreeId
+                    );
             Map<Course, List<StudentGroup>> mapWithCourseAndStudentGroup = new HashMap<>();
             mapWithStudentGroup.forEach((courseId, studentGroups) ->
                     mapWithCourseAndStudentGroup.put(courseService.getById(courseId), studentGroups)
@@ -89,9 +92,13 @@ public class ConsolidatedReportController extends DocumentResponseController {
     }
 
     @GetMapping("/course/{courseId}")
-    public ResponseEntity getGroupsByCourse(@PathVariable Integer courseId, @CurrentUser ApplicationUser user) {
+    public ResponseEntity getGroupsByCourse(
+            @PathVariable Integer courseId,
+            @RequestParam Integer degreeId,
+            @CurrentUser ApplicationUser user
+    ) {
         try {
-            List<StudentGroup> studentGroups = studentGroupService.getGroupsThatAreStudyingSameCourseTo(courseId, user.getFaculty().getId());
+            List<StudentGroup> studentGroups = studentGroupService.getGroupsThatAreStudyingSameCourseTo(courseId, user.getFaculty().getId(), degreeId);
             return ResponseEntity.ok(map(studentGroups, StudentGroupDTO.class));
         } catch (Exception e) {
             return handleException(e);
