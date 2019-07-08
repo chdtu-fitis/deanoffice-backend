@@ -79,10 +79,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
             "INNER JOIN specialization s ON sd.specialization_id = s.id " +
-            "WHERE sd.payment = :payment AND sd.active = true " +
+            "WHERE sd.payment = :payment AND sd.active = true and sg.tuition_form = 'FULL_TIME'" +
             "AND sd.specialization_id = :specializationId AND (:currentYear - sg.creation_year + sg.begin_years) = :studyYear " +
             "AND s.degree_id = :degreeId", nativeQuery = true)
-    int findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment(
+    int findCountAllActiveFulltimeStudentsBySpecializationIdAndStudyYearAndPayment(
             @Param("specializationId") int specializationId,
             @Param("currentYear") int currentYear,
             @Param("studyYear") int studyYear,
