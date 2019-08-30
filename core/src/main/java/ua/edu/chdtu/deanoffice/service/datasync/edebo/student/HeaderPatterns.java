@@ -18,9 +18,9 @@ final class HeaderPatterns {
     static final String EDUCATION_FORM_NAME = "%1-educationFormName%";
     static final String PAYMENT_TYPE_NAME = "%1-personEducationPaymentTypeName%";
     static final String FULL_SPECIALITY_NAME = "%1-fullSpecialityName%";
-    static final String FULL_SPECIALIZATION_NAME = "%1-fullSpecializationName%";
-    static final String PROGRAM_NAME = "%1-programName%";
-    static final String PROGRAM_NAME_EN = "%1-programNameEn%";
+    static final String FULL_SPECIALIZATION_NAME = "%1-specializationName%";
+    static final String PROGRAM_NAME = "%1-studyProgramName%";
+    static final String PROGRAM_NAME_EN = "%1-studyProgramNameEn%";
     static final String PERSON_SEX_ID = "%2-id_PersonSex%";
     static final String COUNTRY_ID = "%2-id_Country%";
     static final String IPN_NUMBER = "%2-ipnNumber%";
