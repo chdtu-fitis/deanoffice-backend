@@ -1,6 +1,6 @@
-package ua.edu.chdtu.deanoffice.service.document.report.sheetsuccess.student;
+package ua.edu.chdtu.deanoffice.service.document.report.exam.ssc;
 
-public class BackFormConfig {
+public class BackSideConfig {
     public static final String REASON = "Причина перенесення підсумкового контролю  ";
     public static final String SHEET = "Аркуш успішності дійсний до “";
     public static final String SHEET_END = "” ";

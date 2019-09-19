@@ -1,6 +1,6 @@
-package ua.edu.chdtu.deanoffice.service.document.report.sheetsuccess.student;
+package ua.edu.chdtu.deanoffice.service.document.report.exam.ssc;
 
-public class FrontFormConfig {
+public class FrontSideConfig {
     public static final String CHDTU_NAME = "ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ";
     public static final String FACULTY = "Факультет ";
     public static final String STUDY_YEAR = " Навчальний рік ";
