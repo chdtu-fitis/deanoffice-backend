@@ -13,7 +13,6 @@ import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -160,7 +159,7 @@ public class StudentDegreeService {
     }
 
     public int getCountAllActiveStudents(int specializationId, int studyYear, Payment payment, int degreeId) {
-        return studentDegreeRepository.findCountAllActiveStudentsBySpecializationIdAndStudyYearAndPayment(specializationId, currentYearService.getYear(), studyYear, payment.toString(), degreeId);
+        return studentDegreeRepository.findCountAllActiveFulltimeStudentsBySpecializationIdAndStudyYearAndPayment(specializationId, currentYearService.getYear(), studyYear, payment.toString(), degreeId);
     }
 
     public int getCountAllActiveDebtors(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {

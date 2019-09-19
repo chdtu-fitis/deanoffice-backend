@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.util.List;
 import java.util.Map;
@@ -17,14 +16,11 @@ public class DebtorReportService {
 
     private SpecializationRepository specializationRepository;
     private StudentDegreeService studentDegreeService;
-    private StudentGroupService studentGroupService;
 
     @Autowired
     public DebtorReportService(SpecializationRepository specializationRepository,
-                               StudentGroupService studentGroupService,
                                StudentDegreeService studentDegreeService) {
         this.specializationRepository = specializationRepository;
-        this.studentGroupService = studentGroupService;
         this.studentDegreeService = studentDegreeService;
     }
 
