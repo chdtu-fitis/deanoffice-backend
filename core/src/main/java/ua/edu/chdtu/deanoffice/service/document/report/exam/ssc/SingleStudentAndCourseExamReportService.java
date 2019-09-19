@@ -141,7 +141,7 @@ public class SingleStudentAndCourseExamReportService {
         cell.addElement(addPhraseWithLine(FrontSideConfig.COURSE, FrontSideConfig.LENGTH_COURSE,course.getCourseName().getName(),FONT_12));
         paragraph = new Paragraph(FrontSideConfig.BY_LINE_COURSE,FONT_10);
         cell.addElement(paragraph);
-        cell.addElement(addPhraseWithLine(FrontSideConfig.TEACHER, FrontSideConfig.LENGTH_TEACHER,courseForGroup.getTeacher().getInitialsUkr(),FONT_12));
+        cell.addElement(addPhraseWithLine(FrontSideConfig.TEACHER, FrontSideConfig.LENGTH_TEACHER,(courseForGroup.getTeacher() != null?courseForGroup.getTeacher().getInitialsUkr():""),FONT_12));
         paragraph = new Paragraph(FrontSideConfig.BY_LINE_TEACHER,FONT_10);
         cell.addElement(paragraph);
         cell.setFixedHeight(HEIGHT_TABLE_PAGE);
