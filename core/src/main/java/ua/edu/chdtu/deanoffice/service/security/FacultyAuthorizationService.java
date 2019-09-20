@@ -13,6 +13,7 @@ import java.util.List;
 
 @Service
 public class FacultyAuthorizationService {
+
     private final StudentDegreeRepository studentDegreeRepository;
 
     public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository) {

@@ -8,7 +8,9 @@ import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -48,6 +50,7 @@ public class StudentGroupService {
     public List<StudentGroup> getGroupsByDegreeAndYearAndTuitionForm(int degreeId, int year, int facultyId, TuitionForm tuitionForm ) {
         return studentGroupRepository.findGroupsByDegreeAndYearAndTuitionForm(degreeId, year, getCurrentYear(), facultyId, tuitionForm);
     }
+
     public List<StudentGroup> getAllByActive(boolean onlyActive, int facultyId) {
         if (onlyActive) {
             return this.studentGroupRepository.findAllActiveByFaculty(facultyId);
@@ -73,6 +76,16 @@ public class StudentGroupService {
     public void delete(List<StudentGroup> studentGroups) {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
         studentGroupRepository.save(studentGroups);
+    }
+
+    public List<StudentGroup> getGroupsThatAreStudyingSameCourseTo(Integer courseIds, Integer facultyId, Integer degreeId) {
+        return studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseIds, facultyId, degreeId);
+    }
+
+    public Map<Integer, List<StudentGroup>> getGroupsThatAreStudyingSameCoursesTo(List<Integer> courseIds, Integer facultyId, Integer degreeId) {
+        Map<Integer, List<StudentGroup>> map = new HashMap<>();
+        courseIds.forEach(courseId -> map.put(courseId, studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseId, facultyId, degreeId)));
+        return map;
     }
 
     public StudentGroup getByNameAndFacultyId(String groupName, int facultyId){
