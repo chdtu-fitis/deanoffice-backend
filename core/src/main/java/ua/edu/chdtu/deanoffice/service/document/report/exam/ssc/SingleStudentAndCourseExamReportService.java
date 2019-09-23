@@ -17,7 +17,7 @@ import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import java.io.*;
 import java.util.List;
 
-@Service
+//@Service
 public class SingleStudentAndCourseExamReportService {
     public static final int COLUMNS_COUNT = 5;
     public static final float PAGE_MARGIN = 36f;

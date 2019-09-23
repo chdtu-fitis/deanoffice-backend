@@ -20,24 +20,24 @@ import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 @RequestMapping("/documents/single-student-and-course-exam-report")
 public class SingleStudentAndCourseExamReportController extends DocumentResponseController{
     private FacultyService facultyService;
-    private SingleStudentAndCourseExamReportService singleStudentAndCourseExamReportService;
+//    private SingleStudentAndCourseExamReportService singleStudentAndCourseExamReportService;
 
-    public SingleStudentAndCourseExamReportController(FacultyService facultyService, SingleStudentAndCourseExamReportService SingleStudentAndCourseExamReportService) {
+    public SingleStudentAndCourseExamReportController(FacultyService facultyService) {//}, SingleStudentAndCourseExamReportService singleStudentAndCourseExamReportService) {
         this.facultyService = facultyService;
-        this.singleStudentAndCourseExamReportService = SingleStudentAndCourseExamReportService;
+//        this.singleStudentAndCourseExamReportService = singleStudentAndCourseExamReportService;
     }
-    @GetMapping("/students/{student_ids}/courses/{course_ids}")
-    public ResponseEntity<Resource> generateForGroup(@PathVariable("student_ids") List<Integer> studentIds,
-                                                     @PathVariable("course_ids") List<Integer> courseIds,
-                                                     @CurrentUser ApplicationUser user) {
-        try {
-            //facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File groupDiplomaSupplements = singleStudentAndCourseExamReportService.formDocument(studentIds,courseIds);
-            return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName(), MEDIA_TYPE_PDF);
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
+//    @GetMapping("/students/{student_ids}/courses/{course_ids}")
+//    public ResponseEntity<Resource> generateForGroup(@PathVariable("student_ids") List<Integer> studentIds,
+//                                                     @PathVariable("course_ids") List<Integer> courseIds,
+//                                                     @CurrentUser ApplicationUser user) {
+//        try {
+//            //facultyService.checkGroup(groupId, user.getFaculty().getId());
+//            File groupDiplomaSupplements = singleStudentAndCourseExamReportService.formDocument(studentIds,courseIds);
+//            return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName(), MEDIA_TYPE_PDF);
+//        } catch (Exception e) {
+//            return handleException(e);
+//        }
+//    }
 
     private static ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, ReportsJournalController.class, ExceptionToHttpCodeMapUtil.map(exception));
