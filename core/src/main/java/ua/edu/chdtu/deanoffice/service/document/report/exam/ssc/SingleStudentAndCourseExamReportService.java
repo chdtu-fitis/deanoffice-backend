@@ -17,7 +17,7 @@ import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import java.io.*;
 import java.util.List;
 
-//@Service
+@Service
 public class SingleStudentAndCourseExamReportService {
     public static final int COLUMNS_COUNT = 5;
     public static final float PAGE_MARGIN = 36f;
@@ -45,7 +45,7 @@ public class SingleStudentAndCourseExamReportService {
     @Autowired
     private CurrentYearService currentYearService;
 
-    @Autowired
+//    @Autowired
     public void setFont() throws IOException, DocumentException {
         baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         FONT_14 = new Font(baseFont, FONT_SIZE_14, Font.NORMAL);
