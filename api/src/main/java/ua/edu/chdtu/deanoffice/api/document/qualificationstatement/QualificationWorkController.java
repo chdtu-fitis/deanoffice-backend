@@ -14,5 +14,9 @@ public class QualificationWorkController {
 
     }
 
+    private ResponseEntity handleException(Exception exception) {
+        return ExceptionHandlerAdvice.handleException(exception, QualificationWorkController.class,
+                ExceptionToHttpCodeMapUtil.map(exception));
+    }
 }
 
