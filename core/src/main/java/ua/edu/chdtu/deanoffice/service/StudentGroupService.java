@@ -51,11 +51,8 @@ public class StudentGroupService {
         return studentGroupRepository.findGroupsByDegreeAndYearAndTuitionForm(degreeId, year, getCurrentYear(), facultyId, tuitionForm);
     }
 
-    public List<StudentGroup> getAllByActive(boolean onlyActive, int facultyId) {
-        if (onlyActive) {
-            return this.studentGroupRepository.findAllActiveByFaculty(facultyId);
-        }
-        return this.studentGroupRepository.findAllByFaculty(facultyId);
+    public List<StudentGroup> getAllByActive(boolean active, int facultyId) {
+        return this.studentGroupRepository.findByActiveAndFaculty(active, facultyId);
     }
 
     public List<StudentGroup> getAllGroups(boolean onlyActive) {
