@@ -5,7 +5,6 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.repository.PositionRepository;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
-import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
@@ -73,6 +72,13 @@ public class DataVerificationService {
         for (Teacher teacher: teachers) {
             if (teacher.isActive() == false)
                 throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
+        }
+    }
+
+    public void isTeachersNotActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
+        for (Teacher teacher : teachers) {
+            if (teacher.isActive())
+                throw new OperationCannotBePerformedException("Вибрані вчителі є активними!");
         }
     }
 
