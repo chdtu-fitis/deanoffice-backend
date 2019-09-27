@@ -95,11 +95,11 @@ public class GroupController {
     @GetMapping("/groups")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroups(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive,
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
     ) {
         try {
-            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
+            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(active, user.getFaculty().getId());
             return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
