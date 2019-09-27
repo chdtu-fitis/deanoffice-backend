@@ -192,7 +192,7 @@ public class GroupController {
             verifyAccess(user, studentGroups);
             validateRestoreGroupBody(groupIds, studentGroups);
             studentGroupService.restore(studentGroups);
-            return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
