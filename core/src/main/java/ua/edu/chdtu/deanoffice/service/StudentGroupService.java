@@ -74,12 +74,12 @@ public class StudentGroupService {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
         studentGroupRepository.save(studentGroups);
     }
-/////1
+
     public void restore(List<StudentGroup> studentGroups) {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(true));
         studentGroupRepository.save(studentGroups);
     }
-/////
+
     public StudentGroup getByNameAndFacultyId(String groupName, int facultyId){
         List<StudentGroup> studentGroups = studentGroupRepository.findByName(groupName, facultyId);
         return (studentGroups.isEmpty()) ? null : studentGroups.get(0);

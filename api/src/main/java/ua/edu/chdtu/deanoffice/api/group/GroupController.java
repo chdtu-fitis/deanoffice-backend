@@ -197,7 +197,7 @@ public class GroupController {
             return handleException(exception);
         }
     }
-////
+
     @DeleteMapping("/groups/{group_ids}")
     public ResponseEntity deleteGroup(@PathVariable("group_ids") List<Integer> groupIds,
                                       @CurrentUser ApplicationUser user) {
@@ -287,7 +287,7 @@ public class GroupController {
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
-//////1
+
     private void validateRestoreGroupBody(List<Integer> groupIds, List<StudentGroup> studentGroups)
             throws NotFoundException, OperationCannotBePerformedException {
         if (studentGroups.size() != groupIds.size()) {
@@ -301,7 +301,7 @@ public class GroupController {
             throw new OperationCannotBePerformedException(exceptionMessage);
         }
     }
-/////
+
     private List<StudentGroup> findStudentGroupsInWhichAllStudentsAreInactive(List<StudentGroup> studentGroups) {
         return studentGroups.stream()
                 .filter(studentGroup -> studentGroup.getActiveStudents().size() == 0)
@@ -321,19 +321,19 @@ public class GroupController {
     private boolean hasInactiveStudentGroups(List<StudentGroup> studentGroups) {
         return findInactiveStudentGroups(studentGroups).size() != 0;
     }
-/////1
+
     private boolean hasActiveStudentGroups(List<StudentGroup> studentGroups) {
         return findActiveStudentGroups(studentGroups).size() != 0;
     }
-/////
+
     private List<StudentGroup> findInactiveStudentGroups(List<StudentGroup> studentGroups) {
         return studentGroups.stream().filter(studentGroup -> !studentGroup.isActive()).collect(Collectors.toList());
     }
-/////1
+
     private List<StudentGroup> findActiveStudentGroups(List<StudentGroup> studentGroups) {
         return studentGroups.stream().filter(studentGroup -> studentGroup.isActive()).collect(Collectors.toList());
     }
-/////
+
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, GroupController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
