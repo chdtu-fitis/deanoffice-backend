@@ -75,6 +75,11 @@ public class StudentGroupService {
         studentGroupRepository.save(studentGroups);
     }
 
+    public void restore(List<StudentGroup> studentGroups) {
+        studentGroups.forEach(studentGroup -> studentGroup.setActive(true));
+        studentGroupRepository.save(studentGroups);
+    }
+  
     public List<StudentGroup> getGroupsThatAreStudyingSameCourseTo(Integer courseIds, Integer facultyId, Integer degreeId) {
         return studentGroupRepository.findGroupsThatAreStudyingSameCourseTo(courseIds, facultyId, degreeId);
     }

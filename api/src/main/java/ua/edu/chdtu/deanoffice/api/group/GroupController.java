@@ -183,6 +183,21 @@ public class GroupController {
         }
     }
 
+    @JsonView(StudentGroupView.Basic.class)
+    @PutMapping("/groups/restore")
+    public ResponseEntity restoreGroup(@RequestParam List<Integer> groupIds,
+                                       @CurrentUser ApplicationUser user) {
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
+            verifyAccess(user, studentGroups);
+            validateRestoreGroupBody(groupIds, studentGroups);
+            studentGroupService.restore(studentGroups);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
     @DeleteMapping("/groups/{group_ids}")
     public ResponseEntity deleteGroup(@PathVariable("group_ids") List<Integer> groupIds,
                                       @CurrentUser ApplicationUser user) {
@@ -273,6 +288,20 @@ public class GroupController {
         }
     }
 
+    private void validateRestoreGroupBody(List<Integer> groupIds, List<StudentGroup> studentGroups)
+            throws NotFoundException, OperationCannotBePerformedException {
+        if (studentGroups.size() != groupIds.size()) {
+            throw new NotFoundException("Групи не були знайдені "
+                    + Arrays.toString(findNotFoundStudentGroups(studentGroups, groupIds)));
+        }
+
+        if (hasActiveStudentGroups(studentGroups)) {
+            String exceptionMessage = "Групи " + Arrays.toString(findActiveStudentGroups(studentGroups).toArray())
+                    + " наразі активні. Відновлення активних груп неможливе.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+    }
+
     private List<StudentGroup> findStudentGroupsInWhichAllStudentsAreInactive(List<StudentGroup> studentGroups) {
         return studentGroups.stream()
                 .filter(studentGroup -> studentGroup.getActiveStudents().size() == 0)
@@ -293,8 +322,16 @@ public class GroupController {
         return findInactiveStudentGroups(studentGroups).size() != 0;
     }
 
+    private boolean hasActiveStudentGroups(List<StudentGroup> studentGroups) {
+        return findActiveStudentGroups(studentGroups).size() != 0;
+    }
+
     private List<StudentGroup> findInactiveStudentGroups(List<StudentGroup> studentGroups) {
         return studentGroups.stream().filter(studentGroup -> !studentGroup.isActive()).collect(Collectors.toList());
+    }
+
+    private List<StudentGroup> findActiveStudentGroups(List<StudentGroup> studentGroups) {
+        return studentGroups.stream().filter(studentGroup -> studentGroup.isActive()).collect(Collectors.toList());
     }
 
     private ResponseEntity handleException(Exception exception) {
