@@ -58,7 +58,8 @@ public class TeacherService {
             throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є існуючі!");
         dataVerificationService.isTeachersNotActive(teachers);
         facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachers);
-        teacherRepository.setTeachersActiveByIds(ids);
+        teachers.forEach(teacher -> teacher.setActive(true));
+        teacherRepository.save(teachers);
     }
 
 

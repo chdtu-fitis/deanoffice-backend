@@ -30,9 +30,4 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     @Transactional
     @Query(value = "UPDATE teacher t SET active = false WHERE t.id IN (:ids)", nativeQuery = true)
     void setTeachersInactiveByIds(@Param("ids") List<Integer> ids);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE teacher t SET active = true WHERE t.id IN (:ids)", nativeQuery = true)
-    void setTeachersActiveByIds(@Param("ids") List<Integer> ids);
 }
