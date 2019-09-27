@@ -79,35 +79,37 @@ public class SingleStudentAndCourseExamReportService {
         int numberForm = 1;
         int positionStart = -1;
         int positionEnd = 3;
+        int size = studentIds.size();
         for (int i = 0; i < studentIds.size();i++){
-            if(isFrontSideActive){
-                addFrontForm(cell,studentIds.get(i),courseIds.get(i));
+            if( size != 0){
+                addFrontForm(cell,studentIds.get(i),courseIds.get(i)); // perednyaya chast`
+                size--;
             } else {
-                addBackForm(cell,studentIds.get(i),courseIds.get(i));
+                addBackForm(cell,studentIds.get(i),courseIds.get(i)); //zadnyaya chast`
             }
-            numberForm++;
-            table.addCell(cell);
+            numberForm++; // minus back formi,propuski
+            table.addCell(cell); // dobavlyaet paneli s dannimi
             cell = new PdfPCell();
             cell.setFixedHeight(HEIGHT_TABLE_PAGE);
             cell.setBorder(Rectangle.NO_BORDER);
-            if(numberForm > 3 || i == 9-1){
+            if(numberForm > 1 || i == 9-1){
                 if(isFrontSideActive) {
                     isFrontSideActive = !isFrontSideActive;
-                    positionEnd = i;
-                    i = positionStart;
-                    if(numberForm == 2){
-                        table.addCell(cell);
-                        table.addCell(cell);
-                    }
-                    if(numberForm == 3){
-                        table.addCell(cell);
-                    }
-                } else {
-                    isFrontSideActive = !isFrontSideActive;
-                    positionStart = positionEnd;
-                    i = positionEnd;
+                    positionEnd = i; // 3>8 => ne budet bol`she 1 formi
+                    i = positionStart; // 8>-1 => ne budet poslednei stranici
+                    //if(numberForm == 2){
+                        //table.addCell(cell); // po forme na starnicu
+                        //table.addCell(cell);// !cell otveshaut za propuski stranic cell = tret` starinci
+                    //}
+                    //if(numberForm == 3){
+                        //table.addCell(cell); // propusk
+                    //}
+                }else {
+                    isFrontSideActive = !isFrontSideActive;  // ne comm
+                    positionStart = positionEnd; // ne comm
+                    i = positionEnd; // ne ponyatno za chto
                 }
-                numberForm = 1;
+                numberForm = 1; // minus propuski posle pervogo
             }
         }
         document.add(table);
@@ -121,27 +123,27 @@ public class SingleStudentAndCourseExamReportService {
         Paragraph paragraph = new Paragraph(FrontSideConfig.CHDTU_NAME,FONT_14);
         paragraph.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(paragraph);
-        paragraph = new Paragraph(addPhraseWithLine(FrontSideConfig.FACULTY, FrontSideConfig.LENGTH_FACULTY,student.getSpecialization().getFaculty().getAbbr(),FONT_14));
+        paragraph = new Paragraph(addPhraseWithLine(FrontSideConfig.FACULTY, FrontSideConfig.LENGTH_FACULTY,"    " + student.getSpecialization().getFaculty().getAbbr(),FONT_14));
         paragraph.add(addPhraseWithLine(FrontSideConfig.STUDY_YEAR, FrontSideConfig.LENGTH_STUDY_YEAR,"20",FONT_14));
         paragraph.add(addPhraseWithLine("/",2,String.valueOf(currentYearService.get().getCurrYear()).substring(2,4),FONT_14));
         cell.addElement(paragraph);
-        paragraph = new Paragraph(addPhraseWithLine(FrontSideConfig.YEAR, FrontSideConfig.LENGTH_YEAR, String.valueOf(currentYearService.get().getCurrYear() - student.getStudentGroup().getCreationYear() + 1),FONT_14));
-        paragraph.add(addPhraseWithLine(FrontSideConfig.SEMESTER, FrontSideConfig.LENGTH_SEMESTER,dividesByTwo(course.getSemester().intValue()),FONT_14));
-        paragraph.add(addPhraseWithLine(FrontSideConfig.GROUP, FrontSideConfig.LENGTH_GROUP,student.getStudentGroup().getName(),FONT_14));
-        paragraph.add(addPhraseWithLine(FrontSideConfig.KNOWLEDGE_CONTROL, FrontSideConfig.LENGTH_KNOWLEDGE_CONTROL,course.getKnowledgeControl().getName(),FONT_14));
+        paragraph = new Paragraph(addPhraseWithLine(FrontSideConfig.YEAR, FrontSideConfig.LENGTH_YEAR, " " +  String.valueOf(currentYearService.get().getCurrYear() - student.getStudentGroup().getCreationYear() + 1),FONT_14));
+        paragraph.add(addPhraseWithLine(FrontSideConfig.SEMESTER, FrontSideConfig.LENGTH_SEMESTER," " + dividesByTwo(course.getSemester().intValue()),FONT_14));
+        paragraph.add(addPhraseWithLine(FrontSideConfig.GROUP, FrontSideConfig.LENGTH_GROUP," " + student.getStudentGroup().getName(),FONT_14));
+        paragraph.add(addPhraseWithLine(FrontSideConfig.KNOWLEDGE_CONTROL, FrontSideConfig.LENGTH_KNOWLEDGE_CONTROL,"    " + course.getKnowledgeControl().getName(),FONT_14));
         cell.addElement(paragraph);
         cell.addElement(new Paragraph(" ",FONT_14));
         paragraph = new Paragraph(addPhraseWithLine(FrontSideConfig.TITLE, FrontSideConfig.LENGTH_TITLE,"",FONT_14_BOLD));
         paragraph.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(paragraph);
         cell.addElement(new Paragraph(" ",FONT_14));
-        cell.addElement(addPhraseWithLine(FrontSideConfig.SRUDENT, FrontSideConfig.LENGTH_SRUDENT,student.getStudent().getInitialsUkr(),FONT_12));
+        cell.addElement(addPhraseWithLine(FrontSideConfig.SRUDENT, FrontSideConfig.LENGTH_SRUDENT,"    " + student.getStudent().getInitialsUkr(),FONT_12));
         paragraph = new Paragraph(FrontSideConfig.BY_LINE_SRUDENT,FONT_10);
         cell.addElement(paragraph);
-        cell.addElement(addPhraseWithLine(FrontSideConfig.COURSE, FrontSideConfig.LENGTH_COURSE,course.getCourseName().getName(),FONT_12));
+        cell.addElement(addPhraseWithLine(FrontSideConfig.COURSE, FrontSideConfig.LENGTH_COURSE,"    " + course.getCourseName().getName(),FONT_12));
         paragraph = new Paragraph(FrontSideConfig.BY_LINE_COURSE,FONT_10);
         cell.addElement(paragraph);
-        cell.addElement(addPhraseWithLine(FrontSideConfig.TEACHER, FrontSideConfig.LENGTH_TEACHER,(courseForGroup.getTeacher() != null?courseForGroup.getTeacher().getInitialsUkr():""),FONT_12));
+        cell.addElement(addPhraseWithLine(FrontSideConfig.TEACHER, FrontSideConfig.LENGTH_TEACHER,"    " + (courseForGroup.getTeacher() != null?courseForGroup.getTeacher().getInitialsUkr():""),FONT_12));
         paragraph = new Paragraph(FrontSideConfig.BY_LINE_TEACHER,FONT_10);
         cell.addElement(paragraph);
         cell.setFixedHeight(HEIGHT_TABLE_PAGE);
@@ -194,7 +196,7 @@ public class SingleStudentAndCourseExamReportService {
         cell.addElement(paragraph);
         cell.addElement(new Paragraph("",FONT_12));
         paragraph = new Paragraph(addPhraseWithLine(BackSideConfig.DEAN, BackSideConfig.LENGTH_DEAN,"      ",FONT_14));
-        paragraph.add(addPhraseWithLine(" ", BackSideConfig.LENGTH_SPACE,convertFullNameToIntials(student.getSpecialization().getFaculty().getDean()),FONT_14));
+        paragraph.add(addPhraseWithLine(" ", BackSideConfig.LENGTH_SPACE,"     " + convertFullNameToIntials(student.getSpecialization().getFaculty().getDean()),FONT_14));
         paragraph.add(addPhraseWithLine(BackSideConfig.BRACKET_OPEN, BackSideConfig.LENGTH_BRACKET_OPEN,"",FONT_14));
         paragraph.add(addPhraseWithLine(BackSideConfig.BRACKET_CLOSE, BackSideConfig.LENGTH_BRACKET_CLOSE,"",FONT_14));
         paragraph.add(addPhraseWithLine(BackSideConfig.YEAR, BackSideConfig.LENGTH_YEAR,"",FONT_14));

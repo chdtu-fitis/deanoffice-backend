@@ -27,9 +27,9 @@ public class SingleStudentAndCourseExamReportController extends DocumentResponse
         this.singleStudentAndCourseExamReportService = singleStudentAndCourseExamReportService;
     }
 
-    @GetMapping("/students/{student_ids}/courses/{course_ids}")
-    public ResponseEntity<Resource> generateForGroup(@PathVariable("student_ids") List<Integer> studentIds,
-                                                     @PathVariable("course_ids") List<Integer> courseIds,
+    @GetMapping
+    public ResponseEntity<Resource> generateForGroup(@RequestParam("student_ids") List<Integer> studentIds,
+                                                     @RequestParam("course_ids") List<Integer> courseIds,
                                                      @CurrentUser ApplicationUser user) {
         try {
             //facultyService.checkGroup(groupId, user.getFaculty().getId());
