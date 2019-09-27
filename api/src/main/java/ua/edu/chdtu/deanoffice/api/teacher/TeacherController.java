@@ -13,11 +13,9 @@ import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.PositionService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
-import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
@@ -67,7 +65,7 @@ public class TeacherController {
             if (teacherDTO == null)
                 throw new OperationCannotBePerformedException("Не отримані дані для збереження!");
             if (teacherDTO.getId() != 0)
-                throw new OperationCannotBePerformedException("Неправильно всказаний ідентифікатор, ідентифікатор повинен бути 0!");
+                throw new OperationCannotBePerformedException("Неправильно вказаний ідентифікатор, ідентифікатор повинен бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
             Teacher teacherAfterSave = teacherService.saveTeacher(user, teacher);
@@ -101,6 +99,17 @@ public class TeacherController {
                                          @CurrentUser ApplicationUser user) {
         try {
             teacherService.deleteByIds(user, teachersIds);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @PutMapping("/teachers/restore")
+    public ResponseEntity restoreTeachers(@RequestParam List<Integer> teachersIds,
+                                          @CurrentUser ApplicationUser user) {
+        try {
+            teacherService.restoreByIds(user, teachersIds);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return handleException(e);
