@@ -145,7 +145,7 @@ public class SpecializationController {
     ){
         try {
             Specialization specialization = specializationService.getById(specializationId);
-            specializationService.reActive(specialization);
+            specializationService.restore(specialization);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
