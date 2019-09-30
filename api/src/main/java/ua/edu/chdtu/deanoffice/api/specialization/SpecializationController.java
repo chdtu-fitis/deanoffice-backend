@@ -139,6 +139,19 @@ public class SpecializationController {
         }
     }
 
+    @PutMapping("/restore")
+    public ResponseEntity restoreSpecialization(
+            @RequestParam int specializationId
+    ){
+        try {
+            Specialization specialization = specializationService.getById(specializationId);
+            specializationService.reActive(specialization);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
     @DeleteMapping("/{specialization_id}")
     public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") int specializationId) {
         try {
