@@ -1,12 +1,13 @@
 package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
@@ -15,6 +16,7 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -22,6 +24,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -33,6 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class GroupController {
@@ -40,6 +44,7 @@ public class GroupController {
     private final SpecializationService specializationService;
     private final CurrentYearService currentYearService;
     private final StudentDegreeService studentDegreeService;
+    private final CourseForGroupService courseForGroupService;
     private final Environment environment;
 
     @Autowired
@@ -48,11 +53,13 @@ public class GroupController {
             SpecializationService specializationService,
             CurrentYearService currentYearService,
             StudentDegreeService studentDegreeService,
+            CourseForGroupService courseForGroupService,
             Environment environment) {
         this.studentGroupService = studentGroupService;
         this.currentYearService = currentYearService;
         this.specializationService = specializationService;
         this.studentDegreeService = studentDegreeService;
+        this.courseForGroupService = courseForGroupService;
         this.environment = environment;
     }
 
@@ -77,16 +84,6 @@ public class GroupController {
         try {
             List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, year, user.getFaculty().getId());
             return ResponseEntity.ok(Mapper.map(groups, StudentGroupDTO.class));
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-    }
-
-    @GetMapping("courses/{courseId}/groups")
-    public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
-        try {
-            List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
-            return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -210,6 +207,17 @@ public class GroupController {
             return ResponseEntity.ok(Mapper.map(groupsToDelete, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @GetMapping("/groups/{groupId}/courses")
+    @JsonView(CourseForGroupView.Course.class)
+    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
+        try {
+            List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
+            return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
         }
     }
 
