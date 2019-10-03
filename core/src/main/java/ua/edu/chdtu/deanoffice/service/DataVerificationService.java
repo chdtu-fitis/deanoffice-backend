@@ -51,13 +51,26 @@ public class DataVerificationService {
         }
     }
 
-    public void specializationNotNullAndActive(Specialization specialization,
+    public void specializationNotNull(Specialization specialization,
                                                int specializationId) throws OperationCannotBePerformedException {
         if (specialization == null) {
             throw new OperationCannotBePerformedException("Освітню програму [" + specializationId + "] не знайдено");
         }
+    }
+
+    public void specializationNotNullAndActive(Specialization specialization,
+                                               int specializationId) throws OperationCannotBePerformedException {
+        specializationNotNull(specialization, specializationId);
         if (!specialization.isActive()) {
-            throw new OperationCannotBePerformedException("Освітня програма [" + specializationId + "] не активна в даний час");
+            throw new OperationCannotBePerformedException("Освітня програма [" + specialization.getName() + "] не активна в даний час");
+        }
+    }
+
+    public void specializationNotNullAndNotActive(Specialization specialization,
+                                               int specializationId) throws OperationCannotBePerformedException {
+        specializationNotNull(specialization, specializationId);
+        if (specialization.isActive()) {
+            throw new OperationCannotBePerformedException("Освітня програма [" + specialization.getName() + "] не активна в даний час");
         }
     }
 

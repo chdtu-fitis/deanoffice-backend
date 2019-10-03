@@ -50,4 +50,8 @@ public class SpecializationService {
         specialization.setActive(false);
         specializationRepository.save(specialization);
     }
+    public void restore(Specialization specialization) {
+        specialization.setActive(true);
+        specializationRepository.save(specialization);
+    }
 }

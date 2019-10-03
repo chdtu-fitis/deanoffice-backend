@@ -26,6 +26,7 @@ import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class SpecializationController {
     private final DepartmentService departmentService;
     private final DegreeService degreeService;
     private final DataVerificationService verificationService;
+    private final FacultyAuthorizationService facultyAuthorizationService;
 
     @Autowired
     public SpecializationController(
@@ -47,13 +49,15 @@ public class SpecializationController {
             SpecialityService specialityService,
             DepartmentService departmentService,
             DegreeService degreeService,
-            DataVerificationService verificationService
+            DataVerificationService verificationService,
+            FacultyAuthorizationService facultyAuthorizationService
     ) {
         this.specializationService = specializationService;
         this.specialityService = specialityService;
         this.departmentService = departmentService;
         this.degreeService = degreeService;
         this.verificationService = verificationService;
+        this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
     @GetMapping
@@ -134,6 +138,19 @@ public class SpecializationController {
             Specialization specializationAfterSave = specializationService.save(specialization);
             SpecializationDTO specializationSavedDTO = Mapper.strictMap(specializationAfterSave, SpecializationDTO.class);
             return new ResponseEntity(specializationSavedDTO, HttpStatus.CREATED);
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PutMapping("/restore")
+    public ResponseEntity restoreSpecialization(@CurrentUser ApplicationUser user, @RequestParam int specializationId){
+        try {
+            Specialization specialization = specializationService.getById(specializationId);
+            this.verificationService.specializationNotNullAndNotActive(specialization, specializationId);
+            facultyAuthorizationService.verifySpecializationAccessibility(user, specialization);
+            specializationService.restore(specialization);
+            return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
