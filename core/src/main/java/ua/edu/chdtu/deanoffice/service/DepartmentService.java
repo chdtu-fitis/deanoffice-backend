@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 
@@ -16,8 +17,12 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-    public List<Department> getAllByActive(boolean active,int facultyId) {
-        return departmentRepository.getAllByActive(active,facultyId);
+    public List<Department> getAllByActive(boolean active, int facultyId) {
+        if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
+            return departmentRepository.getAllByActive(active);
+        } else {
+            return departmentRepository.getAllByActive(active,facultyId);
+        }
     }
 
     public Department getById(Integer departmentId) {
