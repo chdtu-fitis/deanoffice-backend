@@ -139,7 +139,11 @@ public class ConsolidatedReportService {
                 courseForGroup.getCourse().getKnowledgeControl().getName(),
                 String.valueOf(courseForGroup.getCourse().getHours().intValue())
         );
-        createInfoAboutTeacher(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, courseForGroup.getTeacher().getFullNameUkr());
+        String teachersFullName = "";
+        if (courseForGroup.getTeacher() != null){
+            teachersFullName = courseForGroup.getTeacher().getFullNameUkr();
+        }
+        createInfoAboutTeacher(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, teachersFullName);
         createMainTable(FONT, SMALL_FONT, BOLD_FONT, document, studentGroups);
 
         String deanInitials = user.getFaculty().getDean();
@@ -154,7 +158,7 @@ public class ConsolidatedReportService {
         createInfoAboutExamination(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, deanInitials);
         createTitleOfMarks(FONT, document);
         createMarksTable(FONT, EMPTY_CELL, document);
-        createFooter(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, courseForGroup.getTeacher().getFullNameUkr());
+        createFooter(FONT, SMALL_FONT, EMPTY_CELL_NO_BORDER, document, teachersFullName);
     }
 
     private void createFooter(Font FONT, Font SMALL_FONT, PdfPCell EMPTY_CELL_NO_BORDER, Document document, String teacherFullName) throws DocumentException {
