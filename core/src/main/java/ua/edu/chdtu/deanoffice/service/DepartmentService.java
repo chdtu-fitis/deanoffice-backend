@@ -17,11 +17,12 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-    public List<Department> getAllByActive(boolean active,int facultyId) {
-        if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID){
+    public List<Department> getAllByActive(boolean active, int facultyId) {
+        if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
             return departmentRepository.getAllByActive(active);
-        } else
-        return departmentRepository.getAllByActive(active,facultyId);
+        } else {
+            return departmentRepository.getAllByActive(active,facultyId);
+        }
     }
 
     public Department getById(Integer departmentId) {
