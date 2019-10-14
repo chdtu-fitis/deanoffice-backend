@@ -48,15 +48,23 @@ public class ConsolidatedReportService {
     private static final int ALL_BORDER = 15;
 
     private final CurrentYearService currentYearService;
+    private DocumentIOService documentIOService;
 
     @Autowired
-    public ConsolidatedReportService(CurrentYearService currentYearService) {
+    public ConsolidatedReportService(CurrentYearService currentYearService, DocumentIOService documentIOService) {
         this.currentYearService = currentYearService;
+        this.documentIOService = documentIOService;
     }
 
     public synchronized File formConsolidatedReportDocx(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
             throws Docx4JException, IOException, OperationCannotBePerformedException{
         validateData(coursesToStudentGroups);
+        return documentIOService.
+        /*
+        return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year, semester),
+                    "Predmeti-dlya-zhurnalu -" + year +
+                            "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
+        */
     }
 
     public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
