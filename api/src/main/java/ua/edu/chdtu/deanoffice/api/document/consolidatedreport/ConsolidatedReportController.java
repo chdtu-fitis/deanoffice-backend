@@ -110,6 +110,18 @@ public class ConsolidatedReportController extends DocumentResponseController {
             @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
             @CurrentUser ApplicationUser user
     ) {
+        try {
+            File consolidatedDocument = consolidatedReportService.formConsolidatedReportDocx(
+                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds), user);
+
+            return buildDocumentResponseEntity(
+                    consolidatedDocument,
+                    consolidatedDocument.getName(),
+                    DocumentResponseController.MEDIA_TYPE_DOCX
+            );
+        } catch (Exception e) {
+            return handleException(e);
+        }
 
 
     }
