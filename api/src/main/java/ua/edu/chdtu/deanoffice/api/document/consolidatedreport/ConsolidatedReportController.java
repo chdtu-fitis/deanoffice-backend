@@ -105,6 +105,14 @@ public class ConsolidatedReportController extends DocumentResponseController {
         }
     }
 
+    @PostMapping("/create-document-docx")
+    public ResponseEntity getConsolidatedDocumentDocx(
+            @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
+            @CurrentUser ApplicationUser user
+    ) {
+
+    }
+
     @PostMapping("/create-document")
     public ResponseEntity getConsolidatedDocument(
             @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
