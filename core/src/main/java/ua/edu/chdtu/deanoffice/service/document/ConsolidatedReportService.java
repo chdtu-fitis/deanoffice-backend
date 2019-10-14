@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -51,6 +52,10 @@ public class ConsolidatedReportService {
     @Autowired
     public ConsolidatedReportService(CurrentYearService currentYearService) {
         this.currentYearService = currentYearService;
+    }
+
+    public File formConsolidatedReportDocx() throws Docx4JException, IOException, OperationCannotBePerformedException{
+        
     }
 
     public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
