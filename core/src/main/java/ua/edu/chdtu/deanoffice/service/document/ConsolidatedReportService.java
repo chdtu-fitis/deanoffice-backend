@@ -54,8 +54,9 @@ public class ConsolidatedReportService {
         this.currentYearService = currentYearService;
     }
 
-    public File formConsolidatedReportDocx() throws Docx4JException, IOException, OperationCannotBePerformedException{
-        
+    public synchronized File formConsolidatedReportDocx(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
+            throws Docx4JException, IOException, OperationCannotBePerformedException{
+        validateData(coursesToStudentGroups);
     }
 
     public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
