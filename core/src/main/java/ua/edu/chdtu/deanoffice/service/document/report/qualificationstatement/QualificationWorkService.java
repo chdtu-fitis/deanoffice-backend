@@ -13,7 +13,9 @@ import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,6 +28,7 @@ import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getJavaTempDirectory;
 @Service
 public class QualificationWorkService {
     private StudentGroupService studentGroupService;
+    private GradeService gradeService;
 
     private final int ROWS_PER_PAGE = 10;
     private final int POSSIBLE_ROWS_ON_SECOND_PAGE = 20;
@@ -41,8 +44,9 @@ public class QualificationWorkService {
     private Resource ttf;
 
     @Autowired
-    public QualificationWorkService(StudentGroupService studentGroupService) {
+    public QualificationWorkService(StudentGroupService studentGroupService, GradeService gradeService) {
         this.studentGroupService = studentGroupService;
+        this.gradeService = gradeService;
     }
 
     public File createQualificationWorkStatementForGroup(int groupId) throws IOException, DocumentException {
@@ -83,12 +87,15 @@ public class QualificationWorkService {
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
         for (StudentDegree studentDegree: studentDegrees) {
+            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
             Student student = studentDegree.getStudent();
             table.addCell(createCell(count + "", font, 0));
             count++;
             String studentFullName = student.getSurname() + " " + student.getName() + " " + student.getPatronimic();
+            StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
+            StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
             table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0)));
             table.addCell(new PdfPCell(new Paragraph("", font)));
             table.addCell(new PdfPCell(new Paragraph("", font)));
             table.addCell(new PdfPCell(new Paragraph("", font)));
