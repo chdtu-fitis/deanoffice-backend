@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
@@ -26,7 +27,10 @@ import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getJavaTempDirectory;
 public class QualificationWorkService {
     private StudentGroupService studentGroupService;
 
-    private final float NUMBER_CELL_WIDTH = 1.5f;
+    private final int ROWS_PER_PAGE = 10;
+    private final int POSSIBLE_ROWS_ON_SECOND_PAGE = 20;
+
+    private final float NUMBER_CELL_WIDTH = 1f;
     private final float PIP_CELL_WIDTH = 8.5f;
     private final float AVERAGE_MARK = 1.7f;
     private final float ZV_WIDTH = 2f;
@@ -63,11 +67,45 @@ public class QualificationWorkService {
             document.add(createCenterAlignedParagraph("Відомість кваліфікаційної роботи " + groupName.toLowerCase() + "а", font, 0));
             document.add(createCenterAlignedParagraph("группа " + studentGroup.getName(), boldFont, 0));
             document.add(createTable(baseFont));
+            document.add(fillTable(baseFont, studentGroup));
         } finally {
             if (document != null)
                 document.close();
         }
         return file;
+    }
+
+    private PdfPTable fillTable(BaseFont baseFont, StudentGroup studentGroup) throws DocumentException {
+        PdfPTable table = new PdfPTable(9);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, 3.7f, 3f, 2.5f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
+        Font font = new Font(baseFont, 12);
+        int count = 1, studentsCount = 0;
+        List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
+        for (StudentDegree studentDegree: studentDegrees) {
+            Student student = studentDegree.getStudent();
+            table.addCell(createCell(count + "", font, 0));
+            count++;
+            String studentFullName = student.getSurname() + " " + student.getName() + " " + student.getPatronimic();
+            table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph("", font)));
+        }
+        if (studentsCount >= ROWS_PER_PAGE) {
+            for (int i = 0; i < POSSIBLE_ROWS_ON_SECOND_PAGE - (studentsCount - ROWS_PER_PAGE); i++) {
+                table.addCell(createCell(count + "", font, 0));
+                for (int j = 1; j < 7; j++) {
+                    table.addCell(createCell("", font, 0));
+                }
+                count++;
+            }
+        }
+        return table;
     }
 
     private PdfPTable createTable(BaseFont baseFont) throws DocumentException {
