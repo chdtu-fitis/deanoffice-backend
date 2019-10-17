@@ -12,6 +12,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.cleanFileName;
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTime;
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getJavaTempDirectory;
@@ -46,6 +48,7 @@ public class ConsolidatedReportService {
     private Resource ttf;
     private static final int NO_BORDER = 0;
     private static final int ALL_BORDER = 15;
+    private static final String TEMPLATE = TEMPLATES_PATH + "SingleGroupStatement.docx";
 
     private final CurrentYearService currentYearService;
     private DocumentIOService documentIOService;
@@ -56,15 +59,21 @@ public class ConsolidatedReportService {
         this.documentIOService = documentIOService;
     }
 
+    //TODO
     public synchronized File formConsolidatedReportDocx(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
             throws Docx4JException, IOException, OperationCannotBePerformedException{
         validateData(coursesToStudentGroups);
-        return documentIOService.
+        return documentIOService.saveDocumentToTemp();
         /*
         return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year, semester),
                     "Predmeti-dlya-zhurnalu -" + year +
                             "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
         */
+    }
+
+    private WordprocessingMLPackage prepareTemplate(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
+            throws Docx4JException {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
     }
 
     public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
