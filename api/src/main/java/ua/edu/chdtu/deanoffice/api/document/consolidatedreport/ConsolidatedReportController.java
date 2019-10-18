@@ -122,8 +122,6 @@ public class ConsolidatedReportController extends DocumentResponseController {
         } catch (Exception e) {
             return handleException(e);
         }
-
-
     }
 
     private Map<CourseForGroup, List<StudentGroup>> getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse (
