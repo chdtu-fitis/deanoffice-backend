@@ -32,9 +32,7 @@ import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
@@ -63,18 +61,37 @@ public class ConsolidatedReportService {
     public synchronized File formConsolidatedReportDocx(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
             throws Docx4JException, IOException, OperationCannotBePerformedException{
         validateData(coursesToStudentGroups);
-        return documentIOService.saveDocumentToTemp();
-        /*
-        return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year, semester),
-                    "Predmeti-dlya-zhurnalu -" + year +
-                            "kurs_" + getFileCreationDateAndTime() + ".docx", FileFormatEnum.DOCX);
-        */
+        return documentIOService.saveDocumentToTemp(loadTemplate(coursesToStudentGroups, user),
+                "ZVEDENA-VIDOMIST" + ".docx", FileFormatEnum.DOCX);
     }
 
-    private WordprocessingMLPackage prepareTemplate(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
+    //TODO
+    private WordprocessingMLPackage loadTemplate(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
             throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
+        WordprocessingMLPackage document = new WordprocessingMLPackage();
+
+        Set<CourseForGroup> courseForGroups = coursesToStudentGroups.keySet();
+        Iterator iterator1 = courseForGroups.iterator();
+        CourseForGroup courseForGroup;
+
+        while (iterator1.hasNext()) {
+            courseForGroup = (CourseForGroup) iterator1.next();
+            document.getMainDocumentPart().getContent().addAll(template.getMainDocumentPart().getContent());
+            fillTemplate(document, courseForGroup, coursesToStudentGroups.get(courseForGroup), user);
+            if (iterator1.hasNext()) {
+                TemplateUtil.addPageBreak(document);
+            }
+        }
+
+        return document;
     }
+
+    private void fillTemplate(WordprocessingMLPackage document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user)
+        throws Docx4JException {
+
+    }
+
 
     public File formConsolidatedReport(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
         validateData(coursesToStudentGroups);
