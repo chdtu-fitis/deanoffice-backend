@@ -108,6 +108,19 @@ public class DepartmentController {
         }
 
     }
+    @PutMapping("/restore")
+    public ResponseEntity restoreDepartment(@RequestParam int departmentId,
+                                            @CurrentUser ApplicationUser user) {
+        try {
+            Department department = departmentService.getById(departmentId);
+            this.verificationService.departmentNotNullAndNotActive(department,departmentId);
+            this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
+            departmentService.restore(department);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
 
     private Department create(DepartmentDTO departmentDTO, Faculty faculty) {
         Department department = Mapper.strictMap(departmentDTO, Department.class);
