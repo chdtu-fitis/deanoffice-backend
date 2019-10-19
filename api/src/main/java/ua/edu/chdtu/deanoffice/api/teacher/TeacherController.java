@@ -46,6 +46,15 @@ public class TeacherController {
             return handleException(e);
         }
     }
+    @GetMapping("/inactive-teachers")
+    public ResponseEntity getInactiveTeachers() {
+        try {
+            List<Teacher> teachers = teacherService.getTeachersByActive(false);
+            return ResponseEntity.ok(map(teachers, TeacherDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
 
     @GetMapping("/teachers")
     public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active,
@@ -75,6 +84,7 @@ public class TeacherController {
             return handleException(e);
         }
     }
+
 
     @PutMapping("/teachers")
     public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO,
