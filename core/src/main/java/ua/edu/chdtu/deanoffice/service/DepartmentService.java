@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
+import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import java.util.List;
 
@@ -17,15 +20,17 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-    public List<Department> getAllByActive(boolean active, int facultyId) {
+    public List<Department> getFacultyDepartmentsByActive(boolean active) {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
         if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
             return departmentRepository.getAllByActive(active);
         } else {
-            return departmentRepository.getAllByActive(active,facultyId);
+            return departmentRepository.getAllByActive(active, facultyId);
         }
     }
 
-    public Department getById(Integer departmentId) {
+    @FacultyAuthorized
+    public Department getById(Integer departmentId) throws UnauthorizedFacultyDataException {
         return this.departmentRepository.findOne(departmentId);
     }
 
