@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Position;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.PositionService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
@@ -120,7 +121,7 @@ public class TeacherController {
         return ExceptionHandlerAdvice.handleException(exception, TeacherController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 
-    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, TeacherDTO teacherDTO) throws OperationCannotBePerformedException {
+    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, TeacherDTO teacherDTO) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException {
         Department department = departmentService.getById(teacherDTO.getDepartmentId());
         if (department == null)
             throw new OperationCannotBePerformedException("Вказана неіснуюча кафедра!");
