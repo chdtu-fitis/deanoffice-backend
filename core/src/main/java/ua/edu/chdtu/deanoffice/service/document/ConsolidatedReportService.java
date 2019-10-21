@@ -27,6 +27,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportTemplateFillService;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
@@ -50,26 +51,32 @@ public class ConsolidatedReportService {
 
     private final CurrentYearService currentYearService;
     private DocumentIOService documentIOService;
+    private ExamReportTemplateFillService examReportTemplateFillService;
 
     @Autowired
-    public ConsolidatedReportService(CurrentYearService currentYearService, DocumentIOService documentIOService) {
+    public ConsolidatedReportService(CurrentYearService currentYearService, DocumentIOService documentIOService,
+                                     ExamReportTemplateFillService examReportTemplateFillService
+                                     ) {
         this.currentYearService = currentYearService;
         this.documentIOService = documentIOService;
+        this.examReportTemplateFillService = examReportTemplateFillService;
     }
 
     //TODO
     public synchronized File formConsolidatedReportDocx(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
             throws Docx4JException, IOException, OperationCannotBePerformedException{
         validateData(coursesToStudentGroups);
+
         return documentIOService.saveDocumentToTemp(loadTemplate(coursesToStudentGroups, user),
                 "ZVEDENA-VIDOMIST" + ".docx", FileFormatEnum.DOCX);
     }
 
     //TODO
     private WordprocessingMLPackage loadTemplate(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
-            throws Docx4JException {
+            throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
-        WordprocessingMLPackage document = new WordprocessingMLPackage();
+        WordprocessingMLPackage document = documentIOService.loadTemplate(TEMPLATE);
+        //WordprocessingMLPackage document = new WordprocessingMLPackage();
 
         Set<CourseForGroup> courseForGroups = coursesToStudentGroups.keySet();
         Iterator iterator1 = courseForGroups.iterator();
@@ -77,19 +84,22 @@ public class ConsolidatedReportService {
 
         while (iterator1.hasNext()) {
             courseForGroup = (CourseForGroup) iterator1.next();
-            document.getMainDocumentPart().getContent().addAll(template.getMainDocumentPart().getContent());
             fillTemplate(document, courseForGroup, coursesToStudentGroups.get(courseForGroup), user);
             if (iterator1.hasNext()) {
                 TemplateUtil.addPageBreak(document);
+                document.getMainDocumentPart().getContent().addAll(template.getMainDocumentPart().getContent());
             }
         }
 
         return document;
     }
 
+    //TODO
     private void fillTemplate(WordprocessingMLPackage document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user)
-        throws Docx4JException {
-
+        throws Docx4JException, IOException {
+       examReportTemplateFillService.fillTemplate(document, courseForGroup, studentGroups);
+        /* Map<String, String> commonDict = new HashMap<>();
+        commonDict.putAll(examReportBaseService.getGroupInfoReplacements(courseForGroup));*/
     }
 
 
@@ -124,29 +134,38 @@ public class ConsolidatedReportService {
         if (coursesToStudentGroups.values().stream().anyMatch(Objects::isNull) || coursesToStudentGroups.values().stream().anyMatch(List::isEmpty)) {
             throw new OperationCannotBePerformedException("Для формування документу потрібно, щоб кожному предмету відповідала хоча б одна група");
         }
+        Degree degree;
+        for (Map.Entry<CourseForGroup, List<StudentGroup>> courseToStudentGroups : coursesToStudentGroups.entrySet()) {
+            degree = courseToStudentGroups.getValue().get(0).getSpecialization().getDegree();
+            for (StudentGroup studentGroup : courseToStudentGroups.getValue()) {
+                if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
+                    throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
+                }
+            }
+        }
     }
 
     private void createOneConsolidatedReport(Document document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
-        Degree degree = studentGroups.get(0).getSpecialization().getDegree();
-        for (StudentGroup studentGroup : studentGroups) {
-            if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
-                throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
-            }
-        }
-        Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
-        for (StudentGroup studentGroup : studentGroups) {
-            if (studentGroup.getSpecialization().getSpeciality().getId() != speciality.getId()) {
-                speciality = null;
-                break;
-            }
-        }
-        Specialization specialization = studentGroups.get(0).getSpecialization();
-        for (StudentGroup studentGroup : studentGroups) {
-            if (studentGroup.getSpecialization().getId() != specialization.getId()) {
-                specialization = null;
-                break;
-            }
-        }
+                        Degree degree = studentGroups.get(0).getSpecialization().getDegree();
+                        for (StudentGroup studentGroup : studentGroups) {
+                            if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
+                                throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
+                            }
+                        }
+                        Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
+                        for (StudentGroup studentGroup : studentGroups) {
+                            if (studentGroup.getSpecialization().getSpeciality().getId() != speciality.getId()) {
+                                speciality = null;
+                                break;
+                            }
+                        }
+                        Specialization specialization = studentGroups.get(0).getSpecialization();
+                        for (StudentGroup studentGroup : studentGroups) {
+                            if (studentGroup.getSpecialization().getId() != specialization.getId()) {
+                                specialization = null;
+                                break;
+                            }
+                        }
         String groupNames = studentGroups.stream().map(NameEntity::getName).collect(Collectors.joining(", "));
 
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
