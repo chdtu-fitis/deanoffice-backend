@@ -321,6 +321,7 @@ public class CourseController {
             } else {
                 CourseName courseName = new CourseName();
                 courseName.setName(courseDTO.getCourseName().getName());
+                courseName.setNameEng(courseDTO.getCourseName().getNameEng());
                 this.courseNameService.saveCourseName(courseName);
                 CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
                 course.setCourseName(newCourseName);
