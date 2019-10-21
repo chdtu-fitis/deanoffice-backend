@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-class ExamReportTemplateFillService extends ExamReportBaseService {
+public class ExamReportTemplateFillService extends ExamReportBaseService {
 
     private static final int STARTING_ROW_INDEX = 7;
     private static final Logger log = LoggerFactory.getLogger(ExamReportTemplateFillService.class);
@@ -47,6 +47,16 @@ class ExamReportTemplateFillService extends ExamReportBaseService {
         return template;
     }
 
+    public void fillTemplate(WordprocessingMLPackage template, CourseForGroup courseForGroup, List<StudentGroup> studentGroups)
+            throws IOException, Docx4JException {
+        for (StudentGroup studentGroup : studentGroups)
+            fillTableWithStudentInitials(template, studentGroup);
+        Map<String, String> commonDict = new HashMap<>();
+        commonDict.putAll(getGroupInfoReplacements(courseForGroup));
+        commonDict.putAll(getCourseInfoReplacements(courseForGroup));
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+    }
+
     WordprocessingMLPackage fillTemplate(String templateName, List<CourseForGroup> coursesForGroups)
             throws IOException, Docx4JException {
         WordprocessingMLPackage reportsDocument = fillTemplate(templateName, coursesForGroups.get(0));
@@ -64,6 +74,7 @@ class ExamReportTemplateFillService extends ExamReportBaseService {
         }
         return reportsDocument;
     }
+
 
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
         Tbl tempTable = TemplateUtil.findTable(template, "№");
