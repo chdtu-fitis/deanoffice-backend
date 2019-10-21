@@ -105,6 +105,16 @@ public class ConsolidatedReportController extends DocumentResponseController {
         }
     }
 
+  /*  @PostMapping("/get-hashmap-format")
+    public Map<Integer, List<Integer>> getHashMap() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        List<Integer> list = new ArrayList<>();
+        list.add(2);
+        list.add(3);
+        map.put(1, list);
+        return map;
+    }*/
+
     @PostMapping("/create-document-docx")
     public ResponseEntity getConsolidatedDocumentDocx(
             @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
@@ -112,7 +122,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
     ) {
         try {
             File consolidatedDocument = consolidatedReportService.formConsolidatedReportDocx(
-                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds), user);
+                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds, false), user);
 
             return buildDocumentResponseEntity(
                     consolidatedDocument,
@@ -125,11 +135,11 @@ public class ConsolidatedReportController extends DocumentResponseController {
     }
 
     private Map<CourseForGroup, List<StudentGroup>> getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse (
-            Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds
+            Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds, boolean isGoodMark
     ) throws Exception {
         Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
-        courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupId) -> {
-            List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId);
+        courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupIds) -> {
+            List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupIds);
             courseForGroupToGroup.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
         });
         Map<CourseForGroup, List<StudentGroup>> courseToStudentGroupsForCreate = new HashMap<>();
@@ -137,7 +147,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
             studentGroups.forEach(group -> {
                 StudentGroup cloneStudentGroup = createClone(group);
                 cloneStudentGroup.setStudentDegrees(
-                        gradeService.filterStudentByGrade(cloneStudentGroup.getStudentDegrees(), courseForGroup, true)
+                        gradeService.filterStudentByGrade(cloneStudentGroup.getStudentDegrees(), courseForGroup, isGoodMark)
                 );
                 if (!cloneStudentGroup.getStudentDegrees().isEmpty()) {
                     List<StudentGroup> item = courseToStudentGroupsForCreate.getOrDefault(courseForGroup, new ArrayList<>());
@@ -159,7 +169,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         try {
 
             File consolidatedDocument = consolidatedReportService.formConsolidatedReport(
-                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds), user);
+                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds, true), user);
             return buildDocumentResponseEntity(
                     consolidatedDocument,
                     consolidatedDocument.getName(),
