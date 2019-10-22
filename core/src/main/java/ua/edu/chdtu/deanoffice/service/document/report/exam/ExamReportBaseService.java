@@ -64,12 +64,12 @@ public class ExamReportBaseService {
 
     Map<String, String> getGroupInfoReplacements(List<StudentGroup> studentGroups, ApplicationUser user) {
         Map<String, String> result = new HashMap<>();
-        String groupNames = null;
+        String groupNames = "";
         for (StudentGroup studentGroup : studentGroups) {
             groupNames += studentGroup.getName() + ",";
         }
-        if (groupNames != null)
-            groupNames.substring(groupNames.length() - 2);
+        //if (groupNames != null)
+            //groupNames.substring(groupNames.length() - 2);
         result.put("GroupName", groupNames);
         Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
         for (StudentGroup studentGroup : studentGroups) {
