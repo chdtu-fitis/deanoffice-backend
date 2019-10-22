@@ -75,6 +75,40 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         return reportsDocument;
     }
 
+    public void fillTemplate(WordprocessingMLPackage template, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, int numberOfTable)
+            throws IOException, Docx4JException {
+        int currentRowIndex = STARTING_ROW_INDEX;
+        for (StudentGroup studentGroup : studentGroups) {
+            fillTableWithStudentInitials(template, studentGroup, numberOfTable, currentRowIndex);
+            currentRowIndex += studentGroup.getActiveStudents().size();
+        }
+        removeUnfilledPlaceholders(template);
+        Map<String, String> commonDict = new HashMap<>();
+        commonDict.putAll(getGroupInfoReplacements(courseForGroup));
+        commonDict.putAll(getCourseInfoReplacements(courseForGroup));
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+    }
+
+    private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup, int numberOfTable, int currentRowIndex) {
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(numberOfTable);
+        if (tempTable == null) {
+            return;
+        }
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+        List<Student> students = studentGroup.getActiveStudents();
+        sortStudentsByInitials(students);
+        for (Student student : students) {
+            Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("StudentInitials", student.getInitialsUkr());
+            replacements.put("RecBook", studentGroup.getStudentDegrees().stream().filter(studentDegree ->
+                    studentDegree.getStudent().equals(student)).findFirst().get().getRecordBookNumber());
+            TemplateUtil.replaceInRow(currentRow, replacements);
+            currentRowIndex++;
+        }
+
+    }
+
 
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {
         Tbl tempTable = TemplateUtil.findTable(template, "№");
