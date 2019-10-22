@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -75,7 +76,8 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         return reportsDocument;
     }
 
-    public void fillTemplate(WordprocessingMLPackage template, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, int numberOfTable)
+    public void fillTemplate(WordprocessingMLPackage template, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, int numberOfTable,
+                             ApplicationUser user)
             throws IOException, Docx4JException {
         int currentRowIndex = STARTING_ROW_INDEX;
         for (StudentGroup studentGroup : studentGroups) {
@@ -84,7 +86,7 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         }
         removeUnfilledPlaceholders(template);
         Map<String, String> commonDict = new HashMap<>();
-        commonDict.putAll(getGroupInfoReplacements(courseForGroup));
+        commonDict.putAll(getGroupInfoReplacements(studentGroups, user));
         commonDict.putAll(getCourseInfoReplacements(courseForGroup));
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
     }
