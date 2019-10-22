@@ -80,7 +80,7 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         int currentRowIndex = STARTING_ROW_INDEX;
         for (StudentGroup studentGroup : studentGroups) {
             fillTableWithStudentInitials(template, studentGroup, numberOfTable, currentRowIndex);
-            currentRowIndex += studentGroup.getActiveStudents().size();
+            currentRowIndex += studentGroup.getActiveStudents().size() + 1;
         }
         removeUnfilledPlaceholders(template);
         Map<String, String> commonDict = new HashMap<>();
@@ -97,9 +97,14 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
         List<Student> students = studentGroup.getActiveStudents();
         sortStudentsByInitials(students);
+        Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+        currentRowIndex++;
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("StudentInitials", studentGroup.getName());
+        TemplateUtil.replaceInRow(currentRow, replacements);
         for (Student student : students) {
-            Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
-            Map<String, String> replacements = new HashMap<>();
+            currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+            replacements.clear();
             replacements.put("StudentInitials", student.getInitialsUkr());
             replacements.put("RecBook", studentGroup.getStudentDegrees().stream().filter(studentDegree ->
                     studentDegree.getStudent().equals(student)).findFirst().get().getRecordBookNumber());
