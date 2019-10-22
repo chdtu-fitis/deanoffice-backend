@@ -73,7 +73,7 @@ public class ConsolidatedReportService {
 
     //TODO
     private WordprocessingMLPackage loadTemplate(Map<CourseForGroup, List<StudentGroup>> coursesToStudentGroups, ApplicationUser user)
-            throws Docx4JException, IOException {
+            throws Docx4JException, IOException, OperationCannotBePerformedException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         WordprocessingMLPackage document = documentIOService.loadTemplate(TEMPLATE);
         //WordprocessingMLPackage document = new WordprocessingMLPackage();
@@ -84,6 +84,9 @@ public class ConsolidatedReportService {
 
         while (iterator1.hasNext()) {
             courseForGroup = (CourseForGroup) iterator1.next();
+            List<StudentGroup> studentGroups = coursesToStudentGroups.get(courseForGroup);
+            Degree degree = studentGroups.get(0).getSpecialization().getDegree();
+            checkIsAllGroupsHaveSameDegree(studentGroups, degree);
             fillTemplate(document, courseForGroup, coursesToStudentGroups.get(courseForGroup), user);
             if (iterator1.hasNext()) {
                 TemplateUtil.addPageBreak(document);
@@ -137,7 +140,6 @@ public class ConsolidatedReportService {
     }
 
     private void checkIsAllGroupsHaveSameDegree(List<StudentGroup> studentGroups, Degree degree) throws OperationCannotBePerformedException {
-
         for (StudentGroup studentGroup : studentGroups) {
             if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
                 throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
