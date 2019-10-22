@@ -81,16 +81,18 @@ public class ConsolidatedReportService {
         Set<CourseForGroup> courseForGroups = coursesToStudentGroups.keySet();
         Iterator iterator1 = courseForGroups.iterator();
         CourseForGroup courseForGroup;
+        int numberOfTable = 5;
 
         while (iterator1.hasNext()) {
             courseForGroup = (CourseForGroup) iterator1.next();
             List<StudentGroup> studentGroups = coursesToStudentGroups.get(courseForGroup);
             Degree degree = studentGroups.get(0).getSpecialization().getDegree();
             checkIsAllGroupsHaveSameDegree(studentGroups, degree);
-            fillTemplate(document, courseForGroup, coursesToStudentGroups.get(courseForGroup), user);
+            fillTemplate(document, courseForGroup, coursesToStudentGroups.get(courseForGroup), user, numberOfTable);
             if (iterator1.hasNext()) {
                 TemplateUtil.addPageBreak(document);
                 document.getMainDocumentPart().getContent().addAll(template.getMainDocumentPart().getContent());
+                numberOfTable = numberOfTable + 9;
             }
         }
 
@@ -98,9 +100,9 @@ public class ConsolidatedReportService {
     }
 
     //TODO
-    private void fillTemplate(WordprocessingMLPackage document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user)
+    private void fillTemplate(WordprocessingMLPackage document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user, int numberOfTable)
         throws Docx4JException, IOException {
-       examReportTemplateFillService.fillTemplate(document, courseForGroup, studentGroups);
+       examReportTemplateFillService.fillTemplate(document, courseForGroup, studentGroups, numberOfTable);
         /* Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(examReportBaseService.getGroupInfoReplacements(courseForGroup));*/
     }
