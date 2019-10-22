@@ -134,24 +134,20 @@ public class ConsolidatedReportService {
         if (coursesToStudentGroups.values().stream().anyMatch(Objects::isNull) || coursesToStudentGroups.values().stream().anyMatch(List::isEmpty)) {
             throw new OperationCannotBePerformedException("Для формування документу потрібно, щоб кожному предмету відповідала хоча б одна група");
         }
-        Degree degree;
-        for (Map.Entry<CourseForGroup, List<StudentGroup>> courseToStudentGroups : coursesToStudentGroups.entrySet()) {
-            degree = courseToStudentGroups.getValue().get(0).getSpecialization().getDegree();
-            for (StudentGroup studentGroup : courseToStudentGroups.getValue()) {
-                if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
-                    throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
-                }
+    }
+
+    private void checkIsAllGroupsHaveSameDegree(List<StudentGroup> studentGroups, Degree degree) throws OperationCannotBePerformedException {
+
+        for (StudentGroup studentGroup : studentGroups) {
+            if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
+                throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
             }
         }
     }
 
     private void createOneConsolidatedReport(Document document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user) throws DocumentException, IOException, OperationCannotBePerformedException {
-                        Degree degree = studentGroups.get(0).getSpecialization().getDegree();
-                        for (StudentGroup studentGroup : studentGroups) {
-                            if (studentGroup.getSpecialization().getDegree().getId() != degree.getId()) {
-                                throw new OperationCannotBePerformedException("В межах одного курсу всі групи повинні мати один ступінь");
-                            }
-                        }
+        Degree degree = studentGroups.get(0).getSpecialization().getDegree();
+        checkIsAllGroupsHaveSameDegree(studentGroups, degree);
                         Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
                         for (StudentGroup studentGroup : studentGroups) {
                             if (studentGroup.getSpecialization().getSpeciality().getId() != speciality.getId()) {
