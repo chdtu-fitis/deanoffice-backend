@@ -102,7 +102,7 @@ public class ConsolidatedReportService {
     //TODO
     private void fillTemplate(WordprocessingMLPackage document, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, ApplicationUser user, int numberOfTable)
         throws Docx4JException, IOException {
-       examReportTemplateFillService.fillTemplate(document, courseForGroup, studentGroups, numberOfTable);
+       examReportTemplateFillService.fillTemplate(document, courseForGroup, studentGroups, numberOfTable, user);
     }
 
 
