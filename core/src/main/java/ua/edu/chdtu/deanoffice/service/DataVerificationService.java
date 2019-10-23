@@ -82,6 +82,31 @@ public class DataVerificationService {
         }
     }
 
+    public void isTeachersNotActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
+        for (Teacher teacher : teachers) {
+            if (teacher.isActive())
+                throw new OperationCannotBePerformedException("Вибрані вчителі є активними!");
+        }
+    }
+
+    public void specializationNotNull(Specialization specialization,
+                                      int specializationId) throws OperationCannotBePerformedException {
+        if (specialization == null) {
+            throw new OperationCannotBePerformedException("Освітню програму [" + specializationId + "] не знайдено");
+        }
+    }
+
+    public void specializationNotNullAndNotActive(Specialization specialization,
+                                                  int specializationId) throws OperationCannotBePerformedException {
+        specializationNotNull(specialization, specializationId);
+        if (specialization.isActive()) {
+            throw new OperationCannotBePerformedException("Освітня програма [" + specialization.getName() + "] не активна в даний час");
+        }
+        if (!specialization.isActive()) {
+            throw new OperationCannotBePerformedException("Освітня програма [" + specializationId + "] не активна в даний час");
+        }
+    }
+
     public void existActiveStudentDegreesInInactiveStudentGroups(List<StudentDegree> activeStudentDegrees) throws OperationCannotBePerformedException {
         for (StudentDegree activeStudentDegree : activeStudentDegrees) {
             if (activeStudentDegree.getStudentGroup().isActive() == false) {
