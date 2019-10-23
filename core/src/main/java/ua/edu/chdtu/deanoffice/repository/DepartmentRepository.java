@@ -15,5 +15,8 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
             "order by d.name")
     List<Department> getAllByActive(@Param("active") boolean active,@Param("faculty_id") int facultyId);
 
-
+    @Query("select d from Department d " +
+            "where d.active = :active " +
+            "order by d.name")
+    List<Department> getAllByActive(@Param("active") boolean active);
 }

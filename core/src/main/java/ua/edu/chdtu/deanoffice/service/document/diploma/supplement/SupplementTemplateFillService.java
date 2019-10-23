@@ -15,6 +15,7 @@ import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -48,7 +49,6 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlac
 public class SupplementTemplateFillService {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
-    private static final int FOREIGN_STUDENTS_FACULTY_ID = 8;
     private static final String STATE_EXAM = "Кваліфікаційний іспит.";
     private final DocumentIOService documentIOService;
     private QualificationForSpecializationService qualificationForSpecializationService;
@@ -322,7 +322,7 @@ public class SupplementTemplateFillService {
         String admissionRequirementsPlaceholder = "AdmissionRequirements";
         String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
         if (studentDegree.getStudentGroup().getSpecialization().getFaculty().getId()
-                == FOREIGN_STUDENTS_FACULTY_ID) {
+                == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
             result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
             result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
         } else if (studentSummary.getStudentGroup().getTuitionTerm().equals(TuitionTerm.SHORTENED)) {

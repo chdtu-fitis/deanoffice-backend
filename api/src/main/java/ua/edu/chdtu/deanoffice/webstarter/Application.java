@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.system.ApplicationPidFileWriter;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "ua.edu.chdtu.deanoffice"
 })
 @EnableJpaRepositories("ua.edu.chdtu.deanoffice")
+@EnableAspectJAutoProxy
 public class Application extends SpringBootServletInitializer {
 
     private static Logger log = LoggerFactory.getLogger(Application.class);
