@@ -36,7 +36,9 @@ public class ExamReportBaseService {
             result.put("ExamDate", "");
         }
 
-        result.put("Course", String.format("%d", currentYearService.get().getCurrYear() - courseForGroup.getStudentGroup().getCreationYear() + 1));
+        int currentYear = currentYearService.get().getCurrYear();
+        result.put("Year", String.valueOf(currentYear).substring(2));
+        result.put("Course", String.format("%d", currentYear - courseForGroup.getStudentGroup().getCreationYear() + courseForGroup.getStudentGroup().getBeginYears()));
         result.put("KCType", course.getKnowledgeControl().getName());
         if (courseForGroup.getTeacher() != null) {
             result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
@@ -64,12 +66,11 @@ public class ExamReportBaseService {
 
     Map<String, String> getGroupInfoReplacements(List<StudentGroup> studentGroups, ApplicationUser user) {
         Map<String, String> result = new HashMap<>();
+        result.put("ReportType", "ЗВЕДЕНА");
         String groupNames = "";
         for (StudentGroup studentGroup : studentGroups) {
             groupNames += studentGroup.getName() + ",";
         }
-        //if (groupNames != null)
-            //groupNames.substring(groupNames.length() - 2);
         result.put("GroupName", groupNames);
         Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
         for (StudentGroup studentGroup : studentGroups) {

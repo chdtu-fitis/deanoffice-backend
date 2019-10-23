@@ -62,7 +62,6 @@ public class ConsolidatedReportService {
                 numberOfTable = numberOfTable + 9;
             }
         }
-
         return document;
     }
 
