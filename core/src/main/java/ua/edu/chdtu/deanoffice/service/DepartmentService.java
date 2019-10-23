@@ -42,4 +42,8 @@ public class DepartmentService {
         department.setActive(false);
         departmentRepository.save(department);
     }
+    public void restore(Department department) {
+        department.setActive(true);
+        departmentRepository.save(department);
+    }
 }
