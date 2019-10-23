@@ -71,6 +71,9 @@ public class ExamReportBaseService {
         for (StudentGroup studentGroup : studentGroups) {
             groupNames += studentGroup.getName() + ",";
         }
+        if (groupNames.length() > 0) {
+            groupNames = groupNames.substring(0, groupNames.length()-1);
+        }
         result.put("GroupName", groupNames);
         Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
         for (StudentGroup studentGroup : studentGroups) {
