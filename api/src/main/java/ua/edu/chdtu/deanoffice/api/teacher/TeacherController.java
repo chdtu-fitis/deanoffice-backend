@@ -39,10 +39,20 @@ public class TeacherController {
     }
 
     @GetMapping("/teachers-short")
-    public ResponseEntity getAllActiveTeachers(){
+    public ResponseEntity getAllActiveTeachers() {
         try {
             List<Teacher> teachers = teacherService.getTeachersByActive(true);
             return ResponseEntity.ok(map(teachers, PersonFullNameDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/inactive-teachers")
+    public ResponseEntity getInactiveTeachers() {
+        try {
+            List<Teacher> teachers = teacherService.getTeachersByActive(false);
+            return ResponseEntity.ok(map(teachers, TeacherDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
