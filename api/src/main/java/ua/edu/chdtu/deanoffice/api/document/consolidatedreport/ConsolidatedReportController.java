@@ -105,17 +105,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         }
     }
 
-  /*  @PostMapping("/get-hashmap-format")
-    public Map<Integer, List<Integer>> getHashMap() {
-        Map<Integer, List<Integer>> map = new HashMap<>();
-        List<Integer> list = new ArrayList<>();
-        list.add(2);
-        list.add(3);
-        map.put(1, list);
-        return map;
-    }*/
-
-    @PostMapping("/create-document-docx")
+    @PostMapping("/create-document")
     public ResponseEntity getConsolidatedDocumentDocx(
             @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
             @CurrentUser ApplicationUser user
@@ -136,7 +126,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
 
     private Map<CourseForGroup, List<StudentGroup>> getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(
             Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds, boolean isGoodMark
-    ) throws Exception {
+    ) {
         Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
         courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupIds) -> {
             List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupIds);
@@ -159,25 +149,6 @@ public class ConsolidatedReportController extends DocumentResponseController {
         });
 
         return courseToStudentGroupsForCreate;
-    }
-
-    @PostMapping("/create-document")
-    public ResponseEntity getConsolidatedDocument(
-            @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
-            @CurrentUser ApplicationUser user
-    ) {
-        try {
-
-            File consolidatedDocument = consolidatedReportService.formConsolidatedReport(
-                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(courseForGroupIdsToStudentGroupsIds, true), user);
-            return buildDocumentResponseEntity(
-                    consolidatedDocument,
-                    consolidatedDocument.getName(),
-                    DocumentResponseController.MEDIA_TYPE_PDF
-            );
-        } catch (Exception e) {
-            return handleException(e);
-        }
     }
 
     private StudentGroup createClone(StudentGroup group) {
