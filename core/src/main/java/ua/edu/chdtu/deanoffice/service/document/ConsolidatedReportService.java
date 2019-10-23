@@ -36,7 +36,7 @@ public class ConsolidatedReportService {
         validateData(coursesToStudentGroups);
 
         return documentIOService.saveDocumentToTemp(loadTemplate(coursesToStudentGroups, user),
-                "ZVEDENA-VIDOMIST" + ".docx", FileFormatEnum.DOCX);
+                "ZVEDENA-VIDOMIST", FileFormatEnum.DOCX);
     }
 
     //TODO
