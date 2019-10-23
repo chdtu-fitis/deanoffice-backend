@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.consolidatedreport;
+package ua.edu.chdtu.deanoffice.api.document.examreport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
