@@ -26,8 +26,8 @@ import java.util.*;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
-@RequestMapping("/documents/consolidated-report")
-public class ConsolidatedReportController extends DocumentResponseController {
+@RequestMapping("/documents/consolidated-exam-report")
+public class ConsolidatedExamReportController extends DocumentResponseController {
 
     private final CourseForGroupService courseForGroupService;
     private final StudentGroupService studentGroupService;
@@ -36,7 +36,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
     private final GradeService gradeService;
 
     @Autowired
-    public ConsolidatedReportController(
+    public ConsolidatedExamReportController(
             CourseForGroupService courseForGroupService,
             StudentGroupService studentGroupService,
             CourseService courseService,
@@ -167,6 +167,6 @@ public class ConsolidatedReportController extends DocumentResponseController {
     }
 
     private static ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, ConsolidatedReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, ConsolidatedExamReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }
