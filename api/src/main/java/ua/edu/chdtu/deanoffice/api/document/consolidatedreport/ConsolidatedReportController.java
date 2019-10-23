@@ -122,7 +122,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
     ) {
         try {
             File consolidatedDocument = consolidatedReportService.formConsolidatedReportDocx(
-                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds, false), user);
+                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(courseForGroupIdsToStudentGroupsIds, false), user);
 
             return buildDocumentResponseEntity(
                     consolidatedDocument,
@@ -134,7 +134,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         }
     }
 
-    private Map<CourseForGroup, List<StudentGroup>> getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse (
+    private Map<CourseForGroup, List<StudentGroup>> getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(
             Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds, boolean isGoodMark
     ) throws Exception {
         Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
@@ -169,7 +169,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
         try {
 
             File consolidatedDocument = consolidatedReportService.formConsolidatedReport(
-                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkFromTheCourse(courseForGroupIdsToStudentGroupsIds, true), user);
+                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(courseForGroupIdsToStudentGroupsIds, true), user);
             return buildDocumentResponseEntity(
                     consolidatedDocument,
                     consolidatedDocument.getName(),
