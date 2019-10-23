@@ -33,12 +33,16 @@ public class QualificationWorkService {
     private final int ROWS_PER_PAGE = 10;
     private final int POSSIBLE_ROWS_ON_SECOND_PAGE = 20;
 
-    private final float NUMBER_CELL_WIDTH = 1f;
-    private final float PIP_CELL_WIDTH = 8.5f;
-    private final float AVERAGE_MARK = 1.7f;
-    private final float ZV_WIDTH = 2f;
-    private final float PROTOKOL_NUMBER_WIDTH = 4.5f;
-    private final float SIGNATURE_WIDTH = 3f;
+    private final float NUMBER_CELL_WIDTH = 0.3f;
+    private final float PIP_CELL_WIDTH = 1.7f;
+    private final float AVERAGE_MARK = 0.4f;
+    private final float ZV_WIDTH = 0.4f;
+    private final float GRADE_CELL = 1.5f;
+    private final float NATIONAL_GRADE = 1f;
+    private final float HUNDRED_GRADE = 1f;
+    private final float ECTS = 1f;
+    private final float PROTOKOL_NUMBER_WIDTH = 1f;
+    private final float SIGNATURE_WIDTH = 0.6f;
 
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
@@ -51,7 +55,7 @@ public class QualificationWorkService {
 
     public File createQualificationWorkStatementForGroup(int groupId) throws IOException, DocumentException {
         StudentGroup studentGroup = studentGroupService.getById(groupId);
-        Document document = new Document(PageSize.A4, 10f, 28f, 28f, 28f);
+        Document document = new Document(PageSize.A4, 28f, 28f, 28f, 28f);
         String filePath = getJavaTempDirectory() + "/" + "vidomist_qalificaciinoi_roboti" +
                 studentGroup.getName() +
                 getFileCreationDateAndTime() + ".pdf";
@@ -82,7 +86,7 @@ public class QualificationWorkService {
     private PdfPTable fillTable(BaseFont baseFont, StudentGroup studentGroup) throws DocumentException {
         PdfPTable table = new PdfPTable(9);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, 3.7f, 3f, 2.5f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, NATIONAL_GRADE, HUNDRED_GRADE, ECTS, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
         Font font = new Font(baseFont, 12);
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
@@ -96,12 +100,12 @@ public class QualificationWorkService {
             StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
             table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
             table.addCell(new PdfPCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
-            table.addCell(new PdfPCell(new Paragraph("", font)));
+            table.addCell(new PdfPCell(new Paragraph()));
+            table.addCell(new PdfPCell(new Paragraph()));
+            table.addCell(new PdfPCell(new Paragraph()));
+            table.addCell(new PdfPCell(new Paragraph()));
+            table.addCell(new PdfPCell(new Paragraph()));
+            table.addCell(new PdfPCell(new Paragraph()));
         }
         if (studentsCount >= ROWS_PER_PAGE) {
             for (int i = 0; i < POSSIBLE_ROWS_ON_SECOND_PAGE - (studentsCount - ROWS_PER_PAGE); i++) {
@@ -119,12 +123,12 @@ public class QualificationWorkService {
         Font font = new Font(baseFont, 10);
         PdfPTable table = new PdfPTable(7);
         table.setSpacingBefore(10);
-        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, 10f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, GRADE_CELL, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
         table.setWidthPercentage(100);
         table.addCell(createCell("№ з/п", font, 0));
         table.addCell(createCell("Прізвище та ініціали студентів", font, 0));
         table.addCell(createCell("Середній бал", font, 0));
-        table.addCell(createCell("ЗВ", font, 5));
+        table.addCell(createCell("ЗВ", font, 0));
         table.addCell(createGradeTable(font));
         table.addCell(createCell("Дата і номер протоколу державної екзаменаційної комісії", font, 0));
         table.addCell(createCell("Підпис зав.каф", font, 0));
@@ -135,7 +139,7 @@ public class QualificationWorkService {
         PdfPCell gradeCell = new PdfPCell();
         gradeCell.setPadding(0);
         PdfPTable gradeTable = new PdfPTable(3);
-        gradeTable.setWidths(new float[]{3.7f, 3f, 2.5f});
+        gradeTable.setWidths(new float[]{NATIONAL_GRADE, HUNDRED_GRADE, ECTS});
         gradeTable.setWidthPercentage(100);
         gradeTable.addCell(createGradeCell("Оцінка", font, 4,
                 PdfPCell.NO_BORDER, 25));
