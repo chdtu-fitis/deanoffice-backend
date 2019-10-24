@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.reportsjournal.ReportsJournalController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -18,7 +17,6 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.ssc.SingleStudentAndCourseExamReportService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.ssc.StudentCourse;
-import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +51,6 @@ public class SingleStudentAndCourseExamReportController extends DocumentResponse
         List<StudentCourse> studentsCourse = new ArrayList<>();
         try {
             StudentCourseDTO[] studentCoursesDTOs = mapper.readValue(studentsCoursesJson, StudentCourseDTO[].class);
-            //List<StudentCourse> studentsCourse = new ArrayList<>();
             for(StudentCourseDTO studentCourseDTO : studentCoursesDTOs) {
                 StudentDegree studentDegree = studentDegreeService.getById(studentCourseDTO.getStudentDegreeId());
                 for(Integer courseId : studentCourseDTO.getCourses()) {
@@ -65,7 +62,6 @@ public class SingleStudentAndCourseExamReportController extends DocumentResponse
         } catch (IOException e) {
             e.printStackTrace();
         }try {
-            //facultyService.checkGroup(groupId, user.getFaculty().getId());
             File groupDiplomaSupplements = singleStudentAndCourseExamReportService.formDocument( studentsCourse );
             return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {

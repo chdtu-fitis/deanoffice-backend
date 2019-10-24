@@ -2,7 +2,6 @@ package ua.edu.chdtu.deanoffice.service.document.report.exam.ssc;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import javafx.scene.control.Cell;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -12,24 +11,16 @@ import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.course.CourseService;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class SingleStudentAndCourseExamReportService {
-    public static final int COLUMNS_COUNT = 5;
     public static final float PAGE_MARGIN = 36f;
-    public static final float HEIGHT_TABLE_PAGE = 250;
-    public static final float HEIGHT_FIXED = 50;
-    public static final float UNDERLINE_THICKNESS = 0.7f;
     public static final float FONT_SIZE_14 = 14f;
     public static final float FONT_SIZE_12 = 12f;
     public static final float FONT_SIZE_10 = 10f;
-    public static final float PADDING_BOTTOM = 5;
     private Font FONT_14;
     private Font FONT_14_BOLD;
     private Font FONT_12;
@@ -38,10 +29,6 @@ public class SingleStudentAndCourseExamReportService {
     @Value(value = "classpath:fonts/timesnewroman/times.ttf")
     private Resource ttf;
 
-    @Autowired
-    private StudentDegreeService studentDegreeService;
-    @Autowired
-    private CourseService courseService;
     @Autowired
     CourseForGroupService courseForGroupService;
     @Autowired
