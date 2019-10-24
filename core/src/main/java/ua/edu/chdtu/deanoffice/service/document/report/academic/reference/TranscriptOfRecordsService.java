@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -18,6 +19,7 @@ import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.Academ
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
@@ -26,13 +28,8 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextP
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
-public class TranscriptOfRecordsService {
+public class TranscriptOfRecordsService extends AcademicCertificateBaseService{
     private static final String TEMPLATE = TEMPLATES_PATH + "AbstractScholasticRecords.docx";
-    private static final int INDEX_OF_TABLE_WITH_GRADES = 11;
-    private static final String DOCUMENT_DELIMITER = "/";
-    private static final String NO_GRADES_DESCRIPTION_UKR = "Заліків та іспитів не здавав(ла).";
-    private static final String NO_GRADES_DESCRIPTION_EN = "No credits and exams.";
-    private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
     @Autowired
     private DocumentIOService documentIOService;
@@ -42,9 +39,6 @@ public class TranscriptOfRecordsService {
 
     @Autowired
     private StudentDegreeService studentDegreeService;
-
-    @Autowired
-    private AcademicReferenceService academicReferenceService;
 
     public File formTranscriptOfRecordsDocument(int studentDegreeId) throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
@@ -59,9 +53,8 @@ public class TranscriptOfRecordsService {
     private WordprocessingMLPackage formTranscriptOfRecordsDocument(String templateFilepath, StudentSummaryForAcademicReference studentSummary)
             throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
-        academicReferenceService.prepareTable(template, studentSummary);
-        replaceTextPlaceholdersInTemplate(template, academicReferenceService.getStudentInfoDictionary(studentSummary));
+        prepareTable(template, studentSummary);
+        replaceTextPlaceholdersInTemplate(template, getStudentInfoDictionary(studentSummary));
         return template;
     }
-
 }
