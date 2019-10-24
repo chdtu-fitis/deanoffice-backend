@@ -60,12 +60,13 @@ public class AcademicReferenceService {
             throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
         prepareTable(template, studentSummary);
-        replaceTextPlaceholdersInTemplate(template, getStudentInfoDictionary(studentSummary, studentExpel));
+        replaceTextPlaceholdersInTemplate(template, getStudentInfoDictionary(studentSummary));
+        replaceTextPlaceholdersInTemplate(template, getStudentExpelInfoDictionary(studentExpel));
         return template;
     }
 
 
-    private HashMap<String, String> getStudentInfoDictionary(StudentSummaryForAcademicReference studentSummary, StudentExpel studentExpel) {
+    public HashMap<String, String> getStudentInfoDictionary(StudentSummaryForAcademicReference studentSummary) {
         HashMap<String, String> result = new HashMap();
         StudentDegree studentDegree = studentSummary.getStudentDegree();
         Student student = studentDegree.getStudent();
@@ -90,6 +91,7 @@ public class AcademicReferenceService {
         result.put("individualNumber",studentDegree.getSupplementNumber());
         result.put("countryOfBirthUkr", "Україна");
         result.put("countryOfBirthEng", "Ukraine");
+
         result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
         result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
         result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
@@ -98,16 +100,21 @@ public class AcademicReferenceService {
         result.put("programHeadInfoEng", studentDegree.getSpecialization().getEducationalProgramHeadInfoEng());
 
         result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
+        result.put("today", formatDate(new Date()));
+        return result;
+    }
+
+    private HashMap<String, String> getStudentExpelInfoDictionary(StudentExpel studentExpel){
+        HashMap<String, String> result = new HashMap();
         result.put("endStudy", formatDate(studentExpel.getExpelDate()));
         result.put("expelReasonUkr", studentExpel.getOrderReason().getName());
         result.put("expelReasonEng", studentExpel.getOrderReason().getNameEng());
         result.put("orderUkr", " від "+formatDate(studentExpel.getOrderDate())+" № "+studentExpel.getOrderNumber());
         result.put("orderEng", formatDate(studentExpel.getOrderDate())+", № "+studentExpel.getOrderNumber());
-        result.put("today", formatDate(new Date()));
         return result;
     }
 
-    private void prepareTable(WordprocessingMLPackage template, StudentSummaryForAcademicReference studentSummary) {
+    public void prepareTable(WordprocessingMLPackage template, StudentSummaryForAcademicReference studentSummary) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(INDEX_OF_TABLE_WITH_GRADES);
         if(studentSummary.semesters.isEmpty()){
             table.getContent().remove(2);
