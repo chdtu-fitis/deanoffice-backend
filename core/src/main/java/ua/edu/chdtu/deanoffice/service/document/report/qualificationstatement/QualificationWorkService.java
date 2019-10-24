@@ -76,6 +76,12 @@ public class QualificationWorkService {
             document.add(createCenterAlignedParagraph("группа " + studentGroup.getName(), boldFont, 0));
             document.add(createTable(baseFont));
             document.add(fillTable(baseFont, studentGroup));
+            Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
+                    + "                                      "
+                    + studentGroup.getSpecialization().getFaculty().getDean(), font);
+            textBottom.setSpacingBefore(100f);
+            textBottom.setIndentationLeft(75f);
+            document.add(textBottom);
         } finally {
             if (document != null)
                 document.close();
@@ -86,26 +92,28 @@ public class QualificationWorkService {
     private PdfPTable fillTable(BaseFont baseFont, StudentGroup studentGroup) throws DocumentException {
         PdfPTable table = new PdfPTable(9);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, NATIONAL_GRADE, HUNDRED_GRADE, ECTS, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, NATIONAL_GRADE - 0.5f, HUNDRED_GRADE - 0.5f, ECTS - 0.5f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
         Font font = new Font(baseFont, 12);
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
         for (StudentDegree studentDegree: studentDegrees) {
             List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
-            Student student = studentDegree.getStudent();
-            table.addCell(createCell(count + "", font, 0));
-            count++;
-            String studentFullName = student.getSurname() + " " + student.getName() + " " + student.getPatronimic();
-            StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
-            StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
-            table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
-            table.addCell(new PdfPCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0)));
-            table.addCell(new PdfPCell(new Paragraph()));
-            table.addCell(new PdfPCell(new Paragraph()));
-            table.addCell(new PdfPCell(new Paragraph()));
-            table.addCell(new PdfPCell(new Paragraph()));
-            table.addCell(new PdfPCell(new Paragraph()));
-            table.addCell(new PdfPCell(new Paragraph()));
+            if (!isStudentDebtor(grades)) {
+                Student student = studentDegree.getStudent();
+                table.addCell(createCell(count + "", font, 0));
+                count++;
+                String studentFullName = student.getSurname() + " " + student.getName() + " " + student.getPatronimic();
+                StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
+                StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
+                table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
+                table.addCell(new PdfPCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0)));
+                table.addCell(new PdfPCell(new Paragraph()));
+                table.addCell(new PdfPCell(new Paragraph()));
+                table.addCell(new PdfPCell(new Paragraph()));
+                table.addCell(new PdfPCell(new Paragraph()));
+                table.addCell(new PdfPCell(new Paragraph()));
+                table.addCell(new PdfPCell(new Paragraph()));
+            }
         }
         if (studentsCount >= ROWS_PER_PAGE) {
             for (int i = 0; i < POSSIBLE_ROWS_ON_SECOND_PAGE - (studentsCount - ROWS_PER_PAGE); i++) {
@@ -119,6 +127,16 @@ public class QualificationWorkService {
         return table;
     }
 
+    private boolean isStudentDebtor(List<List<Grade>> grades) {
+        for (int i = 0; i < grades.size() - 1; i++) {
+            for (Grade grade : grades.get(i)) {
+                Integer points = grade.getPoints();
+                if (points == null || points < 60) return true;
+            }
+        }
+        return false;
+    }
+
     private PdfPTable createTable(BaseFont baseFont) throws DocumentException {
         Font font = new Font(baseFont, 10);
         PdfPTable table = new PdfPTable(7);
@@ -126,9 +144,9 @@ public class QualificationWorkService {
         table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, GRADE_CELL, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
         table.setWidthPercentage(100);
         table.addCell(createCell("№ з/п", font, 0));
-        table.addCell(createCell("Прізвище та ініціали студентів", font, 0));
+        table.addCell(createCell("Прізвище та ініціали студентів", font, 30));
         table.addCell(createCell("Середній бал", font, 0));
-        table.addCell(createCell("ЗВ", font, 0));
+        table.addCell(createCell("ЗВ", font, 40));
         table.addCell(createGradeTable(font));
         table.addCell(createCell("Дата і номер протоколу державної екзаменаційної комісії", font, 0));
         table.addCell(createCell("Підпис зав.каф", font, 0));
@@ -143,7 +161,7 @@ public class QualificationWorkService {
         gradeTable.setWidthPercentage(100);
         gradeTable.addCell(createGradeCell("Оцінка", font, 4,
                 PdfPCell.NO_BORDER, 25));
-        gradeTable.addCell(createCell("за національною шкалою", font, 0));
+        gradeTable.addCell(createCell("за націона льною шкалою", font, 0));
         gradeTable.addCell(createCell("кількість балів за 100 бальною шкалою", font, 0));
         gradeTable.addCell(createCell("ECTS", font, 0));
         gradeCell.addElement(gradeTable);
