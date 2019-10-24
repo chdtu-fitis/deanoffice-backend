@@ -20,19 +20,19 @@ import java.util.Date;
 @AllArgsConstructor
 public class StudentExpel extends BaseEntity {
     @ManyToOne
-    private StudentDegree studentDegree;
+    private StudentDegree studentDegree; // ступінь
     @ManyToOne
-    private StudentGroup studentGroup;
+    private StudentGroup studentGroup;  // група
     private int studyYear;
     @Enumerated(value = EnumType.STRING)
-    private Payment payment = Payment.BUDGET;
+    private Payment payment = Payment.BUDGET; // бюджет чи контракт
     @Temporal(TemporalType.DATE)
-    private Date expelDate;
-    private String orderNumber;
+    private Date expelDate; // дата вибування
+    private String orderNumber; // номер наказу про вибування
     @Temporal(TemporalType.DATE)
-    private Date orderDate;
+    private Date orderDate; // дата наказу
     @ManyToOne
-    private OrderReason orderReason;
+    private OrderReason orderReason; // причина наказу
     @Temporal(TemporalType.DATE)
-    private Date applicationDate;
+    private Date applicationDate; // дата
 }
