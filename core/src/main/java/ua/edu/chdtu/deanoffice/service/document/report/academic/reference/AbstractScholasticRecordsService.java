@@ -2,33 +2,26 @@ package ua.edu.chdtu.deanoffice.service.document.report.academic.reference;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.Tbl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.StudentSummaryForAcademicReference;
-import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.AcademicReferenceService;
-
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextPlaceholdersInTemplate;
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
-public class TranscriptOfRecordsService extends AcademicCertificateBaseService{
+public class AbstractScholasticRecordsService extends AcademicCertificateBaseService{
     private static final String TEMPLATE = TEMPLATES_PATH + "AbstractScholasticRecords.docx";
 
     @Autowired

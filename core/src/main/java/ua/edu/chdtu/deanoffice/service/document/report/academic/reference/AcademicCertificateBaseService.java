@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.service.document.report.academic.reference;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -13,7 +12,6 @@ import ua.edu.chdtu.deanoffice.util.PersonUtil;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;

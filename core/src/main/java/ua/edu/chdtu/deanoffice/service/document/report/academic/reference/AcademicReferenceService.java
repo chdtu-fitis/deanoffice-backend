@@ -12,7 +12,6 @@ import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
-import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +33,6 @@ public class AcademicReferenceService extends AcademicCertificateBaseService {
     @Autowired
     private StudentExpelService studentExpelService;
 
-    @Autowired
-    private AcademicCertificateBaseService academicCertificateBaseService;
     private static final String TEMPLATE = TEMPLATES_PATH + "AcademicCertificate.docx";
 
     public File formDocument(int studentExpelId) throws Docx4JException, IOException {

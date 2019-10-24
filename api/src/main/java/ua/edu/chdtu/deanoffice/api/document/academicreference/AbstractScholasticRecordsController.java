@@ -12,7 +12,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.TranscriptOfRecordsService;
+import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.AbstractScholasticRecordsService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
@@ -20,13 +20,13 @@ import java.io.IOException;
 
 @Controller
 @RequestMapping("/documents/abstract-scholastic-records")
-public class TranscriptOfRecordsController extends DocumentResponseController {
+public class AbstractScholasticRecordsController extends DocumentResponseController {
 
-    private TranscriptOfRecordsService transcriptOfRecordsService;
+    private AbstractScholasticRecordsService abstractScholasticRecordsService;
     private FacultyService facultyService;
 
-    public TranscriptOfRecordsController(TranscriptOfRecordsService transcriptOfRecordsService, FacultyService facultyService) {
-        this.transcriptOfRecordsService = transcriptOfRecordsService;
+    public AbstractScholasticRecordsController(AbstractScholasticRecordsService abstractScholasticRecordsService, FacultyService facultyService) {
+        this.abstractScholasticRecordsService = abstractScholasticRecordsService;
         this.facultyService = facultyService;
     }
 
@@ -35,7 +35,7 @@ public class TranscriptOfRecordsController extends DocumentResponseController {
                                                                @CurrentUser ApplicationUser user) throws IOException, Docx4JException {
         try {
             facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
-            File transcriptOfRecordsReport = transcriptOfRecordsService.formTranscriptOfRecordsDocument(studentDegreeId);
+            File transcriptOfRecordsReport = abstractScholasticRecordsService.formTranscriptOfRecordsDocument(studentDegreeId);
             return buildDocumentResponseEntity(transcriptOfRecordsReport, transcriptOfRecordsReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
