@@ -22,7 +22,7 @@ public class SingleStudentAndCourseExamReportService {
     public static final float FONT_SIZE_12 = 12f;
     public static final float FONT_SIZE_10 = 10f;
 
-    @Value(value = "classpath:fonts/timesnewroman/times.ttf")
+    @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
     @Autowired
@@ -128,7 +128,7 @@ public class SingleStudentAndCourseExamReportService {
     private PdfPTable createCourseTable(Course course, Font font) throws DocumentException {
         PdfPTable courseTable = new PdfPTable(2);
         courseTable.setWidthPercentage(100);
-        courseTable.setTotalWidth(new float[]{3f,7f});
+        courseTable.setTotalWidth(new float[]{2.8f,7.2f});
 
         PdfPCell courseCell = new PdfPCell();
         courseCell.addElement(new Paragraph(FrontSideConfig.COURSE, font));
@@ -164,7 +164,7 @@ public class SingleStudentAndCourseExamReportService {
     private PdfPTable createInfoTable(StudentDegree student, Course course, Font font) throws DocumentException {
         PdfPTable infoTable = new PdfPTable(8);
         infoTable.setWidthPercentage(100);
-        infoTable.setTotalWidth(new float[]{0.8f, 0.2f, 1.5f, 0.2f, 1.4f, 1.5f, 2.7f, 4f});
+        infoTable.setTotalWidth(new float[]{0.8f, 0.2f, 1.5f, 0.2f, 1.1f, 1.9f, 2.7f, 3.9f});
 
         PdfPCell yearInfoCell = new PdfPCell();
         yearInfoCell.addElement(new Paragraph(FrontSideConfig.YEAR, font));
@@ -321,9 +321,9 @@ public class SingleStudentAndCourseExamReportService {
     }
 
     private PdfPTable createDeanTable(StudentDegree student, Font reasonFont) throws DocumentException {
-        PdfPTable deanTable = new PdfPTable(9);
+        PdfPTable deanTable = new PdfPTable(6);
         deanTable.setWidthPercentage(100);
-        deanTable.setTotalWidth(new float[]{3.5f, 2f, 0.5f, 5f, 1f, 0.5f, 1f, 2.8f, 0.7f });
+        deanTable.setTotalWidth(new float[]{2.9f, 2f, 0.2f, 4.2f, 1.2f, 3.6f});
 
         PdfPCell infoCell = new PdfPCell();
         infoCell.addElement(new Paragraph(BackSideConfig.DEAN, reasonFont));
@@ -341,62 +341,39 @@ public class SingleStudentAndCourseExamReportService {
         nameCell.addElement(new Paragraph(convertFullNameToIntials(student.getSpecialization().getFaculty().getDean()), reasonFont));
         nameCell.setBorder(PdfPCell.BOTTOM);
 
-        PdfPCell dateCell = new PdfPCell();
-        dateCell.addElement(new Paragraph("     "+ BackSideConfig.BRACKET_OPEN, reasonFont));
-        dateCell.setBorder(PdfPCell.NO_BORDER);
-
         PdfPCell emptyDateCell = new PdfPCell();
-        emptyDateCell.addElement(new Paragraph( " ", reasonFont));
-        emptyDateCell.setBorder(PdfPCell.BOTTOM);
-
-        PdfPCell secondDateCell = new PdfPCell();
-        secondDateCell.addElement(new Paragraph(BackSideConfig.BRACKET_CLOSE, reasonFont));
-        secondDateCell.setBorder(PdfPCell.NO_BORDER);
+        emptyDateCell.addElement(new Paragraph( "\"_____\"", reasonFont));
+        emptyDateCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell deanYearCell = new PdfPCell();
         deanYearCell.addElement(new Paragraph(BackSideConfig.DEANYEAR, reasonFont));
         deanYearCell.setBorder(PdfPCell.NO_BORDER);
 
-        PdfPCell emptyCell = new PdfPCell();
-        emptyCell.addElement(new Paragraph(BackSideConfig.YEAR_MARK, reasonFont));
-        emptyCell.setBorder(PdfPCell.NO_BORDER);
-
         deanTable.addCell(infoCell);
         deanTable.addCell(initialsCell);
         deanTable.addCell(emptyInitialsCell);
         deanTable.addCell(nameCell);
-        deanTable.addCell(dateCell);
         deanTable.addCell(emptyDateCell);
-        deanTable.addCell(secondDateCell);
         deanTable.addCell(deanYearCell);
-        deanTable.addCell(emptyCell);
         return deanTable;
     }
 
     private PdfPTable createDurationTable(Font reasonFont) throws DocumentException {
-        PdfPTable durationTable = new PdfPTable(6);
+        PdfPTable durationTable = new PdfPTable(4);
         durationTable.setWidthPercentage(100);
-        durationTable.setTotalWidth(new float[]{5f, 1f, 1f, 2f, 1f, 4f });
+        durationTable.setTotalWidth(new float[]{3.8f, 1.1f, 3.2f, 3.7f});
 
         PdfPCell durationCell = new PdfPCell();
         durationCell.addElement(new Paragraph(BackSideConfig.SHEET, reasonFont));
         durationCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell underlineCell = new PdfPCell();
-        underlineCell.addElement(new Paragraph("____", reasonFont));
+        underlineCell.addElement(new Paragraph("\"_____\"", reasonFont));
         underlineCell.setBorder(PdfPCell.NO_BORDER);
-
-        PdfPCell dayCell = new PdfPCell();
-        dayCell.addElement(new Paragraph(BackSideConfig.SHEET_END, reasonFont));
-        dayCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell monthCell = new PdfPCell();
         monthCell.addElement(new Paragraph(BackSideConfig.YEAR, reasonFont));
         monthCell.setBorder(PdfPCell.NO_BORDER);
-
-        PdfPCell yearCell = new PdfPCell();
-        yearCell.addElement(new Paragraph(BackSideConfig.YEAR_MARK, reasonFont));
-        yearCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell halfCell = new PdfPCell();
         halfCell.addElement(new Paragraph(" ", reasonFont));
@@ -404,9 +381,7 @@ public class SingleStudentAndCourseExamReportService {
 
         durationTable.addCell(durationCell);
         durationTable.addCell(underlineCell);
-        durationTable.addCell(dayCell);
         durationTable.addCell(monthCell);
-        durationTable.addCell(yearCell);
         durationTable.addCell(halfCell);
         return durationTable;
     }
