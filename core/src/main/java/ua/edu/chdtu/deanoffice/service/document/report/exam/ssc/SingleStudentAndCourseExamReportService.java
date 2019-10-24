@@ -21,11 +21,7 @@ public class SingleStudentAndCourseExamReportService {
     public static final float FONT_SIZE_14 = 14f;
     public static final float FONT_SIZE_12 = 12f;
     public static final float FONT_SIZE_10 = 10f;
-    private Font FONT_14;
-    private Font FONT_14_BOLD;
-    private Font FONT_12;
-    private Font FONT_10;
-    private BaseFont baseFont;
+
     @Value(value = "classpath:fonts/timesnewroman/times.ttf")
     private Resource ttf;
 
@@ -34,17 +30,7 @@ public class SingleStudentAndCourseExamReportService {
     @Autowired
     private CurrentYearService currentYearService;
 
-//    @Autowired
-    public void setFont() throws IOException, DocumentException {
-        baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-        FONT_14 = new Font(baseFont, FONT_SIZE_14, Font.NORMAL);
-        FONT_14_BOLD = new Font(baseFont, FONT_SIZE_14, Font.BOLD);
-        FONT_10 = new Font(baseFont,FONT_SIZE_10,Font.NORMAL);
-        FONT_12 = new Font(baseFont, FONT_SIZE_12, Font.NORMAL);
-    }
-
     public File formDocument(List<StudentCourse> studentCourses) throws IOException, DocumentException {
-        setFont();
         Document document = new Document(PageSize.A4, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN);
         String filePath = getJavaTempDirectory() + "/" + "name" +".pdf";
         File file = new File(filePath);
@@ -131,7 +117,7 @@ public class SingleStudentAndCourseExamReportService {
         teacherCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell teacherInfoCell = new PdfPCell();
-        teacherInfoCell.addElement(new Paragraph((courseForGroup.getTeacher() != null ? courseForGroup.getTeacher().getInitialsUkr() : ""), font));
+//        teacherInfoCell.addElement(new Paragraph((courseForGroup.getTeacher() != null ? courseForGroup.getTeacher().getInitialsUkr() : ""), font));
         teacherInfoCell.setBorder(PdfPCell.BOTTOM);
 
         teacherTable.addCell(teacherCell);
@@ -232,7 +218,7 @@ public class SingleStudentAndCourseExamReportService {
         facultyTable.setWidthPercentage(100);
         facultyTable.setTotalWidth(new float[]{1.3f, 5.5f, 2f, 1f});
 
-        Paragraph paragraph = new Paragraph(FrontSideConfig.CHDTU_NAME,FONT_14);
+        Paragraph paragraph = new Paragraph(FrontSideConfig.CHDTU_NAME, font);
         paragraph.setAlignment(Element.ALIGN_CENTER);
 
         PdfPCell facultyCell = new PdfPCell();
@@ -490,14 +476,14 @@ public class SingleStudentAndCourseExamReportService {
 
         table.addCell(createCell(student.getStudent().getInitialsUkr(), font, 10));
         table.addCell(createCell(student.getRecordBookNumber(), font, 10));
-        table.addCell(createInnerDataTable());
+        table.addCell(createInnerDataTable(baseFont));
         table.addCell(createCell(" ", font, 0));
         table.addCell(createCell(" ", font, 0));
 
         return table;
     }
 
-    private PdfPCell createInnerDataTable() throws DocumentException {
+    private PdfPCell createInnerDataTable(BaseFont baseFont) throws DocumentException {
         PdfPCell coverForAchievements = new PdfPCell();
         Font font = new Font(baseFont, 10);
         coverForAchievements.setPadding(0);
@@ -538,13 +524,6 @@ public class SingleStudentAndCourseExamReportService {
         achievementCell.setBorder(border);
         achievementCell.setFixedHeight(fixedHeight);
         return achievementCell;
-    }
-
-    private PdfPCell fillCell(String text) {
-        PdfPCell cell = new PdfPCell(new Phrase(text,FONT_12));
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        cell.setVerticalAlignment(Element.ALIGN_CENTER);
-        return cell;
     }
 
     private String getJavaTempDirectory() {
