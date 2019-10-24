@@ -2,13 +2,9 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
-import ua.edu.chdtu.deanoffice.repository.PositionRepository;
-import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
-import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithActiveEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
+import ua.edu.chdtu.deanoffice.repository.*;
+
 import java.util.List;
 
 @Service
@@ -41,13 +37,23 @@ public class DataVerificationService {
             throw new OperationCannotBePerformedException("Серед даних студентів є неактивні");
         }
     }
-
-    public void departmentNotNullAndActive(Department department,
-                                           int departmentId) throws OperationCannotBePerformedException {
+    public void departmentNotNull(Department department,
+                                  int departmentId) throws OperationCannotBePerformedException {
         if (department == null) {
             throw new OperationCannotBePerformedException("Кафедру [" + departmentId + "] не знайдено");
         }
+    }
+    public void departmentNotNullAndActive(Department department,
+                                           int departmentId) throws OperationCannotBePerformedException {
+        departmentNotNull(department, departmentId);
         if (!department.isActive()) {
+            throw new OperationCannotBePerformedException("Кафедра [" + departmentId + "] не активна в даний час");
+        }
+    }
+    public void departmentNotNullAndNotActive(Department department,
+                                              int departmentId) throws OperationCannotBePerformedException {
+        departmentNotNull(department, departmentId);
+        if (department.isActive()) {
             throw new OperationCannotBePerformedException("Кафедра [" + departmentId + "] не активна в даний час");
         }
     }
@@ -73,6 +79,31 @@ public class DataVerificationService {
         for (Teacher teacher: teachers) {
             if (teacher.isActive() == false)
                 throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
+        }
+    }
+
+    public void isTeachersNotActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
+        for (Teacher teacher : teachers) {
+            if (teacher.isActive())
+                throw new OperationCannotBePerformedException("Вибрані вчителі є активними!");
+        }
+    }
+
+    public void specializationNotNull(Specialization specialization,
+                                      int specializationId) throws OperationCannotBePerformedException {
+        if (specialization == null) {
+            throw new OperationCannotBePerformedException("Освітню програму [" + specializationId + "] не знайдено");
+        }
+    }
+
+    public void specializationNotNullAndNotActive(Specialization specialization,
+                                                  int specializationId) throws OperationCannotBePerformedException {
+        specializationNotNull(specialization, specializationId);
+        if (specialization.isActive()) {
+            throw new OperationCannotBePerformedException("Освітня програма [" + specialization.getName() + "] не активна в даний час");
+        }
+        if (!specialization.isActive()) {
+            throw new OperationCannotBePerformedException("Освітня програма [" + specializationId + "] не активна в даний час");
         }
     }
 

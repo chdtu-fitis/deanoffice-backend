@@ -15,9 +15,9 @@ import java.util.Set;
 public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer> {
 
     @Query("select sg from StudentGroup as sg " +
-            "where sg.active = true and sg.specialization.faculty.id = :facultyId " +
+            "where sg.active = :active and sg.specialization.faculty.id = :facultyId " +
             "order by sg.name")
-    List<StudentGroup> findAllActiveByFaculty(@Param("facultyId") int facultyId);
+    List<StudentGroup> findByActiveAndFaculty(@Param("active") boolean active, @Param("facultyId") int facultyId);
 
     @Query("SELECT sg FROM StudentGroup AS sg " +
             "WHERE sg.active = TRUE " +

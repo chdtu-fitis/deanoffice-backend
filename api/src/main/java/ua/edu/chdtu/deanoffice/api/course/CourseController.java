@@ -21,6 +21,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
@@ -32,6 +33,7 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.course.CoursePaginationBean;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -89,17 +91,6 @@ public class CourseController {
         try {
             List<Course> courses = courseService.getCoursesBySemesterAndHoursPerCredit(semester, hoursPerCredit);
             return ResponseEntity.ok(map(courses, CourseDTO.class));
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
-    @GetMapping("/groups/{groupId}/courses")
-    @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
-        try {
-            List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
-            return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
@@ -330,6 +321,7 @@ public class CourseController {
             } else {
                 CourseName courseName = new CourseName();
                 courseName.setName(courseDTO.getCourseName().getName());
+                courseName.setNameEng(courseDTO.getCourseName().getNameEng());
                 this.courseNameService.saveCourseName(courseName);
                 CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
                 course.setCourseName(newCourseName);
@@ -390,6 +382,16 @@ public class CourseController {
             validatePageParameter(page);
             CoursePaginationBean unusedCourses = courseService.getPaginatedUnusedCourses(page);
             return ResponseEntity.ok(Mapper.strictMap(unusedCourses, CoursePaginationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("courses/{courseId}/groups")
+    public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }

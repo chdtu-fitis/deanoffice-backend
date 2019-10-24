@@ -1,12 +1,13 @@
 package ua.edu.chdtu.deanoffice.api.group;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
@@ -15,6 +16,7 @@ import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupShortDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupView;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -22,6 +24,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -33,6 +36,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class GroupController {
@@ -40,6 +44,7 @@ public class GroupController {
     private final SpecializationService specializationService;
     private final CurrentYearService currentYearService;
     private final StudentDegreeService studentDegreeService;
+    private final CourseForGroupService courseForGroupService;
     private final Environment environment;
 
     @Autowired
@@ -48,11 +53,13 @@ public class GroupController {
             SpecializationService specializationService,
             CurrentYearService currentYearService,
             StudentDegreeService studentDegreeService,
+            CourseForGroupService courseForGroupService,
             Environment environment) {
         this.studentGroupService = studentGroupService;
         this.currentYearService = currentYearService;
         this.specializationService = specializationService;
         this.studentDegreeService = studentDegreeService;
+        this.courseForGroupService = courseForGroupService;
         this.environment = environment;
     }
 
@@ -82,24 +89,14 @@ public class GroupController {
         }
     }
 
-    @GetMapping("courses/{courseId}/groups")
-    public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
-        try {
-            List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
-            return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-    }
-
     @GetMapping("/groups")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroups(
-            @RequestParam(value = "only-active", required = false, defaultValue = "true") boolean onlyActive,
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @CurrentUser ApplicationUser user
     ) {
         try {
-            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(onlyActive, user.getFaculty().getId());
+            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(active, user.getFaculty().getId());
             return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
@@ -183,6 +180,21 @@ public class GroupController {
         }
     }
 
+    @JsonView(StudentGroupView.Basic.class)
+    @PutMapping("/groups/restore")
+    public ResponseEntity restoreGroup(@RequestParam List<Integer> groupIds,
+                                       @CurrentUser ApplicationUser user) {
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getByIds(groupIds);
+            verifyAccess(user, studentGroups);
+            validateRestoreGroupBody(groupIds, studentGroups);
+            studentGroupService.restore(studentGroups);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
     @DeleteMapping("/groups/{group_ids}")
     public ResponseEntity deleteGroup(@PathVariable("group_ids") List<Integer> groupIds,
                                       @CurrentUser ApplicationUser user) {
@@ -195,6 +207,17 @@ public class GroupController {
             return ResponseEntity.ok(Mapper.map(groupsToDelete, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @GetMapping("/groups/{groupId}/courses")
+    @JsonView(CourseForGroupView.Course.class)
+    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
+        try {
+            List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
+            return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
         }
     }
 
@@ -273,6 +296,20 @@ public class GroupController {
         }
     }
 
+    private void validateRestoreGroupBody(List<Integer> groupIds, List<StudentGroup> studentGroups)
+            throws NotFoundException, OperationCannotBePerformedException {
+        if (studentGroups.size() != groupIds.size()) {
+            throw new NotFoundException("Групи не були знайдені "
+                    + Arrays.toString(findNotFoundStudentGroups(studentGroups, groupIds)));
+        }
+
+        if (hasActiveStudentGroups(studentGroups)) {
+            String exceptionMessage = "Групи " + Arrays.toString(findActiveStudentGroups(studentGroups).toArray())
+                    + " наразі активні. Відновлення активних груп неможливе.";
+            throw new OperationCannotBePerformedException(exceptionMessage);
+        }
+    }
+
     private List<StudentGroup> findStudentGroupsInWhichAllStudentsAreInactive(List<StudentGroup> studentGroups) {
         return studentGroups.stream()
                 .filter(studentGroup -> studentGroup.getActiveStudents().size() == 0)
@@ -293,8 +330,16 @@ public class GroupController {
         return findInactiveStudentGroups(studentGroups).size() != 0;
     }
 
+    private boolean hasActiveStudentGroups(List<StudentGroup> studentGroups) {
+        return findActiveStudentGroups(studentGroups).size() != 0;
+    }
+
     private List<StudentGroup> findInactiveStudentGroups(List<StudentGroup> studentGroups) {
         return studentGroups.stream().filter(studentGroup -> !studentGroup.isActive()).collect(Collectors.toList());
+    }
+
+    private List<StudentGroup> findActiveStudentGroups(List<StudentGroup> studentGroups) {
+        return studentGroups.stream().filter(studentGroup -> studentGroup.isActive()).collect(Collectors.toList());
     }
 
     private ResponseEntity handleException(Exception exception) {

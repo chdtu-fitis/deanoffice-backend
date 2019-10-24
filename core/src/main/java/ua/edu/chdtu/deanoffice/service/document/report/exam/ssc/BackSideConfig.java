@@ -2,13 +2,14 @@ package ua.edu.chdtu.deanoffice.service.document.report.exam.ssc;
 
 public class BackSideConfig {
     public static final String REASON = "Причина перенесення підсумкового контролю  ";
-    public static final String SHEET = "Аркуш успішності дійсний до “";
-    public static final String SHEET_END = "” ";
-    public static final String YEAR = " 20";
+    public static final String SHEET = "Аркуш успішності дійсний до   “";
+    public static final String SHEET_END = " ”";
+    public static final String YEAR = " ______  20__";
+    public static final String DEANYEAR = " ________  20__";
     public static final String YEAR_MARK = " р.";
     public static final String DEAN = "Декан факультету";
     public static final String BRACKET_OPEN = " “";
-    public static final String BRACKET_CLOSE = "” ";
+    public static final String BRACKET_CLOSE = " ” ";
     public static final String BY_LINE = "                                   (підпис)        (прізвище та ініціали)";
     public static final String INITIALS = "ПІБ студента";
     public static final String NUMBER = "Номер залікової книжки";

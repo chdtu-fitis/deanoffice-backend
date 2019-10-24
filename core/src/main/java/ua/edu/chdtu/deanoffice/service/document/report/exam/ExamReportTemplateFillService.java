@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Service
-class ExamReportTemplateFillService extends ExamReportBaseService {
+public class ExamReportTemplateFillService extends ExamReportBaseService {
 
     private static final int STARTING_ROW_INDEX = 7;
     private static final Logger log = LoggerFactory.getLogger(ExamReportTemplateFillService.class);
@@ -63,6 +64,45 @@ class ExamReportTemplateFillService extends ExamReportBaseService {
             });
         }
         return reportsDocument;
+    }
+
+    public void fillTemplate(WordprocessingMLPackage template, CourseForGroup courseForGroup, List<StudentGroup> studentGroups, int numberOfTable,
+                             ApplicationUser user)
+            throws IOException, Docx4JException {
+        int currentRowIndex = STARTING_ROW_INDEX;
+        for (StudentGroup studentGroup : studentGroups) {
+            fillTableWithStudentInitials(template, studentGroup, numberOfTable, currentRowIndex);
+            currentRowIndex += studentGroup.getActiveStudents().size() + 1;
+        }
+        removeUnfilledPlaceholders(template);
+        Map<String, String> commonDict = new HashMap<>();
+        commonDict.putAll(getGroupInfoReplacements(studentGroups, user));
+        commonDict.putAll(getCourseInfoReplacements(courseForGroup));
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+    }
+
+    private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup, int numberOfTable, int currentRowIndex) {
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(numberOfTable);
+        if (tempTable == null) {
+            return;
+        }
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+        List<Student> students = studentGroup.getActiveStudents();
+        sortStudentsByInitials(students);
+        Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+        currentRowIndex++;
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("StudentInitials", studentGroup.getName());
+        TemplateUtil.replaceInRow(currentRow, replacements);
+        for (Student student : students) {
+            currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+            replacements.clear();
+            replacements.put("StudentInitials", student.getInitialsUkr());
+            replacements.put("RecBook", studentGroup.getStudentDegrees().stream().filter(studentDegree ->
+                    studentDegree.getStudent().equals(student)).findFirst().get().getRecordBookNumber());
+            TemplateUtil.replaceInRow(currentRow, replacements);
+            currentRowIndex++;
+        }
     }
 
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, StudentGroup studentGroup) {

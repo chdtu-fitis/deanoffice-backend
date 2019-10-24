@@ -41,7 +41,7 @@ public class TeacherService {
 
     public void deleteByIds(ApplicationUser user, List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (ids.size() == 0)
-            throw new OperationCannotBePerformedException("Невказані ідентифікатори викладачів!");
+            throw new OperationCannotBePerformedException("Не вказані ідентифікатори викладачів!");
         List<Teacher> teachers = getTeachers(ids);
         if (teachers.size() != ids.size())
             throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
@@ -49,6 +49,19 @@ public class TeacherService {
         facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachers);
         teacherRepository.setTeachersInactiveByIds(ids);
     }
+
+    public void restoreByIds(ApplicationUser user, List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+        if (ids == null || ids.size() == 0)
+            throw new OperationCannotBePerformedException("Не вказані ідентифікатори викладачів!");
+        List<Teacher> teachers = getTeachers(ids);
+        if (teachers.size() != ids.size())
+            throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є існуючі!");
+        dataVerificationService.isTeachersNotActive(teachers);
+        facultyAuthorizationService.verifyAccessibilityOfDepartments(user, teachers);
+        teachers.forEach(teacher -> teacher.setActive(true));
+        teacherRepository.save(teachers);
+    }
+
 
     public Teacher saveTeacher(ApplicationUser user, Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         dataVerificationService.isCorrectTeacher(teacher);

@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.webstarter.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,18 +40,22 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
         String user;
+        String facultyId;
         if (token != null) {
             try {
-                user = Jwts.parser()
+                Claims claims = Jwts.parser()
                         .setSigningKey(SECRET)
                         .parseClaimsJws(token)
-                        .getBody()
-                        .getSubject();
+                        .getBody();
+                user = claims.getSubject();
+                facultyId = claims.getIssuer();
             } catch (JwtException e) {
                 return null;
             }
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                usernamePasswordAuthenticationToken.setDetails(facultyId);
+                return usernamePasswordAuthenticationToken;
             }
             return null;
         }
