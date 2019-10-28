@@ -49,10 +49,9 @@ public class TeacherController {
     }
 
     @GetMapping("/teachers")
-    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active,
-                                      @CurrentUser ApplicationUser user) {
+    public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
         try {
-            List<Teacher> teachers = teacherService.getTeachersByActiveAndFacultyId(active, user.getFaculty().getId());
+            List<Teacher> teachers = teacherService.getActiveFacultyTeachers(active);
             return ResponseEntity.ok(map(teachers, TeacherDTO.class));
         } catch (Exception e) {
             return handleException(e);
@@ -78,17 +77,13 @@ public class TeacherController {
     }
 
     @PutMapping("/teachers")
-    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO,
-                                        @CurrentUser ApplicationUser user) {
+    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO) {
         try {
             if (teacherDTO == null)
                 throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
-            Teacher teacherFromDB = teacherService.getTeacher(teacherDTO.getId());
-            if (teacherFromDB == null)
-                throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
-            Teacher savedTeacher = teacherService.updateTeacher(user, teacher, teacherFromDB);
+            Teacher savedTeacher = teacherService.updateTeacher(teacher);
             return new ResponseEntity(map(savedTeacher, TeacherDTO.class), HttpStatus.OK);
         } catch (Exception e) {
             return handleException(e);
@@ -121,6 +116,7 @@ public class TeacherController {
         return ExceptionHandlerAdvice.handleException(exception, TeacherController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 
+    //TODO Звернути увагу - перенести в сервіс
     private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, TeacherDTO teacherDTO) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException {
         Department department = departmentService.getById(teacherDTO.getDepartmentId());
         if (department == null)
