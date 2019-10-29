@@ -15,11 +15,11 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/documents/statement")
-public class QualificationWorkController  extends DocumentResponseController {
+public class QualificationWorkReportController extends DocumentResponseController {
     private QualificationWorkService qualificationWorkService;
 
     @Autowired
-    public QualificationWorkController(QualificationWorkService qualificationWorkService) {
+    public QualificationWorkReportController(QualificationWorkService qualificationWorkService) {
         this.qualificationWorkService = qualificationWorkService;
     }
 
@@ -34,7 +34,7 @@ public class QualificationWorkController  extends DocumentResponseController {
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, QualificationWorkController.class,
+        return ExceptionHandlerAdvice.handleException(exception, QualificationWorkReportController.class,
                 ExceptionToHttpCodeMapUtil.map(exception));
     }
 }
