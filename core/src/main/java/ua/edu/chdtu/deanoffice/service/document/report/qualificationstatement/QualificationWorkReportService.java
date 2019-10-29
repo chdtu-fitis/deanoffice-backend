@@ -74,7 +74,7 @@ public class QualificationWorkReportService {
                     font, 0));
             document.add(createCenterAlignedParagraph("Відомість кваліфікаційної роботи " + groupName.toLowerCase() + "а", font, 0));
             document.add(createCenterAlignedParagraph("группа " + studentGroup.getName(), boldFont, 0));
-            document.add(createTable(baseFont));
+            document.add(createTableWithHeaders(baseFont));
             document.add(fillTable(baseFont, studentGroup));
             Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
                     + "                                      "
@@ -134,7 +134,7 @@ public class QualificationWorkReportService {
         return false;
     }
 
-    private PdfPTable createTable(BaseFont baseFont) throws DocumentException {
+    private PdfPTable createTableWithHeaders(BaseFont baseFont) throws DocumentException {
         Font font = new Font(baseFont, 10);
         PdfPTable table = new PdfPTable(7);
         table.setSpacingBefore(10);
