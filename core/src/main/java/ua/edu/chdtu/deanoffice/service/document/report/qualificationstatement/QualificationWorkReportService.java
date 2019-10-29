@@ -77,10 +77,10 @@ public class QualificationWorkReportService {
             document.add(createTableWithHeaders(baseFont));
             document.add(fillTable(baseFont, studentGroup));
             Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
-                    + "                                      "
+                    + "                                                             "
                     + studentGroup.getSpecialization().getFaculty().getDean(), font);
             textBottom.setSpacingBefore(100f);
-            textBottom.setIndentationLeft(75f);
+            textBottom.setIndentationLeft(24f);
             document.add(textBottom);
         } finally {
             if (document != null)
