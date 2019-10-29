@@ -26,7 +26,7 @@ import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getFileCreationDateAndTi
 import static ua.edu.chdtu.deanoffice.util.DocumentUtil.getJavaTempDirectory;
 
 @Service
-public class QualificationWorkService {
+public class QualificationWorkReportService {
     private StudentGroupService studentGroupService;
     private GradeService gradeService;
 
@@ -48,7 +48,7 @@ public class QualificationWorkService {
     private Resource ttf;
 
     @Autowired
-    public QualificationWorkService(StudentGroupService studentGroupService, GradeService gradeService) {
+    public QualificationWorkReportService(StudentGroupService studentGroupService, GradeService gradeService) {
         this.studentGroupService = studentGroupService;
         this.gradeService = gradeService;
     }
