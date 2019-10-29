@@ -96,7 +96,7 @@ public class QualificationWorkReportService {
         Font font = new Font(baseFont, 12);
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
-        for (StudentDegree studentDegree: studentDegrees) {
+        for (StudentDegree studentDegree : studentDegrees) {
             List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
             if (!isStudentDebtor(grades)) {
                 Student student = studentDegree.getStudent();
@@ -107,12 +107,9 @@ public class QualificationWorkReportService {
                 StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
                 table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
                 table.addCell(new PdfPCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0)));
-                table.addCell(new PdfPCell(new Paragraph()));
-                table.addCell(new PdfPCell(new Paragraph()));
-                table.addCell(new PdfPCell(new Paragraph()));
-                table.addCell(new PdfPCell(new Paragraph()));
-                table.addCell(new PdfPCell(new Paragraph()));
-                table.addCell(new PdfPCell(new Paragraph()));
+                for (int i = 0; i < 6; i++) {
+                    table.addCell(new PdfPCell(new Paragraph()));
+                }
             }
         }
         if (studentsCount >= ROWS_PER_PAGE) {
