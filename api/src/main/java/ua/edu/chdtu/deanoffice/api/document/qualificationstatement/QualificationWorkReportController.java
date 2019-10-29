@@ -20,7 +20,7 @@ public class QualificationWorkReportController extends DocumentResponseControlle
         this.qualificationWorkReportService = qualificationWorkReportService;
     }
 
-    @GetMapping("/qualification/work")
+    @GetMapping("/qualification-work-report")
     public ResponseEntity getStatementOfQualificationWorkPdf(@RequestParam Integer groupId) {
         try {
             File file = qualificationWorkReportService.createQualificationWorkStatementForGroup(groupId);
