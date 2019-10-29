@@ -11,7 +11,7 @@ import ua.edu.chdtu.deanoffice.service.document.report.qualificationstatement.Qu
 import java.io.File;
 
 @RestController
-@RequestMapping("/documents/statement")
+@RequestMapping("/documents")
 public class QualificationWorkReportController extends DocumentResponseController {
     private QualificationWorkReportService qualificationWorkReportService;
 
