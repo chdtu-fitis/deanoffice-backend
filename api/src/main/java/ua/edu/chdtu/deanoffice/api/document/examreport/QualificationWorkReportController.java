@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.qualificationstatement;
+package ua.edu.chdtu.deanoffice.api.document.examreport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.service.document.report.qualificationstatement.QualificationWorkReportService;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.QualificationWorkReportService;
 
 import java.io.File;
 

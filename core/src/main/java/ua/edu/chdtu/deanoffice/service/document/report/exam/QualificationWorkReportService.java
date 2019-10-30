@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.qualificationstatement;
+package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.BaseFont;
