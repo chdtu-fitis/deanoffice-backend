@@ -19,7 +19,6 @@ import java.util.List;
 public class SingleStudentAndCourseExamReportService {
     public static final float PAGE_MARGIN = 36f;
     public static final float FONT_SIZE_14 = 14f;
-    public static final float FONT_SIZE_12 = 12f;
     public static final float FONT_SIZE_10 = 10f;
 
     @Value(value = "classpath:fonts/arial/arial.ttf")
@@ -32,7 +31,7 @@ public class SingleStudentAndCourseExamReportService {
 
     public File formDocument(List<StudentCourse> studentCourses) throws IOException, DocumentException {
         Document document = new Document(PageSize.A4, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN);
-        String filePath = getJavaTempDirectory() + "/" + "name" +".pdf";
+        String filePath = getJavaTempDirectory() + "/" + "bigunok" +".pdf";
         File file = new File(filePath);
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
@@ -474,7 +473,6 @@ public class SingleStudentAndCourseExamReportService {
 
         PdfPCell ectslCell = new PdfPCell();
         nationalCell.addElement(new Paragraph(" ", font));
-
 
         achievementsTable.addCell(nationalCell);
         achievementsTable.addCell(hundredCell);
