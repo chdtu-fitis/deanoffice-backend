@@ -13,6 +13,8 @@ import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -31,12 +33,14 @@ public class SingleStudentAndCourseExamReportService {
 
     public File formDocument(List<StudentCourse> studentCourses) throws IOException, DocumentException {
         Document document = new Document(PageSize.A4, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN);
-        String filePath = getJavaTempDirectory() + "/" + "bigunok" +".pdf";
+            String filePath = getJavaTempDirectory()
+                    + "/bigunok-"
+                    + new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date()) +".pdf";
         File file = new File(filePath);
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
             document.open();
-            fillDocument(document,studentCourses);
+            fillDocument(document, studentCourses);
         } finally {
             if (document != null)
                 document.close();
