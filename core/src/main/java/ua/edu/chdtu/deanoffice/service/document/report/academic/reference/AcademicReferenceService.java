@@ -50,8 +50,9 @@ public class AcademicReferenceService extends AcademicCertificateBaseService {
             throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
         prepareTable(template, studentSummary);
-        replaceTextPlaceholdersInTemplate(template, getStudentInfoDictionary(studentSummary));
-        replaceTextPlaceholdersInTemplate(template, getStudentExpelInfoDictionary(studentExpel));
+        Map <String, String> studentSummaryAndExpelData = getStudentInfoDictionary(studentSummary);
+        studentSummaryAndExpelData.putAll(getStudentExpelInfoDictionary(studentExpel));
+        replaceTextPlaceholdersInTemplate(template, studentSummaryAndExpelData);
         return template;
     }
 
