@@ -13,9 +13,7 @@ public class FacultyUtil {
     }
 
     public static String getRefinedFacultyName(Faculty faculty) {
-        String defaultFacultyName = faculty.getName();
-        String fixedFacultyName = defaultFacultyName.replace("факультет","").trim();
-
-        return fixedFacultyName;
+        String refinedFacultyName = faculty.getName().replace("факультет","").trim();
+        return refinedFacultyName;
     }
 }
