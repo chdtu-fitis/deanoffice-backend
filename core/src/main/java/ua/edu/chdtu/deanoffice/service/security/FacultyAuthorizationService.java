@@ -1,11 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.security;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
@@ -13,6 +9,7 @@ import java.util.List;
 
 @Service
 public class FacultyAuthorizationService {
+
     private final StudentDegreeRepository studentDegreeRepository;
 
     public FacultyAuthorizationService(StudentDegreeRepository studentDegreeRepository) {
@@ -55,5 +52,10 @@ public class FacultyAuthorizationService {
         for (Teacher teacher: teachers)
             if (teacher.getDepartment().getFaculty().getId() != user.getFaculty().getId())
                 throw new UnauthorizedFacultyDataException("Тут присутні ідентифікатори викладачів, які не відносяться до поточного факультету!");
+    }
+
+    public void verifySpecializationAccessibility(ApplicationUser user, Specialization specialization) throws UnauthorizedFacultyDataException {
+            if (specialization.getFaculty().getId() != user.getFaculty().getId())
+                throw new UnauthorizedFacultyDataException("Спеціалізація (освітня програма) не належить поточному факультету!");
     }
 }

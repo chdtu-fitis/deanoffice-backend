@@ -20,7 +20,6 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
 
-
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
@@ -41,19 +40,15 @@ public class DepartmentController {
 
     @GetMapping
     public ResponseEntity getDepartments(
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
-            @CurrentUser ApplicationUser user
-    ) {
-        List<Department> departments = departmentService.getAllByActive(active, user.getFaculty().getId());
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active) {
+        List<Department> departments = departmentService.getFacultyDepartmentsByActive(active);
         return ResponseEntity.ok(map(departments, DepartmentDTO.class));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity getDepartmentById(@PathVariable("id") int departmentId,
-                                            @CurrentUser ApplicationUser user) {
+    public ResponseEntity getDepartmentById(@PathVariable("id") int departmentId) {
         try {
             Department department = departmentService.getById(departmentId);
-            this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
             return ResponseEntity.ok(Mapper.strictMap(department, DepartmentDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
@@ -77,14 +72,13 @@ public class DepartmentController {
     }
 
     @PutMapping
-    public ResponseEntity updateDepartment(@RequestBody DepartmentDTO departmentDTO,
-                                           @CurrentUser ApplicationUser user) {
+    public ResponseEntity updateDepartment(@RequestBody DepartmentDTO departmentDTO) {
         try {
             if (!departmentDTO.isActive()) {
                 throw new OperationCannotBePerformedException("Не можна змінювати не активну кафедру");
             }
             Department department = Mapper.strictMap(departmentDTO, Department.class);
-            this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
+            department.setFaculty(departmentService.getById(department.getId()).getFaculty());
             Department departmentAfterSave = departmentService.save(department);
             DepartmentDTO departmentSavedDTO = Mapper.strictMap(departmentAfterSave, DepartmentDTO.class);
             return new ResponseEntity(departmentSavedDTO, HttpStatus.CREATED);
@@ -94,18 +88,29 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteDepartment(@PathVariable("id") int departmentId,
-                                           @CurrentUser ApplicationUser user) {
+    public ResponseEntity deleteDepartment(@PathVariable("id") int departmentId) {
         try {
             Department department = departmentService.getById(departmentId);
             this.verificationService.departmentNotNullAndActive(department, departmentId);
-            this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
             departmentService.delete(department);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);
         }
 
+    }
+    @PutMapping("/restore")
+    public ResponseEntity restoreDepartment(@RequestParam int departmentId,
+                                            @CurrentUser ApplicationUser user) {
+        try {
+            Department department = departmentService.getById(departmentId);
+            this.verificationService.departmentNotNullAndNotActive(department,departmentId);
+            this.facultyAuthorizationService.verifyAccessibilityOfDepartment(user, department);
+            departmentService.restore(department);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
     }
 
     private Department create(DepartmentDTO departmentDTO, Faculty faculty) {

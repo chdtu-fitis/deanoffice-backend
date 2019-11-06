@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.webstarter.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,19 +44,17 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
         String user;
+        String facultyId;
         List<GrantedAuthority> roles = new ArrayList<>();
         if (token != null) {
             try {
-                user = Jwts.parser()
+                Claims claims = Jwts.parser()
                         .setSigningKey(SECRET)
                         .parseClaimsJws(token)
-                        .getBody()
-                        .getSubject();
-                List<String> roleStrs = Jwts.parser()
-                        .setSigningKey(SECRET)
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .get("rol", List.class);
+                        .getBody();
+                user = claims.getSubject();
+                facultyId = claims.getIssuer();
+                List<String> roleStrs = claims.get("rol", List.class);
                 if (roleStrs != null)
                     roles = roleStrs.stream()
                             .map(role -> new SimpleGrantedAuthority((String)role))
@@ -64,7 +63,9 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                 return null;
             }
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, roles);
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(user, null, roles);
+                usernamePasswordAuthenticationToken.setDetails(facultyId);
+                return usernamePasswordAuthenticationToken;
             }
             return null;
         }

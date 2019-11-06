@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.student.synchronization.diploma.number;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,8 +76,8 @@ public class DiplomaNumberController {
     @PutMapping("/edebo-diploma-number-synchronization")
     public ResponseEntity diplomaNumberSaveChanges(@RequestBody DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS,
                                                    @CurrentUser ApplicationUser user,
-                                                   @RequestParam(required = false) Date diplomaDate,
-                                                   @RequestParam(required = false) Date supplementDate) {
+                                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date diplomaDate,
+                                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date supplementDate) {
         try {
             validateDiplomaNumbersDataForSave(diplomaNumberDataForSaveDTOS.length);
             validateStudentDegreeIdWithFacultyId(user, diplomaNumberDataForSaveDTOS);

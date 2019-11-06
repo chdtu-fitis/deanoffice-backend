@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.webstarter.security.SecurityConstants.EXPIRATION_TIME;
-import static ua.edu.chdtu.deanoffice.webstarter.security.SecurityConstants.TOKEN_PREFIX;
 import static ua.edu.chdtu.deanoffice.webstarter.security.SecurityConstants.SECRET;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -55,14 +54,14 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             HttpServletResponse res,
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
+        String facultyId = "" + ((CurrentUserDetails) auth.getPrincipal()).getCurrentUser().getFaculty().getId();
         String token = Jwts.builder()
                 .setSubject(((User) auth.getPrincipal()).getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setIssuer(facultyId)
                 .claim("rol", ((User) auth.getPrincipal()).getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .signWith(SignatureAlgorithm.HS512, SECRET)
                 .compact();
-        int facultyId = ((CurrentUserDetails) auth.getPrincipal()).getCurrentUser().getFaculty().getId();
         res.getWriter().write("{\"token\": \"" + token +"\", \"facultyId\":\""+ facultyId +"\"}");
-        res.addHeader(SecurityConstants.HEADER_STRING, TOKEN_PREFIX + token);
     }
 }

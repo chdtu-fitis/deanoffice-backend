@@ -21,6 +21,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
@@ -32,6 +33,7 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.course.CoursePaginationBean;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -89,17 +91,6 @@ public class CourseController {
         try {
             List<Course> courses = courseService.getCoursesBySemesterAndHoursPerCredit(semester, hoursPerCredit);
             return ResponseEntity.ok(map(courses, CourseDTO.class));
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
-    @GetMapping("/groups/{groupId}/courses")
-    @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity getCoursesByGroupAndSemester(@PathVariable int groupId, @RequestParam int semester) {
-        try {
-            List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(groupId, semester);
-            return ResponseEntity.ok(map(coursesForGroup, CourseForGroupDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
@@ -215,8 +206,8 @@ public class CourseController {
 
     private void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
         Map<String, Boolean> gradeDefinition = gradeService.evaluateGradedChange(oldKnowledgeControlId, newKnowledgeControlId);
-        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null){
-            if(gradeDefinition.get(GradeService.NEW_GRADED_VALUE)){
+        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null) {
+            if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE)) {
                 gradeService.updateNationalGradeByCourseIdAndGradedTrue(newCourseId);
             } else {
                 gradeService.updateNationalGradeByCourseIdAndGradedFalse(newCourseId);
@@ -254,7 +245,9 @@ public class CourseController {
             List<Integer> deleteCoursesIds = coursesForGroupHolder.getDeleteCoursesIds();
 
             Set<CourseForGroup> newCoursesForGroup = new HashSet<>();
-            Set<CourseForGroup> updatedCoursesForGroup = new HashSet<>();
+            Set<CourseForGroup> courseForGroupWithNewAcademicDifference = new HashSet<>();
+            Set<CourseForGroup> courseForGroupWithOldAcademicDifference = new HashSet<>();
+            Map<Boolean, Set<CourseForGroup>> updatedCoursesForGroup = new HashMap<>();
             for (CourseForGroupDTO newCourseForGroup : newCourses) {
                 CourseForGroup courseForGroup = new CourseForGroup();
                 Course course = courseService.getById(newCourseForGroup.getCourse().getId());
@@ -269,6 +262,7 @@ public class CourseController {
                 courseForGroup.setAcademicDifference(newCourseForGroup.isAcademicDifference());
                 newCoursesForGroup.add(courseForGroup);
             }
+
             for (CourseForGroupDTO updatedCourseForGroup : updatedCourses) {
                 CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(updatedCourseForGroup.getId());
                 if (updatedCourseForGroup.getTeacher().getId() != 0) {
@@ -276,9 +270,18 @@ public class CourseController {
                     courseForGroup.setTeacher(teacher);
                 }
                 courseForGroup.setExamDate(updatedCourseForGroup.getExamDate());
+
+                boolean academicDifference = courseForGroup.isAcademicDifference();
                 courseForGroup.setAcademicDifference(updatedCourseForGroup.isAcademicDifference());
-                updatedCoursesForGroup.add(courseForGroup);
+
+                if (academicDifference != updatedCourseForGroup.isAcademicDifference()) {
+                    courseForGroupWithNewAcademicDifference.add(courseForGroup);
+                } else {
+                    courseForGroupWithOldAcademicDifference.add(courseForGroup);
+                }
             }
+            updatedCoursesForGroup.put(true, courseForGroupWithNewAcademicDifference);
+            updatedCoursesForGroup.put(false, courseForGroupWithOldAcademicDifference);
             courseForGroupService.addCourseForGroupAndNewChanges(newCoursesForGroup, updatedCoursesForGroup, deleteCoursesIds);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
@@ -318,6 +321,7 @@ public class CourseController {
             } else {
                 CourseName courseName = new CourseName();
                 courseName.setName(courseDTO.getCourseName().getName());
+                courseName.setNameEng(courseDTO.getCourseName().getNameEng());
                 this.courseNameService.saveCourseName(courseName);
                 CourseName newCourseName = this.courseNameService.getCourseNameByName(courseName.getName());
                 course.setCourseName(newCourseName);
@@ -346,11 +350,13 @@ public class CourseController {
                                              @RequestParam(required = false, name = "hoursPerCredit") Integer hoursPerCredit,
                                              @RequestParam(required = false, name = "knowledgeControl") String knowledgeControl,
                                              @RequestParam(required = false, name = "nameStartingWith") String nameStartingWith,
-                                             @RequestParam(required = false, name = "nameContains") String nameContains) {
+                                             @RequestParam(required = false, name = "nameContains") String nameContains,
+                                             @RequestParam(required = false, name = "semester") Integer semester
+    ) {
         try {
             validatePageParameter(page);
             CoursePaginationBean courseByFilters = courseService.getCourseByFilters(
-                    page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains);
+                    page, courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains, semester);
             return ResponseEntity.ok(Mapper.strictMap(courseByFilters, CoursePaginationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
@@ -376,6 +382,16 @@ public class CourseController {
             validatePageParameter(page);
             CoursePaginationBean unusedCourses = courseService.getPaginatedUnusedCourses(page);
             return ResponseEntity.ok(Mapper.strictMap(unusedCourses, CoursePaginationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @GetMapping("courses/{courseId}/groups")
+    public ResponseEntity getGroupsByCourse(@PathVariable int courseId, @CurrentUser ApplicationUser user) {
+        try {
+            List<StudentGroup> studentGroups = studentGroupService.getGroupsByCourse(courseId, user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(studentGroups, NamedDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }

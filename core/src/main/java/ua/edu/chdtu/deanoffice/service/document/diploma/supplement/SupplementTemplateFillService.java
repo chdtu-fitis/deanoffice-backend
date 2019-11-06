@@ -15,6 +15,7 @@ import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -35,7 +36,6 @@ import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlac
 public class SupplementTemplateFillService {
 
     private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
-    private static final int FOREIGN_STUDENTS_FACULTY_ID = 8;
+    private static final String STATE_EXAM = "Кваліфікаційний іспит.";
     private final DocumentIOService documentIOService;
     private QualificationForSpecializationService qualificationForSpecializationService;
     private AcquiredCompetenciesService acquiredCompetenciesService;
@@ -101,8 +101,8 @@ public class SupplementTemplateFillService {
                     && (courseNameUkr.contains("іспит") || courseNameUkr.contains("екзамен")));
         })
                 ) {
-            certificationName = "Державний іспит.";
-            certificationNameEng = "State exam.";
+            certificationName = STATE_EXAM;
+            certificationNameEng = "Qualification exam.";
         } else {
             String degreeName = "";
             String degreeNameEng = "";
@@ -263,8 +263,9 @@ public class SupplementTemplateFillService {
         result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname").toUpperCase());
         result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
         result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
-        result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic().toUpperCase(), ""));
-        result.put("PatronimicEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimicEng().toUpperCase(), ""));
+
+        result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic(), "").toUpperCase());
+        result.put("PatronimicEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimicEng(), "").toUpperCase());
 
         DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         DateFormat yearDateFormat = new SimpleDateFormat("yyyy");
@@ -321,7 +322,7 @@ public class SupplementTemplateFillService {
         String admissionRequirementsPlaceholder = "AdmissionRequirements";
         String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
         if (studentDegree.getStudentGroup().getSpecialization().getFaculty().getId()
-                == FOREIGN_STUDENTS_FACULTY_ID) {
+                == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
             result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
             result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
         } else if (studentSummary.getStudentGroup().getTuitionTerm().equals(TuitionTerm.SHORTENED)) {
@@ -348,7 +349,7 @@ public class SupplementTemplateFillService {
         result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
         result.putAll(getCertificationType(studentSummary));
-        if (!result.get("CertificationName").equals("Державний іспит.")) {
+        if (!result.get("CertificationName").equals(STATE_EXAM)) {
             result.put("ThesisNameUkr", "«" + TemplateUtil.getValueSafely(studentDegree.getThesisName()) + "»");
             result.put("ThesisNameEng", "\"" + TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()) + "\"");
         }

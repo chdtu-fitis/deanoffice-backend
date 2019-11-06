@@ -10,7 +10,8 @@ public enum EducationDocument {
     OTHER_FOREIGN(7, "Іноземний документ", "Foreign document"),
     QUALIFIED_WORKER_DIPLOMA(8, "Диплом кваліфікованого робітника", "Qualified Worker diploma"),
     WORKER_QUALIFICATION_DIPLOMA(9, "Свідоцтво про присвоєння(підвищення) робітничої кваліфікації", "Certificate of Appointment (Upgrade) of the Worker Qualification"),
-    SPECIALIST_DIPLOMA(10, "Диплом спеціаліста", "Specialist diploma");
+    SPECIALIST_DIPLOMA(10, "Диплом спеціаліста", "Specialist diploma"),
+    SECONDARY_SCHOOL_CERTIFICATE1(11, "Свідоцтво про здобуття повної загальної середньої освіти", "Certificate of Full Secondary Education");
 
     private final int id;
     private final String nameUkr;

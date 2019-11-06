@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.repository;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,9 +15,9 @@ import java.util.Set;
 public interface StudentGroupRepository extends JpaRepository<StudentGroup, Integer> {
 
     @Query("select sg from StudentGroup as sg " +
-            "where sg.active = true and sg.specialization.faculty.id = :facultyId " +
+            "where sg.active = :active and sg.specialization.faculty.id = :facultyId " +
             "order by sg.name")
-    List<StudentGroup> findAllActiveByFaculty(@Param("facultyId") int facultyId);
+    List<StudentGroup> findByActiveAndFaculty(@Param("active") boolean active, @Param("facultyId") int facultyId);
 
     @Query("SELECT sg FROM StudentGroup AS sg " +
             "WHERE sg.active = TRUE " +
@@ -77,6 +78,28 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "where sg.id in :group_ids")
     List<StudentGroup> findAllByIds(@Param("group_ids") List<Integer> groupIds);
 
+    @Query(value =
+            "SELECT *\n" +
+                    "FROM student_group\n" +
+                    "       INNER JOIN courses_for_groups cfg ON student_group.id = cfg.student_group_id\n" +
+                    "       INNER JOIN specialization sp ON specialization_id = sp.id\n" +
+                    "       INNER JOIN course c ON cfg.course_id = c.id\n" +
+                    "WHERE cfg.course_id IN (SELECT course.id\n" +
+                    "                        FROM course\n" +
+                    "                        WHERE course.hours IN (SELECT c2.hours FROM course c2 WHERE c2.id = :course_id)\n" +
+                    "                          AND\n" +
+                    "                            course.course_name_id IN (SELECT c3.course_name_id FROM course c3 WHERE c3.id = :course_id)\n" +
+                    "                          AND course.kc_id IN (SELECT c4.kc_id FROM course c4 WHERE c4.id = :course_id))\n" +
+                    "  AND sp.faculty_id = :faculty_id\n" +
+                    "  AND sp.degree_id = :degree_id\n" +
+                    "  AND c.semester = ((((SELECT curr_year FROM current_year) - student_group.creation_year) * 2 + 1) +\n" +
+                    "                    cast((NOT date_part('year', CURRENT_DATE) = (SELECT curr_year FROM current_year)) AS int))", nativeQuery = true)
+    List<StudentGroup> findGroupsThatAreStudyingSameCourseTo(
+            @Param("course_id") Integer courseId,
+            @Param("faculty_id") Integer facultyId,
+            @Param("degree_id") Integer degreeId
+    );
+
     @Query("SELECT sg from StudentGroup sg " +
             "where sg.active = true " +
             "and sg.name = :name " +
@@ -110,4 +133,6 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "where fg.specialization.faculty.id = 8 and fg.active = :active)"
     )
     List<StudentGroup> findStudentGroupsMatchingForeignGroups(@Param("active") Boolean active);
+
+    List<StudentGroup> findAll(Specification<StudentGroup> specification);
 }

@@ -6,11 +6,14 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -36,6 +39,7 @@ public class ReportsCoursesService {
 
     private StudentGroupService groupService;
     private CourseForGroupService courseForGroupService;
+    private CurrentYearService currentYearService;
     private DocumentIOService documentIOService;
     private Format formatter;
     private Comparator comparator = new Comparator<CourseForGroup>() {
@@ -66,34 +70,40 @@ public class ReportsCoursesService {
 
     public ReportsCoursesService(StudentGroupService groupService,
                                  DocumentIOService documentIOService,
-                                 CourseForGroupService courseForGroupService) {
+                                 CourseForGroupService courseForGroupService,
+                                 CurrentYearService currentYearService) {
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
+        this.currentYearService = currentYearService;
         formatter = new SimpleDateFormat("dd.MM.yyyy");
     }
 
     public synchronized File prepareReportForGroup(Integer groupId, Integer semesterId) throws Docx4JException, IOException {
         StudentGroup group = groupService.getById(groupId);
         return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE,
-                                                    prepareGroup(groupId,semesterId),group.getName()),
-                                           LanguageUtil.transliterate(group.getName())+".docx", FileFormatEnum.DOCX);
+                prepareGroup(groupId,semesterId),group.getName()),
+                LanguageUtil.transliterate(group.getName())+".docx", FileFormatEnum.DOCX);
     }
-    public synchronized File prepareReportForYear(Integer degreeId,
-                                                  Integer year,
+    public synchronized File prepareReportForYear(int degreeId,
+                                                  int year,
                                                   Integer semesterId,
-                                                  Integer facultyId) throws Docx4JException, IOException {
-        List<StudentGroup> studentGroups = groupService.getGroupsByDegreeAndYear(degreeId,year,facultyId);
+                                                  TuitionForm tuitionForm,
+                                                  int groupId,
+                                                  int facultyId) throws Docx4JException, IOException {
+        Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+        List<StudentGroup> studentGroups = groupService.getGroupsBySelectionCriteria(specification);
         WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
         for(StudentGroup groups:studentGroups){
             List<CourseReport> courseReports = prepareGroup(groups.getId(),(int)semesterId);
             if(studentGroups.get(0) == groups){
-                 wordMLPackage = fillTemplate(TEMPLATE, courseReports,groups.getName());
+                wordMLPackage = fillTemplate(TEMPLATE, courseReports,groups.getName());
             }
             else {
                 wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE,
-                                                                        courseReports,
-                                                                        groups.getName()).getMainDocumentPart().getContent());
+                        courseReports,
+                        groups.getName()).getMainDocumentPart().getContent());
 
             }
         }
