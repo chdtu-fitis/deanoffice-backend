@@ -22,6 +22,10 @@ import java.util.Set;
 @Entity
 public class StudentDegree extends BaseEntity {
     private boolean active;
+    @Enumerated(value = EnumType.STRING)
+    private TuitionForm tuitionForm = TuitionForm.FULL_TIME;
+    @Enumerated(value = EnumType.STRING)
+    private TuitionTerm tuitionTerm = TuitionTerm.REGULAR;
     @Temporal(TemporalType.DATE)
     private Date admissionOrderDate;
     private String admissionOrderNumber;
