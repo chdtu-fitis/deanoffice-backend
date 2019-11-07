@@ -13,3 +13,8 @@ ALTER TABLE student_degree
 ALTER COLUMN tuition_form SET NOT NULL ;
 ALTER TABLE student_degree
 ALTER COLUMN tuition_term SET NOT NULL;
+
+UPDATE student_degree set tuition_form ='FULL_TIME'
+WHERE tuition_form IS NULL;
+UPDATE student_degree set tuition_term = 'REGULAR'
+WHERE tuition_term IS NULL;
