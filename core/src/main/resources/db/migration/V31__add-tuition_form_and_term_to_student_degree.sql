@@ -9,11 +9,6 @@ SET tuition_form = student_group.tuition_form,
 FROM student_group
 WHERE student_group.id = student_degree.student_group_id;
 
-ALTER TABLE student_degree
-ALTER COLUMN tuition_form SET NOT NULL ;
-ALTER TABLE student_degree
-ALTER COLUMN tuition_term SET NOT NULL;
-
 UPDATE student_degree set tuition_form ='FULL_TIME'
 WHERE tuition_form IS NULL;
 UPDATE student_degree set tuition_term = 'REGULAR'
