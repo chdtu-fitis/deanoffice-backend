@@ -201,4 +201,7 @@ public class GradeService {
         return studentDegreeResult;
     }
 
+    public List<Grade> getGradesByStudetDegreeIdAndKCTypes(Integer studentDegreeId, List<Integer> knowledgeControlsIds) {
+        return gradeRepository.getByStudentDegreeIdAndKCTypes(studentDegreeId, knowledgeControlsIds);
+    }
 }

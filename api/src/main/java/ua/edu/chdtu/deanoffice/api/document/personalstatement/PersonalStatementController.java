@@ -42,6 +42,30 @@ public class PersonalStatementController extends DocumentResponseController {
         }
     }
 
+    @GetMapping("/front/{studentDegreeId}/")
+    public ResponseEntity<Resource> generatePersonalWrapperFront(@PathVariable Integer studentDegreeId,
+                                                              @CurrentUser ApplicationUser user) {
+        try {
+            facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
+            File result  = personalStatementService.preparePersonalWrapperFront(studentDegreeId);
+            return buildDocumentResponseEntity(result , result .getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/back/{studentDegreeId}/")
+    public ResponseEntity<Resource> generatePersonalWrapperBack(@PathVariable Integer studentDegreeId,
+                                                              @CurrentUser ApplicationUser user) {
+        try {
+            facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
+            File result  = personalStatementService.preparePersonalWrapperBack(studentDegreeId);
+            return buildDocumentResponseEntity(result , result .getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, GroupGradeReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
