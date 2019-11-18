@@ -48,7 +48,7 @@ public class PersonalStatementController extends DocumentResponseController {
         try {
             facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
             File result  = personalStatementService.preparePersonalWrapperFront(studentDegreeId);
-            return buildDocumentResponseEntity(result , result .getName(), MEDIA_TYPE_DOCX);
+            return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
         }

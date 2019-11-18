@@ -74,9 +74,9 @@ public class GradeService {
     }
 
     @Transactional
-    public void setAcademicDifferenceByGradeIds(Map<Boolean, List<Integer>> academicDifferenceAndGradeIds){
+    public void setAcademicDifferenceByGradeIds(Map<Boolean, List<Integer>> academicDifferenceAndGradeIds) {
         List<Integer> gradesIdsWithAcademicDifference = academicDifferenceAndGradeIds.get(true);
-        if (gradesIdsWithAcademicDifference != null && !gradesIdsWithAcademicDifference.isEmpty()){
+        if (gradesIdsWithAcademicDifference != null && !gradesIdsWithAcademicDifference.isEmpty()) {
             gradeRepository.updateAcademicDifference(true, gradesIdsWithAcademicDifference);
         }
         List<Integer> gradesIdsWithoutAcademicDifference = academicDifferenceAndGradeIds.get(false);
@@ -144,8 +144,8 @@ public class GradeService {
         for (Grade grade : grades) {
             grade.setCourse(course);
             Boolean newGradedValue = gradedDefinition.get(NEW_GRADED_VALUE);
-            if (newGradedValue != null){
-                if (newGradedValue){
+            if (newGradedValue != null) {
+                if (newGradedValue) {
                     grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
                 } else {
                     grade.setGrade(GradeUtil.getCreditFromPoints(grade.getPoints()));
@@ -160,17 +160,17 @@ public class GradeService {
     }
 
     @Transactional
-    public void updateNationalGradeByCourseIdAndGradedFalse(int courseId){
-        List <Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
-        for (Integer studentDegreeId: studentDegreeIds) {
+    public void updateNationalGradeByCourseIdAndGradedFalse(int courseId) {
+        List<Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
+        for (Integer studentDegreeId : studentDegreeIds) {
             gradeRepository.updateGradeByCourseIdAndGradedFalse(courseId, studentDegreeId);
         }
     }
 
     @Transactional
-    public void updateNationalGradeByCourseIdAndGradedTrue(int courseId){
-        List <Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
-        for (Integer studentDegreeId: studentDegreeIds) {
+    public void updateNationalGradeByCourseIdAndGradedTrue(int courseId) {
+        List<Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
+        for (Integer studentDegreeId : studentDegreeIds) {
             gradeRepository.updateGradeByCourseIdAndGradedTrue(courseId, studentDegreeId);
         }
     }
