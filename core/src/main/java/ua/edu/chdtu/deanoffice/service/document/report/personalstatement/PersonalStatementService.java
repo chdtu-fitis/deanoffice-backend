@@ -21,10 +21,7 @@ import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.PracticeReport;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.AcademicVacationReport;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.QualificationReport;
-import ua.edu.chdtu.deanoffice.util.DateUtil;
-import ua.edu.chdtu.deanoffice.util.GradeUtil;
-import ua.edu.chdtu.deanoffice.util.LanguageUtil;
-import ua.edu.chdtu.deanoffice.util.PersonUtil;
+import ua.edu.chdtu.deanoffice.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -292,14 +289,26 @@ public class PersonalStatementService {
                 DateUtil.getDate(studentDegree.getStudent().getBirthDate()) : "");
         commonDict.put("GrY", (studentDegree.getPreviousDiplomaDate() != null) ?
                 DateUtil.getYear(studentDegree.getPreviousDiplomaDate()) : "");
-        commonDict.put("Graduated", studentDegree.getPreviousDiplomaIssuedBy());
-        commonDict.put("GradSer", studentDegree.getPreviousDiplomaNumber());
-        commonDict.put("POfRes", studentDegree.getStudent().getRegistrationAddress());
-        commonDict.put("PhoneNum", studentDegree.getStudent().getTelephone());
+        List<String> graduates = StringUtil.makeHyphenationByCharsLength(studentDegree.getPreviousDiplomaIssuedBy() != null ?
+                studentDegree.getPreviousDiplomaIssuedBy() : "", 55);
+        commonDict.put("Graduated", graduates.get(0));
+        commonDict.put("Graduated2", graduates.get(1));
+        commonDict.put("GradSer", studentDegree.getPreviousDiplomaNumber() != null ?
+                studentDegree.getPreviousDiplomaNumber() : "");
+        List<String> addresses = StringUtil.makeHyphenationByCharsLength(
+                studentDegree.getStudent().getRegistrationAddress() != null ?
+                        studentDegree.getStudent().getRegistrationAddress() :
+                        studentDegree.getStudent().getActualAddress() != null ?
+                                studentDegree.getStudent().getActualAddress() : "", 55);
+        commonDict.put("POfRes", addresses.get(0));
+        commonDict.put("POfRes2", addresses.get(1));
+        commonDict.put("PhoneNum", studentDegree.getStudent().getTelephone() != null ?
+                studentDegree.getStudent().getTelephone() : "");
         commonDict.put("AdmPriv", studentDegree.getStudent().getPrivilege().getName());
         commonDict.put("AdmDate", studentDegree.getAdmissionDate() != null ?
                 DateUtil.getDate(studentDegree.getAdmissionDate()) : "");
-        commonDict.put("AdmSer", studentDegree.getAdmissionOrderNumber());
+        commonDict.put("AdmSer", studentDegree.getAdmissionOrderNumber() != null ?
+                studentDegree.getAdmissionOrderNumber() : "");
         fillAcademicVacationTable(template, prepareAcademicVacationReports(studentDegree.getId()));
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
@@ -310,14 +319,13 @@ public class PersonalStatementService {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         Map<String, String> commonDict = new HashMap<>(prepareStudentsGrade(studentDegree.getId()));
         fillPracticeTable(template, preparePracticeReports(studentDegree.getId()));
-        fillQualificationTable(template,prepareQualificationReport(studentDegree.getId()));
-        if (studentDegree.getThesisName().length() > 55) {
-            commonDict.put("ThesisName", studentDegree.getThesisName().substring(0, 55));
-            commonDict.put("ThesisName2", studentDegree.getThesisName().substring(55));
-        } else {
-            commonDict.put("ThesisName", studentDegree.getThesisName());
-        }
-        commonDict.put("DeanName", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
+        fillQualificationTable(template, prepareQualificationReport(studentDegree.getId()));
+        List<String> thesis = StringUtil.makeHyphenationByCharsLength(studentDegree.getThesisName() != null ?
+                studentDegree.getThesisName() : "", 55);
+        commonDict.put("ThesisName", thesis.get(0));
+        commonDict.put("ThesisName2", thesis.get(1));
+        commonDict.put("DeanName", PersonUtil.makeInitialsSurnameLast(
+                studentDegree.getSpecialization().getFaculty().getDean()));
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
@@ -360,43 +368,13 @@ public class PersonalStatementService {
             academicVacationReports.add(new AcademicVacationReport(
                     String.valueOf(studentAcademicVacation.getStudyYear()),
                     studentAcademicVacation.getOrderNumber(),
-                    studentAcademicVacation.getOrderDate() != null ?
-                            DateUtil.getDate(studentAcademicVacation.getOrderDate()) : "",
+                    DateUtil.getDate(studentAcademicVacation.getOrderDate()),
                     studentAcademicVacation.getOrderReason().getName()));
         return academicVacationReports;
     }
 
-    private List<QualificationReport> prepareQualificationReport(Integer studentDegreeId) {
-        List<QualificationReport> qualificationReports = new ArrayList<>();
-        List<Integer> kCTypes = new ArrayList<>();
-        kCTypes.add(Constants.ATTESTATION);
-        List<Grade> grades = gradeService.getGradesByStudetDegreeIdAndKCTypes(studentDegreeId, kCTypes);
-        int number = 1;
-        for (Grade grade : grades) {
-            qualificationReports.add(new QualificationReport(
-                    grade.getCourse().getCourseName().getName(),
-                    number++,
-                    grade.getGrade(),
-                    grade.getPoints(),
-                    EctsGrade.getEctsGrade(grade.getPoints()).getNationalGradeUkr(grade)));
-        }
-        return qualificationReports;
-    }
-
-    private void fillQualificationTable(WordprocessingMLPackage template, List<QualificationReport> qualificationReports){
-        Tbl tempTable = findTable(template, "Кваліфікаційний іспит та/або кваліфікаційна робота");
-        if (tempTable == null) return;
-        Tr templateRow = getTableRow(tempTable, 2);
-        int rowToAddIndex = 2;
-        for (QualificationReport qualificationReport : qualificationReports) {
-            Map<String, String> replacements = qualificationReport.getDictionary();
-            addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
-            rowToAddIndex++;
-        }
-        tempTable.getContent().remove(templateRow);
-    }
-
-    private void fillAcademicVacationTable(WordprocessingMLPackage template, List<AcademicVacationReport> academicVacationReports) {
+    private void fillAcademicVacationTable(WordprocessingMLPackage template,
+                                           List<AcademicVacationReport> academicVacationReports) {
         Tbl tempTable = findTable(template, "Курс");
         if (tempTable == null) return;
         Tr templateRow = getTableRow(tempTable, 1);
@@ -422,9 +400,9 @@ public class PersonalStatementService {
         for (Grade grade : grades)
             practiceReports.add(new PracticeReport(grade.getCourse().getCourseName().getName(),
                     number++,
-                    grade.getGrade(),
                     grade.getPoints(),
-                    EctsGrade.getEctsGrade(grade.getPoints()).getNationalGradeUkr(grade)));
+                    grade.getGrade(),
+                    grade.getEcts().name()));
         return practiceReports;
     }
 
@@ -439,6 +417,37 @@ public class PersonalStatementService {
             replaceInRow(templateRow, replacements);
             rowToAddIndex++;
         }
+    }
+
+    private List<QualificationReport> prepareQualificationReport(Integer studentDegreeId) {
+        List<QualificationReport> qualificationReports = new ArrayList<>();
+        List<Integer> kCTypes = new ArrayList<>();
+        kCTypes.add(Constants.ATTESTATION);
+        kCTypes.add(Constants.STATE_EXAM);
+        List<Grade> grades = gradeService.getGradesByStudetDegreeIdAndKCTypes(studentDegreeId, kCTypes);
+        int number = 1;
+        for (Grade grade : grades) {
+            qualificationReports.add(new QualificationReport(
+                    grade.getCourse().getCourseName().getName(),
+                    number++,
+                    grade.getPoints(),
+                    grade.getGrade(),
+                    grade.getEcts().name()));
+        }
+        return qualificationReports;
+    }
+
+    private void fillQualificationTable(WordprocessingMLPackage template, List<QualificationReport> qualificationReports) {
+        Tbl tempTable = findTable(template, "Кваліфікаційний іспит та/або кваліфікаційна робота");
+        if (tempTable == null) return;
+        Tr templateRow = getTableRow(tempTable, 2);
+        int rowToAddIndex = 2;
+        for (QualificationReport qualificationReport : qualificationReports) {
+            Map<String, String> replacements = qualificationReport.getDictionary();
+            addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+            rowToAddIndex++;
+        }
+        tempTable.getContent().remove(templateRow);
     }
 
     @Getter

@@ -10,7 +10,6 @@ public class QualificationReport {
     private static Logger log = LoggerFactory.getLogger(QualificationReport.class);
     private int number;
     private String name;
-
     private int score;
     private int point;
     private String eCTS;
