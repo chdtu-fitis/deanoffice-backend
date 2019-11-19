@@ -10,15 +10,15 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class StudentAcademicVacationReport {
+public class AcademicVacationReport {
 
-    private static Logger log = LoggerFactory.getLogger(StudentAcademicVacationReport.class);
+    private static Logger log = LoggerFactory.getLogger(AcademicVacationReport.class);
     private String course;
     private String number;
     private String date;
     private String content;
 
-    public StudentAcademicVacationReport(String course, String number, String date, String content) {
+    public AcademicVacationReport(String course, String number, String date, String content) {
         this.course = course;
         this.number = number;
         this.date = date;

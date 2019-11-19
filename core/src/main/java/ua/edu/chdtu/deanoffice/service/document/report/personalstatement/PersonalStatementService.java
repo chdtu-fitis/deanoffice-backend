@@ -15,21 +15,20 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.GradeService;
-import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.PracticeReport;
-import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.StudentAcademicVacationReport;
+import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.AcademicVacationReport;
+import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.QualificationReport;
+import ua.edu.chdtu.deanoffice.util.DateUtil;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,7 +40,7 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 @Service
 public class PersonalStatementService {
 
-    private static final String TEMPLATE_PATH_FRONT = TEMPLATES_PATH + "PesronalWrapperFront.docx";
+    private static final String TEMPLATE_PATH_FRONT = TEMPLATES_PATH + "PersonalWrapperFront.docx";
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "PersonalStatement.docx";
     private static final String TEMPLATE_PATH_BACK = TEMPLATES_PATH + "PersonalWrapperBack.docx";
     private static final int NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE = 10;
@@ -60,8 +59,6 @@ public class PersonalStatementService {
     StudentDegreeService studentDegreeService;
     @Autowired
     StudentAcademicVacationService studentAcademicVacationService;
-
-    Format formatter = new SimpleDateFormat("dd.MM.yyyy");
 
     public File formDocument(Integer year, List<Integer> studentDegreeIds)
             throws Docx4JException, IOException {
@@ -285,23 +282,25 @@ public class PersonalStatementService {
                                                   StudentDegree studentDegree) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         Map<String, String> commonDict = new HashMap<>();
-
         commonDict.put("Faculty", studentDegree.getSpecialization().getFaculty().getName());
         commonDict.put("Degree", studentDegree.getSpecialization().getDegree().getName());
         commonDict.put("Speciality", studentDegree.getSpecialization().getSpeciality().getName());
-        commonDict.put((studentDegree.getSpecialization().getCode() == null) ? "Specialization" : "EducationalProgram",
+        commonDict.put((studentDegree.getSpecialization().getCode() == null) ? "EducationalProgram" : "Specialization",
                 studentDegree.getSpecialization().getName());
         commonDict.put("Name", studentDegree.getStudent().getFullNameUkr());
-        commonDict.put("BDate", (studentDegree.getStudent().getBirthDate() != null) ? formatter.format(studentDegree.getStudent().getBirthDate()) : "");
-        commonDict.put("GrY", (studentDegree.getPreviousDiplomaDate() != null) ? formatter.format(studentDegree.getPreviousDiplomaDate()).substring(6) : "");
+        commonDict.put("BDate", (studentDegree.getStudent().getBirthDate() != null) ?
+                DateUtil.getDate(studentDegree.getStudent().getBirthDate()) : "");
+        commonDict.put("GrY", (studentDegree.getPreviousDiplomaDate() != null) ?
+                DateUtil.getYear(studentDegree.getPreviousDiplomaDate()) : "");
         commonDict.put("Graduated", studentDegree.getPreviousDiplomaIssuedBy());
         commonDict.put("GradSer", studentDegree.getPreviousDiplomaNumber());
         commonDict.put("POfRes", studentDegree.getStudent().getRegistrationAddress());
         commonDict.put("PhoneNum", studentDegree.getStudent().getTelephone());
         commonDict.put("AdmPriv", studentDegree.getStudent().getPrivilege().getName());
-        commonDict.put("AdmDate", studentDegree.getAdmissionDate() != null ? formatter.format(studentDegree.getAdmissionDate()) : "");
+        commonDict.put("AdmDate", studentDegree.getAdmissionDate() != null ?
+                DateUtil.getDate(studentDegree.getAdmissionDate()) : "");
         commonDict.put("AdmSer", studentDegree.getAdmissionOrderNumber());
-        fillStudentAcademicVacationTable(template, prepareStudentAcademicVacationReports(studentDegree.getId()));
+        fillAcademicVacationTable(template, prepareAcademicVacationReports(studentDegree.getId()));
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
@@ -310,20 +309,21 @@ public class PersonalStatementService {
                                                  StudentDegree studentDegree) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
         Map<String, String> commonDict = new HashMap<>(prepareStudentsGrade(studentDegree.getId()));
+        fillPracticeTable(template, preparePracticeReports(studentDegree.getId()));
+        fillQualificationTable(template,prepareQualificationReport(studentDegree.getId()));
         if (studentDegree.getThesisName().length() > 55) {
             commonDict.put("ThesisName", studentDegree.getThesisName().substring(0, 55));
             commonDict.put("ThesisName2", studentDegree.getThesisName().substring(55));
-        } else
+        } else {
             commonDict.put("ThesisName", studentDegree.getThesisName());
-        commonDict.put("DeanName", studentDegree.getSpecialization().getFaculty().getDean());
-        fillPracticeTable(template, preparePracticeReports(studentDegree.getId()));
+        }
+        commonDict.put("DeanName", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
 
     private Map<String, String> prepareStudentsGrade(Integer studentDegreeId) {
         List<Integer> kCTypes = new ArrayList<>();
-        Map<String, String> result = new HashMap<>();
         kCTypes.add(Constants.INTERNSHIP);
         kCTypes.add(Constants.ATTESTATION);
         kCTypes.add(Constants.COURSE_PROJECT);
@@ -333,51 +333,76 @@ public class PersonalStatementService {
         kCTypes.add(Constants.EXAM);
         kCTypes.add(Constants.STATE_EXAM);
         kCTypes.add(Constants.NON_GRADED_INTERNSHIP);
-
         List<Grade> grades = gradeService.getGradesByStudetDegreeIdAndKCTypes(studentDegreeId, kCTypes);
-        int amount = grades.size();
-        int perfect = 0;
-        int good = 0;
-        int satisfactorily = 0;
-        for (Grade grade : grades) {
-            if (grade.getPoints() >= EctsGrade.A.getLowerBound())
-                perfect++;
-            else if (grade.getPoints() <= EctsGrade.B.getUpperBound() && grade.getPoints() >= EctsGrade.C.getLowerBound())
-                good++;
-            else if (grade.getPoints() <= EctsGrade.D.getUpperBound() && grade.getPoints() >= EctsGrade.E.getLowerBound())
-                satisfactorily++;
-        }
+        Long perfect = grades.stream().filter(grade -> (grade.getPoints() >= EctsGrade.A.getLowerBound())).count(),
+                good = grades.stream().filter(grade -> (grade.getPoints() <= EctsGrade.B.getUpperBound()
+                        && grade.getPoints() >= EctsGrade.C.getLowerBound())).count(),
+                satisfactory = grades.stream().filter(grade -> (grade.getPoints() <= EctsGrade.D.getUpperBound()
+                        && grade.getPoints() >= EctsGrade.E.getLowerBound())).count();
+        Integer amount = grades.size();
+
         DecimalFormat df = new DecimalFormat("0.00");
+        Map<String, String> result = new HashMap<>();
         result.put("Amount", String.valueOf(amount));
         result.put("P", String.valueOf(perfect));
-        result.put("Pp", String.valueOf(df.format((double) perfect / (double) amount * 100)));
+        result.put("Pp", String.valueOf(df.format(perfect.doubleValue() / amount.doubleValue() * 100)));
         result.put("G", String.valueOf(good));
-        result.put("Gp", String.valueOf(df.format((double) good / (double) amount * 100)));
-        result.put("S", String.valueOf(satisfactorily));
-        result.put("Sp", String.valueOf(df.format((double) satisfactorily / (double) amount * 100)));
+        result.put("Gp", String.valueOf(df.format(good.doubleValue() / amount.doubleValue() * 100)));
+        result.put("S", String.valueOf(satisfactory));
+        result.put("Sp", String.valueOf(df.format(satisfactory.doubleValue() / amount.doubleValue() * 100)));
         return result;
     }
 
-    private List<StudentAcademicVacationReport> prepareStudentAcademicVacationReports(Integer studentDegreeId) {
-        List<StudentAcademicVacationReport> studentAcademicVacationReports = new ArrayList<>();
+    private List<AcademicVacationReport> prepareAcademicVacationReports(Integer studentDegreeId) {
+        List<AcademicVacationReport> academicVacationReports = new ArrayList<>();
         List<StudentAcademicVacation> studentAcademicVacations = studentAcademicVacationService.getByDegreeId(studentDegreeId);
         for (StudentAcademicVacation studentAcademicVacation : studentAcademicVacations)
-            studentAcademicVacationReports.add(new StudentAcademicVacationReport(
+            academicVacationReports.add(new AcademicVacationReport(
                     String.valueOf(studentAcademicVacation.getStudyYear()),
                     studentAcademicVacation.getOrderNumber(),
                     studentAcademicVacation.getOrderDate() != null ?
-                            formatter.format(studentAcademicVacation.getOrderDate()) : "",
+                            DateUtil.getDate(studentAcademicVacation.getOrderDate()) : "",
                     studentAcademicVacation.getOrderReason().getName()));
-        return studentAcademicVacationReports;
+        return academicVacationReports;
     }
 
-    private void fillStudentAcademicVacationTable(WordprocessingMLPackage template, List<StudentAcademicVacationReport> studentAcademicVacationReports) {
+    private List<QualificationReport> prepareQualificationReport(Integer studentDegreeId) {
+        List<QualificationReport> qualificationReports = new ArrayList<>();
+        List<Integer> kCTypes = new ArrayList<>();
+        kCTypes.add(Constants.ATTESTATION);
+        List<Grade> grades = gradeService.getGradesByStudetDegreeIdAndKCTypes(studentDegreeId, kCTypes);
+        int number = 1;
+        for (Grade grade : grades) {
+            qualificationReports.add(new QualificationReport(
+                    grade.getCourse().getCourseName().getName(),
+                    number++,
+                    grade.getGrade(),
+                    grade.getPoints(),
+                    EctsGrade.getEctsGrade(grade.getPoints()).getNationalGradeUkr(grade)));
+        }
+        return qualificationReports;
+    }
+
+    private void fillQualificationTable(WordprocessingMLPackage template, List<QualificationReport> qualificationReports){
+        Tbl tempTable = findTable(template, "Кваліфікаційний іспит та/або кваліфікаційна робота");
+        if (tempTable == null) return;
+        Tr templateRow = getTableRow(tempTable, 2);
+        int rowToAddIndex = 2;
+        for (QualificationReport qualificationReport : qualificationReports) {
+            Map<String, String> replacements = qualificationReport.getDictionary();
+            addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+            rowToAddIndex++;
+        }
+        tempTable.getContent().remove(templateRow);
+    }
+
+    private void fillAcademicVacationTable(WordprocessingMLPackage template, List<AcademicVacationReport> academicVacationReports) {
         Tbl tempTable = findTable(template, "Курс");
         if (tempTable == null) return;
         Tr templateRow = getTableRow(tempTable, 1);
         int rowToAddIndex = 1;
-        for (StudentAcademicVacationReport studentAcademicVacationReport : studentAcademicVacationReports) {
-            Map<String, String> replacements = studentAcademicVacationReport.getDictionary();
+        for (AcademicVacationReport academicVacationReport : academicVacationReports) {
+            Map<String, String> replacements = academicVacationReport.getDictionary();
             addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
             rowToAddIndex++;
         }
@@ -399,21 +424,21 @@ public class PersonalStatementService {
                     number++,
                     grade.getGrade(),
                     grade.getPoints(),
-                    grade.getEcts().getNationalGradeEng(grade)));
+                    EctsGrade.getEctsGrade(grade.getPoints()).getNationalGradeUkr(grade)));
         return practiceReports;
     }
 
     private void fillPracticeTable(WordprocessingMLPackage template, List<PracticeReport> practiceReports) {
         Tbl tempTable = findTable(template, "Назва практики");
         if (tempTable == null) return;
-        Tr templateRow = getTableRow(tempTable, 2);
-        int rowToAddIndex = 1;
+        Tr templateRow;
+        int rowToAddIndex = 2;
         for (PracticeReport PracticeReport : practiceReports) {
             Map<String, String> replacements = PracticeReport.getDictionary();
-            addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+            templateRow = getTableRow(tempTable, rowToAddIndex);
+            replaceInRow(templateRow, replacements);
             rowToAddIndex++;
         }
-        tempTable.getContent().remove(templateRow);
     }
 
     @Getter
