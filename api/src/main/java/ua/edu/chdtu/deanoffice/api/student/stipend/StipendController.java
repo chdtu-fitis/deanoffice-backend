@@ -75,21 +75,21 @@ public class StipendController {
     }
 
     @PostMapping("/extra-points-update")
-    public ResponseEntity updateExtraPoints(@RequestBody List <ExtraPointsDTO> extraPointsDTO,
-                                            @CurrentUser ApplicationUser user){
+    public ResponseEntity updateExtraPoints(@RequestBody List<ExtraPointsDTO> extraPointsDTO,
+                                            @CurrentUser ApplicationUser user) {
         try {
-            List <Integer> degreesIds = new ArrayList<>();
-            for (ExtraPointsDTO extraPoints : extraPointsDTO){
+            List<Integer> degreesIds = new ArrayList<>();
+            for (ExtraPointsDTO extraPoints : extraPointsDTO) {
                 degreesIds.add(extraPoints.getStudentDegreeId());
             }
             facultyAuthorizationService.verifyAccessibilityOfStudentDegrees(degreesIds, user);
-            for (ExtraPointsDTO extraPoints : extraPointsDTO){
+            for (ExtraPointsDTO extraPoints : extraPointsDTO) {
                 Integer semester = stipendService.getStudentSemester(extraPoints.getStudentDegreeId());
                 stipendService.putExtraPoints(extraPoints.getStudentDegreeId(), semester, extraPoints.getPoints());
             }
             URI location = getNewResourceLocation(extraPointsDTO.get(0).getStudentDegreeId());
             return ResponseEntity.created(location).build();
-        } catch (Exception e){
+        } catch (Exception e) {
             return handleException(e);
         }
     }

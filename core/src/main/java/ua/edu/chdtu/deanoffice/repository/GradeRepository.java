@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.List;
 
@@ -51,22 +52,22 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     @Query(value =
             "SELECT CAST(CAST(COUNT(*) AS INT) AS BOOLEAN) AS is_good_mark" +
-            "  FROM student_degree" +
-            "        LEFT JOIN grade ON student_degree.id = grade.student_degree_id" +
-            " WHERE student_degree.id = :studentDegreeId " +
-            "       AND student_degree.student_group_id = :studentGroupId " +
-            "       AND grade.points >= 60 " +
-            "       AND course_id IN (SELECT similar_course.id " +
-            "                           FROM course similar_course " +
-            "                          WHERE course_name_id IN (SELECT course_name.course_name_id " +
-            "                                                     FROM course course_name " +
-            "                                                    WHERE course_name.id = :courseId) " +
-            "                                AND kc_id IN (SELECT course_kc.kc_id " +
-            "                                                FROM course course_kc " +
-            "                                               WHERE course_kc.id = :courseId) " +
-            "                                AND hours IN (SELECT course_hours.hours " +
-            "                                                FROM course course_hours " +
-            "                                               WHERE course_hours.id = :courseId)) ",
+                    "  FROM student_degree" +
+                    "        LEFT JOIN grade ON student_degree.id = grade.student_degree_id" +
+                    " WHERE student_degree.id = :studentDegreeId " +
+                    "       AND student_degree.student_group_id = :studentGroupId " +
+                    "       AND grade.points >= 60 " +
+                    "       AND course_id IN (SELECT similar_course.id " +
+                    "                           FROM course similar_course " +
+                    "                          WHERE course_name_id IN (SELECT course_name.course_name_id " +
+                    "                                                     FROM course course_name " +
+                    "                                                    WHERE course_name.id = :courseId) " +
+                    "                                AND kc_id IN (SELECT course_kc.kc_id " +
+                    "                                                FROM course course_kc " +
+                    "                                               WHERE course_kc.id = :courseId) " +
+                    "                                AND hours IN (SELECT course_hours.hours " +
+                    "                                                FROM course course_hours " +
+                    "                                               WHERE course_hours.id = :courseId)) ",
             nativeQuery = true)
     boolean isStudentHaveGoodMarkFromCourse(@Param("studentDegreeId") Integer studentDegreeId,
                                             @Param("studentGroupId") Integer studentGroupId,
@@ -86,7 +87,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     @Modifying
     @Query(value = "UPDATE Grade AS gr " +
             "set grade = " +
-            "case "  +
+            "case " +
             "when points < 60 or points = null or points = 0 then 0 " +
             "when points >= 60 and points <= 73 then 3 " +
             "when points >= 74 and points <= 89 then 4 " +
@@ -95,7 +96,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             "from student_degree sd " +
             "inner join student_group sg on sd.student_group_id = sg.id " +
             "where gr.course_id = :courseId and gr.student_degree_id = :studentDegreeId  and  sg.id = sd.student_group_id ", nativeQuery = true)
-    void updateGradeByCourseIdAndGradedTrue(@Param("courseId") int courseId,  @Param("studentDegreeId") int studentDegreeId);
+    void updateGradeByCourseIdAndGradedTrue(@Param("courseId") int courseId, @Param("studentDegreeId") int studentDegreeId);
 
     @Modifying
     @Query(value = "UPDATE Grade AS gr " +
@@ -109,8 +110,8 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     void updateGradeByCourseIdAndGradedFalse(@Param("courseId") int courseId, @Param("studentDegreeId") int studentDegreeId);
 
     @Query(value = "select gr.student_degree_id from Grade as gr " +
-            "where gr.course_id = :courseId ",nativeQuery = true)
-     List <Integer> getStudentDegreeIdByCourseId(@Param("courseId") int courseId);
+            "where gr.course_id = :courseId ", nativeQuery = true)
+    List<Integer> getStudentDegreeIdByCourseId(@Param("courseId") int courseId);
 
     @Modifying
     @Query(value = "UPDATE grade as g " +

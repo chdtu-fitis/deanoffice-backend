@@ -7,11 +7,9 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
@@ -32,7 +30,7 @@ public class StudyYearFinishController {
     public StudyYearFinishController(StudyYearFinishService studyYearFinishService,
                                      FacultyAuthorizationService facultyAuthorizationService,
                                      DataVerificationService dataVerificationService,
-                                     StudentDegreeService studentDegreeService){
+                                     StudentDegreeService studentDegreeService) {
         this.studyYearFinishService = studyYearFinishService;
         this.facultyAuthorizationService = facultyAuthorizationService;
         this.dataVerificationService = dataVerificationService;
@@ -40,7 +38,7 @@ public class StudyYearFinishController {
     }
 
     @PostMapping
-    public ResponseEntity finishStudyYear(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user){
+    public ResponseEntity finishStudyYear(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user) {
         try {
             if (studyYearFinishDTO == null)
                 throw new OperationCannotBePerformedException("Не передана форма");
