@@ -289,13 +289,13 @@ public class PersonalStatementService {
                 DateUtil.getDate(studentDegree.getStudent().getBirthDate()) : "");
         commonDict.put("GrY", (studentDegree.getPreviousDiplomaDate() != null) ?
                 DateUtil.getYear(studentDegree.getPreviousDiplomaDate()) : "");
-        List<String> graduates = StringUtil.makeHyphenationByCharsLength(studentDegree.getPreviousDiplomaIssuedBy() != null ?
+        List<String> graduates = StringUtil.makeHyphenationForRow(studentDegree.getPreviousDiplomaIssuedBy() != null ?
                 studentDegree.getPreviousDiplomaIssuedBy() : "", 55);
         commonDict.put("Graduated", graduates.get(0));
         commonDict.put("Graduated2", graduates.get(1));
         commonDict.put("GradSer", studentDegree.getPreviousDiplomaNumber() != null ?
                 studentDegree.getPreviousDiplomaNumber() : "");
-        List<String> addresses = StringUtil.makeHyphenationByCharsLength(
+        List<String> addresses = StringUtil.makeHyphenationForRow(
                 studentDegree.getStudent().getRegistrationAddress() != null ?
                         studentDegree.getStudent().getRegistrationAddress() :
                         studentDegree.getStudent().getActualAddress() != null ?
@@ -320,8 +320,8 @@ public class PersonalStatementService {
         Map<String, String> commonDict = new HashMap<>(prepareStudentsGrade(studentDegree.getId()));
         fillPracticeTable(template, preparePracticeReports(studentDegree.getId()));
         fillQualificationTable(template, prepareQualificationReport(studentDegree.getId()));
-        List<String> thesis = StringUtil.makeHyphenationByCharsLength(studentDegree.getThesisName() != null ?
-                studentDegree.getThesisName() : "", 55);
+        List<String> thesis = StringUtil.makeHyphenationForRow(studentDegree.getThesisName() != null ?
+                studentDegree.getThesisName() : "", 60);
         commonDict.put("ThesisName", thesis.get(0));
         commonDict.put("ThesisName2", thesis.get(1));
         commonDict.put("DeanName", PersonUtil.makeInitialsSurnameLast(
@@ -342,11 +342,19 @@ public class PersonalStatementService {
         kCTypes.add(Constants.STATE_EXAM);
         kCTypes.add(Constants.NON_GRADED_INTERNSHIP);
         List<Grade> grades = gradeService.getGradesByStudetDegreeIdAndKCTypes(studentDegreeId, kCTypes);
-        Long perfect = grades.stream().filter(grade -> (grade.getPoints() >= EctsGrade.A.getLowerBound())).count(),
-                good = grades.stream().filter(grade -> (grade.getPoints() <= EctsGrade.B.getUpperBound()
-                        && grade.getPoints() >= EctsGrade.C.getLowerBound())).count(),
-                satisfactory = grades.stream().filter(grade -> (grade.getPoints() <= EctsGrade.D.getUpperBound()
-                        && grade.getPoints() >= EctsGrade.E.getLowerBound())).count();
+        Long perfect = 0L, good = 0L, satisfactory = 0L;
+        for (Grade grade : grades) {
+            if (grade.getPoints() == null)
+                continue;
+            if (grade.getPoints() >= EctsGrade.A.getLowerBound())
+                perfect++;
+            else if (grade.getPoints() <= EctsGrade.B.getUpperBound()
+                    && grade.getPoints() >= EctsGrade.C.getLowerBound())
+                good++;
+            else if (grade.getPoints() <= EctsGrade.D.getUpperBound()
+                    && grade.getPoints() >= EctsGrade.E.getLowerBound())
+                satisfactory++;
+        }
         Integer amount = grades.size();
 
         DecimalFormat df = new DecimalFormat("0.00");
@@ -377,14 +385,14 @@ public class PersonalStatementService {
                                            List<AcademicVacationReport> academicVacationReports) {
         Tbl tempTable = findTable(template, "Курс");
         if (tempTable == null) return;
-        Tr templateRow = getTableRow(tempTable, 1);
+        Tr templateRow;
         int rowToAddIndex = 1;
         for (AcademicVacationReport academicVacationReport : academicVacationReports) {
             Map<String, String> replacements = academicVacationReport.getDictionary();
-            addRowToTable(tempTable, templateRow, rowToAddIndex, replacements);
+            templateRow = getTableRow(tempTable, rowToAddIndex);
+            replaceInRow(templateRow, replacements);
             rowToAddIndex++;
         }
-        tempTable.getContent().remove(templateRow);
     }
 
     private Tr getTableRow(Tbl table, int row) {
@@ -400,9 +408,12 @@ public class PersonalStatementService {
         for (Grade grade : grades)
             practiceReports.add(new PracticeReport(grade.getCourse().getCourseName().getName(),
                     number++,
-                    grade.getPoints(),
-                    grade.getGrade(),
-                    grade.getEcts().name()));
+                    grade.getPoints() != null ?
+                            String.valueOf(grade.getPoints()) : "",
+                    grade.getGrade() != null ?
+                            String.valueOf(grade.getGrade()) : "",
+                    grade.getEcts() != null ?
+                            grade.getEcts().name() : ""));
         return practiceReports;
     }
 
@@ -430,9 +441,12 @@ public class PersonalStatementService {
             qualificationReports.add(new QualificationReport(
                     grade.getCourse().getCourseName().getName(),
                     number++,
-                    grade.getPoints(),
-                    grade.getGrade(),
-                    grade.getEcts().name()));
+                    grade.getPoints() != null ?
+                            String.valueOf(grade.getPoints()) : "",
+                    grade.getGrade() != null ?
+                            String.valueOf(grade.getGrade()) : "",
+                    grade.getEcts() != null ?
+                            grade.getEcts().name() : ""));
         }
         return qualificationReports;
     }

@@ -16,20 +16,20 @@ public class StringUtil {
         return "";
     }
 
-    public static List<String> makeHyphenationByCharsLength(String string, int charsLength) {
+    public static List<String> makeHyphenationForRow(String string,
+                                                     int rowLength) {
         List<String> result = new ArrayList<String>();
-        if (string.length()<=charsLength){
+        if (string.length() <= rowLength) {
             result.add(string);
+            result.add("");
             result.add("");
             return result;
         }
-        int num;
-        for (num = charsLength;num<=charsLength;num--) {
-            if(string.toCharArray()[num]==' '){
-                break;
-            }
+        int num = rowLength;
+        while (string.toCharArray()[num] != ' ') {
+            num--;
         }
-        result.add(string.substring(0,num));
+        result.add(string.substring(0, num));
         result.add(string.substring(num));
         return result;
     }

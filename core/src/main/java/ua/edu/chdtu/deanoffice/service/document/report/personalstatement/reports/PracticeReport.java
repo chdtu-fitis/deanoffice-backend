@@ -14,12 +14,12 @@ public class PracticeReport {
     private static Logger log = LoggerFactory.getLogger(PracticeReport.class);
     private int number;
     private String name;
-    private int score;
-    private int point;
+    private String score;
+    private String point;
     private String eCTS;
 
     public PracticeReport(String name, int number,
-                          int score, int point, String eCTS) {
+                          String score, String point, String eCTS) {
         this.name = name;
         this.number = number;
         this.score = score;
@@ -31,8 +31,8 @@ public class PracticeReport {
         Map<String, String> result = new HashMap<>();
         result.put("Num", String.valueOf(number));
         result.put("PracticeName", name);
-        result.put("Score", String.valueOf(score));
-        result.put("Point", String.valueOf(point));
+        result.put("Score", score);
+        result.put("Point", point);
         result.put("ECTS", eCTS);
         return result;
     }

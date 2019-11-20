@@ -10,12 +10,12 @@ public class QualificationReport {
     private static Logger log = LoggerFactory.getLogger(QualificationReport.class);
     private int number;
     private String name;
-    private int score;
-    private int point;
+    private String score;
+    private String point;
     private String eCTS;
 
     public QualificationReport(String name, int number,
-                               int score, int point, String eCTS) {
+                               String score, String point, String eCTS) {
         this.number = number;
         this.name = name;
         this.score = score;
@@ -27,8 +27,8 @@ public class QualificationReport {
         Map<String, String> result = new HashMap<>();
         result.put("Num", String.valueOf(number));
         result.put("Qualification", name);
-        result.put("Score", String.valueOf(score));
-        result.put("Point", String.valueOf(point));
+        result.put("Score", score);
+        result.put("Point", point);
         result.put("ECTS", eCTS);
         return result;
     }
