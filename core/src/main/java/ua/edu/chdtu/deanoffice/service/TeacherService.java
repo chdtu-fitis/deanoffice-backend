@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
@@ -39,7 +40,7 @@ public class TeacherService {
     }
 
     @FacultyAuthorized
-    public void deleteByIds(List<Integer> ids) throws OperationCannotBePerformedException {
+    public void deleteByIds(List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (ids.size() == 0)
             throw new OperationCannotBePerformedException("Не вказані ідентифікатори викладачів!");
         List<Teacher> teachers = getTeachers(ids);
@@ -50,7 +51,7 @@ public class TeacherService {
     }
 
     @FacultyAuthorized
-    public void restoreByIds(List<Integer> ids) throws OperationCannotBePerformedException {
+    public void restoreByIds(List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (ids == null || ids.size() == 0)
             throw new OperationCannotBePerformedException("Не вказані ідентифікатори викладачів!");
         List<Teacher> teachers = getTeachers(ids);
@@ -67,7 +68,7 @@ public class TeacherService {
     }
 
     @FacultyAuthorized
-    public Teacher updateTeacher(Teacher teacher) throws OperationCannotBePerformedException {
+    public Teacher updateTeacher(Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         if (teacher.getId() == 0)
             throw new OperationCannotBePerformedException("Не можна редагувати дані викладача, що не існує в базі");
         dataVerificationService.isCorrectTeacher(teacher);
