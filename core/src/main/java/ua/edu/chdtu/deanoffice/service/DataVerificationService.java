@@ -100,10 +100,7 @@ public class DataVerificationService {
                                                   int specializationId) throws OperationCannotBePerformedException {
         specializationNotNull(specialization, specializationId);
         if (specialization.isActive()) {
-            throw new OperationCannotBePerformedException("Освітня програма [" + specialization.getName() + "] не активна в даний час");
-        }
-        if (!specialization.isActive()) {
-            throw new OperationCannotBePerformedException("Освітня програма [" + specializationId + "] не активна в даний час");
+            throw new OperationCannotBePerformedException("Освітня програма [" + specialization.getName() + "] активна в даний час");
         }
     }
 
