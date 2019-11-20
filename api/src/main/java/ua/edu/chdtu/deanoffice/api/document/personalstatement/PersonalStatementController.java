@@ -43,7 +43,7 @@ public class PersonalStatementController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/front/docx/")
+    @GetMapping("/front/docx")
     public ResponseEntity<Resource> generatePersonalWrapperFront(@RequestParam List<Integer> studentDegreeIds,
                                                               @CurrentUser ApplicationUser user) {
         try {
@@ -56,7 +56,7 @@ public class PersonalStatementController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/back/docx/")
+    @GetMapping("/back/docx")
     public ResponseEntity<Resource> generatePersonalWrapperBack(@RequestParam List<Integer> studentDegreeIds,
                                                               @CurrentUser ApplicationUser user) {
         try {
