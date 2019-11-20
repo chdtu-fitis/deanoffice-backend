@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/documents/personal-file-grades-statement")
@@ -42,25 +43,27 @@ public class PersonalStatementController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/front/{studentDegreeId}/")
-    public ResponseEntity<Resource> generatePersonalWrapperFront(@PathVariable Integer studentDegreeId,
+    @GetMapping("/front/docx/")
+    public ResponseEntity<Resource> generatePersonalWrapperFront(@RequestParam List<Integer> studentDegreeIds,
                                                               @CurrentUser ApplicationUser user) {
         try {
-            facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
-            File result  = personalStatementService.preparePersonalWrapperFront(studentDegreeId);
+            for (Integer studentDegreeId:studentDegreeIds)
+                facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
+            File result  = personalStatementService.preparePersonalWrapperFront(studentDegreeIds);
             return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
         }
     }
 
-    @GetMapping("/back/{studentDegreeId}/")
-    public ResponseEntity<Resource> generatePersonalWrapperBack(@PathVariable Integer studentDegreeId,
+    @GetMapping("/back/docx/")
+    public ResponseEntity<Resource> generatePersonalWrapperBack(@RequestParam List<Integer> studentDegreeIds,
                                                               @CurrentUser ApplicationUser user) {
         try {
-            facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
-            File result  = personalStatementService.preparePersonalWrapperBack(studentDegreeId);
-            return buildDocumentResponseEntity(result , result .getName(), MEDIA_TYPE_DOCX);
+            for (Integer studentDegreeId:studentDegreeIds)
+                facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
+            File result  = personalStatementService.preparePersonalWrapperBack(studentDegreeIds);
+            return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
         }

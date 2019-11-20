@@ -18,6 +18,7 @@ import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.PracticeReport;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.AcademicVacationReport;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.QualificationReport;
@@ -263,16 +264,52 @@ public class PersonalStatementService {
         return SEMESTER_NAMES[semester];
     }
 
-    public synchronized File preparePersonalWrapperFront(Integer studentDegreeId) throws Docx4JException, IOException {
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        return documentIOService.saveDocumentToTemp(fillFrontPage(TEMPLATE_PATH_FRONT, studentDegree),
-                LanguageUtil.transliterate(studentDegree.getStudent().getName()) + "Front" + ".docx", FileFormatEnum.DOCX);
+    public synchronized File preparePersonalWrapperFront(List<Integer> studentDegreeIds) throws Docx4JException, IOException {
+        if (studentDegreeIds.size() > 0) {
+            List<StudentDegree> studentDegrees = new ArrayList<>();
+            StringBuilder fileName = new StringBuilder();
+            studentDegreeIds.forEach(studentDegreeId -> {
+                studentDegrees.add(studentDegreeService.getById(studentDegreeId));
+                fileName.append(studentDegreeId).append("_");
+            });
+
+            WordprocessingMLPackage filledTemplate = fillFrontPage(TEMPLATE_PATH_FRONT, studentDegrees);
+            return documentIOService.saveDocumentToTemp(filledTemplate,
+                    fileName + "Front", FileFormatEnum.DOCX);
+        } else throw new IOException();
     }
 
-    public synchronized File preparePersonalWrapperBack(Integer studentDegreeId) throws Docx4JException, IOException {
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        return documentIOService.saveDocumentToTemp(fillBackPage(TEMPLATE_PATH_BACK, studentDegree),
-                LanguageUtil.transliterate(studentDegree.getStudent().getName()) + "Back" + ".docx", FileFormatEnum.DOCX);
+    public synchronized File preparePersonalWrapperBack(List<Integer> studentDegreeIds) throws Docx4JException, IOException {
+        if (studentDegreeIds.size() > 0) {
+            List<StudentDegree> studentDegrees = new ArrayList<>();
+            StringBuilder fileName = new StringBuilder();
+            studentDegreeIds.forEach(studentDegreeId -> {
+                studentDegrees.add(studentDegreeService.getById(studentDegreeId));
+                fileName.append(studentDegreeId).append("_");
+            });
+
+            WordprocessingMLPackage filledTemplate = fillBackPage(TEMPLATE_PATH_BACK, studentDegrees);
+            return documentIOService.saveDocumentToTemp(filledTemplate,
+                    fileName + "Back", FileFormatEnum.DOCX);
+        } else throw new IOException();
+    }
+
+    private WordprocessingMLPackage fillFrontPage(String templateName,
+                                                  List<StudentDegree> studentDegrees) throws Docx4JException {
+        WordprocessingMLPackage reportsDocument = fillFrontPage(templateName, studentDegrees.get(0));
+        studentDegrees.remove(0);
+        if (studentDegrees.size() > 0) {
+            studentDegrees.forEach(studentDegree -> {
+                TemplateUtil.addPageBreak(reportsDocument);
+                try {
+                    reportsDocument.getMainDocumentPart().getContent()
+                            .addAll(fillFrontPage(templateName, studentDegree).getMainDocumentPart().getContent());
+                } catch (Docx4JException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return reportsDocument;
     }
 
     private WordprocessingMLPackage fillFrontPage(String templateName,
@@ -328,6 +365,24 @@ public class PersonalStatementService {
                 studentDegree.getSpecialization().getFaculty().getDean()));
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
+    }
+
+    private WordprocessingMLPackage fillBackPage(String templateName,
+                                                 List<StudentDegree> studentDegrees) throws Docx4JException {
+        WordprocessingMLPackage reportsDocument = fillBackPage(templateName, studentDegrees.get(0));
+        studentDegrees.remove(0);
+        if (studentDegrees.size() > 0) {
+            studentDegrees.forEach(studentDegree -> {
+                TemplateUtil.addPageBreak(reportsDocument);
+                try {
+                    reportsDocument.getMainDocumentPart().getContent()
+                            .addAll(fillBackPage(templateName, studentDegree).getMainDocumentPart().getContent());
+                } catch (Docx4JException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return reportsDocument;
     }
 
     private Map<String, String> prepareStudentsGrade(Integer studentDegreeId) {
