@@ -22,25 +22,29 @@ public class FacultyAuthorizationAspects {
         this.facultyRepository = facultyRepository;
     }
 
-    @Before("within(ua.edu.chdtu.deanoffice.service" +
-            ".DepartmentService) && @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) && args(departmentId)")
+    @Before("within(ua.edu.chdtu.deanoffice.service.DepartmentService) " +
+            "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
+            "&& args(departmentId)")
     public void beforeGetDepartmentById(Integer departmentId) throws UnauthorizedFacultyDataException {
         int userFacultyId = FacultyUtil.getUserFacultyIdInt();
         int departmentFacultyId = facultyRepository.findIdByDepartment(departmentId);
-        if (!(userFacultyId == departmentFacultyId))
+        if (userFacultyId != departmentFacultyId)
             throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибрана кафедра належить до іншого факультету");
     }
 
-    @Before("within(ua.edu.chdtu.deanoffice.service.TeacherService) && @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) && args(teacher)")
+    @Before("within(ua.edu.chdtu.deanoffice.service.TeacherService) " +
+            "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
+            "&& args(teacher)")
     public void beforeUpdateTeacher(Teacher teacher) throws UnauthorizedFacultyDataException {
         int userFacultyId = FacultyUtil.getUserFacultyIdInt();
         int teacherFacultyId = facultyRepository.findIdByTeacher(teacher.getId());
-        if (!(userFacultyId == teacherFacultyId))
+        if (userFacultyId != teacherFacultyId)
             throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибраний викладач належить до іншого факультету");
     }
 
-    @Before("within(ua.edu.chdtu.deanoffice.service" +
-            ".TeacherService) && @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) && args(teacherIds)")
+    @Before("within(ua.edu.chdtu.deanoffice.service.TeacherService) " +
+            "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
+            "&& args(teacherIds)")
     public void beforeRestoreOrDeleteTeacherById(List<Integer> teacherIds) throws UnauthorizedFacultyDataException {
         int userFacultyId = FacultyUtil.getUserFacultyIdInt();
         List<Integer> teacherFacultyIds = facultyRepository.findIdByTeachers(teacherIds);
