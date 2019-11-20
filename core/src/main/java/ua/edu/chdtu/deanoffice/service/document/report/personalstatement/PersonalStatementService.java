@@ -416,11 +416,14 @@ public class PersonalStatementService {
         Map<String, String> result = new HashMap<>();
         result.put("Amount", String.valueOf(amount));
         result.put("P", String.valueOf(perfect));
-        result.put("Pp", String.valueOf(df.format(perfect.doubleValue() / amount.doubleValue() * 100)));
+        result.put("Pp", perfect != 0 ?
+                String.valueOf(df.format(perfect.doubleValue() / amount.doubleValue() * 100)) : "0");
         result.put("G", String.valueOf(good));
-        result.put("Gp", String.valueOf(df.format(good.doubleValue() / amount.doubleValue() * 100)));
+        result.put("Gp", good != 0 ?
+                String.valueOf(df.format(good.doubleValue() / amount.doubleValue() * 100)) : "0");
         result.put("S", String.valueOf(satisfactory));
-        result.put("Sp", String.valueOf(df.format(satisfactory.doubleValue() / amount.doubleValue() * 100)));
+        result.put("Sp", satisfactory != 0 ?
+                String.valueOf(df.format(satisfactory.doubleValue() / amount.doubleValue() * 100)) : "0");
         return result;
     }
 
