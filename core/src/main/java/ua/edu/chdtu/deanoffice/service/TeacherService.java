@@ -61,7 +61,6 @@ public class TeacherService {
         teacherRepository.save(teachers);
     }
 
-    @FacultyAuthorized
     public Teacher saveTeacher(Teacher teacher) throws OperationCannotBePerformedException {
         dataVerificationService.isCorrectTeacher(teacher);
         return teacherRepository.save(teacher);
