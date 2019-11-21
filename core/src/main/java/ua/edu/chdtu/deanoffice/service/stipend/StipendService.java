@@ -195,24 +195,21 @@ public class StipendService {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         List<StudentInfoForStipend> stipendData = getStipendData();
         Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
-//        replaceTextPlaceholdersInTemplate(template, fillStipendData(studentInfoForStipend));
         generateTables(template, studentInfoByGroup);
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
-
         HashMap<String, String> result = new HashMap();
-        result.put("course", studentInfoForStipend.getSpecializationName());
-        result.put("name", studentInfoForStipend.getName()+studentInfoForStipend.getSurname()+studentInfoForStipend.getPatronimic());
-        result.put("groupName", studentInfoForStipend.getGroupName());
-        result.put("degreeName", studentInfoForStipend.getDegreeName());
-        result.put("studyType", studentInfoForStipend.getTuitionTerm());
-        result.put("points", studentInfoForStipend.getAverageGrade().toString());
-        result.put("percentPoints", bigDecimalPoints.toString());
-        result.put("extraPoints", studentInfoForStipend.getExtraPoints().toString());
-        result.put("resultPoints", finalGrade.toString() );
+        result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
+        result.put("gName", studentInfoForStipend.getGroupName());
+        result.put("dName", studentInfoForStipend.getDegreeName());
+        result.put("stType", studentInfoForStipend.getTuitionTerm());
+        result.put("pts", studentInfoForStipend.getAverageGrade().toString());
+        result.put("pcPts", bigDecimalPoints.toString());
+        result.put("exPts", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString():"");
+        result.put("resPts", finalGrade.toString() );
         return result;
     }
     private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
@@ -220,8 +217,7 @@ public class StipendService {
         for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, entry.getKey());
-//            formSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree), year, PersonalStatementService.SemesterType.FIRST, studentDegree);
-//            formSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year, PersonalStatementService.SemesterType.SECOND, studentDegree);
+            fillStudentData(table, entry.getValue());
             template.getMainDocumentPart().addObject(table);
         }
         template.getMainDocumentPart().getContent().remove(0);
@@ -232,5 +228,18 @@ public class StipendService {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         replaceInRow(tableRows.get(0), result);
     }
+    private void fillStudentData(Tbl table, List<StudentInfoForStipend> studentInfoForStipend) {
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        int currentIndex = 2;
+        Tr rowToCopy = tableRows.get(currentIndex);
+        for (StudentInfoForStipend studInfo : studentInfoForStipend) {
+            Tr newRow = XmlUtils.deepCopy(rowToCopy);
+            replaceInRow(newRow, fillStipendData(studInfo));
+            table.getContent().add(currentIndex, newRow);
+            currentIndex++;
+        }
+        table.getContent().remove(currentIndex);
+    }
+
 
 }
