@@ -1,7 +1,9 @@
 package ua.edu.chdtu.deanoffice.service.stipend;
 
-import org.docx4j.model.datastorage.migration.VariablePrepare;
+import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tr;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextPlaceholdersInTemplate;
-import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 
 @Service
 public class StipendService {
@@ -184,21 +186,19 @@ public class StipendService {
         return studentDegreeRepository.save(extraPoints);
     }
 
-    public File formDocument(StudentInfoForStipend studentInfoForStipend) throws Exception {
-
-        WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE, studentInfoForStipend);
-        String fileName = transliterate("Rating");
-        return documentIOService.saveDocumentToTemp(resultTemplate, fileName, FileFormatEnum.DOCX);
+    public Map<String, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
+        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
+                .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
+        return studentInfoByGroup;
     }
-
-    private WordprocessingMLPackage formDocument(String templateFilepath,StudentInfoForStipend studentInfoForStipend)
-            throws Exception {
-        WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
-        VariablePrepare.prepare(template);
-        replaceTextPlaceholdersInTemplate(template, fillStipendData(studentInfoForStipend));
-        return template;
+    public File formDocument() throws Exception {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
+        List<StudentInfoForStipend> stipendData = getStipendData();
+        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
+//        replaceTextPlaceholdersInTemplate(template, fillStipendData(studentInfoForStipend));
+        generateTables(template, studentInfoByGroup);
+        return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
-
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
@@ -206,20 +206,31 @@ public class StipendService {
         HashMap<String, String> result = new HashMap();
         result.put("course", studentInfoForStipend.getSpecializationName());
         result.put("name", studentInfoForStipend.getName()+studentInfoForStipend.getSurname()+studentInfoForStipend.getPatronimic());
-        result.put("gName", studentInfoForStipend.getGroupName());
-        result.put("dName", studentInfoForStipend.getDegreeName());
-        result.put("stType", studentInfoForStipend.getTuitionTerm());
-        result.put("pts", studentInfoForStipend.getAverageGrade().toString());
-        result.put("pcPts", bigDecimalPoints.toString());
-        result.put("exPts", studentInfoForStipend.getExtraPoints().toString());
-        result.put("resPts", finalGrade.toString() );
+        result.put("groupName", studentInfoForStipend.getGroupName());
+        result.put("degreeName", studentInfoForStipend.getDegreeName());
+        result.put("studyType", studentInfoForStipend.getTuitionTerm());
+        result.put("points", studentInfoForStipend.getAverageGrade().toString());
+        result.put("percentPoints", bigDecimalPoints.toString());
+        result.put("extraPoints", studentInfoForStipend.getExtraPoints().toString());
+        result.put("resultPoints", finalGrade.toString() );
         return result;
     }
-
-    public Map<String, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
-        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
-                .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
-        return studentInfoByGroup;
+    private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
+        Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+        for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
+            Tbl table = XmlUtils.deepCopy(templateTable);
+            fillFirstRow(table, entry.getKey());
+//            formSemesterInTable(table, yearGrades.getGradeMapForFirstSemester().get(studentDegree), year, PersonalStatementService.SemesterType.FIRST, studentDegree);
+//            formSemesterInTable(table, yearGrades.getGradeMapForSecondSemester().get(studentDegree), year, PersonalStatementService.SemesterType.SECOND, studentDegree);
+            template.getMainDocumentPart().addObject(table);
+        }
+        template.getMainDocumentPart().getContent().remove(0);
+    }
+    private void fillFirstRow(Tbl table, String groupName) {
+        Map<String, String> result = new HashMap<>();
+        result.put("groupName", groupName);
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        replaceInRow(tableRows.get(0), result);
     }
 
 }

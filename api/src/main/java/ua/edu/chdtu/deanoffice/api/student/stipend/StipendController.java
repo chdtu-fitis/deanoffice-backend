@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.student.stipend;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -9,7 +10,6 @@ import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
-import ua.edu.chdtu.deanoffice.service.stipend.StudentInfoForStipend;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
@@ -21,7 +21,7 @@ import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 @RequestMapping("/student-degree/stipend")
-public class StipendController {
+public class StipendController extends DocumentResponseController {
     private StipendService stipendService;
     private StudentDegreeService studentDegreeService;
     private FacultyAuthorizationService facultyAuthorizationService;
@@ -46,16 +46,17 @@ public class StipendController {
     }
 
     @GetMapping("/docx")
-    public ResponseEntity<File> generateStipendDocument(){
+    public ResponseEntity<File> generateStipendDocument() {
         try {
-            File stipendInfoList = stipendService.formDocument((StudentInfoForStipend) stipendService.getStipendData());
-            return ResponseEntity.ok(stipendInfoList);
+            File result = stipendService.formDocument();
+            return buildDocumentResponseEntity(result, result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
-    @PostMapping("/extra-points-update")
+
+        @PostMapping("/extra-points-update")
     public ResponseEntity updateExtraPoints(@RequestBody List <ExtraPointsDTO> extraPointsDTO,
                                             @CurrentUser ApplicationUser user){
         try {
