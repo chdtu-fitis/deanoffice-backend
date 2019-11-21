@@ -341,7 +341,8 @@ public class PersonalStatementService {
         commonDict.put("POfRes2", addresses.get(1));
         commonDict.put("PhoneNum", studentDegree.getStudent().getTelephone() != null ?
                 studentDegree.getStudent().getTelephone() : "");
-        commonDict.put("AdmPriv", studentDegree.getStudent().getPrivilege().getName());
+        commonDict.put("AdmPriv", studentDegree.getStudent().getPrivilege() != null ?
+                studentDegree.getStudent().getPrivilege().getName() : "");
         commonDict.put("AdmDate", studentDegree.getAdmissionDate() != null ?
                 DateUtil.getDate(studentDegree.getAdmissionDate()) : "");
         commonDict.put("AdmSer", studentDegree.getAdmissionOrderNumber() != null ?
@@ -361,8 +362,9 @@ public class PersonalStatementService {
                 studentDegree.getThesisName() : "", 60);
         commonDict.put("ThesisName", thesis.get(0));
         commonDict.put("ThesisName2", thesis.get(1));
-        commonDict.put("DeanName", PersonUtil.makeInitialsSurnameLast(
-                studentDegree.getSpecialization().getFaculty().getDean()));
+        commonDict.put("DeanName", studentDegree.getSpecialization().getFaculty().getDean() != null ?
+                PersonUtil.makeInitialsSurnameLast(
+                        studentDegree.getSpecialization().getFaculty().getDean()) : "");
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
