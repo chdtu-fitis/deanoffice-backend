@@ -58,11 +58,16 @@ public class DebtorReportService {
                     threeOrMoreDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebts(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
                 }
                 double debtorsPercent = (budgetDebtorsCount + contractDebtorsCount) / (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+                double lessThanThreeDebtsPercent = (lessThanThreeDebtsForBudgetDebtorsCount + lessThanThreeDebtsForContractDebtorsCount) /
+                        (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+                double threeOrMoreDebtsPercent = (threeOrMoreDebtsForBudgetDebtorsCount + threeOrMoreDebtsForContractDebtorsCount) /
+                        (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
                 SpecializationDebtorsYearBean specializationDebtorsYearBean
                         = new SpecializationDebtorsYearBean(budgetStudentsCount, contractStudentsCount, budgetDebtorsCount,
                         contractDebtorsCount, debtorsPercent, lessThanThreeDebtsForBudgetDebtorsCount,
-                        lessThanThreeDebtsForContractDebtorsCount, threeOrMoreDebtsForBudgetDebtorsCount,
-                        threeOrMoreDebtsForContractDebtorsCount);
+                        lessThanThreeDebtsForContractDebtorsCount, lessThanThreeDebtsPercent,
+                        threeOrMoreDebtsForBudgetDebtorsCount, threeOrMoreDebtsForContractDebtorsCount,
+                        threeOrMoreDebtsPercent);
 
                 specializationDebtorsYearBeanMap.put(year, specializationDebtorsYearBean);
             }
@@ -126,14 +131,27 @@ public class DebtorReportService {
                 continue;
             }
 
+            double allDebtorsOfCurrentFacultyPercent = (allBudgetDebtorsOfCurrentFacultyCount + allContractDebtorsOfCurrentFacultyCount)
+                    * 1.0 / (allBudgetStudentOfCurrentFacultyCount + allContractStudentOfCurrentFacultyCount) * 100;
+            double allDebtorsOfCurrentFacultyWithLessThanThreeDebtsPercent =
+                    (allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFacultyCount +
+                     allContractDebtorsWithLessThanThreeDebtsOfCurrentFacultyCount)
+                     * 1.0 / (allBudgetStudentOfCurrentFacultyCount + allContractStudentOfCurrentFacultyCount) * 100;
+            double allDebtorsOfCurrentFacultyWithThreeOrMoreDebtsPercent =
+                    (allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount +
+                     allContractDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount)
+                            * 1.0 / (allBudgetStudentOfCurrentFacultyCount + allContractStudentOfCurrentFacultyCount) * 100;
+
             SpecializationDebtorsYearBean specializationDebtorsForFacultyYearBean
                     = new SpecializationDebtorsYearBean(allBudgetStudentOfCurrentFacultyCount, allContractStudentOfCurrentFacultyCount,
                     allBudgetDebtorsOfCurrentFacultyCount, allContractDebtorsOfCurrentFacultyCount,
-                    (allBudgetDebtorsOfCurrentFacultyCount + allContractDebtorsOfCurrentFacultyCount) * 1.0 / (allBudgetStudentOfCurrentFacultyCount + allContractStudentOfCurrentFacultyCount) * 100,
+                    allDebtorsOfCurrentFacultyPercent,
                     allBudgetDebtorsWithLessThanThreeDebtsOfCurrentFacultyCount,
                     allContractDebtorsWithLessThanThreeDebtsOfCurrentFacultyCount,
+                    allDebtorsOfCurrentFacultyWithLessThanThreeDebtsPercent,
                     allBudgetDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount,
-                    allContractDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount);
+                    allContractDebtorsWithThreeOrMoreDebtsOfCurrentFacultyCount,
+                    allDebtorsOfCurrentFacultyWithThreeOrMoreDebtsPercent);
             allSpecializationDebtorsYearBeanMap.put(year, specializationDebtorsForFacultyYearBean);
         }
         calculateAllDataOfFaculty(allSpecializationDebtorsYearBeanMap, debtorsReport, faculty);
@@ -170,11 +188,23 @@ public class DebtorReportService {
             allContractDebtorsWithThreeOrMoreDebtsCount += specializationDebtorsYearBean.getThreeOrMoreDebtsForContractDebtors();
         }
 
+        double allDebtorsPercent = (allBudgetDebtorsCount + allContractDebtorsCount)
+                * 1.0 / (allBudgetStudentCount + allContractStudentCount) * 100;
+        double allDebtorsWithLessThanThreeDebtsPercent =
+                (allBudgetDebtorsWithLessThanThreeDebtsCount +
+                 allContractDebtorsWithLessThanThreeDebtsCount)
+                 * 1.0 / (allBudgetStudentCount + allContractStudentCount) * 100;
+        double allDebtorsWithThreeOrMoreDebtsPercent =
+                (allBudgetDebtorsWithThreeOrMoreDebtsCount +
+                 allContractDebtorsWithThreeOrMoreDebtsCount)
+                 * 1.0 / (allBudgetStudentCount + allContractStudentCount) * 100;
+
         SpecializationDebtorsYearBean specializationDebtorsYearBean
                 = new SpecializationDebtorsYearBean(allBudgetStudentCount, allContractStudentCount, allBudgetDebtorsCount,
-                allContractDebtorsCount, (allBudgetDebtorsCount + allContractDebtorsCount) * 1.0 / (allBudgetStudentCount + allContractStudentCount) * 100,
+                allContractDebtorsCount, allDebtorsPercent,
                 allBudgetDebtorsWithLessThanThreeDebtsCount, allContractDebtorsWithLessThanThreeDebtsCount,
-                allBudgetDebtorsWithThreeOrMoreDebtsCount, allContractDebtorsWithThreeOrMoreDebtsCount);
+                allDebtorsWithLessThanThreeDebtsPercent, allBudgetDebtorsWithThreeOrMoreDebtsCount,
+                allContractDebtorsWithThreeOrMoreDebtsCount, allDebtorsWithThreeOrMoreDebtsPercent);
 
         return specializationDebtorsYearBean;
     }
