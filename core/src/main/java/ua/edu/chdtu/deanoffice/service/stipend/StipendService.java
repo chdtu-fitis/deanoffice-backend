@@ -19,6 +19,7 @@ import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceTextPlaceholdersInTemplate;
@@ -205,14 +206,20 @@ public class StipendService {
         HashMap<String, String> result = new HashMap();
         result.put("course", studentInfoForStipend.getSpecializationName());
         result.put("name", studentInfoForStipend.getName()+studentInfoForStipend.getSurname()+studentInfoForStipend.getPatronimic());
-        result.put("groupName", studentInfoForStipend.getGroupName());
-        result.put("degreeName", studentInfoForStipend.getDegreeName());
-        result.put("studyType", studentInfoForStipend.getTuitionTerm());
-        result.put("points", studentInfoForStipend.getAverageGrade().toString());
-        result.put("percentPoints", bigDecimalPoints.toString());
-        result.put("extraPoints", studentInfoForStipend.getExtraPoints().toString());
-        result.put("resultPoints", finalGrade.toString() );
+        result.put("gName", studentInfoForStipend.getGroupName());
+        result.put("dName", studentInfoForStipend.getDegreeName());
+        result.put("stType", studentInfoForStipend.getTuitionTerm());
+        result.put("pts", studentInfoForStipend.getAverageGrade().toString());
+        result.put("pcPts", bigDecimalPoints.toString());
+        result.put("exPts", studentInfoForStipend.getExtraPoints().toString());
+        result.put("resPts", finalGrade.toString() );
         return result;
+    }
+
+    public Map<String, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
+        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
+                .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
+        return studentInfoByGroup;
     }
 
 }
