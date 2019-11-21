@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequestMapping("/documents/personal-file-grades-statement")
@@ -37,6 +38,32 @@ public class PersonalStatementController extends DocumentResponseController {
             }
             File result = personalStatementService.formDocument(year, Arrays.asList(studentDegreeIds));
             return buildDocumentResponseEntity(result, result.getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/front/docx")
+    public ResponseEntity<Resource> generatePersonalWrapperFront(@RequestParam List<Integer> studentDegreeIds,
+                                                              @CurrentUser ApplicationUser user) {
+        try {
+            for (Integer studentDegreeId:studentDegreeIds)
+                facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
+            File result  = personalStatementService.preparePersonalWrapperFront(studentDegreeIds);
+            return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/back/docx")
+    public ResponseEntity<Resource> generatePersonalWrapperBack(@RequestParam List<Integer> studentDegreeIds,
+                                                              @CurrentUser ApplicationUser user) {
+        try {
+            for (Integer studentDegreeId:studentDegreeIds)
+                facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
+            File result  = personalStatementService.preparePersonalWrapperBack(studentDegreeIds);
+            return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
         }

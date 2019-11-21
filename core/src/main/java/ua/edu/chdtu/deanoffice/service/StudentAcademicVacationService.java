@@ -62,6 +62,10 @@ public class StudentAcademicVacationService {
         studentDegreeRepository.save(studentDegree);
     }
 
+    public List<StudentAcademicVacation> getByDegreeId(Integer studentDegreeId){
+        return studentAcademicVacationRepository.findAllByDegreeId(studentDegreeId);
+    }
+
     public StudentAcademicVacation getById(Integer studentAcademicVacationId) {
         return studentAcademicVacationRepository.getOne(studentAcademicVacationId);
     }
