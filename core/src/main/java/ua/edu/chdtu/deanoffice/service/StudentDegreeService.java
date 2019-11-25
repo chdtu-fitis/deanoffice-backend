@@ -208,8 +208,8 @@ public class StudentDegreeService {
                                                                               int studyYear,
                                                                               TuitionForm tuitionForm,
                                                                               Payment payment,
-                                                                              int degreeId) {
-        int semester = SemesterUtil.getCurrentSemester();
+                                                                              int degreeId,
+                                                                              int semester) {
         return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
     }
@@ -218,14 +218,14 @@ public class StudentDegreeService {
                                                                                int studyYear,
                                                                                TuitionForm tuitionForm,
                                                                                Payment payment,
-                                                                               int degreeId) {
-        int semester = SemesterUtil.getCurrentSemester();
+                                                                               int degreeId,
+                                                                               int semester) {
         return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
     }
 
-    public int getCountAllActiveDebtorsForCurrentSemester(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
-        int semester = SemesterUtil.getCurrentSemester();
+    public int getCountAllActiveDebtorsForCurrentSemester(int specializationId, int studyYear, TuitionForm tuitionForm,
+                                                          Payment payment, int degreeId, int semester) {
         return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester);
     }
