@@ -14,4 +14,9 @@ public interface StudentAcademicVacationRepository extends JpaRepository<Student
             "order by sac.studentDegree.student.surname, sac.studentDegree.student.name, " +
             "sac.studentDegree.student.patronimic, sac.studentDegree.studentGroup.name")
     List<StudentAcademicVacation> findAllInactive(@Param("faculty_id") Integer facultyId);
+
+    @Query("select sac from StudentAcademicVacation  sac " +
+            "where sac.studentDegree.id =:student_degree_id " +
+            "order by sac.vacationStartDate")
+    List<StudentAcademicVacation> findAllByDegreeId(@Param("student_degree_id") Integer degreeId);
 }

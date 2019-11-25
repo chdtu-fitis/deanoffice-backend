@@ -191,6 +191,7 @@ public class StipendService {
                 .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
         return studentInfoByGroup;
     }
+
     public File formDocument() throws Exception {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         List<StudentInfoForStipend> stipendData = getStipendData();
@@ -198,25 +199,23 @@ public class StipendService {
         generateTables(template, studentInfoByGroup);
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
+
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
-//        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
-//        String exPts = String.format("%.2f", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString():"");
-//        String resPts = String.format("%.2f", finalGrade);
-
-
+        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade().doubleValue());
         HashMap<String, String> result = new HashMap();
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
         result.put("dName", studentInfoForStipend.getDegreeName());
         result.put("stType", studentInfoForStipend.getTuitionTerm());
-        result.put("pts",  studentInfoForStipend.getAverageGrade().toString());
+        result.put("pts", strPts);
         result.put("pcPts", bigDecimalPoints.toString());
-        result.put("exPts", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString():"");
-        result.put("resPts", finalGrade.toString());
+        result.put("exPts", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString() : "");
+        result.put("resPts", finalGrade.toString() );
         return result;
     }
+
     private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
         for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
@@ -227,12 +226,14 @@ public class StipendService {
         }
         template.getMainDocumentPart().getContent().remove(0);
     }
+
     private void fillFirstRow(Tbl table, String groupName) {
         Map<String, String> result = new HashMap<>();
         result.put("groupName", groupName);
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         replaceInRow(tableRows.get(0), result);
     }
+
     private void fillStudentData(Tbl table, List<StudentInfoForStipend> studentInfoForStipend) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         int currentIndex = 2;
@@ -245,6 +246,4 @@ public class StipendService {
         }
         table.getContent().remove(currentIndex);
     }
-
-
 }

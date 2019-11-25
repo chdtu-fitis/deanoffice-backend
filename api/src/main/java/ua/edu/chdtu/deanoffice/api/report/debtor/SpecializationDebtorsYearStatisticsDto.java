@@ -13,6 +13,8 @@ public class SpecializationDebtorsYearStatisticsDto {
     private double debtorsPercent;
     private int lessThanThreeDebtsForBudgetDebtors;
     private int lessThanThreeDebtsForContractDebtors;
+    private double lessThanThreeDebtsPercent;
     private int threeOrMoreDebtsForBudgetDebtors;
     private int threeOrMoreDebtsForContractDebtors;
+    private double threeOrMoreDebtsPercent;
 }
