@@ -24,7 +24,11 @@ public class DebtorReportService {
         this.studentDegreeService = studentDegreeService;
     }
 
-    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, int semester) {
+    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, int semester) throws Exception {
+
+        if (semester > 2 || semester < 0)
+            throw new Exception("Incorrect semester!");
+
         semester--;
         Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
         List<Specialization> specializations = specializationRepository.findAllByActive(true, faculty.getId());
