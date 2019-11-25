@@ -24,7 +24,8 @@ public class DebtorReportService {
         this.studentDegreeService = studentDegreeService;
     }
 
-    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, Boolean forCurrentSemester) {
+    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, int semester) {
+        semester--;
         Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
         List<Specialization> specializations = specializationRepository.findAllByActive(true, faculty.getId());
         for (Specialization specialization : specializations) {
@@ -42,7 +43,7 @@ public class DebtorReportService {
                 int lessThanThreeDebtsForBudgetDebtorsCount, lessThanThreeDebtsForContractDebtorsCount,
                         threeOrMoreDebtsForBudgetDebtorsCount, threeOrMoreDebtsForContractDebtorsCount,
                         budgetDebtorsCount, contractDebtorsCount;
-                if (forCurrentSemester) {
+                if (semester != -1) {
                     contractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
                     budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
                     lessThanThreeDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
