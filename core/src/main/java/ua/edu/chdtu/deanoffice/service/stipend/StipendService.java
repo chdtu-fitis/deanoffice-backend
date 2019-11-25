@@ -198,20 +198,27 @@ public class StipendService {
         generateTables(template, studentInfoByGroup);
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
-    private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
+    private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
+
+        String uaTuitionTerm = studentInfoForStipend.getTuitionTerm();
+        if(uaTuitionTerm.equals("REGULAR")){
+            uaTuitionTerm = "Повна";
+        }else if (uaTuitionTerm.equals("SHORTENED")){
+            uaTuitionTerm = "Скорочена";
+        }
 
         String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
         //String exPts = String.format("%.2f", studentInfoForStipend.getExtraPoints());
         String resPts = String.format("%.2f", finalGrade);
 
-
         HashMap<String, String> result = new HashMap();
+        result.put("n",String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
         result.put("dName", studentInfoForStipend.getDegreeName());
-        result.put("stType", studentInfoForStipend.getTuitionTerm());
+        result.put("stType", uaTuitionTerm);
         result.put("pts", strPts);
         result.put("pcPts", bigDecimalPoints.toString());
         result.put("exPts", studentInfoForStipend.getExtraPoints()!= null ? studentInfoForStipend.getExtraPoints().toString():"-" );
@@ -236,13 +243,15 @@ public class StipendService {
     }
     private void fillStudentData(Tbl table, List<StudentInfoForStipend> studentInfoForStipend) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        int studentNumber = 1;
         int currentIndex = 2;
         Tr rowToCopy = tableRows.get(currentIndex);
         for (StudentInfoForStipend studInfo : studentInfoForStipend) {
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            replaceInRow(newRow, fillStipendData(studInfo));
+            replaceInRow(newRow, fillStipendData(studInfo, studentNumber));
             table.getContent().add(currentIndex, newRow);
             currentIndex++;
+            studentNumber++;
         }
         table.getContent().remove(currentIndex);
     }
