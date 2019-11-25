@@ -1,5 +1,11 @@
 package ua.edu.chdtu.deanoffice.service.stipend;
 
+import org.docx4j.XmlUtils;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tr;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
@@ -7,19 +13,30 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
+import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 
 @Service
 public class StipendService {
     private final StudentDegreeRepository studentDegreeRepository;
     private final CurrentYearService currentYearService;
     private final StudentDegreeService studentDegreeService;
+
+    private static final String TEMPLATE = TEMPLATES_PATH + "FacultyStipendList.docx";
+
+    @Autowired
+    private DocumentIOService documentIOService;
 
     @Autowired
     public StipendService(StudentDegreeRepository studentDegreeRepository,
@@ -28,6 +45,56 @@ public class StipendService {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentDegreeService = studentDegreeService;
         this.currentYearService = currentYearService;
+    }
+
+    public List<StudentInfoForStipend> getStipendData(){
+//        LinkedHashMap<Integer, StudentInfoForStipendDTO> debtorStudentDegreesDTOsMap = new LinkedHashMap<>();
+//        debtorStudentDegrees.forEach(dsd -> {
+//            StudentInfoForStipendDTO studentInfoForStipendDTO = debtorStudentDegreesDTOsMap.get(dsd.getId());
+//            if (studentInfoForStipendDTO == null) {
+//                studentInfoForStipendDTO = Mapper.strictMap(dsd, StudentInfoForStipendDTO.class);
+//            }
+//            CourseForStipendDTO courseForStipendDto = new CourseForStipendDTO(
+//                    dsd.getCourseName(), dsd.getKnowledgeControlName(), dsd.getSemester()
+//            );
+//            studentInfoForStipendDTO.getDebtCourses().add(courseForStipendDto);
+//            debtorStudentDegreesDTOsMap.put(studentInfoForStipendDTO.getId(), studentInfoForStipendDTO);
+//        });
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        List<DebtorStudentDegreesBean> debtorStudentDegrees = getDebtorStudentDegrees(FacultyUtil.getUserFacultyIdInt());
+        LinkedHashMap<Integer, StudentInfoForStipend> debtorStudentDegreesMap = new LinkedHashMap<>();
+
+        debtorStudentDegrees.forEach(dsd -> {
+            StudentInfoForStipend studentInfoForStipend = debtorStudentDegreesMap.get(dsd.getId());
+            if (studentInfoForStipend == null) {
+                studentInfoForStipend = modelMapper.map(dsd, StudentInfoForStipend.class);
+            }
+            CourseForStipendBean courseForStipend = new CourseForStipendBean(
+                    dsd.getCourseName(), dsd.getKnowledgeControlName(), dsd.getSemester()
+            );
+            studentInfoForStipend.getDebtCourses().add(courseForStipend);
+            debtorStudentDegreesMap.put(studentInfoForStipend.getId(), studentInfoForStipend);
+        });
+
+        List<StudentInfoForStipend> noDebtsStudentDegrees = getNoDebtStudentDegrees(FacultyUtil.getUserFacultyIdInt(), debtorStudentDegreesMap.keySet());
+//        List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDTO.class);
+        noDebtsStudentDegrees.addAll(new ArrayList(debtorStudentDegreesMap.values()));
+        noDebtsStudentDegrees.sort(Comparator
+                .comparing(StudentInfoForStipend::getDegreeName)
+                .thenComparing(StudentInfoForStipend::getYear)
+                .thenComparing(StudentInfoForStipend::getSpecialityCode)
+                .thenComparing(StudentInfoForStipend::getSpecializationName)
+                .thenComparing(StudentInfoForStipend::getGroupName)
+                //.thenComparing(StudentInfoForStipendDTO::getExtraPoints)
+                .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipend::getFinalGrade)))
+                .thenComparing(StudentInfoForStipend::getSurname)
+                .thenComparing(StudentInfoForStipend::getName)
+                .thenComparing(StudentInfoForStipend::getPatronimic)
+        );
+        return noDebtsStudentDegrees;
+        //return ResponseEntity.ok(noDebtsStudentDegreesDTOs);
     }
 
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
@@ -47,6 +114,7 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
+                // 0,
                 BigDecimal.ZERO/*averageGrade*/,
                 (String)item[13]/*courseName*/,
                 (String)item[14]/*knowledgeControlName*/,
@@ -55,15 +123,15 @@ public class StipendService {
         return debtorStudentDegreesBeans;
     }
 
-    public List<DebtorStudentDegreesBean> getNoDebtStudentDegrees(int facultyId, Set<Integer> debtorStudentDegreeIds) {
+    public List<StudentInfoForStipend> getNoDebtStudentDegrees(int facultyId, Set<Integer> debtorStudentDegreeIds) {
         if (debtorStudentDegreeIds.size() == 0) {
             debtorStudentDegreeIds = new HashSet();
             debtorStudentDegreeIds.add(0);
         }
         int currentYear = currentYearService.getYear();
         List<Object[]> rawData = studentDegreeRepository.findNoDebtStudentDegreesRaw(facultyId, debtorStudentDegreeIds, SemesterUtil.getCurrentSemester(), currentYear);
-        List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
-        rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
+        List<StudentInfoForStipend> StudentInfoForStipend = new ArrayList<>(rawData.size());
+        rawData.forEach(item -> StudentInfoForStipend.add(new StudentInfoForStipend(
                 (Integer)item[0]/*degreeId*/,
                 (String)item[1]/*surname*/,
                 (String)item[2]/*name*/,
@@ -76,10 +144,11 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
+                //(Double)item[12]/*averageGrade*/,
                 (BigDecimal)item[12]/*averageGrade*/,
                 (Integer)item[13]/*extraPoints*/
         )));
-        return debtorStudentDegreesBeans;
+        return StudentInfoForStipend;
     }
 
     public ExtraPoints getExtraPoints(Integer studentDegreeId, Integer semester){
@@ -116,4 +185,66 @@ public class StipendService {
     public ExtraPoints saveExtraPoints(ExtraPoints extraPoints){
         return studentDegreeRepository.save(extraPoints);
     }
+
+    public Map<String, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
+        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
+                .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
+        return studentInfoByGroup;
+    }
+    public File formDocument() throws Exception {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
+        List<StudentInfoForStipend> stipendData = getStipendData();
+        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
+        generateTables(template, studentInfoByGroup);
+        return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
+    }
+    private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
+        Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
+        Double finalGrade = studentInfoForStipend.getFinalGrade();
+//        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
+//        String exPts = String.format("%.2f", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString():"");
+//        String resPts = String.format("%.2f", finalGrade);
+
+
+        HashMap<String, String> result = new HashMap();
+        result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
+        result.put("gName", studentInfoForStipend.getGroupName());
+        result.put("dName", studentInfoForStipend.getDegreeName());
+        result.put("stType", studentInfoForStipend.getTuitionTerm());
+        result.put("pts",  studentInfoForStipend.getAverageGrade().toString());
+        result.put("pcPts", bigDecimalPoints.toString());
+        result.put("exPts", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString():"");
+        result.put("resPts", finalGrade.toString());
+        return result;
+    }
+    private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
+        Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
+        for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
+            Tbl table = XmlUtils.deepCopy(templateTable);
+            fillFirstRow(table, entry.getKey());
+            fillStudentData(table, entry.getValue());
+            template.getMainDocumentPart().addObject(table);
+        }
+        template.getMainDocumentPart().getContent().remove(0);
+    }
+    private void fillFirstRow(Tbl table, String groupName) {
+        Map<String, String> result = new HashMap<>();
+        result.put("groupName", groupName);
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        replaceInRow(tableRows.get(0), result);
+    }
+    private void fillStudentData(Tbl table, List<StudentInfoForStipend> studentInfoForStipend) {
+        List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        int currentIndex = 2;
+        Tr rowToCopy = tableRows.get(currentIndex);
+        for (StudentInfoForStipend studInfo : studentInfoForStipend) {
+            Tr newRow = XmlUtils.deepCopy(rowToCopy);
+            replaceInRow(newRow, fillStipendData(studInfo));
+            table.getContent().add(currentIndex, newRow);
+            currentIndex++;
+        }
+        table.getContent().remove(currentIndex);
+    }
+
+
 }
