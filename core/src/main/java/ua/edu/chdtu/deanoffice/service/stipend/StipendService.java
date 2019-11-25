@@ -201,8 +201,10 @@ public class StipendService {
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
+
         String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
-        String exPts = String.format("%.2f", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString():"");
+        //String exPts = String.format("%.2f", studentInfoForStipend.getExtraPoints());
+        String resPts = String.format("%.2f", finalGrade);
 
 
         HashMap<String, String> result = new HashMap();
@@ -212,8 +214,8 @@ public class StipendService {
         result.put("stType", studentInfoForStipend.getTuitionTerm());
         result.put("pts", strPts);
         result.put("pcPts", bigDecimalPoints.toString());
-        result.put("exPts", exPts);
-        result.put("resPts", finalGrade.toString() );
+        result.put("exPts", studentInfoForStipend.getExtraPoints()!= null ? studentInfoForStipend.getExtraPoints().toString():"-" );
+        result.put("resPts", resPts );
         return result;
     }
     private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
