@@ -94,7 +94,6 @@ public class StipendService {
                 .thenComparing(StudentInfoForStipend::getPatronimic)
         );
         return noDebtsStudentDegrees;
-        //return ResponseEntity.ok(noDebtsStudentDegreesDTOs);
     }
 
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
@@ -196,6 +195,11 @@ public class StipendService {
         List<StudentInfoForStipend> stipendData = getStipendData();
         Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
         generateTables(template, studentInfoByGroup);
+
+        for (int i = 1; i >= 0; i--){
+            template.getMainDocumentPart().getContent().remove(i);
+        }
+
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
