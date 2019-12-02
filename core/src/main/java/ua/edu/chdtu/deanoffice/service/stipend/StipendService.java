@@ -206,23 +206,13 @@ public class StipendService {
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
 
-        String uaTuitionTerm = studentInfoForStipend.getTuitionTerm();
-        if(uaTuitionTerm.equals("REGULAR")){
-            uaTuitionTerm = "Повна";
-        }else if (uaTuitionTerm.equals("SHORTENED")){
-            uaTuitionTerm = "Скорочена";
-        }
-
         String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
-        //String exPts = String.format("%.2f", studentInfoForStipend.getExtraPoints());
         String resPts = String.format("%.2f", finalGrade);
 
         HashMap<String, String> result = new HashMap();
-        result.put("n",String.valueOf(studentNumber));
+        result.put("№", String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
-        result.put("dName", studentInfoForStipend.getDegreeName());
-        result.put("stType", uaTuitionTerm);
         result.put("pts", strPts);
         result.put("pcPts", bigDecimalPoints.toString());
         result.put("exPts", studentInfoForStipend.getExtraPoints()!= null ? studentInfoForStipend.getExtraPoints().toString():"-" );
