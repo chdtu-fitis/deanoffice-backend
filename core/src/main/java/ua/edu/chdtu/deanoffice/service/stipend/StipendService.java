@@ -190,6 +190,7 @@ public class StipendService {
                 .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
         return studentInfoByGroup;
     }
+
     public File formDocument() throws Exception {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         List<StudentInfoForStipend> stipendData = getStipendData();
@@ -202,6 +203,7 @@ public class StipendService {
 
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
+
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
@@ -219,6 +221,7 @@ public class StipendService {
         result.put("resPts", resPts );
         return result;
     }
+
     private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
         for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
@@ -229,12 +232,14 @@ public class StipendService {
         }
         template.getMainDocumentPart().getContent().remove(0);
     }
+
     private void fillFirstRow(Tbl table, String groupName) {
         Map<String, String> result = new HashMap<>();
         result.put("groupName", groupName);
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         replaceInRow(tableRows.get(0), result);
     }
+
     private void fillStudentData(Tbl table, List<StudentInfoForStipend> studentInfoForStipend) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         int studentNumber = 1;
@@ -249,6 +254,4 @@ public class StipendService {
         }
         table.getContent().remove(currentIndex);
     }
-
-
 }

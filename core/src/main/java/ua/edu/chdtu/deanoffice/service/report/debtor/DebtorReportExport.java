@@ -79,8 +79,10 @@ public class DebtorReportExport {
         map.put("%", String.format("%.2f", bean.getDebtorsPercent()));
         map.put("lttb", bean.getLessThanThreeDebtsForBudgetDebtors() + "");
         map.put("lttc", bean.getLessThanThreeDebtsForContractDebtors() + "");
+        map.put("2%", String.format("%.2f", bean.getLessThanThreeDebtsPercent()));
         map.put("tomb", bean.getThreeOrMoreDebtsForBudgetDebtors() + "");
         map.put("tomc", bean.getThreeOrMoreDebtsForContractDebtors() + "");
+        map.put("3%", String.format("%.2f", bean.getThreeOrMoreDebtsPercent()));
         replaceInRow(tableRows.get(3), map);
     }
 

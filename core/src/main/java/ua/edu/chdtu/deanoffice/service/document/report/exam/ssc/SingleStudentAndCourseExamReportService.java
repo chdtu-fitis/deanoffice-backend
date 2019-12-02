@@ -11,16 +11,19 @@ import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import static ua.edu.chdtu.deanoffice.util.FacultyUtil.getRefinedFacultyName;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class SingleStudentAndCourseExamReportService {
     public static final float PAGE_MARGIN = 36f;
     public static final float FONT_SIZE_14 = 14f;
-    public static final float FONT_SIZE_12 = 12f;
     public static final float FONT_SIZE_10 = 10f;
+    private static final int MAX_FACULTY_FIELD_CHARACTERS_NUMBER = 40;
 
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
@@ -32,12 +35,14 @@ public class SingleStudentAndCourseExamReportService {
 
     public File formDocument(List<StudentCourse> studentCourses) throws IOException, DocumentException {
         Document document = new Document(PageSize.A4, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN, PAGE_MARGIN);
-        String filePath = getJavaTempDirectory() + "/" + "name" +".pdf";
+            String filePath = getJavaTempDirectory()
+                    + "/bigunok-"
+                    + new SimpleDateFormat("dd-MM-yyyy-HH-mm-ss").format(new Date()) +".pdf";
         File file = new File(filePath);
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
             document.open();
-            fillDocument(document,studentCourses);
+            fillDocument(document, studentCourses);
         } finally {
             if (document != null)
                 document.close();
@@ -164,7 +169,7 @@ public class SingleStudentAndCourseExamReportService {
     private PdfPTable createInfoTable(StudentDegree student, Course course, Font font) throws DocumentException {
         PdfPTable infoTable = new PdfPTable(8);
         infoTable.setWidthPercentage(100);
-        infoTable.setTotalWidth(new float[]{0.8f, 0.2f, 1.5f, 0.2f, 1.1f, 1.9f, 2.7f, 3.9f});
+        infoTable.setTotalWidth(new float[]{0.8f, 0.2f, 1.5f, 0.2f, 1.1f, 2.1f, 2.7f, 3.7f});
 
         PdfPCell yearInfoCell = new PdfPCell();
         yearInfoCell.addElement(new Paragraph(FrontSideConfig.YEAR, font));
@@ -221,12 +226,18 @@ public class SingleStudentAndCourseExamReportService {
         Paragraph paragraph = new Paragraph(FrontSideConfig.CHDTU_NAME, font);
         paragraph.setAlignment(Element.ALIGN_CENTER);
 
+        String refinedFacultyName = getRefinedFacultyName(student.getSpecialization().getFaculty());
+        Paragraph faculty = new Paragraph(refinedFacultyName, font);
+        if (refinedFacultyName.length() > MAX_FACULTY_FIELD_CHARACTERS_NUMBER){
+            faculty = new Paragraph(student.getSpecialization().getFaculty().getAbbr(), font);
+        }
+
         PdfPCell facultyCell = new PdfPCell();
         facultyCell.addElement(new Paragraph(FrontSideConfig.FACULTY, font));
         facultyCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell facultyNameCell = new PdfPCell();
-        facultyNameCell.addElement(new Paragraph(student.getSpecialization().getFaculty().getName(), font));
+        facultyNameCell.addElement(faculty);
         facultyNameCell.setBorder(PdfPCell.BOTTOM);
 
         PdfPCell yearCell = new PdfPCell();
@@ -474,7 +485,6 @@ public class SingleStudentAndCourseExamReportService {
 
         PdfPCell ectslCell = new PdfPCell();
         nationalCell.addElement(new Paragraph(" ", font));
-
 
         achievementsTable.addCell(nationalCell);
         achievementsTable.addCell(hundredCell);
