@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.StudentSummary;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,8 +31,7 @@ public class QualificationWorkReportService {
     private StudentGroupService studentGroupService;
     private GradeService gradeService;
 
-    private final int ROWS_PER_PAGE = 10;
-    private final int POSSIBLE_ROWS_ON_SECOND_PAGE = 20;
+    private final int ROWS_PER_PAGE = 15;
 
     private final float NUMBER_CELL_WIDTH = 0.3f;
     private final float PIP_CELL_WIDTH = 1.7f;
@@ -78,8 +78,8 @@ public class QualificationWorkReportService {
             document.add(fillTable(baseFont, studentGroup));
             Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
                     + "                                                             "
-                    + studentGroup.getSpecialization().getFaculty().getDean(), font);
-            textBottom.setSpacingBefore(100f);
+                    + PersonUtil.makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()), font);
+            textBottom.setSpacingBefore(50f);
             textBottom.setIndentationLeft(24f);
             document.add(textBottom);
         } finally {
@@ -94,33 +94,50 @@ public class QualificationWorkReportService {
         table.setWidthPercentage(100);
         table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, NATIONAL_GRADE - 0.5f, HUNDRED_GRADE - 0.5f, ECTS - 0.5f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
         Font font = new Font(baseFont, 12);
+
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
         for (StudentDegree studentDegree : studentDegrees) {
             List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            String grade = "";
+
             if (!isStudentDebtor(grades)) {
-                Student student = studentDegree.getStudent();
-                table.addCell(createCell(count + "", font, 0));
-                count++;
-                String studentFullName = student.getSurname() + " " + student.getName() + " " + student.getPatronimic();
                 StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
                 StudentSummary.StudentGradesSummary gradesStatistic = studentSummary.getStudentGradesSummary();
-                table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
-                table.addCell(new PdfPCell(createCell(String.format("%.2f", gradesStatistic.getGradeAverage()), font, 0)));
-                for (int i = 0; i < 6; i++) {
-                    table.addCell(new PdfPCell(new Paragraph()));
+                grade = String.format("%.2f", gradesStatistic.getGradeAverage());
+            }
+
+            Student student = studentDegree.getStudent();
+            table.addCell(createCell(count + "", font, 0));
+            count++;
+            String studentFullName =
+                    student.getSurname() +
+                    " " +
+                    student.getName() +
+                    " " +
+                    student.getPatronimic();
+
+            table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
+            table.addCell(new PdfPCell(createCell(grade, font, 0)));
+
+            for (int i = 0; i < 6; i++) {
+                table.addCell(new PdfPCell(new Paragraph()));
+            }
+
+            if (studentsCount / ROWS_PER_PAGE == 1) {
+
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 9; j++) {
+                        PdfPCell cell = new PdfPCell(createCell(" ", font, 0));
+                            cell.setBorderColor(BaseColor.WHITE);
+                        table.addCell(cell);
+                    }
                 }
             }
+
+            studentsCount++;
         }
-        if (studentsCount >= ROWS_PER_PAGE) {
-            for (int i = 0; i < POSSIBLE_ROWS_ON_SECOND_PAGE - (studentsCount - ROWS_PER_PAGE); i++) {
-                table.addCell(createCell(count + "", font, 0));
-                for (int j = 1; j < 7; j++) {
-                    table.addCell(createCell("", font, 0));
-                }
-                count++;
-            }
-        }
+
         return table;
     }
 
