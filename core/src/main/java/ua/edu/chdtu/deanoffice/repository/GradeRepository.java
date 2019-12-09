@@ -121,4 +121,15 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             "and g.course_id = :courseId " +
             "and sd.student_group_id = :groupId", nativeQuery = true)
     void updateAcademicDifferenceByCourseIdAndGroupId(@Param("academicDifference") boolean academicDifference, @Param("groupId") int groupId, @Param("courseId") int courseId);
+
+    @Query("Select grade From Grade grade" +
+            " Join grade.course course" +
+            " Where grade.studentDegree.id = :studentDegreeId" +
+            " and course.knowledgeControl.id in (:KnowledgeControlIds)" +
+            " Order by course.courseName.name")
+    public List<Grade> getByStudentDegreeIdAndKCTypes(
+            @Param("studentDegreeId") Integer studentDegreeId,
+            @Param("KnowledgeControlIds") List<Integer> knowledgeControlsIds
+    );
+
 }

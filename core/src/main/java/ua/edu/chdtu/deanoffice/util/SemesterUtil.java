@@ -7,7 +7,7 @@ public class SemesterUtil {
         LocalDate winterSessionStarts = LocalDate.of(LocalDate.now().getYear(), 12, 10);
         LocalDate winterSessionEnds = LocalDate.of(LocalDate.now().getYear(), 6, 10);
         if (LocalDate.now().isAfter(winterSessionEnds) && LocalDate.now().isBefore(winterSessionStarts))
-            return  2;
+            return  0;
         else
             return  1;
     }
