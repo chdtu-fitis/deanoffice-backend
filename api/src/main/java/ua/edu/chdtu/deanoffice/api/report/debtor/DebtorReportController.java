@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.report.debtor.SpecializationDebtorsBean;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -59,6 +60,21 @@ public class DebtorReportController extends DocumentResponseController {
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @GetMapping("/bygroups")
+    public ResponseEntity getDebtorsReportByGroups(@CurrentUser ApplicationUser user,
+                                                   List<Integer> groupsIds) {
+        try {
+            Map<String, SpecializationDebtorsBean> debtorsReport;
+            Map<String, SpecializationDebtorStatisticsDto> debtorsReportDTO = new TreeMap<>();
+            for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry : debtorsReport.entrySet()) {
+                SpecializationDebtorStatisticsDto sds = new SpecializationDebtorStatisticsDto();
+                Mapper.strictMap(specializationDebtorsBeanEntry.getValue(), sds);
+                debtorsReportDTO.put(specializationDebtorsBeanEntry.getKey(), sds);
+            }
+            return ResponseEntity.ok().body(debtorsReportDTO);
         }
     }
 
