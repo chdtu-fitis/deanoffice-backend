@@ -101,9 +101,27 @@ public class DebtorReportService {
         return debtorsReport;
     }
 
-    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportDataForGroups(Faculty faculty, List<Integer> groupsIds) {
+    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportDataForGroups(Faculty faculty, List<Integer> groupsIds) throws Exception {
         List<StudentGroup> studentGroups = studentGroupService.getByIds(groupsIds);
 
+    }
+
+    private int getTheLatestSemesterForGroups(List<StudentGroup> studentGroups) throws Exception {
+        if (studentGroups.size() == 0)
+            throw new Exception("Вказаних груп немає в базі даних!");
+
+        int maxSemester = 0;
+        int currentMaxSemester;
+
+        for (StudentGroup studentGroup : studentGroups) {
+            currentMaxSemester = studentGroup.getStudySemesters();
+
+            if (currentMaxSemester > maxSemester) {
+                maxSemester = currentMaxSemester;
+            }
+        }
+
+        return maxSemester;
     }
 
     private void calculateAllDataOfSpecialization(Map<String, SpecializationDebtorsBean> debtorsReport) {
