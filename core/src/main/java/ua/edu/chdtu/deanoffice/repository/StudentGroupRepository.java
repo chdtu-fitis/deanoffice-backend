@@ -78,6 +78,11 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
             "where sg.id in :group_ids")
     List<StudentGroup> findAllByIds(@Param("group_ids") List<Integer> groupIds);
 
+    @Query("SELECT sg FROM StudentGroup as sg " +
+           "WHERE sg.id IN :groupsIds AND sg.active = :active")
+    List<StudentGroup> findAllByIdsAndActive(@Param("groupsIds") List<Integer> groupsIds,
+                                             @Param("active") boolean active);
+
     @Query(value =
             "SELECT *\n" +
                     "FROM student_group\n" +
