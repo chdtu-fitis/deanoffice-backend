@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,15 @@ public class DebtorReportService {
 
     private SpecializationRepository specializationRepository;
     private StudentDegreeService studentDegreeService;
+    private StudentGroupService studentGroupService;
 
     @Autowired
     public DebtorReportService(SpecializationRepository specializationRepository,
-                               StudentDegreeService studentDegreeService) {
+                               StudentDegreeService studentDegreeService,
+                               StudentGroupService studentGroupService) {
         this.specializationRepository = specializationRepository;
         this.studentDegreeService = studentDegreeService;
+        this.studentGroupService = studentGroupService;
     }
 
     public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, int semester) throws Exception {
@@ -95,6 +99,11 @@ public class DebtorReportService {
         calculateAllDataOfFacultyForEachYear(debtorsReport, faculty);
 
         return debtorsReport;
+    }
+
+    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportDataForGroups(Faculty faculty, List<Integer> groupsIds) {
+        List<StudentGroup> studentGroups = studentGroupService.getByIds(groupsIds);
+
     }
 
     private void calculateAllDataOfSpecialization(Map<String, SpecializationDebtorsBean> debtorsReport) {
