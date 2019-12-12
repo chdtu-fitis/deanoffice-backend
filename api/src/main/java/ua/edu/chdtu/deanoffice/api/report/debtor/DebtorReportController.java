@@ -75,6 +75,8 @@ public class DebtorReportController extends DocumentResponseController {
                 debtorsReportDTO.put(specializationDebtorsBeanEntry.getKey(), sds);
             }
             return ResponseEntity.ok().body(debtorsReportDTO);
+        } catch (Exception e) {
+            return handleException(e);
         }
     }
 
