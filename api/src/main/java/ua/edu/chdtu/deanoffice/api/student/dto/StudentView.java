@@ -4,45 +4,31 @@ import ua.edu.chdtu.deanoffice.api.general.dto.GeneralView;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
 
 public class StudentView {
-    interface DetailAndDegree {
-    }
+    interface DetailAndDegree {}
 
-    interface SearchSimpleDegrees {
-    }
+    interface SearchSimpleDegrees {}
 
-    interface SimpleAndDegrees extends GeneralView.Named {
-    }
+    interface SimpleAndDegrees extends GeneralView.Named {}
 
-    interface WithActive {
-    }
+    interface WithActive {}
 
-    interface WithSpecilization extends SpecializationView.WithDegreeAndSpeciality {
-    }
+    interface WithSpecilization extends SpecializationView.WithDegreeAndSpeciality {}
 
-    interface SimpleAndSpecilization extends SpecializationView.WithSpeciality {
-    }
+    interface SimpleAndSpecilization extends SpecializationView.WithSpeciality {}
 
-    public interface Simple extends SearchSimpleDegrees, SimpleAndDegrees, SimpleAndSpecilization {
-    }
+    public interface Simple extends SearchSimpleDegrees, SimpleAndDegrees, SimpleAndSpecilization {}
 
-    public interface Detail extends Simple, DetailAndDegree {
-    }
+    public interface Detail extends Simple, DetailAndDegree {}
 
-    public interface Degree extends Simple, DetailAndDegree, WithSpecilization {
-    }
+    public interface Degree extends Simple, DetailAndDegree, WithSpecilization {}
 
-    public interface Personal extends Detail {
-    }
+    public interface Personal extends Detail {}
 
-    public interface Search extends SearchSimpleDegrees {
-    }
+    public interface Search extends SearchSimpleDegrees {}
 
-    public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees, WithActive, WithSpecilization {
-    }
+    public interface Degrees extends SearchSimpleDegrees, DetailAndDegree, SimpleAndDegrees, WithActive, WithSpecilization {}
 
-    public interface Expel extends Simple, GeneralView.Named, WithActive {
-    }
+    public interface Expel extends Simple, GeneralView.Named, WithActive {}
 
-    public interface AcademicVacation extends Simple, GeneralView.Named, WithActive {
-    }
+    public interface AcademicVacation extends Simple, GeneralView.Named, WithActive {}
 }
