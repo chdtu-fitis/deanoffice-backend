@@ -2,10 +2,8 @@ package ua.edu.chdtu.deanoffice.service.stipend;
 
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.entity.Course;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Getter
 @Setter
@@ -23,6 +21,7 @@ public class DebtorStudentDegreesBean {
     private String specializationName;
     private String departmentAbbreviation;
     private BigDecimal averageGrade;
+    //private double averageGrade;
     private String courseName;
     private String knowledgeControlName;
     private int semester;
@@ -40,6 +39,7 @@ public class DebtorStudentDegreesBean {
                                     String specialityName,
                                     String specializationName,
                                     String departmentAbbreviation,
+                                    //double averageGrade,
                                     BigDecimal averageGrade,
                                     String courseName,
                                     String knowledgeControlName,
@@ -74,6 +74,7 @@ public class DebtorStudentDegreesBean {
                                     String specialityName,
                                     String specializationName,
                                     String departmentAbbreviation,
+                                    //double averageGrade,
                                     BigDecimal averageGrade,
                                     Integer extraPoints ) {
         this.id = id;
@@ -91,4 +92,12 @@ public class DebtorStudentDegreesBean {
         this.averageGrade = averageGrade;
         this.extraPoints = extraPoints;
     }
+
+//    public double getFinalGrade() {
+//        if (extraPoints != null)
+//            return averageGrade * 0.9 + extraPoints;
+//        else
+//            return averageGrade * 0.9;
+//    }
+
 }

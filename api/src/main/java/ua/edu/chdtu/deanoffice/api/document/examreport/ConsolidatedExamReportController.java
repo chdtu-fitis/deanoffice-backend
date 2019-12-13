@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.consolidatedreport;
+package ua.edu.chdtu.deanoffice.api.document.examreport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +26,8 @@ import java.util.*;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
-@RequestMapping("/documents/consolidated-report")
-public class ConsolidatedReportController extends DocumentResponseController {
+@RequestMapping("/documents/consolidated-exam-report")
+public class ConsolidatedExamReportController extends DocumentResponseController {
 
     private final CourseForGroupService courseForGroupService;
     private final StudentGroupService studentGroupService;
@@ -36,7 +36,7 @@ public class ConsolidatedReportController extends DocumentResponseController {
     private final GradeService gradeService;
 
     @Autowired
-    public ConsolidatedReportController(
+    public ConsolidatedExamReportController(
             CourseForGroupService courseForGroupService,
             StudentGroupService studentGroupService,
             CourseService courseService,
@@ -106,40 +106,49 @@ public class ConsolidatedReportController extends DocumentResponseController {
     }
 
     @PostMapping("/create-document")
-    public ResponseEntity getConsolidatedDocument(
+    public ResponseEntity getConsolidatedDocumentDocx(
             @RequestBody Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds,
             @CurrentUser ApplicationUser user
     ) {
         try {
-            Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
-            courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupId) -> {
-                List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupId);
-                courseForGroupToGroup.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
-            });
-            Map<CourseForGroup, List<StudentGroup>> courseToStudentGroupsForCreate = new HashMap<>();
-            courseForGroupToGroup.forEach((courseForGroup, studentGroups) -> {
-                studentGroups.forEach(group -> {
-                    StudentGroup cloneStudentGroup = createClone(group);
-                    cloneStudentGroup.setStudentDegrees(
-                            gradeService.filterStudentByGrade(cloneStudentGroup.getStudentDegrees(), courseForGroup, true)
-                    );
-                    if (!cloneStudentGroup.getStudentDegrees().isEmpty()) {
-                        List<StudentGroup> item = courseToStudentGroupsForCreate.getOrDefault(courseForGroup, new ArrayList<>());
-                        item.add(cloneStudentGroup);
-                        courseToStudentGroupsForCreate.put(courseForGroup, item);
-                    }
+            File consolidatedDocument = consolidatedReportService.formConsolidatedReportDocx(
+                    getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(courseForGroupIdsToStudentGroupsIds, false), user);
 
-                });
-            });
-            File consolidatedDocument = consolidatedReportService.formConsolidatedReport(courseToStudentGroupsForCreate, user);
             return buildDocumentResponseEntity(
                     consolidatedDocument,
                     consolidatedDocument.getName(),
-                    DocumentResponseController.MEDIA_TYPE_PDF
+                    DocumentResponseController.MEDIA_TYPE_DOCX
             );
         } catch (Exception e) {
             return handleException(e);
         }
+    }
+
+    private Map<CourseForGroup, List<StudentGroup>> getStudentGroupsWithStudentDegreesWhichHaveGoodMarkOrNotFromTheCourse(
+            Map<Integer, List<Integer>> courseForGroupIdsToStudentGroupsIds, boolean isGoodMark
+    ) {
+        Map<CourseForGroup, List<StudentGroup>> courseForGroupToGroup = new HashMap<>();
+        courseForGroupIdsToStudentGroupsIds.forEach((courseForGroupId, studentGroupIds) -> {
+            List<StudentGroup> studentGroups = studentGroupService.getByIds(studentGroupIds);
+            courseForGroupToGroup.put(courseForGroupService.getCourseForGroup(courseForGroupId), studentGroups);
+        });
+        Map<CourseForGroup, List<StudentGroup>> courseToStudentGroupsForCreate = new HashMap<>();
+        courseForGroupToGroup.forEach((courseForGroup, studentGroups) -> {
+            studentGroups.forEach(group -> {
+                StudentGroup cloneStudentGroup = createClone(group);
+                cloneStudentGroup.setStudentDegrees(
+                        gradeService.filterStudentByGrade(cloneStudentGroup.getStudentDegrees(), courseForGroup, isGoodMark)
+                );
+                if (!cloneStudentGroup.getStudentDegrees().isEmpty()) {
+                    List<StudentGroup> item = courseToStudentGroupsForCreate.getOrDefault(courseForGroup, new ArrayList<>());
+                    item.add(cloneStudentGroup);
+                    courseToStudentGroupsForCreate.put(courseForGroup, item);
+                }
+
+            });
+        });
+
+        return courseToStudentGroupsForCreate;
     }
 
     private StudentGroup createClone(StudentGroup group) {
@@ -158,6 +167,6 @@ public class ConsolidatedReportController extends DocumentResponseController {
     }
 
     private static ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, ConsolidatedReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, ConsolidatedExamReportController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

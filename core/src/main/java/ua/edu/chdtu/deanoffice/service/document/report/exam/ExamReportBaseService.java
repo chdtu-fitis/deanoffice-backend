@@ -1,16 +1,14 @@
 package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.Speciality;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
@@ -38,7 +36,9 @@ public class ExamReportBaseService {
             result.put("ExamDate", "");
         }
 
-        result.put("Course", String.format("%d", currentYearService.get().getCurrYear() - courseForGroup.getStudentGroup().getCreationYear() + 1));
+        int currentYear = currentYearService.get().getCurrYear();
+        result.put("Year", String.valueOf(currentYear).substring(2));
+        result.put("Course", String.format("%d", currentYear - courseForGroup.getStudentGroup().getCreationYear() + courseForGroup.getStudentGroup().getBeginYears()));
         result.put("KCType", course.getKnowledgeControl().getName());
         if (courseForGroup.getTeacher() != null) {
             result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
@@ -59,6 +59,44 @@ public class ExamReportBaseService {
         result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
         result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
+        result.put("StudyYear", getStudyYear());
+
+        return result;
+    }
+
+    Map<String, String> getGroupInfoReplacements(List<StudentGroup> studentGroups, ApplicationUser user) {
+        Map<String, String> result = new HashMap<>();
+        result.put("ReportType", "ЗВЕДЕНА");
+        String groupNames = "";
+        for (StudentGroup studentGroup : studentGroups) {
+            groupNames += studentGroup.getName() + ",";
+        }
+        if (groupNames.length() > 0) {
+            groupNames = groupNames.substring(0, groupNames.length()-1);
+        }
+        result.put("GroupName", groupNames);
+        Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
+        for (StudentGroup studentGroup : studentGroups) {
+            if (studentGroup.getSpecialization().getSpeciality().getId() != speciality.getId()) {
+                speciality = null;
+                break;
+            }
+        }
+
+        result.put("Speciality", speciality == null ? "" : speciality.getCode() + " " + speciality.getName());
+
+        Specialization specialization = studentGroups.get(0).getSpecialization();
+        for (StudentGroup studentGroup : studentGroups) {
+            if (studentGroup.getSpecialization().getId() != specialization.getId()) {
+                specialization = null;
+                break;
+            }
+        }
+
+        result.put("Specialization", specialization == null ? "" : specialization.getName());
+        result.put("FacultyAbbr", user.getFaculty().getAbbr().toUpperCase());
+        result.put("DeanInitials", user.getFaculty().getDean());
+        result.put("Degree", studentGroups.get(0).getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 
         return result;

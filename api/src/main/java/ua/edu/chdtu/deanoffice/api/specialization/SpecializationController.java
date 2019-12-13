@@ -25,13 +25,12 @@ import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
-
-import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
 @RestController
 @RequestMapping("/specializations")
@@ -99,8 +98,8 @@ public class SpecializationController {
         }
     }
 
-    private Specialization create(SpecializationDTO specializationDTO, Faculty faculty) {
-        Specialization specialization = (Specialization) Mapper.strictMap(specializationDTO, Specialization.class);
+    private Specialization create(SpecializationDTO specializationDTO, Faculty faculty) throws UnauthorizedFacultyDataException {
+        Specialization specialization = Mapper.strictMap(specializationDTO, Specialization.class);
         Speciality speciality = this.specialityService.getById(specializationDTO.getSpecialityId());
         specialization.setSpeciality(speciality);
         if (specializationDTO.getDepartmentId() != null && specializationDTO.getDepartmentId() != 0) {

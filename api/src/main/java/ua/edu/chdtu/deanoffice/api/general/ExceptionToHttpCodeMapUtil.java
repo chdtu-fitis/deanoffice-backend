@@ -10,7 +10,7 @@ public class ExceptionToHttpCodeMapUtil {
         if (e instanceof NotFoundException)
             return HttpStatus.NOT_FOUND;
         if (e instanceof UnauthorizedFacultyDataException)
-            return HttpStatus.UNAUTHORIZED;
+            return HttpStatus.FORBIDDEN;
         if (e instanceof OperationCannotBePerformedException)
             return HttpStatus.UNPROCESSABLE_ENTITY;
         return HttpStatus.INTERNAL_SERVER_ERROR;
