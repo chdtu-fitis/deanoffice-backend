@@ -40,7 +40,7 @@ public class SupplementTemplateFillService {
     private QualificationForSpecializationService qualificationForSpecializationService;
     private AcquiredCompetenciesService acquiredCompetenciesService;
     private StudentAcademicVacationService studentAcademicVacationService;
-//    private RenewedAcademicVacationStudentRepository
+    //    private RenewedAcademicVacationStudentRepository
     private StudentExpelService studentExpelService;
     private RenewedExpelledStudentService renewedExpelledStudentService;
 
@@ -432,11 +432,33 @@ public class SupplementTemplateFillService {
     }
 
     private String getAllDurationsFromUniversity(StudentDegree studentDegree) {
+        StringBuilder dates = new StringBuilder();
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getByDegreeId(studentDegree.getId());
         List<StudentExpel> studentExpels = studentExpelService.getByStudentDegreeId(studentDegree.getId());
 
+        int academVacationCount = 0;
+        for (StudentAcademicVacation academicVacation : academicVacations) {
+            academVacationCount++;
+            dates.append(academicVacation.getVacationStartDate())
+                    .append("-")
+                    .append(academicVacation.getVacationEndDate());
+            if (academVacationCount < academicVacations.size()) {
+                dates.append(",");
+            }
+        }
 
-        return null;
+        int expelCount = 0;
+        for (StudentExpel studentExpel : studentExpels) {
+            academVacationCount++;
+            dates.append(studentExpel.getExpelDate())
+                    .append("-")
+                    .append(renewedExpelledStudentService.getRenewedStudentByExpelledId(studentExpel.getId()).getRenewDate());
+            if (expelCount < studentExpels.size()) {
+                dates.append(",");
+            }
+        }
+
+        return dates.toString();
     }
 
     private static String getTrainingDuration(StudentGroup studentGroup) {
