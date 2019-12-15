@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
@@ -115,5 +116,13 @@ public class StudentGroupService {
 
     public List<StudentGroup> getGroupsBySelectionCriteria(Specification<StudentGroup> specification) {
         return studentGroupRepository.findAll(specification);
+    }
+
+    public List<Integer> getStudySemestersByIds(List<Integer> ids, boolean active) {
+        return studentGroupRepository.findStudySemestersByIds(ids, active);
+    }
+
+    public int getCountOfAllActiveBudgetStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment) {
+        return studentGroupRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString());
     }
 }
