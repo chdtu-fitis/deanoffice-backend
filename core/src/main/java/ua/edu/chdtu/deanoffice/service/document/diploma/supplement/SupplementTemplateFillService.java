@@ -337,11 +337,15 @@ public class SupplementTemplateFillService {
         result.put("TrainingDurationEng", getTrainingDurationEng(group));
 
         Map<String, String> allPreviousUniversities = getAllPreviousUniversities(studentDegree);
-        result.put("AllTrainingDurationsUkr", allPreviousUniversities.get("ukr"));
-        result.put("AllTrainingDurationsEng", allPreviousUniversities.get("eng"));
+        result.put("AllTrainingDurationsAndUniversitiesUkr", TemplateUtil.getValueSafely(allPreviousUniversities.get("ukr")));
+        result.put("AllTrainingDurationsAndUniversitiesEng", TemplateUtil.getValueSafely(allPreviousUniversities.get("eng")));
 
         String allTrainingDurationsFromUniversity = getAllTrainingDurationsFromUniversity(studentDegree);
-        result.put("Training", allTrainingDurationsFromUniversity);
+        result.put("TrainingDurations", TemplateUtil.getValueSafely(allTrainingDurationsFromUniversity));
+
+        Map<String, String> academicBackground = getAcademicBackground(studentDegree);
+        result.put("AcademicBackgroundUkr", academicBackground == null ? "" : TemplateUtil.getValueSafely(academicBackground.get("ukr")));
+        result.put("AcademicBackgroundEng", academicBackground == null ? "" : TemplateUtil.getValueSafely(academicBackground.get("eng")));
 
         result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
         result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
@@ -393,6 +397,44 @@ public class SupplementTemplateFillService {
         return result;
     }
 
+    private Map<String, String> getAcademicBackground(StudentDegree studentDegree) {
+        Map<String, String> academicBackground = new HashMap<>();
+
+        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
+        if (studentPreviousUniversities.isEmpty()) {
+            return null;
+        }
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        DateFormat monthDayYearFormat = new SimpleDateFormat("MMMM dd, yyyy", new Locale("en"));
+
+        StringBuilder academicBackgroundUkr = new StringBuilder();
+        StringBuilder academicBackgroundEng = new StringBuilder();
+
+        for (StudentPreviousUniversity university : studentPreviousUniversities) {
+            academicBackgroundUkr.append("Академічна довідка №")
+                    .append(TemplateUtil.getValueSafely(university.getAcademicCertificateNumber()))
+                    .append(" від ")
+                    .append(formatDateSafely(simpleDateFormat, university.getAcademicCertificateDate()))
+                    .append(", ")
+                    .append(TemplateUtil.getValueSafely(university.getUniversityName()));
+        }
+
+        for (StudentPreviousUniversity university : studentPreviousUniversities) {
+            academicBackgroundEng.append("Trascript of records №")
+                    .append(TemplateUtil.getValueSafely(university.getAcademicCertificateNumber()))
+                    .append(" issued on ")
+                    .append(formatDateSafely(monthDayYearFormat, university.getAcademicCertificateDate()))
+                    .append(", ")
+                    .append(TemplateUtil.getValueSafely(university.getUniversityNameEng()));
+        }
+
+        academicBackground.put("ukr", academicBackgroundUkr.toString());
+        academicBackground.put("eng", academicBackgroundEng.toString());
+
+        return academicBackground;
+    }
+
     private Map<String, String> getAllPreviousUniversities(StudentDegree studentDegree) {
         Map<String, String> durationOfTraining = new HashMap<>();
         StringBuilder ukr = new StringBuilder();
@@ -403,23 +445,23 @@ public class SupplementTemplateFillService {
         Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
         if (!studentPreviousUniversities.isEmpty()) {
             for (StudentPreviousUniversity university : studentPreviousUniversities) {
-                ukr.append(university.getUniversityName())
+                ukr.append(TemplateUtil.getValueSafely(university.getUniversityName()))
                         .append(". ")
                         .append("Строк навчання - ")
-                        .append(simpleDateFormat.format(university.getStudyStartDate()))
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyStartDate()))
                         .append("-")
-                        .append(simpleDateFormat.format(university.getStudyEndDate()))
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyEndDate()))
                         .append(". ");
             }
 
             for (StudentPreviousUniversity university : studentPreviousUniversities) {
                 eng.append(" ")
-                        .append(university.getUniversityNameEng())
+                        .append(TemplateUtil.getValueSafely(university.getUniversityNameEng()))
                         .append(". ")
                         .append("Duration of training - ")
-                        .append(simpleDateFormat.format(university.getStudyStartDate()))
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyStartDate()))
                         .append("-")
-                        .append(simpleDateFormat.format(university.getStudyEndDate()))
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyEndDate()))
                         .append(". ");
             }
         }
@@ -458,9 +500,9 @@ public class SupplementTemplateFillService {
 
         if (!expelDates.isEmpty() && !renewDates.isEmpty() && expelDates.size() == renewDates.size()) {
             for (int i = 0; i < expelDates.size(); i++) {
-                dates.append(simpleDateFormat.format(expelDates.get(i)))
+                dates.append(formatDateSafely(simpleDateFormat, expelDates.get(i)))
                         .append(", ")
-                        .append(simpleDateFormat.format(renewDates.get(i)))
+                        .append(formatDateSafely(simpleDateFormat, renewDates.get(i)))
                         .append("-");
                 if (i < expelDates.size() - 1) {
                     dates.append(", ");
