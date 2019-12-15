@@ -17,7 +17,7 @@ public class StudentPreviousUniversity extends BaseEntity {
     @ManyToOne
     private StudentDegree studentDegree;
     private String universityName;
-    private Student universityNameEng;
+    private String universityNameEng;
     @Temporal(TemporalType.DATE)
     private Date studyStartDate;
     @Temporal(TemporalType.DATE)
