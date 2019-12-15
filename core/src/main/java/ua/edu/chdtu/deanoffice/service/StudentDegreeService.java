@@ -229,4 +229,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester);
     }
+
+    public int getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment) {
+        return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString());
+    }
 }
