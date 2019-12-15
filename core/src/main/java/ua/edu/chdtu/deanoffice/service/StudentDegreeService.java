@@ -233,4 +233,10 @@ public class StudentDegreeService {
     public int getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment) {
         return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString());
     }
+
+    public int getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
+            List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
+        return studentDegreeRepository.findCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
+                ids, payment.toString(), tuitionForm.toString(), semester);
+    }
 }
