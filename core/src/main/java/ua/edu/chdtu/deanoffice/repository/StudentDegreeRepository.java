@@ -375,4 +375,16 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("degreeId") int degreeId,
             @Param("semester") int semester
     );
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree as sd " +
+                    "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+                    "WHERE sd.student_group_id IN (:ids) " +
+                    "AND sd.payment = :payment AND sd.active = true " +
+                    "AND sg.tuition_form = 'FULL_TIME'"
+            , nativeQuery = true)
+    int findCountOfAllActiveStudentsInStudentsGroupsByPayment(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment
+    );
 }
