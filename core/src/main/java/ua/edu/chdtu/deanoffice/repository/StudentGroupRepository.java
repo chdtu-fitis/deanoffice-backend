@@ -140,4 +140,21 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     List<StudentGroup> findStudentGroupsMatchingForeignGroups(@Param("active") Boolean active);
 
     List<StudentGroup> findAll(Specification<StudentGroup> specification);
+
+    @Query(value = "SELECT sg.study_semesters FROM student_group as sg " +
+                   "WHERE sg.id IN (:ids) AND sg.active = :active", nativeQuery = true)
+    List<Integer> findStudySemestersByIds(@Param("ids") List<Integer> ids, @Param("active") boolean active);
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree as sd " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "WHERE sd.student_group_id IN (:ids) " +
+            "AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = 'FULL_TIME'"
+            , nativeQuery = true)
+    int findCountOfAllActiveStudentsInStudentsGroupsByPayment(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment
+    );
+    
 }
