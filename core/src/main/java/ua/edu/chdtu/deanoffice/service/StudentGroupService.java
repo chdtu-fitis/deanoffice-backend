@@ -121,8 +121,4 @@ public class StudentGroupService {
     public List<Integer> getStudySemestersByIds(List<Integer> ids, boolean active) {
         return studentGroupRepository.findStudySemestersByIds(ids, active);
     }
-
-    public int getCountOfAllActiveBudgetStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment) {
-        return studentGroupRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString());
-    }
 }
