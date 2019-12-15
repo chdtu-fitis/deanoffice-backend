@@ -239,4 +239,16 @@ public class StudentDegreeService {
         return studentDegreeRepository.findCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
                 ids, payment.toString(), tuitionForm.toString(), semester);
     }
+
+    public int getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
+            List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
+        return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
+                ids, payment.toString(), tuitionForm.toString(), semester);
+    }
+
+    public int getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
+            List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
+        return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
+                ids, payment.toString(), tuitionForm.toString(), semester);
+    }
 }
