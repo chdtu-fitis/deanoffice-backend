@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.repository.RenewedAcademicVacationStudentRepository;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
@@ -337,12 +336,12 @@ public class SupplementTemplateFillService {
         result.put("TrainingDuration", getTrainingDuration(group));
         result.put("TrainingDurationEng", getTrainingDurationEng(group));
 
-        Map<String, String> allTrainingDurations = getAllTrainingDurations(studentDegree);
-        result.put("AllTrainingDurationsUkr", allTrainingDurations.get("ukr"));
-        result.put("AllTrainingDurationsEng", allTrainingDurations.get("eng"));
+        Map<String, String> allPreviousUniversities = getAllPreviousUniversities(studentDegree);
+        result.put("AllTrainingDurationsUkr", allPreviousUniversities.get("ukr"));
+        result.put("AllTrainingDurationsEng", allPreviousUniversities.get("eng"));
 
-//        result.put("TrainingStart", formatDateSafely(simpleDateFormat, studentDegree.getAdmissionDate()));
-//        result.put("TrainingEnd", formatDateSafely(simpleDateFormat, studentDegree.getDiplomaDate()));
+        String allTrainingDurationsFromUniversity = getAllTrainingDurationsFromUniversity(studentDegree);
+        result.put("Training", allTrainingDurationsFromUniversity);
 
         result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
         result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
@@ -394,34 +393,34 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private Map<String, String> getAllTrainingDurations(StudentDegree studentDegree) {
+    private Map<String, String> getAllPreviousUniversities(StudentDegree studentDegree) {
         Map<String, String> durationOfTraining = new HashMap<>();
         StringBuilder ukr = new StringBuilder();
         StringBuilder eng = new StringBuilder();
 
-        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
-//        List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getByDegreeId(studentDegree.getId());
-        if (!studentPreviousUniversities.isEmpty()) {
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
+        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
+        if (!studentPreviousUniversities.isEmpty()) {
             for (StudentPreviousUniversity university : studentPreviousUniversities) {
                 ukr.append(university.getUniversityName())
-                        .append(".")
+                        .append(". ")
                         .append("Строк навчання - ")
-                        .append(university.getStudyStartDate())
+                        .append(simpleDateFormat.format(university.getStudyStartDate()))
                         .append("-")
-                        .append(university.getStudyEndDate());
+                        .append(simpleDateFormat.format(university.getStudyEndDate()))
+                        .append(". ");
             }
-
-            ukr.append(" / ");
 
             for (StudentPreviousUniversity university : studentPreviousUniversities) {
                 eng.append(" ")
                         .append(university.getUniversityNameEng())
-                        .append(".")
+                        .append(". ")
                         .append("Duration of training - ")
-                        .append(university.getStudyStartDate())
+                        .append(simpleDateFormat.format(university.getStudyStartDate()))
                         .append("-")
-                        .append(university.getStudyEndDate());
+                        .append(simpleDateFormat.format(university.getStudyEndDate()))
+                        .append(". ");
             }
         }
 
@@ -431,32 +430,45 @@ public class SupplementTemplateFillService {
         return durationOfTraining;
     }
 
-    private String getAllDurationsFromUniversity(StudentDegree studentDegree) {
+    private String getAllTrainingDurationsFromUniversity(StudentDegree studentDegree) {
         StringBuilder dates = new StringBuilder();
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getByDegreeId(studentDegree.getId());
         List<StudentExpel> studentExpels = studentExpelService.getByStudentDegreeId(studentDegree.getId());
+        List<RenewedExpelledStudent> renewedExpelledStudents = renewedExpelledStudentService.getRenewedStudentsByStudentDegreeId(studentDegree.getId());
 
-        int academVacationCount = 0;
-        for (StudentAcademicVacation academicVacation : academicVacations) {
-            academVacationCount++;
-            dates.append(academicVacation.getVacationStartDate())
-                    .append("-")
-                    .append(academicVacation.getVacationEndDate());
-            if (academVacationCount < academicVacations.size()) {
-                dates.append(",");
+        List<Date> expelDates = new ArrayList<>();
+        List<Date> renewDates = new ArrayList<>();
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        dates.append(formatDateSafely(simpleDateFormat, studentDegree.getAdmissionDate()))
+                .append("-");
+
+        if (!studentExpels.isEmpty()) {
+            expelDates.addAll(studentExpels.stream().map(StudentExpel::getExpelDate).collect(Collectors.toList()));
+            renewDates.addAll(renewedExpelledStudents.stream().map(RenewedExpelledStudent::getRenewDate).collect(Collectors.toList()));
+        }
+        if (!academicVacations.isEmpty()) {
+            expelDates.addAll(academicVacations.stream().map(StudentAcademicVacation::getVacationStartDate).collect(Collectors.toList()));
+            renewDates.addAll(academicVacations.stream().map(StudentAcademicVacation::getVacationEndDate).collect(Collectors.toList()));
+        }
+
+        expelDates.sort(Date::compareTo);
+        renewDates.sort(Date::compareTo);
+
+        if (!expelDates.isEmpty() && !renewDates.isEmpty() && expelDates.size() == renewDates.size()) {
+            for (int i = 0; i < expelDates.size(); i++) {
+                dates.append(simpleDateFormat.format(expelDates.get(i)))
+                        .append(", ")
+                        .append(simpleDateFormat.format(renewDates.get(i)))
+                        .append("-");
+                if (i < expelDates.size() - 1) {
+                    dates.append(", ");
+                }
             }
         }
 
-        int expelCount = 0;
-        for (StudentExpel studentExpel : studentExpels) {
-            academVacationCount++;
-            dates.append(studentExpel.getExpelDate())
-                    .append("-")
-                    .append(renewedExpelledStudentService.getRenewedStudentByExpelledId(studentExpel.getId()).getRenewDate());
-            if (expelCount < studentExpels.size()) {
-                dates.append(",");
-            }
-        }
+        dates.append(formatDateSafely(simpleDateFormat, studentDegree.getDiplomaDate()));
 
         return dates.toString();
     }
