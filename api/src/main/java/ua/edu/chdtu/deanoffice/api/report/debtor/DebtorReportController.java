@@ -65,9 +65,10 @@ public class DebtorReportController extends DocumentResponseController {
 
     @GetMapping("/bygroups")
     public ResponseEntity getDebtorsReportByGroups(@CurrentUser ApplicationUser user,
-                                                   List<Integer> groupsIds) {
+                                                   @RequestParam List<Integer> groupsIds) {
         try {
-            Map<String, SpecializationDebtorsBean> debtorsReport;
+            Map<String, SpecializationDebtorsBean> debtorsReport =
+                    debtorReportService.calculateDebtorsReportDataForGroups(user.getFaculty(), groupsIds);
             Map<String, SpecializationDebtorStatisticsDto> debtorsReportDTO = new TreeMap<>();
             for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry : debtorsReport.entrySet()) {
                 SpecializationDebtorStatisticsDto sds = new SpecializationDebtorStatisticsDto();
