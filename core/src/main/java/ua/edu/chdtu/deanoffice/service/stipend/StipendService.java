@@ -94,7 +94,6 @@ public class StipendService {
                 .thenComparing(StudentInfoForStipend::getPatronimic)
         );
         return noDebtsStudentDegrees;
-        //return ResponseEntity.ok(noDebtsStudentDegreesDTOs);
     }
 
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
@@ -197,22 +196,29 @@ public class StipendService {
         List<StudentInfoForStipend> stipendData = getStipendData();
         Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
         generateTables(template, studentInfoByGroup);
+
+        for (int i = 1; i >= 0; i--){
+            template.getMainDocumentPart().getContent().remove(i);
+        }
+
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
 
-    private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend){
+    private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
         Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
-        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade().doubleValue());
+
+        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
+        String resPts = String.format("%.2f", finalGrade);
+
         HashMap<String, String> result = new HashMap();
+        result.put("№", String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
-        result.put("dName", studentInfoForStipend.getDegreeName());
-        result.put("stType", studentInfoForStipend.getTuitionTerm());
         result.put("pts", strPts);
         result.put("pcPts", bigDecimalPoints.toString());
-        result.put("exPts", studentInfoForStipend.getExtraPoints() != null ? studentInfoForStipend.getExtraPoints().toString() : "");
-        result.put("resPts", finalGrade.toString() );
+        result.put("exPts", studentInfoForStipend.getExtraPoints()!= null ? studentInfoForStipend.getExtraPoints().toString():"-" );
+        result.put("resPts", resPts );
         return result;
     }
 
@@ -236,13 +242,15 @@ public class StipendService {
 
     private void fillStudentData(Tbl table, List<StudentInfoForStipend> studentInfoForStipend) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
+        int studentNumber = 1;
         int currentIndex = 2;
         Tr rowToCopy = tableRows.get(currentIndex);
         for (StudentInfoForStipend studInfo : studentInfoForStipend) {
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
-            replaceInRow(newRow, fillStipendData(studInfo));
+            replaceInRow(newRow, fillStipendData(studInfo, studentNumber));
             table.getContent().add(currentIndex, newRow);
             currentIndex++;
+            studentNumber++;
         }
         table.getContent().remove(currentIndex);
     }
