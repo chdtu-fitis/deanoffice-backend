@@ -230,8 +230,8 @@ public class StudentDegreeService {
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester);
     }
 
-    public int getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment) {
-        return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString());
+    public int getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment, int semester) {
+        return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString(), semester);
     }
 
     public int getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
@@ -243,12 +243,12 @@ public class StudentDegreeService {
     public int getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
             List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
         return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
-                ids, payment.toString(), tuitionForm.toString(), semester);
+                ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
 
     public int getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
             List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
         return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
-                ids, payment.toString(), tuitionForm.toString(), semester);
+                ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
 }
