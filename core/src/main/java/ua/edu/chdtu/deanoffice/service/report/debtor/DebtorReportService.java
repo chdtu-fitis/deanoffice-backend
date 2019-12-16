@@ -33,9 +33,9 @@ public class DebtorReportService {
         if (semester > 2 || semester < 0)
             throw new Exception("Incorrect semester!");
 
-        semester--;
         Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
         List<Specialization> specializations = specializationRepository.findAllByActive(true, faculty.getId());
+
         for (Specialization specialization : specializations) {
             if (specialization.getName().equals("")) {
                 continue;
@@ -51,7 +51,7 @@ public class DebtorReportService {
                 int lessThanThreeDebtsForBudgetDebtorsCount, lessThanThreeDebtsForContractDebtorsCount,
                         threeOrMoreDebtsForBudgetDebtorsCount, threeOrMoreDebtsForContractDebtorsCount,
                         budgetDebtorsCount, contractDebtorsCount;
-                if (semester != -1) {
+                if (semester != 0) {
                     contractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year), semester);
                     budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year), semester);
                     lessThanThreeDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year), semester);
@@ -102,22 +102,78 @@ public class DebtorReportService {
     }
 
     public Map<String, SpecializationDebtorsBean> calculateDebtorsReportDataForGroups(Faculty faculty, List<Integer> groupsIds) throws Exception {
-        List<StudentGroup> studentGroups = studentGroupService.getByIds(groupsIds);
+        if (groupsIds.size() == 0)
+            throw new Exception("Не вказано жодної групи!");
 
+        List<Integer> studySemestersForTheseStudentGroup = studentGroupService.getStudySemestersByIds(groupsIds, true);
+
+        if (groupsIds.size() != studySemestersForTheseStudentGroup.size())
+            throw new Exception("Серед вказаних груп є неактивні або неіснуючі!");
+
+        int maxSemester = getTheLatestSemesterForGroups(studySemestersForTheseStudentGroup);
+        Map<Integer, SpecializationDebtorsYearBean> semesterAndDebtors = new TreeMap<>();
+
+        for (int semester = 1; semester <= maxSemester; semester++) {
+            int budgetStudentsCount = 0;
+            int contractStudentsCount = 0;
+            int budgetDebtorsCount = 0;
+            int contractDebtorsCount = 0;
+            int lessThanThreeDebtsForBudgetDebtorsCount = 0;
+            int lessThanThreeDebtsForContractDebtorsCount = 0;
+            int threeOrMoreDebtsForBudgetDebtorsCount = 0;
+            int threeOrMoreDebtsForContractDebtorsCount = 0;
+
+            budgetStudentsCount += studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.BUDGET, semester);
+            contractStudentsCount += studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.CONTRACT, semester);
+
+            if (budgetStudentsCount + contractStudentsCount == 0) {
+                continue;
+            }
+
+            budgetDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            contractDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            lessThanThreeDebtsForBudgetDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            lessThanThreeDebtsForContractDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            threeOrMoreDebtsForBudgetDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            threeOrMoreDebtsForContractDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+
+            double debtorsPercent = (budgetDebtorsCount + contractDebtorsCount) / (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+            double lessThanThreeDebtsPercent = (lessThanThreeDebtsForBudgetDebtorsCount + lessThanThreeDebtsForContractDebtorsCount) /
+                    (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+            double threeOrMoreDebtsPercent = (threeOrMoreDebtsForBudgetDebtorsCount + threeOrMoreDebtsForContractDebtorsCount) /
+                    (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+
+            SpecializationDebtorsYearBean specializationDebtorsYearBean
+                    = new SpecializationDebtorsYearBean(budgetStudentsCount, contractStudentsCount, budgetDebtorsCount,
+                    contractDebtorsCount, debtorsPercent, lessThanThreeDebtsForBudgetDebtorsCount,
+                    lessThanThreeDebtsForContractDebtorsCount, lessThanThreeDebtsPercent,
+                    threeOrMoreDebtsForBudgetDebtorsCount, threeOrMoreDebtsForContractDebtorsCount,
+                    threeOrMoreDebtsPercent);
+
+            semesterAndDebtors.put(semester, specializationDebtorsYearBean);
+        }
+
+        //semesterAndDebtors.put(maxSemester + 1, calculateAllDataOfSpecializationOrFaculty(semesterAndDebtors));
+
+        Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
+
+        SpecializationDebtorsBean specializationDebtorsBean = new SpecializationDebtorsBean();
+        specializationDebtorsBean.setSpecializationDebtorsYearBeanMap(semesterAndDebtors);
+
+        debtorsReport.put("Debtor's report for current groups", specializationDebtorsBean);
+
+        return debtorsReport;
     }
 
-    private int getTheLatestSemesterForGroups(List<StudentGroup> studentGroups) throws Exception {
-        if (studentGroups.size() == 0)
+    private int getTheLatestSemesterForGroups(List<Integer> studySemestersForTheseStudentGroup) throws Exception {
+        if (studySemestersForTheseStudentGroup.size() == 0)
             throw new Exception("Вказаних груп немає в базі даних!");
 
         int maxSemester = 0;
-        int currentMaxSemester;
 
-        for (StudentGroup studentGroup : studentGroups) {
-            currentMaxSemester = studentGroup.getStudySemesters();
-
-            if (currentMaxSemester > maxSemester) {
-                maxSemester = currentMaxSemester;
+        for (Integer e : studySemestersForTheseStudentGroup) {
+            if (e > maxSemester) {
+                maxSemester = e;
             }
         }
 
