@@ -16,19 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.AcquiredCompetencies;
-import ua.edu.chdtu.deanoffice.entity.Degree;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.ProfessionalQualification;
-import ua.edu.chdtu.deanoffice.entity.QualificationForSpecialization;
-import ua.edu.chdtu.deanoffice.entity.Speciality;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.TuitionForm;
-import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
-import ua.edu.chdtu.deanoffice.service.AcquiredCompetenciesService;
-import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
+import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
@@ -36,11 +25,7 @@ import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlaceholdersFromContentAccessor;
@@ -53,13 +38,23 @@ public class SupplementTemplateFillService {
     private final DocumentIOService documentIOService;
     private QualificationForSpecializationService qualificationForSpecializationService;
     private AcquiredCompetenciesService acquiredCompetenciesService;
+    private StudentAcademicVacationService studentAcademicVacationService;
+    //    private RenewedAcademicVacationStudentRepository
+    private StudentExpelService studentExpelService;
+    private RenewedExpelledStudentService renewedExpelledStudentService;
 
     public SupplementTemplateFillService(DocumentIOService documentIOService,
                                          QualificationForSpecializationService qualificationForSpecializationService,
-                                         AcquiredCompetenciesService acquiredCompetenciesService) {
+                                         AcquiredCompetenciesService acquiredCompetenciesService,
+                                         StudentAcademicVacationService studentAcademicVacationService,
+                                         StudentExpelService studentExpelService,
+                                         RenewedExpelledStudentService renewedExpelledStudentService) {
         this.documentIOService = documentIOService;
         this.qualificationForSpecializationService = qualificationForSpecializationService;
         this.acquiredCompetenciesService = acquiredCompetenciesService;
+        this.studentAcademicVacationService = studentAcademicVacationService;
+        this.studentExpelService = studentExpelService;
+        this.renewedExpelledStudentService = renewedExpelledStudentService;
     }
 
     WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
@@ -100,7 +95,7 @@ public class SupplementTemplateFillService {
             return (!Strings.isNullOrEmpty(courseNameUkr)
                     && (courseNameUkr.contains("іспит") || courseNameUkr.contains("екзамен")));
         })
-                ) {
+        ) {
             certificationName = STATE_EXAM;
             certificationNameEng = "Qualification exam.";
         } else {
@@ -340,8 +335,17 @@ public class SupplementTemplateFillService {
 
         result.put("TrainingDuration", getTrainingDuration(group));
         result.put("TrainingDurationEng", getTrainingDurationEng(group));
-        result.put("TrainingStart", formatDateSafely(simpleDateFormat, studentDegree.getAdmissionDate()));
-        result.put("TrainingEnd", formatDateSafely(simpleDateFormat, studentDegree.getDiplomaDate()));
+
+        Map<String, String> allPreviousUniversities = getAllPreviousUniversities(studentDegree);
+        result.put("AllTrainingDurationsAndUniversitiesUkr", TemplateUtil.getValueSafely(allPreviousUniversities.get("ukr")));
+        result.put("AllTrainingDurationsAndUniversitiesEng", TemplateUtil.getValueSafely(allPreviousUniversities.get("eng")));
+
+        String allTrainingDurationsFromUniversity = getAllTrainingDurationsFromUniversity(studentDegree);
+        result.put("TrainingDurations", TemplateUtil.getValueSafely(allTrainingDurationsFromUniversity));
+
+        Map<String, String> academicBackground = getAcademicBackground(studentDegree);
+        result.put("AcademicBackgroundUkr", academicBackground == null ? "" : TemplateUtil.getValueSafely(academicBackground.get("ukr")));
+        result.put("AcademicBackgroundEng", academicBackground == null ? "" : TemplateUtil.getValueSafely(academicBackground.get("eng")));
 
         result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
         result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
@@ -391,6 +395,121 @@ public class SupplementTemplateFillService {
         }
 
         return result;
+    }
+
+    private Map<String, String> getAcademicBackground(StudentDegree studentDegree) {
+        Map<String, String> academicBackground = new HashMap<>();
+
+        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
+        if (studentPreviousUniversities.isEmpty()) {
+            return null;
+        }
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        DateFormat monthDayYearFormat = new SimpleDateFormat("MMMM dd, yyyy", new Locale("en"));
+
+        StringBuilder academicBackgroundUkr = new StringBuilder();
+        StringBuilder academicBackgroundEng = new StringBuilder();
+
+        for (StudentPreviousUniversity university : studentPreviousUniversities) {
+            academicBackgroundUkr.append("Академічна довідка №")
+                    .append(TemplateUtil.getValueSafely(university.getAcademicCertificateNumber()))
+                    .append(" від ")
+                    .append(formatDateSafely(simpleDateFormat, university.getAcademicCertificateDate()))
+                    .append(", ")
+                    .append(TemplateUtil.getValueSafely(university.getUniversityName()));
+        }
+
+        for (StudentPreviousUniversity university : studentPreviousUniversities) {
+            academicBackgroundEng.append("Trascript of records №")
+                    .append(TemplateUtil.getValueSafely(university.getAcademicCertificateNumber()))
+                    .append(" issued on ")
+                    .append(formatDateSafely(monthDayYearFormat, university.getAcademicCertificateDate()))
+                    .append(", ")
+                    .append(TemplateUtil.getValueSafely(university.getUniversityNameEng()));
+        }
+
+        academicBackground.put("ukr", academicBackgroundUkr.toString());
+        academicBackground.put("eng", academicBackgroundEng.toString());
+
+        return academicBackground;
+    }
+
+    private Map<String, String> getAllPreviousUniversities(StudentDegree studentDegree) {
+        Map<String, String> durationOfTraining = new HashMap<>();
+        StringBuilder ukr = new StringBuilder();
+        StringBuilder eng = new StringBuilder();
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
+        if (!studentPreviousUniversities.isEmpty()) {
+            for (StudentPreviousUniversity university : studentPreviousUniversities) {
+                ukr.append(TemplateUtil.getValueSafely(university.getUniversityName()))
+                        .append(". ")
+                        .append("Строк навчання - ")
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyStartDate()))
+                        .append("-")
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyEndDate()))
+                        .append(". ");
+            }
+
+            for (StudentPreviousUniversity university : studentPreviousUniversities) {
+                eng.append(" ")
+                        .append(TemplateUtil.getValueSafely(university.getUniversityNameEng()))
+                        .append(". ")
+                        .append("Duration of training - ")
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyStartDate()))
+                        .append("-")
+                        .append(formatDateSafely(simpleDateFormat, university.getStudyEndDate()))
+                        .append(". ");
+            }
+        }
+
+        durationOfTraining.put("ukr", ukr.toString());
+        durationOfTraining.put("eng", eng.toString());
+
+        return durationOfTraining;
+    }
+
+    private String getAllTrainingDurationsFromUniversity(StudentDegree studentDegree) {
+        StringBuilder dates = new StringBuilder();
+        List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getByDegreeId(studentDegree.getId());
+        List<StudentExpel> studentExpels = studentExpelService.getByStudentDegreeId(studentDegree.getId());
+        List<RenewedExpelledStudent> renewedExpelledStudents = renewedExpelledStudentService.getRenewedStudentsByStudentDegreeId(studentDegree.getId());
+
+        List<Date> expelDates = new ArrayList<>();
+        List<Date> renewDates = new ArrayList<>();
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        dates.append(formatDateSafely(simpleDateFormat, studentDegree.getAdmissionDate()))
+                .append("-");
+
+        if (!studentExpels.isEmpty()) {
+            expelDates.addAll(studentExpels.stream().map(StudentExpel::getExpelDate).collect(Collectors.toList()));
+            renewDates.addAll(renewedExpelledStudents.stream().map(RenewedExpelledStudent::getRenewDate).collect(Collectors.toList()));
+        }
+        if (!academicVacations.isEmpty()) {
+            expelDates.addAll(academicVacations.stream().map(StudentAcademicVacation::getVacationStartDate).collect(Collectors.toList()));
+            renewDates.addAll(academicVacations.stream().map(StudentAcademicVacation::getVacationEndDate).collect(Collectors.toList()));
+        }
+
+        expelDates.sort(Date::compareTo);
+        renewDates.sort(Date::compareTo);
+
+        if (!expelDates.isEmpty() && !renewDates.isEmpty() && expelDates.size() == renewDates.size()) {
+            for (int i = 0; i < expelDates.size(); i++) {
+                dates.append(formatDateSafely(simpleDateFormat, expelDates.get(i)))
+                        .append(", ")
+                        .append(formatDateSafely(simpleDateFormat, renewDates.get(i)))
+                        .append("-");
+            }
+        }
+
+        dates.append(formatDateSafely(simpleDateFormat, studentDegree.getDiplomaDate()));
+
+        return dates.toString();
     }
 
     private static String getTrainingDuration(StudentGroup studentGroup) {
