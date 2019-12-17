@@ -205,20 +205,17 @@ public class StipendService {
     }
 
     private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
-        Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
-        Double finalGrade = studentInfoForStipend.getFinalGrade();
-
-        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
-        String resPts = String.format("%.2f", finalGrade);
+        double normalizedAverageGrade = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
+        double finalGrade = studentInfoForStipend.getFinalGrade();
 
         HashMap<String, String> result = new HashMap();
         result.put("№", String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
-        result.put("pts", strPts);
-        result.put("pcPts", bigDecimalPoints.toString());
+        result.put("pts", String.format("%.2f", studentInfoForStipend.getAverageGrade()));
+        result.put("pcPts", String.format("%.2f", normalizedAverageGrade));
         result.put("exPts", studentInfoForStipend.getExtraPoints()!= null ? studentInfoForStipend.getExtraPoints().toString():"-" );
-        result.put("resPts", resPts );
+        result.put("resPts", String.format("%.2f", finalGrade));
         return result;
     }
 
