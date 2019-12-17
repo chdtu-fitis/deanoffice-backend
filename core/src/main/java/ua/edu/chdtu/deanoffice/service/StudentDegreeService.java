@@ -34,6 +34,8 @@ public class StudentDegreeService {
         this.gradeRepository = gradeRepository;
     }
 
+    // student degree id && coursess   //// student id and specialisation
+
     public StudentDegree getById(Integer id) {
         return studentDegreeRepository.getById(id);
     }

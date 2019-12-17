@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.api.document.diplomasupplement.DiplomaSupplementController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportForForeignStudentService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -26,11 +28,16 @@ public class ExamReportController extends DocumentResponseController {
 
     private ExamReportService examReportService;
     private FacultyService facultyService;
+    private ExamReportForForeignStudentService examReportForForeignStudentService;
+    private StudentDegreeService studentDegreeService;
+
+
 
     public ExamReportController(ExamReportService examReportService, FacultyService facultyService) {
         this.examReportService = examReportService;
         this.facultyService = facultyService;
     }
+
 
     @GetMapping("/groups/{groupId}/docx")
     public ResponseEntity<Resource> generateDocxForSingleCourse(
@@ -41,6 +48,19 @@ public class ExamReportController extends DocumentResponseController {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
             File examReport = examReportService.createGroupStatement(groupId, courseIds, FileFormatEnum.DOCX);
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
+    @GetMapping("/student/foreign/{studentId}/docx")
+    public ResponseEntity<Resource> generateDocxForSingleStudent(
+            @PathVariable Integer semester,
+            @PathVariable List<Integer> studentId) {
+        try {
+                File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentId, semester, FileFormatEnum.DOCX);
+                return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
+
         } catch (Exception e) {
             return handleException(e);
         }
