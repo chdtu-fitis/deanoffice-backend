@@ -504,9 +504,6 @@ public class SupplementTemplateFillService {
                         .append(", ")
                         .append(formatDateSafely(simpleDateFormat, renewDates.get(i)))
                         .append("-");
-                if (i < expelDates.size() - 1) {
-                    dates.append(", ");
-                }
             }
         }
 
