@@ -18,9 +18,9 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-public class AcquiredCompetencies extends BaseEntity {
+    public class AcquiredCompetencies extends BaseEntity {
     private String competencies;
-    private String competenciesEng;
+//    private String competenciesEng;
     @ManyToOne
     private Specialization specialization;
     private Integer year;

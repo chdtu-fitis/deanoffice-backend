@@ -28,6 +28,7 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
+import ua.edu.chdtu.deanoffice.service.specialization.SpecializationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
