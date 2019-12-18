@@ -185,16 +185,67 @@ public class StipendService {
         return studentDegreeRepository.save(extraPoints);
     }
 
-    public Map<String, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
-        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
-                .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
+    public Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
+        Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
+                .collect(Collectors.groupingBy(StudentInfoForStipend::getSingleSpecializationStipendDataBean, LinkedHashMap::new, Collectors.toList()));
+
+//        for(int i = 0; i < studentInfoForStipend.size(); i++){
+//
+//            if(studentInfoForStipend.get(i).getDegreeName().equals(studentInfoForStipend.get(i+1).getDegreeName())&&
+//                    studentInfoForStipend.get(i).getSpecializationName().equals(studentInfoForStipend.get(i+1).getSpecializationName())&&
+//                    studentInfoForStipend.get(i).getYear()==studentInfoForStipend.get(i+1).getYear()&&
+//                    studentInfoForStipend.get(i).getTuitionTerm().equals(studentInfoForStipend.get(i+1).getTuitionTerm())&&
+//                    studentInfoForStipend.get(i).getSpecialityCode().equals(studentInfoForStipend.get(i+1).getSpecialityCode())&&
+//                    studentInfoForStipend.get(i).getSpecialityName().equals(studentInfoForStipend.get(i+1).getSpecialityName())){
+//
+//                studentInfoByGroup.put(StudentInfoForStipend::getSingleSpecializationStipendDataBean, studentInfoForStipend.get(i))
+//            }
+//
+//
+//        }
+
+//        Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoBySpecialization = null;
+//        ArrayList<StudentInfoForStipend> singleSpecizlizationData = new ArrayList<>();
+//        for (Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoByGroup.entrySet()) {
+//                if(entry.getKey().getDegreeName().equals(entry.getValue())&&
+//                        entry.getKey().getSpecializationName().equals(entry.getValue())&&
+////                            entry.getKey().getYear().equals(entry.getValue().get(6))&&
+//                                entry.getKey().getTuitionTerm().equals(entry.getValue())&&
+//                                        entry.getKey().getSpecialityCode().equals(entry.getValue())&&
+//                                                entry.getKey().getSpecialityName().equals(entry.getValue())){
+//                    singleSpecizlizationData.add((StudentInfoForStipend) entry.getValue());
+//                }else{
+//                    studentInfoBySpecialization.put(entry.getKey(),singleSpecizlizationData);
+//                    singleSpecizlizationData = null;
+//                }
+//        }
+
+//        Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>>[] entries =
+//                studentInfoByGroup.entrySet().stream().toArray(Map.Entry[]::new);
+//        Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoBySpecialization = null;
+//        ArrayList<StudentInfoForStipend> singleSpecizlizationData = new ArrayList<>();
+//        for (int i = 0; i < entries.length-1; i++) {
+//            Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> current = entries[i];
+//            Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> next = entries[i+1];
+//            for (Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoByGroup.entrySet()) {
+//                if(current.equals(next)){
+//                    singleSpecizlizationData.add((StudentInfoForStipend) entry.getValue());
+//                }else{
+//                    studentInfoBySpecialization.put(entry.getKey(),singleSpecizlizationData);
+//                    singleSpecizlizationData = null;
+//                }
+//            }
+//        }
+
+
         return studentInfoByGroup;
+
     }
 
     public File formDocument() throws Exception {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         List<StudentInfoForStipend> stipendData = getStipendData();
-        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
+        Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
         generateTables(template, studentInfoByGroup);
 
         for (int i = 1; i >= 0; i--){
@@ -222,20 +273,25 @@ public class StipendService {
         return result;
     }
 
-    private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
+    private void generateTables(WordprocessingMLPackage template, Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoForStipend) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
-        for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
+
+        for (Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, entry.getKey());
             fillStudentData(table, entry.getValue());
             template.getMainDocumentPart().addObject(table);
         }
-        template.getMainDocumentPart().getContent().remove(0);
+        //template.getMainDocumentPart().getContent().remove(0);
     }
 
-    private void fillFirstRow(Tbl table, String groupName) {
+    private void fillFirstRow(Tbl table, SingleSpecializationStipendDataBean stipendData) {
         Map<String, String> result = new HashMap<>();
-        result.put("groupName", groupName);
+        result.put("specializationName", stipendData.getSpecializationName());
+        result.put("tuitTerm", stipendData.getTuitionTerm());
+        result.put("specialization", stipendData.getSpecialityCode());
+        result.put("speciality", stipendData.getSpecialityName());
+        result.put("degName", stipendData.getDegreeName());
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         replaceInRow(tableRows.get(0), result);
     }
@@ -254,4 +310,5 @@ public class StipendService {
         }
         table.getContent().remove(currentIndex);
     }
+
 }

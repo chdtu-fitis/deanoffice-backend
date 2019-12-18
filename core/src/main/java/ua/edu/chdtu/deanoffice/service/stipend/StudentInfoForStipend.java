@@ -28,6 +28,10 @@ public class StudentInfoForStipend {
     private Integer extraPoints;
     List<CourseForStipendBean> debtCourses = new ArrayList<>();
 
+    public SingleSpecializationStipendDataBean getSingleSpecializationStipendDataBean() {
+        return new SingleSpecializationStipendDataBean(degreeName, year, specializationName, tuitionTerm, specialityCode, specialityName);
+    }
+
 //    @Override
 //    public boolean equals(Object o) {
 //        if (this == o) return true;
