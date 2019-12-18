@@ -2,9 +2,14 @@ package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+//import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -27,6 +32,8 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
 public class ExamReportForForeignStudentService extends ExamReportBaseService {
 
     private static final String TEMPLATE = TEMPLATES_PATH + "abcd.docx";
+    private static final int STARTING_ROW_INDEX = 7;
+    private final DocumentIOService documentIOService;
 
     @Autowired
     private CourseForGroupService courseForGroupService;
@@ -34,14 +41,16 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
     @Autowired
     private StudentDegreeService studentDegreeService;
 
-    @Autowired
-    private DocumentIOService documentIOService;
+    /*@Autowired
+    private DocumentIOService documentIOService;*/
 
     @Autowired
     private ExamReportBaseService examReportBaseService;
 
-    public ExamReportForForeignStudentService(CurrentYearService currentYearService) {
+    public ExamReportForForeignStudentService(DocumentIOService documentIOService,
+                                         CurrentYearService currentYearService) {
         super(currentYearService);
+        this.documentIOService = documentIOService;
     }
 
     public File createGroupStatementForeign(List<Integer> studentId, Integer semester, FileFormatEnum format)
@@ -67,33 +76,61 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
 
     WordprocessingMLPackage fillTemplate(String templateName, Map<StudentDegree, List<CourseForGroup>> studentsAndCourses)
             throws IOException, Docx4JException {
-        WordprocessingMLPackage reportsDocumen = documentIOService.loadTemplate(TEMPLATE);
-        studentsAndCourses.forEach(studentAndCourses -> {
-            WordprocessingMLPackage reportsDocument = fillTemplate(templateName, studentAndCourses, studentsAndCourses.get(studentAndCourses)); ///
-            TemplateUtil.addPageBreak(reportsDocument);
-            try {
-                reportsDocument.getMainDocumentPart().getContent()
-                        .addAll(fillTemplate(templateName, studentsAndCourses).getMainDocumentPart().getContent());
-            } catch (IOException | Docx4JException e) {
-                e.printStackTrace();
+        WordprocessingMLPackage reportsDocument = null;
+        int i = 0;
+        if (i > 0 ) {
+            for (Map.Entry<StudentDegree, List<CourseForGroup>> studentAndCourses : studentsAndCourses.entrySet()) {
+                reportsDocument = fillTemplate(templateName, studentAndCourses.getKey(), studentAndCourses.getValue());
+                TemplateUtil.addPageBreak(reportsDocument);
+                try {
+                    reportsDocument.getMainDocumentPart().getContent()
+                            .addAll(fillTemplate(templateName, studentsAndCourses).getMainDocumentPart().getContent());
+                } catch (IOException | Docx4JException e) {
+                    e.printStackTrace();
+                }
             }
-        });
+        } else {
+
+        }
+
         return reportsDocument;
     }
 
     WordprocessingMLPackage fillTemplate(String templateName, StudentDegree studentDegree, List<CourseForGroup> studentsAndCourses) //генерує для одного
             throws IOException, Docx4JException {
-        WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);///
-                studentDegree.getStudent();
+        int currentRowIndex = STARTING_ROW_INDEX;
+        WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         Map<String, String> commonDict = new HashMap<>();
-        for(CourseForGroup courseForGroup : studentsAndCourses) { ////
-            commonDict.putAll(getGroupInfoReplacements(studentDegree));
-            TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+        for(CourseForGroup courseForGroup : studentsAndCourses) { //// цикл щоб пройти по всім предметам даного студента
+            commonDict.putAll(getGroupInfoReplacements(courseForGroup));////////
+            fillTableWithCourses(template, courseForGroup, 8, currentRowIndex);
+            currentRowIndex +=  1;
         }
+
+
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
 
-    Map<String, String> getGroupInfoReplacements(StudentDegree courseForGroup) {
+    private void fillTableWithCourses(WordprocessingMLPackage template, CourseForGroup courseForGroup, int numberOfTable, int currentRowIndex) {
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(numberOfTable);
+        if (tempTable == null) {
+            return;
+        }
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+
+        Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+        currentRowIndex++;
+        Map<String, String> replacements = new HashMap<>();
+            replacements.put("Course name", courseForGroup.getCourse().toString());
+            TemplateUtil.replaceInRow(currentRow, replacements);
+            currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+            replacements.clear();
+            TemplateUtil.replaceInRow(currentRow, replacements);
+            currentRowIndex++;
+    }
+
+    /*Map<String, String> getGroupInfoReplacements(CourseForGroup courseForGroup) {
         Map<String, String> result = new HashMap<>();
         StudentGroup studentGroup = courseForGroup.getStudentGroup();
         result.put("GroupName", studentGroup.getName());
@@ -106,7 +143,7 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
         result.put("StudyYear", getStudyYear());
 
         return result;
-    }
+    }*/
 
 
 

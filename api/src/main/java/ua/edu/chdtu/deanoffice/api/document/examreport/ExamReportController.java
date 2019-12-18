@@ -53,7 +53,7 @@ public class ExamReportController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/student/foreign/{studentId}/docx")
+    @GetMapping("/student/foreign//docx")
     public ResponseEntity<Resource> generateDocxForSingleStudent(
             @PathVariable Integer semester,
             @PathVariable List<Integer> studentId) {
