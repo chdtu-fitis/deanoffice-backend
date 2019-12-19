@@ -7,7 +7,6 @@ import java.util.Objects;
 
 @Getter
 @Setter
-
 public class SingleSpecializationStipendDataBean {
     private String degreeName;
     private int year;
@@ -16,10 +15,9 @@ public class SingleSpecializationStipendDataBean {
     private String tuitionTerm;
     private String specialityCode;
     private String specialityName;
-
+    private String groupsName;
 
     public SingleSpecializationStipendDataBean(){
-
     }
 
     public SingleSpecializationStipendDataBean(String degreeName, int year, String specializationName, String tuitionTerm, String specialityCode, String specialityName){

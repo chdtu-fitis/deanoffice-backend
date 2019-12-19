@@ -97,4 +97,8 @@ public class StudentInfoForStipend {
         else
             return averageGrade.doubleValue() * 0.9;
     }
+
+    public String getGroupName(){
+        return groupName;
+    }
 }
