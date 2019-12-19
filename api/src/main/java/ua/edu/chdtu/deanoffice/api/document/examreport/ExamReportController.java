@@ -1,12 +1,9 @@
 package ua.edu.chdtu.deanoffice.api.document.examreport;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -29,13 +26,15 @@ public class ExamReportController extends DocumentResponseController {
     private ExamReportService examReportService;
     private FacultyService facultyService;
     private ExamReportForForeignStudentService examReportForForeignStudentService;
-    private StudentDegreeService studentDegreeService;
 
 
-
-    public ExamReportController(ExamReportService examReportService, FacultyService facultyService) {
+    @Autowired
+    public ExamReportController(ExamReportService examReportService,
+                                FacultyService facultyService,
+                                ExamReportForForeignStudentService examReportForForeignStudentService) {
         this.examReportService = examReportService;
         this.facultyService = facultyService;
+        this.examReportForForeignStudentService = examReportForForeignStudentService;
     }
 
 
@@ -53,13 +52,15 @@ public class ExamReportController extends DocumentResponseController {
         }
     }
 
-    @GetMapping("/student/foreign//docx")
+    @PostMapping("/student/foreign/examReport/docx")
     public ResponseEntity<Resource> generateDocxForSingleStudent(
-            @PathVariable Integer semester,
-            @PathVariable List<Integer> studentId) {
+            @RequestParam Integer semesterId,
+            @RequestBody List<Integer> studentId,
+            @CurrentUser ApplicationUser user) {
         try {
-                File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentId, semester, FileFormatEnum.DOCX);
-                return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
+
+            File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentId, semesterId, FileFormatEnum.DOCX);
+            return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
 
         } catch (Exception e) {
             return handleException(e);
