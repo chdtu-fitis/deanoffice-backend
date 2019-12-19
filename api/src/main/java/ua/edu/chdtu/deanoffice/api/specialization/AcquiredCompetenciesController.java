@@ -78,8 +78,8 @@ public class AcquiredCompetenciesController {
     }
 
 
-    @PutMapping("/acquired-competencies/{acquired-competencies-id}/ukr")
-    public ResponseEntity updateAcquiredCompetenciesUkr(
+    @PutMapping("/acquired-competencies/{acquired-competencies-id}")
+    public ResponseEntity updateAcquiredCompetencies(
             @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
             @RequestBody String competencies
     ) {
@@ -92,24 +92,6 @@ public class AcquiredCompetenciesController {
     }
 
 
-//    @GetMapping("/specializations/{specialization_id}/competencies/ukr")
-//    @JsonView(SpecializationView.AcquiredCompetenciesUkr.class)
-//    public ResponseEntity getCompetenciesUkrForSpecialization(@PathVariable("specialization_id") int specializationId) {
-//        try {
-//            return ResponseEntity.ok(getAcquiredCompetenciesDTO(specializationId));
-//        } catch (Exception exception) {
-//            return handleException(exception);
-//        }
-//    }
-//
-//    private AcquiredCompetenciesDTO getAcquiredCompetenciesDTO(int specializationId) {
-//        AcquiredCompetencies acquiredCompetencies = acquiredCompetenciesService.getLastAcquiredCompetencies(specializationId);
-//        if (acquiredCompetencies == null) {
-//            return new AcquiredCompetenciesDTO();
-//        }
-//        return (AcquiredCompetenciesDTO) map(acquiredCompetencies, AcquiredCompetenciesDTO.class);
-//    }
-//
 //    @PutMapping("/acquired-competencies/{acquired-competencies-id}/ukr")
 //    public ResponseEntity updateAcquiredCompetenciesUkr(
 //            @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
@@ -122,29 +104,7 @@ public class AcquiredCompetenciesController {
 //            return handleException(exception);
 //        }
 //    }
-//
-//    @GetMapping("/specializations/{specialization_id}/competencies/eng")
-//    @JsonView(SpecializationView.AcquiredCompetenciesEng.class)
-//    public ResponseEntity getCompetenciesEngForSpecialization(@PathVariable("specialization_id") int specializationId) {
-//        try {
-//            return ResponseEntity.ok(getAcquiredCompetenciesDTO(specializationId));
-//        } catch (Exception exception) {
-//            return handleException(exception);
-//        }
-//    }
-//
-//    @PutMapping("/acquired-competencies/{acquired-competencies-id}/eng")
-//    public ResponseEntity updateAcquiredCompetenciesEng(
-//            @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
-//            @RequestBody String competencies
-//    ) {
-//        try {
-//            acquiredCompetenciesService.updateCompetenciesEng(acquiredCompetenciesId, competencies);
-//            return ResponseEntity.ok().build();
-//        } catch (Exception exception) {
-//            return handleException(exception);
-//        }
-//    }
+
 
     @PostMapping("/acquired-competencies")
     public ResponseEntity create(@RequestBody AcquiredCompetenciesDTO acquiredCompetenciesDTO) throws IOException {

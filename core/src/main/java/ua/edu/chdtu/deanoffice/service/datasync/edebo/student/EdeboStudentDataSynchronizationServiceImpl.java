@@ -27,7 +27,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
-import ua.edu.chdtu.deanoffice.service.SpecializationService;
+import ua.edu.chdtu.deanoffice.service.specialization.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataBean;

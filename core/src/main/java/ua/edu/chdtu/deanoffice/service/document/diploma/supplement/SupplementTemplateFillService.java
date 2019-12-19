@@ -31,8 +31,10 @@ import ua.edu.chdtu.deanoffice.service.AcquiredCompetenciesService;
 import ua.edu.chdtu.deanoffice.service.QualificationForSpecializationService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.service.specialization.CompetenciesBean;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -63,7 +65,7 @@ public class SupplementTemplateFillService {
     }
 
     WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
-            throws Docx4JException {
+            throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
 
         prepareTrainingDirectionPlaceholders(template, studentSummary);
@@ -134,12 +136,12 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
+    private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) throws IOException {
+        CompetenciesBean competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
                 studentSummary.getStudentGroup().getSpecialization().getId());
         if (competencies != null) {
-            fillCompetenciesTable(template, competencies, "#AcquiredCompetencies");
-            fillCompetenciesTable(template, competencies, "#AcquiredCompetenciesEng");
+            fillCompetenciesTable(template, acquiredCompetenciesService.getCompetenciesStringUkr(competencies.getCompetencies()), "#AcquiredCompetencies");
+            fillCompetenciesTable(template, acquiredCompetenciesService.getCompetenciesStringEng(competencies.getCompetencies()), "#AcquiredCompetenciesEng");
         }
     }
 
@@ -568,7 +570,7 @@ public class SupplementTemplateFillService {
         return false;
     }
 
-    private void fillCompetenciesTable(WordprocessingMLPackage template, AcquiredCompetencies competencies, String placeholder) {
+    private void fillCompetenciesTable(WordprocessingMLPackage template, String competencies, String placeholder) {
         String competencySeparator = "\\.";
         String endOfTheSentence = ".";
 
@@ -582,11 +584,7 @@ public class SupplementTemplateFillService {
         P parentParagraph = (P) TemplateUtil.findParentNode(textWithAcquiredCompetenciesPlaceholder, P.class);
         ContentAccessor paragraphsParent = (ContentAccessor) parentParagraph.getParent();
 
-        String competenciesString = placeholder.equals("#AcquiredCompetencies")
-                ? competencies.getCompetencies()
-                : competencies.getCompetenciesEng();
-
-        for (String item : competenciesString.split(competencySeparator)) {
+        for (String item : competencies.split(competencySeparator)) {
             P newParagraph = XmlUtils.deepCopy(parentParagraph);
             newParagraph.getContent().clear();
 

@@ -13,7 +13,7 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
-import ua.edu.chdtu.deanoffice.service.SpecializationService;
+import ua.edu.chdtu.deanoffice.service.specialization.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentTransferService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;

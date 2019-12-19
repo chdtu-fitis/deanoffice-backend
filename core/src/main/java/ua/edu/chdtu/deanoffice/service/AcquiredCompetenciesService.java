@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,9 +28,11 @@ public class AcquiredCompetenciesService {
 
     public CompetenciesBean getLastAcquiredCompetencies(int specializationId) throws IOException {
         AcquiredCompetencies lastCompForSpec = acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
+        if (lastCompForSpec == null)
+            return null;
         ObjectMapper mapper = new ObjectMapper();
         String competenciesJsonStr = lastCompForSpec.getCompetencies();
-        List<CompetenceBean> competenciesBeans = mapper.readValue(competenciesJsonStr, List.class);
+        List<CompetenceBean> competenciesBeans = mapper.readValue(competenciesJsonStr, new TypeReference<List<CompetenceBean>>() {});
         CompetenciesBean competenciesBean = new CompetenciesBean(lastCompForSpec.getId(), competenciesBeans, lastCompForSpec.getSpecialization().getId(), lastCompForSpec.getYear());
         return competenciesBean;
     }
@@ -58,5 +61,21 @@ public class AcquiredCompetenciesService {
             acquiredCompetencies = acquiredCompetenciesRepository.findLastCompetenciesForSpecialization(specializationId);
         }
         return acquiredCompetencies == null;
+    }
+
+    public String getCompetenciesStringUkr(List<CompetenceBean> competencies) {
+        String result = "";
+        for (CompetenceBean competence : competencies) {
+            result += competence.getName() + ".";
+        }
+        return result;
+    }
+
+    public String getCompetenciesStringEng(List<CompetenceBean> competencies) {
+        String result = "";
+        for (CompetenceBean competence : competencies) {
+            result += competence.getNameEng() + ".";
+        }
+        return result;
     }
 }
