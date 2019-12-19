@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
+import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
@@ -23,12 +24,14 @@ import java.io.IOException;
 import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
 
 @Service
 public class ExamReportForForeignStudentService extends ExamReportBaseService {
 
-    private static final String TEMPLATE = TEMPLATES_PATH + "dddddd.docx";
+    private static final String TEMPLATE = TEMPLATES_PATH + "ExamReportForeignStudent.docx";
     private static final int STARTING_ROW_INDEX = 3;
     private final DocumentIOService documentIOService;
 
@@ -38,11 +41,9 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
     @Autowired
     private StudentDegreeService studentDegreeService;
 
-    /*@Autowired
-    private DocumentIOService documentIOService;*/
+    @Autowired
+    private CurrentYearService currentYearService;
 
-    /*@Autowired
-    private ExamReportBaseService examReportBaseService;*/
     @Autowired
     public ExamReportForForeignStudentService(DocumentIOService documentIOService,
                                          CurrentYearService currentYearService) {
@@ -73,18 +74,16 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
     WordprocessingMLPackage fillTemplate(String templateName, Map<StudentDegree, List<CourseForGroup>> coursesToStudents)
             throws IOException, Docx4JException { //головний метод
         WordprocessingMLPackage reportsDocument = documentIOService.loadTemplate(templateName);
-        /*int i = 0;
-        if (i == 0 ) {
-            reportsDocument = documentIOService.loadTemplate(templateName);
-            i++;// виклик самого себе ?
-        } else {*/
+        int i = 0;
             for (Map.Entry<StudentDegree, List<CourseForGroup>> coursesToStudent : coursesToStudents.entrySet()) {
-                //reportsDocument = fillTemplate(templateName, coursesToStudent.getKey(), coursesToStudent.getValue());
                 TemplateUtil.addPageBreak(reportsDocument);
                 try {
-                    fillTemplate(reportsDocument, coursesToStudent.getKey(), coursesToStudent.getValue(), coursesToStudent.getValue().size());
-                    reportsDocument.getMainDocumentPart().getContent()
+                    if (i==0)
+                        fillTemplate(reportsDocument, coursesToStudent.getKey(), coursesToStudent.getValue());
+                    else
+                        reportsDocument.getMainDocumentPart().getContent()
                             .addAll(fillTemplate(templateName, coursesToStudent.getKey(), coursesToStudent.getValue()).getMainDocumentPart().getContent());
+                    i++;
                 } catch (IOException | Docx4JException e) {
                     e.printStackTrace();
                 }
@@ -94,83 +93,73 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
     }
 //+
     WordprocessingMLPackage fillTemplate(String templateName, StudentDegree studentDegree, List<CourseForGroup> coursesToStudent) //генерує для одного студента з багатьма предметами
-            throws IOException, Docx4JException {////course 0
+            throws IOException, Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
-        fillTableWithCoursesInfo(template, coursesToStudent);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.putAll(getStudentInfoReplacements(studentDegree)); //////////
+
+        fillTableWithCoursesInfo(template, coursesToStudent);
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+        //Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(0);
+        //template.getMainDocumentPart().getContent().remove(1);
         return template;
     }
 
-    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, List<CourseForGroup> courses) {//генерує інф по предметам у студента
-        Tbl tempTable = TemplateUtil.findTable(template, "№");
-        if (tempTable == null) {
-            return;
-        }
-        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
-
-        int currentRowIndex = STARTING_ROW_INDEX;
-
-        for (CourseForGroup courseForGroup : courses) {
-            Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
-            Course course = courseForGroup.getCourse();
-            Map<String, String> replacements = new HashMap<>();
-            replacements.put("CourseName", course.getCourseName().getName());
-            replacements.put("Semester", String.format("%d-й",courseForGroup.getCourse().getSemester()));/////
-            replacements.put("KCType", course.getKnowledgeControl().getName());
-            replacements.put("Hours", String.format("%d", course.getHours()));
-            replacements.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
-            TemplateUtil.replaceInRow(currentRow, replacements);
-            currentRowIndex++;
-        }
-        removeUnfilledPlaceholders(template);
-    }
-
-    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, List<CourseForGroup> coursesToStudent, int numberOfTable, int currentRowIndex) {
-        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(numberOfTable); //
-        if (tempTable == null) {
-            return;
-        }
-        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
-        Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
-        currentRowIndex++;
-        Map<String, String> replacements = new HashMap<>();
-        replacements.put("CourseName", "AAAAAAAAAAAA");////////////
-        TemplateUtil.replaceInRow(currentRow, replacements);
-        for (CourseForGroup courseForGroup : coursesToStudent) {
-            Course course = courseForGroup.getCourse();
-            currentRow = (Tr) gradeTableRows.get(currentRowIndex);
-            replacements.clear();
-            replacements.put("CourseName", course.getCourseName().getName());
-            replacements.put("Semester", String.format("%d-й",courseForGroup.getCourse().getSemester()));
-            replacements.put("KCType", course.getKnowledgeControl().getName());
-            replacements.put("Hours", String.format("%d", course.getHours()));
-            replacements.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
-
-            TemplateUtil.replaceInRow(currentRow, replacements);
-            currentRowIndex++;
-        }
-    }
-
-    public void fillTemplate(WordprocessingMLPackage template, StudentDegree studentDegree, List<CourseForGroup> coursesToStudent, int numberOfTable) // формування інф за 1 студ із предметами
+    public void fillTemplate(WordprocessingMLPackage template, StudentDegree studentDegree, List<CourseForGroup> coursesToStudent) // формування інф за 1 студ із предметами
             throws IOException, Docx4JException {
-        int currentRowIndex = STARTING_ROW_INDEX;
+        //int currentRowIndex = STARTING_ROW_INDEX;
         //for (CourseForGroup courseForGroup : coursesToStudent) {
-            fillTableWithCoursesInfo(template, coursesToStudent, numberOfTable, currentRowIndex);// заповнить інформацію за предмети
-            //currentRowIndex += coursesToStudent.size() + 1;
-        //}
+        fillTableWithCoursesInfo(template, coursesToStudent);// заповнить інформацію за предмети
+        //currentRowIndex += coursesToStudent.size() + 1;
         removeUnfilledPlaceholders(template);
         Map<String, String> commonDict = new HashMap<>();
+                commonDict.putAll(getSemester(coursesToStudent.get(0).getCourse().getSemester()));
         commonDict.putAll(getStudentInfoReplacements(studentDegree)); // заповнить інформацію за студента
-
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+    }
+
+    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, List<CourseForGroup> courses) {//генерує інф по предметам у студента
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(1);
+        if (tempTable == null) {
+            return;
+        }
+        List<Object> gradeTableRows = getAllElementsFromObject(tempTable, Tr.class);
+        int currentRowIndex = STARTING_ROW_INDEX;
+        int numberOfRow = 1;
+        Tr blanckRow = (Tr) gradeTableRows.get(currentRowIndex);
+
+        //Tr newRowWithSignature = XmlUtils.deepCopy(blanckRow);
+        for (CourseForGroup courseForGroup : courses) {
+            Tr currentRow = XmlUtils.deepCopy(blanckRow);
+
+            Course course = courseForGroup.getCourse();
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("n", String.format("" + numberOfRow));
+            replacements.put("CourseName", course.getCourseName().getName());
+           // replacements.put("Semester", String.format("%d-й",courseForGroup.getCourse().getSemester()));/////
+            replacements.put("KCType", course.getKnowledgeControl().getName());
+            replacements.put("Hours", String.format("%d", course.getHours()));
+            replacements.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
+            replaceInRow(currentRow, replacements);
+            tempTable.getContent().add(currentRowIndex, currentRow);
+            currentRowIndex++;
+            numberOfRow++;
+            //replaceInRow(currentRow,replacements);
+        }
+        removeUnfilledPlaceholders(template);
+        tempTable.getContent().remove(currentRowIndex);
+    }
+
+    Map<String, String> getSemester(int semester) {
+        Map<String, String> result = new HashMap<>();
+        result.put("Semester", String.format("%d-й", semester));
+        return result;
     }
 
     private void removeUnfilledPlaceholders(WordprocessingMLPackage template) {
         Set<String> placeholdersToRemove = new HashSet<>();
         placeholdersToRemove.add("CourseName");
-        placeholdersToRemove.add("Semester");
+       // placeholdersToRemove.add("Semester");////
         placeholdersToRemove.add("KCType");
         placeholdersToRemove.add("Hours");
         placeholdersToRemove.add("TeacherInitials");
@@ -179,16 +168,16 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
 
     Map<String, String> getStudentInfoReplacements(StudentDegree studentDegree) {
         Map<String, String> result = new HashMap<>();
+        int currentYear = currentYearService.get().getCurrYear();
         result.put("GroupName", studentDegree.getStudentGroup().getName());
         Speciality speciality = studentDegree.getSpecialization().getSpeciality();
         result.put("Speciality", speciality.getCode() + " " + speciality.getName());
-        result.put("Specialization", studentDegree.getSpecialization().getName());
         result.put("FacultyAbbr", studentDegree.getSpecialization().getFaculty().getAbbr());
         result.put("DeanInitials", makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean().toString()));/////
         result.put("StudyYear", getStudyYear());
         result.put("StudentInitials", studentDegree.getStudent().getFullNameUkr());
         result.put("RecBook", studentDegree.getRecordBookNumber());
-        result.put("dean", studentDegree.getSpecialization().getFaculty().getDean());
+        result.put("Course",  String.format("%d", currentYear - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears()));
 
         return result;
     }
