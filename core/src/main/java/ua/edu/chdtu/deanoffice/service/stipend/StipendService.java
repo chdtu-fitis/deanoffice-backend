@@ -107,7 +107,6 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                // 0,
                 BigDecimal.ZERO/*averageGrade*/,
                 (String)item[13]/*courseName*/,
                 (String)item[14]/*knowledgeControlName*/,
@@ -137,7 +136,6 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                //(Double)item[12]/*averageGrade*/,
                 (BigDecimal)item[12]/*averageGrade*/,
                 (Integer)item[13]/*extraPoints*/
         )));
@@ -244,7 +242,6 @@ public class StipendService {
         String ukTuitionTerm = tuitionTerm.equals("SHORTENED") ? "Скорочена" : "" ;
 
         Map<String, String> result = new HashMap<>();
-        //result.put("gName", stipendData.getGroupsName());
         result.put("Term", ukTuitionTerm);
         result.put("speciality", stipendData.getSpecialityCode() + " " + stipendData.getSpecialityName());
         result.put("dName", stipendData.getDegreeName() + " " + stipendData.getGroupsName() );

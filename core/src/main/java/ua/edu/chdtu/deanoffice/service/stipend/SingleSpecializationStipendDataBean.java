@@ -10,7 +10,6 @@ import java.util.Objects;
 public class SingleSpecializationStipendDataBean {
     private String degreeName;
     private int year;
-    //private String courseName;
     private String specializationName;
     private String tuitionTerm;
     private String specialityCode;
