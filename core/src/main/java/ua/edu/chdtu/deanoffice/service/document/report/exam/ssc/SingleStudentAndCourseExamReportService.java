@@ -88,6 +88,7 @@ public class SingleStudentAndCourseExamReportService {
 
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont, 14);
+        Font courseFont = new Font(baseFont, 13);
         Font boldFont = new Font(baseFont,14, Font.BOLD);
         Font underlineFont = new Font(baseFont, 8);
 
@@ -95,7 +96,7 @@ public class SingleStudentAndCourseExamReportService {
         PdfPTable facultyTable = createFacultyTable(student, font);
         PdfPTable infoTable = createInfoTable(student, course, font);
         PdfPTable studentTable = createStudentTable(student, font);
-        PdfPTable courseTable = createCourseTable(course, font);
+        PdfPTable courseTable = createCourseTable(course, courseFont);
         PdfPTable teacherTable = createTeacherTable(courseForGroup, font);
 
         facultyTable.setHorizontalAlignment(Element.ALIGN_LEFT);
@@ -107,7 +108,7 @@ public class SingleStudentAndCourseExamReportService {
         document.add(courseTable);
         document.add(createCenterAlignedParagraph("назва навчальної дисципліни", underlineFont, 0));
         document.add(teacherTable);
-        document.add(createCenterAlignedParagraph("вчене звання, прізвище та ініціали", underlineFont, 3));
+        document.add(createCenterAlignedParagraph("вчене звання, прізвище та ініціали", underlineFont, 6));
 
         return facultyTable;
     }
@@ -133,7 +134,7 @@ public class SingleStudentAndCourseExamReportService {
     private PdfPTable createCourseTable(Course course, Font font) throws DocumentException {
         PdfPTable courseTable = new PdfPTable(2);
         courseTable.setWidthPercentage(100);
-        courseTable.setTotalWidth(new float[]{2.8f,7.2f});
+        courseTable.setTotalWidth(new float[]{2.7f,7.3f});
 
         PdfPCell courseCell = new PdfPCell();
         courseCell.addElement(new Paragraph(FrontSideConfig.COURSE, font));
@@ -288,7 +289,9 @@ public class SingleStudentAndCourseExamReportService {
         underlineInfoCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell underlineInitialsCell = new PdfPCell();
-        underlineInitialsCell.addElement(new Paragraph("підпис", underlineFont));
+        Paragraph paragraph = new Paragraph("підпис", underlineFont);
+        paragraph.setSpacingAfter(2);
+        underlineInitialsCell.addElement(paragraph);
         underlineInitialsCell.setBorder(PdfPCell.NO_BORDER);
 
         PdfPCell emptyUnderlineInitialsCell = new PdfPCell();
