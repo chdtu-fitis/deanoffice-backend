@@ -4,6 +4,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
@@ -24,10 +25,10 @@ public class FacultyAuthorizationAspects {
 
     @Before("within(ua.edu.chdtu.deanoffice.service.DepartmentService) " +
             "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
-            "&& args(departmentId)")
-    public void beforeGetDepartmentById(Integer departmentId) throws UnauthorizedFacultyDataException {
+            "&& args(department)")
+    public void beforeUpadteOrDeleteOrRestoreDepartment(Department department) throws UnauthorizedFacultyDataException {
         int userFacultyId = FacultyUtil.getUserFacultyIdInt();
-        int departmentFacultyId = facultyRepository.findIdByDepartment(departmentId);
+        int departmentFacultyId = department.getFaculty().getId();
         if (userFacultyId != departmentFacultyId)
             throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибрана кафедра належить до іншого факультету");
     }
