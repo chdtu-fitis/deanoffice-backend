@@ -36,7 +36,7 @@ public class ExamReportBaseService {
             result.put("ExamDate", "");
         }
 
-        int currentYear = currentYearService.get().getCurrYear();
+        int currentYear = currentYearService.get().getCurrYear() + 1 - (course.getSemester() % 2);
         result.put("Year", String.valueOf(currentYear).substring(2));
         result.put("Course", String.format("%d", currentYear - courseForGroup.getStudentGroup().getCreationYear() + courseForGroup.getStudentGroup().getBeginYears()));
         result.put("KCType", course.getKnowledgeControl().getName());

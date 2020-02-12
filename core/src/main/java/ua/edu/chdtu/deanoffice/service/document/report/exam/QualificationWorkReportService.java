@@ -133,6 +133,8 @@ public class QualificationWorkReportService {
                         table.addCell(cell);
                     }
                 }
+
+                studentsCount = 0;
             }
 
             studentsCount++;
