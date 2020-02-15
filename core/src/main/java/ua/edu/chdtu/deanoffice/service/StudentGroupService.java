@@ -121,4 +121,8 @@ public class StudentGroupService {
     public List<Integer> getStudySemestersByIds(List<Integer> ids, boolean active) {
         return studentGroupRepository.findStudySemestersByIds(ids, active);
     }
+
+    public List<Integer> getFacultyIdsOfStudentsGroupsByStudentsGroupsIds(List<Integer> ids) {
+        return studentGroupRepository.findFacultyIdsOfStudentsGroupsByStudentsGroupsIds(ids);
+    }
 }
