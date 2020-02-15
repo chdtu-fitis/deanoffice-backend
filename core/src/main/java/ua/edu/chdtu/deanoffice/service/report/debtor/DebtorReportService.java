@@ -101,7 +101,19 @@ public class DebtorReportService {
         return debtorsReport;
     }
 
+    private void isUserFacultyEqualsFacultyOfTheseStudentsGroups(Integer userFacultyId, List<Integer> groupsIds) throws Exception {
+        List<Integer> facultyIdsOfTheseStudentsGroups = studentGroupService.getFacultyIdsOfStudentsGroupsByStudentsGroupsIds(groupsIds);
+
+        for (Integer facultyIdOfTheStudentGroup : facultyIdsOfTheseStudentsGroups) {
+            if (userFacultyId != facultyIdOfTheStudentGroup) {
+                throw new Exception("Немає доступу до всіх вказаних груп!");
+            }
+        }
+    }
+
     public Map<String, SpecializationDebtorsBean> calculateDebtorsReportDataForGroups(Faculty faculty, List<Integer> groupsIds) throws Exception {
+        isUserFacultyEqualsFacultyOfTheseStudentsGroups(faculty.getId(), groupsIds);
+
         if (groupsIds.size() == 0)
             throw new Exception("Не вказано жодної групи!");
 
