@@ -432,8 +432,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value =
             "SELECT count(DISTINCT sd.id) FROM student_degree as sd " +
-            "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
-            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id " +
             "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
             "INNER JOIN course as c ON cfg.course_id = c.id " +
             "WHERE sd.student_group_id IN (:ids) " +
