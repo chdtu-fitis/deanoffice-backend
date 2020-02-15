@@ -126,28 +126,19 @@ public class DebtorReportService {
         Map<Integer, SpecializationDebtorsYearBean> semesterAndDebtors = new TreeMap<>();
 
         for (int semester = 1; semester <= maxSemester; semester++) {
-            int budgetStudentsCount = 0;
-            int contractStudentsCount = 0;
-            int budgetDebtorsCount = 0;
-            int contractDebtorsCount = 0;
-            int lessThanThreeDebtsForBudgetDebtorsCount = 0;
-            int lessThanThreeDebtsForContractDebtorsCount = 0;
-            int threeOrMoreDebtsForBudgetDebtorsCount = 0;
-            int threeOrMoreDebtsForContractDebtorsCount = 0;
-
-            budgetStudentsCount += studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.BUDGET, semester);
-            contractStudentsCount += studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.CONTRACT, semester);
+            int budgetStudentsCount = studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.BUDGET, semester);
+            int contractStudentsCount = studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.CONTRACT, semester);
 
             if (budgetStudentsCount + contractStudentsCount == 0) {
                 continue;
             }
 
-            budgetDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
-            contractDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
-            lessThanThreeDebtsForBudgetDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
-            lessThanThreeDebtsForContractDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
-            threeOrMoreDebtsForBudgetDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
-            threeOrMoreDebtsForContractDebtorsCount += studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            int budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            int contractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            int lessThanThreeDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            int lessThanThreeDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            int threeOrMoreDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            int threeOrMoreDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
 
             double debtorsPercent = (budgetDebtorsCount + contractDebtorsCount) / (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
             double lessThanThreeDebtsPercent = (lessThanThreeDebtsForBudgetDebtorsCount + lessThanThreeDebtsForContractDebtorsCount) /
