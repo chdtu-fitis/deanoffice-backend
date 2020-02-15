@@ -145,4 +145,9 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
                    "WHERE sg.id IN (:ids) AND sg.active = :active", nativeQuery = true)
     List<Integer> findStudySemestersByIds(@Param("ids") List<Integer> ids, @Param("active") boolean active);
 
+    @Query(value = "SELECT s.faculty_id FROM specialization as s " +
+            "INNER JOIN student_group as sg ON sg.specialization_id = s.id " +
+            "WHERE sg.id IN (:ids)", nativeQuery = true)
+    List<Integer> findFacultyIdsOfStudentsGroupsByStudentsGroupsIds(@Param("ids") List<Integer> ids);
+
 }
