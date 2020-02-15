@@ -11,7 +11,6 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -231,7 +230,7 @@ public class StudentDegreeService {
     }
 
     public int getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment, int semester) {
-        return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByPayment(groupsIds, payment.toString(), semester);
+        return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByThemIdsAndBySemesterAndByPayment(groupsIds, payment.toString(), semester);
     }
 
     public int getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(

@@ -441,7 +441,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "AND sg.tuition_form = 'FULL_TIME' " +
             "AND c.semester = :semester",
              nativeQuery = true)
-    int findCountOfAllActiveStudentsInStudentsGroupsByPayment(
+    int findCountOfAllActiveStudentsInStudentsGroupsByThemIdsAndBySemesterAndByPayment(
             @Param("ids") List<Integer> ids,
             @Param("payment") String payment,
             @Param("semester") int semester
