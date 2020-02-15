@@ -118,7 +118,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "WHERE sg.id IN (:ids) " +
             "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
             "AND sg.tuition_form = :tuitionForm " +
-            "AND c.semester = :semester", nativeQuery = true)
+            "AND c.semester = :semester " +
+            "AND cfg.academic_difference = false", nativeQuery = true)
     int findCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
             @Param("ids") List<Integer> ids,
             @Param("payment") String payment,
