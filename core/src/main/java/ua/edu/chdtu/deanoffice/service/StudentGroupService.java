@@ -71,10 +71,6 @@ public class StudentGroupService {
         return studentGroupRepository.findAllByIds(groupIds);
     }
 
-    public List<StudentGroup> getByIdsAndByActive(List<Integer> groupsIds, boolean active) {
-        return studentGroupRepository.findAllByIdsAndActive(groupsIds, active);
-    }
-
     public void delete(List<StudentGroup> studentGroups) {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
         studentGroupRepository.save(studentGroups);
