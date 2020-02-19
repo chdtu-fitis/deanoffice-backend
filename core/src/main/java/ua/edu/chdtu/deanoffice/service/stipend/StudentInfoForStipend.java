@@ -23,10 +23,13 @@ public class StudentInfoForStipend {
     private String specialityName;
     private String specializationName;
     private String departmentAbbreviation;
-    //private double averageGrade;
     private BigDecimal averageGrade;
     private Integer extraPoints;
     List<CourseForStipendBean> debtCourses = new ArrayList<>();
+
+    public SingleSpecializationStipendDataBean getSingleSpecializationStipendDataBean() {
+        return new SingleSpecializationStipendDataBean(degreeName, year, specializationName, tuitionTerm, specialityCode, specialityName);
+    }
 
 //    @Override
 //    public boolean equals(Object o) {
@@ -92,5 +95,9 @@ public class StudentInfoForStipend {
             return averageGrade.doubleValue() * 0.9 + extraPoints;
         else
             return averageGrade.doubleValue() * 0.9;
+    }
+
+    public String getGroupName(){
+        return groupName;
     }
 }
