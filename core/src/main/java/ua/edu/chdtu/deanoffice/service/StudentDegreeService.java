@@ -11,7 +11,6 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -208,8 +207,8 @@ public class StudentDegreeService {
                                                                               int studyYear,
                                                                               TuitionForm tuitionForm,
                                                                               Payment payment,
-                                                                              int degreeId) {
-        int semester = SemesterUtil.getCurrentSemester();
+                                                                              int degreeId,
+                                                                              int semester) {
         return studentDegreeRepository.findAllActiveDebtorsWithThreeOrMoreDebts(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
     }
@@ -218,15 +217,37 @@ public class StudentDegreeService {
                                                                                int studyYear,
                                                                                TuitionForm tuitionForm,
                                                                                Payment payment,
-                                                                               int degreeId) {
-        int semester = SemesterUtil.getCurrentSemester();
+                                                                               int degreeId,
+                                                                               int semester) {
         return studentDegreeRepository.findAllActiveDebtorsWithLessThanThreeDebs(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester).length;
     }
 
-    public int getCountAllActiveDebtorsForCurrentSemester(int specializationId, int studyYear, TuitionForm tuitionForm, Payment payment, int degreeId) {
-        int semester = SemesterUtil.getCurrentSemester();
+    public int getCountAllActiveDebtorsForCurrentSemester(int specializationId, int studyYear, TuitionForm tuitionForm,
+                                                          Payment payment, int degreeId, int semester) {
         return studentDegreeRepository.findCountAllActiveDebtorsBySpecializationIdAndStudyYearAndTuitionFormAndPayment(specializationId,
                 currentYearService.getYear(), studyYear, tuitionForm.toString(), payment.toString(), degreeId, semester);
+    }
+
+    public int getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(List<Integer> groupsIds, Payment payment, int semester) {
+        return studentDegreeRepository.findCountOfAllActiveStudentsInStudentsGroupsByThemIdsAndBySemesterAndByPayment(groupsIds, payment.toString(), semester);
+    }
+
+    public int getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
+            List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
+        return studentDegreeRepository.findCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
+                ids, payment.toString(), tuitionForm.toString(), semester);
+    }
+
+    public int getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
+            List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
+        return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
+                ids, payment.toString(), tuitionForm.toString(), semester).length;
+    }
+
+    public int getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
+            List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
+        return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
+                ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
 }
