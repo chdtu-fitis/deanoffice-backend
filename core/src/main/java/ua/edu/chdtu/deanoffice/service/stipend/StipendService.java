@@ -218,10 +218,10 @@ public class StipendService {
         result.put("№", String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
-        result.put("pts", strPts);
-        result.put("pcPts", bigDecimalPoints.toString());
+        result.put("pts", String.format("%.2f", studentInfoForStipend.getAverageGrade()));
+        result.put("pcPts", String.format("%.2f", normalizedAverageGrade));
         result.put("exPts", studentInfoForStipend.getExtraPoints()!= null ? studentInfoForStipend.getExtraPoints().toString():"-" );
-        result.put("resPts", resPts );
+        result.put("resPts", String.format("%.2f", finalGrade));
         return result;
     }
 

@@ -29,20 +29,23 @@ public class DepartmentService {
         }
     }
 
-    @FacultyAuthorized
-    public Department getById(Integer departmentId) throws UnauthorizedFacultyDataException {
+    public Department getById(Integer departmentId) {
         return this.departmentRepository.findOne(departmentId);
     }
 
-    public Department save(Department department) {
+    @FacultyAuthorized
+    public Department save(Department department) throws UnauthorizedFacultyDataException {
         return departmentRepository.save(department);
     }
 
-    public void delete(Department department) {
+    @FacultyAuthorized
+    public void delete(Department department) throws UnauthorizedFacultyDataException {
         department.setActive(false);
         departmentRepository.save(department);
     }
-    public void restore(Department department) {
+
+    @FacultyAuthorized
+    public void restore(Department department) throws UnauthorizedFacultyDataException {
         department.setActive(true);
         departmentRepository.save(department);
     }

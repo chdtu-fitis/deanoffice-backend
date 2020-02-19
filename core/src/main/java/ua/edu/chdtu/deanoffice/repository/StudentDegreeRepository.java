@@ -109,6 +109,60 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("degreeId") int degreeId
     );
 
+    @Query(value =
+            "SELECT count(DISTINCT sd.id) FROM student_degree as sd " +
+            "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN course as c ON cfg.course_id = c.id " +
+            "WHERE sg.id IN (:ids) " +
+            "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = :tuitionForm " +
+            "AND c.semester = :semester " +
+            "AND cfg.academic_difference = false", nativeQuery = true)
+    int findCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("semester") int semester
+    );
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree as sd " +
+            "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN course as c ON cfg.course_id = c.id " +
+            "WHERE sg.id IN (:ids) " +
+            "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = :tuitionForm " +
+            "AND c.semester = :semester " +
+            "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
+    int[] findCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("semester") int semester
+    );
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree as sd " +
+                    "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
+                    "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+                    "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+                    "INNER JOIN course as c ON cfg.course_id = c.id " +
+                    "WHERE sg.id IN (:ids) " +
+                    "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+                    "AND sg.tuition_form = :tuitionForm " +
+                    "AND c.semester = :semester " +
+                    "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
+    int[] findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("semester") int semester
+    );
+
     //TODO неперевірений
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN grade g ON sd.id = g.student_degree_id " +
@@ -244,38 +298,71 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("semester") int semester,
             @Param("currentYear") int currentYear);
 
+
+    @Query(value = "SELECT student_degree.id, \n" +
+            "student.surname, \n" +
+            "student.name, \n" +
+            "student.patronimic, \n" +
+            "degree.name as degreeName, \n" +
+            "student_group.name as groupName, \n" +
+            ":currentYear - student_group.creation_year + student_group.begin_years as year, \n" +
+            "student_group.tuition_term as tuitionTerm, \n" +
+            "speciality.code as specialityCode, \n" +
+            "speciality.name as specialityName, \n" +
+            "specialization.name as specializationName, \n" +
+            "avg(grade.points) as averageGrade \n" +
+            "FROM student \n" +
+            "INNER JOIN student_degree ON student_degree.student_id = student.id \n" +
+            "INNER JOIN specialization ON student_degree.specialization_id = specialization.id\n" +
+            "INNER JOIN speciality ON specialization.speciality_id = speciality.id \n" +
+            "INNER JOIN degree ON specialization.degree_id = degree.id \n" +
+            "INNER JOIN student_group ON student_degree.student_group_id = student_group.id\n" +
+            "INNER JOIN courses_for_groups ON courses_for_groups.student_group_id = student_group.id \n" +
+            "INNER JOIN course ON courses_for_groups.course_id = course.id \n" +
+            "INNER JOIN course_name ON course.course_name_id = course_name.id \n" +
+            "INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id \n" +
+            "INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id\n" +
+            "WHERE (:currentYear-creation_year + begin_years)*2-1=course.semester or (:currentYear-creation_year + begin_years)*2=course.semester \n" +
+            "AND student_group.active=TRUE AND knowledge_control.graded=TRUE \n" +
+            "GROUP BY student_degree.id, student.surname, student.name, student.patronimic,\n" +
+            "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName \n" +
+            "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic\n", nativeQuery = true)
+    List<Object[]> findAverageGradesForYear(
+            @Param("currentYear") int currentYear
+    );
+
     @Query(value =
             "SELECT student_degree.id, student.surname, student.name, student.patronimic, " +
-            "       degree.name as degreeName, student_group.name as groupName, " +
-            "       :currentYear - student_group.creation_year + student_group.begin_years as year, " +
-            "       student_group.tuition_term as tuitionTerm, speciality.code as specialityCode, " +
-            "       speciality.name as specialityName, specialization.name as specializationName, " +
-            "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade, " +
-            "       extra_points.points as extraPoints " +
-            "FROM student " +
-            "       INNER JOIN student_degree ON student_degree.student_id = student.id " +
-            "       INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
-            "       INNER JOIN speciality ON specialization.speciality_id = speciality.id " +
-            "       INNER JOIN degree ON specialization.degree_id = degree.id " +
-            "       INNER JOIN student_group ON student_degree.student_group_id = student_group.id " +
-            "       INNER JOIN courses_for_groups ON courses_for_groups.student_group_id = student_group.id " +
-            "       INNER JOIN course ON courses_for_groups.course_id = course.id " +
-            "       INNER JOIN course_name ON course.course_name_id = course_name.id " +
-            "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
-            "       INNER JOIN department ON specialization.department_id = department.id " +
-            "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
-            "       FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
-            "WHERE specialization.faculty_id = :facultyId " +
-            "  AND student_degree.active = true " +
-            "  AND student_group.tuition_form = 'FULL_TIME' " +
-            "  AND student_degree.payment = 'BUDGET' " +
-            "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
-            "  AND course.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
-            "  AND knowledge_control.graded = true " +
-            "  AND grade.academic_difference = false " +
-            "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
-            "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, extraPoints " +
-            "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic", nativeQuery = true)
+                    "       degree.name as degreeName, student_group.name as groupName, " +
+                    "       :currentYear - student_group.creation_year + student_group.begin_years as year, " +
+                    "       student_group.tuition_term as tuitionTerm, speciality.code as specialityCode, " +
+                    "       speciality.name as specialityName, specialization.name as specializationName, " +
+                    "       department.abbr as departmentAbbreviation, avg(grade.points) as averageGrade, " +
+                    "       extra_points.points as extraPoints " +
+                    "FROM student " +
+                    "       INNER JOIN student_degree ON student_degree.student_id = student.id " +
+                    "       INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
+                    "       INNER JOIN speciality ON specialization.speciality_id = speciality.id " +
+                    "       INNER JOIN degree ON specialization.degree_id = degree.id " +
+                    "       INNER JOIN student_group ON student_degree.student_group_id = student_group.id " +
+                    "       INNER JOIN courses_for_groups ON courses_for_groups.student_group_id = student_group.id " +
+                    "       INNER JOIN course ON courses_for_groups.course_id = course.id " +
+                    "       INNER JOIN course_name ON course.course_name_id = course_name.id " +
+                    "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
+                    "       INNER JOIN department ON specialization.department_id = department.id " +
+                    "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
+                    "       FULL JOIN extra_points ON extra_points.student_degree_id = student_degree.id AND extra_points.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
+                    "WHERE specialization.faculty_id = :facultyId " +
+                    "  AND student_degree.active = true " +
+                    "  AND student_group.tuition_form = 'FULL_TIME' " +
+                    "  AND student_degree.payment = 'BUDGET' " +
+                    "  AND student_degree.id NOT IN (:debtorStudentDegreeIds) " +
+                    "  AND course.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
+                    "  AND knowledge_control.graded = true " +
+                    "  AND grade.academic_difference = false " +
+                    "GROUP BY student_degree.id, student.surname, student.name, student.patronimic, " +
+                    "degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, extraPoints " +
+                    "ORDER BY degreeName, specialityCode, groupName, student.surname, student.name, student.patronimic", nativeQuery = true)
     List<Object[]> findNoDebtStudentDegreesRaw(
             @Param("facultyId") int facultyId,
             @Param("debtorStudentDegreeIds") Set<Integer> debtorStudentDegreeIds,
@@ -373,6 +460,22 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("tuitionForm") String tuitionForm,
             @Param("payment") String payment,
             @Param("degreeId") int degreeId,
+            @Param("semester") int semester
+    );
+
+    @Query(value =
+            "SELECT count(DISTINCT sd.id) FROM student_degree as sd " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN course as c ON cfg.course_id = c.id " +
+            "WHERE sd.student_group_id IN (:ids) " +
+            "AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = 'FULL_TIME' " +
+            "AND c.semester = :semester",
+             nativeQuery = true)
+    int findCountOfAllActiveStudentsInStudentsGroupsByThemIdsAndBySemesterAndByPayment(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
             @Param("semester") int semester
     );
 }
