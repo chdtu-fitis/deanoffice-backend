@@ -60,7 +60,6 @@ public class SpecializationController {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
-    @Secured("ROLE_DEANOFFICER")
     @GetMapping
     @JsonView(SpecializationView.Extended.class)
     public ResponseEntity getSpecializationByActive(
@@ -84,6 +83,7 @@ public class SpecializationController {
         }
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping
     public ResponseEntity createSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
@@ -124,6 +124,7 @@ public class SpecializationController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PutMapping
     public ResponseEntity updateSpecialization(
             @RequestBody SpecializationDTO specializationDTO,
@@ -144,6 +145,7 @@ public class SpecializationController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PutMapping("/restore")
     public ResponseEntity restoreSpecialization(@CurrentUser ApplicationUser user, @RequestParam int specializationId){
         try {
@@ -157,6 +159,7 @@ public class SpecializationController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @DeleteMapping("/{specialization_id}")
     public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") int specializationId) {
         try {
