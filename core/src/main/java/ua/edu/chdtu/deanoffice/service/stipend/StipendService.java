@@ -208,11 +208,11 @@ public class StipendService {
     }
 
     private Map<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
-        Double bigDecimalPoints = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
+        double normalizedAverageGrade = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
 
-        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
-        String resPts = String.format("%.2f", finalGrade);
+//        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
+//        String resPts = String.format("%.2f", finalGrade);
 
         Map<String, String> result = new HashMap();
         result.put("№", String.valueOf(studentNumber));
