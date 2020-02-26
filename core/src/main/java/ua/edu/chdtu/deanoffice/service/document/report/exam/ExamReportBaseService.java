@@ -3,6 +3,8 @@ package ua.edu.chdtu.deanoffice.service.document.report.exam;
 import org.springframework.beans.factory.annotation.Autowired;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.SemesterDetails;
+import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.StudentSummaryForAcademicReference;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,6 +19,7 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
 public class ExamReportBaseService {
 
     private CurrentYearService currentYearService;
+    private static final int EXAMS_AND_CREDITS_INDEX = 0, COURSE_PAPERS_INDEX = 1, INTERNSHIPS_INDEX = 2;
 
     @Autowired
     public ExamReportBaseService(CurrentYearService currentYearService) {
@@ -102,7 +105,7 @@ public class ExamReportBaseService {
         return result;
     }
 
-    private String getStudyYear() {
+    protected String getStudyYear() {
         int currentYear = currentYearService.get().getCurrYear();
         return String.format("%4d-%4d", currentYear, currentYear + 1);
     }
