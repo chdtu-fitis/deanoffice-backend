@@ -8,7 +8,10 @@ import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.Studen
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
 
@@ -57,8 +60,8 @@ public class ExamReportBaseService {
         result.put("Speciality", speciality.getCode() + " " + speciality.getName());
         result.put("Specialization", studentGroup.getSpecialization().getName());
         result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
-        result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));/////
-        result.put("Degree", studentGroup.getSpecialization().getDegree().getName());///////
+        result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
+        result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
 
         result.put("StudyYear", getStudyYear());
 
@@ -67,7 +70,7 @@ public class ExamReportBaseService {
 
     Map<String, String> getGroupInfoReplacements(List<StudentGroup> studentGroups, ApplicationUser user) {
         Map<String, String> result = new HashMap<>();
-        result.put("ReportType", "ЗВЕДЕНА");//////
+        result.put("ReportType", "ЗВЕДЕНА");
         String groupNames = "";
         for (StudentGroup studentGroup : studentGroups) {
             groupNames += studentGroup.getName() + ",";
@@ -75,7 +78,7 @@ public class ExamReportBaseService {
         if (groupNames.length() > 0) {
             groupNames = groupNames.substring(0, groupNames.length()-1);
         }
-        result.put("GroupName", groupNames);/////
+        result.put("GroupName", groupNames);
         Speciality speciality = studentGroups.get(0).getSpecialization().getSpeciality();
         for (StudentGroup studentGroup : studentGroups) {
             if (studentGroup.getSpecialization().getSpeciality().getId() != speciality.getId()) {
@@ -94,10 +97,10 @@ public class ExamReportBaseService {
             }
         }
 
-        result.put("Specialization", specialization == null ? "" : specialization.getName());//////
+        result.put("Specialization", specialization == null ? "" : specialization.getName());
         result.put("FacultyAbbr", user.getFaculty().getAbbr().toUpperCase());
         result.put("DeanInitials", user.getFaculty().getDean());/////
-        result.put("Degree", studentGroups.get(0).getSpecialization().getDegree().getName());//////
+        result.put("Degree", studentGroups.get(0).getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 
         return result;
