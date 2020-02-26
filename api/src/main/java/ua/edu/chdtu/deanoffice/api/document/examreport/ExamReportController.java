@@ -52,11 +52,10 @@ public class ExamReportController extends DocumentResponseController {
         }
     }
 
-    @PostMapping("/student/foreign/examReport/docx")
+    @GetMapping("/foreign/docx")
     public ResponseEntity<Resource> generateDocxForSingleStudent(
             @RequestParam Integer semesterId,
-            @RequestBody List<Integer> studentId,
-            @CurrentUser ApplicationUser user) {
+            @RequestParam List<Integer> studentId) {
         try {
 
             File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentId, semesterId, FileFormatEnum.DOCX);
