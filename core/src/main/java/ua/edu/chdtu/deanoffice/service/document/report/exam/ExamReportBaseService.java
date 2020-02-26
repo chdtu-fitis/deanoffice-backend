@@ -62,7 +62,6 @@ public class ExamReportBaseService {
         result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
         result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
-
         result.put("StudyYear", getStudyYear());
 
         return result;
@@ -99,7 +98,7 @@ public class ExamReportBaseService {
 
         result.put("Specialization", specialization == null ? "" : specialization.getName());
         result.put("FacultyAbbr", user.getFaculty().getAbbr().toUpperCase());
-        result.put("DeanInitials", user.getFaculty().getDean());/////
+        result.put("DeanInitials", user.getFaculty().getDean());
         result.put("Degree", studentGroups.get(0).getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 
