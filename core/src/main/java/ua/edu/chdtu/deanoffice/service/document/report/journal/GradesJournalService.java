@@ -1,6 +1,12 @@
 package ua.edu.chdtu.deanoffice.service.document.report.journal;
 
-import com.itextpdf.text.*;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -13,14 +19,17 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
-
-import org.springframework.core.io.Resource;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
@@ -30,11 +39,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
-import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.addRowToTable;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInCell;
 
 @Service
 public class GradesJournalService {
@@ -99,9 +114,11 @@ public class GradesJournalService {
         pdfPCell1.setBorder(0);
         PdfPCell pdfPCell2 = new PdfPCell();
         pdfPCell2.setBorder(0);
+
         PdfPTable table1 = new PdfPTable(2);
         table1.setWidths(new int[]{30, 2});
         table1.setWidthPercentage(100);
+
         PdfPTable table2 = new PdfPTable(2);
         table2.setWidths(new int[]{30, 2});
         table2.setWidthPercentage(100);
@@ -115,6 +132,28 @@ public class GradesJournalService {
         tableMain.addCell(pdfPCell1);
         tableMain.addCell(pdfPCell2);
         return tableMain;
+    }
+
+    private void addStudentsAndMarksOnPdfTables(List<StudentGroup> studentGroups, PdfPTable table1, PdfPTable table2) throws DocumentException, IOException {
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font = new Font(baseFont);
+        Font boldFont = new Font(baseFont, 12, Font.BOLD);
+
+        int sumOfCellsInTheTable1 = 0;
+        int sumOfCellsInTheTable2 = 0;
+
+        for(StudentGroup studentGroup : studentGroups){
+            List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
+            PdfPCell groupNameCell = new PdfPCell(new Phrase(studentGroup.getName(), font));
+            groupNameCell.setFixedHeight(28);
+            groupNameCell.setPadding(5);
+            groupNameCell.setBorder(0);
+            PdfPCell emptyCell = new PdfPCell();
+            emptyCell.setFixedHeight(28);
+            emptyCell.setBorder(0);
+
+            sumOfCellsInTheTable1 = addCellToStudentsTable(table1, groupNameCell, emptyCell, sumOfCellsInTheTable1);
+        }
     }
 
     private void addStudentsOnPdfTables(List<StudentGroup> studentGroups, PdfPTable table1, PdfPTable table2) throws DocumentException, IOException {
@@ -184,7 +223,8 @@ public class GradesJournalService {
             PdfWriter.getInstance(document, new FileOutputStream(file));
             try {
                 document.open();
-                document.add(addCoursesOnTable(studentGroups, semester, year));
+                document.add(createOneGroupOneSemesterCoursesTableHorizontal(studentGroups, semester, year));
+                //document.add(addCoursesOnTable(studentGroups, semester, year));
             } finally {
                 if (document != null)
                     document.close();
@@ -199,6 +239,99 @@ public class GradesJournalService {
         pdfPCell.setBorder(0);
         pdfPCell.setPadding(0);
         return pdfPCell;
+    }
+
+    private PdfPTable createOneGroupOneSemesterCoursesTableHorizontal(List<StudentGroup> studentGroups, int semester, int year) throws DocumentException, IOException {
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font1 = new Font(baseFont, 9);
+        Font font2 = new Font(baseFont, 8);
+        Font boldFont = new Font(baseFont, 8, Font.BOLD);
+        semester = year * 2 - 1;
+
+        ArrayList<Integer> size = new ArrayList();
+        int tablesNumber = 0;
+
+        for (StudentGroup studentGroup : studentGroups) {
+            List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+            size.add(courseForGroups.size());
+        }
+
+            PdfPTable tableMain = new PdfPTable(1);
+            tableMain.setLockedWidth(true);
+            tableMain.setTotalWidth(28 * size.get(tablesNumber));
+
+            for (StudentGroup studentGroup : studentGroups) {
+                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+                courseForGroups.sort(sortCourseForGroup);
+                //int columnsNumber = studentGroups.size();
+                int columnsNumber = courseForGroups.size();
+
+                PdfPTable coursesTable = new PdfPTable(columnsNumber);
+                coursesTable.setKeepTogether(true);
+                coursesTable.setWidthPercentage(100);
+
+                PdfPTable knowledgeControlTable = new PdfPTable(columnsNumber);
+                knowledgeControlTable.setKeepTogether(true);
+                knowledgeControlTable.setWidthPercentage(100);
+
+//            PdfPTable temporaryTable1 = new PdfPTable(columnsNumber);
+//            temporaryTable1.setKeepTogether(true);
+//            temporaryTable1.setWidthPercentage(100);
+//
+//            PdfPTable temporaryTable2 = new PdfPTable(columnsNumber);
+//            temporaryTable2.setKeepTogether(true);
+//            temporaryTable2.setWidthPercentage(100);
+//
+//            for (CourseForGroup courseForGroup : courseForGroups) {
+//                PdfPCell knowledgeControl = new PdfPCell(
+//                        new Phrase(getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
+//                knowledgeControl.setFixedHeight(28);
+//                temporaryTable1.addCell(knowledgeControl);
+//
+//                String courseName = courseForGroup.getCourse().getCourseName().getName();
+//                PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
+//                courseNameCell.setFixedHeight(28);
+//                courseNameCell.setPadding(0);
+//                courseNameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//                courseNameCell.setRotation(270);
+//                temporaryTable2.addCell(courseNameCell);
+//                break;
+//            }
+                int borderNumber = columnsNumber;
+
+                for (CourseForGroup courseForGroup : courseForGroups) {
+                    PdfPCell knowledgeControl = new PdfPCell(
+                            new Phrase(getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), boldFont));
+                    knowledgeControl.setFixedHeight(8);
+                    knowledgeControl.setPadding(0);
+                    knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    knowledgeControl.setBorder(0);
+                    if (borderNumber != 1) {
+                        knowledgeControl.setBorder(Rectangle.RIGHT);
+                    }
+                    knowledgeControlTable.addCell(knowledgeControl);
+
+                    String courseName = courseForGroup.getCourse().getCourseName().getName();
+                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
+                    courseNameCell.setFixedHeight(78);
+                    courseNameCell.setPadding(0);
+                    courseNameCell.setHorizontalAlignment(Element.ALIGN_BOTTOM);
+                    courseNameCell.setRotation(90);
+                    courseNameCell.setBorder(0);
+                    if (borderNumber != 1) {
+                        courseNameCell.setBorder(Rectangle.RIGHT);
+                    }
+                    coursesTable.addCell(courseNameCell);
+
+                    borderNumber--;
+                }
+                tableMain.addCell(coursesTable);
+                tableMain.addCell(knowledgeControlTable);
+                tablesNumber++;
+                break;
+            }
+        return tableMain;
     }
 
     private PdfPTable createPdfPTableForCellsOfTableCoursesMain() throws DocumentException {

@@ -14,11 +14,11 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/documents/grades-journal")
-public class GradesJournalStudentsController extends DocumentResponseController {
+public class GradesJournalController extends DocumentResponseController {
 
     private GradesJournalService gradesJournalService;
 
-    public GradesJournalStudentsController(GradesJournalService gradesJournalService){
+    public GradesJournalController(GradesJournalService gradesJournalService){
         this.gradesJournalService = gradesJournalService;
     }
 
@@ -35,7 +35,7 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     @GetMapping("/courses/pdf")
-    public ResponseEntity getSubjectsFile(@RequestParam int degreeId, @RequestParam int year,
+    public ResponseEntity getCoursesFile(@RequestParam int degreeId, @RequestParam int year,
                                           @RequestParam(required = false, defaultValue = "0") int semester,
                                           @RequestParam(required = false) TuitionForm tuitionForm,
                                           @RequestParam(required = false, defaultValue = "0") int groupId,
@@ -63,6 +63,6 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, GradesJournalStudentsController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, GradesJournalController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }
