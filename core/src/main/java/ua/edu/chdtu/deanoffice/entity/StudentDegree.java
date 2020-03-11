@@ -62,4 +62,6 @@ public class StudentDegree extends BaseEntity {
     private StudentGroup studentGroup;
     @OneToMany(mappedBy = "studentDegree", orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<StudentPreviousUniversity> studentPreviousUniversities = new HashSet<>();
+    @Enumerated(value = EnumType.STRING)
+    private Citizenship citizenship = Citizenship.UKR;
 }

@@ -14,15 +14,7 @@ import org.xlsx4j.sml.Cell;
 import org.xlsx4j.sml.Row;
 import org.xlsx4j.sml.Worksheet;
 
-import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.entity.Faculty;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.Speciality;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentPreviousUniversity;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
@@ -56,7 +48,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String EXPEL_DATE_REGEXP = "[\\W\\w]+Дата[\\s]+відрахування[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
     private static final String STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE[] = {"universityName", "studyStartDate", "studyEndDate"};
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "previousDiplomaNumber", "previousDiplomaDate",
-            "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate", "admissionOrderNumber", "admissionOrderDate"};
+            "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
             "surnameEng", "nameEng", "patronimicEng", "sex"};
     private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
@@ -328,6 +320,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Map<String, Object> admissionOrderNumberAndDate = getAdmissionOrderNumberAndDate(data.getRefillInfo());
         studentDegree.setAdmissionOrderNumber((String) admissionOrderNumberAndDate.get("admissionOrderNumber"));
         studentDegree.setAdmissionOrderDate((Date) admissionOrderNumberAndDate.get("admissionOrderDate"));
+        studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryCode(Integer.valueOf(data.getCountryId())));
         return studentDegree;
     }
 

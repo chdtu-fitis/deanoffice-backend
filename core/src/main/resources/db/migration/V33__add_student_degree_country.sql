@@ -1,1 +1,0 @@
-ALTER TABLE student_degree ADD COLUMN citizenship character varying(3) NULL;

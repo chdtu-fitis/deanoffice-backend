@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+import ua.edu.chdtu.deanoffice.entity.Citizenship;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 
@@ -29,4 +30,5 @@ public class StudentDegreeFullEdeboDataDto {
     private Payment payment;
     private boolean modified;
     private Set<StudentPreviousUniversityDTO> studentPreviousUniversities;
+    private Citizenship citizenship;
 }
