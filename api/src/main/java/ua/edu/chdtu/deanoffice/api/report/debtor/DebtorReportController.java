@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.report.debtor.SpecializationDebtorsBean;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -34,9 +35,9 @@ public class DebtorReportController extends DocumentResponseController {
     @GetMapping
     public ResponseEntity<Map<String, SpecializationDebtorStatisticsDto>> getReportOfDebtors(
             @CurrentUser ApplicationUser user,
-            @RequestParam(required = false, name = "forCurrentSemester", defaultValue = "false") Boolean forCurrentSemester) {
+            @RequestParam(required = false, name = "semester", defaultValue = "0") int semester) {
         try {
-            Map<String, SpecializationDebtorsBean> debtorsReport = debtorReportService.calculateDebtorsReportData(user.getFaculty(), forCurrentSemester);
+            Map<String, SpecializationDebtorsBean> debtorsReport = debtorReportService.calculateDebtorsReportData(user.getFaculty(), semester);
             Map<String, SpecializationDebtorStatisticsDto> debtorsReportDTO = new TreeMap<>();
             for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry : debtorsReport.entrySet()) {
                 SpecializationDebtorStatisticsDto sds = new SpecializationDebtorStatisticsDto();
@@ -52,13 +53,31 @@ public class DebtorReportController extends DocumentResponseController {
     @GetMapping("/export")
     public ResponseEntity getDebtorReportDocx(
             @CurrentUser ApplicationUser user,
-            @RequestParam(required = false, name = "forCurrentSemester", defaultValue = "false") Boolean forCurrentSemester) {
+            @RequestParam(required = false, name = "semester", defaultValue = "0") int semester) {
         try {
-            Map<String, SpecializationDebtorsBean> map = debtorReportService.calculateDebtorsReportData(user.getFaculty(), forCurrentSemester);
+            Map<String, SpecializationDebtorsBean> map = debtorReportService.calculateDebtorsReportData(user.getFaculty(), semester);
             File file = debtorReportExport.formDocument(map);
             return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception exception) {
             return handleException(exception);
+        }
+    }
+
+    @GetMapping("/bygroups")
+    public ResponseEntity getDebtorsReportByGroups(@CurrentUser ApplicationUser user,
+                                                   @RequestParam List<Integer> groupsIds) {
+        try {
+            Map<String, SpecializationDebtorsBean> debtorsReport =
+                    debtorReportService.calculateDebtorsReportDataForGroups(user.getFaculty(), groupsIds);
+            Map<String, SpecializationDebtorStatisticsDto> debtorsReportDTO = new TreeMap<>();
+            for (Map.Entry<String, SpecializationDebtorsBean> specializationDebtorsBeanEntry : debtorsReport.entrySet()) {
+                SpecializationDebtorStatisticsDto sds = new SpecializationDebtorStatisticsDto();
+                Mapper.strictMap(specializationDebtorsBeanEntry.getValue(), sds);
+                debtorsReportDTO.put(specializationDebtorsBeanEntry.getKey(), sds);
+            }
+            return ResponseEntity.ok().body(debtorsReportDTO);
+        } catch (Exception e) {
+            return handleException(e);
         }
     }
 

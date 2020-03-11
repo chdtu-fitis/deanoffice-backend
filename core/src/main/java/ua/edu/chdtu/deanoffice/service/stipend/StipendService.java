@@ -20,7 +20,15 @@ import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
@@ -48,18 +56,6 @@ public class StipendService {
     }
 
     public List<StudentInfoForStipend> getStipendData(){
-//        LinkedHashMap<Integer, StudentInfoForStipendDTO> debtorStudentDegreesDTOsMap = new LinkedHashMap<>();
-//        debtorStudentDegrees.forEach(dsd -> {
-//            StudentInfoForStipendDTO studentInfoForStipendDTO = debtorStudentDegreesDTOsMap.get(dsd.getId());
-//            if (studentInfoForStipendDTO == null) {
-//                studentInfoForStipendDTO = Mapper.strictMap(dsd, StudentInfoForStipendDTO.class);
-//            }
-//            CourseForStipendDTO courseForStipendDto = new CourseForStipendDTO(
-//                    dsd.getCourseName(), dsd.getKnowledgeControlName(), dsd.getSemester()
-//            );
-//            studentInfoForStipendDTO.getDebtCourses().add(courseForStipendDto);
-//            debtorStudentDegreesDTOsMap.put(studentInfoForStipendDTO.getId(), studentInfoForStipendDTO);
-//        });
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
@@ -79,7 +75,6 @@ public class StipendService {
         });
 
         List<StudentInfoForStipend> noDebtsStudentDegrees = getNoDebtStudentDegrees(FacultyUtil.getUserFacultyIdInt(), debtorStudentDegreesMap.keySet());
-//        List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(noDebtsStudentDegrees, StudentInfoForStipendDTO.class);
         noDebtsStudentDegrees.addAll(new ArrayList(debtorStudentDegreesMap.values()));
         noDebtsStudentDegrees.sort(Comparator
                 .comparing(StudentInfoForStipend::getDegreeName)
@@ -87,7 +82,6 @@ public class StipendService {
                 .thenComparing(StudentInfoForStipend::getSpecialityCode)
                 .thenComparing(StudentInfoForStipend::getSpecializationName)
                 .thenComparing(StudentInfoForStipend::getGroupName)
-                //.thenComparing(StudentInfoForStipendDTO::getExtraPoints)
                 .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipend::getFinalGrade)))
                 .thenComparing(StudentInfoForStipend::getSurname)
                 .thenComparing(StudentInfoForStipend::getName)
@@ -113,7 +107,6 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                // 0,
                 BigDecimal.ZERO/*averageGrade*/,
                 (String)item[13]/*courseName*/,
                 (String)item[14]/*knowledgeControlName*/,
@@ -143,7 +136,6 @@ public class StipendService {
                 (String)item[9]/*specialityName*/,
                 (String)item[10]/*specializationName*/,
                 (String)item[11]/*departmentAbbreviation*/,
-                //(Double)item[12]/*averageGrade*/,
                 (BigDecimal)item[12]/*averageGrade*/,
                 (Integer)item[13]/*extraPoints*/
         )));
@@ -185,17 +177,28 @@ public class StipendService {
         return studentDegreeRepository.save(extraPoints);
     }
 
-    public Map<String, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
-        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
-                .collect(Collectors.groupingBy(StudentInfoForStipend::getGroupName, LinkedHashMap::new, Collectors.toList()));
-        return studentInfoByGroup;
+    public Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> getStudentInfoGroupedBySpeciality(List<StudentInfoForStipend> studentInfoForStipend) {
+        Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality = studentInfoForStipend.stream()
+                .collect(Collectors.groupingBy(StudentInfoForStipend::getSingleSpecializationStipendDataBean, LinkedHashMap::new, Collectors.toList()));
+        for (Map.Entry<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> entry : studInfoGroupedBySpeciality.entrySet()) {
+            Set<String> studentGroups = new HashSet<>();
+            for (StudentInfoForStipend studentInfoForGroups : entry.getValue()) {
+                studentGroups.add(studentInfoForGroups.getGroupName());
+            }
+            String groupNames = "";
+            for (String name : studentGroups) {
+                groupNames += name + " ";
+            }
+            entry.getKey().setGroupsName(groupNames);
+        }
+        return studInfoGroupedBySpeciality;
     }
 
     public File formDocument() throws Exception {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         List<StudentInfoForStipend> stipendData = getStipendData();
-        Map<String, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
-        generateTables(template, studentInfoByGroup);
+        Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality = getStudentInfoGroupedBySpeciality(stipendData);
+        generateTables(template, studInfoGroupedBySpeciality);
 
         for (int i = 1; i >= 0; i--){
             template.getMainDocumentPart().getContent().remove(i);
@@ -204,11 +207,10 @@ public class StipendService {
         return documentIOService.saveDocumentToTemp(template, "stipend", FileFormatEnum.DOCX);
     }
 
-    private HashMap<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
+    private Map<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
         double normalizedAverageGrade = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
-        double finalGrade = studentInfoForStipend.getFinalGrade();
-
-        HashMap<String, String> result = new HashMap();
+        Double finalGrade = studentInfoForStipend.getFinalGrade();
+        Map<String, String> result = new HashMap();
         result.put("№", String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
         result.put("gName", studentInfoForStipend.getGroupName());
@@ -219,20 +221,26 @@ public class StipendService {
         return result;
     }
 
-    private void generateTables(WordprocessingMLPackage template, Map<String, List<StudentInfoForStipend>> studentInfoForStipend) {
+    private void generateTables(WordprocessingMLPackage template, Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studentInfoForStipend) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
-        for (Map.Entry<String, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
+
+        for (Map.Entry<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, entry.getKey());
             fillStudentData(table, entry.getValue());
             template.getMainDocumentPart().addObject(table);
         }
-        template.getMainDocumentPart().getContent().remove(0);
     }
 
-    private void fillFirstRow(Tbl table, String groupName) {
+    private void fillFirstRow(Tbl table, SingleSpecialityStipendDataBean stipendData) {
+
+        String tuitionTerm = stipendData.getTuitionTerm();
+        String ukTuitionTerm = tuitionTerm.equals("SHORTENED") ? "Скорочена" : "" ;
+
         Map<String, String> result = new HashMap<>();
-        result.put("groupName", groupName);
+        result.put("Term", ukTuitionTerm);
+        result.put("speciality", stipendData.getSpecialityCode() + " " + stipendData.getSpecialityName());
+        result.put("dName", stipendData.getDegreeName() + " " + stipendData.getGroupsName() );
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         replaceInRow(tableRows.get(0), result);
     }

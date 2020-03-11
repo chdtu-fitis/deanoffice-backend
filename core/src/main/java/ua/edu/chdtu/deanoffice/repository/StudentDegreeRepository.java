@@ -109,6 +109,60 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("degreeId") int degreeId
     );
 
+    @Query(value =
+            "SELECT count(DISTINCT sd.id) FROM student_degree as sd " +
+            "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN course as c ON cfg.course_id = c.id " +
+            "WHERE sg.id IN (:ids) " +
+            "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = :tuitionForm " +
+            "AND c.semester = :semester " +
+            "AND cfg.academic_difference = false", nativeQuery = true)
+    int findCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("semester") int semester
+    );
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree as sd " +
+            "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN course as c ON cfg.course_id = c.id " +
+            "WHERE sg.id IN (:ids) " +
+            "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = :tuitionForm " +
+            "AND c.semester = :semester " +
+            "GROUP BY sd.id HAVING count (sd.id) < 3", nativeQuery = true)
+    int[] findCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("semester") int semester
+    );
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree as sd " +
+                    "INNER JOIN grade as g ON sd.id = g.student_degree_id " +
+                    "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id AND g.course_id = cfg.course_id " +
+                    "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+                    "INNER JOIN course as c ON cfg.course_id = c.id " +
+                    "WHERE sg.id IN (:ids) " +
+                    "AND (g.points is null OR g.points < 60) AND sd.payment = :payment AND sd.active = true " +
+                    "AND sg.tuition_form = :tuitionForm " +
+                    "AND c.semester = :semester " +
+                    "GROUP BY sd.id HAVING count (sd.id) > 2", nativeQuery = true)
+    int[] findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
+            @Param("tuitionForm") String tuitionForm,
+            @Param("semester") int semester
+    );
+
     //TODO неперевірений
     @Query(value = "SELECT count(sd.id) FROM student_degree sd " +
             "INNER JOIN grade g ON sd.id = g.student_degree_id " +
@@ -406,6 +460,22 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("tuitionForm") String tuitionForm,
             @Param("payment") String payment,
             @Param("degreeId") int degreeId,
+            @Param("semester") int semester
+    );
+
+    @Query(value =
+            "SELECT count(DISTINCT sd.id) FROM student_degree as sd " +
+            "INNER JOIN courses_for_groups as cfg ON sd.student_group_id = cfg.student_group_id " +
+            "INNER JOIN student_group as sg ON sd.student_group_id = sg.id " +
+            "INNER JOIN course as c ON cfg.course_id = c.id " +
+            "WHERE sd.student_group_id IN (:ids) " +
+            "AND sd.payment = :payment AND sd.active = true " +
+            "AND sg.tuition_form = 'FULL_TIME' " +
+            "AND c.semester = :semester",
+             nativeQuery = true)
+    int findCountOfAllActiveStudentsInStudentsGroupsByThemIdsAndBySemesterAndByPayment(
+            @Param("ids") List<Integer> ids,
+            @Param("payment") String payment,
             @Param("semester") int semester
     );
 }

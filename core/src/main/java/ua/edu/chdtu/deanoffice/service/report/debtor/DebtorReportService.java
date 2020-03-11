@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.SpecializationRepository;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.util.List;
 import java.util.Map;
@@ -16,17 +17,25 @@ public class DebtorReportService {
 
     private SpecializationRepository specializationRepository;
     private StudentDegreeService studentDegreeService;
+    private StudentGroupService studentGroupService;
 
     @Autowired
     public DebtorReportService(SpecializationRepository specializationRepository,
-                               StudentDegreeService studentDegreeService) {
+                               StudentDegreeService studentDegreeService,
+                               StudentGroupService studentGroupService) {
         this.specializationRepository = specializationRepository;
         this.studentDegreeService = studentDegreeService;
+        this.studentGroupService = studentGroupService;
     }
 
-    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, Boolean forCurrentSemester) {
+    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportData(Faculty faculty, int semester) throws Exception {
+
+        if (semester > 2 || semester < 0)
+            throw new Exception("Incorrect semester!");
+
         Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
         List<Specialization> specializations = specializationRepository.findAllByActive(true, faculty.getId());
+
         for (Specialization specialization : specializations) {
             if (specialization.getName().equals("")) {
                 continue;
@@ -42,13 +51,13 @@ public class DebtorReportService {
                 int lessThanThreeDebtsForBudgetDebtorsCount, lessThanThreeDebtsForContractDebtorsCount,
                         threeOrMoreDebtsForBudgetDebtorsCount, threeOrMoreDebtsForContractDebtorsCount,
                         budgetDebtorsCount, contractDebtorsCount;
-                if (forCurrentSemester) {
-                    contractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
-                    budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
-                    lessThanThreeDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
-                    lessThanThreeDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
-                    threeOrMoreDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebtsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
-                    threeOrMoreDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebtsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
+                if (semester != 0) {
+                    contractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year), semester);
+                    budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year), semester);
+                    lessThanThreeDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year), semester);
+                    lessThanThreeDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithLessThanThreeDebsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year), semester);
+                    threeOrMoreDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebtsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year), semester);
+                    threeOrMoreDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsWithThreeOrMoreDebtsForCurrentSemester(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year), semester);
                 } else {
                     contractDebtorsCount = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.CONTRACT, getDegreeIdByYear(year));
                     budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtors(specialization.getId(), getCorrectYear(year), TuitionForm.FULL_TIME, Payment.BUDGET, getDegreeIdByYear(year));
@@ -90,6 +99,88 @@ public class DebtorReportService {
         calculateAllDataOfFacultyForEachYear(debtorsReport, faculty);
 
         return debtorsReport;
+    }
+
+    private void isUserFacultyEqualsFacultyOfTheseStudentsGroups(Integer userFacultyId, List<Integer> groupsIds) throws Exception {
+        List<Integer> facultyIdsOfTheseStudentsGroups = studentGroupService.getFacultyIdsOfStudentsGroupsByStudentsGroupsIds(groupsIds);
+
+        for (Integer facultyIdOfTheStudentGroup : facultyIdsOfTheseStudentsGroups) {
+            if (userFacultyId != facultyIdOfTheStudentGroup) {
+                throw new Exception("Немає доступу до всіх вказаних груп!");
+            }
+        }
+    }
+
+    public Map<String, SpecializationDebtorsBean> calculateDebtorsReportDataForGroups(Faculty faculty, List<Integer> groupsIds) throws Exception {
+        isUserFacultyEqualsFacultyOfTheseStudentsGroups(faculty.getId(), groupsIds);
+
+        if (groupsIds.size() == 0)
+            throw new Exception("Не вказано жодної групи!");
+
+        List<Integer> studySemestersForTheseStudentGroup = studentGroupService.getStudySemestersByIds(groupsIds, true);
+
+        if (groupsIds.size() != studySemestersForTheseStudentGroup.size())
+            throw new Exception("Серед вказаних груп є неактивні або неіснуючі!");
+
+        int maxSemester = getTheLatestSemesterForGroups(studySemestersForTheseStudentGroup);
+        Map<Integer, SpecializationDebtorsYearBean> semesterAndDebtors = new TreeMap<>();
+
+        for (int semester = 1; semester <= maxSemester; semester++) {
+            int budgetStudentsCount = studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.BUDGET, semester);
+            int contractStudentsCount = studentDegreeService.getCountOfAllActiveBudgetOrContractStudentsInStudentsGroups(groupsIds, Payment.CONTRACT, semester);
+
+            if (budgetStudentsCount + contractStudentsCount == 0) {
+                continue;
+            }
+
+            int budgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            int contractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentsGroupsByPaymentAndTuitionFormAndSemester(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            int lessThanThreeDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            int lessThanThreeDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithLessThanThreeDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+            int threeOrMoreDebtsForBudgetDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.BUDGET, TuitionForm.FULL_TIME, semester);
+            int threeOrMoreDebtsForContractDebtorsCount = studentDegreeService.getCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(groupsIds, Payment.CONTRACT, TuitionForm.FULL_TIME, semester);
+
+            double debtorsPercent = (budgetDebtorsCount + contractDebtorsCount) / (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+            double lessThanThreeDebtsPercent = (lessThanThreeDebtsForBudgetDebtorsCount + lessThanThreeDebtsForContractDebtorsCount) /
+                    (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+            double threeOrMoreDebtsPercent = (threeOrMoreDebtsForBudgetDebtorsCount + threeOrMoreDebtsForContractDebtorsCount) /
+                    (budgetStudentsCount * 1.0 + contractStudentsCount) * 100;
+
+            SpecializationDebtorsYearBean specializationDebtorsYearBean
+                    = new SpecializationDebtorsYearBean(budgetStudentsCount, contractStudentsCount, budgetDebtorsCount,
+                    contractDebtorsCount, debtorsPercent, lessThanThreeDebtsForBudgetDebtorsCount,
+                    lessThanThreeDebtsForContractDebtorsCount, lessThanThreeDebtsPercent,
+                    threeOrMoreDebtsForBudgetDebtorsCount, threeOrMoreDebtsForContractDebtorsCount,
+                    threeOrMoreDebtsPercent);
+
+            semesterAndDebtors.put(semester, specializationDebtorsYearBean);
+        }
+
+        //semesterAndDebtors.put(maxSemester + 1, calculateAllDataOfSpecializationOrFaculty(semesterAndDebtors));
+
+        Map<String, SpecializationDebtorsBean> debtorsReport = new TreeMap<>();
+
+        SpecializationDebtorsBean specializationDebtorsBean = new SpecializationDebtorsBean();
+        specializationDebtorsBean.setSpecializationDebtorsYearBeanMap(semesterAndDebtors);
+
+        debtorsReport.put("Debtor's report for current groups", specializationDebtorsBean);
+
+        return debtorsReport;
+    }
+
+    private int getTheLatestSemesterForGroups(List<Integer> studySemestersForTheseStudentGroup) throws Exception {
+        if (studySemestersForTheseStudentGroup.size() == 0)
+            throw new Exception("Вказаних груп немає в базі даних!");
+
+        int maxSemester = 0;
+
+        for (Integer e : studySemestersForTheseStudentGroup) {
+            if (e > maxSemester) {
+                maxSemester = e;
+            }
+        }
+
+        return maxSemester;
     }
 
     private void calculateAllDataOfSpecialization(Map<String, SpecializationDebtorsBean> debtorsReport) {

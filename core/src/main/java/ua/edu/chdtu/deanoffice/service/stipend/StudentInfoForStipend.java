@@ -23,31 +23,13 @@ public class StudentInfoForStipend {
     private String specialityName;
     private String specializationName;
     private String departmentAbbreviation;
-    //private double averageGrade;
     private BigDecimal averageGrade;
     private Integer extraPoints;
     List<CourseForStipendBean> debtCourses = new ArrayList<>();
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        StudentInfoForStipend that = (StudentInfoForStipend) o;
-//        return year == that.year &&
-//                Double.compare(that.averageGrade, averageGrade) == 0 &&
-//                id.equals(that.id) &&
-//                Objects.equals(surname, that.surname) &&
-//                Objects.equals(name, that.name) &&
-//                Objects.equals(patronimic, that.patronimic) &&
-//                degreeName.equals(that.degreeName) &&
-//                Objects.equals(groupName, that.groupName) &&
-//                tuitionTerm.equals(that.tuitionTerm) &&
-//                extraPoints == that.extraPoints &&
-//                specialityCode.equals(that.specialityCode) &&
-//                specialityName.equals(that.specialityName) &&
-//                specializationName.equals(that.specializationName) &&
-//                departmentAbbreviation.equals(that.departmentAbbreviation);
-//    }
+    public SingleSpecialityStipendDataBean getSingleSpecializationStipendDataBean() {
+        return new SingleSpecialityStipendDataBean(degreeName, year, tuitionTerm, specialityCode, specialityName);
+    }
 
     @Override
     public int hashCode() {
@@ -92,5 +74,9 @@ public class StudentInfoForStipend {
             return averageGrade.doubleValue() * 0.9 + extraPoints;
         else
             return averageGrade.doubleValue() * 0.9;
+    }
+
+    public String getGroupName(){
+        return groupName;
     }
 }
