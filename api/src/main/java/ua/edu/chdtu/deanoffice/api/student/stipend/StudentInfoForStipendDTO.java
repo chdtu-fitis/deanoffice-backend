@@ -14,6 +14,7 @@ public class StudentInfoForStipendDTO {
     private String name;
     private String patronimic;
     private int year;
+    private String groupName;
     private String specializationName;
     private String departmentAbbreviation;
     private double averageGrade;
