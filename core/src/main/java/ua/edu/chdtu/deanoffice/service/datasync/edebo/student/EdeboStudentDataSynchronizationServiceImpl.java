@@ -103,7 +103,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 for (Cell c : r.getC()) {
                     cellValue = "";
                     try {
-                        cellValue = StringUtil.replaceSingleQuotes(formatter.formatCellValue(c));
+                        if (c.getF() != null)
+                            cellValue = c.getF().getValue();
+                        else
+                            cellValue = StringUtil.replaceSingleQuotes(formatter.formatCellValue(c));
                     } catch (Exception e) {
                         log.debug(e.getMessage());
                     }
@@ -320,7 +323,10 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Map<String, Object> admissionOrderNumberAndDate = getAdmissionOrderNumberAndDate(data.getRefillInfo());
         studentDegree.setAdmissionOrderNumber((String) admissionOrderNumberAndDate.get("admissionOrderNumber"));
         studentDegree.setAdmissionOrderDate((Date) admissionOrderNumberAndDate.get("admissionOrderDate"));
-        studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryCode(Integer.valueOf(data.getCountryId())));
+        if (!data.getCountryId().equals(""))
+            studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryCode(Integer.valueOf(data.getCountryId())));
+        else
+            studentDegree.setCitizenship(Citizenship.UKR);
         return studentDegree;
     }
 
