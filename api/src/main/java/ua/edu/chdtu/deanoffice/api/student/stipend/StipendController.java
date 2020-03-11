@@ -9,13 +9,16 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
+import ua.edu.chdtu.deanoffice.service.stipend.SingleSpecialityStipendDataBean;
 import ua.edu.chdtu.deanoffice.service.stipend.StipendService;
+import ua.edu.chdtu.deanoffice.service.stipend.StudentInfoForStipend;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
 
@@ -33,13 +36,13 @@ public class StipendController extends DocumentResponseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentInfoForStipendDTO>> getStipendInfo() {
+    public ResponseEntity<List<SpecialityStudentsInfoForStipendDTO>> getStipendInfo() {
         try {
-//            List<DebtorStudentDegreesBean> noDebtsStudentDegrees = stipendService.getNoDebtStudentDegrees(facultyId, debtorStudentDegreesDTOsMap.keySet());
-//            noDebtsStudentDegrees.addAll(new ArrayList(debtorStudentDegreesDTOsMap.values()));
-            List<StudentInfoForStipendDTO> noDebtsStudentDegreesDTOs = Mapper.map(stipendService.getStipendData(), StudentInfoForStipendDTO.class);
+            List<StudentInfoForStipend> stipendData = stipendService.getStipendData();
+            Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality = stipendService.getStudentInfoGroupedBySpeciality(stipendData);
+            List<SpecialityStudentsInfoForStipendDTO> studInfoGroupedBySpecialityDTOs = mapStipendInfoBeansToDtos(studInfoGroupedBySpeciality);
 
-            return ResponseEntity.ok(noDebtsStudentDegreesDTOs);
+            return ResponseEntity.ok(studInfoGroupedBySpecialityDTOs);
         } catch (Exception e) {
             return handleException(e);
         }
@@ -74,6 +77,17 @@ public class StipendController extends DocumentResponseController {
         } catch (Exception e) {
             return handleException(e);
         }
+    }
+
+    private List<SpecialityStudentsInfoForStipendDTO> mapStipendInfoBeansToDtos(Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality) {
+        List<SpecialityStudentsInfoForStipendDTO> specialityStudentsInfoForStipendDtos = new ArrayList<>();
+        studInfoGroupedBySpeciality.forEach((singleSpecialityStipendDataBean, studentInfoForStipend) -> {
+            SpecialityStudentsInfoForStipendDTO specialityStudentsInfoForStipendDTO = Mapper.strictMap(singleSpecialityStipendDataBean, SpecialityStudentsInfoForStipendDTO.class);
+            List<StudentInfoForStipendDTO> studentsInfoForStipendDTO = Mapper.strictMap(studentInfoForStipend, StudentInfoForStipendDTO.class);
+            specialityStudentsInfoForStipendDTO.setStudentsInfoForStipend(studentsInfoForStipendDTO);
+            specialityStudentsInfoForStipendDtos.add(specialityStudentsInfoForStipendDTO);
+        });
+        return specialityStudentsInfoForStipendDtos;
     }
 
     private ResponseEntity handleException(Exception exception) {

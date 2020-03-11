@@ -177,10 +177,10 @@ public class StipendService {
         return studentDegreeRepository.save(extraPoints);
     }
 
-    public Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> getStudentInfoByGroup(List<StudentInfoForStipend> studentInfoForStipend) {
-        Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoByGroup = studentInfoForStipend.stream()
+    public Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> getStudentInfoGroupedBySpeciality(List<StudentInfoForStipend> studentInfoForStipend) {
+        Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality = studentInfoForStipend.stream()
                 .collect(Collectors.groupingBy(StudentInfoForStipend::getSingleSpecializationStipendDataBean, LinkedHashMap::new, Collectors.toList()));
-        for (Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoByGroup.entrySet()) {
+        for (Map.Entry<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> entry : studInfoGroupedBySpeciality.entrySet()) {
             Set<String> studentGroups = new HashSet<>();
             for (StudentInfoForStipend studentInfoForGroups : entry.getValue()) {
                 studentGroups.add(studentInfoForGroups.getGroupName());
@@ -191,14 +191,14 @@ public class StipendService {
             }
             entry.getKey().setGroupsName(groupNames);
         }
-        return studentInfoByGroup;
+        return studInfoGroupedBySpeciality;
     }
 
     public File formDocument() throws Exception {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE);
         List<StudentInfoForStipend> stipendData = getStipendData();
-        Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoByGroup = getStudentInfoByGroup(stipendData);
-        generateTables(template, studentInfoByGroup);
+        Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality = getStudentInfoGroupedBySpeciality(stipendData);
+        generateTables(template, studInfoGroupedBySpeciality);
 
         for (int i = 1; i >= 0; i--){
             template.getMainDocumentPart().getContent().remove(i);
@@ -210,10 +210,6 @@ public class StipendService {
     private Map<String, String> fillStipendData(StudentInfoForStipend studentInfoForStipend, int studentNumber){
         double normalizedAverageGrade = studentInfoForStipend.getAverageGrade().doubleValue()*0.9;
         Double finalGrade = studentInfoForStipend.getFinalGrade();
-
-//        String strPts = String.format("%.2f", studentInfoForStipend.getAverageGrade());
-//        String resPts = String.format("%.2f", finalGrade);
-
         Map<String, String> result = new HashMap();
         result.put("№", String.valueOf(studentNumber));
         result.put("name", studentInfoForStipend.getSurname()+ " " + studentInfoForStipend.getName() + " " + studentInfoForStipend.getPatronimic());
@@ -225,10 +221,10 @@ public class StipendService {
         return result;
     }
 
-    private void generateTables(WordprocessingMLPackage template, Map<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> studentInfoForStipend) {
+    private void generateTables(WordprocessingMLPackage template, Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studentInfoForStipend) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
 
-        for (Map.Entry<SingleSpecializationStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
+        for (Map.Entry<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> entry : studentInfoForStipend.entrySet()) {
             Tbl table = XmlUtils.deepCopy(templateTable);
             fillFirstRow(table, entry.getKey());
             fillStudentData(table, entry.getValue());
@@ -236,7 +232,7 @@ public class StipendService {
         }
     }
 
-    private void fillFirstRow(Tbl table, SingleSpecializationStipendDataBean stipendData) {
+    private void fillFirstRow(Tbl table, SingleSpecialityStipendDataBean stipendData) {
 
         String tuitionTerm = stipendData.getTuitionTerm();
         String ukTuitionTerm = tuitionTerm.equals("SHORTENED") ? "Скорочена" : "" ;
