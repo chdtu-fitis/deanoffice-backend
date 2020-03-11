@@ -76,17 +76,6 @@ public class StipendService {
 
         List<StudentInfoForStipend> noDebtsStudentDegrees = getNoDebtStudentDegrees(FacultyUtil.getUserFacultyIdInt(), debtorStudentDegreesMap.keySet());
         noDebtsStudentDegrees.addAll(new ArrayList(debtorStudentDegreesMap.values()));
-        noDebtsStudentDegrees.sort(Comparator
-                .comparing(StudentInfoForStipend::getDegreeName)
-                .thenComparing(StudentInfoForStipend::getYear)
-                .thenComparing(StudentInfoForStipend::getSpecialityCode)
-                .thenComparing(StudentInfoForStipend::getSpecializationName)
-                .thenComparing(StudentInfoForStipend::getGroupName)
-                .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipend::getFinalGrade)))
-                .thenComparing(StudentInfoForStipend::getSurname)
-                .thenComparing(StudentInfoForStipend::getName)
-                .thenComparing(StudentInfoForStipend::getPatronimic)
-        );
         return noDebtsStudentDegrees;
     }
 
@@ -181,6 +170,13 @@ public class StipendService {
         Map<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> studInfoGroupedBySpeciality = studentInfoForStipend.stream()
                 .collect(Collectors.groupingBy(StudentInfoForStipend::getSingleSpecializationStipendDataBean, LinkedHashMap::new, Collectors.toList()));
         for (Map.Entry<SingleSpecialityStipendDataBean, List<StudentInfoForStipend>> entry : studInfoGroupedBySpeciality.entrySet()) {
+            entry.getValue().sort(Comparator
+                    .comparing(StudentInfoForStipend::getDegreeName)
+                    .thenComparing(Collections.reverseOrder(Comparator.comparing(StudentInfoForStipend::getFinalGrade)))
+                    .thenComparing(StudentInfoForStipend::getSurname)
+                    .thenComparing(StudentInfoForStipend::getName)
+                    .thenComparing(StudentInfoForStipend::getPatronimic)
+            );
             Set<String> studentGroups = new HashSet<>();
             for (StudentInfoForStipend studentInfoForGroups : entry.getValue()) {
                 studentGroups.add(studentInfoForGroups.getGroupName());
