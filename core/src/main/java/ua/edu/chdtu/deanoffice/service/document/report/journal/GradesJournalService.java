@@ -23,17 +23,20 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
+import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -63,6 +66,8 @@ public class GradesJournalService {
     private StudentGroupService studentGroupService;
     private CourseForGroupService courseForGroupService;
     private CurrentYearService currentYearService;
+    private GradeService gradeService;
+    private SemesterUtil semesterUtil;
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
@@ -223,8 +228,35 @@ public class GradesJournalService {
             PdfWriter.getInstance(document, new FileOutputStream(file));
             try {
                 document.open();
-                document.add(createOneGroupOneSemesterCoursesTableHorizontal(studentGroups, semester, year));
-                //document.add(addCoursesOnTable(studentGroups, semester, year));
+                document.add(addCoursesOnTable(studentGroups, semester, year));
+            } finally {
+                if (document != null)
+                    document.close();
+            }
+            return file;
+        }
+        return null;
+    }
+
+    public File createCoursesAndPointsListsPdf(int degreeId, int year, TuitionForm tuitionForm,
+                                      int groupId, int facultyId) throws IOException, DocumentException {
+        Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+        List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
+        if (studentGroups != null && studentGroups.size() != 0) {
+            Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
+            String filePath = getJavaTempDirectory() + "/" + "Predmeti-dlya-zhurnalu -" + year +
+                    "kurs_" + getFileCreationDateAndTime() + ".pdf";
+            File file = new File(filePath);
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+            int semester = year * 2 - 1 + semesterUtil.getCurrentSemester();
+            try {
+                document.open();
+                for (StudentGroup studentGroup : studentGroups) {
+                    List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+                    document.add(createOneGroupOneSemesterCoursesTableHorizontal(courseForGroups));
+                    //document.add(createOneGroupOneSemesterPointsTable(studentIds, courseForGroups));
+                }
             } finally {
                 if (document != null)
                     document.close();
@@ -241,97 +273,77 @@ public class GradesJournalService {
         return pdfPCell;
     }
 
-    private PdfPTable createOneGroupOneSemesterCoursesTableHorizontal(List<StudentGroup> studentGroups, int semester, int year) throws DocumentException, IOException {
+    private PdfPTable createOneGroupOneSemesterCoursesTableHorizontal( List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
         Font boldFont = new Font(baseFont, 8, Font.BOLD);
-        semester = year * 2 - 1;
+        //semester = year * 2 - 1;
+        SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+        courseForGroups.sort(sortCourseForGroup);
+        int columnsNumber = courseForGroups.size();
 
-        ArrayList<Integer> size = new ArrayList();
-        int tablesNumber = 0;
+        PdfPTable tableMain = new PdfPTable(1);
+        tableMain.setLockedWidth(true);
+        tableMain.setTotalWidth(28 * columnsNumber);
 
-        for (StudentGroup studentGroup : studentGroups) {
-            List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
-            size.add(courseForGroups.size());
-        }
+        PdfPTable coursesTable = new PdfPTable(columnsNumber);
+        coursesTable.setKeepTogether(true);
+        coursesTable.setWidthPercentage(100);
 
-            PdfPTable tableMain = new PdfPTable(1);
-            tableMain.setLockedWidth(true);
-            tableMain.setTotalWidth(28 * size.get(tablesNumber));
+        PdfPTable knowledgeControlTable = new PdfPTable(columnsNumber);
+        knowledgeControlTable.setKeepTogether(true);
+        knowledgeControlTable.setWidthPercentage(100);
 
-            for (StudentGroup studentGroup : studentGroups) {
-                List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
-                SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
-                courseForGroups.sort(sortCourseForGroup);
-                //int columnsNumber = studentGroups.size();
-                int columnsNumber = courseForGroups.size();
+        int borderNumber = columnsNumber;
 
-                PdfPTable coursesTable = new PdfPTable(columnsNumber);
-                coursesTable.setKeepTogether(true);
-                coursesTable.setWidthPercentage(100);
-
-                PdfPTable knowledgeControlTable = new PdfPTable(columnsNumber);
-                knowledgeControlTable.setKeepTogether(true);
-                knowledgeControlTable.setWidthPercentage(100);
-
-//            PdfPTable temporaryTable1 = new PdfPTable(columnsNumber);
-//            temporaryTable1.setKeepTogether(true);
-//            temporaryTable1.setWidthPercentage(100);
-//
-//            PdfPTable temporaryTable2 = new PdfPTable(columnsNumber);
-//            temporaryTable2.setKeepTogether(true);
-//            temporaryTable2.setWidthPercentage(100);
-//
-//            for (CourseForGroup courseForGroup : courseForGroups) {
-//                PdfPCell knowledgeControl = new PdfPCell(
-//                        new Phrase(getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
-//                knowledgeControl.setFixedHeight(28);
-//                temporaryTable1.addCell(knowledgeControl);
-//
-//                String courseName = courseForGroup.getCourse().getCourseName().getName();
-//                PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
-//                courseNameCell.setFixedHeight(28);
-//                courseNameCell.setPadding(0);
-//                courseNameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-//                courseNameCell.setRotation(270);
-//                temporaryTable2.addCell(courseNameCell);
-//                break;
-//            }
-                int borderNumber = columnsNumber;
-
-                for (CourseForGroup courseForGroup : courseForGroups) {
-                    PdfPCell knowledgeControl = new PdfPCell(
-                            new Phrase(getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), boldFont));
-                    knowledgeControl.setFixedHeight(8);
-                    knowledgeControl.setPadding(0);
-                    knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    knowledgeControl.setBorder(0);
-                    if (borderNumber != 1) {
-                        knowledgeControl.setBorder(Rectangle.RIGHT);
-                    }
-                    knowledgeControlTable.addCell(knowledgeControl);
-
-                    String courseName = courseForGroup.getCourse().getCourseName().getName();
-                    PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
-                    courseNameCell.setFixedHeight(78);
-                    courseNameCell.setPadding(0);
-                    courseNameCell.setHorizontalAlignment(Element.ALIGN_BOTTOM);
-                    courseNameCell.setRotation(90);
-                    courseNameCell.setBorder(0);
-                    if (borderNumber != 1) {
-                        courseNameCell.setBorder(Rectangle.RIGHT);
-                    }
-                    coursesTable.addCell(courseNameCell);
-
-                    borderNumber--;
+        for (CourseForGroup courseForGroup : courseForGroups) {
+            PdfPCell knowledgeControl = new PdfPCell(
+                new Phrase(getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), boldFont));
+            knowledgeControl.setFixedHeight(8);
+            knowledgeControl.setPadding(0);
+            knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
+            knowledgeControl.setBorder(0);
+            if (borderNumber != 1) {
+                knowledgeControl.setBorder(Rectangle.RIGHT);
                 }
-                tableMain.addCell(coursesTable);
-                tableMain.addCell(knowledgeControlTable);
-                tablesNumber++;
-                break;
+            knowledgeControlTable.addCell(knowledgeControl);
+
+            String courseName = courseForGroup.getCourse().getCourseName().getName();
+            PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
+            courseNameCell.setFixedHeight(78);
+            courseNameCell.setPadding(0);
+            courseNameCell.setHorizontalAlignment(Element.ALIGN_BOTTOM);
+            courseNameCell.setRotation(90);
+            courseNameCell.setBorder(0);
+            if (borderNumber != 1) {
+               courseNameCell.setBorder(Rectangle.RIGHT);
+               }
+            coursesTable.addCell(courseNameCell);
+
+            borderNumber--;
             }
+        tableMain.addCell(coursesTable);
+        tableMain.addCell(knowledgeControlTable);
         return tableMain;
+    }
+
+    private PdfPTable createOneGroupOneSemesterPointsTable(List <Integer> studentIds, List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font font1 = new Font(baseFont, 9);
+        Font font2 = new Font(baseFont, 8);
+        Font boldFont = new Font(baseFont, 8, Font.BOLD);
+
+        SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+        courseForGroups.sort(sortCourseForGroup);
+        int columnsNumber = courseForGroups.size();
+
+        PdfPTable tableMain = new PdfPTable(1);
+        tableMain.setLockedWidth(true);
+        tableMain.setTotalWidth(28 * columnsNumber);
+
+        List<Grade> studentsGrade = gradeService.getGradesForStudents(studentIds ,courseForGroups);
+       return tableMain;
     }
 
     private PdfPTable createPdfPTableForCellsOfTableCoursesMain() throws DocumentException {

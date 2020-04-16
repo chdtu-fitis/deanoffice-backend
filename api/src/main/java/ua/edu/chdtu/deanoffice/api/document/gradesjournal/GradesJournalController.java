@@ -48,6 +48,19 @@ public class GradesJournalController extends DocumentResponseController {
         }
     }
 
+    @GetMapping("/coursesAndPoints/pdf")
+    public ResponseEntity getCoursesAndPointsFile(@RequestParam int degreeId, @RequestParam int year,
+                                         @RequestParam(required = false) TuitionForm tuitionForm,
+                                         @RequestParam(required = false, defaultValue = "0") int groupId,
+                                         @CurrentUser ApplicationUser user) {
+        try{
+            File file = gradesJournalService.createCoursesAndPointsListsPdf(degreeId, year, tuitionForm, groupId, user.getFaculty().getId());
+            return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_PDF);
+        } catch (Exception e){
+            return handleException(e);
+        }
+    }
+
     @GetMapping("/courses/docx")
     public ResponseEntity getCoursesInDocxFile(@RequestParam int degreeId, @RequestParam int year,
                                                @RequestParam(required = false, defaultValue = "0") int semester,
