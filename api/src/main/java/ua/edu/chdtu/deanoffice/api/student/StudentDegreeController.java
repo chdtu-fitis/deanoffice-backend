@@ -18,11 +18,7 @@ import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.entity.Student;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -117,40 +113,17 @@ public class StudentDegreeController {
     }
 
     private StudentDegree createStudentDegree(StudentDegreeDTO newStudentDegreeDTO, Student student) {
-        StudentDegree newStudentDegree = (StudentDegree) Mapper.strictMap(newStudentDegreeDTO, StudentDegree.class);
+        StudentDegree newStudentDegree = Mapper.strictMap(newStudentDegreeDTO, StudentDegree.class);
         newStudentDegree.setStudent(student);
         newStudentDegree.setStudentGroup(studentGroupService.getById(newStudentDegreeDTO.getStudentGroupId()));
         newStudentDegree.setSpecialization(newStudentDegree.getStudentGroup().getSpecialization());
         newStudentDegree.setActive(true);
 
-        PreviousDiplomaDTO previousDiplomaDTO = getPreviousDiploma(newStudentDegree);
-        newStudentDegree.setPreviousDiplomaType(previousDiplomaDTO.getType());
-        boolean degreeIsNotBachelor = newStudentDegree.getSpecialization().getDegree().getId() != 1;
-        if (degreeIsNotBachelor) {
-            newStudentDegree.setPreviousDiplomaNumber(previousDiplomaDTO.getNumber());
-            newStudentDegree.setPreviousDiplomaDate(previousDiplomaDTO.getDate());
-        }
+        newStudentDegree.setPreviousDiplomaType(EducationDocument.getForecastedDiplomaTypeByDegree(newStudentDegree.getStudentGroup().getSpecialization().getDegree().getId()));
+        newStudentDegree.setCitizenship(Citizenship.UKR);
+        newStudentDegree.setTuitionForm(newStudentDegree.getStudentGroup().getTuitionForm());
+        newStudentDegree.setTuitionTerm(newStudentDegree.getStudentGroup().getTuitionTerm());
         return studentDegreeService.save(newStudentDegree);
-    }
-
-    private PreviousDiplomaDTO getPreviousDiploma(StudentDegree studentDegree) {
-        EducationDocument educationDocument = getPreviousDiplomaType(studentDegree);
-        StudentDegree firstStudentDegree = studentDegreeService.getFirst(studentDegree.getStudent().getId());
-        if (firstStudentDegree != null) {
-            return new PreviousDiplomaDTO(
-                    firstStudentDegree.getPreviousDiplomaDate(),
-                    firstStudentDegree.getPreviousDiplomaNumber(),
-                    educationDocument
-            );
-        }
-        return new PreviousDiplomaDTO(educationDocument);
-    }
-
-    private EducationDocument getPreviousDiplomaType(StudentDegree studentDegree) {
-        if (EducationDocument.isExist(studentDegree.getPreviousDiplomaType())) {
-            return studentDegree.getPreviousDiplomaType();
-        }
-        return EducationDocument.getForecastedDiplomaTypeByDegree(studentDegree.getSpecialization().getDegree().getId());
     }
 
     @JsonView(StudentView.Degrees.class)
