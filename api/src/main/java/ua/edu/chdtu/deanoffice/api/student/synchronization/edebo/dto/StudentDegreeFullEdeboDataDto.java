@@ -6,6 +6,8 @@ import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.Citizenship;
 import ua.edu.chdtu.deanoffice.entity.EducationDocument;
 import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 
 import java.util.Date;
 import java.util.Set;
@@ -28,6 +30,8 @@ public class StudentDegreeFullEdeboDataDto {
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date admissionOrderDate;
     private Payment payment;
+    private TuitionForm tuitionForm;
+    private TuitionTerm tuitionTerm;
     private boolean modified;
     private Set<StudentPreviousUniversityDTO> studentPreviousUniversities;
     private Citizenship citizenship;

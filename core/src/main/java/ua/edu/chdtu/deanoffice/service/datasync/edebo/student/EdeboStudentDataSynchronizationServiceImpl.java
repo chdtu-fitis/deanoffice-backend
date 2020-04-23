@@ -315,6 +315,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
 
         studentDegree.setSupplementNumber(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
+        studentDegree.setTuitionForm(TuitionForm.getTuitionFormFromUkrName(data.getEducationFormName()));
+        if (studentDegree.getSpecialization().getDegree().getName().toUpperCase().equals(DegreeEnum.BACHELOR.getNameUkr().toUpperCase()))
+            studentDegree.setTuitionTerm(evaluateTuitionTermGuess(data.getEducationDateBegin(), data.getEducationDateEnd()));
+        else
+            studentDegree.setTuitionTerm(TuitionTerm.REGULAR);
         studentDegree.setPreviousDiplomaDate(parseDate(data.getDocumentDateGet2()));
         studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
         studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
@@ -328,6 +333,19 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         else
             studentDegree.setCitizenship(Citizenship.UKR);
         return studentDegree;
+    }
+
+    private int getYearFromDateStringInImportedFile(String date) {
+        int i = date.lastIndexOf('/');
+        return Integer.parseInt(date.substring(i+1, i+3));
+    }
+
+    private TuitionTerm evaluateTuitionTermGuess(String educationBeginDate, String educationEndDate) {
+        int educationDuration = getYearFromDateStringInImportedFile(educationEndDate) - getYearFromDateStringInImportedFile(educationBeginDate);
+        if (educationDuration <= 3)
+            return TuitionTerm.SHORTENED;
+        else
+            return TuitionTerm.REGULAR;
     }
 
     public Map<String, Object> getAdmissionOrderNumberAndDate(String refillInfo) {

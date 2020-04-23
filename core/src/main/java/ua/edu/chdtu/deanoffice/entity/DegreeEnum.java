@@ -1,7 +1,7 @@
 package ua.edu.chdtu.deanoffice.entity;
 
 public enum DegreeEnum {
-    BACHELOR(1, "Бакалавр", "Specialist"),
+    BACHELOR(1, "Бакалавр", "Bachelor"),
     SPECIALIST(2, "Спеціаліст", "Specialist"),
     MASTER(3, "Магістр", "Master");
 

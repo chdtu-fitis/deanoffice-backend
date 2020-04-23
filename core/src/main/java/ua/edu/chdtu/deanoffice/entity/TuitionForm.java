@@ -13,4 +13,14 @@ public enum TuitionForm {
     public String getNameUkr() {
         return nameUkr;
     }
+
+    public static TuitionForm getTuitionFormFromUkrName(String ukrName){
+        String ukrNameInUppercase = ukrName.toUpperCase();
+
+        for (TuitionForm tuitionForm: values()) {
+            if (tuitionForm.getNameUkr().toUpperCase().equals(ukrNameInUppercase))
+                return tuitionForm;
+        }
+        return null;
+    }
 }
