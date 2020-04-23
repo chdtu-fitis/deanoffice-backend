@@ -106,6 +106,8 @@ public class Mapper {
         entity.setAdmissionOrderNumber(dto.getAdmissionOrderNumber());
         entity.setAdmissionOrderDate(dto.getAdmissionOrderDate());
         entity.setPayment(dto.getPayment());
+        entity.setTuitionForm(dto.getTuitionForm());
+        entity.setCitizenship(dto.getCitizenship());
         entity.setPreviousDiplomaDate(dto.getPreviousDiplomaDate());
         entity.setPreviousDiplomaType(dto.getPreviousDiplomaType());
         entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());
