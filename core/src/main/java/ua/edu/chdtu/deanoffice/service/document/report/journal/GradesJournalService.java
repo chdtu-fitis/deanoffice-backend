@@ -255,7 +255,7 @@ public class GradesJournalService {
                 for (StudentGroup studentGroup : studentGroups) {
                     List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
                     document.add(createOneGroupOneSemesterCoursesTableHorizontal(courseForGroups));
-                    //document.add(createOneGroupOneSemesterPointsTable(studentIds, courseForGroups));
+                    document.add(createOneGroupOneSemesterPointsTable(studentIds, courseForGroups));
                 }
             } finally {
                 if (document != null)
@@ -338,12 +338,41 @@ public class GradesJournalService {
         courseForGroups.sort(sortCourseForGroup);
         int columnsNumber = courseForGroups.size();
 
+        List<Integer> courseIds = new ArrayList<>();
+        for (CourseForGroup courseForGroup : courseForGroups) {
+            courseIds.add(courseForGroup.getCourse().getId());
+        }
+//        List<Integer> studentsIds = new ArrayList<>();
+//        for (CourseForGroup courseForGroup : courseForGroups) {
+//            studentsIds.add(courseForGroup.);
+//        }
+
         PdfPTable tableMain = new PdfPTable(1);
         tableMain.setLockedWidth(true);
         tableMain.setTotalWidth(28 * columnsNumber);
 
-        List<Grade> studentsGrade = gradeService.getGradesForStudents(studentIds ,courseForGroups);
-       return tableMain;
+        PdfPTable gradesTable = new PdfPTable(columnsNumber);
+        gradesTable.setKeepTogether(true);
+        gradesTable.setWidthPercentage(100);
+
+        List<Grade> studentsGrade = gradeService.getGradesForStudents(studentIds ,courseIds);
+        int borderNumber = columnsNumber;
+
+        for (int i = 0;i < studentsGrade.size(); i++) {
+            PdfPCell grade = new PdfPCell(
+                    new Phrase(String.valueOf(studentsGrade.get(i)), boldFont));
+            grade.setFixedHeight(8);
+            grade.setPadding(0);
+            grade.setHorizontalAlignment(Element.ALIGN_CENTER);
+            grade.setBorder(0);
+            if (borderNumber != 1) {
+                grade.setBorder(Rectangle.RIGHT);
+            }
+            gradesTable.addCell(grade);
+        }
+        tableMain.addCell(gradesTable);
+
+        return tableMain;
     }
 
     private PdfPTable createPdfPTableForCellsOfTableCoursesMain() throws DocumentException {
