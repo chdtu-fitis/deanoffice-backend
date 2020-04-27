@@ -10,6 +10,16 @@ dependencies {
 			"org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",
 	)
 	compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+
+	compile('org.springframework.boot:spring-boot-starter-web') {
+		exclude module: "spring-boot-starter-tomcat"
+	}
+
+	compile(
+			"org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}",
+	)
+	compile('org.springframework.boot:spring-boot-starter-undertow')
+
 	compile("org.flywaydb:flyway-core:${flywayVersion}")
 	compile group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'
 	compile('org.modelmapper:modelmapper:1.1.0')
