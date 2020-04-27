@@ -18,3 +18,12 @@ ALTER TABLE teacher ADD COLUMN scientific_degree_id INTEGER;
 
 ALTER TABLE teacher
   ADD CONSTRAINT FK_teacher_scientific_degree FOREIGN KEY (scientific_degree_id) references scientific_degree;
+
+ALTER TABLE specialization DROP COLUMN applying_knowledge_and_understanding_outcomes;
+ALTER TABLE specialization DROP COLUMN applying_knowledge_and_understanding_outcomes_eng;
+ALTER TABLE specialization DROP COLUMN knowledge_and_understanding_outcomes;
+ALTER TABLE specialization DROP COLUMN knowledge_and_understanding_outcomes_eng;
+
+ALTER TABLE specialization ADD COLUMN program_head_id INTEGER;
+ALTER TABLE teacher
+  ADD CONSTRAINT FK_teacher_program_head FOREIGN KEY (program_head_id) references teacher;
