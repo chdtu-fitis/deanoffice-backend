@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.teacher.ScientificDegreeDTO;
 import ua.edu.chdtu.deanoffice.entity.ScientificDegree;
 import ua.edu.chdtu.deanoffice.service.ScientificDegreeService;
-
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
