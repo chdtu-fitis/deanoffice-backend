@@ -8,9 +8,9 @@ CREATE TABLE scientific_degree (
 ALTER TABLE scientific_degree ADD CONSTRAINT uk_scientific_degree_name UNIQUE (name);
 -- ALTER SEQUENCE scientific_degree_id_seq OWNED BY scientific_degree.id;
 -- ALTER TABLE ONLY scientific_degree ALTER COLUMN id SET DEFAULT nextval('scientific_degree_id_seq'::regclass);
-INSERT INTO scientific_degree(name, name_eng, abbr) VALUES ('доктор технічних наук', 'д.т.н.', 'Doctor of Technical Science');
-INSERT INTO scientific_degree(name, name_eng, abbr) VALUES ('доктор фізико-математичних наук', 'д.ф-м.н.', 'Doctor of Physical-Mathematical Science');
-INSERT INTO scientific_degree(name, name_eng, abbr) VALUES ('доктор хіміних наук', 'д.т.н.', 'Doctor of Chemical Science');
+INSERT INTO scientific_degree(name, abbr, name_eng) VALUES ('доктор технічних наук', 'д.т.н.', 'Doctor of Technical Science');
+INSERT INTO scientific_degree(name, abbr, name_eng) VALUES ('доктор фізико-математичних наук', 'д.ф-м.н.', 'Doctor of Physical-Mathematical Science');
+INSERT INTO scientific_degree(name, abbr, name_eng) VALUES ('доктор хіміних наук', 'д.т.н.', 'Doctor of Chemical Science');
 
 ALTER TABLE teacher ADD COLUMN academic_title VARCHAR(25);
 ALTER TABLE teacher ADD COLUMN academic_title_eng VARCHAR(25);
@@ -25,5 +25,5 @@ ALTER TABLE specialization DROP COLUMN knowledge_and_understanding_outcomes;
 ALTER TABLE specialization DROP COLUMN knowledge_and_understanding_outcomes_eng;
 
 ALTER TABLE specialization ADD COLUMN program_head_id INTEGER;
-ALTER TABLE teacher
+ALTER TABLE specialization
   ADD CONSTRAINT FK_teacher_program_head FOREIGN KEY (program_head_id) references teacher;
