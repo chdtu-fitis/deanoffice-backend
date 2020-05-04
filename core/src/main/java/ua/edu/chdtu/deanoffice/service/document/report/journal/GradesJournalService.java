@@ -28,9 +28,11 @@ import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -48,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.addRowToTable;
@@ -68,17 +71,22 @@ public class GradesJournalService {
     private CurrentYearService currentYearService;
     private GradeService gradeService;
     private SemesterUtil semesterUtil;
+    private StudentDegreeService studentDegreeService;
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
     public GradesJournalService(StudentGroupService studentGroupService,
                                 CourseForGroupService courseForGroupService,
                                 DocumentIOService documentIOService,
-                                CurrentYearService currentYearService) {
+                                CurrentYearService currentYearService,
+                                StudentDegreeService studentDegreeService,
+                                GradeService gradeService) {
         this.studentGroupService = studentGroupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
         this.currentYearService = currentYearService;
+        this.studentDegreeService  = studentDegreeService;
+        this.gradeService = gradeService;
     }
 
     private String getJavaTempDirectory() {
@@ -255,7 +263,7 @@ public class GradesJournalService {
                 for (StudentGroup studentGroup : studentGroups) {
                     List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
                     document.add(createOneGroupOneSemesterCoursesTableHorizontal(courseForGroups));
-                    document.add(createOneGroupOneSemesterPointsTable(studentIds, courseForGroups));
+                    document.add(createOneGroupOneSemesterPointsTable(courseForGroups));
                 }
             } finally {
                 if (document != null)
@@ -328,7 +336,12 @@ public class GradesJournalService {
         return tableMain;
     }
 
-    private PdfPTable createOneGroupOneSemesterPointsTable(List <Integer> studentIds, List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
+    private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
+        List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
+        return students.stream().map(BaseEntity::getId).collect(Collectors.toList());
+    }
+
+    private PdfPTable createOneGroupOneSemesterPointsTable(List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
@@ -342,10 +355,19 @@ public class GradesJournalService {
         for (CourseForGroup courseForGroup : courseForGroups) {
             courseIds.add(courseForGroup.getCourse().getId());
         }
-//        List<Integer> studentsIds = new ArrayList<>();
-//        for (CourseForGroup courseForGroup : courseForGroups) {
-//            studentsIds.add(courseForGroup.);
-//        }
+        List<List<Integer>> studentsIds = new ArrayList<>();
+        for (CourseForGroup courseForGroup : courseForGroups) {
+            studentsIds.add(getStudentsIdsByGroupId(courseForGroup.getStudentGroup().getId()));
+            break;
+        }
+        List<Integer> studentsSize = studentsIds.get(0);
+        List<Integer> studentIds = new ArrayList<>();
+        for (int i = 0; i < studentsSize.size(); i++) {
+            studentIds.add(studentsIds.get(0).get(i));
+        }
+
+        List<Grade> studentsGrade = gradeService.getGradesForStudents(studentIds, courseIds);
+//        studentsGrade.add(gradeService.getGradesForStudents(studentIds, courseIds));
 
         PdfPTable tableMain = new PdfPTable(1);
         tableMain.setLockedWidth(true);
@@ -355,10 +377,9 @@ public class GradesJournalService {
         gradesTable.setKeepTogether(true);
         gradesTable.setWidthPercentage(100);
 
-        List<Grade> studentsGrade = gradeService.getGradesForStudents(studentIds ,courseIds);
         int borderNumber = columnsNumber;
 
-        for (int i = 0;i < studentsGrade.size(); i++) {
+        for (int i = 0; i < studentsGrade.size(); i++) {
             PdfPCell grade = new PdfPCell(
                     new Phrase(String.valueOf(studentsGrade.get(i)), boldFont));
             grade.setFixedHeight(8);
