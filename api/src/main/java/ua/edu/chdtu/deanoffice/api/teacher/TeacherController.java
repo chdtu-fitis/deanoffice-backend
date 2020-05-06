@@ -15,8 +15,11 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.PositionService;
+import ua.edu.chdtu.deanoffice.service.ScientificDegreeService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -27,13 +30,15 @@ public class TeacherController {
     private TeacherService teacherService;
     private DepartmentService departmentService;
     private PositionService positionService;
+    private ScientificDegreeService scientificDegreeService;
 
     @Autowired
-    public TeacherController(TeacherService teacherService,
-                             DepartmentService departmentService, PositionService positionService) {
+    public TeacherController(TeacherService teacherService, DepartmentService departmentService,
+                             PositionService positionService, ScientificDegreeService scientificDegreeService) {
         this.teacherService = teacherService;
         this.departmentService = departmentService;
         this.positionService = positionService;
+        this.scientificDegreeService = scientificDegreeService;
     }
 
     @GetMapping("/teachers-short")
@@ -77,14 +82,14 @@ public class TeacherController {
     }
 
     @PostMapping("/teachers")
-    public ResponseEntity addTeacher(@RequestBody TeacherDTO teacherDTO) {
+    public ResponseEntity addTeacher(@Valid @RequestBody TeacherInsertDTO teacherDTO) {
         try {
-            if (teacherDTO == null)
-                throw new OperationCannotBePerformedException("Не отримані дані для збереження!");
-            if (teacherDTO.getId() != 0)
-                throw new OperationCannotBePerformedException("Неправильно вказаний ідентифікатор, ідентифікатор повинен бути 0!");
+//            if (teacherDTO == null)
+//                throw new OperationCannotBePerformedException("Не отримані дані для збереження!");
+//            if (teacherDTO.getId() != 0)
+//                throw new OperationCannotBePerformedException("Неправильно вказаний ідентифікатор, ідентифікатор повинен бути 0!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
+            setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO.getDepartmentId(), teacherDTO.getPositionId());
             Teacher teacherAfterSave = teacherService.saveTeacher(teacher);
             TeacherDTO teacherAfterSaveDTO = map(teacherAfterSave, TeacherDTO.class);
             return new ResponseEntity(teacherAfterSaveDTO, HttpStatus.CREATED);
@@ -94,12 +99,12 @@ public class TeacherController {
     }
 
     @PutMapping("/teachers")
-    public ResponseEntity changeTeacher(@RequestBody TeacherDTO teacherDTO) {
+    public ResponseEntity changeTeacher(@RequestBody TeacherUpdateDTO teacherDTO) {
         try {
-            if (teacherDTO == null)
-                throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
+//            if (teacherDTO == null)
+//                throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO);
+            setCorrectDepartmentAndPositionFromDataBase(teacher, teacherDTO.getDepartmentId(), teacherDTO.getPositionId());
             Teacher savedTeacher = teacherService.updateTeacher(teacher);
             return new ResponseEntity(map(savedTeacher, TeacherDTO.class), HttpStatus.OK);
         } catch (Exception e) {
@@ -132,11 +137,11 @@ public class TeacherController {
     }
 
     //TODO Звернути увагу - перенести в сервіс
-    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, TeacherDTO teacherDTO) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException {
-        Department department = departmentService.getById(teacherDTO.getDepartmentId());
+    private void setCorrectDepartmentAndPositionFromDataBase(Teacher teacher, int departmentId, int positionId) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException {
+        Department department = departmentService.getById(departmentId);
         if (department == null)
             throw new OperationCannotBePerformedException("Вказана неіснуюча кафедра!");
-        Position position = positionService.getById(teacherDTO.getPositionId());
+        Position position = positionService.getById(positionId);
         if (position == null)
             throw new OperationCannotBePerformedException("Вказана неіснуюча посада!");
         teacher.setDepartment(department);
