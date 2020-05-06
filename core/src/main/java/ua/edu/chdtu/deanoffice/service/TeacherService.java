@@ -62,16 +62,13 @@ public class TeacherService {
         teacherRepository.save(teachers);
     }
 
-    public Teacher saveTeacher(Teacher teacher) throws OperationCannotBePerformedException {
-        dataVerificationService.isCorrectTeacher(teacher);
+    public Teacher saveTeacher(Teacher teacher) {
         return teacherRepository.save(teacher);
     }
 
+    //UnauthorizedFacultyDataException потрібен для перевірки права доступу в аспектах
     @FacultyAuthorized
     public Teacher updateTeacher(Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        if (teacher.getId() == 0)
-            throw new OperationCannotBePerformedException("Не можна редагувати дані викладача, що не існує в базі");
-        dataVerificationService.isCorrectTeacher(teacher);
         Teacher teacherFromDB = teacherRepository.findOne(teacher.getId());
         if (teacherFromDB == null)
             throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");

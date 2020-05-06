@@ -99,7 +99,7 @@ public class TeacherController {
     }
 
     @PutMapping("/teachers")
-    public ResponseEntity changeTeacher(@RequestBody TeacherUpdateDTO teacherDTO) {
+    public ResponseEntity changeTeacher(@Valid @RequestBody TeacherUpdateDTO teacherDTO) {
         try {
 //            if (teacherDTO == null)
 //                throw new OperationCannotBePerformedException("Не отримані дані для зміни!");
