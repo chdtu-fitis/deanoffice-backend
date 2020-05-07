@@ -38,10 +38,6 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String educationalProgramHeadInfo;
     @Column(name = "program_head_info_eng", nullable = false)
     private String educationalProgramHeadInfoEng;
-    private String knowledgeAndUnderstandingOutcomes;
-    private String knowledgeAndUnderstandingOutcomesEng;
-    private String applyingKnowledgeAndUnderstandingOutcomes;
-    private String applyingKnowledgeAndUnderstandingOutcomesEng;
     private String makingJudgementsOutcomes;
     private String makingJudgementsOutcomesEng;
     @Column(name = "certificate_number", nullable = false)

@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
-import ua.edu.chdtu.deanoffice.entity.Citizenship;
-import ua.edu.chdtu.deanoffice.entity.EducationDocument;
-import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.entity.*;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -48,6 +46,10 @@ public class StudentDegreeDTO {
     private Date previousDiplomaDate;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private Payment payment;
+    @JsonView(StudentView.SimpleAndDegrees.class)
+    private TuitionForm tuitionForm;
+    @JsonView(StudentView.SimpleAndDegrees.class)
+    private TuitionTerm tuitionTerm;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private Citizenship citizenship;
     @JsonView({StudentView.WithSpecilization.class, StudentView.SimpleAndSpecilization.class})

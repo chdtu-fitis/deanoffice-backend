@@ -275,6 +275,8 @@ public class TestFeatureDiplomaSupplement {
         studentDegree.setProtocolNumber("112233");
         studentDegree.setSupplementDate(new Date());
         studentDegree.setSupplementNumber("234567");
+        studentDegree.setTuitionForm(studentGroup.getTuitionForm());
+        studentDegree.setTuitionTerm(studentGroup.getTuitionTerm());
         return studentDegree;
     }
 

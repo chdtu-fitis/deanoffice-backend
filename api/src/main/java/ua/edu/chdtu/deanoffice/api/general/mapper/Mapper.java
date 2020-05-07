@@ -78,6 +78,8 @@ public class Mapper {
         entity.setDiplomaDate(dto.getDiplomaDate());
         entity.setDiplomaWithHonours(dto.isDiplomaWithHonours());
         entity.setPayment(dto.getPayment());
+        entity.setTuitionForm(dto.getTuitionForm());
+        entity.setTuitionTerm(dto.getTuitionTerm());
         entity.setPreviousDiplomaDate(dto.getPreviousDiplomaDate());
         entity.setPreviousDiplomaType(dto.getPreviousDiplomaType());
         entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());
@@ -91,6 +93,7 @@ public class Mapper {
         entity.setSupplementNumber(dto.getSupplementNumber());
         entity.setThesisName(dto.getThesisName());
         entity.setThesisNameEng(dto.getThesisNameEng());
+        entity.setCitizenship(dto.getCitizenship());
         entity.getStudentPreviousUniversities().clear();
         entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
         entity.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(entity));
@@ -103,6 +106,8 @@ public class Mapper {
         entity.setAdmissionOrderNumber(dto.getAdmissionOrderNumber());
         entity.setAdmissionOrderDate(dto.getAdmissionOrderDate());
         entity.setPayment(dto.getPayment());
+        entity.setTuitionForm(dto.getTuitionForm());
+        entity.setCitizenship(dto.getCitizenship());
         entity.setPreviousDiplomaDate(dto.getPreviousDiplomaDate());
         entity.setPreviousDiplomaType(dto.getPreviousDiplomaType());
         entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());

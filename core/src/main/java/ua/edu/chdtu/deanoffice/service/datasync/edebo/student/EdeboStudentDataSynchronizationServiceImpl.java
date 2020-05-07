@@ -47,7 +47,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String ADMISSION_REGEXP = "Номер[\\s]+наказу[\\s:]+([\\w\\W]+);[\\W\\w]+Дата[\\s]+наказу[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
     private static final String EXPEL_DATE_REGEXP = "[\\W\\w]+Дата[\\s]+відрахування[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
     private static final String STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE[] = {"universityName", "studyStartDate", "studyEndDate"};
-    private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "previousDiplomaNumber", "previousDiplomaDate",
+    private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "tuitionForm", "citizenship", "previousDiplomaNumber", "previousDiplomaDate",
             "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
             "surnameEng", "nameEng", "patronimicEng", "sex"};
@@ -315,6 +315,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
 
         studentDegree.setSupplementNumber(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
+        studentDegree.setTuitionForm(TuitionForm.getTuitionFormFromUkrName(data.getEducationFormName()));
+        if (studentDegree.getSpecialization().getDegree().getName().toUpperCase().equals(DegreeEnum.BACHELOR.getNameUkr().toUpperCase()))
+            studentDegree.setTuitionTerm(evaluateTuitionTermGuess(data.getEducationDateBegin(), data.getEducationDateEnd()));
+        else
+            studentDegree.setTuitionTerm(TuitionTerm.REGULAR);
         studentDegree.setPreviousDiplomaDate(parseDate(data.getDocumentDateGet2()));
         studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
         studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
@@ -328,6 +333,19 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         else
             studentDegree.setCitizenship(Citizenship.UKR);
         return studentDegree;
+    }
+
+    private int getYearFromDateStringInImportedFile(String date) {
+        int i = date.lastIndexOf('/');
+        return Integer.parseInt(date.substring(i+1, i+3));
+    }
+
+    private TuitionTerm evaluateTuitionTermGuess(String educationBeginDate, String educationEndDate) {
+        int educationDuration = getYearFromDateStringInImportedFile(educationEndDate) - getYearFromDateStringInImportedFile(educationBeginDate);
+        if (educationDuration <= 3)
+            return TuitionTerm.SHORTENED;
+        else
+            return TuitionTerm.REGULAR;
     }
 
     public Map<String, Object> getAdmissionOrderNumberAndDate(String refillInfo) {

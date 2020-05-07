@@ -34,3 +34,5 @@ backend/bin/
 backend/.settings
 backend/.project
 backend/.classpath
+
+app.pid
