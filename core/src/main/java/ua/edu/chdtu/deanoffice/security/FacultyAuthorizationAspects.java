@@ -26,7 +26,7 @@ public class FacultyAuthorizationAspects {
     @Before("within(ua.edu.chdtu.deanoffice.service.DepartmentService) " +
             "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
             "&& args(department)")
-    public void beforeUpadteOrDeleteOrRestoreDepartment(Department department) throws UnauthorizedFacultyDataException {
+    public void beforeUpdateOrDeleteOrRestoreDepartment(Department department) throws UnauthorizedFacultyDataException {
         int userFacultyId = FacultyUtil.getUserFacultyIdInt();
         int departmentFacultyId = department.getFaculty().getId();
         if (userFacultyId != departmentFacultyId)
