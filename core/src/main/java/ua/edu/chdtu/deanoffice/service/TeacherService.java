@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
+import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
+import ua.edu.chdtu.deanoffice.repository.PositionRepository;
+import ua.edu.chdtu.deanoffice.repository.ScientificDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
@@ -15,11 +18,19 @@ import java.util.List;
 public class TeacherService {
     private TeacherRepository teacherRepository;
     private DataVerificationService dataVerificationService;
+    private DepartmentRepository departmentRepository;
+    private PositionRepository positionRepository;
+    private ScientificDegreeRepository scientificDegreeRepository;
 
     @Autowired
-    public TeacherService(TeacherRepository teacherRepository, DataVerificationService dataVerificationService) {
+    public TeacherService(TeacherRepository teacherRepository, DataVerificationService dataVerificationService,
+                          DepartmentRepository departmentRepository, PositionRepository positionRepository,
+                          ScientificDegreeRepository scientificDegreeRepository) {
         this.teacherRepository = teacherRepository;
         this.dataVerificationService = dataVerificationService;
+        this.departmentRepository = departmentRepository;
+        this.positionRepository = positionRepository;
+        this.scientificDegreeRepository = scientificDegreeRepository;
     }
 
     public Teacher getTeacher(int teacherId) {
@@ -63,6 +74,11 @@ public class TeacherService {
     }
 
     public Teacher saveTeacher(Teacher teacher) {
+        teacher.setPosition(positionRepository.findOne(teacher.getPosition().getId()));
+        teacher.setDepartment(departmentRepository.findOne(teacher.getDepartment().getId()));
+        if (teacher.getScientificDegree() != null) {
+            teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
+        }
         return teacherRepository.save(teacher);
     }
 
@@ -70,8 +86,27 @@ public class TeacherService {
     @FacultyAuthorized
     public Teacher updateTeacher(Teacher teacher) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         Teacher teacherFromDB = teacherRepository.findOne(teacher.getId());
-        if (teacherFromDB == null)
+        if (teacherFromDB == null) {
             throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
+        } else {
+            if (teacher.getPosition().getId() == teacherFromDB.getPosition().getId()) {
+                teacher.setPosition(teacherFromDB.getPosition());
+            } else {
+                teacher.setPosition(positionRepository.findOne(teacher.getPosition().getId()));
+            }
+            if (teacher.getDepartment().getId() == teacherFromDB.getDepartment().getId()) {
+                teacher.setDepartment(teacherFromDB.getDepartment());
+            } else {
+                teacher.setDepartment(departmentRepository.findOne(teacher.getDepartment().getId()));
+            }
+            if (teacher.getScientificDegree()!= null) {
+                if (teacher.getScientificDegree().getId() == teacherFromDB.getScientificDegree().getId()) {
+                    teacher.setScientificDegree(teacherFromDB.getScientificDegree());
+                } else {
+                    teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
+                }
+            }
+        }
         return teacherRepository.save(teacher);
     }
 }
