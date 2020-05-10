@@ -69,7 +69,7 @@ public class TeacherController {
     public ResponseEntity addTeacher(@Valid @RequestBody TeacherInsertDTO teacherDTO) {
         try {
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
-            Teacher teacherAfterSave = teacherService.saveTeacher(teacher);
+            Teacher teacherAfterSave = teacherService.createTeacher(teacher);
             TeacherDTO teacherAfterSaveDTO = map(teacherAfterSave, TeacherDTO.class);
             return new ResponseEntity(teacherAfterSaveDTO, HttpStatus.CREATED);
         } catch (Exception e) {

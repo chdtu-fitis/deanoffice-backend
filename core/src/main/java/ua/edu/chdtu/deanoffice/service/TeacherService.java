@@ -73,12 +73,8 @@ public class TeacherService {
         teacherRepository.save(teachers);
     }
 
-    public Teacher saveTeacher(Teacher teacher) {
-        teacher.setPosition(positionRepository.findOne(teacher.getPosition().getId()));
-        teacher.setDepartment(departmentRepository.findOne(teacher.getDepartment().getId()));
-        if (teacher.getScientificDegree() != null) {
-            teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
-        }
+    public Teacher createTeacher(Teacher teacher) {
+        setPositionAndDepartmentAndScientificDegreeFromDBForCreate(teacher);
         return teacherRepository.save(teacher);
     }
 
@@ -89,25 +85,45 @@ public class TeacherService {
         if (teacherFromDB == null) {
             throw new OperationCannotBePerformedException("Викладача з вказаним ідентифікатором не існує!");
         } else {
-            if (teacher.getPosition().getId() == teacherFromDB.getPosition().getId()) {
-                teacher.setPosition(teacherFromDB.getPosition());
-            } else {
-                teacher.setPosition(positionRepository.findOne(teacher.getPosition().getId()));
-            }
-            if (teacher.getDepartment().getId() == teacherFromDB.getDepartment().getId()) {
-                teacher.setDepartment(teacherFromDB.getDepartment());
-            } else {
-                teacher.setDepartment(departmentRepository.findOne(teacher.getDepartment().getId()));
-            }
-            if (teacher.getScientificDegree()!= null) {
-                if (teacher.getScientificDegree().getId() == teacherFromDB.getScientificDegree().getId()) {
-                    teacher.setScientificDegree(teacherFromDB.getScientificDegree());
-                } else {
-                    teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
-                }
-            }
+            setPositionFromDBForUpdate(teacher, teacherFromDB);
+            setDepartmentFromDBForUpdate(teacher, teacherFromDB);
+            setScientificDegreeFromDBForUpdate(teacher, teacherFromDB);
         }
         return teacherRepository.save(teacher);
+    }
+
+    private void setPositionFromDBForUpdate(Teacher teacher, Teacher teacherFromDB) {
+        if (teacher.getPosition().getId() == teacherFromDB.getPosition().getId()) {
+            teacher.setPosition(teacherFromDB.getPosition());
+        } else {
+            teacher.setPosition(positionRepository.findOne(teacher.getPosition().getId()));
+        }
+    }
+
+    private void setDepartmentFromDBForUpdate(Teacher teacher, Teacher teacherFromDB) {
+        if (teacher.getDepartment().getId() == teacherFromDB.getDepartment().getId()) {
+            teacher.setDepartment(teacherFromDB.getDepartment());
+        } else {
+            teacher.setDepartment(departmentRepository.findOne(teacher.getDepartment().getId()));
+        }
+    }
+
+    private void setScientificDegreeFromDBForUpdate(Teacher teacher, Teacher teacherFromDB) {
+        if (teacher.getScientificDegree()!= null) {
+            if (teacher.getScientificDegree().getId() == teacherFromDB.getScientificDegree().getId()) {
+                teacher.setScientificDegree(teacherFromDB.getScientificDegree());
+            } else {
+                teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
+            }
+        }
+    }
+
+    private void setPositionAndDepartmentAndScientificDegreeFromDBForCreate(Teacher teacher) {
+        teacher.setPosition(positionRepository.findOne(teacher.getPosition().getId()));
+        teacher.setDepartment(departmentRepository.findOne(teacher.getDepartment().getId()));
+        if (teacher.getScientificDegree() != null) {
+            teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
+        }
     }
 }
 
