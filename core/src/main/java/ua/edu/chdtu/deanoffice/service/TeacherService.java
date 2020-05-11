@@ -109,8 +109,8 @@ public class TeacherService {
     }
 
     private void setScientificDegreeFromDBForUpdate(Teacher teacher, Teacher teacherFromDB) {
-        if (teacher.getScientificDegree()!= null) {
-            if (teacher.getScientificDegree().getId() == teacherFromDB.getScientificDegree().getId()) {
+        if (teacher.getScientificDegree() != null) {
+            if (teacherFromDB.getScientificDegree() != null && teacher.getScientificDegree().getId() == teacherFromDB.getScientificDegree().getId()) {
                 teacher.setScientificDegree(teacherFromDB.getScientificDegree());
             } else {
                 teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
