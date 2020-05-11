@@ -13,8 +13,8 @@ INSERT INTO scientific_degree(name, abbr, name_eng) VALUES ('доктор фіз
 INSERT INTO scientific_degree(name, abbr, name_eng) VALUES ('доктор хіміних наук', 'д.т.н.', 'Doctor of Chemical Science');
 
 ALTER TABLE teacher ADD COLUMN academic_title VARCHAR(25);
-ALTER TABLE teacher ADD COLUMN academic_title_eng VARCHAR(25);
 ALTER TABLE teacher ADD COLUMN scientific_degree_id INTEGER;
+ALTER TABLE teacher DROP COLUMN scientific_degree;
 
 ALTER TABLE teacher
   ADD CONSTRAINT FK_teacher_scientific_degree FOREIGN KEY (scientific_degree_id) references scientific_degree;
@@ -23,6 +23,8 @@ ALTER TABLE specialization DROP COLUMN applying_knowledge_and_understanding_outc
 ALTER TABLE specialization DROP COLUMN applying_knowledge_and_understanding_outcomes_eng;
 ALTER TABLE specialization DROP COLUMN knowledge_and_understanding_outcomes;
 ALTER TABLE specialization DROP COLUMN knowledge_and_understanding_outcomes_eng;
+ALTER TABLE specialization DROP COLUMN making_judgements_outcomes_eng;
+ALTER TABLE specialization DROP COLUMN making_judgements_outcomes;
 
 ALTER TABLE specialization ADD COLUMN program_head_id INTEGER;
 ALTER TABLE specialization
