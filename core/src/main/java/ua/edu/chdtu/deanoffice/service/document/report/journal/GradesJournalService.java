@@ -38,6 +38,7 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.util.SemesterUtil;
 
 import java.io.File;
@@ -247,7 +248,8 @@ public class GradesJournalService {
     }
 
     public File createCoursesAndPointsListsPdf(int degreeId, int year, TuitionForm tuitionForm,
-                                      int groupId, int facultyId) throws IOException, DocumentException {
+                                      int groupId) throws IOException, DocumentException {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
                 degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
         List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
@@ -380,8 +382,7 @@ public class GradesJournalService {
         int borderNumber = columnsNumber;
 
         for (int i = 0; i < studentsGrade.size(); i++) {
-            PdfPCell grade = new PdfPCell(
-                    new Phrase(String.valueOf(studentsGrade.get(i)), boldFont));
+            PdfPCell grade = new PdfPCell(new Phrase(String.valueOf(studentsGrade.get(i).getPoints()), boldFont));
             grade.setFixedHeight(8);
             grade.setPadding(0);
             grade.setHorizontalAlignment(Element.ALIGN_CENTER);
