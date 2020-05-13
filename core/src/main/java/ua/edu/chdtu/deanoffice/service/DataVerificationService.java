@@ -134,17 +134,4 @@ public class DataVerificationService {
             }
         }
     }
-
-    public void isCorrectTeacher(Teacher teacher) throws OperationCannotBePerformedException {
-        String errorMessage = null;
-        errorMessage = (teacher.getName() == null) ? "Не вказано ім'я!" : errorMessage;
-        errorMessage = (teacher.getSex() == null) ? "Не вказана стать!" : errorMessage;
-        errorMessage = (teacher.getSurname() == null) ? "Не вказано прізвище!" : errorMessage;
-        errorMessage = (teacher.getDepartment() == null) ? "Не вказана кафедра!" : errorMessage;
-        errorMessage = (teacher.getDepartment().getId() == 0) ? "Вказана неіснуюча кафедра!" : errorMessage;
-        errorMessage = (teacher.getPosition() == null) ? "Не вказана посада!" : errorMessage;
-        errorMessage = (teacher.getPosition().getId() == 0) ? "Вказана неіснуюча посада!" : errorMessage;
-        if (errorMessage != null)
-            throw new OperationCannotBePerformedException(errorMessage);
-    }
 }
