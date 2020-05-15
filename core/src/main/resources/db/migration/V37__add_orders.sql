@@ -34,7 +34,7 @@ create table legal_basis
     active           boolean not null default true
 );
 ALTER TABLE legal_basis
-    ADD CONSTRAINT uk_legal_basis_text_and_introduced_on UNIQUE (legal_basis_text, introduced_on);
+    ADD CONSTRAINT uk_legal_basis_introduced_on UNIQUE (introduced_on);
 
 -- People who are listed in the bottom of each order (approvers). Will be used to create a set of approvers
 -- (order_approve_template). May be improved with faculty id inclusion (to restrict user from seeing templates of other faculties)
