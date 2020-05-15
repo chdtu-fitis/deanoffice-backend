@@ -19,11 +19,11 @@ public class ApproveTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private SingleApprover executionControl;
-    private SingleApprover headApprover;
-    private SingleApprover introducedBy;
-    private SingleApprover approver;
-    private Faculty faculty;
-    private boolean active;
+//    private SingleApprover executionControl;
+//    private SingleApprover headApprover;
+//    private SingleApprover introducedBy;
+//    private SingleApprover approver;
+//    private Faculty faculty;
+//    private boolean active;
 
 }

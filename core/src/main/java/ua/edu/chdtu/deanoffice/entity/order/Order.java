@@ -21,28 +21,28 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Version version;
-
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Faculty faculty;
-
-    private LocalDate date;
-
-    private String name;
-
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private OrderReason reason;
-
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private ApproveTemplate approveTemplate;
-
-    @OneToOne
-    private UserInputSet userInputSet;
-
-    private String comment;
-
-    private Boolean active;
-
-    private Boolean signed;
+//    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private Version version;
+//
+//    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private Faculty faculty;
+//
+//    private LocalDate date;
+//
+//    private String name;
+//
+//    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private OrderReason reason;
+//
+//    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private ApproveTemplate approveTemplate;
+//
+//    @OneToOne
+//    private UserInputSet userInputSet;
+//
+//    private String comment;
+//
+//    private Boolean active;
+//
+//    private Boolean signed;
 }

@@ -105,7 +105,7 @@ create table orders
 );
 
 ALTER TABLE orders
-    ADD CONSTRAINT fk_orders_order_template_version_id FOREIGN KEY (order_template_version_id) REFERENCES order_templateq_version (id);
+    ADD CONSTRAINT fk_orders_order_template_version_id FOREIGN KEY (order_template_version_id) REFERENCES order_template_version (id);
 ALTER TABLE orders
     ADD CONSTRAINT fk_orders_faculty_id FOREIGN KEY (faculty_id) REFERENCES faculty (id);
 ALTER TABLE orders
@@ -118,44 +118,42 @@ ALTER TABLE orders
     ADD CONSTRAINT uk_orders_faculty_id_and_order_number_and_order_date UNIQUE (faculty_id, order_number, order_date);
 
 -- Paragraphs in order; can be in sections
-ALTER TABLE student_expel ADD COLUMN order_id integer not null;
-ALTER TABLE student_expel ADD COLUMN tuition_form varchar(10) not null;
-ALTER TABLE student_expel ADD COLUMN tuition_term varchar(10) not null;
-ALTER TABLE student_expel ADD COLUMN specialization_id integer not null;
-ALTER TABLE student_expel ADD COLUMN speciality_id integer not null;
-ALTER TABLE student_expel ADD COLUMN reason_document varchar(150) not null;
+ALTER TABLE student_expel ADD COLUMN order_id integer not null default 0;
+ALTER TABLE student_expel ADD COLUMN tuition_form varchar(10) not null default 'FULL_TIME';
+ALTER TABLE student_expel ADD COLUMN tuition_term varchar(10) not null default 'REGULAR';
+ALTER TABLE student_expel ADD COLUMN specialization_id integer not null default 0;
+ALTER TABLE student_expel ADD COLUMN speciality_id integer not null default 0;
+ALTER TABLE student_expel ADD COLUMN reason_document varchar(150) not null default '';
 ALTER TABLE student_expel ADD COLUMN section varchar(50) not null default '';
-ALTER TABLE student_expel ADD COLUMN item_text varchar(1000) not null;
+ALTER TABLE student_expel ADD COLUMN item_text varchar(1000) not null default '';
 
-ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_order_id FOREIGN KEY (order_id) REFERENCES orders (id);
-ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_specialization_id FOREIGN KEY (specialization_id) REFERENCES specialization (id);
-ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_speciality_id FOREIGN KEY (speciality_id) REFERENCES speciality (id);
-ALTER TABLE student_expel ADD CONSTRAINT uk_student_expel_order_id_student_degree_id UNIQUE (order_id, student_degree_id);
+-- ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_order_id FOREIGN KEY (order_id) REFERENCES orders (id);
+-- ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_specialization_id FOREIGN KEY (specialization_id) REFERENCES specialization (id);
+-- ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_speciality_id FOREIGN KEY (speciality_id) REFERENCES speciality (id);
+-- ALTER TABLE student_expel ADD CONSTRAINT uk_student_expel_order_id_student_degree_id UNIQUE (order_id, student_degree_id);
 
-create table name_cases
-(
+create table name_case(
     id SERIAL primary key,
-    nominative    varchar(25),
-    genitive      varchar(25),
-    dative        varchar(25),
-    accusative    varchar(25),
-    instrumental  varchar(25),
-    prepositional varchar(25),
+    nominative    varchar(25) not null,
+    genitive      varchar(25) not null,
+    dative        varchar(25) not null,
+    accusative    varchar(25) not null,
+    instrumental  varchar(25) not null,
+    prepositional varchar(25) not null
 );
 
-create table surname_cases
-(
+create table surname_case(
     id SERIAL primary key,
-    male_nominative   varchar(25),
-    female_nominative varchar(25),
-    male_genitive     varchar(25),
-    female_genitive   varchar(25),
-    male_dative       varchar(25),
-    female_dative     varchar(25),
-    male_accusative    varchar(25),
-    female_accusative    varchar(25),
-    male_instrumental  varchar(25),
-    female_instrumental  varchar(25),
-    male_prepositional varchar(25),
-    female_prepositional varchar(25),
+    male_nominative     varchar(25) not null,
+    female_nominative   varchar(25) not null,
+    male_genitive       varchar(25) not null,
+    female_genitive     varchar(25) not null,
+    male_dative         varchar(25) not null,
+    female_dative       varchar(25) not null,
+    male_accusative     varchar(25) not null,
+    female_accusative   varchar(25) not null,
+    male_instrumental   varchar(25) not null,
+    female_instrumental varchar(25) not null,
+    male_prepositional  varchar(25) not null,
+    female_prepositional varchar(25) not null
 );
