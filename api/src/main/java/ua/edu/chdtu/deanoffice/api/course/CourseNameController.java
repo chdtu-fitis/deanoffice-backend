@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.course;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ public class CourseNameController {
         this.courseNameService = courseNameService;
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/unused")
     public ResponseEntity getUnusedCoursesNames() {
         try {
@@ -37,6 +39,7 @@ public class CourseNameController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @DeleteMapping
     public ResponseEntity deleteCoursesNamesByIds(@RequestParam("ids") List<Integer> ids) {
         try {
@@ -47,6 +50,7 @@ public class CourseNameController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/similar")
     public ResponseEntity getSimilarCoursesNames() {
         Map<CourseName, List<CourseName>> similarCoursesNames = courseNameService.getSimilarCoursesNames();

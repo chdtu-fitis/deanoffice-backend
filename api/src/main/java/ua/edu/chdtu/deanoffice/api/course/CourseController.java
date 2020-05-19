@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.course;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -375,6 +376,7 @@ public class CourseController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/course/unused")
     public ResponseEntity getUnusedCourses(
             @RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
@@ -397,6 +399,7 @@ public class CourseController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/courses")
     public ResponseEntity deleteCoursesByIds(@RequestParam List<Integer> ids) {
         try {
@@ -408,6 +411,7 @@ public class CourseController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/credits/wrong")
     public ResponseEntity getCoursesWithWrongCredits() {
         try {
@@ -418,6 +422,7 @@ public class CourseController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @PutMapping("/credits/wrong")
     public ResponseEntity updateCourseCreditsByIds(@RequestParam("ids") List<Integer> ids) {
         try {
@@ -428,6 +433,7 @@ public class CourseController {
         }
     }
 
+    @Secured("ROLE_ADMIN")
     @PostMapping("/merge")
     public ResponseEntity mergeCoursesByName(@RequestBody Map<Integer, List<Integer>> idToId) {
         try {
