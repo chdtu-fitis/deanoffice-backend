@@ -9,6 +9,7 @@ create table order_type
 );
 ALTER TABLE order_type
     ADD CONSTRAINT uk_order_type_db_table_name_and_introduced_on UNIQUE (db_table_name, introduced_on);
+
 INSERT INTO order_type(db_table_name, text_in_order, introduced_on, active) VALUES ('student_transfer', 'про переведення', '2020/01/01', true);
 INSERT INTO order_type(db_table_name, text_in_order, introduced_on, active) VALUES ('student_expel', 'про відрахування', '2020/01/01', true);
 
@@ -19,6 +20,7 @@ create table order_template_version
     id            SERIAL primary key,
     template_name varchar(40) not null,
     order_type_id int not null,
+    paragraph_template varchar(1200) not null,
     introduced_on date not null,
     active        boolean not null default true
 );
@@ -26,23 +28,9 @@ ALTER TABLE order_template_version
     ADD CONSTRAINT fk_order_template_version_order_type_id FOREIGN KEY (order_type_id) REFERENCES order_type (id);
 ALTER TABLE order_template_version
     ADD CONSTRAINT uk_order_template_version_order_type_and_introduced_on UNIQUE (order_type_id, introduced_on);
+ALTER TABLE order_template_version
+    ADD CONSTRAINT uk_order_template_template_name UNIQUE (template_name);
 
---legal basis - a paragraph which refers to laws on which the order is based
-create table order_legal_basis
-(
-    id SERIAL primary key,
-    legal_basis_text varchar(600) not null,
-    introduced_on    date not null,
-    active           boolean not null default true
-);
-ALTER TABLE order_legal_basis
-    ADD CONSTRAINT uk_order_legal_basis_introduced_on UNIQUE (introduced_on);
-ALTER TABLE order_legal_basis
-    ADD CONSTRAINT uk_order_legal_basis_text UNIQUE (legal_basis_text);
-INSERT INTO order_legal_basis(legal_basis_text, introduced_on, active) VALUES (
-'Керуючись Законом України «Про Вищу освіту» від 01.07.2014 № 1556-VII та Положенням про порядок переведення, відрахування та поновлення студентів вищих закладів освіти, затвердженого наказом  Міністерства освіти України № 245 від 15 липня 1996 р. та відповідно до статті 46 Закону України «Про вищу освіту».',
-'2020/01/01', true
-);
 -- People who are listed in the bottom of each order (approvers). Will be used to create a set of approvers
 -- (order_approve_template). May be improved with faculty id inclusion (to restrict user from seeing templates of other faculties)
 create table order_approver
@@ -139,28 +127,3 @@ ALTER TABLE student_expel ADD COLUMN item_text varchar(1000) not null default ''
 -- ALTER TABLE student_expel ADD CONSTRAINT fk_student_expel_speciality_id FOREIGN KEY (speciality_id) REFERENCES speciality (id);
 -- ALTER TABLE student_expel ADD CONSTRAINT uk_student_expel_order_id_student_degree_id UNIQUE (order_id, student_degree_id);
 
-create table name_cases(
-    id SERIAL primary key,
-    nominative    varchar(25) not null,
-    genitive      varchar(25) not null,
-    dative        varchar(25) not null,
-    accusative    varchar(25) not null,
-    instrumental  varchar(25) not null,
-    prepositional varchar(25) not null
-);
-
-create table surname_cases(
-    id SERIAL primary key,
-    male_nominative     varchar(25) not null,
-    female_nominative   varchar(25) not null,
-    male_genitive       varchar(25) not null,
-    female_genitive     varchar(25) not null,
-    male_dative         varchar(25) not null,
-    female_dative       varchar(25) not null,
-    male_accusative     varchar(25) not null,
-    female_accusative   varchar(25) not null,
-    male_instrumental   varchar(25) not null,
-    female_instrumental varchar(25) not null,
-    male_prepositional  varchar(25) not null,
-    female_prepositional varchar(25) not null
-);
