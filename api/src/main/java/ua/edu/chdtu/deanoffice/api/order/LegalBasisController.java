@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.entity.order.LegalBasis;
 import ua.edu.chdtu.deanoffice.service.order.LegalBasisService;
 
+import java.util.List;
+
 @RestController("/orders")
 public class LegalBasisController {
     private LegalBasisService legalBasisService;
@@ -17,6 +19,12 @@ public class LegalBasisController {
     @GetMapping("/legal-basis")
     public ResponseEntity<LegalBasis> getActiveLegalBasis() {
         LegalBasis legalBasis = legalBasisService.getActiveLegalBasis();
+        return ResponseEntity.ok(legalBasis);
+    }
+    
+    @GetMapping("/legal-basis-old")
+    public ResponseEntity<List<LegalBasis>> getNotActiveLegalBasis() {
+        List<LegalBasis> legalBasis = legalBasisService.getNotActiveLegalBasis();
         return ResponseEntity.ok(legalBasis);
     }
 }
