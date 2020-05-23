@@ -17,7 +17,7 @@ import java.util.List;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
-@RestController("/orders2")
+@RestController
 public class OrderApproverController {
     private OrderApproverService orderApproverService;
 
@@ -25,13 +25,13 @@ public class OrderApproverController {
         this.orderApproverService = orderApproverService;
     }
 
-    @GetMapping("/approvers")
+    @GetMapping("/orders/approvers")
     public ResponseEntity<List<OrderApproverDTO>> getOrderApprovers() {
         List<OrderApprover> orderApprovers = orderApproverService.getApproversForFaculty();
         return ResponseEntity.ok(strictMap(orderApprovers, OrderApproverDTO.class));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/orders/{id}")
     public ResponseEntity deleteApprover(@PathVariable("id") int id) {
         try {
             OrderApprover orderApprover = orderApproverService.getApproverById(id);
@@ -42,7 +42,7 @@ public class OrderApproverController {
         }
     }
 
-    @PostMapping("/approver")
+    @PostMapping("/orders/approver")
     public ResponseEntity createApprover(@RequestBody OrderApproverDTO orderApproverDTO) {
         try {
             OrderApprover newApprover = map(orderApproverDTO, OrderApprover.class);
