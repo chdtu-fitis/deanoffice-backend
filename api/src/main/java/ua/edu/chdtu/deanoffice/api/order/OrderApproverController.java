@@ -11,7 +11,9 @@ import ua.edu.chdtu.deanoffice.api.course.CourseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.order.dto.OrderApproverDTO;
+import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApprover;
+import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.order.OrderApproverService;
 import java.util.List;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -20,9 +22,11 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 @RestController
 public class OrderApproverController {
     private OrderApproverService orderApproverService;
+    private FacultyService facultyService;
 
-    public OrderApproverController(OrderApproverService orderApproverService) {
+    public OrderApproverController(OrderApproverService orderApproverService, FacultyService facultyService) {
         this.orderApproverService = orderApproverService;
+        this.facultyService = facultyService;
     }
 
     @GetMapping("/orders/approvers")
@@ -46,6 +50,8 @@ public class OrderApproverController {
     public ResponseEntity createApprover(@RequestBody OrderApproverDTO orderApproverDTO) {
         try {
             OrderApprover newApprover = map(orderApproverDTO, OrderApprover.class);
+            Faculty faculty = facultyService.getById(orderApproverDTO.getFaculty().getId());
+            newApprover.setFaculty(faculty);
             orderApproverService.create(newApprover);
             return ResponseEntity.ok(newApprover);
         } catch (Exception exception) {
