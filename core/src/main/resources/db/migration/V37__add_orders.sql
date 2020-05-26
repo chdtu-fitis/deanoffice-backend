@@ -45,6 +45,13 @@ ALTER TABLE order_approver
     ADD CONSTRAINT fk_order_approver_faculty_id FOREIGN KEY (faculty_id) REFERENCES faculty (id);
 ALTER TABLE order_approver
     ADD CONSTRAINT uk_order_approver_position_and_full_name UNIQUE (position, full_name);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Ректор', 'Григор Олег Олександрович', null, true);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Головний бухгалтер', 'Антоненко Яків Степанович', null, true);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Провідний  юрисконсульт', 'Півненко Володимир Юрійович', null, true);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Уповноважена особа з питань запобігання та виявлення корупції', 'Власенко В.В.', null, true);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Начальник відділу кадрів', 'Кутах Андрій Євгенович', null, true);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Начальник навчально-методичного відділу', 'Мильніченко Сергій Михайлович', null, true);
+INSERT INTO order_approver(position, full_name, faculty_id, active) VALUES ('Декан ФІТІС', 'Трегубенко Ірина Борисівна', 1, true);
 
 -- User will choose among templates to paste suitable one. Needs discussion on structure and further sequencing in order.
 create table order_approve_template
