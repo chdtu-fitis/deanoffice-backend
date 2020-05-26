@@ -20,6 +20,13 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
             @Param("facultyId") int facultyId
     );
 
+    @Query("SELECT t FROM Teacher t WHERE t.active = true AND t.department.faculty.id = :facultyId AND lower(t.surname) like :searchStr% " +
+            "ORDER BY t.surname, t.name, t.patronimic")
+    List<Teacher> findActiveBySurnamePartAndFacultyId(
+            @Param("searchStr") String searchStr,
+            @Param("facultyId") int facultyId
+    );
+
     @Query("SELECT t FROM Teacher t WHERE t.active = :active " +
             "ORDER BY t.surname, t.name, t.patronimic")
     List<Teacher> findAllByActive(
