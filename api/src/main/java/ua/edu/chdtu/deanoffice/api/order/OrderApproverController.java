@@ -31,7 +31,7 @@ public class OrderApproverController {
         return ResponseEntity.ok(strictMap(orderApprovers, OrderApproverDTO.class));
     }
 
-    @DeleteMapping("/orders/{id}")
+    @DeleteMapping("/orders/approvers/{id}")
     public ResponseEntity deleteApprover(@PathVariable("id") int id) {
         try {
             OrderApprover orderApprover = orderApproverService.getApproverById(id);
@@ -42,7 +42,7 @@ public class OrderApproverController {
         }
     }
 
-    @PostMapping("/orders/approver")
+    @PostMapping("/orders/approvers")
     public ResponseEntity createApprover(@RequestBody OrderApproverDTO orderApproverDTO) {
         try {
             OrderApprover newApprover = map(orderApproverDTO, OrderApprover.class);
