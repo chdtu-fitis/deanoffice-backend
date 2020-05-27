@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
-
+import ua.edu.chdtu.deanoffice.api.teacher.TeacherDTO;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -31,6 +31,7 @@ public class SpecializationDTO {
     private BigDecimal paymentFulltime;
     private BigDecimal paymentExtramural;
     @JsonView(SpecializationView.Extended.class)
+    private TeacherDTO programHead;
     private String educationalProgramHeadName;
     private String educationalProgramHeadNameEng;
     private String educationalProgramHeadInfo;
@@ -38,6 +39,7 @@ public class SpecializationDTO {
     private String certificateNumber;
     private Date certificateDate;
 
+    private Integer programHeadId;
     private Integer specialityId;
     private Integer degreeId;
     private Integer departmentId;

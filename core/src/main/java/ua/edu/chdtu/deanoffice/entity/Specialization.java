@@ -25,6 +25,8 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private Faculty faculty;
     @ManyToOne
     private Department department;
+    @ManyToOne
+    private Teacher programHead;
     private String code;
     private String qualification;
     private String qualificationEng;
