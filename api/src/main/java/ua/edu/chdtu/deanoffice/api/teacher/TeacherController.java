@@ -35,11 +35,11 @@ public class TeacherController {
         }
     }
 
-    @GetMapping("/teachers-short/search")
+    @GetMapping("/teachers-full/search")
     public ResponseEntity getSearchedFacultyActiveTeachersShort(@RequestParam String searchStr) {
         try {
             List<Teacher> teachers = teacherService.getActiveFacultyTeachersBySurnamePart(searchStr);
-            return ResponseEntity.ok(map(teachers, PersonFullNameDTO.class));
+            return ResponseEntity.ok(map(teachers, TeacherDTO.class));
         } catch (Exception e) {
             return handleException(e);
         }
