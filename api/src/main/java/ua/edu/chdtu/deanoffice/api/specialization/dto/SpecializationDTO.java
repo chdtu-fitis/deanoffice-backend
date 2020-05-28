@@ -39,7 +39,6 @@ public class SpecializationDTO {
     private String certificateNumber;
     private Date certificateDate;
 
-    private Integer programHeadId;
     private Integer specialityId;
     private Integer degreeId;
     private Integer departmentId;

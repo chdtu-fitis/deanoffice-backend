@@ -10,5 +10,5 @@ public class TeacherDTO extends TeacherBasicDTO {
     private int id;
     private NamedDTO department;
     private NamedDTO position;
-    private NamedDTO scientificDegree;
+    private ScientificDegreeDTO scientificDegree;
 }
