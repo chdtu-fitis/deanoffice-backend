@@ -61,7 +61,7 @@ public class OrderApproverController {
         }
     }
 
-    @PutMapping("/orders/approvers/restore/{id}")
+    @PutMapping("/orders/approvers/{id}/restore")
     public ResponseEntity restoreApprover(@PathVariable("id") int id) {
         try {
             OrderApprover orderApprover = orderApproverService.getApproverById(id);

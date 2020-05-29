@@ -17,7 +17,7 @@ public class OrderApproverService {
 
     public List<OrderApprover> getApproversForFaculty(boolean active) {
         int facultyId = FacultyUtil.getUserFacultyIdInt();
-        return orderApproverRepository.findApproversForFacultyAndActive(active, facultyId);
+        return orderApproverRepository.findApproversForFacultyByActive(active, facultyId);
     }
 
     public OrderApprover getApproverById(int id) {
