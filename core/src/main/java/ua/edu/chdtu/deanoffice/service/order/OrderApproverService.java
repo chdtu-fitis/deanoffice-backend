@@ -15,15 +15,16 @@ public class OrderApproverService {
         this.orderApproverRepository = orderApproverRepository;
     }
 
-    public List<OrderApprover> getApproversForFaculty() {
-        return orderApproverRepository.findApproversForFaculty(FacultyUtil.getUserFacultyIdInt());
+    public List<OrderApprover> getApproversForFaculty(boolean active) {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
+        return orderApproverRepository.findApproversForFacultyAndActive(active, facultyId);
     }
 
     public OrderApprover getApproverById(int id) {
         return orderApproverRepository.findOne(id);
     }
 
-//    @FacultyAuthorized
+    //    @FacultyAuthorized
     public void delete(OrderApprover orderApprover) throws UnauthorizedFacultyDataException {
         orderApprover.setActive(false);
         orderApproverRepository.save(orderApprover);
@@ -32,5 +33,10 @@ public class OrderApproverService {
     public OrderApprover create(OrderApprover orderApprover) {
         orderApprover.setActive(true);
         return this.orderApproverRepository.save(orderApprover);
+    }
+
+    public void restore(OrderApprover orderApprover) {
+        orderApprover.setActive(true);
+        orderApproverRepository.save(orderApprover);
     }
 }
