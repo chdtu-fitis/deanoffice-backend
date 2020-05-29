@@ -30,6 +30,7 @@ public class OrderApproverService {
     }
 
     public OrderApprover create(OrderApprover orderApprover) {
+        orderApprover.setActive(true);
         return this.orderApproverRepository.save(orderApprover);
     }
 }
