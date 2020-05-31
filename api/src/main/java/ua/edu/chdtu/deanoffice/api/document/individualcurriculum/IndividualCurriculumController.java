@@ -14,7 +14,7 @@ import java.util.List;
 public class IndividualCurriculumController {
     @GetMapping
     public ResponseEntity generateIndividualCurriculum(
-            @RequestParam(required = false, defaultValue = "0") Integer groupId,
+            @RequestParam(required = false, defaultValue = "0") int groupId,
             @RequestParam(required = false) List<Integer> studentsIds
             ) {
         return new ResponseEntity(HttpStatus.OK);
