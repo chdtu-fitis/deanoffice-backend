@@ -1,34 +1,26 @@
 -- Види наказів: наказ про відрахування, про переведення тощо
-create table order_type
+
+-- INSERT INTO order_type(db_table_name, text_in_order, introduced_on, active) VALUES ('student_transfer', 'про переведення', '2020/01/01', true);
+-- INSERT INTO order_type(db_table_name, text_in_order, introduced_on, active) VALUES ('student_expel', 'про відрахування', '2020/01/01', true);
+
+-- Used for cases when an order template changes (and we need to give user an previously generated version)
+-- template_name -  версія темплейта ордера(docx) - форма документа може змінюваатись з часом
+
+create table order_template_version
 (
     id            SERIAL primary key,
     db_table_name varchar(50) not null,
     text_in_order varchar(100) not null,
-    introduced_on date not null,
-    active        boolean not null default true
-);
-ALTER TABLE order_type
-    ADD CONSTRAINT uk_order_type_db_table_name_and_introduced_on UNIQUE (db_table_name, introduced_on);
-
-INSERT INTO order_type(db_table_name, text_in_order, introduced_on, active) VALUES ('student_transfer', 'про переведення', '2020/01/01', true);
-INSERT INTO order_type(db_table_name, text_in_order, introduced_on, active) VALUES ('student_expel', 'про відрахування', '2020/01/01', true);
-
--- Used for cases when an order template changes (and we need to give user an previously generated version)
--- template_name -  версія темплейта ордера(docx) - форма документа може змінюваатись з часом
-create table order_template_version
-(
-    id            SERIAL primary key,
     template_name varchar(40) not null,
-    order_type_id int not null,
     paragraph_template varchar(1200) not null,
     introduced_on date not null,
     active        boolean not null default true
 );
+-- ALTER TABLE order_template_version
+--     ADD CONSTRAINT fk_order_template_version_order_type_id FOREIGN KEY (order_type_id) REFERENCES order_type (id);
 ALTER TABLE order_template_version
-    ADD CONSTRAINT fk_order_template_version_order_type_id FOREIGN KEY (order_type_id) REFERENCES order_type (id);
-ALTER TABLE order_template_version
-    ADD CONSTRAINT uk_order_template_version_order_type_and_introduced_on UNIQUE (order_type_id, introduced_on);
-ALTER TABLE order_template_version
+--     ADD CONSTRAINT uk_order_template_version_order_type_and_introduced_on UNIQUE (order_type_id, introduced_on);
+-- ALTER TABLE order_template_version
     ADD CONSTRAINT uk_order_template_template_name UNIQUE (template_name);
 
 -- People who are listed in the bottom of each order (approvers). Will be used to create a set of approvers
@@ -98,9 +90,9 @@ create table orders
     faculty_id                int     not null,
     order_date                date    not null,
     order_number              varchar(15) not null,
-    order_type_id             int     not null,
     order_approve_template_id int     not null,
     order_control_template_id integer,
+    order_paragraph           varchar(40000) not null,
     comment                   varchar(200),
     active                    boolean not null default true,
     signed                    boolean not null default false
@@ -110,8 +102,8 @@ ALTER TABLE orders
     ADD CONSTRAINT fk_orders_order_template_version_id FOREIGN KEY (order_template_version_id) REFERENCES order_template_version (id);
 ALTER TABLE orders
     ADD CONSTRAINT fk_orders_faculty_id FOREIGN KEY (faculty_id) REFERENCES faculty (id);
-ALTER TABLE orders
-    ADD CONSTRAINT fk_orders_order_type_id FOREIGN KEY (order_type_id) REFERENCES order_type (id);
+-- ALTER TABLE orders
+--     ADD CONSTRAINT fk_orders_order_type_id FOREIGN KEY (order_type_id) REFERENCES order_type (id);
 ALTER TABLE orders
     ADD CONSTRAINT fk_orders_approve_template_id FOREIGN KEY (order_approve_template_id) REFERENCES order_approve_template (id);
 ALTER TABLE orders

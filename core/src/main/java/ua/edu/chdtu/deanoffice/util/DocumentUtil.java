@@ -1,9 +1,12 @@
 package ua.edu.chdtu.deanoffice.util;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 public class DocumentUtil {
+
+    public static final String PLACEHOLDER = "&PH";
+
     public static String getJavaTempDirectory() {
         return System.getProperty("java.io.tmpdir");
     }
@@ -17,5 +20,4 @@ public class DocumentUtil {
                 .replaceAll(" +", " ")
                 .replaceAll("[^a-zA-Z0-9_-]+", "");
     }
-
 }

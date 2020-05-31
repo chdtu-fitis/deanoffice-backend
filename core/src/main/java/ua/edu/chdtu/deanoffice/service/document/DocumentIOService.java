@@ -21,6 +21,7 @@ import java.util.Date;
 public class DocumentIOService {
 
     public static final String TEMPLATES_PATH = "/docs/templates/";
+    public static final String ORDERS_PATH = "/docs/templates/order/";
 
     public WordprocessingMLPackage loadTemplate(String name) throws Docx4JException {
         InputStream inputStream = getClass().getResourceAsStream(name);
@@ -60,7 +61,7 @@ public class DocumentIOService {
     private File saveDocument(Object document, String fileName, FileFormatEnum format)
             throws Docx4JException, FileNotFoundException {
 
-        String filePath = getJavaTempDirectory() + "/" + cleanFileName(fileName) + getFileCreationDateAndTime();
+        String filePath = cleanFileName(fileName) + getFileCreationDateAndTime();
         File documentFile = null;
 
         if (document instanceof WordprocessingMLPackage) {
