@@ -21,7 +21,7 @@ public class IndividualCurriculumService {
         this.studentDegreeService = studentDegreeService;
     }
 
-    public File createIndividualCurriculumDocx(Integer groupId, List<Integer> studentIds) {
+    public File createIndividualCurriculumDocx(int groupId, List<Integer> studentIds) {
         Set<StudentDegree> studentDegrees = getStudentDegreesByGroup(groupId);
         studentDegrees.addAll(getStudentDegreesByStudentIds(studentIds));
 
@@ -29,10 +29,10 @@ public class IndividualCurriculumService {
         return null;
     }
 
-    private Set<StudentDegree> getStudentDegreesByGroup(Integer groupId) {
+    private Set<StudentDegree> getStudentDegreesByGroup(int groupId) {
         Set<StudentDegree> degrees = new HashSet<>();
 
-        if (Objects.nonNull(groupId) && groupId > 0) {
+        if (groupId > 0) {
             degrees.addAll(studentDegreeService.getAllByGroupId(groupId));
         }
 
