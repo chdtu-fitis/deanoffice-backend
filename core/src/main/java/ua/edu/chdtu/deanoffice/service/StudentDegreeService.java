@@ -33,6 +33,10 @@ public class StudentDegreeService {
         this.gradeRepository = gradeRepository;
     }
 
+    public List<StudentDegree> getByStudentIds(List<Integer> studentIds) {
+        return studentDegreeRepository.findAllByStudentIds(studentIds);
+    }
+
     public StudentDegree getById(Integer id) {
         return studentDegreeRepository.getById(id);
     }
