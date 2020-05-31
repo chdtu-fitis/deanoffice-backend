@@ -18,7 +18,7 @@ import java.util.Set;
 
 @Service
 public class IndividualCurriculumService {
-    private static final String FILE_NAME = "Individual curriculum of the higher educators";
+    private static final String FILE_NAME = "Individual_curriculum_of_the_higher_educators";
 
     private final StudentDegreeService studentDegreeService;
     private final IndividualCurriculumFillTemplateService fillTemplateService;
