@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/documents/session-report")
 public class SessionReportController {
 
-    
+
 
 }
