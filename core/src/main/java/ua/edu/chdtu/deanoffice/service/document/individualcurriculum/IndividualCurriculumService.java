@@ -5,12 +5,16 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
 
 @Service
 public class IndividualCurriculumService {
+    private static final String FILE_NAME = "Individual curriculum of the higher educators";
+
     private final StudentDegreeService studentDegreeService;
 
     public IndividualCurriculumService(StudentDegreeService studentDegreeService) {
@@ -18,14 +22,15 @@ public class IndividualCurriculumService {
     }
 
     public File createIndividualCurriculumDocx(Integer groupId, List<Integer> studentIds) {
-        if (Objects.nonNull(groupId)) {
+        Set<StudentDegree> studentDegrees = getStudentDegreesByGroup(groupId);
+        studentDegrees.addAll(getStudentDegreesByStudentIds(studentIds));
 
-        }
+
         return null;
     }
 
-    private List<StudentDegree> getStudentDegreesByGroup(Integer groupId) {
-        List<StudentDegree> degrees = new ArrayList<>();
+    private Set<StudentDegree> getStudentDegreesByGroup(Integer groupId) {
+        Set<StudentDegree> degrees = new HashSet<>();
 
         if (Objects.nonNull(groupId) && groupId > 0) {
             degrees.addAll(studentDegreeService.getAllByGroupId(groupId));
@@ -34,8 +39,8 @@ public class IndividualCurriculumService {
         return degrees;
     }
 
-    private List<StudentDegree> getStudentDegreesByStudentIds(List<Integer> studentIds) {
-        List<StudentDegree> degrees = new ArrayList<>();
+    private Set<StudentDegree> getStudentDegreesByStudentIds(List<Integer> studentIds) {
+        Set<StudentDegree> degrees = new HashSet<>();
 
         if (Objects.nonNull(studentIds) && studentIds.size() > 0) {
             degrees.addAll(studentDegreeService.getByStudentIds(studentIds));
