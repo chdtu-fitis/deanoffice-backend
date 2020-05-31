@@ -50,8 +50,7 @@ create table order_approve_template
 (
     id SERIAL primary key,
     main_approver_id integer not null,
-    university_approver_ids integer[] not null,
-    faculty_approver_ids integer[] not null,
+    approvers_ids integer[] not null,
     initiator_approver_id integer not null,
     faculty_id integer not null,
     active boolean not null default true
