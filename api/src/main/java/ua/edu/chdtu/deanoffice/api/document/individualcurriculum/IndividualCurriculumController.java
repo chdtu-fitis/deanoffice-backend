@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.individualstudyplan;
+package ua.edu.chdtu.deanoffice.api.document.individualcurriculum;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/documents/individual-curriculum")
-public class IndividualStudyPlanController {
+public class IndividualCurriculumController {
     @GetMapping
     public ResponseEntity generateIndividualCurriculum(
             @RequestParam(required = false, defaultValue = "0") Integer groupId,
