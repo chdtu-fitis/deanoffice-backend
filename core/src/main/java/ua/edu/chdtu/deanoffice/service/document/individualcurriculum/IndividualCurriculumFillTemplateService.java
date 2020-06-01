@@ -152,14 +152,14 @@ public class IndividualCurriculumFillTemplateService {
         List<CourseForGroup> springSemester =
                 courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semesters.get(1));
 
-        fillCourseTable(template, autumnSemester, STARTING_ROW_INDEX_AUTUMN_TABLE, "N", "CourseName");
-        fillCourseTable(template, springSemester, STARTING_ROW_INDEX_SPRING_TABLE + autumnSemester.size(), "Nn", "CourseNamen");
+        fillCourseTable(template, autumnSemester, STARTING_ROW_INDEX_AUTUMN_TABLE);
+        fillCourseTable(template, springSemester, STARTING_ROW_INDEX_SPRING_TABLE + autumnSemester.size());
 
         removeUnfilledPlaceholders(template);
     }
 
     private void fillCourseTable(WordprocessingMLPackage template, List<CourseForGroup> courseForGroups,
-                                 int startingRowIndex, String numMark, String cn) {
+                                 int startingRowIndex) {
         Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
 
         if (!Objects.nonNull(tempTable)) {
@@ -177,8 +177,8 @@ public class IndividualCurriculumFillTemplateService {
             Course course = courseForGroup.getCourse();
 
             Map<String, String> replacements = new HashMap<>();
-            replacements.put(numMark, String.valueOf(numberOfRow));
-            replacements.put(cn, course.getCourseName().getName());
+            replacements.put("N", String.valueOf(numberOfRow));
+            replacements.put("CourseName", course.getCourseName().getName());
 
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
