@@ -1,10 +1,15 @@
 package ua.edu.chdtu.deanoffice.service.document.individualcurriculum;
 
+import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -17,17 +22,23 @@ import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
+import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 
 @Service
 public class IndividualCurriculumFillTemplateService {
     private static final Logger log = LoggerFactory.getLogger(IndividualCurriculumFillTemplateService.class);
 
     private final static String TEMPLATE_PATH = TEMPLATES_PATH + "IndividualCurriculum.docx";
+    private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
+    private static final int STARTING_ROW_INDEX_SPRING_TABLE = 10;
+    private static final int TABLE_INDEX = 4;
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
@@ -48,7 +59,7 @@ public class IndividualCurriculumFillTemplateService {
         for (StudentDegree degree : degrees) {
             try {
                 if (Objects.nonNull(formedDocument)) {
-//                    TemplateUtil.addPageBreak(formedDocument);
+                    TemplateUtil.addPageBreak(formedDocument);
 
                     formedDocument.getMainDocumentPart().getContent().addAll(
                             fillTemplateForSingleDegree(commonStudentDegreeInfo, degree).getMainDocumentPart().getContent()
@@ -83,7 +94,7 @@ public class IndividualCurriculumFillTemplateService {
 
         String admissionDate = getYearFromDate(degree.getAdmissionDate());
         replacements.put("Begin", TemplateUtil.getValueSafely(admissionDate));
-        String endDate = String.valueOf(Integer.parseInt(admissionDate) + studentGroup.getStudyYears().intValue());
+        String endDate = String.valueOf(Integer.parseInt(admissionDate) + studentGroup.getStudyYears().intValue() + 1);
         replacements.put("End", TemplateUtil.getValueSafely(endDate));
 
         int dbCurrentYear = currentYearService.get().getCurrYear();
@@ -92,6 +103,8 @@ public class IndividualCurriculumFillTemplateService {
 
         replacements.putAll(commonStudyInfo);
 
+        fillTableWithCoursesInfo(template, degree);
+        removeUnfilledPlaceholders(template);
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements);
 
         return template;
@@ -130,7 +143,65 @@ public class IndividualCurriculumFillTemplateService {
         return String.format("%4d-%4d", currentYear, currentYear + 1);
     }
 
-    private Map<String, String> fillTableWithCoursesInfo() {
-        return null;
+    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree) {
+        StudentGroup studentGroup = degree.getStudentGroup();
+        List<Integer> semesters = getSemestersByCourseForGroup(studentGroup);
+
+        List<CourseForGroup> autumnSemester =
+                courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semesters.get(0));
+        List<CourseForGroup> springSemester =
+                courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semesters.get(1));
+
+        fillCourseTable(template, autumnSemester, STARTING_ROW_INDEX_AUTUMN_TABLE, "N", "CourseName");
+        fillCourseTable(template, springSemester, STARTING_ROW_INDEX_SPRING_TABLE + autumnSemester.size(), "Nn", "CourseNamen");
+
+        removeUnfilledPlaceholders(template);
+    }
+
+    private void fillCourseTable(WordprocessingMLPackage template, List<CourseForGroup> courseForGroups,
+                                 int startingRowIndex, String numMark, String cn) {
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
+
+        if (!Objects.nonNull(tempTable)) {
+            return;
+        }
+
+        List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+        int currentRowIndex = startingRowIndex;
+        int numberOfRow = 1;
+        Tr blankRow = (Tr) tableRows.get(currentRowIndex);
+
+        for (CourseForGroup courseForGroup : courseForGroups) {
+            Tr currentRow = XmlUtils.deepCopy(blankRow);
+
+            Course course = courseForGroup.getCourse();
+
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put(numMark, String.valueOf(numberOfRow));
+            replacements.put(cn, course.getCourseName().getName());
+
+            replaceInRow(currentRow, replacements);
+            tempTable.getContent().add(currentRowIndex, currentRow);
+
+            currentRowIndex++;
+            numberOfRow++;
+        }
+
+        tempTable.getContent().remove(currentRowIndex);
+    }
+
+    private void removeUnfilledPlaceholders(WordprocessingMLPackage template) {
+        Set<String> placeholdersToRemove = new HashSet<>();
+        placeholdersToRemove.add("#N");
+        placeholdersToRemove.add("#CourseName");
+
+        TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
+    }
+
+    private List<Integer> getSemestersByCourseForGroup(StudentGroup studentGroup) {
+        int dbCurrentYear = currentYearService.get().getCurrYear();
+        int course = dbCurrentYear - studentGroup.getCreationYear() + studentGroup.getBeginYears();
+
+        return Arrays.asList(course * 2 - 1, course * 2);
     }
 }
