@@ -27,6 +27,7 @@ dependencies {
 	compile (
 			"com.zaxxer:HikariCP:${hikariVersion}"
 	)
+	compile group: 'org.mockito', name: 'mockito-core', version: '2.13.0'
 	testCompile(
 			"org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
 	)

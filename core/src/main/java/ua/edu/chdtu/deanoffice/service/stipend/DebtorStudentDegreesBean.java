@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -93,7 +94,12 @@ public class DebtorStudentDegreesBean {
         this.extraPoints = extraPoints;
     }
 
-//    public double getFinalGrade() {
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, surname, name, patronimic, degreeName, groupName, year, tuitionTerm, specialityCode, specialityName, specializationName, departmentAbbreviation, averageGrade, courseName, knowledgeControlName, semester, extraPoints);
+    }
+
+    //    public double getFinalGrade() {
 //        if (extraPoints != null)
 //            return averageGrade * 0.9 + extraPoints;
 //        else
