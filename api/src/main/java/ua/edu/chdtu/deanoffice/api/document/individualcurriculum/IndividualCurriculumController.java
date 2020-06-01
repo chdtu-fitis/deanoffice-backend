@@ -25,9 +25,9 @@ public class IndividualCurriculumController extends DocumentResponseController {
 
     @GetMapping
     public ResponseEntity generateIndividualCurriculum(
-            @RequestParam(required = false, defaultValue = "0") int groupId,
+            @RequestParam(required = false) int groupId,
             @RequestParam(required = false) List<Integer> studentsIds
-            ) {
+    ) {
         File file = null;
         try {
             file = individualCurriculumService.createIndividualCurriculumDocx(groupId, studentsIds);
