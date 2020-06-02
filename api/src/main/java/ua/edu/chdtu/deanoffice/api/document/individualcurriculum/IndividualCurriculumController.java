@@ -26,11 +26,12 @@ public class IndividualCurriculumController extends DocumentResponseController {
     @GetMapping
     public ResponseEntity generateIndividualCurriculum(
             @RequestParam(required = false) int groupId,
-            @RequestParam(required = false) List<Integer> studentsIds
+            @RequestParam(required = false) List<Integer> studentsIds,
+            @RequestParam String studyYear
     ) {
         File file = null;
         try {
-            file = individualCurriculumService.createIndividualCurriculumDocx(groupId, studentsIds);
+            file = individualCurriculumService.createIndividualCurriculumDocx(groupId, studentsIds, studyYear);
         } catch (FileNotFoundException | Docx4JException e) {
             e.printStackTrace();
         }

@@ -51,19 +51,17 @@ public class IndividualCurriculumFillTemplateService {
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
-    private final CurrentYearService currentYearService;
 
     public IndividualCurriculumFillTemplateService(DocumentIOService documentIOService,
-                                                   CourseForGroupService courseForGroupService, CurrentYearService currentYearService) {
+                                                   CourseForGroupService courseForGroupService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
-        this.currentYearService = currentYearService;
     }
 
-    public WordprocessingMLPackage fillTemplate(Set<StudentDegree> degrees) {
+    public WordprocessingMLPackage fillTemplate(Set<StudentDegree> degrees, String studyYears) {
         WordprocessingMLPackage formedDocument = null;
 
-        Map<String, String> commonStudentDegreeInfo = getCommonStudentDegreeInfo(degrees.iterator().next());
+        Map<String, String> commonStudentDegreeInfo = getCommonStudentDegreeInfo(degrees.iterator().next(), studyYears);
 
         for (StudentDegree degree : degrees) {
             try {
@@ -71,10 +69,10 @@ public class IndividualCurriculumFillTemplateService {
                     TemplateUtil.addPageBreak(formedDocument);
 
                     formedDocument.getMainDocumentPart().getContent().addAll(
-                            fillTemplateForSingleDegree(commonStudentDegreeInfo, degree).getMainDocumentPart().getContent()
+                            fillTemplateForSingleDegree(commonStudentDegreeInfo, degree, studyYears).getMainDocumentPart().getContent()
                     );
                 } else {
-                    formedDocument = fillTemplateForSingleDegree(commonStudentDegreeInfo, degree);
+                    formedDocument = fillTemplateForSingleDegree(commonStudentDegreeInfo, degree, studyYears);
                 }
             } catch (Docx4JException e) {
                 log.error(e.getMessage());
@@ -85,21 +83,22 @@ public class IndividualCurriculumFillTemplateService {
     }
 
     private WordprocessingMLPackage fillTemplateForSingleDegree(Map<String, String> commonStudyInfo,
-                                                                StudentDegree degree) throws Docx4JException {
+                                                                StudentDegree degree,
+                                                                String studyYear) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
         Map<String, String> replacements = new HashMap<>();
 
-        replacements.putAll(getInfoForSingleStudent(degree));
+        replacements.putAll(getInfoForSingleStudent(degree, studyYear));
         replacements.putAll(commonStudyInfo);
 
-        fillTableWithCoursesInfo(template, degree);
+        fillTableWithCoursesInfo(template, degree, studyYear);
         removeUnfilledPlaceholders(template);
         TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements);
 
         return template;
     }
 
-    private Map<String, String> getInfoForSingleStudent(StudentDegree degree) {
+    private Map<String, String> getInfoForSingleStudent(StudentDegree degree, String studyYear) {
         StudentGroup studentGroup = degree.getStudentGroup();
 
         Map<String, String> replacements = new HashMap<>();
@@ -124,8 +123,7 @@ public class IndividualCurriculumFillTemplateService {
         String endDate = String.valueOf(Integer.parseInt(admissionDate) + studentGroup.getStudyYears().intValue() + 1);
         replacements.put("End", TemplateUtil.getValueSafely(endDate));
 
-        int dbCurrentYear = currentYearService.get().getCurrYear();
-        String course = String.valueOf(dbCurrentYear - studentGroup.getCreationYear() + studentGroup.getBeginYears());
+        String course = String.valueOf(Integer.parseInt(studyYear) - studentGroup.getCreationYear() + studentGroup.getBeginYears());
         replacements.put("Course", TemplateUtil.getValueSafely(course));
 
         return replacements;
@@ -135,10 +133,10 @@ public class IndividualCurriculumFillTemplateService {
         return Objects.nonNull(date) ? date.toString().split("-", 2)[0] : "";
     }
 
-    private Map<String, String> getCommonStudentDegreeInfo(StudentDegree degree) {
+    private Map<String, String> getCommonStudentDegreeInfo(StudentDegree degree, String studyYears) {
         Map<String, String> replacements = new HashMap<>();
 
-        replacements.put("StudyYear", TemplateUtil.getValueSafely(getStudyYear()));
+        replacements.put("StudyYear", TemplateUtil.getValueSafely(studyYears));
 
         String faculty = degree.getSpecialization().getFaculty().getName();
         replacements.put("Faculty", TemplateUtil.getValueSafely(faculty.toUpperCase()));
@@ -159,14 +157,14 @@ public class IndividualCurriculumFillTemplateService {
         return replacements;
     }
 
-    private String getStudyYear() {
-        int currentYear = currentYearService.get().getCurrYear();
-        return String.format("%4d-%4d", currentYear, currentYear + 1);
-    }
+//    private String getStudyYear() {
+//        int currentYear = currentYearService.get().getCurrYear();
+//        return String.format("%4d-%4d", currentYear, currentYear + 1);
+//    }
 
-    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree) {
+    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, String studyYear) {
         StudentGroup studentGroup = degree.getStudentGroup();
-        List<Integer> semesters = getSemestersByCourseForGroup(studentGroup);
+        List<Integer> semesters = getSemestersByCourseForGroup(studentGroup, studyYear);
 
         Map<String, List<CourseForGroup>> autumnSemester = getCoursesBySemester(studentGroup, semesters.get(0));
         Map<String, List<CourseForGroup>> springSemester = getCoursesBySemester(studentGroup, semesters.get(1));
@@ -307,9 +305,8 @@ public class IndividualCurriculumFillTemplateService {
         TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
 
-    private List<Integer> getSemestersByCourseForGroup(StudentGroup studentGroup) {
-        int dbCurrentYear = currentYearService.get().getCurrYear();
-        int course = dbCurrentYear - studentGroup.getCreationYear() + studentGroup.getBeginYears();
+    private List<Integer> getSemestersByCourseForGroup(StudentGroup studentGroup, String studyYear) {
+        int course = Integer.parseInt(studyYear) - studentGroup.getCreationYear() + studentGroup.getBeginYears();
 
         return Arrays.asList(course * 2 - 1, course * 2);
     }
