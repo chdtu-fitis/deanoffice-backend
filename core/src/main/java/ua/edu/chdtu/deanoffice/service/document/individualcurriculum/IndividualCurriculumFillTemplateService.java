@@ -42,6 +42,8 @@ public class IndividualCurriculumFillTemplateService {
     private final static String TEMPLATE_PATH = TEMPLATES_PATH + "IndividualCurriculum.docx";
     private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
     private static final int STARTING_ROW_INDEX_SPRING_TABLE = 10;
+    private static final int STARTING_ROW_INDEX_PRACTICAL_TABLE = 15;
+    private static final int STARTING_ROW_INDEX_CONCLUSION_TABLE = 16;
     private static final int TABLE_INDEX = 4;
     private static final String SPRING_COURSES_KEY = "Spring";
     private static final String AUTUMN_COURSES_KEY = "Autumn";
@@ -178,9 +180,47 @@ public class IndividualCurriculumFillTemplateService {
         List<CourseForGroup> practical = autumnSemester.get(PRACTICAL_COURSES_KEY);
         practical.addAll(springSemester.get(PRACTICAL_COURSES_KEY));
 
-        fillCourseTable(template, practical, 15 + autumnCourses.size() + springCourses.size());
+        int startRowIndexForPracticalTable = STARTING_ROW_INDEX_PRACTICAL_TABLE + autumnCourses.size() + springCourses.size();
+        fillCourseTable(template, practical, startRowIndexForPracticalTable);
+
+        fillConclusionTable(autumnCourses, springCourses, practical, template);
 
         removeUnfilledPlaceholders(template);
+    }
+
+    private void fillConclusionTable(List<CourseForGroup> autumnSemester,
+                                     List<CourseForGroup> springSemester,
+                                     List<CourseForGroup> practicals,
+                                     WordprocessingMLPackage template) {
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
+
+        if (!Objects.nonNull(tempTable)) {
+            return;
+        }
+
+        List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+        int currentRowIndex = STARTING_ROW_INDEX_CONCLUSION_TABLE + autumnSemester.size() + springSemester.size() + practicals.size();
+
+        Tr blankRow = (Tr) tableRows.get(currentRowIndex);
+//        Tr currentRow = XmlUtils.deepCopy(blankRow);
+        int hourSumAutumn = autumnSemester.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumSpring = springSemester.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumPracticals = practicals.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+
+        int hourPerCreditSumAutumn = autumnSemester
+                .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
+        int hourPerCreditSumSpring = springSemester
+                .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
+        int hourPerCreditSumPracticals = practicals.stream()
+                .mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
+
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("TH", String.valueOf(hourSumAutumn + hourSumSpring + hourSumPracticals));
+        replacements.put("TCr", String.valueOf(hourPerCreditSumAutumn + hourPerCreditSumPracticals + hourPerCreditSumSpring));
+
+        replaceInRow(blankRow, replacements);
+        tempTable.getContent().add(currentRowIndex, blankRow);
+        tempTable.getContent().remove(currentRowIndex);
     }
 
     private Map<String, List<CourseForGroup>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
@@ -231,9 +271,7 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("CourseName", course.getCourseName().getName());
             replacements.put("H", String.valueOf(course.getHours()));
             replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
-            replacements.put("KC", String.valueOf(course.getKnowledgeControl())
-                    .replaceAll("\\B.|\\P{L}", "").toUpperCase()
-            );
+            replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
 
             Department department =
                     Objects.nonNull(courseForGroup.getTeacher()) ? courseForGroup.getTeacher().getDepartment() : null;
@@ -249,6 +287,13 @@ public class IndividualCurriculumFillTemplateService {
         tempTable.getContent().remove(currentRowIndex);
     }
 
+    private String getKnowledgeControl(Course course) {
+        String knowledgeControl = course.getKnowledgeControl().getName();
+
+        return knowledgeControl.length() > 5 ?
+                knowledgeControl.replaceAll("\\B.|\\P{L}", "").toUpperCase() : knowledgeControl;
+    }
+
     private void removeUnfilledPlaceholders(WordprocessingMLPackage template) {
         Set<String> placeholdersToRemove = new HashSet<>();
         placeholdersToRemove.add("#N");
@@ -256,6 +301,8 @@ public class IndividualCurriculumFillTemplateService {
         placeholdersToRemove.add("#Cred");
         placeholdersToRemove.add("#KC");
         placeholdersToRemove.add("#Dep");
+        placeholdersToRemove.add("#TH");
+        placeholdersToRemove.add("#TCr");
 
         TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
