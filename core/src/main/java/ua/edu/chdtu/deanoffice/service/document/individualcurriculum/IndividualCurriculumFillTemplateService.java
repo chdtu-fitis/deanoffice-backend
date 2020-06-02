@@ -10,12 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.KnowledgeControlService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
@@ -27,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
@@ -78,6 +83,19 @@ public class IndividualCurriculumFillTemplateService {
     private WordprocessingMLPackage fillTemplateForSingleDegree(Map<String, String> commonStudyInfo,
                                                                 StudentDegree degree) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
+        Map<String, String> replacements = new HashMap<>();
+
+        replacements.putAll(getInfoForSingleStudent(degree));
+        replacements.putAll(commonStudyInfo);
+
+        fillTableWithCoursesInfo(template, degree);
+        removeUnfilledPlaceholders(template);
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements);
+
+        return template;
+    }
+
+    private Map<String, String> getInfoForSingleStudent(StudentDegree degree) {
         StudentGroup studentGroup = degree.getStudentGroup();
 
         Map<String, String> replacements = new HashMap<>();
@@ -85,7 +103,7 @@ public class IndividualCurriculumFillTemplateService {
         String studentName = degree.getStudent().getFullNameUkr();
         replacements.put("StudentName", studentName);
 
-        replacements.put("RecNum", degree.getRecordBookNumber());
+        replacements.put("RecNum", degree.getSupplementNumber());
 
         String tuitionForm = Objects.requireNonNull(
                 TuitionForm.getTuitionFormFromUkrName(degree.getTuitionForm().getNameUkr())
@@ -101,13 +119,7 @@ public class IndividualCurriculumFillTemplateService {
         String course = String.valueOf(dbCurrentYear - studentGroup.getCreationYear() + studentGroup.getBeginYears());
         replacements.put("Course", TemplateUtil.getValueSafely(course));
 
-        replacements.putAll(commonStudyInfo);
-
-        fillTableWithCoursesInfo(template, degree);
-        removeUnfilledPlaceholders(template);
-        TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements);
-
-        return template;
+        return replacements;
     }
 
     private String getYearFromDate(Date date) {
@@ -152,11 +164,18 @@ public class IndividualCurriculumFillTemplateService {
         List<CourseForGroup> springSemester =
                 courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semesters.get(1));
 
+
+        List<CourseForGroup> collect = autumnSemester.stream()
+                .filter(courses ->
+                        courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+                ).collect(Collectors.toList());
+
         fillCourseTable(template, autumnSemester, STARTING_ROW_INDEX_AUTUMN_TABLE);
         fillCourseTable(template, springSemester, STARTING_ROW_INDEX_SPRING_TABLE + autumnSemester.size());
 
         removeUnfilledPlaceholders(template);
     }
+
 
     private void fillCourseTable(WordprocessingMLPackage template, List<CourseForGroup> courseForGroups,
                                  int startingRowIndex) {
@@ -179,6 +198,15 @@ public class IndividualCurriculumFillTemplateService {
             Map<String, String> replacements = new HashMap<>();
             replacements.put("N", String.valueOf(numberOfRow));
             replacements.put("CourseName", course.getCourseName().getName());
+            replacements.put("H", String.valueOf(course.getHours()));
+            replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
+            replacements.put("KC", String.valueOf(course.getKnowledgeControl())
+                    .replaceAll("\\B.|\\P{L}", "").toUpperCase()
+            );
+
+            Department department =
+                    Objects.nonNull(courseForGroup.getTeacher()) ? courseForGroup.getTeacher().getDepartment() : null;
+            replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
 
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
@@ -193,7 +221,10 @@ public class IndividualCurriculumFillTemplateService {
     private void removeUnfilledPlaceholders(WordprocessingMLPackage template) {
         Set<String> placeholdersToRemove = new HashSet<>();
         placeholdersToRemove.add("#N");
-        placeholdersToRemove.add("#CourseName");
+        placeholdersToRemove.add("#H");
+        placeholdersToRemove.add("#Cred");
+        placeholdersToRemove.add("#KC");
+        placeholdersToRemove.add("#Dep");
 
         TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
