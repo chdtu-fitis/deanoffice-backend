@@ -11,18 +11,17 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.KnowledgeControl;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
-import ua.edu.chdtu.deanoffice.service.KnowledgeControlService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,6 +43,9 @@ public class IndividualCurriculumFillTemplateService {
     private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
     private static final int STARTING_ROW_INDEX_SPRING_TABLE = 10;
     private static final int TABLE_INDEX = 4;
+    private static final String SPRING_COURSES_KEY = "Spring";
+    private static final String AUTUMN_COURSES_KEY = "Autumn";
+    private static final String PRACTICAL_COURSES_KEY = "Practical";
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
@@ -101,7 +103,12 @@ public class IndividualCurriculumFillTemplateService {
         Map<String, String> replacements = new HashMap<>();
 
         String studentName = degree.getStudent().getFullNameUkr();
+        String studentInitials = degree.getStudent().getInitialsUkr();
         replacements.put("StudentName", studentName);
+        replacements.put("StudentAbr", studentInitials);
+
+        String dean = degree.getStudentGroup().getSpecialization().getFaculty().getDean();
+        replacements.put("DeanAbr", PersonUtil.makeInitialsSurnameLast(dean));
 
         replacements.put("RecNum", degree.getSupplementNumber());
 
@@ -159,23 +166,47 @@ public class IndividualCurriculumFillTemplateService {
         StudentGroup studentGroup = degree.getStudentGroup();
         List<Integer> semesters = getSemestersByCourseForGroup(studentGroup);
 
-        List<CourseForGroup> autumnSemester =
-                courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semesters.get(0));
-        List<CourseForGroup> springSemester =
-                courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semesters.get(1));
+        Map<String, List<CourseForGroup>> autumnSemester = getCoursesBySemester(studentGroup, semesters.get(0));
+        Map<String, List<CourseForGroup>> springSemester = getCoursesBySemester(studentGroup, semesters.get(1));
 
+        List<CourseForGroup> autumnCourses = autumnSemester.get(AUTUMN_COURSES_KEY);
+        fillCourseTable(template, autumnCourses, STARTING_ROW_INDEX_AUTUMN_TABLE);
 
-        List<CourseForGroup> collect = autumnSemester.stream()
-                .filter(courses ->
-                        courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
-                ).collect(Collectors.toList());
+        List<CourseForGroup> springCourses = springSemester.get(SPRING_COURSES_KEY);
+        fillCourseTable(template, springCourses, STARTING_ROW_INDEX_SPRING_TABLE + autumnCourses.size());
 
-        fillCourseTable(template, autumnSemester, STARTING_ROW_INDEX_AUTUMN_TABLE);
-        fillCourseTable(template, springSemester, STARTING_ROW_INDEX_SPRING_TABLE + autumnSemester.size());
+        List<CourseForGroup> practical = autumnSemester.get(PRACTICAL_COURSES_KEY);
+        practical.addAll(springSemester.get(PRACTICAL_COURSES_KEY));
+
+        fillCourseTable(template, practical, 15 + autumnCourses.size() + springCourses.size());
 
         removeUnfilledPlaceholders(template);
     }
 
+    private Map<String, List<CourseForGroup>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
+        Map<String, List<CourseForGroup>> container = new HashMap<>();
+
+        List<CourseForGroup> courseForGroups =
+                courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+
+        String key = getKeyBySemester(semester);
+
+        List<CourseForGroup> lessPractical = courseForGroups.stream().filter(courses ->
+                !courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        ).collect(Collectors.toList());
+        List<CourseForGroup> practical = courseForGroups.stream().filter(courses ->
+                courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        ).collect(Collectors.toList());
+
+        container.put(key, lessPractical);
+        container.put(PRACTICAL_COURSES_KEY, practical);
+
+        return container;
+    }
+
+    private String getKeyBySemester(int semester) {
+        return semester % 2 == 0 ? SPRING_COURSES_KEY : AUTUMN_COURSES_KEY;
+    }
 
     private void fillCourseTable(WordprocessingMLPackage template, List<CourseForGroup> courseForGroups,
                                  int startingRowIndex) {
