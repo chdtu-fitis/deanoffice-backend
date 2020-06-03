@@ -16,11 +16,11 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -78,7 +78,6 @@ public class IndividualCurriculumFillTemplateService {
                 log.error(e.getMessage());
             }
         }
-
         return formedDocument;
     }
 
@@ -100,8 +99,15 @@ public class IndividualCurriculumFillTemplateService {
 
     private Map<String, String> getInfoForSingleStudent(StudentDegree degree, String studyYear) {
         StudentGroup studentGroup = degree.getStudentGroup();
-
         Map<String, String> replacements = new HashMap<>();
+
+        Speciality speciality = degree.getSpecialization().getSpeciality();
+        String specialityName = speciality.getCode() + " " + speciality.getName();
+        replacements.put("Speciality", TemplateUtil.getValueSafely(specialityName));
+        replacements.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfStudy()));
+        String educationProgram = degree.getSpecialization().getName();
+        replacements.put("EducationProgram", TemplateUtil.getValueSafely(educationProgram));
+        replacements.put("AG", TemplateUtil.getValueSafely(degree.getStudentGroup().getName()));
 
         String studentName = degree.getStudent().getFullNameUkr();
         String studentInitials = degree.getStudent().getInitialsUkr();
@@ -120,9 +126,15 @@ public class IndividualCurriculumFillTemplateService {
 
         String admissionDate = getYearFromDate(degree.getAdmissionDate());
         replacements.put("Begin", TemplateUtil.getValueSafely(admissionDate));
-        String endDate = String.valueOf(Integer.parseInt(admissionDate) + studentGroup.getStudyYears().intValue() + 1);
-        replacements.put("End", TemplateUtil.getValueSafely(endDate));
-
+        String endDate = "";
+        try {
+            int endYear = Integer.parseInt(admissionDate);
+            endDate = String.valueOf(endYear + studentGroup.getStudyYears().setScale(0, RoundingMode.HALF_UP).intValue());
+        } catch (NumberFormatException e) {
+        }
+        finally {
+            replacements.put("End", TemplateUtil.getValueSafely(endDate));
+        }
         String course = String.valueOf(Integer.parseInt(studyYear) - studentGroup.getCreationYear() + studentGroup.getBeginYears());
         replacements.put("Course", TemplateUtil.getValueSafely(course));
 
@@ -135,32 +147,13 @@ public class IndividualCurriculumFillTemplateService {
 
     private Map<String, String> getCommonStudentDegreeInfo(StudentDegree degree, String studyYears) {
         Map<String, String> replacements = new HashMap<>();
-
         replacements.put("StudyYear", TemplateUtil.getValueSafely(studyYears));
-
         String faculty = degree.getSpecialization().getFaculty().getName();
         replacements.put("Faculty", TemplateUtil.getValueSafely(faculty.toUpperCase()));
-
-        Speciality speciality = degree.getSpecialization().getSpeciality();
-        String specialityName = speciality.getCode() + " " + speciality.getName();
-        replacements.put("Speciality", TemplateUtil.getValueSafely(specialityName));
-        replacements.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfStudy()));
-
-        String educationProgram = degree.getSpecialization().getName();
-        replacements.put("EducationProgram", TemplateUtil.getValueSafely(educationProgram));
-
         String degreeName = degree.getSpecialization().getDegree().getName();
         replacements.put("Degree", TemplateUtil.getValueSafely(degreeName));
-
-        replacements.put("AG", TemplateUtil.getValueSafely(degree.getStudentGroup().getName()));
-
         return replacements;
     }
-
-//    private String getStudyYear() {
-//        int currentYear = currentYearService.get().getCurrYear();
-//        return String.format("%4d-%4d", currentYear, currentYear + 1);
-//    }
 
     private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, String studyYear) {
         StudentGroup studentGroup = degree.getStudentGroup();
@@ -261,9 +254,7 @@ public class IndividualCurriculumFillTemplateService {
 
         for (CourseForGroup courseForGroup : courseForGroups) {
             Tr currentRow = XmlUtils.deepCopy(blankRow);
-
             Course course = courseForGroup.getCourse();
-
             Map<String, String> replacements = new HashMap<>();
             replacements.put("N", String.valueOf(numberOfRow));
             replacements.put("CourseName", course.getCourseName().getName());
@@ -281,7 +272,6 @@ public class IndividualCurriculumFillTemplateService {
             currentRowIndex++;
             numberOfRow++;
         }
-
         tempTable.getContent().remove(currentRowIndex);
     }
 
@@ -301,13 +291,11 @@ public class IndividualCurriculumFillTemplateService {
         placeholdersToRemove.add("#Dep");
         placeholdersToRemove.add("#TH");
         placeholdersToRemove.add("#TCr");
-
         TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
 
     private List<Integer> getSemestersByCourseForGroup(StudentGroup studentGroup, String studyYear) {
         int course = Integer.parseInt(studyYear) - studentGroup.getCreationYear() + studentGroup.getBeginYears();
-
         return Arrays.asList(course * 2 - 1, course * 2);
     }
 }

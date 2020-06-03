@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Service
 public class IndividualCurriculumService {
     private static final String FILE_NAME = "Individual_curriculum";
@@ -50,24 +49,4 @@ public class IndividualCurriculumService {
                         )
                 )).collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
-//    private Set<StudentDegree> getStudentDegreesByGroup(int groupId) {
-//        Set<StudentDegree> degrees = new HashSet<>();
-//
-//        if (groupId > 0) {
-//            degrees.addAll(studentDegreeService.getAllByGroupId(groupId));
-//        }
-//
-//        return degrees;
-//    }
-
-//    private Set<StudentDegree> getStudentDegreesByStudentIds(List<Integer> studentIds) {
-//        Set<StudentDegree> degrees = new HashSet<>();
-//
-//        if (Objects.nonNull(studentIds) && studentIds.size() > 0) {
-//            degrees.addAll(studentDegreeService.getByStudentIds(studentIds));
-//        }
-//
-//        return degrees;
-//    }
 }
