@@ -478,8 +478,4 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("payment") String payment,
             @Param("semester") int semester
     );
-
-    @Query("SELECT sd FROM StudentDegree sd " +
-            "WHERE sd.student.id IN :studentIds")
-    List<StudentDegree> findAllByStudentIds(@Param("studentIds") List<Integer> studentIds);
 }
