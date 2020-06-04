@@ -28,7 +28,7 @@ public class SessionReportService {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet("Session report");
 
-            setColumnWidth(sheet);
+            setWidthsForComumns(sheet);
             addMergeRegions(sheet);
             createHead(sheet, wb);
 
@@ -38,7 +38,7 @@ public class SessionReportService {
         return new File(TEMP_DiRECTORY + FILE_NAME);
     }
 
-    private void setColumnsWidth(Sheet sheet) {
+    private void setWidthsForComumns(Sheet sheet) {
         sheet.setColumnWidth(0, 6014);//A - 22.71
         sheet.setColumnWidth(1, 2770);//B - 10.14
         sheet.setColumnWidth(2, 2150);//C - 7.71
