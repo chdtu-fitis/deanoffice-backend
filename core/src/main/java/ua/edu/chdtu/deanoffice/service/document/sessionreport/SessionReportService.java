@@ -16,6 +16,12 @@ public class SessionReportService {
 
     private final String TEMP_DiRECTORY = System.getProperty("java.io.tmpdir") + "/";
     private final String FILE_NAME = "session-report.xlsx";
+    private static final String GLOBAL_FONT_NAME = "Arial Cyr";
+    private static final Short GLOBAL_FONT_COLOR = IndexedColors.BLACK.getIndex();
+    private static final Short GLOBAL_BORDERS_COLOR = IndexedColors.BLACK.getIndex();
+    private static final BorderStyle GLOBAL_BORDER_STYLE = BorderStyle.THIN;
+
+
 
     public File createSessionReportInXLSX() throws Exception {
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
