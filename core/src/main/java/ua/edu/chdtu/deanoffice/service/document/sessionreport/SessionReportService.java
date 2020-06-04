@@ -413,18 +413,22 @@ public class SessionReportService {
                             boolean isTop, boolean isLeft, boolean isRight, boolean isBottom) {
         if (isTop) {
             RegionUtil.setBorderTop(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+            RegionUtil.setTopBorderColor(GLOBAL_BORDERS_COLOR, cellAddresses, sheet);
         }
 
         if (isLeft) {
             RegionUtil.setBorderLeft(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+            RegionUtil.setLeftBorderColor(GLOBAL_BORDERS_COLOR, cellAddresses, sheet);
         }
 
         if (isRight) {
             RegionUtil.setBorderRight(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+            RegionUtil.setRightBorderColor(GLOBAL_BORDERS_COLOR, cellAddresses, sheet);
         }
 
         if (isBottom) {
             RegionUtil.setBorderBottom(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+            RegionUtil.setBottomBorderColor(GLOBAL_BORDERS_COLOR, cellAddresses, sheet);
         }
     }
 
