@@ -22,13 +22,9 @@ public class SessionReportService {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet("Session report");
 
-            setColumnsWidth(sheet);
-
-            Row row = sheet.createRow(0);
-            row.setHeight( (short) 450);
-            Cell cell = row.createCell(0);
-
-            cell.setCellValue("Денна, заочна форми навчання (підкреслити)");
+            setColumnWidth(sheet);
+            addMergeRegions(sheet);
+            createHead(sheet, wb);
 
             wb.write(outputStream);
         }
