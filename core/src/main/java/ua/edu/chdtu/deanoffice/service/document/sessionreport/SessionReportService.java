@@ -1,15 +1,17 @@
 package ua.edu.chdtu.deanoffice.service.document.sessionreport;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class SessionReportService {
@@ -61,7 +63,369 @@ public class SessionReportService {
         sheet.setColumnWidth(19, 2750);//T - 10
         sheet.setColumnWidth(20, 2200);//U - 7.86
         sheet.setColumnWidth(21, 2150);//V - 7.71
+    }
 
+    private void addMergeRegions(Sheet sheet) {
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 1, 21));
+        sheet.addMergedRegion(new CellRangeAddress(2, 2, 1, 21));
+        sheet.addMergedRegion(new CellRangeAddress(4, 4, 1, 21));
+        sheet.addMergedRegion(new CellRangeAddress(6, 6, 5, 6));
+        sheet.addMergedRegion(new CellRangeAddress(6, 6, 7, 15));
+        sheet.addMergedRegion(new CellRangeAddress(8, 8, 5, 6));
+        sheet.addMergedRegion(new CellRangeAddress(8, 8, 7, 15));
+        sheet.addMergedRegion(new CellRangeAddress(10, 10, 5, 6));
+        sheet.addMergedRegion(new CellRangeAddress(10, 10, 7, 11));
+        sheet.addMergedRegion(new CellRangeAddress(10, 10, 12, 15));
+        sheet.addMergedRegion(new CellRangeAddress(10, 10, 20, 21));
+        sheet.addMergedRegion(new CellRangeAddress(11, 11, 20, 21));
+    }
+
+    private void createHead(Sheet sheet, Workbook wb) {
+        List<Cell> similarCells = new ArrayList<>();
+
+        Row row1 = sheet.createRow(1);
+        row1.setHeightInPoints((float) 22.5);
+        Cell currentCell = createCellForHeadAndSetThisValue(row1, 1, "Денна, заочна форми навчання (підкреслити)");
+        setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 16, true);
+
+
+        Row row2 = sheet.createRow(2);
+        row2.setHeightInPoints(15);
+        currentCell = createCellForHeadAndSetThisValue(row2, 1, "Денна, заочна форми навчання (підкреслити)");
+        setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
+
+        Row row3 = sheet.createRow(3);
+        row3.setHeightInPoints(9);
+
+        Row row4 = sheet.createRow(4);
+        row4.setHeightInPoints(27);
+        currentCell = createCellForHeadAndSetThisValue(row4, 1, "ВІДОМОСТІ ПРО РЕЗУЛЬТАТИ ЕКЗАМЕНАЦІЙНОЇ СЕСІЇ #рікПочаток/#рікКінець__н.р.");
+        setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 16, true);
+
+        Row row5 = sheet.createRow(5);
+        row5.setHeightInPoints(12);
+
+        Row row6 = sheet.createRow(6);
+        row6.setHeightInPoints((float) 19.5);
+        currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестр");
+        setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
+        currentCell = createCellForHeadAndSetThisValue(row6, 7, "#семестри");
+        setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 10, false);
+
+        Row row7 = sheet.createRow(7);
+        row7.setHeightInPoints(12);
+
+        Row row8 = sheet.createRow(8);
+        row8.setHeightInPoints(24);
+        similarCells.add(createCellForHeadAndSetThisValue(row8, 5, "Факультет"));
+        similarCells.add(createCellForHeadAndSetThisValue(row8, 7, "#Назва факультету"));
+        setCellStyleAndFontForCells(similarCells, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 14, false);
+        similarCells.clear();
+
+        Row row9 = sheet.createRow(9);
+        row9.setHeightInPoints((float) 9.75);
+
+        Row row10 = sheet.createRow(10);
+        row10.setHeightInPoints((float) 12.75);
+        currentCell = createCellForHeadAndSetThisValue(row10, 0, "Курс, спеціальність");
+        setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 8, false);
+        similarCells.addAll(
+                Arrays.asList(
+                        createCellForHeadAndSetThisValue(row10, 1, "Усього"),
+                        createCellForHeadAndSetThisValue(row10, 2, "У т.ч."),
+                        createCellForHeadAndSetThisValue(row10, 3, "Повинні"),
+                        createCellForHeadAndSetThisValue(row10, 4, "Усього"),
+                        createCellForHeadAndSetThisValue(row10, 5, "Не з'явилися"),
+                        createCellForHeadAndSetThisValue(row10, 7, "Склали"),
+                        createCellForHeadAndSetThisValue(row10, 12, "Дістали незадовільну оцінку"),
+                        createCellForHeadAndSetThisValue(row10, 16, "Абсолютна"),
+                        createCellForHeadAndSetThisValue(row10, 17, "Закінчили"),
+                        createCellForHeadAndSetThisValue(row10, 18, "Залишено"),
+                        createCellForHeadAndSetThisValue(row10, 19, "Відраховано"),
+                        createCellForHeadAndSetThisValue(row10, 20, "Переведено на")
+                )
+        );
+
+        Row row11 = sheet.createRow(11);
+        row11.setHeightInPoints((float) 12.75);
+        similarCells.addAll(
+                Arrays.asList(
+                        createCellForHeadAndSetThisValue(row11, 1, "студентів"),
+                        createCellForHeadAndSetThisValue(row11, 2, "в академ."),
+                        createCellForHeadAndSetThisValue(row11, 3, "складати"),
+                        createCellForHeadAndSetThisValue(row11, 4, "допущено"),
+                        createCellForHeadAndSetThisValue(row11, 5, "з поважної"),
+                        createCellForHeadAndSetThisValue(row11, 6, "з неповаж-"),
+                        createCellForHeadAndSetThisValue(row11, 7, "з усіх"),
+                        createCellForHeadAndSetThisValue(row11, 8, "лише"),
+                        createCellForHeadAndSetThisValue(row11, 9, "лише"),
+                        createCellForHeadAndSetThisValue(row11, 10, "на змішані"),
+                        createCellForHeadAndSetThisValue(row11, 11, "лише на"),
+                        createCellForHeadAndSetThisValue(row11, 12, "усього"),
+                        createCellForHeadAndSetThisValue(row11, 13, "одну"),
+                        createCellForHeadAndSetThisValue(row11, 14, "дві"),
+                        createCellForHeadAndSetThisValue(row11, 15, "три"),
+                        createCellForHeadAndSetThisValue(row11, 16, "успішність"),
+                        createCellForHeadAndSetThisValue(row11, 17, "теоретичний"),
+                        createCellForHeadAndSetThisValue(row11, 18, "на другий"),
+                        createCellForHeadAndSetThisValue(row11, 19, "за"),
+                        createCellForHeadAndSetThisValue(row11, 20, "наступний курс")
+                )
+        );
+
+        Row row12 = sheet.createRow(12);
+        row12.setHeightInPoints((float) 12.75);
+        similarCells.addAll(
+                Arrays.asList(
+                        createCellForHeadAndSetThisValue(row12, 1, "на початок"),
+                        createCellForHeadAndSetThisValue(row12, 2, "відпустці"),
+                        createCellForHeadAndSetThisValue(row12, 3, "екзамени"),
+                        createCellForHeadAndSetThisValue(row12, 4, "до"),
+                        createCellForHeadAndSetThisValue(row12, 5, "причини"),
+                        createCellForHeadAndSetThisValue(row12, 6, "ної"),
+                        createCellForHeadAndSetThisValue(row12, 7, "предметів"),
+                        createCellForHeadAndSetThisValue(row12, 8, "на"),
+                        createCellForHeadAndSetThisValue(row12, 9, "на 'добре'"),
+                        createCellForHeadAndSetThisValue(row12, 10, "оцінки"),
+                        createCellForHeadAndSetThisValue(row12, 11, "'задовільно'"),
+                        createCellForHeadAndSetThisValue(row12, 12, "(сума"),
+                        createCellForHeadAndSetThisValue(row12, 16, "гр.8"),
+                        createCellForHeadAndSetThisValue(row12, 17, "курс"),
+                        createCellForHeadAndSetThisValue(row12, 18, "рік"),
+                        createCellForHeadAndSetThisValue(row12, 19, "результатами"),
+                        createCellForHeadAndSetThisValue(row12, 20, "на"),
+                        createCellForHeadAndSetThisValue(row12, 21, "у т.ч.")
+                )
+        );
+
+        Row row13 = sheet.createRow(13);
+        row13.setHeightInPoints((float) 12.75);
+        similarCells.addAll(
+                Arrays.asList(
+                        createCellForHeadAndSetThisValue(row13, 1, "сесії"),
+                        createCellForHeadAndSetThisValue(row13, 3, "(Гр.2-Гр.3)"),
+                        createCellForHeadAndSetThisValue(row13, 4, "екзаменів"),
+                        createCellForHeadAndSetThisValue(row13, 6, "причини"),
+                        createCellForHeadAndSetThisValue(row13, 7, "навчального"),
+                        createCellForHeadAndSetThisValue(row13, 8, "'відмінно'"),
+                        createCellForHeadAndSetThisValue(row13, 9, "і 'відмінно'"),
+                        createCellForHeadAndSetThisValue(row13, 12, "Гр.14,15,16)"),
+                        createCellForHeadAndSetThisValue(row13, 16, "Гр.4"),
+                        createCellForHeadAndSetThisValue(row13, 17, "навчання"),
+                        createCellForHeadAndSetThisValue(row13, 19, "перевідних"),
+                        createCellForHeadAndSetThisValue(row13, 20, "заочну"),
+                        createCellForHeadAndSetThisValue(row13, 21, "умовно")
+                )
+        );
+
+        Row row14 = sheet.createRow(14);
+        row14.setHeightInPoints((float) 12.75);
+        similarCells.addAll(
+                Arrays.asList(
+                        createCellForHeadAndSetThisValue(row14, 7, "плану"),
+                        createCellForHeadAndSetThisValue(row14, 19, "екзаменів"),
+                        createCellForHeadAndSetThisValue(row14, 20, "ф.н.")
+                )
+        );
+        setCellStyleAndFontForCells(similarCells, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 8, false);
+        similarCells.clear();
+        addBordersToHead(sheet);
+
+    }
+
+    private Cell createCellForHeadAndSetThisValue(Row row, int columnNumber, String text) {
+        Cell cell = row.createCell(columnNumber);
+        cell.setCellValue(text);
+
+        return cell;
+    }
+
+    private void setCellStyleAndFontForCells(List<Cell> cells, Workbook wb, HorizontalAlignment horizontalAlignment,
+                                             VerticalAlignment verticalAlignment, double fontHeight, boolean isBold) {
+        for (Cell cell : cells) {
+            setCellStyleAndFontForCell(cell, wb, horizontalAlignment,
+                    verticalAlignment, fontHeight, isBold);
+        }
+    }
+
+    private void setCellStyleAndFontForCell(Cell cell, Workbook wb, HorizontalAlignment horizontalAlignment,
+                                            VerticalAlignment verticalAlignment, double fontHeight, boolean isBold) {
+        CellStyle cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(horizontalAlignment);
+        cellStyle.setVerticalAlignment(verticalAlignment);
+        cellStyle.setFillBackgroundColor(IndexedColors.WHITE.getIndex());
+
+        Font font = wb.createFont();
+        font.setFontName(GLOBAL_FONT_NAME);
+        font.setFontHeightInPoints((short) fontHeight);
+        font.setColor(GLOBAL_FONT_COLOR);
+        font.setBold(isBold);
+
+        cellStyle.setFont(font);
+
+        cell.setCellStyle(cellStyle);
+    }
+
+    private void addBordersToHead(Sheet sheet) {
+        setBorders(
+                new CellRangeAddress(0, 9, 0, 0), sheet,
+                false, false, true, false
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 0, 0), sheet,
+                true, false, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 1, 1), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 2, 2), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 3, 3), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 4, 4), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 10, 5, 6), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 5, 5), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 6, 6), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 10, 7, 11), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 7, 7), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 8, 8), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 9, 9), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 10, 10), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 11, 11), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 10, 12, 15), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 12, 12), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 13, 13), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 14, 14), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(11, 14, 15, 15), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 12, 16, 16), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(13, 14, 16, 16), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 17, 17), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 18, 18), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 14, 19, 19), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(10, 11, 20, 21), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(12, 14, 20, 20), sheet,
+                true, true, true, true
+        );
+
+        setBorders(
+                new CellRangeAddress(12, 14, 21, 21), sheet,
+                true, true, true, true
+        );
+
+    }
+
+    private void setBorders(CellRangeAddress cellAddresses, Sheet sheet,
+                            boolean isTop, boolean isLeft, boolean isRight, boolean isBottom) {
+        if (isTop) {
+            RegionUtil.setBorderTop(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+        }
+
+        if (isLeft) {
+            RegionUtil.setBorderLeft(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+        }
+
+        if (isRight) {
+            RegionUtil.setBorderRight(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+        }
+
+        if (isBottom) {
+            RegionUtil.setBorderBottom(GLOBAL_BORDER_STYLE, cellAddresses, sheet);
+        }
     }
 
 }
