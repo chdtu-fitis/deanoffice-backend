@@ -29,11 +29,10 @@ public class IndividualCurriculumController extends DocumentResponseController {
     ) {
         File file = null;
         try {
-            file = individualCurriculumService.createIndividualCurriculumDocx(studentDegreeIds, ""+studyYear);
+            file = individualCurriculumService.createIndividualCurriculumDocx(studentDegreeIds, studyYear);
         } catch (FileNotFoundException | Docx4JException e) {
             e.printStackTrace();
         }
-
         return buildDocumentResponseEntity(file, file.getName(), MEDIA_TYPE_DOCX);
     }
 }

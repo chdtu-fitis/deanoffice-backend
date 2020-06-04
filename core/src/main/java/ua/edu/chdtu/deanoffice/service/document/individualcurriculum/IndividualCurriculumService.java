@@ -33,7 +33,7 @@ public class IndividualCurriculumService {
     }
 
     public File createIndividualCurriculumDocx(List<Integer> studentDegreeIds,
-                                               String studyYear) throws FileNotFoundException, Docx4JException {
+                                               int studyYear) throws FileNotFoundException, Docx4JException {
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(studentDegreeIds);
         Set<StudentDegree> collect = sortByFullName(studentDegrees);
         WordprocessingMLPackage file = fillTemplateService.fillTemplate(collect, studyYear);
