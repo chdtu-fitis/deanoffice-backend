@@ -30,6 +30,8 @@ public class SessionReportService {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet("Session report");
 
+            sheet.createFreezePane(1, 15);
+
             setWidthsForComumns(sheet);
             addMergeRegions(sheet);
             createHead(sheet, wb);
