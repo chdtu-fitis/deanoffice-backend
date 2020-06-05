@@ -30,7 +30,7 @@ public class SessionReportController extends DocumentResponseController {
     @GetMapping
     public ResponseEntity<Resource> getSessionReportInExcel(@CurrentUser ApplicationUser user) {
         try {
-            File sessionReport = sessionReportService.createSessionReportInXLSX();
+            File sessionReport = sessionReportService.createSessionReportInXLSX(user);
 
             return buildDocumentResponseEntity(sessionReport, sessionReport.getName(), MEDIA_TYPE_XLSX);
         } catch (Exception e) {
