@@ -4,7 +4,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,19 +16,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static ua.edu.chdtu.deanoffice.util.SemesterUtil.getCurrentSemester;
+
 @Service
 public class SessionReportService {
 
     private final String TEMP_DiRECTORY = System.getProperty("java.io.tmpdir") + "/";
     private final String FILE_NAME = "session-report.xlsx";
-    private static final String GLOBAL_FONT_NAME = "Arial Cyr";
-    private static final Short GLOBAL_FONT_COLOR = IndexedColors.BLACK.getIndex();
-    private static final Short GLOBAL_BORDERS_COLOR = IndexedColors.BLACK.getIndex();
-    private static final BorderStyle GLOBAL_BORDER_STYLE = BorderStyle.THIN;
+    private final String GLOBAL_FONT_NAME = "Arial Cyr";
+    private final Short GLOBAL_FONT_COLOR = IndexedColors.BLACK.getIndex();
+    private final Short GLOBAL_BORDERS_COLOR = IndexedColors.BLACK.getIndex();
+    private final BorderStyle GLOBAL_BORDER_STYLE = BorderStyle.THIN;
 
+    private final DegreeService degreeService;
 
+    @Autowired
+    public SessionReportService(DegreeService degreeService) {
+        this.degreeService = degreeService;
+    }
 
-    public File createSessionReportInXLSX() throws Exception {
+    public File createSessionReportInXLSX(ApplicationUser user) throws Exception {
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet("Session report");
@@ -111,7 +121,7 @@ public class SessionReportService {
         row6.setHeightInPoints((float) 19.5);
         currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестр");
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
-        currentCell = createCellForHeadAndSetThisValue(row6, 7, "#семестри");
+        currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters());
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 10, false);
 
         Row row7 = sheet.createRow(7);
@@ -233,6 +243,25 @@ public class SessionReportService {
         similarCells.clear();
         addBordersToHead(sheet);
 
+    }
+
+    private String getCorrectSemesters() {
+        int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
+        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEng("Bachelor");
+        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEng("Master");
+        int totalMaxSemester = bachelorMaxSemester + masterMaxSemester;
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int semester = previousSemester + 1; semester <= totalMaxSemester; semester += 2) {
+            stringBuilder.append(semester);
+
+            if (semester < totalMaxSemester) {
+                stringBuilder.append(", ");
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
     private Cell createCellForHeadAndSetThisValue(Row row, int columnNumber, String text) {
