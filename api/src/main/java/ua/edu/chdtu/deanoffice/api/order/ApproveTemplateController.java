@@ -11,7 +11,6 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.order.dto.OrderApproveTemplateDTO;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
-import ua.edu.chdtu.deanoffice.entity.order.Order;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApproveTemplate;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApprover;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
@@ -39,13 +38,15 @@ public class ApproveTemplateController {
     public ResponseEntity createApprover(@RequestBody OrderApproveTemplateDTO approveTemplateDTO) {
         try {
             OrderApproveTemplate newApproveTemplate = map(approveTemplateDTO, OrderApproveTemplate.class);
-            int facultyId = FacultyUtil.getUserFacultyIdInt();
+            Integer facultyId = FacultyUtil.getUserFacultyIdInt();
             Faculty faculty = facultyService.getById(facultyId);
             OrderApprover mainApprover = orderApproverService.getApproverById(newApproveTemplate.getMainApprover().getId());
             OrderApprover initiatorApprover = orderApproverService.getApproverById(newApproveTemplate.getInitiatorApprover().getId());
+            orderApproverService.getApproverById(newApproveTemplate.getApprovers());
             newApproveTemplate.setFaculty(faculty);
             newApproveTemplate.setMainApprover(mainApprover);
             newApproveTemplate.setInitiatorApprover(initiatorApprover);
+            newApproveTemplate.setApprovers(approvers);
             OrderApproveTemplate orderApproveTemplate = approveTemplateService.create(newApproveTemplate);
             OrderApproveTemplateDTO templateDTO = map(orderApproveTemplate, OrderApproveTemplateDTO.class);
             return ResponseEntity.ok(templateDTO);
