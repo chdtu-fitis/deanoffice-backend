@@ -42,11 +42,11 @@ public class ApproveTemplateController {
             Faculty faculty = facultyService.getById(facultyId);
             OrderApprover mainApprover = orderApproverService.getApproverById(newApproveTemplate.getMainApprover().getId());
             OrderApprover initiatorApprover = orderApproverService.getApproverById(newApproveTemplate.getInitiatorApprover().getId());
-            orderApproverService.getApproverById(newApproveTemplate.getApprovers());
+//            orderApproverService.getApproverById(newApproveTemplate.getApprovers());
             newApproveTemplate.setFaculty(faculty);
             newApproveTemplate.setMainApprover(mainApprover);
             newApproveTemplate.setInitiatorApprover(initiatorApprover);
-            newApproveTemplate.setApprovers(approvers);
+//            newApproveTemplate.setApprovers(approvers);
             OrderApproveTemplate orderApproveTemplate = approveTemplateService.create(newApproveTemplate);
             OrderApproveTemplateDTO templateDTO = map(orderApproveTemplate, OrderApproveTemplateDTO.class);
             return ResponseEntity.ok(templateDTO);
