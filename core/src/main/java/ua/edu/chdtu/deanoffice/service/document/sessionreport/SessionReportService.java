@@ -245,6 +245,7 @@ public class SessionReportService {
 
     }
 
+    //TODO треба уточнити які можуть бути семестри
     private String getCorrectSemesters() {
         int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
         int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEng("Bachelor");
