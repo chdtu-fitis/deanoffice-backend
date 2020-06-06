@@ -44,7 +44,7 @@ public class SessionReportService {
 
             setWidthsForComumns(sheet);
             addMergeRegions(sheet);
-            createHead(sheet, wb);
+            createHead(sheet, wb, user);
 
             wb.write(outputStream);
         }
@@ -92,7 +92,7 @@ public class SessionReportService {
         sheet.addMergedRegion(new CellRangeAddress(11, 11, 20, 21));
     }
 
-    private void createHead(Sheet sheet, Workbook wb) {
+    private void createHead(Sheet sheet, Workbook wb, ApplicationUser user) {
         List<Cell> similarCells = new ArrayList<>();
 
         Row row1 = sheet.createRow(1);
@@ -130,7 +130,7 @@ public class SessionReportService {
         Row row8 = sheet.createRow(8);
         row8.setHeightInPoints(24);
         similarCells.add(createCellForHeadAndSetThisValue(row8, 5, "Факультет"));
-        similarCells.add(createCellForHeadAndSetThisValue(row8, 7, "#Назва факультету"));
+        similarCells.add(createCellForHeadAndSetThisValue(row8, 7, user.getFaculty().getName()));
         setCellStyleAndFontForCells(similarCells, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 14, false);
         similarCells.clear();
 
