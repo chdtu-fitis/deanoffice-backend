@@ -26,7 +26,7 @@ public class DegreeService {
         return degreeRepository.findByName(degreeName);
     }
 
-    public int getMaxSemesterForDegreeByNameEng(String nameEng) {
-        return degreeRepository.findMaxSemesterForDegreeByNameEng(nameEng);
+    public int getMaxSemesterForDegreeByNameEngAndFacultyId(String nameEng, int facultyId) {
+        return degreeRepository.findMaxSemesterForDegreeByNameEngAndFacultyId(nameEng, facultyId);
     }
 }

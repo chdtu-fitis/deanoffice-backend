@@ -121,7 +121,7 @@ public class SessionReportService {
         row6.setHeightInPoints((float) 19.5);
         currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестр");
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
-        currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters());
+        currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters(user));
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 10, false);
 
         Row row7 = sheet.createRow(7);
@@ -246,10 +246,11 @@ public class SessionReportService {
     }
 
     //TODO треба уточнити які можуть бути семестри
-    private String getCorrectSemesters() {
+    private String getCorrectSemesters(ApplicationUser user) {
+        int facultyId = user.getFaculty().getId();
         int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
-        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEng("Bachelor");
-        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEng("Master");
+        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId("Bachelor", facultyId);
+        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId("Master", facultyId);
         int totalMaxSemester = bachelorMaxSemester + masterMaxSemester;
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -464,4 +465,7 @@ public class SessionReportService {
         }
     }
 
+//    private void createBody() {
+//        for ()
+//    }
 }
