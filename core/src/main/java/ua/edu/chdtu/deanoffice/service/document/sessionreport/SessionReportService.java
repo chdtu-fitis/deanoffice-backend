@@ -7,14 +7,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.util.SemesterUtil.getCurrentSemester;
 
@@ -27,12 +27,19 @@ public class SessionReportService {
     private final Short GLOBAL_FONT_COLOR = IndexedColors.BLACK.getIndex();
     private final Short GLOBAL_BORDERS_COLOR = IndexedColors.BLACK.getIndex();
     private final BorderStyle GLOBAL_BORDER_STYLE = BorderStyle.THIN;
+    private final String BACHELOR_NAME_ENG_IN_DATABASE = "Bachelor";
+    private final String MASTER_NAME_ENG_IN_DATABASE = "Master";
+    private Set<Integer> semesters;
+    private int maxSemesterForBachelor;
 
     private final DegreeService degreeService;
+    private final StudentGroupService studentGroupService;
 
     @Autowired
-    public SessionReportService(DegreeService degreeService) {
+    public SessionReportService(DegreeService degreeService,
+                                StudentGroupService studentGroupService) {
         this.degreeService = degreeService;
+        this.studentGroupService = studentGroupService;
     }
 
     public File createSessionReportInXLSX(ApplicationUser user) throws Exception {
@@ -45,6 +52,7 @@ public class SessionReportService {
             setWidthsForComumns(sheet);
             addMergeRegions(sheet);
             createHead(sheet, wb, user);
+            createBody(user.getFaculty().getId(), wb, 15);
 
             wb.write(outputStream);
         }
@@ -249,19 +257,24 @@ public class SessionReportService {
     private String getCorrectSemesters(ApplicationUser user) {
         int facultyId = user.getFaculty().getId();
         int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
-        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId("Bachelor", facultyId);
-        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId("Master", facultyId);
+        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId(BACHELOR_NAME_ENG_IN_DATABASE, facultyId);
+        this.maxSemesterForBachelor = bachelorMaxSemester;
+        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId(MASTER_NAME_ENG_IN_DATABASE, facultyId);
         int totalMaxSemester = bachelorMaxSemester + masterMaxSemester;
 
         StringBuilder stringBuilder = new StringBuilder();
+        Set<Integer> semesters = new TreeSet<>();
 
         for (int semester = previousSemester + 1; semester <= totalMaxSemester; semester += 2) {
             stringBuilder.append(semester);
+            semesters.add(semester);
 
             if (semester < totalMaxSemester) {
                 stringBuilder.append(", ");
             }
         }
+
+        this.semesters = semesters;
 
         return stringBuilder.toString();
     }
@@ -465,7 +478,32 @@ public class SessionReportService {
         }
     }
 
-//    private void createBody() {
-//        for ()
-//    }
+    private void createBody(int facultyId, Workbook workbook, int numberOfRow) {
+        Sheet sheet = workbook.getSheetAt(0);
+
+        int degreeId = degreeService.getByNameEng(BACHELOR_NAME_ENG_IN_DATABASE).getId();
+        int degreeIdOfMaster = degreeService.getByNameEng(MASTER_NAME_ENG_IN_DATABASE).getId();
+        boolean isMasterDegree = false;
+
+        for (Integer semester : semesters) {
+
+            if (semester > maxSemesterForBachelor) {
+                semester = semester - maxSemesterForBachelor;
+
+                if (!isMasterDegree) {
+                    degreeId = degreeIdOfMaster;
+                    isMasterDegree = true;
+                }
+            }
+
+            int yearOfStudy = semester % 2 == 0 ? semester / 2 : semester / 2 + 1;
+            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, yearOfStudy, facultyId);
+
+            Cell numberOfCourse = sheet.createRow(numberOfRow).createCell(0);
+            numberOfCourse.setCellValue(semester);
+            setCellStyleAndFontForCell(numberOfCourse, workbook, HorizontalAlignment.CENTER,
+                    VerticalAlignment.CENTER, 8, false);
+            numberOfRow++;
+        }
+    }
 }
