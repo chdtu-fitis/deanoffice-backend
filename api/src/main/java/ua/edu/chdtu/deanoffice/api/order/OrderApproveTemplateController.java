@@ -14,7 +14,7 @@ import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApproveTemplate;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApprover;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.order.ApproveTemplateService;
+import ua.edu.chdtu.deanoffice.service.order.OrderApproveTemplateService;
 import ua.edu.chdtu.deanoffice.service.order.OrderApproverService;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import java.util.List;
@@ -23,12 +23,12 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 
 @RestController
-public class ApproveTemplateController {
-    private ApproveTemplateService approveTemplateService;
+public class OrderApproveTemplateController {
+    private OrderApproveTemplateService approveTemplateService;
     private FacultyService facultyService;
     private OrderApproverService orderApproverService;
 
-    public ApproveTemplateController(ApproveTemplateService approveTemplateService, FacultyService facultyService, OrderApproverService orderApproverService) {
+    public OrderApproveTemplateController(OrderApproveTemplateService approveTemplateService, FacultyService facultyService, OrderApproverService orderApproverService) {
         this.approveTemplateService = approveTemplateService;
         this.facultyService = facultyService;
         this.orderApproverService = orderApproverService;

@@ -7,10 +7,10 @@ import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import java.util.List;
 
 @Service
-public class ApproveTemplateService {
+public class OrderApproveTemplateService {
     private ApproveTemplateRepository orderApproveTemplateRepository;
 
-    public ApproveTemplateService(ApproveTemplateRepository approveTemplateRepository) {
+    public OrderApproveTemplateService(ApproveTemplateRepository approveTemplateRepository) {
         this.orderApproveTemplateRepository = approveTemplateRepository;
     }
 
