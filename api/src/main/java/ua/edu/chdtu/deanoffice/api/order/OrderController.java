@@ -15,6 +15,9 @@ import ua.edu.chdtu.deanoffice.service.order.OrderDtoSerializationService;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -61,5 +64,12 @@ public class OrderController extends DocumentResponseController {
             default:
                 return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/order-type")
+    public ResponseEntity<List<String>> getAvailableOrderTypes() {
+        return ResponseEntity.ok(Arrays.stream(OrderType.values())
+                .map(Enum::toString)
+                .collect(Collectors.toList()));
     }
 }

@@ -36,9 +36,6 @@ public class Order extends BaseEntity {
     @ManyToOne
     private OrderApproveTemplate orderApproveTemplate;
 
-//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private OrderReason reason;
-
     private String comment;
 
     private String orderParagraph;
