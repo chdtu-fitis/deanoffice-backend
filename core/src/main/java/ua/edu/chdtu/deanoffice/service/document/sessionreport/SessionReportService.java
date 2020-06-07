@@ -23,6 +23,7 @@ public class SessionReportService {
 
     private final String TEMP_DiRECTORY = System.getProperty("java.io.tmpdir") + "/";
     private final String FILE_NAME = "session-report.xlsx";
+    private final String SHEET_NAME = "Session report";
     private final String GLOBAL_FONT_NAME = "Arial Cyr";
     private final Short GLOBAL_FONT_COLOR = IndexedColors.BLACK.getIndex();
     private final Short GLOBAL_BORDERS_COLOR = IndexedColors.BLACK.getIndex();
@@ -45,13 +46,13 @@ public class SessionReportService {
     public File createSessionReportInXLSX(ApplicationUser user) throws Exception {
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
             Workbook wb = new XSSFWorkbook();
-            Sheet sheet = wb.createSheet("Session report");
+            Sheet sheet = wb.createSheet(SHEET_NAME);
 
             sheet.createFreezePane(1, 15);
 
             setWidthsForComumns(sheet);
             addMergeRegions(sheet);
-            createHead(sheet, wb, user);
+            createHead(wb, user);
             createBody(user.getFaculty().getId(), wb, 15);
 
             wb.write(outputStream);
@@ -100,7 +101,9 @@ public class SessionReportService {
         sheet.addMergedRegion(new CellRangeAddress(11, 11, 20, 21));
     }
 
-    private void createHead(Sheet sheet, Workbook wb, ApplicationUser user) {
+    private void createHead(Workbook wb, ApplicationUser user) {
+        Sheet sheet = wb.getSheet(SHEET_NAME);
+
         List<Cell> similarCells = new ArrayList<>();
 
         Row row1 = sheet.createRow(1);
@@ -479,7 +482,7 @@ public class SessionReportService {
     }
 
     private void createBody(int facultyId, Workbook workbook, int numberOfRow) {
-        Sheet sheet = workbook.getSheetAt(0);
+        Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         int degreeId = degreeService.getByNameEng(BACHELOR_NAME_ENG_IN_DATABASE).getId();
         int degreeIdOfMaster = degreeService.getByNameEng(MASTER_NAME_ENG_IN_DATABASE).getId();
@@ -504,6 +507,13 @@ public class SessionReportService {
             setCellStyleAndFontForCell(numberOfCourse, workbook, HorizontalAlignment.CENTER,
                     VerticalAlignment.CENTER, 8, false);
             numberOfRow++;
+            addDataForOneCourse(groups, numberOfRow, workbook);
+        }
+    }
+
+    private void addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook) {
+        for (StudentGroup studentGroup : groups) {
+
         }
     }
 }
