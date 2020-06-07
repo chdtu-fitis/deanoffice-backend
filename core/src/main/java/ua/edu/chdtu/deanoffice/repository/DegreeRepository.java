@@ -14,6 +14,9 @@ public interface DegreeRepository extends JpaRepository<Degree, Integer> {
     @Query("select d from Degree d where upper(d.name)=upper(:name) ")
     Degree findByName(@Param("name") String name);
 
+    @Query("SELECT d FROM Degree d WHERE upper(d.nameEng) = upper(:nameEng)")
+    Degree findByNameEng(@Param("nameEng") String nameEng);
+
     @Query(value =
             "SELECT max(study_semesters) FROM student_group AS sg " +
             "INNER JOIN specialization AS s ON sg.specialization_id = s.id " +
