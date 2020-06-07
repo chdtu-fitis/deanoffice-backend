@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.order.OrderApprover;
 import java.util.List;
 
 public interface OrderApproverRepository extends JpaRepository<OrderApprover,Integer> {
+
     @Query("select oa from OrderApprover as oa where oa.active =:active AND (oa.faculty.id=:facultyId or oa.faculty is null)")
     List<OrderApprover> findApproversForFacultyByActive(
             @Param("active") boolean active,
