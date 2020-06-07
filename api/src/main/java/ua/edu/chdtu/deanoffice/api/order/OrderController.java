@@ -2,21 +2,32 @@ package ua.edu.chdtu.deanoffice.api.order;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.api.order.paragraphdto.StudentExpelParagraphDtoV1;
+import ua.edu.chdtu.deanoffice.api.order.paragraphdto.StudentExpelParagraphDto;
 import ua.edu.chdtu.deanoffice.api.student.StudentExpelController;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
+import ua.edu.chdtu.deanoffice.entity.order.Order;
 import ua.edu.chdtu.deanoffice.entity.order.OrderSerializedData;
 import ua.edu.chdtu.deanoffice.entity.order.OrderType;
+import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.order.OrderDtoSerializationService;
 
 import javax.validation.Valid;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -29,6 +40,23 @@ public class OrderController extends DocumentResponseController {
     private final OrderDtoSerializationService orderDtoSerializationService;
     private final StudentExpelController studentExpelController;
     private final ObjectMapper objectMapper;
+    private final DocumentIOService documentIOService;
+
+    @GetMapping("/{orderId}/document")
+    public ResponseEntity<Resource> generateDocument(@PathVariable Integer orderId)
+            throws Docx4JException, FileNotFoundException {
+        Order order = orderService.getOrderById(orderId);
+        String orderName = order.getOrderTemplateVersion().getDbTableName() + " " + order.getOrderNumber();
+        WordprocessingMLPackage orderDocument = documentIOService.loadTemplate(DocumentIOService.ORDERS_PATH +
+                order.getOrderTemplateVersion().getTemplateName());
+        Map<String, String> placeholderValue = new HashMap<>();
+        placeholderValue.put("PHParagraph", order.getOrderParagraph());
+        placeholderValue.put("PHOrderDate", order.getOrderDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString());
+        placeholderValue.put("PHNumber", order.getOrderNumber());
+        TemplateUtil.replaceTextPlaceholdersInTemplate(orderDocument, placeholderValue);
+        return buildDocumentResponseEntity(documentIOService.saveDocumentToTemp(orderDocument, orderName, FileFormatEnum.DOCX),
+                orderName, MEDIA_TYPE_DOCX);
+    }
 
     @PutMapping("/{orderId}/student-expel")
     public void saveStudentExpelOperation(@PathVariable Integer orderId, @RequestBody StudentExpelDTO studentExpelDTO) throws IOException {
@@ -60,7 +88,7 @@ public class OrderController extends DocumentResponseController {
     public ResponseEntity getParagraphByOrderType(OrderType orderType) {
         switch (orderType) {
             case STUDENT_EXPEL:
-                return ResponseEntity.ok(new StudentExpelParagraphDtoV1(orderService.getParagraphByOrderType(orderType)));
+                return ResponseEntity.ok(new StudentExpelParagraphDto(orderService.getParagraphByOrderType(orderType)));
             default:
                 return ResponseEntity.badRequest().build();
         }

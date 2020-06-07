@@ -37,4 +37,8 @@ public class OrderService {
                         .setComment(orderCreateCommand.getOrderComment()))
                 .getId();
     }
+
+    public Order getOrderById(Integer orderId) {
+        return orderRepository.findOne(orderId);
+    }
 }

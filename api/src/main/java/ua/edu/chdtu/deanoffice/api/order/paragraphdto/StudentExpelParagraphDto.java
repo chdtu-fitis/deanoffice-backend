@@ -13,7 +13,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentExpelParagraphDtoV1 {
+public class StudentExpelParagraphDto {
 
     private Set<String> fullOrderFieldsList = new HashSet<>(Arrays.asList("studentFullName", "studyYear",
             "studentDegree", "tuitionForm", "groupName",
@@ -25,7 +25,7 @@ public class StudentExpelParagraphDtoV1 {
             "orderReason", "orderCause"));
     private String paragraph;
 
-    public StudentExpelParagraphDtoV1(String paragraph) {
+    public StudentExpelParagraphDto(String paragraph) {
         this.paragraph = paragraph;
     }
 }
