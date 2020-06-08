@@ -15,6 +15,7 @@ import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -129,6 +130,10 @@ public class StudentExpelService {
     public List <StudentExpel> getByStudentDegreeId(Integer studentDegreeId){
         List <StudentExpel> expelledStudentInformation = studentExpelRepository.findByStudentDegreeIdOrderByExpelDate(studentDegreeId);
         return expelledStudentInformation;
+    }
+
+    public int getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(int studentGroupId, LocalDate sessionStartDate) {
+        return studentExpelRepository.findCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroupId, java.sql.Date.valueOf(sessionStartDate));
     }
 
 }

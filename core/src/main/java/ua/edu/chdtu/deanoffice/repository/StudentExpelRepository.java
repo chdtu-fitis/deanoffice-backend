@@ -34,4 +34,11 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
 
     List <StudentExpel> findByStudentDegreeIdOrderByExpelDate(@Param("student_degree_id") Integer studentDegreeId);
 
+    @Query(value =
+            "SELECT count(se.id) FROM student_expel AS se " +
+            "WHERE se.student_group_id = :studentGroupId " +
+            "AND se.expel_date > :sessionStartDate", nativeQuery = true)
+    int findCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(@Param("studentGroupId") int studentGroupId,
+                                                                       @Param("sessionStartDate") java.sql.Date sessionStartDate);
+
 }
