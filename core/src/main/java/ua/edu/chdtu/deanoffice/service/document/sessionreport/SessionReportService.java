@@ -9,11 +9,14 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.time.LocalDate;
 import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.util.SemesterUtil.getCurrentSemester;
@@ -35,15 +38,21 @@ public class SessionReportService {
 
     private final DegreeService degreeService;
     private final StudentGroupService studentGroupService;
+    private final StudentDegreeService studentDegreeService;
+    private final StudentExpelService studentExpelService;
 
     @Autowired
     public SessionReportService(DegreeService degreeService,
-                                StudentGroupService studentGroupService) {
+                                StudentGroupService studentGroupService,
+                                StudentDegreeService studentDegreeService,
+                                StudentExpelService studentExpelService) {
         this.degreeService = degreeService;
         this.studentGroupService = studentGroupService;
+        this.studentDegreeService = studentDegreeService;
+        this.studentExpelService = studentExpelService;
     }
 
-    public File createSessionReportInXLSX(ApplicationUser user) throws Exception {
+    public File createSessionReportInXLSX(ApplicationUser user, LocalDate sessionStartDate) throws Exception {
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet(SHEET_NAME);
@@ -53,7 +62,7 @@ public class SessionReportService {
             setWidthsForComumns(sheet);
             addMergeRegions(sheet);
             createHead(wb, user);
-            createBody(user.getFaculty().getId(), wb, 15);
+            createBody(user.getFaculty().getId(), wb, 15, sessionStartDate);
 
             wb.write(outputStream);
         }
@@ -481,7 +490,7 @@ public class SessionReportService {
         }
     }
 
-    private void createBody(int facultyId, Workbook workbook, int numberOfRow) {
+    private void createBody(int facultyId, Workbook workbook, int numberOfRow, LocalDate sessionStartDate) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         int degreeId = degreeService.getByNameEng(BACHELOR_NAME_ENG_IN_DATABASE).getId();
@@ -507,13 +516,15 @@ public class SessionReportService {
             setCellStyleAndFontForCell(numberOfCourse, workbook, HorizontalAlignment.CENTER,
                     VerticalAlignment.CENTER, 8, false);
             numberOfRow++;
-            addDataForOneCourse(groups, numberOfRow, workbook);
+            addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate);
         }
     }
 
-    private void addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook) {
+    private void addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate) {
         for (StudentGroup studentGroup : groups) {
-
+            int countStudentsOnSessionStart =
+                    studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(studentGroup.getId(), sessionStartDate) +
+                    studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroup.getId(), sessionStartDate);
         }
     }
 }
