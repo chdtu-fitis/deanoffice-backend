@@ -139,7 +139,7 @@ public class SessionReportService {
 
         Row row6 = sheet.createRow(6);
         row6.setHeightInPoints((float) 19.5);
-        currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестр");
+        currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестри");
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
         currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters(user));
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 10, false);
@@ -272,18 +272,27 @@ public class SessionReportService {
         int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId(BACHELOR_NAME_ENG_IN_DATABASE, facultyId);
         this.maxSemesterForBachelor = bachelorMaxSemester;
         int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId(MASTER_NAME_ENG_IN_DATABASE, facultyId);
-        int totalMaxSemester = bachelorMaxSemester + masterMaxSemester;
+        int totalMaxSemesterForCurrentDegree = bachelorMaxSemester;
+        int StartFromSemester = 0;
 
         StringBuilder stringBuilder = new StringBuilder();
         Set<Integer> semesters = new TreeSet<>();
+        List<String> degreeNames = Arrays.asList("Бакалаври: ", "; Магістри: ");
 
-        for (int semester = previousSemester + 1; semester <= totalMaxSemester; semester += 2) {
-            stringBuilder.append(semester);
-            semesters.add(semester);
+        for (String degreeName : degreeNames) {
+            stringBuilder.append(degreeName);
 
-            if (semester < totalMaxSemester) {
-                stringBuilder.append(", ");
+            for (int semester = previousSemester + 1; semester <= totalMaxSemesterForCurrentDegree; semester += 2) {
+                stringBuilder.append(semester);
+                semesters.add(semester + StartFromSemester);
+
+                if (semester + 1 < totalMaxSemesterForCurrentDegree) {
+                    stringBuilder.append(", ");
+                }
             }
+
+            StartFromSemester += bachelorMaxSemester;
+            totalMaxSemesterForCurrentDegree = masterMaxSemester;
         }
 
         this.semesters = semesters;
@@ -499,32 +508,50 @@ public class SessionReportService {
 
         for (Integer semester : semesters) {
 
+            Cell numberOfCourse = sheet.createRow(numberOfRow).createCell(0);
+            int yearOfStudy;
+
             if (semester > maxSemesterForBachelor) {
                 semester = semester - maxSemesterForBachelor;
+                yearOfStudy = semester % 2 == 0 ? semester / 2 : semester / 2 + 1;
+                numberOfCourse.setCellValue("Магістри курс " + yearOfStudy + ", сем. " + semester);
 
                 if (!isMasterDegree) {
                     degreeId = degreeIdOfMaster;
                     isMasterDegree = true;
                 }
+            } else {
+                yearOfStudy = semester % 2 == 0 ? semester / 2 : semester / 2 + 1;
+                numberOfCourse.setCellValue("Бакалаври курс " + yearOfStudy + ", сем. " + semester);
             }
 
-            int yearOfStudy = semester % 2 == 0 ? semester / 2 : semester / 2 + 1;
-            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, yearOfStudy, facultyId);
-
-            Cell numberOfCourse = sheet.createRow(numberOfRow).createCell(0);
-            numberOfCourse.setCellValue(semester);
             setCellStyleAndFontForCell(numberOfCourse, workbook, HorizontalAlignment.CENTER,
                     VerticalAlignment.CENTER, 8, false);
+
+            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, yearOfStudy, facultyId);
             numberOfRow++;
-            addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate);
+            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate);
         }
     }
 
-    private void addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate) {
+    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate) {
+        Sheet sheet = workbook.getSheet(SHEET_NAME);
         for (StudentGroup studentGroup : groups) {
+            Row dataAboutOneStudentGroup = sheet.createRow(numberOfRow++);
+            Cell groupName = dataAboutOneStudentGroup.createCell(0);
+            groupName.setCellValue(studentGroup.getName());
+            setCellStyleAndFontForCell(groupName, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
+            List<Cell> dataCells = new ArrayList<>();
             int countStudentsOnSessionStart =
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(studentGroup.getId(), sessionStartDate) +
-                    studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroup.getId(), sessionStartDate);
+                            studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroup.getId(), sessionStartDate);
+
+            Cell numberOfStudentsOnSessionStart = dataAboutOneStudentGroup.createCell(1);
+            numberOfStudentsOnSessionStart.setCellValue(countStudentsOnSessionStart);
+            dataCells.add(numberOfStudentsOnSessionStart);
+            setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
         }
+
+        return numberOfRow;
     }
 }
