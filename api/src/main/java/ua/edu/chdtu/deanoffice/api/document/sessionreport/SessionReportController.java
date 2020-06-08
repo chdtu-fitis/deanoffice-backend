@@ -2,9 +2,11 @@ package ua.edu.chdtu.deanoffice.api.document.sessionreport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.document.examreport.ConsolidatedExamReportController;
@@ -15,6 +17,8 @@ import ua.edu.chdtu.deanoffice.service.document.sessionreport.SessionReportServi
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/documents/session-report")
@@ -28,9 +32,10 @@ public class SessionReportController extends DocumentResponseController {
     }
 
     @GetMapping
-    public ResponseEntity<Resource> getSessionReportInExcel(@CurrentUser ApplicationUser user) {
+    public ResponseEntity<Resource> getSessionReportInExcel(@CurrentUser ApplicationUser user,
+                                                            @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate sessionStartDate) {
         try {
-            File sessionReport = sessionReportService.createSessionReportInXLSX(user);
+            File sessionReport = sessionReportService.createSessionReportInXLSX(user, sessionStartDate);
 
             return buildDocumentResponseEntity(sessionReport, sessionReport.getName(), MEDIA_TYPE_XLSX);
         } catch (Exception e) {
