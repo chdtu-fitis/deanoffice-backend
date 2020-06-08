@@ -61,7 +61,7 @@ public class DocumentIOService {
     private File saveDocument(Object document, String fileName, FileFormatEnum format)
             throws Docx4JException, FileNotFoundException {
 
-        String filePath = cleanFileName(fileName) + getFileCreationDateAndTime();
+        String filePath = getJavaTempDirectory() + "/" + cleanFileName(fileName) + getFileCreationDateAndTime();
         File documentFile = null;
 
         if (document instanceof WordprocessingMLPackage) {
