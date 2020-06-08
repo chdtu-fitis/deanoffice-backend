@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,6 +53,10 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllByGroupId(Integer groupId) {
         return this.studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
+    }
+
+    public int getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(int studentGroupId, LocalDate sessionStartDate) {
+        return this.studentDegreeRepository.findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(studentGroupId, java.sql.Date.valueOf(sessionStartDate));
     }
 
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {

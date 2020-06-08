@@ -44,6 +44,14 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("active") boolean active
     );
 
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree AS sd " +
+            "WHERE sd.student_group_id = :studentGroupId " +
+            "AND sd.active = true " +
+            "AND sd.admission_date < :sessionStartDate", nativeQuery = true)
+    int findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(@Param("studentGroupId") int studentGroupId,
+                                                                            @Param("sessionStartDate") java.sql.Date sessionStartDate);
+
     @Query(value = "SELECT * FROM student_degree sd " +
             "INNER JOIN specialization s ON s.id = sd.specialization_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
