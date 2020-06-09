@@ -7,6 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
@@ -62,7 +63,7 @@ public class SessionReportService {
 
             setWidthsForColumns(sheet);
             addMergeRegions(sheet);
-            createHead(wb, user, sessionStartDate);
+            createHead(wb, user, sessionStartDate, tuitionForm);
             createBody(user.getFaculty().getId(), wb, 15, sessionStartDate, tuitionForm);
 
             wb.write(outputStream);
@@ -111,7 +112,7 @@ public class SessionReportService {
         sheet.addMergedRegion(new CellRangeAddress(11, 11, 20, 21));
     }
 
-    private void createHead(Workbook wb, ApplicationUser user, LocalDate sessionStartDate) {
+    private void createHead(Workbook wb, ApplicationUser user, LocalDate sessionStartDate, TuitionForm tuitionForm) {
         Sheet sheet = wb.getSheet(SHEET_NAME);
 
         List<Cell> similarCells = new ArrayList<>();
@@ -143,7 +144,7 @@ public class SessionReportService {
         row6.setHeightInPoints((float) 19.5);
         currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестри");
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
-        currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters(user));
+        currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters(user, tuitionForm));
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 10, false);
 
         Row row7 = sheet.createRow(7);
@@ -268,12 +269,12 @@ public class SessionReportService {
     }
 
     //TODO треба уточнити які можуть бути семестри
-    private String getCorrectSemesters(ApplicationUser user) {
+    private String getCorrectSemesters(ApplicationUser user, TuitionForm tuitionForm) {
         int facultyId = user.getFaculty().getId();
         int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
-        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId(BACHELOR_NAME_ENG_IN_DATABASE, facultyId);
+        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(BACHELOR_NAME_ENG_IN_DATABASE, facultyId, tuitionForm);
         this.maxSemesterForBachelor = bachelorMaxSemester;
-        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyId(MASTER_NAME_ENG_IN_DATABASE, facultyId);
+        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(MASTER_NAME_ENG_IN_DATABASE, facultyId, tuitionForm);
         int totalMaxSemesterForCurrentDegree = bachelorMaxSemester;
         int StartFromSemester = 0;
 
@@ -532,33 +533,91 @@ public class SessionReportService {
 
             List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, yearOfStudy, facultyId, tuitionForm);
             numberOfRow++;
-            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate);
+            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy);
         }
     }
 
-    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate) {
+    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
+        int numberFirstRow = numberOfRow;
+
+        List<Cell> dataCells = new ArrayList<>();
 
         for (StudentGroup studentGroup : groups) {
             Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
             dataAboutOneStudentGroupPart1.setHeightInPoints((float) 12.75);
+
             Row dataAboutOneStudentGroupPart2 = sheet.createRow(numberOfRow + 1);
             dataAboutOneStudentGroupPart2.setHeightInPoints((float) 12.75);
+
             Cell groupName = dataAboutOneStudentGroupPart1.createCell(0);
             sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
             groupName.setCellValue(studentGroup.getName());
             setCellStyleAndFontForCell(groupName, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
-            List<Cell> dataCells = new ArrayList<>();
-            int countStudentsOnSessionStart =
-                    studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(studentGroup.getId(), sessionStartDate) +
-                            studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroup.getId(), sessionStartDate);
 
-            Cell numberOfStudentsOnSessionStart = dataAboutOneStudentGroupPart1.createCell(1);
-            numberOfStudentsOnSessionStart.setCellValue(countStudentsOnSessionStart);
-            dataCells.add(numberOfStudentsOnSessionStart);
-            setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+            int countBudgetStudentsOnSessionStart =
+                    studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
+                            studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET);
+
+            int countContractStudentsOnSessionStart =
+                    studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
+                            studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
+
+            Cell numberOfBudgetStudentsOnSessionStart = dataAboutOneStudentGroupPart1.createCell(1);
+            numberOfBudgetStudentsOnSessionStart.setCellValue(countBudgetStudentsOnSessionStart);
+
+            Cell numberOfContractStudentsOnSessionStart = dataAboutOneStudentGroupPart2.createCell(1);
+            numberOfContractStudentsOnSessionStart.setCellValue(countContractStudentsOnSessionStart);
+
+            dataCells.add(numberOfBudgetStudentsOnSessionStart);
+            dataCells.add(numberOfContractStudentsOnSessionStart);
+
             numberOfRow += 2;
         }
+
+        Row totalNumberOFStudentsForOneCourseOnSessionStartPart1 = sheet.createRow(numberOfRow);
+        Row totalNumberOFStudentsForOneCourseOnSessionStartPart2 = sheet.createRow(numberOfRow + 1);
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
+        Cell numberOfCourseCell = totalNumberOFStudentsForOneCourseOnSessionStartPart1.createCell(0);
+        numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
+        setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
+        Cell totalCountBudgetStudentsOnSessionStart = totalNumberOFStudentsForOneCourseOnSessionStartPart1.createCell(1);
+        Cell totalCountContractStudentsOnSessionStart = totalNumberOFStudentsForOneCourseOnSessionStartPart2.createCell(1);
+        setCellStyleAndFontForCells(
+                Arrays.asList(totalCountBudgetStudentsOnSessionStart, totalCountContractStudentsOnSessionStart),
+                workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true
+        );
+
+        StringBuilder formulaForStudentsByPayment = new StringBuilder();
+
+        for (int i = numberFirstRow; i <= numberOfRow - 1; i += 2) {
+            Row currentRow = sheet.getRow(i);
+            Cell currentCell = currentRow.getCell(1);
+            formulaForStudentsByPayment.append(currentCell.getAddress().toString());
+            formulaForStudentsByPayment.append("+");
+        }
+
+
+        formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
+
+        totalCountBudgetStudentsOnSessionStart.setCellFormula(formulaForStudentsByPayment.toString());
+
+        formulaForStudentsByPayment.delete(0, formulaForStudentsByPayment.length());
+
+        for (int i = numberFirstRow + 1; i <= numberOfRow - 1; i += 2) {
+            Row currentRow = sheet.getRow(i);
+            Cell currentCell = currentRow.getCell(1);
+            formulaForStudentsByPayment.append(currentCell.getAddress().toString());
+            formulaForStudentsByPayment.append("+");
+        }
+
+        formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
+
+        totalCountContractStudentsOnSessionStart.setCellFormula(formulaForStudentsByPayment.toString());
+
+        numberOfRow += 2;
+
+        setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
 
         return numberOfRow;
     }
