@@ -90,7 +90,6 @@ create table orders
     order_number              varchar(15)    not null,
     order_approve_template_id int            not null,
     order_control_template_id integer,
-    order_paragraph           varchar(40000) not null,
     comment                   varchar(200),
     active                    boolean        not null default true,
     signed                    boolean        not null default false
