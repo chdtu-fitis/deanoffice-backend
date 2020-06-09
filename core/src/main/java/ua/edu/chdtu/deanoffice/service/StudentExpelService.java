@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.OrderReason;
-import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentExpel;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
@@ -132,8 +129,8 @@ public class StudentExpelService {
         return expelledStudentInformation;
     }
 
-    public int getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(int studentGroupId, LocalDate sessionStartDate) {
-        return studentExpelRepository.findCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroupId, java.sql.Date.valueOf(sessionStartDate));
+    public int getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(int studentGroupId, LocalDate sessionStartDate, Payment payment) {
+        return studentExpelRepository.findCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString());
     }
 
 }
