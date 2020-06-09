@@ -559,66 +559,73 @@ public class SessionReportService {
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET);
 
+            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart1, 1, countBudgetStudentsOnSessionStart, dataCells);
+
             int countContractStudentsOnSessionStart =
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
 
-            Cell numberOfBudgetStudentsOnSessionStart = dataAboutOneStudentGroupPart1.createCell(1);
-            numberOfBudgetStudentsOnSessionStart.setCellValue(countBudgetStudentsOnSessionStart);
-
-            Cell numberOfContractStudentsOnSessionStart = dataAboutOneStudentGroupPart2.createCell(1);
-            numberOfContractStudentsOnSessionStart.setCellValue(countContractStudentsOnSessionStart);
-
-            dataCells.add(numberOfBudgetStudentsOnSessionStart);
-            dataCells.add(numberOfContractStudentsOnSessionStart);
+            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart2, 1, countContractStudentsOnSessionStart, dataCells);
 
             numberOfRow += 2;
         }
 
-        Row totalNumberOFStudentsForOneCourseOnSessionStartPart1 = sheet.createRow(numberOfRow);
-        Row totalNumberOFStudentsForOneCourseOnSessionStartPart2 = sheet.createRow(numberOfRow + 1);
-        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
-        Cell numberOfCourseCell = totalNumberOFStudentsForOneCourseOnSessionStartPart1.createCell(0);
-        numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
-        setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
-        Cell totalCountBudgetStudentsOnSessionStart = totalNumberOFStudentsForOneCourseOnSessionStartPart1.createCell(1);
-        Cell totalCountContractStudentsOnSessionStart = totalNumberOFStudentsForOneCourseOnSessionStartPart2.createCell(1);
-        setCellStyleAndFontForCells(
-                Arrays.asList(totalCountBudgetStudentsOnSessionStart, totalCountContractStudentsOnSessionStart),
-                workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true
+        setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+
+        calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
+                numberOfRow, sheet, numberOfCourse, 1, numberFirstRow
         );
-
-        StringBuilder formulaForStudentsByPayment = new StringBuilder();
-
-        for (int i = numberFirstRow; i <= numberOfRow - 1; i += 2) {
-            Row currentRow = sheet.getRow(i);
-            Cell currentCell = currentRow.getCell(1);
-            formulaForStudentsByPayment.append(currentCell.getAddress().toString());
-            formulaForStudentsByPayment.append("+");
-        }
-
-
-        formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
-
-        totalCountBudgetStudentsOnSessionStart.setCellFormula(formulaForStudentsByPayment.toString());
-
-        formulaForStudentsByPayment.delete(0, formulaForStudentsByPayment.length());
-
-        for (int i = numberFirstRow + 1; i <= numberOfRow - 1; i += 2) {
-            Row currentRow = sheet.getRow(i);
-            Cell currentCell = currentRow.getCell(1);
-            formulaForStudentsByPayment.append(currentCell.getAddress().toString());
-            formulaForStudentsByPayment.append("+");
-        }
-
-        formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
-
-        totalCountContractStudentsOnSessionStart.setCellFormula(formulaForStudentsByPayment.toString());
 
         numberOfRow += 2;
 
-        setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
-
         return numberOfRow;
     }
+
+    private void calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
+            int numberOfRow, Sheet sheet, int numberOfCourse, int columnNumber, int numberFirstRow
+    ) {
+        Workbook workbook = sheet.getWorkbook();
+
+        Row rowPart1 = sheet.createRow(numberOfRow);
+        Row rowPart2 = sheet.createRow(numberOfRow + 1);
+
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
+
+        Cell numberOfCourseCell = rowPart1.createCell(0);
+        numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
+        setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
+
+        Cell totalCountBudgetStudents = rowPart1.createCell(columnNumber);
+        Cell totalCountContractStudents = rowPart2.createCell(columnNumber);
+
+        setCellStyleAndFontForCells(
+                Arrays.asList(totalCountBudgetStudents, totalCountContractStudents),
+                workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true
+        );
+
+        createFormulaForCell(numberFirstRow, numberOfRow, sheet, totalCountBudgetStudents, 1);
+        createFormulaForCell(numberFirstRow + 1, numberOfRow, sheet, totalCountContractStudents, 1);
+
+    }
+
+    private void createCellAndSetHereValueAndAddToList(Row row, int columnNumber, int value, List<Cell> list) {
+        Cell cell = row.createCell(columnNumber);
+        cell.setCellValue(value);
+        list.add(cell);
+    }
+
+    private void createFormulaForCell(int startNumber, int finishNumber, Sheet sheet, Cell cell, int columnNumber) {
+        StringBuilder formulaForStudentsByPayment = new StringBuilder();
+
+        for (int i = startNumber; i < finishNumber; i += 2) {
+            Row currentRow = sheet.getRow(i);
+            Cell currentCell = currentRow.getCell(columnNumber);
+            formulaForStudentsByPayment.append(currentCell.getAddress().toString());
+            formulaForStudentsByPayment.append("+");
+        }
+
+        formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
+        cell.setCellFormula(formulaForStudentsByPayment.toString());
+    }
+
 }
