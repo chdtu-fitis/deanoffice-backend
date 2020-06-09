@@ -55,8 +55,8 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
     }
 
-    public int getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(int studentGroupId, LocalDate sessionStartDate) {
-        return this.studentDegreeRepository.findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(studentGroupId, java.sql.Date.valueOf(sessionStartDate));
+    public int getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(int studentGroupId, LocalDate sessionStartDate, Payment payment) {
+        return this.studentDegreeRepository.findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString());
     }
 
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
