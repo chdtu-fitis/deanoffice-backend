@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentExpelService;
@@ -52,17 +53,17 @@ public class SessionReportService {
         this.studentExpelService = studentExpelService;
     }
 
-    public File createSessionReportInXLSX(ApplicationUser user, LocalDate sessionStartDate) throws Exception {
+    public File createSessionReportInXLSX(ApplicationUser user, LocalDate sessionStartDate, TuitionForm tuitionForm) throws Exception {
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet(SHEET_NAME);
 
             sheet.createFreezePane(1, 15);
 
-            setWidthsForComumns(sheet);
+            setWidthsForColumns(sheet);
             addMergeRegions(sheet);
-            createHead(wb, user);
-            createBody(user.getFaculty().getId(), wb, 15, sessionStartDate);
+            createHead(wb, user, sessionStartDate);
+            createBody(user.getFaculty().getId(), wb, 15, sessionStartDate, tuitionForm);
 
             wb.write(outputStream);
         }
@@ -70,7 +71,7 @@ public class SessionReportService {
         return new File(TEMP_DiRECTORY + FILE_NAME);
     }
 
-    private void setWidthsForComumns(Sheet sheet) {
+    private void setWidthsForColumns(Sheet sheet) {
         sheet.setColumnWidth(0, 6014);//A - 22.71
         sheet.setColumnWidth(1, 2770);//B - 10.14
         sheet.setColumnWidth(2, 2150);//C - 7.71
@@ -110,7 +111,7 @@ public class SessionReportService {
         sheet.addMergedRegion(new CellRangeAddress(11, 11, 20, 21));
     }
 
-    private void createHead(Workbook wb, ApplicationUser user) {
+    private void createHead(Workbook wb, ApplicationUser user, LocalDate sessionStartDate) {
         Sheet sheet = wb.getSheet(SHEET_NAME);
 
         List<Cell> similarCells = new ArrayList<>();
@@ -131,7 +132,8 @@ public class SessionReportService {
 
         Row row4 = sheet.createRow(4);
         row4.setHeightInPoints(27);
-        currentCell = createCellForHeadAndSetThisValue(row4, 1, "ВІДОМОСТІ ПРО РЕЗУЛЬТАТИ ЕКЗАМЕНАЦІЙНОЇ СЕСІЇ #рікПочаток/#рікКінець__н.р.");
+        currentCell = createCellForHeadAndSetThisValue(row4, 1, "ВІДОМОСТІ ПРО РЕЗУЛЬТАТИ ЕКЗАМЕНАЦІЙНОЇ СЕСІЇ " +
+                sessionStartDate.getYear() + "_/" + (sessionStartDate.getYear() + 1) + "_н.р.");
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 16, true);
 
         Row row5 = sheet.createRow(5);
@@ -499,7 +501,7 @@ public class SessionReportService {
         }
     }
 
-    private void createBody(int facultyId, Workbook workbook, int numberOfRow, LocalDate sessionStartDate) {
+    private void createBody(int facultyId, Workbook workbook, int numberOfRow, LocalDate sessionStartDate, TuitionForm tuitionForm) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         int degreeId = degreeService.getByNameEng(BACHELOR_NAME_ENG_IN_DATABASE).getId();
@@ -528,7 +530,7 @@ public class SessionReportService {
             setCellStyleAndFontForCell(numberOfCourse, workbook, HorizontalAlignment.CENTER,
                     VerticalAlignment.CENTER, 8, false);
 
-            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYear(degreeId, yearOfStudy, facultyId);
+            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, yearOfStudy, facultyId, tuitionForm);
             numberOfRow++;
             numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate);
         }
@@ -536,9 +538,14 @@ public class SessionReportService {
 
     private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
+
         for (StudentGroup studentGroup : groups) {
-            Row dataAboutOneStudentGroup = sheet.createRow(numberOfRow++);
-            Cell groupName = dataAboutOneStudentGroup.createCell(0);
+            Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
+            dataAboutOneStudentGroupPart1.setHeightInPoints((float) 12.75);
+            Row dataAboutOneStudentGroupPart2 = sheet.createRow(numberOfRow + 1);
+            dataAboutOneStudentGroupPart2.setHeightInPoints((float) 12.75);
+            Cell groupName = dataAboutOneStudentGroupPart1.createCell(0);
+            sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
             groupName.setCellValue(studentGroup.getName());
             setCellStyleAndFontForCell(groupName, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
             List<Cell> dataCells = new ArrayList<>();
@@ -546,10 +553,11 @@ public class SessionReportService {
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupId(studentGroup.getId(), sessionStartDate) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDate(studentGroup.getId(), sessionStartDate);
 
-            Cell numberOfStudentsOnSessionStart = dataAboutOneStudentGroup.createCell(1);
+            Cell numberOfStudentsOnSessionStart = dataAboutOneStudentGroupPart1.createCell(1);
             numberOfStudentsOnSessionStart.setCellValue(countStudentsOnSessionStart);
             dataCells.add(numberOfStudentsOnSessionStart);
             setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+            numberOfRow += 2;
         }
 
         return numberOfRow;
