@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.api.document.examreport.ConsolidatedExamReportCon
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.document.sessionreport.SessionReportService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -33,9 +34,10 @@ public class SessionReportController extends DocumentResponseController {
 
     @GetMapping
     public ResponseEntity<Resource> getSessionReportInExcel(@CurrentUser ApplicationUser user,
-                                                            @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate sessionStartDate) {
+                                                            @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") LocalDate sessionStartDate,
+                                                            @RequestParam TuitionForm tuitionForm) {
         try {
-            File sessionReport = sessionReportService.createSessionReportInXLSX(user, sessionStartDate);
+            File sessionReport = sessionReportService.createSessionReportInXLSX(user, sessionStartDate, tuitionForm);
 
             return buildDocumentResponseEntity(sessionReport, sessionReport.getName(), MEDIA_TYPE_XLSX);
         } catch (Exception e) {
