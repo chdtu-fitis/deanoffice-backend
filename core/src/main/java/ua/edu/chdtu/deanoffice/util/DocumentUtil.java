@@ -1,7 +1,7 @@
 package ua.edu.chdtu.deanoffice.util;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
 
 public class DocumentUtil {
 
