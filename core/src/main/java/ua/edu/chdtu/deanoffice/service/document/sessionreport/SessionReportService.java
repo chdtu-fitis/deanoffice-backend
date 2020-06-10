@@ -539,9 +539,9 @@ public class SessionReportService {
 
     private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
-        int numberFirstRow = numberOfRow;
 
-        List<Cell> dataCells = new ArrayList<>();
+        List<Cell> budgetCells = new ArrayList<>();
+        List<Cell> contractCells = new ArrayList<>();
 
         for (StudentGroup studentGroup : groups) {
             Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
@@ -559,30 +559,42 @@ public class SessionReportService {
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET);
 
-            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart1, 1, countBudgetStudentsOnSessionStart, dataCells);
+            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart1, 1, countBudgetStudentsOnSessionStart, budgetCells);
 
             int countContractStudentsOnSessionStart =
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
 
-            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart2, 1, countContractStudentsOnSessionStart, dataCells);
+            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart2, 1, countContractStudentsOnSessionStart, contractCells);
 
             numberOfRow += 2;
         }
 
-        setCellStyleAndFontForCells(dataCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+        setCellStyleAndFontForCells(budgetCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+        setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
 
         calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-                numberOfRow, sheet, numberOfCourse, 1, numberFirstRow
+                numberOfRow, sheet, numberOfCourse, 1, budgetCells, contractCells
         );
+
+        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgetCells);
+        setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, contractCells);
 
         numberOfRow += 2;
 
         return numberOfRow;
     }
 
+    private void setCellColorForPaymentCells(FillPatternType fillPatternType, IndexedColors color, List<Cell> budgedCells) {
+        for (Cell budgetCell : budgedCells) {
+            CellStyle cellStyle = budgetCell.getCellStyle();
+            cellStyle.setFillPattern(fillPatternType);
+            cellStyle.setFillForegroundColor(color.getIndex());
+        }
+    }
+
     private void calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-            int numberOfRow, Sheet sheet, int numberOfCourse, int columnNumber, int numberFirstRow
+            int numberOfRow, Sheet sheet, int numberOfCourse, int columnNumber, List<Cell> budgedCells, List<Cell> contractCell
     ) {
         Workbook workbook = sheet.getWorkbook();
 
@@ -596,15 +608,16 @@ public class SessionReportService {
         setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
 
         Cell totalCountBudgetStudents = rowPart1.createCell(columnNumber);
+        createFormulaForCell(budgedCells, totalCountBudgetStudents);
+        budgedCells.add(totalCountBudgetStudents);
         Cell totalCountContractStudents = rowPart2.createCell(columnNumber);
+        createFormulaForCell(contractCell, totalCountContractStudents);
+        contractCell.add(totalCountContractStudents);
 
         setCellStyleAndFontForCells(
                 Arrays.asList(totalCountBudgetStudents, totalCountContractStudents),
                 workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true
         );
-
-        createFormulaForCell(numberFirstRow, numberOfRow, sheet, totalCountBudgetStudents, 1);
-        createFormulaForCell(numberFirstRow + 1, numberOfRow, sheet, totalCountContractStudents, 1);
 
     }
 
@@ -614,18 +627,16 @@ public class SessionReportService {
         list.add(cell);
     }
 
-    private void createFormulaForCell(int startNumber, int finishNumber, Sheet sheet, Cell cell, int columnNumber) {
+    private void createFormulaForCell(List<Cell> cells, Cell totalCountCell) {
         StringBuilder formulaForStudentsByPayment = new StringBuilder();
 
-        for (int i = startNumber; i < finishNumber; i += 2) {
-            Row currentRow = sheet.getRow(i);
-            Cell currentCell = currentRow.getCell(columnNumber);
-            formulaForStudentsByPayment.append(currentCell.getAddress().toString());
+        for (Cell cell : cells) {
+            formulaForStudentsByPayment.append(cell.getAddress().toString());
             formulaForStudentsByPayment.append("+");
         }
 
         formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
-        cell.setCellFormula(formulaForStudentsByPayment.toString());
+        totalCountCell.setCellFormula(formulaForStudentsByPayment.toString());
     }
 
 }
