@@ -37,7 +37,7 @@ public class OrderApproveTemplateController {
         this.orderApproverService = orderApproverService;
     }
 
-    @PostMapping("/orders/approve/template")
+    @PostMapping("/orders/approve-template")
     public ResponseEntity createApproveTemplate(@RequestBody OrderApproveTemplateDTO approveTemplateDTO) {
         try {
             OrderApproveTemplate newApproveTemplate = map(approveTemplateDTO, OrderApproveTemplate.class);
@@ -59,13 +59,13 @@ public class OrderApproveTemplateController {
         }
     }
 
-    @GetMapping("/orders/approve/template")
+    @GetMapping("/orders/approve-template")
     public ResponseEntity<List<OrderApproveTemplateDTO>> getApproveTemplates(@RequestParam(required = false, defaultValue = "true") boolean active) {
         List<OrderApproveTemplate> approveTemplates = approveTemplateService.getApproveTemplateForFaculty(active);
         return ResponseEntity.ok(strictMap(approveTemplates, OrderApproveTemplateDTO.class));
     }
 
-    @DeleteMapping("/orders/approve/template/{id}")
+    @DeleteMapping("/orders/approve-template/{id}")
     public ResponseEntity deleteApproveTemplate(@PathVariable("id") int id) {
         try {
             OrderApproveTemplate orderApproveTemplate = approveTemplateService.getApproveTemplateById(id);
