@@ -265,7 +265,7 @@ public class GradesJournalService {
                 for (StudentGroup studentGroup : studentGroups) {
                     List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
                     document.add(createOneGroupOneSemesterCoursesTableHorizontal(courseForGroups));
-                    document.add(createOneGroupOneSemesterPointsTable(courseForGroups));
+//                  document.add(createOneGroupOneSemesterPointsTable(courseForGroups));
                 }
             } finally {
                 if (document != null)
@@ -283,15 +283,19 @@ public class GradesJournalService {
         return pdfPCell;
     }
 
+    public int getCoursesNumber (List<CourseForGroup> courseForGroups){
+        SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
+        courseForGroups.sort(sortCourseForGroup);
+        int coursesNumber = courseForGroups.size();
+        return coursesNumber;
+    }
+
     private PdfPTable createOneGroupOneSemesterCoursesTableHorizontal( List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
         BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
         Font boldFont = new Font(baseFont, 8, Font.BOLD);
-        //semester = year * 2 - 1;
-        SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
-        courseForGroups.sort(sortCourseForGroup);
-        int columnsNumber = courseForGroups.size();
+        int columnsNumber = getCoursesNumber(courseForGroups);
 
         PdfPTable tableMain = new PdfPTable(1);
         tableMain.setLockedWidth(true);
@@ -338,7 +342,7 @@ public class GradesJournalService {
         return tableMain;
     }
 
-    private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
+    public List<Integer> getStudentsIdsByGroupId(Integer groupId) {
         List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
         return students.stream().map(BaseEntity::getId).collect(Collectors.toList());
     }
@@ -348,10 +352,7 @@ public class GradesJournalService {
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
         Font boldFont = new Font(baseFont, 8, Font.BOLD);
-
-        SortCourseForGroup sortCourseForGroup = new SortCourseForGroup();
-        courseForGroups.sort(sortCourseForGroup);
-        int columnsNumber = courseForGroups.size();
+        int columnsNumber = getCoursesNumber(courseForGroups);
 
         List<Integer> courseIds = new ArrayList<>();
         for (CourseForGroup courseForGroup : courseForGroups) {
