@@ -20,8 +20,13 @@ public class OrderApproverService {
         return orderApproverRepository.findApproversForFacultyByActive(active, facultyId);
     }
 
-    public OrderApprover getApproverById(int id) {
+    public OrderApprover getApproverById(Integer id) {
         return orderApproverRepository.findOne(id);
+    }
+
+    public List<OrderApprover> getActiveApproversByIds(List<Integer> ids) {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
+        return orderApproverRepository.findActiveApproversByIds(ids, facultyId);
     }
 
 //    @FacultyAuthorized

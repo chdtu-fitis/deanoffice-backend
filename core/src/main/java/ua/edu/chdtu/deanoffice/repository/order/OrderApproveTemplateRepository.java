@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApproveTemplate;
 import java.util.List;
 
-public interface ApproveTemplateRepository extends JpaRepository<OrderApproveTemplate, Integer> {
+public interface OrderApproveTemplateRepository extends JpaRepository<OrderApproveTemplate, Integer> {
     @Query("select at from OrderApproveTemplate as at where at.active =:active AND at.faculty.id=:facultyId")
     List<OrderApproveTemplate> findApproverTemplateForFacultyByActive(
             @Param("active") boolean active,
