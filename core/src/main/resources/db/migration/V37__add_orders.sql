@@ -49,12 +49,11 @@ VALUES ('Декан ФІТІС', 'Трегубенко Ірина Борисів
 -- User will choose among templates to paste suitable one. Needs discussion on structure and further sequencing in order.
 create table order_approve_template
 (
-    id                    SERIAL primary key,
-    main_approver_id      integer   not null,
-    approvers_ids         integer[] not null,
-    initiator_approver_id integer   not null,
-    faculty_id            integer   not null,
-    active                boolean   not null default true
+    id SERIAL primary key,
+    main_approver_id integer not null,
+    initiator_approver_id integer not null,
+    faculty_id integer not null,
+    active boolean not null default true
 );
 ALTER TABLE order_approve_template
     ADD CONSTRAINT fk_order_approve_template_main_approver_id FOREIGN KEY (main_approver_id) REFERENCES order_approver (id);
@@ -62,6 +61,19 @@ ALTER TABLE order_approve_template
     ADD CONSTRAINT fk_order_approve_template_initiator_approver_id FOREIGN KEY (initiator_approver_id) REFERENCES order_approver (id);
 ALTER TABLE order_approve_template
     ADD CONSTRAINT fk_order_approve_template_faculty_id FOREIGN KEY (faculty_id) REFERENCES faculty (id);
+
+create table order_approve_template_approvers
+(
+    id SERIAL primary key,
+    order_approve_template_id integer not null,
+    approver_id integer not null
+);
+ALTER TABLE order_approve_template_approvers
+    ADD CONSTRAINT fk_order_approve_template_approvers_approver_id FOREIGN KEY (approver_id) REFERENCES order_approver (id);
+ALTER TABLE order_approve_template_approvers
+    ADD CONSTRAINT fk_order_approve_template_approvers_template_id FOREIGN KEY (order_approve_template_id) REFERENCES order_approve_template (id);
+ALTER TABLE order_approve_template_approvers
+    ADD CONSTRAINT uk_order_approve_template_approvers_template_and_approver UNIQUE (order_approve_template_id, approver_id);
 
 -- Абзац про те, хто контролюватиме виконання наказу
 create table order_control_template
