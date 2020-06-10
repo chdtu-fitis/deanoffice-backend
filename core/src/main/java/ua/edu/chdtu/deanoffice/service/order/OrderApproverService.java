@@ -24,6 +24,10 @@ public class OrderApproverService {
         return orderApproverRepository.findOne(id);
     }
 
+    public List<OrderApprover> getActiveApproversByIds(List<Integer> ids) {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
+        return orderApproverRepository.findActiveApproversByIds(ids, facultyId);
+    }
 
 //    @FacultyAuthorized
     public void delete(OrderApprover orderApprover) throws UnauthorizedFacultyDataException {
