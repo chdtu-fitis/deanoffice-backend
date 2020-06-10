@@ -25,7 +25,7 @@ public class OrderApproveTemplateService {
         return orderApproveTemplateRepository.findApproverTemplateForFacultyByActive(active, facultyId);
     }
 
-    public OrderApproveTemplate getApproveTemplateById(Integer id) {
+    public OrderApproveTemplate getApproveTemplateById(int id) {
         return orderApproveTemplateRepository.findOne(id);
     }
 

@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
-
 @RestController
 public class OrderApproveTemplateController {
     private OrderApproveTemplateService approveTemplateService;
