@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.order;
+package ua.edu.chdtu.deanoffice.service.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Getter
 @Setter
-public class OrderCreateCommand {
+public class OrderUpdateCommand {
     @NotNull
     private OrderType orderType;
     @NotNull

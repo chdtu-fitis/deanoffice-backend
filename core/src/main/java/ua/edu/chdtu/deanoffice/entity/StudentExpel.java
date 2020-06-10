@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,6 +20,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Accessors(chain = true)
 public class StudentExpel extends BaseEntity {
     @ManyToOne
     private StudentDegree studentDegree; // ступінь
@@ -35,4 +38,6 @@ public class StudentExpel extends BaseEntity {
     private OrderReason orderReason; // причина наказу
     @Temporal(TemporalType.DATE)
     private Date applicationDate; // дата
+    private String orderParagraphJson;
+    private String orderBusinessOperation;
 }

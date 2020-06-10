@@ -8,11 +8,10 @@ import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
+import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
-
-import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
 import java.util.ArrayList;
@@ -79,7 +78,7 @@ public class StudentExpelService {
             studentExpels.add(new StudentExpel( studentDegree, studentDegree.getStudentGroup(),
                     currentYear - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears(),
                     studentDegree.getPayment(), expelDate, orderNumber, orderDate,
-                    orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()), null));
+                    orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()), null, null, null));
         }
 
         studentExpelRepository.save(studentExpels);
@@ -122,12 +121,12 @@ public class StudentExpelService {
         return studentExpelRepository.getOne(studentExpelId);
     }
 
-    public List<StudentExpel> getSpecificationName(Date startDate, Date endDate,String surname, String name, int facultyId) {
-        return studentExpelRepository.findAll(StudentDegreeSpecification.getExpelStudent(startDate,endDate,surname, name, facultyId));
+    public List<StudentExpel> getSpecificationName(Date startDate, Date endDate, String surname, String name, int facultyId) {
+        return studentExpelRepository.findAll(StudentDegreeSpecification.getExpelStudent(startDate, endDate, surname, name, facultyId));
     }
 
-    public List <StudentExpel> getByStudentDegreeId(Integer studentDegreeId){
-        List <StudentExpel> expelledStudentInformation = studentExpelRepository.findByStudentDegreeIdOrderByExpelDate(studentDegreeId);
+    public List<StudentExpel> getByStudentDegreeId(Integer studentDegreeId) {
+        List<StudentExpel> expelledStudentInformation = studentExpelRepository.findByStudentDegreeIdOrderByExpelDate(studentDegreeId);
         return expelledStudentInformation;
     }
 

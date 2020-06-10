@@ -3,7 +3,7 @@
 -- Used for cases when an order template changes (and we need to give user an previously generated version)
 -- template_name -  версія темплейта ордера(docx) - форма документа може змінюваатись з часом
 
-create table order_template_version
+create table if not exists order_template_version
 (
     id                 SERIAL primary key,
     db_table_name      varchar(50)   not null,
@@ -19,7 +19,7 @@ ALTER TABLE order_template_version
 
 -- People who are listed in the bottom of each order (approvers). Will be used to create a set of approvers
 -- (order_approve_template). May be improved with faculty id inclusion (to restrict user from seeing templates of other faculties)
-create table order_approver
+create table if not exists order_approver
 (
     id         SERIAL primary key,
     position   varchar(150) not null,
@@ -47,7 +47,7 @@ INSERT INTO order_approver(position, full_name, faculty_id, active)
 VALUES ('Декан ФІТІС', 'Трегубенко Ірина Борисівна', 1, true);
 
 -- User will choose among templates to paste suitable one. Needs discussion on structure and further sequencing in order.
-create table order_approve_template
+create table if not exists order_approve_template
 (
     id                    SERIAL primary key,
     main_approver_id      integer   not null,
@@ -64,7 +64,7 @@ ALTER TABLE order_approve_template
     ADD CONSTRAINT fk_order_approve_template_faculty_id FOREIGN KEY (faculty_id) REFERENCES faculty (id);
 
 -- Абзац про те, хто контролюватиме виконання наказу
-create table order_control_template
+create table if not exists order_control_template
 (
     id           SERIAL primary key,
     control_text varchar(300),
@@ -81,30 +81,25 @@ ALTER TABLE order_control_template
 -- active == true, signed == false -> order is in draft status.
 -- active == true, signed == true -> order's business logic has been applied
 -- order_control - зазвичай останній абзац у наказі - контроль за виконанням наказу покласти на...
-create table orders
+create table if not exists orders
 (
     id                        SERIAL primary key,
-    order_template_version_id int            not null,
-    faculty_id                int            not null,
-    order_date                date           not null,
-    order_number              varchar(15)    not null,
-    order_approve_template_id int            not null,
+    order_template_version_id int         not null,
+    faculty_id                int         not null,
+    order_date                date        not null,
+    order_number              varchar(15) not null,
+    order_approve_template_id int,
     order_control_template_id integer,
     comment                   varchar(200),
-    active                    boolean        not null default true,
-    signed                    boolean        not null default false
+    active                    boolean     not null default true,
+    signed                    boolean     not null default false
 );
 
-create table order_serialized_data
-(
-    id             SERIAL primary key,
-    order_id       int              not null,
-    order_type     varchar(100)     not null,
-    order_dto_name varchar(100)     not null,
-    data           varchar(1000000) not null,
-    deserialized   boolean          not null,
-    unique (order_id, order_type, order_dto_name)
-);
+alter table student_expel
+    add column order_paragraph_json varchar(100000);
+alter table student_expel
+    add column order_business_operation varchar(100000);
+
 
 ALTER TABLE orders
     ADD CONSTRAINT fk_orders_order_template_version_id FOREIGN KEY (order_template_version_id) REFERENCES order_template_version (id);
@@ -117,20 +112,3 @@ ALTER TABLE orders
 ALTER TABLE orders
     ADD CONSTRAINT uk_orders_faculty_id_and_order_number_and_order_date UNIQUE (faculty_id, order_number, order_date);
 
--- Paragraphs in order; can be in sections
-ALTER TABLE student_expel
-    ADD COLUMN order_id integer not null default 0;
-ALTER TABLE student_expel
-    ADD COLUMN tuition_form varchar(10) not null default 'FULL_TIME';
-ALTER TABLE student_expel
-    ADD COLUMN tuition_term varchar(10) not null default 'REGULAR';
-ALTER TABLE student_expel
-    ADD COLUMN specialization_id integer not null default 0;
-ALTER TABLE student_expel
-    ADD COLUMN speciality_id integer not null default 0;
-ALTER TABLE student_expel
-    ADD COLUMN reason_document varchar(150) not null default '';
-ALTER TABLE student_expel
-    ADD COLUMN section varchar(50) not null default '';
-ALTER TABLE student_expel
-    ADD COLUMN item_text varchar(1000) not null default '';
