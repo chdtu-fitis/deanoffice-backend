@@ -59,6 +59,13 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString());
     }
 
+    public int getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+            int studentGroupId, LocalDate sessionStartDate, Payment payment) {
+        return this.studentDegreeRepository.findCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+                studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString()
+        );
+    }
+
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
     }

@@ -54,6 +54,22 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                                                                                       @Param("sessionStartDate") java.sql.Date sessionStartDate,
                                                                                       @Param("payment") String payment);
 
+    //TODO чи може не бути вказано кінця академ. відпустки? + чи потрібно вставляти дату вступу, якщо вказано академ. відпустку?
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree AS sd " +
+            "INNER JOIN student_academic_vacation AS sav " +
+            "ON sav.student_degree_id = sd.id " +
+            "WHERE sd.student_group_id = :studentGroupId " +
+            "AND sd.active = true " +
+            "AND sd.admission_date < :sessionStartDate " +
+            "AND sav.vacation_start_date < :sessionStartDate " +
+            "AND sav.vacation_end_date > :sessionStartDate " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+            @Param("studentGroupId") int studentGroupId,
+            @Param("sessionStartDate") java.sql.Date sessionStartDate,
+            @Param("payment") String payment);
+
     @Query(value = "SELECT * FROM student_degree sd " +
             "INNER JOIN specialization s ON s.id = sd.specialization_id " +
             "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
