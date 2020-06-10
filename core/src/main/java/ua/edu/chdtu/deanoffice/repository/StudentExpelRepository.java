@@ -45,4 +45,21 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
                                                                                    @Param("sessionStartDate") java.sql.Date sessionStartDate,
                                                                                    @Param("payment") String payment);
 
+    //TODO чи може не бути кінця академ. відпустки?
+    @Query(value =
+            "SELECT count(se.id) FROM student_expel AS se " +
+            "INNER JOIN student_degree AS sd " +
+            "ON se.student_degree_id = sd.id " +
+            "INNER JOIN student_academic_vacation AS sav " +
+            "ON sav.student_degree_id = sd.id " +
+            "WHERE se.student_group_id = :studentGroupId " +
+            "AND se.expel_date > :sessionStartDate " +
+            "AND sav.vacation_start_date < :sessionStartDate " +
+            "AND sav.vacation_end_date > :sessionStartDate " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+            @Param("studentGroupId") int studentGroupId,
+            @Param("sessionStartDate") java.sql.Date sessionStartDate,
+            @Param("payment") String payment);
+
 }

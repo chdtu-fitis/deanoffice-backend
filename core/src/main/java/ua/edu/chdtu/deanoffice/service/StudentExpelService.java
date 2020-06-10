@@ -133,4 +133,11 @@ public class StudentExpelService {
         return studentExpelRepository.findCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString());
     }
 
+    public int getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+            int studentGroupId, LocalDate sessionStartDate, Payment payment) {
+        return studentExpelRepository.findCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+                studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString()
+        );
+    }
+
 }
