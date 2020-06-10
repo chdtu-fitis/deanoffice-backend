@@ -96,10 +96,12 @@ create table if not exists orders
 );
 
 alter table student_expel
-    add column order_paragraph_json varchar(100000);
+    add column order_paragraph_json varchar(1000);
 alter table student_expel
-    add column order_business_operation varchar(100000);
+    add column order_business_operation varchar(1000);
 
+ALTER TABLE student_expel
+    ADD COLUMN order_id integer not null default 0;
 
 ALTER TABLE orders
     ADD CONSTRAINT fk_orders_order_template_version_id FOREIGN KEY (order_template_version_id) REFERENCES order_template_version (id);
