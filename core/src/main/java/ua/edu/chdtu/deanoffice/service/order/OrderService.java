@@ -3,6 +3,8 @@ package ua.edu.chdtu.deanoffice.service.order;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ua.edu.chdtu.deanoffice.Constants;
@@ -20,7 +22,14 @@ import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
+import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +50,8 @@ public class OrderService {
     private final ObjectMapper objectMapper;
     private final StudentExpelRepository studentExpelRepository;
     private final OrderApproverTemplateRepository orderApproverTemplateRepository;
+    private final StudentExpelService studentExpelService;
+    private final DocumentIOService documentIOService;
 
     public Integer createOrder(OrderCreateCommand orderCreateCommand) {
         return orderRepository.save(new Order()
@@ -52,6 +63,24 @@ public class OrderService {
                         findByFacultyIdAndActive(orderCreateCommand.getFacultyId(), true))
                 .setFaculty(facultyService.getById(orderCreateCommand.getFacultyId())))
                 .getId();
+    }
+
+    public File generateStudentExpelDocument(Integer studentExpelId) throws IOException, Docx4JException {
+        StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
+        StudentExpelBusinessInformation studentExpelBusinessInformation = objectMapper.readValue(studentExpel.getOrderBusinessOperation(), StudentExpelBusinessInformation.class);
+        Order order = this.getOrderById(studentExpelBusinessInformation.getOrderId());
+        String orderName = order.getOrderTemplateVersion().getDbTableName() + " " + order.getOrderNumber();
+        WordprocessingMLPackage orderDocument = documentIOService.loadTemplate(DocumentIOService.ORDERS_PATH +
+                order.getOrderTemplateVersion().getTemplateName());
+        Map<String, String> placeholderValue = new HashMap<>();
+        placeholderValue.put("PHParagraph", objectMapper
+                .readValue(studentExpel.getOrderParagraphJson(),
+                        OrderParsedParagraphDto.class).getParagraphFields().stream()
+                .map(OrderParagraphPiece::getValue).collect(Collectors.joining()));
+        placeholderValue.put("PHOrderDate", order.getOrderDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString());
+        placeholderValue.put("PHNumber", order.getOrderNumber());
+        TemplateUtil.replaceTextPlaceholdersInTemplate(orderDocument, placeholderValue);
+        return documentIOService.saveDocumentToTemp(orderDocument, orderName, FileFormatEnum.DOCX);
     }
 
     public Integer saveStudentExpel(@RequestBody StudentExpelCreateCommand studentExpelCreateCommand) throws JsonProcessingException {
