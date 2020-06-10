@@ -2,10 +2,8 @@ package ua.edu.chdtu.deanoffice.entity.order;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -13,7 +11,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import java.util.List;
-
 
 @Getter
 @Setter

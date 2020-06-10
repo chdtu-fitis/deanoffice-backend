@@ -20,10 +20,9 @@ public class OrderApproverService {
         return orderApproverRepository.findApproversForFacultyByActive(active, facultyId);
     }
 
-    public OrderApprover getApproverById(Integer id) {
+    public OrderApprover getApproverById(int id) {
         return orderApproverRepository.findOne(id);
     }
-
 
 //    @FacultyAuthorized
     public void delete(OrderApprover orderApprover) throws UnauthorizedFacultyDataException {
