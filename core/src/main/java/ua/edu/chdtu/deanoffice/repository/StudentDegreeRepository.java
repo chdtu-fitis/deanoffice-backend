@@ -219,6 +219,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "and sd.active = true")
     List<StudentDegree> findByFullNameAndGroupId(@Param("full_name") String fullName, @Param("group_id") int groupId);
 
+    @Query("select sd from StudentDegree sd " +
+            "where sd.student.surname like :surname% " +
+            "and sd.specialization.faculty.id = :faculty_id " +
+            "and sd.active = true")
+    List<StudentDegree> findActiveBySurnameAndFacultyId(@Param("surname") String surname, @Param("faculty_id") int facultyId);
+
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.thesisName = :thesisName, sd.thesisNameEng = :thesisNameEng, sd.thesisSupervisor = :thesisSupervisor WHERE sd.id = :idStudentDegree")
