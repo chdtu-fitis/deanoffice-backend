@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.CourseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.order.dto.OrderApproveTemplateDTO;
 import ua.edu.chdtu.deanoffice.api.order.dto.OrderApproverDTO;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApprover;
@@ -40,6 +41,7 @@ public class OrderApproverController {
     @DeleteMapping("/orders/approvers/{id}")
     public ResponseEntity deleteApprover(@PathVariable("id") int id) {
         try {
+
             OrderApprover orderApprover = orderApproverService.getApproverById(id);
             orderApproverService.delete(orderApprover);
             return ResponseEntity.ok().build();
