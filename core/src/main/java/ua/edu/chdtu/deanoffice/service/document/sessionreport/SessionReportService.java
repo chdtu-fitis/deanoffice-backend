@@ -540,8 +540,12 @@ public class SessionReportService {
     private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
-        List<Cell> budgetCells = new ArrayList<>();
-        List<Cell> contractCells = new ArrayList<>();
+        List<Cell> budgetOnSessionStartList = new ArrayList<>();
+        List<Cell> bungedOnSessionStartWhoHaveAcademicVacationList = new ArrayList<>();
+        List<Cell> budgetOnSessionStartWhoHaveNotAcademicVacationList = new ArrayList<>();
+        List<Cell> contractOnSessionStartList = new ArrayList<>();
+        List<Cell> contractOnSessionStartWhoHaveAcademicVacationList = new ArrayList<>();
+        List<Cell> contractOnSessionStartWhoHaveNotAcademicVacationList = new ArrayList<>();
 
         for (StudentGroup studentGroup : groups) {
             Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
@@ -559,25 +563,100 @@ public class SessionReportService {
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET);
 
-            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart1, 1, countBudgetStudentsOnSessionStart, budgetCells);
+            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart1, 1, countBudgetStudentsOnSessionStart, budgetOnSessionStartList);
+
+            int countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation =
+                    studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+                        studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
+                    studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+                        studentGroup.getId(), sessionStartDate, Payment.BUDGET);
+
+            createCellAndSetHereValueAndAddToList(
+                    dataAboutOneStudentGroupPart1, 2, countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation, bungedOnSessionStartWhoHaveAcademicVacationList);
+
+            Cell countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell = dataAboutOneStudentGroupPart1.createCell(3);
+
+            countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell.setCellFormula(
+                    dataAboutOneStudentGroupPart1.getCell(1).getAddress().toString() +
+                    "-" +
+                    dataAboutOneStudentGroupPart1.getCell(2).getAddress().toString()
+            );
+
+            budgetOnSessionStartWhoHaveNotAcademicVacationList.add(countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
 
             int countContractStudentsOnSessionStart =
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
 
-            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart2, 1, countContractStudentsOnSessionStart, contractCells);
+            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart2, 1, countContractStudentsOnSessionStart, contractOnSessionStartList);
+
+            int countContractStudentsOnSessionStartAndWhoHaveAcademicVacation =
+                    studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+                            studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
+                    studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+                            studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
+
+            createCellAndSetHereValueAndAddToList(
+                    dataAboutOneStudentGroupPart2, 2, countContractStudentsOnSessionStartAndWhoHaveAcademicVacation, contractOnSessionStartWhoHaveAcademicVacationList
+            );
+
+            Cell countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell = dataAboutOneStudentGroupPart2.createCell(3);
+
+            countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell.setCellFormula(
+                    dataAboutOneStudentGroupPart2.getCell(1).getAddress().toString() +
+                    "-" +
+                    dataAboutOneStudentGroupPart2.getCell(2).getAddress().toString()
+            );
+
+            contractOnSessionStartWhoHaveNotAcademicVacationList.add(countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
 
             numberOfRow += 2;
         }
 
-        setCellStyleAndFontForCells(budgetCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
-        setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+        Row rowPart1 = sheet.createRow(numberOfRow);
+        Row rowPart2 = sheet.createRow(numberOfRow + 1);
+
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
 
         calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-                numberOfRow, sheet, numberOfCourse, 1, budgetCells, contractCells
+                rowPart1, rowPart2, workbook, numberOfCourse, 1, budgetOnSessionStartList, contractOnSessionStartList
         );
 
-        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgetCells);
+        calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, workbook, numberOfCourse, 2,
+                bungedOnSessionStartWhoHaveAcademicVacationList, contractOnSessionStartWhoHaveAcademicVacationList
+        );
+
+        Cell budgetTotalCountStudentsWhoHaveNotAcademicVacation = rowPart1.createCell(3);
+        budgetTotalCountStudentsWhoHaveNotAcademicVacation.setCellFormula(
+                rowPart1.getCell(1).getAddress().toString() +
+                "-" +
+                rowPart1.getCell(2).getAddress().toString()
+        );
+        budgetOnSessionStartWhoHaveNotAcademicVacationList.add(budgetTotalCountStudentsWhoHaveNotAcademicVacation);
+
+        Cell contractTotalCountStudentsWhoHaveNotAcademicVacation = rowPart2.createCell(3);
+        contractTotalCountStudentsWhoHaveNotAcademicVacation.setCellFormula(
+                rowPart2.getCell(1).getAddress().toString() +
+                "-" +
+                rowPart2.getCell(2).getAddress().toString()
+        );
+        contractOnSessionStartWhoHaveNotAcademicVacationList.add(contractTotalCountStudentsWhoHaveNotAcademicVacation);
+
+        List<Cell> budgedCells = new ArrayList<>();
+        budgedCells.addAll(budgetOnSessionStartList);
+        budgedCells.addAll(bungedOnSessionStartWhoHaveAcademicVacationList);
+        budgedCells.addAll(budgetOnSessionStartWhoHaveNotAcademicVacationList);
+
+        List<Cell> contractCells = new ArrayList<>();
+        contractCells.addAll(contractOnSessionStartList);
+        contractCells.addAll(contractOnSessionStartWhoHaveAcademicVacationList);
+        contractCells.addAll(contractOnSessionStartWhoHaveNotAcademicVacationList);
+
+        setCellStyleAndFontForCells(budgedCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+        setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+
+        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgedCells);
         setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, contractCells);
 
         numberOfRow += 2;
@@ -594,15 +673,8 @@ public class SessionReportService {
     }
 
     private void calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-            int numberOfRow, Sheet sheet, int numberOfCourse, int columnNumber, List<Cell> budgedCells, List<Cell> contractCell
+            Row rowPart1, Row rowPart2, Workbook workbook, int numberOfCourse, int columnNumber, List<Cell> budgedCells, List<Cell> contractCell
     ) {
-        Workbook workbook = sheet.getWorkbook();
-
-        Row rowPart1 = sheet.createRow(numberOfRow);
-        Row rowPart2 = sheet.createRow(numberOfRow + 1);
-
-        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
-
         Cell numberOfCourseCell = rowPart1.createCell(0);
         numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
         setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
