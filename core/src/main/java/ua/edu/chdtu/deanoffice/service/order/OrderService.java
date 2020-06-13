@@ -6,13 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.order.Order;
-import ua.edu.chdtu.deanoffice.entity.order.OrderType;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderApproverTemplateRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderControlTemplateRepository;
@@ -26,6 +24,13 @@ import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderParagraphPiece;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderParsedParagraphDto;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderType;
+import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelBusinessInformation;
+import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelResponseDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +63,7 @@ public class OrderService {
                 .setOrderDate(orderCreateCommand.getOrderDate())
                 .setOrderNumber(orderCreateCommand.getOrderNumber())
                 .setOrderTemplateVersion(orderTemplateVersionRepository
-                        .findByDbTableNameAndActive(orderCreateCommand.getOrderType().toString(), true))
+                        .findByDbTableNameAndActive(orderCreateCommand.getOrderType(), true))
                 .setOrderControlTemplate(orderControlTemplateRepository.
                         findByFacultyIdAndActive(orderCreateCommand.getFacultyId(), true))
                 .setFaculty(facultyService.getById(orderCreateCommand.getFacultyId())))
@@ -68,8 +73,7 @@ public class OrderService {
     public File generateStudentExpelDocument(Integer studentExpelId) throws IOException, Docx4JException {
         StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
         StudentExpelBusinessInformation studentExpelBusinessInformation = objectMapper.readValue(studentExpel.getOrderBusinessOperation(), StudentExpelBusinessInformation.class);
-        Order order = this.getOrderById(studentExpelBusinessInformation.getOrderId());
-        String orderName = order.getOrderTemplateVersion().getDbTableName() + " " + order.getOrderNumber();
+        Order order = getOrderById(studentExpelBusinessInformation.getOrderId());
         WordprocessingMLPackage orderDocument = documentIOService.loadTemplate(DocumentIOService.ORDERS_PATH +
                 order.getOrderTemplateVersion().getTemplateName());
         Map<String, String> placeholderValue = new HashMap<>();
@@ -80,42 +84,45 @@ public class OrderService {
         placeholderValue.put("PHOrderDate", order.getOrderDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toString());
         placeholderValue.put("PHNumber", order.getOrderNumber());
         TemplateUtil.replaceTextPlaceholdersInTemplate(orderDocument, placeholderValue);
-        return documentIOService.saveDocumentToTemp(orderDocument, orderName, FileFormatEnum.DOCX);
+        return documentIOService.saveDocumentToTemp(orderDocument, order.getOrderTemplateVersion().getDbTableName() + " " + order.getOrderNumber(), FileFormatEnum.DOCX);
     }
 
-    public Integer saveStudentExpel(@RequestBody StudentExpelCreateCommand studentExpelCreateCommand) throws JsonProcessingException {
+    public List<StudentExpelResponseDto> saveStudentExpel(Integer orderId, List<StudentExpelCreateCommand> studentExpelCreateCommands) throws JsonProcessingException {
 
         Map<Integer, OrderReason> orderReasonMap = new HashMap<>();
         orderReasonMap.put(1, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_BACHELOR));
         orderReasonMap.put(2, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_SPECIALIST));
         orderReasonMap.put(3, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_MASTER));
-
-        Order order = this.getOrderById(studentExpelCreateCommand.getOrderId());
-        order.setOrderControlTemplate(orderControlTemplateRepository.findOne(studentExpelCreateCommand.getOrderControlTemplateId()))
-                .setOrderApproveTemplate(orderApproverTemplateRepository.findOne(studentExpelCreateCommand.getOrderApproverTemplateId()));
+        List<StudentExpelResponseDto> studentExpelResponseDtos = new ArrayList<>();
+        Order order = this.getOrderById(orderId);
+        order.setOrderControlTemplate(orderControlTemplateRepository.findOne(studentExpelCreateCommands.get(0).getOrderControlTemplateId()))
+                .setOrderApproveTemplate(orderApproverTemplateRepository.findOne(studentExpelCreateCommands.get(0).getOrderApproverTemplateId()));
         orderRepository.save(order);
-        StudentDegree studentDegree = studentDegreeService.getById(studentExpelCreateCommand.getStudentDegreeId());
-        return studentExpelRepository.save(new StudentExpel().setStudentDegree(studentDegree)
-                .setStudentGroup(studentDegree.getStudentGroup())
-                .setStudyYear(currentYearService.getYear() - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())
-                .setPayment(studentExpelCreateCommand.getPayment())
-                .setExpelDate(studentExpelCreateCommand.getExpelDate())
-                .setOrderNumber(order.getOrderNumber())
-                .setOrderDate(order.getOrderDate())
-                .setOrderReason(orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()))
-                .setApplicationDate(studentExpelCreateCommand.getApplicationDate())
-                .setOrderParagraphJson(objectMapper.writeValueAsString(studentExpelCreateCommand.getOrderParsedParagraphDto()))
-                .setOrderBusinessOperation(objectMapper.writeValueAsString(new StudentExpelBusinessInformation(studentExpelCreateCommand.getStudentDegreeId(),
-                        studentExpelCreateCommand.getOrderId()))))
-                .getId();
+
+        for (StudentExpelCreateCommand studentExpelCreateCommand : studentExpelCreateCommands) {
+            StudentDegree studentDegree = studentDegreeService.getById(studentExpelCreateCommand.getStudentDegreeId());
+            studentExpelResponseDtos.add(new StudentExpelResponseDto(orderId, studentExpelRepository.save(new StudentExpel().setStudentDegree(studentDegree)
+                    .setStudentGroup(studentDegree.getStudentGroup())
+                    .setStudyYear(currentYearService.getYear() - studentDegree.getStudentGroup().getCreationYear() + studentDegree.getStudentGroup().getBeginYears())
+                    .setPayment(studentDegree.getPayment())
+                    .setExpelDate(studentExpelCreateCommand.getExpelDate())
+                    .setOrderNumber(order.getOrderNumber())
+                    .setOrderDate(order.getOrderDate())
+                    .setOrderReason(orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()))
+                    .setOrderParagraphJson(objectMapper.writeValueAsString(studentExpelCreateCommand.getOrderParsedParagraphDto()))
+                    .setOrderBusinessOperation(objectMapper.writeValueAsString(new StudentExpelBusinessInformation(studentExpelCreateCommand.getStudentDegreeId(),
+                            orderId))))
+                    .getId()));
+        }
+        return studentExpelResponseDtos;
     }
 
     public Order getOrderById(Integer orderId) {
         return orderRepository.findOne(orderId);
     }
 
-    public List<OrderParagraphPiece> getParsedParagraph(OrderType orderType) {
-        String template = orderTemplateVersionRepository.findByDbTableNameAndActive(orderType.toString(), true).getParagraphTemplate();
+    public List<OrderParagraphPiece> getParsedParagraphByOrderType(String orderType) {
+        String template = orderTemplateVersionRepository.findByDbTableNameAndActive(orderType, true).getParagraphTemplate();
         List<OrderParagraphPiece> orderParagraphPieces = new ArrayList<>();
         while (template.length() != 0) {
             int lastWordIndex = 0;
@@ -130,23 +137,20 @@ public class OrderService {
                     break;
                 }
                 orderParagraphPieces.add(new OrderParagraphPiece(charSequence.stream().map(String::valueOf).collect(Collectors.joining()), false));
-                template = removeParsedSymbols(template, lastWordIndex);
-                continue;
-            }
-
-            Boolean editable = template.charAt(0) == '$';
-
-            for (int i = 0; i < template.length(); i++) {
-                if (template.charAt(i) != ' ' && template.charAt(i) != ',' && template.charAt(i) != '.' && template.charAt(i) != ';' && template.charAt(i) != '«' && template.charAt(i) != '»') {
-                    if (template.charAt(i) != '$') {
-                        charSequence.add(template.charAt(i));
+            } else {
+                Boolean editable = template.charAt(0) == '$';
+                for (int i = 0; i < template.length(); i++) {
+                    if (template.charAt(i) != ' ' && template.charAt(i) != ',' && template.charAt(i) != '.' && template.charAt(i) != ';' && template.charAt(i) != '«' && template.charAt(i) != '»') {
+                        if (template.charAt(i) != '$') {
+                            charSequence.add(template.charAt(i));
+                        }
+                        continue;
                     }
-                    continue;
+                    lastWordIndex = i - 1;
+                    break;
                 }
-                lastWordIndex = i - 1;
-                break;
+                orderParagraphPieces.add(new OrderParagraphPiece(charSequence.stream().map(String::valueOf).collect(Collectors.joining()), editable));
             }
-            orderParagraphPieces.add(new OrderParagraphPiece(charSequence.stream().map(String::valueOf).collect(Collectors.joining()), editable));
             template = removeParsedSymbols(template, lastWordIndex);
         }
         return orderParagraphPieces;

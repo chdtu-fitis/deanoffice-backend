@@ -1,10 +1,10 @@
-package ua.edu.chdtu.deanoffice.service.order;
+package ua.edu.chdtu.deanoffice.service.order.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.entity.Payment;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderParsedParagraphDto;
 
 import java.util.Date;
 
@@ -13,16 +13,10 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentExpelCreateCommand {
-    private Date applicationDate;
-    private Date expelDate;
-    private Payment payment;
-    private int studyYear;
-    private Integer orderReason;
     private Integer studentDegreeId;
-    private Integer studentGroupId;
-    private OrderParsedParagraphDto orderParsedParagraphDto;
-    private Integer orderId;
     private Integer orderApproverTemplateId;
     private Integer orderControlTemplateId;
+    private OrderParsedParagraphDto orderParsedParagraphDto;
+    private Date expelDate;
     private String orderComment;
 }

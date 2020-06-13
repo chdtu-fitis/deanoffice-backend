@@ -96,9 +96,9 @@ create table if not exists orders
 );
 
 alter table student_expel
-    add column order_paragraph_json varchar(1000);
+    add column order_paragraph_json varchar(10000);
 alter table student_expel
-    add column order_business_operation varchar(1000);
+    add column order_business_operation varchar(10000);
 
 ALTER TABLE student_expel
     ADD COLUMN order_id integer not null default 0;

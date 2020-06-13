@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.order;
+package ua.edu.chdtu.deanoffice.service.order.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
