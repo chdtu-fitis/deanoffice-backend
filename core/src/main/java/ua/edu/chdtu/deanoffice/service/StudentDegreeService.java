@@ -262,4 +262,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
                 ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
+
+    public int getCountAllStudentsInStudentGroupWhoWerePassExamInTime(int studentGroupId, int semester, Payment payment) {
+        return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoWerePassExamInTime(studentGroupId, semester, payment.toString());
+    }
 }
