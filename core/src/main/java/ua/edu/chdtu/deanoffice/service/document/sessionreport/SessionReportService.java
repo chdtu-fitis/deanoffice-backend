@@ -533,19 +533,24 @@ public class SessionReportService {
 
             List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, yearOfStudy, facultyId, tuitionForm);
             numberOfRow++;
-            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy);
+            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy, semester);
         }
     }
 
-    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse) {
+    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse, int semester) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         List<Cell> budgetOnSessionStartList = new ArrayList<>();
         List<Cell> bungedOnSessionStartWhoHaveAcademicVacationList = new ArrayList<>();
         List<Cell> budgetOnSessionStartWhoHaveNotAcademicVacationList = new ArrayList<>();
+        List<Cell> budgetWhoPassAllExamOnTimeList = new ArrayList<>();
+        List<Cell> budgetThatDidNotComeToExamWithImportantReason = new ArrayList<>();
+
         List<Cell> contractOnSessionStartList = new ArrayList<>();
         List<Cell> contractOnSessionStartWhoHaveAcademicVacationList = new ArrayList<>();
         List<Cell> contractOnSessionStartWhoHaveNotAcademicVacationList = new ArrayList<>();
+        List<Cell> contractWhoPassAllExamOnTimeList = new ArrayList<>();
+        List<Cell> contractThatDidNotComeToExamWithImportantReason = new ArrayList<>();
 
         for (StudentGroup studentGroup : groups) {
             Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
@@ -584,6 +589,15 @@ public class SessionReportService {
 
             budgetOnSessionStartWhoHaveNotAcademicVacationList.add(countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
 
+            int countBudgetStudentsWhoWasPassExamInTime = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamInTime(
+                    studentGroup.getId(), semester, Payment.BUDGET
+            );
+
+            createCellAndSetHereValueAndAddToList(
+                    dataAboutOneStudentGroupPart1, 4, countBudgetStudentsWhoWasPassExamInTime, budgetWhoPassAllExamOnTimeList);
+
+            budgetThatDidNotComeToExamWithImportantReason.add(dataAboutOneStudentGroupPart1.createCell(5));
+
             int countContractStudentsOnSessionStart =
                     studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
                             studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
@@ -608,23 +622,62 @@ public class SessionReportService {
                     dataAboutOneStudentGroupPart2.getCell(2).getAddress().toString()
             );
 
+
             contractOnSessionStartWhoHaveNotAcademicVacationList.add(countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
+
+            int countContractStudentsWhoWasPassExamInTime = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamInTime(
+                    studentGroup.getId(), semester, Payment.CONTRACT
+            );
+
+            createCellAndSetHereValueAndAddToList(
+                    dataAboutOneStudentGroupPart2, 4, countContractStudentsWhoWasPassExamInTime, contractWhoPassAllExamOnTimeList);
+
+            contractThatDidNotComeToExamWithImportantReason.add(dataAboutOneStudentGroupPart2.createCell(5));
 
             numberOfRow += 2;
         }
+
+        List<Cell> budgedCells = new ArrayList<>();
+        budgedCells.addAll(budgetOnSessionStartList);
+        budgedCells.addAll(bungedOnSessionStartWhoHaveAcademicVacationList);
+        budgedCells.addAll(budgetOnSessionStartWhoHaveNotAcademicVacationList);
+        budgedCells.addAll(budgetWhoPassAllExamOnTimeList);
+        budgedCells.addAll(budgetThatDidNotComeToExamWithImportantReason);
+
+        List<Cell> contractCells = new ArrayList<>();
+        contractCells.addAll(contractOnSessionStartList);
+        contractCells.addAll(contractOnSessionStartWhoHaveAcademicVacationList);
+        contractCells.addAll(contractOnSessionStartWhoHaveNotAcademicVacationList);
+        contractCells.addAll(contractWhoPassAllExamOnTimeList);
+        contractCells.addAll(contractThatDidNotComeToExamWithImportantReason);
+
+        setCellStyleAndFontForCells(budgedCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+        setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+
+        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgedCells);
+        setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, contractCells);
 
         Row rowPart1 = sheet.createRow(numberOfRow);
         Row rowPart2 = sheet.createRow(numberOfRow + 1);
 
         sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
 
+        Cell numberOfCourseCell = rowPart1.createCell(0);
+        numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
+        setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
+
+        List<Cell> totalBudgetCells = new ArrayList<>();
+        List<Cell> totalContractCells = new ArrayList<>();
+
         calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-                rowPart1, rowPart2, workbook, numberOfCourse, 1, budgetOnSessionStartList, contractOnSessionStartList
+                rowPart1, rowPart2, 1, budgetOnSessionStartList, contractOnSessionStartList,
+                totalBudgetCells, totalContractCells
         );
 
         calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-                rowPart1, rowPart2, workbook, numberOfCourse, 2,
-                bungedOnSessionStartWhoHaveAcademicVacationList, contractOnSessionStartWhoHaveAcademicVacationList
+                rowPart1, rowPart2, 2,
+                bungedOnSessionStartWhoHaveAcademicVacationList, contractOnSessionStartWhoHaveAcademicVacationList,
+                totalBudgetCells, totalContractCells
         );
 
         Cell budgetTotalCountStudentsWhoHaveNotAcademicVacation = rowPart1.createCell(3);
@@ -633,7 +686,9 @@ public class SessionReportService {
                 "-" +
                 rowPart1.getCell(2).getAddress().toString()
         );
-        budgetOnSessionStartWhoHaveNotAcademicVacationList.add(budgetTotalCountStudentsWhoHaveNotAcademicVacation);
+        totalBudgetCells.add(budgetTotalCountStudentsWhoHaveNotAcademicVacation);
+
+        totalBudgetCells.add(rowPart1.createCell(5));
 
         Cell contractTotalCountStudentsWhoHaveNotAcademicVacation = rowPart2.createCell(3);
         contractTotalCountStudentsWhoHaveNotAcademicVacation.setCellFormula(
@@ -641,23 +696,21 @@ public class SessionReportService {
                 "-" +
                 rowPart2.getCell(2).getAddress().toString()
         );
-        contractOnSessionStartWhoHaveNotAcademicVacationList.add(contractTotalCountStudentsWhoHaveNotAcademicVacation);
+        totalContractCells.add(contractTotalCountStudentsWhoHaveNotAcademicVacation);
 
-        List<Cell> budgedCells = new ArrayList<>();
-        budgedCells.addAll(budgetOnSessionStartList);
-        budgedCells.addAll(bungedOnSessionStartWhoHaveAcademicVacationList);
-        budgedCells.addAll(budgetOnSessionStartWhoHaveNotAcademicVacationList);
+        totalContractCells.add(rowPart2.createCell(5));
 
-        List<Cell> contractCells = new ArrayList<>();
-        contractCells.addAll(contractOnSessionStartList);
-        contractCells.addAll(contractOnSessionStartWhoHaveAcademicVacationList);
-        contractCells.addAll(contractOnSessionStartWhoHaveNotAcademicVacationList);
+        calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 4,
+                budgetWhoPassAllExamOnTimeList, contractWhoPassAllExamOnTimeList,
+                totalBudgetCells, totalContractCells
+        );
 
-        setCellStyleAndFontForCells(budgedCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
-        setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+        setCellStyleAndFontForCells(totalBudgetCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true);
+        setCellStyleAndFontForCells(totalContractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true);
 
-        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgedCells);
-        setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, contractCells);
+        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, totalBudgetCells);
+        setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, totalContractCells);
 
         numberOfRow += 2;
 
@@ -673,24 +726,15 @@ public class SessionReportService {
     }
 
     private void calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-            Row rowPart1, Row rowPart2, Workbook workbook, int numberOfCourse, int columnNumber, List<Cell> budgedCells, List<Cell> contractCell
+            Row rowPart1, Row rowPart2, int columnNumber,
+            List<Cell> budgedCells, List<Cell> contractCell, List<Cell> totalBudgetCells, List<Cell> totalContractCells
     ) {
-        Cell numberOfCourseCell = rowPart1.createCell(0);
-        numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
-        setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
-
         Cell totalCountBudgetStudents = rowPart1.createCell(columnNumber);
         createFormulaForCell(budgedCells, totalCountBudgetStudents);
-        budgedCells.add(totalCountBudgetStudents);
+        totalBudgetCells.add(totalCountBudgetStudents);
         Cell totalCountContractStudents = rowPart2.createCell(columnNumber);
         createFormulaForCell(contractCell, totalCountContractStudents);
-        contractCell.add(totalCountContractStudents);
-
-        setCellStyleAndFontForCells(
-                Arrays.asList(totalCountBudgetStudents, totalCountContractStudents),
-                workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true
-        );
-
+        totalContractCells.add(totalCountContractStudents);
     }
 
     private void createCellAndSetHereValueAndAddToList(Row row, int columnNumber, int value, List<Cell> list) {
