@@ -517,13 +517,25 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "sd.payment = :payment AND " +
                     "(SELECT count(g.id) FROM grade g " +
                     "INNER JOIN course AS c ON g.course_id = c.id " +
+                    "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
                     "WHERE g.on_time = true " +
-                    "AND g.course_id = c.id " +
-                    "AND g.student_degree_id = sd.id " +
+                    "AND sd.student_group_id = :studentGroupId " +
                     "AND c.semester = :semester) = (SELECT num FROM query1) " +
                     "GROUP BY sd.id) " +
             "SELECT count(id) FROM query2", nativeQuery = true)
-    int findCountAllStudentsInStudentGroupWhoWerePassExamInTime(@Param("studentGroupId") int studentGroupId,
+    int findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(@Param("studentGroupId") int studentGroupId,
                                                                 @Param("semester") int semester,
                                                                 @Param("payment") String payment);
+
+    @Query(value =
+            "SELECT count(DISTINCT sd.id) FROM student_degree AS sd " +
+            "INNER JOIN grade AS g ON sd.id = g.student_degree_id " +
+            "INNER JOIN course AS c ON c.id = g.course_id " +
+            "WHERE c.semester = :semester " +
+            "AND sd.student_group_id = :studentGroupId " +
+            "AND g.points > 60 " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(@Param("studentGroupId") int studentGroupId,
+                                                                         @Param("semester") int semester,
+                                                                         @Param("payment") String payment);
 }
