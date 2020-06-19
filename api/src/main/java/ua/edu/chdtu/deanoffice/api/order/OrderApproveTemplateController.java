@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,6 +71,17 @@ public class OrderApproveTemplateController {
         try {
             OrderApproveTemplate orderApproveTemplate = approveTemplateService.getApproveTemplateById(id);
             approveTemplateService.delete(orderApproveTemplate);
+            return ResponseEntity.ok().build();
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @PutMapping("/orders/approve-template/{id}/restore")
+    public ResponseEntity restoreApproveTemplate(@PathVariable("id") int id) {
+        try {
+            OrderApproveTemplate approveTemplateById = approveTemplateService.getApproveTemplateById(id);
+            approveTemplateService.restore(approveTemplateById);
             return ResponseEntity.ok().build();
         } catch (Exception exception) {
             return handleException(exception);

@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service.order;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.order.OrderApproveTemplate;
+import ua.edu.chdtu.deanoffice.entity.order.OrderApprover;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.order.OrderApproveTemplateRepository;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
@@ -32,5 +33,10 @@ public class OrderApproveTemplateService {
     public void delete(OrderApproveTemplate orderApproveTemplate) throws UnauthorizedFacultyDataException {
         orderApproveTemplate.setActive(false);
         orderApproveTemplateRepository.save(orderApproveTemplate);
+    }
+
+    public void restore(OrderApproveTemplate orderApproverTemplate) {
+        orderApproverTemplate.setActive(true);
+        orderApproveTemplateRepository.save(orderApproverTemplate);
     }
 }
