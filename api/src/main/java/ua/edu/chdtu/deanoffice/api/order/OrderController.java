@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.api.order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.springframework.core.io.Resource;
@@ -12,19 +11,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.entity.order.OrderType;
-import ua.edu.chdtu.deanoffice.service.StudentExpelService;
-import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
-import ua.edu.chdtu.deanoffice.service.order.OrderCreateCommand;
-import ua.edu.chdtu.deanoffice.service.order.OrderParagraphPiece;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderParagraphPiece;
 import ua.edu.chdtu.deanoffice.service.order.OrderService;
-import ua.edu.chdtu.deanoffice.service.order.StudentExpelCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.dto.OrderType;
+import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelResponseDto;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -33,9 +30,6 @@ import java.util.stream.Collectors;
 public class OrderController extends DocumentResponseController {
 
     private final OrderService orderService;
-    private final DocumentIOService documentIOService;
-    private final StudentExpelService studentExpelService;
-    private final ObjectMapper objectMapper;
 
     @GetMapping("/{studentExpelId}/student-expel")
     public ResponseEntity<Resource> generateStudentExpelDocument(@PathVariable Integer studentExpelId)
@@ -45,8 +39,9 @@ public class OrderController extends DocumentResponseController {
     }
 
     @PutMapping("/{orderId}/student-expel")
-    public ResponseEntity<Integer> saveStudentExpelOperation(@RequestBody StudentExpelCreateCommand studentExpelCreateCommand) throws IOException {
-        return ResponseEntity.ok(orderService.saveStudentExpel(studentExpelCreateCommand));
+    public ResponseEntity<List<StudentExpelResponseDto>> saveStudentExpelOperation(@PathVariable Integer orderId,
+                                                                                   @RequestBody List<StudentExpelCreateCommand> studentExpelCreateCommand) throws IOException {
+        return ResponseEntity.ok(orderService.saveStudentExpel(orderId,studentExpelCreateCommand));
     }
 
     @PutMapping
@@ -55,14 +50,12 @@ public class OrderController extends DocumentResponseController {
     }
 
     @GetMapping("/paragraph")
-    public ResponseEntity<List<OrderParagraphPiece>> getJsonParagraphByOrderType(OrderType orderType) {
-        return ResponseEntity.ok(orderService.getParsedParagraph(orderType));
+    public ResponseEntity<List<OrderParagraphPiece>> getJsonParagraphByOrderType(String orderType) {
+        return ResponseEntity.ok(orderService.getParsedParagraphByOrderType(orderType));
     }
 
     @GetMapping("/order-type")
-    public ResponseEntity<List<String>> getAvailableOrderTypes() {
-        return ResponseEntity.ok(Arrays.stream(OrderType.values())
-                .map(Enum::toString)
-                .collect(Collectors.toList()));
+    public ResponseEntity<List<OrderType>> getAvailableOrderTypes() {
+        return ResponseEntity.ok(Arrays.asList(new OrderType("STUDENT_EXPEL", "про відрахування")));
     }
 }
