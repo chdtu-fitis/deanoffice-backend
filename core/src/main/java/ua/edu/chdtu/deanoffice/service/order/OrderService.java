@@ -8,6 +8,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.OrderReason;
+import ua.edu.chdtu.deanoffice.entity.OrderType;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.order.Order;
@@ -24,21 +25,23 @@ import ua.edu.chdtu.deanoffice.service.StudentExpelService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderCreateCommand;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderParagraphPiece;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderParsedParagraphDto;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderType;
-import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelBusinessInformation;
-import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelCreateCommand;
-import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelResponseDto;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderParagraphPiece;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderParsedParagraphDto;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderTypeBean;
+import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelBusinessInformation;
+import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelResponseDto;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,6 +60,14 @@ public class OrderService {
     private final OrderApproverTemplateRepository orderApproverTemplateRepository;
     private final StudentExpelService studentExpelService;
     private final DocumentIOService documentIOService;
+
+    public Set<OrderTypeBean> getOrderTypes() {
+        Set<OrderTypeBean> orderTypes = new HashSet<>();
+        for (OrderType orderType : OrderType.values()) {
+            orderTypes.add(new OrderTypeBean(orderType.name(), orderType.getNameUkr()));
+        }
+        return orderTypes;
+    }
 
     public Integer createOrder(OrderCreateCommand orderCreateCommand) {
         return orderRepository.save(new Order()

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.order.dto;
+package ua.edu.chdtu.deanoffice.service.order.beans;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class OrderType {
+public class OrderTypeBean {
     private String type;
     private String typeUkr;
 }

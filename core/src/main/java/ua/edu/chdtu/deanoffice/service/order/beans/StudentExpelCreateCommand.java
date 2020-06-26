@@ -1,10 +1,9 @@
-package ua.edu.chdtu.deanoffice.service.order.dto;
+package ua.edu.chdtu.deanoffice.service.order.beans;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderParsedParagraphDto;
 
 import java.util.Date;
 

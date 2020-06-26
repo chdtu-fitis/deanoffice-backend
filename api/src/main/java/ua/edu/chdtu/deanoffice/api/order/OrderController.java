@@ -11,18 +11,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderCreateCommand;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderParagraphPiece;
+import ua.edu.chdtu.deanoffice.api.order.dto.OrderTypeDTO;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderParagraphPiece;
 import ua.edu.chdtu.deanoffice.service.order.OrderService;
-import ua.edu.chdtu.deanoffice.service.order.dto.OrderType;
-import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelCreateCommand;
-import ua.edu.chdtu.deanoffice.service.order.dto.StudentExpelResponseDto;
+import ua.edu.chdtu.deanoffice.service.order.beans.OrderTypeBean;
+import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelCreateCommand;
+import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelResponseDto;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 @RequestMapping("/order")
@@ -55,7 +57,8 @@ public class OrderController extends DocumentResponseController {
     }
 
     @GetMapping("/order-type")
-    public ResponseEntity<List<OrderType>> getAvailableOrderTypes() {
-        return ResponseEntity.ok(Arrays.asList(new OrderType("STUDENT_EXPEL", "про відрахування")));
+    public ResponseEntity<Set<OrderTypeDTO>> getAvailableOrderTypes() {
+        Set<OrderTypeBean> orderTypes = orderService.getOrderTypes();
+        return ResponseEntity.ok(map(orderTypes, OrderTypeDTO.class));
     }
 }

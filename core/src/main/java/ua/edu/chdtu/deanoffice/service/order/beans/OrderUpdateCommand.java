@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.order.dto;
+package ua.edu.chdtu.deanoffice.service.order.beans;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,8 +13,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class OrderUpdateCommand {
-    @NotNull
-    private OrderType orderType;
     @NotNull
     private String orderNumber;
     @NotNull
