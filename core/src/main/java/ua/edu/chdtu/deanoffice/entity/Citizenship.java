@@ -5,10 +5,15 @@ public enum Citizenship {
     ARM(51, "Вірменія", "Armenia"),
     BGR(100, "Болгарія", "Bulgaria"),
     BLR(112, "Білорусь", "Belarus"),
+    CAN(120, "Камерун", "Cameroon"),
     CHN(156, "Китай", "China"),
     COL(170, "Колумбія", "Columbia"),
+    GEO(268, "Грузія", "Georgia"),
+    PSE(274, "Палестина", "Palestine"),
     DEU(276, "Німеччина", "Germany"),
+    GHA(288, "Гана", "Ghana"),
     GRC(300, "Греція", "Greece"),
+    GIN(324, "Гвинея", "Guinea"),
     HUN(348, "Угорщина", "Hungary"),
     JOR(400, "Йорданія", "Jordan"),
     IRQ(368, "Ірак", "Iraq"),
@@ -19,7 +24,9 @@ public enum Citizenship {
     POL(616, "Польща", "Poland"),
     ROU(642, "Румунія", "Romania"),
     RUS(643, "Росія", "Russia"),
+    TUR(792, "Туреччина", "Turkey"),
     TKM(795, "Туркменістан", "Turkmenistan"),
+    UZB(860, "Узбекистан", "Uzbekistan"),
     UKR(804, "Україна", "Ukraine");
 
     private final Integer countryCode;

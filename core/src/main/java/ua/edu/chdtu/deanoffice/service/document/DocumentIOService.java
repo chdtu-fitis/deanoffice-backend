@@ -82,7 +82,6 @@ public class DocumentIOService {
 
     private String getFileCreationDateAndTime() {
         DateFormat dateFormat = new SimpleDateFormat(" dd-MM-yyyy HH-mm");
-        System.out.println(dateFormat.format(new Date()));
         return dateFormat.format(new Date());
     }
 

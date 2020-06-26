@@ -35,6 +35,16 @@ public class TeacherController {
         }
     }
 
+    @GetMapping("/teachers-full/search")
+    public ResponseEntity getSearchedFacultyActiveTeachersShort(@RequestParam String searchStr) {
+        try {
+            List<Teacher> teachers = teacherService.getActiveFacultyTeachersBySurnamePart(searchStr);
+            return ResponseEntity.ok(map(teachers, TeacherDTO.class));
+        } catch (Exception e) {
+            return handleException(e);
+        }
+    }
+
     @GetMapping("/teachers-full")
     public ResponseEntity getAllActiveTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
         try {
@@ -58,7 +68,7 @@ public class TeacherController {
     @GetMapping("/teachers")
     public ResponseEntity getTeachers(@RequestParam(required = false, defaultValue = "true") boolean active) {
         try {
-            List<Teacher> teachers = teacherService.getActiveFacultyTeachers(active);
+            List<Teacher> teachers = teacherService.getFacultyTeachers(active);
             return ResponseEntity.ok(map(teachers, TeacherDTO.class));
         } catch (Exception e) {
             return handleException(e);

@@ -124,7 +124,7 @@ public class SpecializationController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping
     public ResponseEntity updateSpecialization(
             @RequestBody SpecializationDTO specializationDTO,

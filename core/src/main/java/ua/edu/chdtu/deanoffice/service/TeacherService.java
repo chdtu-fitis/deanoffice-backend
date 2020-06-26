@@ -41,9 +41,14 @@ public class TeacherService {
         return teacherRepository.findAll(ids);
     }
 
-    public List<Teacher> getActiveFacultyTeachers(boolean active) {
+    public List<Teacher> getFacultyTeachers(boolean active) {
         int facultyId = FacultyUtil.getUserFacultyIdInt();
         return teacherRepository.findAllByActiveAndFacultyId(active, facultyId);
+    }
+
+    public List<Teacher> getActiveFacultyTeachersBySurnamePart(String searchStr) {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
+        return teacherRepository.findActiveBySurnamePartAndFacultyId(searchStr.toLowerCase(), facultyId);
     }
 
     public List<Teacher> getTeachersByActive(boolean active) {
