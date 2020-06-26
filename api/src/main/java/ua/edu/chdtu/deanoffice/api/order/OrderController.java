@@ -27,7 +27,7 @@ import java.util.Set;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController extends DocumentResponseController {
 
