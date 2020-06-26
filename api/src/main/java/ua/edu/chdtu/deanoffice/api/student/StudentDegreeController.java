@@ -14,7 +14,6 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -73,6 +72,17 @@ public class StudentDegreeController {
     public ResponseEntity getActiveStudentsDegree_moreDetail(@CurrentUser ApplicationUser user) {
         try {
             return ResponseEntity.ok(getActiveStudentDegrees(user.getFaculty().getId()));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @JsonView(StudentView.Degree.class)
+    @GetMapping("/students/degrees/search")
+    public ResponseEntity<List<StudentDegreeDTO>> getActiveStudentsDegreesBySurname(@RequestParam String surname) {
+        try {
+            List<StudentDegree> studentDegrees = studentDegreeService.getActiveBySurnameAndFaculty(surname);
+            return ResponseEntity.ok(Mapper.map(studentDegrees, StudentDegreeDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }

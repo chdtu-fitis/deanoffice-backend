@@ -12,7 +12,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentSurnameChange;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.order.StudentSurnameChangeService;
+import ua.edu.chdtu.deanoffice.service.StudentSurnameChangeService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;

@@ -36,9 +36,10 @@ public class Order extends BaseEntity {
     @ManyToOne
     private OrderApproveTemplate orderApproveTemplate;
 
-    private String comment;
+    @ManyToOne
+    private OrderControlTemplate orderControlTemplate;
 
-    private String orderParagraph;
+    private String comment;
 
     private Boolean active =false;
 

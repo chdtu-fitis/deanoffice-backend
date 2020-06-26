@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service;
 
 import com.google.common.base.Strings;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Grade;
@@ -11,6 +12,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +58,10 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
+    }
+
+    public List<StudentDegree> getActiveBySurnameAndFaculty(String surname) {
+        return studentDegreeRepository.findActiveBySurnameAndFacultyId(surname, FacultyUtil.getUserFacultyIdInt());
     }
 
     private String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
