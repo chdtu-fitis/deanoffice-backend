@@ -62,7 +62,6 @@ public class TeacherService {
         List<Teacher> teachers = getTeachers(ids);
         if (teachers.size() != ids.size())
             throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
-        dataVerificationService.areTeachersActive(teachers);
         teacherRepository.setTeachersInactiveByIds(ids);
     }
 
@@ -73,7 +72,6 @@ public class TeacherService {
         List<Teacher> teachers = getTeachers(ids);
         if (teachers.size() != ids.size())
             throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є існуючі!");
-        dataVerificationService.isTeachersNotActive(teachers);
         teachers.forEach(teacher -> teacher.setActive(true));
         teacherRepository.save(teachers);
     }

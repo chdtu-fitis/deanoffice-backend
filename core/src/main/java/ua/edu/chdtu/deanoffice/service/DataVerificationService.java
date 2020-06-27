@@ -75,20 +75,6 @@ public class DataVerificationService {
         }
     }
 
-    public void areTeachersActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
-        for (Teacher teacher: teachers) {
-            if (teacher.isActive() == false)
-                throw new OperationCannotBePerformedException("Серед даних вчителів є неактивні!");
-        }
-    }
-
-    public void isTeachersNotActive(List<Teacher> teachers) throws OperationCannotBePerformedException {
-        for (Teacher teacher : teachers) {
-            if (teacher.isActive())
-                throw new OperationCannotBePerformedException("Вибрані вчителі є активними!");
-        }
-    }
-
     public void specializationNotNull(Specialization specialization,
                                       int specializationId) throws OperationCannotBePerformedException {
         if (specialization == null) {
