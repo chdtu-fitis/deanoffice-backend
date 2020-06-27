@@ -97,7 +97,7 @@ public class TeacherController {
     }
 
     @PutMapping("/teachers/{id}")
-    public ResponseEntity changeTeacher(@PathVariable @Min(value = 1) int id, @Validated @RequestBody TeacherWriteDTO teacherDTO) {
+    public ResponseEntity changeTeacher(@PathVariable @Min(1) int id, @Validated @RequestBody TeacherWriteDTO teacherDTO) {
         try {
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             teacher.setId(id);

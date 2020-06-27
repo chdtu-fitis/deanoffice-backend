@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.*;
-
 import java.util.List;
 
 @Service
@@ -13,48 +12,19 @@ public class DataVerificationService {
     private StudentDegreeRepository studentDegreeRepository;
     private final StudentGroupRepository studentGroupRepository;
     private CurrentYearService currentYearService;
-    private DepartmentRepository departmentRepository;
-    private PositionRepository positionRepository;
-    private TeacherRepository teacherRepository;
 
     public DataVerificationService(StudentDegreeRepository studentDegreeRepository,
                                    StudentGroupRepository studentGroupRepository,
-                                   CurrentYearService currentYearService,
-                                   DepartmentRepository departmentRepository,
-                                   PositionRepository positionRepository,
-                                   TeacherRepository teacherRepository) {
+                                   CurrentYearService currentYearService) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentGroupRepository = studentGroupRepository;
         this.currentYearService = currentYearService;
-        this.departmentRepository = departmentRepository;
-        this.positionRepository = positionRepository;
-        this.teacherRepository = teacherRepository;
     }
 
     public void isStudentDegreesActiveByIds(List<Integer> ids) throws OperationCannotBePerformedException {
         int countInactiveStudentDegrees = studentDegreeRepository.countInactiveStudentDegreesByIds(ids);
         if (countInactiveStudentDegrees != 0) {
             throw new OperationCannotBePerformedException("Серед даних студентів є неактивні");
-        }
-    }
-    public void departmentNotNull(Department department,
-                                  int departmentId) throws OperationCannotBePerformedException {
-        if (department == null) {
-            throw new OperationCannotBePerformedException("Кафедру [" + departmentId + "] не знайдено");
-        }
-    }
-    public void departmentNotNullAndActive(Department department,
-                                           int departmentId) throws OperationCannotBePerformedException {
-        departmentNotNull(department, departmentId);
-        if (!department.isActive()) {
-            throw new OperationCannotBePerformedException("Кафедра [" + departmentId + "] не активна в даний час");
-        }
-    }
-    public void departmentNotNullAndNotActive(Department department,
-                                              int departmentId) throws OperationCannotBePerformedException {
-        departmentNotNull(department, departmentId);
-        if (department.isActive()) {
-            throw new OperationCannotBePerformedException("Кафедра [" + departmentId + "] не активна в даний час");
         }
     }
 

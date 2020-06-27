@@ -8,7 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
 
 @Getter
 @Setter
-public class TeacherDTO extends TeacherBasicDTO {
+public class TeacherDTO {
     private int id;
     private String surname;
     private String name;
