@@ -3,14 +3,23 @@ package ua.edu.chdtu.deanoffice.api.teacher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.dto.PersonFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
-import javax.validation.Valid;
+
+import javax.validation.constraints.Min;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -76,7 +85,7 @@ public class TeacherController {
     }
 
     @PostMapping("/teachers")
-    public ResponseEntity addTeacher(@Valid @RequestBody TeacherInsertDTO teacherDTO) {
+    public ResponseEntity addTeacher(@Validated @RequestBody TeacherWriteDTO teacherDTO) {
         try {
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
             Teacher teacherAfterSave = teacherService.createTeacher(teacher);
@@ -87,10 +96,11 @@ public class TeacherController {
         }
     }
 
-    @PutMapping("/teachers")
-    public ResponseEntity changeTeacher(@Valid @RequestBody TeacherUpdateDTO teacherDTO) {
+    @PutMapping("/teachers/{id}")
+    public ResponseEntity changeTeacher(@PathVariable @Min(value = 1) int id, @Validated @RequestBody TeacherWriteDTO teacherDTO) {
         try {
             Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
+            teacher.setId(id);
             Teacher savedTeacher = teacherService.updateTeacher(teacher);
             return new ResponseEntity(map(savedTeacher, TeacherDTO.class), HttpStatus.OK);
         } catch (Exception e) {
