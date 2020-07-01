@@ -11,12 +11,15 @@ import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.OrderType;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.order.Order;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderApproverTemplateRepository;
-import ua.edu.chdtu.deanoffice.repository.order.OrderControlTemplateRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderTemplateVersionRepository;
+import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.OrderReasonService;
@@ -47,11 +50,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
     private final OrderTemplateVersionRepository orderTemplateVersionRepository;
     private final OrderRepository orderRepository;
     private final FacultyService facultyService;
-    private final OrderControlTemplateRepository orderControlTemplateRepository;
     private final StudentDegreeService studentDegreeService;
     private final CurrentYearService currentYearService;
     private final OrderReasonService orderReasonService;
@@ -75,10 +76,18 @@ public class OrderService {
                 .setOrderNumber(orderCreateCommand.getOrderNumber())
                 .setOrderTemplateVersion(orderTemplateVersionRepository
                         .findByDbTableNameAndActive(orderCreateCommand.getOrderType(), true))
-                .setOrderControlTemplate(orderControlTemplateRepository.
-                        findByFacultyIdAndActive(orderCreateCommand.getFacultyId(), true))
                 .setFaculty(facultyService.getById(orderCreateCommand.getFacultyId())))
                 .getId();
+    }
+
+    public Order getOrderById(Integer orderId) {
+        return orderRepository.findOne(orderId);
+    }
+
+    //UnauthorizedFacultyDataException потрібен для перевірки права доступу в аспектах
+    @FacultyAuthorized
+    public void updateOrder(Order order) throws UnauthorizedFacultyDataException {
+        orderRepository.save(order);
     }
 
     public File generateStudentExpelDocument(Integer studentExpelId) throws IOException, Docx4JException {
@@ -106,8 +115,6 @@ public class OrderService {
         orderReasonMap.put(3, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_MASTER));
         List<StudentExpelResponseDto> studentExpelResponseDtos = new ArrayList<>();
         Order order = this.getOrderById(orderId);
-        order.setOrderControlTemplate(orderControlTemplateRepository.findOne(studentExpelCreateCommands.get(0).getOrderControlTemplateId()))
-                .setOrderApproveTemplate(orderApproverTemplateRepository.findOne(studentExpelCreateCommands.get(0).getOrderApproverTemplateId()));
         orderRepository.save(order);
 
         for (StudentExpelCreateCommand studentExpelCreateCommand : studentExpelCreateCommands) {
@@ -126,10 +133,6 @@ public class OrderService {
                     .getId()));
         }
         return studentExpelResponseDtos;
-    }
-
-    public Order getOrderById(Integer orderId) {
-        return orderRepository.findOne(orderId);
     }
 
     public List<OrderParagraphPiece> getParsedParagraphByOrderType(String orderType) {

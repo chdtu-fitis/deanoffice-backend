@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.order.Order;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
@@ -55,5 +56,15 @@ public class FacultyAuthorizationAspects {
             if (teacherFacultyId != userFacultyId)
                 throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибраний викладач належить до іншого факультету");
         }
+    }
+
+    @Before("within(ua.edu.chdtu.deanoffice.service.order.OrderService) " +
+            "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
+            "&& args(order)")
+    public void beforeUpdateOrder(Order order) throws UnauthorizedFacultyDataException {
+        int userFacultyId = FacultyUtil.getUserFacultyIdInt();
+        int orderFacultyIds = order.getFaculty().getId();
+        if (userFacultyId != orderFacultyIds)
+            throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибраний наказ належить до іншого факультету");
     }
 }

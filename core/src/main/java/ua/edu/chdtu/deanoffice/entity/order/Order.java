@@ -22,27 +22,16 @@ import java.util.Date;
 @Accessors(chain = true)
 @Table(name = "orders")
 public class Order extends BaseEntity {
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     private OrderTemplateVersion orderTemplateVersion;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Faculty faculty;
-
     private Date orderDate;
-
     private String orderNumber;
-
     @ManyToOne
     private OrderApproveTemplate orderApproveTemplate;
-
-    @ManyToOne
-    private OrderControlTemplate orderControlTemplate;
-
     private String comment;
-
-    private Boolean active =false;
-
+    private Boolean active = false;
     private Boolean signed = false;
 }
 
