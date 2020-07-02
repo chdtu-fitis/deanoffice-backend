@@ -57,8 +57,6 @@ public class TeacherService {
 
     @FacultyAuthorized
     public void deleteByIds(List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        if (ids.size() == 0)
-            throw new OperationCannotBePerformedException("Не вказані ідентифікатори викладачів!");
         List<Teacher> teachers = getTeachers(ids);
         if (teachers.size() != ids.size())
             throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є неіснуючі!");
@@ -67,8 +65,6 @@ public class TeacherService {
 
     @FacultyAuthorized
     public void restoreByIds(List<Integer> ids) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        if (ids == null || ids.size() == 0)
-            throw new OperationCannotBePerformedException("Не вказані ідентифікатори викладачів!");
         List<Teacher> teachers = getTeachers(ids);
         if (teachers.size() != ids.size())
             throw new OperationCannotBePerformedException("Серед даних ідентифікаторів викладачів є існуючі!");

@@ -43,7 +43,7 @@ public class ExceptionHandlerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity handleGeneralException(Exception e, WebRequest request) {
         logger.error("ERROR", e);
-        return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return handleExceptionInternal(e, "Помилка сервера. Зверніться до адміністратора або розробника програми", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     public static ResponseEntity handleException(String message, Class exceptionLocation, HttpStatus responseStatus) {
