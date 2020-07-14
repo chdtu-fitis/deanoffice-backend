@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
@@ -9,6 +10,7 @@ import ua.edu.chdtu.deanoffice.repository.DepartmentRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Service
@@ -39,13 +41,15 @@ public class DepartmentService {
     }
 
     @FacultyAuthorized
-    public void delete(Department department) throws UnauthorizedFacultyDataException {
+    public void delete(@Validated @NotNull(message="Не можна видалити не існуючу кафедру")
+                                   Department department) throws UnauthorizedFacultyDataException {
         department.setActive(false);
         departmentRepository.save(department);
     }
 
     @FacultyAuthorized
-    public void restore(Department department) throws UnauthorizedFacultyDataException {
+    public void restore(@Validated @NotNull(message="Не можна відновити не існуючу кафедру")
+                                    Department department) throws UnauthorizedFacultyDataException {
         department.setActive(true);
         departmentRepository.save(department);
     }
