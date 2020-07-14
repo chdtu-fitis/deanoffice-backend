@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
+import ua.edu.chdtu.deanoffice.api.order.dto.OrderDTO;
 import ua.edu.chdtu.deanoffice.api.order.dto.OrderNumberAndDateDTO;
 import ua.edu.chdtu.deanoffice.api.order.dto.OrderTypeDTO;
 import ua.edu.chdtu.deanoffice.entity.order.Order;
@@ -24,23 +25,27 @@ import ua.edu.chdtu.deanoffice.service.order.OrderService;
 import ua.edu.chdtu.deanoffice.service.order.beans.OrderTypeBean;
 import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelCreateCommand;
 import ua.edu.chdtu.deanoffice.service.order.beans.StudentExpelResponseDto;
-
 import javax.validation.constraints.Min;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 @Validated
 public class OrderController extends DocumentResponseController {
-
     private final OrderService orderService;
+
+    @GetMapping
+    public ResponseEntity<List<OrderDTO>> getOrder(@RequestParam boolean signed, @RequestParam boolean draft, @RequestParam boolean rejected) {
+        List<Order> orders = orderService.getOrders(signed, draft, rejected);
+        return ResponseEntity.ok(strictMap(orders, OrderDTO.class));
+    }
 
     @GetMapping("/{studentExpelId}/student-expel")
     public ResponseEntity<Resource> generateStudentExpelDocument(@PathVariable Integer studentExpelId)
@@ -75,7 +80,7 @@ public class OrderController extends DocumentResponseController {
     public ResponseEntity signOrder(@PathVariable @Min(1) int id,
                                     @Validated @RequestBody OrderNumberAndDateDTO orderNumberAndDateDto) throws Exception {
         Order order = orderService.getOrderById(id);
-        if (order == null || !order.getActive()) {
+        if (order == null || !order.isActive()) {
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Даний наказ не можна підписувати");
         } else {
             order.setOrderNumber(orderNumberAndDateDto.getOrderNumber());

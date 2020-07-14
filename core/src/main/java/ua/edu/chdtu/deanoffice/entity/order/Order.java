@@ -6,9 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
-import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
-
 import javax.persistence.*;
 import java.util.Date;
 
@@ -17,21 +15,21 @@ import java.util.Date;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
-
 @Accessors(chain = true)
+@AllArgsConstructor
 @Table(name = "orders")
 public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private OrderTemplateVersion orderTemplateVersion;
     @ManyToOne(fetch = FetchType.LAZY)
     private Faculty faculty;
+    @Temporal(TemporalType.DATE)
     private Date orderDate;
     private String orderNumber;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private OrderApproveTemplate orderApproveTemplate;
     private String comment;
-    private Boolean active = false;
-    private Boolean signed = false;
+    private boolean active = true;
+    private boolean signed = false;
 }
 

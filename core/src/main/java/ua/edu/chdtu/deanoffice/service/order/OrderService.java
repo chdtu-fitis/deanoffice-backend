@@ -11,12 +11,9 @@ import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.OrderType;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.order.Order;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
-import ua.edu.chdtu.deanoffice.repository.order.OrderApproverTemplateRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderRepository;
 import ua.edu.chdtu.deanoffice.repository.order.OrderTemplateVersionRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
@@ -58,9 +55,12 @@ public class OrderService {
     private final OrderReasonService orderReasonService;
     private final ObjectMapper objectMapper;
     private final StudentExpelRepository studentExpelRepository;
-    private final OrderApproverTemplateRepository orderApproverTemplateRepository;
     private final StudentExpelService studentExpelService;
     private final DocumentIOService documentIOService;
+
+    public List<Order> getOrders(boolean signed, boolean draft, boolean rejected) {
+        return orderRepository.findAll(new OrderStatusSpecification(signed, draft, rejected));
+    }
 
     public Set<OrderTypeBean> getOrderTypes() {
         Set<OrderTypeBean> orderTypes = new HashSet<>();
