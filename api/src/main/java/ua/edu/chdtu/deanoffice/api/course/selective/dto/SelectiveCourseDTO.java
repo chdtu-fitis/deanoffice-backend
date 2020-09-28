@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.selective.courses.dto;
+package ua.edu.chdtu.deanoffice.api.course.selective.dto;
 
 import lombok.Getter;
 import lombok.Setter;
