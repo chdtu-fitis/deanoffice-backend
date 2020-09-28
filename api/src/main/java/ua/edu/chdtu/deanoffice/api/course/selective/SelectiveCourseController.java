@@ -12,7 +12,6 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.service.selective.courses.SelectiveCourseService;
-
 import javax.validation.constraints.Min;
 import java.util.List;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -35,7 +34,7 @@ public class SelectiveCourseController {
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
-    @PostMapping("selective-courses/create")
+    @PostMapping("/create")
     public ResponseEntity createSelectiveCourse(@Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) {
         SelectiveCourse selectiveCourse = Mapper.strictMap(selectiveCourseWriteDTO, SelectiveCourse.class);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
@@ -44,7 +43,7 @@ public class SelectiveCourseController {
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
-    @DeleteMapping("/selective-courses/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity deleteSelectiveCourse(@PathVariable("id") int id) {
         SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
         selectiveCourseService.delete(selectiveCourse);
@@ -52,22 +51,20 @@ public class SelectiveCourseController {
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
-    @PutMapping("/selective-courses/{id}/restore")
+    @PutMapping("/{id}/restore")
     public ResponseEntity restoreSelectiveCourse(@PathVariable("id") int id) {
         SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
         selectiveCourseService.restore(selectiveCourse);
         return ResponseEntity.ok().build();
     }
-    @Transactional(readOnly = true)
     @Secured({"ROLE_NAVCH_METHOD"})
-    @PutMapping("/{id}/update")
+    @PutMapping("/{id}/")
     public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
                                                 @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) {
-        SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
-        Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
+        SelectiveCourse selectiveCourse = Mapper.strictMap(selectiveCourseWriteDTO, SelectiveCourse.class);
+        selectiveCourse.setId(id);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.save(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.CREATED);
     }
-
 }
