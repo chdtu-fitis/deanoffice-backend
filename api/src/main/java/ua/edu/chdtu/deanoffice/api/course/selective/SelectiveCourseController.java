@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
@@ -11,6 +12,8 @@ import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.service.selective.courses.SelectiveCourseService;
+
+import javax.validation.constraints.Min;
 import java.util.List;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
@@ -55,4 +58,16 @@ public class SelectiveCourseController {
         selectiveCourseService.restore(selectiveCourse);
         return ResponseEntity.ok().build();
     }
+    @Transactional(readOnly = true)
+    @Secured({"ROLE_NAVCH_METHOD"})
+    @PutMapping("/{id}/update")
+    public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
+                                                @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) {
+        SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
+        Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
+        SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.save(selectiveCourse);
+        SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
+        return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.CREATED);
+    }
+
 }

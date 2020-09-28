@@ -46,4 +46,13 @@ public class SelectiveCourseService {
         selectiveCourse.setAvailable(true);
         selectiveCourseRepository.save(selectiveCourse);
     }
+
+    public SelectiveCourse getById(Integer selectiveCourseId) {
+        return this.selectiveCourseRepository.findOne(selectiveCourseId);
+    }
+
+    @FacultyAuthorized
+    public SelectiveCourse save(SelectiveCourse selectiveCourse) {
+        return selectiveCourseRepository.save(selectiveCourse);
+    }
 }
