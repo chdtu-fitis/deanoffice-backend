@@ -51,7 +51,6 @@ public class SelectiveCourseService {
         return this.selectiveCourseRepository.findOne(selectiveCourseId);
     }
 
-    @FacultyAuthorized
     public SelectiveCourse save(SelectiveCourse selectiveCourse) {
         return selectiveCourseRepository.save(selectiveCourse);
     }

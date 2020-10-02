@@ -10,7 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
+import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.TeacherService;
+import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.selective.courses.SelectiveCourseService;
 
 import javax.validation.constraints.Min;
@@ -23,10 +28,14 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 public class SelectiveCourseController {
 
     private SelectiveCourseService selectiveCourseService;
+    private TeacherService teacherService;
+    private CourseService courseService;
 
     @Autowired
-    public SelectiveCourseController(SelectiveCourseService selectiveCourseService) {
+    public SelectiveCourseController(SelectiveCourseService selectiveCourseService, TeacherService teacherService, CourseService courseService) {
         this.selectiveCourseService = selectiveCourseService;
+        this.teacherService = teacherService;
+        this.courseService = courseService;
     }
 
     @GetMapping
@@ -53,7 +62,7 @@ public class SelectiveCourseController {
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
-    @PutMapping("/{id}/restore")
+    @PatchMapping("/{id}")
     public ResponseEntity restoreSelectiveCourse(@PathVariable("id") int id) {
         SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
         selectiveCourseService.restore(selectiveCourse);
@@ -61,13 +70,45 @@ public class SelectiveCourseController {
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
-    @PutMapping("/{id}")
+    @PutMapping("/{id}/")
     public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
-                                                @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) {
-        SelectiveCourse selectiveCourse = Mapper.strictMap(selectiveCourseWriteDTO, SelectiveCourse.class);
-        selectiveCourse.setId(id);
+                                                @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
+        SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
+        selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.save(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
+    }
+
+    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
+        Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
+        if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
+            if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
+                if (teacher == null) {
+                    throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
+                }
+                selectiveCourse.setTeacher(teacher);
+            } else {
+                if (selectiveCourse.getTeacher() != null && selectiveCourseWriteDTO.getTeacher() == null) {
+                    selectiveCourse.setTeacher(null);
+                } else {
+                    if (selectiveCourse.getTeacher().getId() != selectiveCourseWriteDTO.getTeacher().getId()) {
+                        if (teacher == null) {
+                            throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
+                        }
+                        selectiveCourse.setTeacher(teacher);
+                    }
+                }
+            }
+        }
+        if (selectiveCourse.getCourse().getId() != selectiveCourseWriteDTO.getCourse().getId()) {
+            Course course = courseService.getById(selectiveCourseWriteDTO.getCourse().getId());
+            if (course == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
+            }
+            selectiveCourse.setCourse(course);
+        }
+        Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
+        return selectiveCourse;
     }
 }
