@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.selective.courses;
+package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,6 @@ public class SelectiveCourseService {
         return selectiveCourseRepository.findAllAvailableByStudyYear(studyYear);
     }
 
-
     public SelectiveCourse getSelectiveCourseById(Integer id) {
         return selectiveCourseRepository.findOne(id);
     }
@@ -47,11 +46,7 @@ public class SelectiveCourseService {
         selectiveCourseRepository.save(selectiveCourse);
     }
 
-    public SelectiveCourse getById(Integer selectiveCourseId) {
-        return this.selectiveCourseRepository.findOne(selectiveCourseId);
-    }
-
-    public SelectiveCourse save(SelectiveCourse selectiveCourse) {
+    public SelectiveCourse update(SelectiveCourse selectiveCourse) {
         return selectiveCourseRepository.save(selectiveCourse);
     }
 }

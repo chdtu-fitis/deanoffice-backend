@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
@@ -16,7 +15,7 @@ import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
-import ua.edu.chdtu.deanoffice.service.selective.courses.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 
 import javax.validation.constraints.Min;
 import java.util.List;
@@ -75,7 +74,7 @@ public class SelectiveCourseController {
                                                 @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
         SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
-        SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.save(selectiveCourse);
+        SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
