@@ -69,7 +69,7 @@ public class SelectiveCourseController {
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
-    @PutMapping("/{id}/")
+    @PutMapping("/{id}")
     public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
                                                 @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
         SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
