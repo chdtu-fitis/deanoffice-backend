@@ -55,7 +55,7 @@ public class SelectiveCourseController {
     @Secured({"ROLE_NAVCH_METHOD"})
     @DeleteMapping("/{id}")
     public ResponseEntity deleteSelectiveCourse(@PathVariable("id") int id) {
-        SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
+        SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
         selectiveCourseService.delete(selectiveCourse);
         return ResponseEntity.ok().build();
     }
@@ -63,7 +63,7 @@ public class SelectiveCourseController {
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/{id}")
     public ResponseEntity restoreSelectiveCourse(@PathVariable("id") int id) {
-        SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
+        SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
         selectiveCourseService.restore(selectiveCourse);
         return ResponseEntity.ok().build();
     }
@@ -72,7 +72,7 @@ public class SelectiveCourseController {
     @PutMapping("/{id}/")
     public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
                                                 @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
-        SelectiveCourse selectiveCourse = selectiveCourseService.getSelectiveCourseById(id);
+        SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
