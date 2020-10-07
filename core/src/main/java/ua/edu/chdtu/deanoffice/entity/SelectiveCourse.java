@@ -13,10 +13,8 @@ import javax.persistence.ManyToOne;
 @Setter
 public class SelectiveCourse extends BaseEntity {
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "course_id")
     private Course course;
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "teacher_id")
     private Teacher teacher;
     private int studyYear;
     private boolean available;
