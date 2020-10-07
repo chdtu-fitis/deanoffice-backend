@@ -100,7 +100,7 @@ public class SelectiveCourseController {
         if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
             if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
                 if (teacher == null) {
-                    throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
+                    throw new OperationCannotBePerformedException("Неправильний ідентифікатор викладача");
                 }
                 selectiveCourse.setTeacher(teacher);
             } else {
@@ -109,7 +109,7 @@ public class SelectiveCourseController {
                 } else {
                     if (selectiveCourse.getTeacher().getId() != selectiveCourseWriteDTO.getTeacher().getId()) {
                         if (teacher == null) {
-                            throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
+                            throw new OperationCannotBePerformedException("Неправильний ідентифікатор викладача");
                         }
                         selectiveCourse.setTeacher(teacher);
                     }
