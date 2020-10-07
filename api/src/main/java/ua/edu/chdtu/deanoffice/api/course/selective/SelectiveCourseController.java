@@ -45,25 +45,22 @@ public class SelectiveCourseController {
     @PostMapping
     public ResponseEntity createSelectiveCourse(@Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
         SelectiveCourse selectiveCourse = Mapper.strictMap(selectiveCourseWriteDTO, SelectiveCourse.class);
-        Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
-        if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
-            if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
-                if (teacher == null) {
-                    throw new OperationCannotBePerformedException("Неправильний ідентифікатор викладача");
-                }
+        if (selectiveCourseWriteDTO.getTeacher() != null) {
+            Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
+            if (teacher == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор викладача");
             }
+            selectiveCourse.setTeacher(teacher);
         }
-        selectiveCourse.setTeacher(teacher);
-        if (selectiveCourse.getCourse().getId() != selectiveCourseWriteDTO.getCourse().getId()) {
-            Course course = courseService.getById(selectiveCourseWriteDTO.getCourse().getId());
-            if (course == null) {
-                throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
-            }
-            selectiveCourse.setCourse(course);
+
+        Course course = courseService.getById(selectiveCourseWriteDTO.getCourse().getId());
+        if (course == null) {
+            throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
         }
+        selectiveCourse.setCourse(course);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
-        return ResponseEntity.ok(selectiveCourseAfterSaveDTO);
+        return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
@@ -85,8 +82,8 @@ public class SelectiveCourseController {
     @Secured({"ROLE_NAVCH_METHOD"})
     @PutMapping("/{id}")
     public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
-                                                @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws
-            OperationCannotBePerformedException {
+                                                @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO)
+                                                throws OperationCannotBePerformedException {
         SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
@@ -94,11 +91,11 @@ public class SelectiveCourseController {
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
 
-    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse
-                                                                selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
-        Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
+    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO)
+                                                        throws OperationCannotBePerformedException {
         if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
             if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
+                Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
                 if (teacher == null) {
                     throw new OperationCannotBePerformedException("Неправильний ідентифікатор викладача");
                 }
@@ -108,6 +105,7 @@ public class SelectiveCourseController {
                     selectiveCourse.setTeacher(null);
                 } else {
                     if (selectiveCourse.getTeacher().getId() != selectiveCourseWriteDTO.getTeacher().getId()) {
+                        Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
                         if (teacher == null) {
                             throw new OperationCannotBePerformedException("Неправильний ідентифікатор викладача");
                         }
