@@ -22,6 +22,7 @@ public class SelectiveCourseService {
         if (studyYear == null) {
             studyYear = currentYearService.getYear() + 1;
         }
+
         return selectiveCourseRepository.findAllAvailableByStudyYear(studyYear);
     }
 
