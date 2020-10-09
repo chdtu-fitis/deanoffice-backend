@@ -16,6 +16,8 @@ public class SelectiveCourseWriteDTO {
     private boolean available;
     @NotNull(message = "Обов'язково має бути назва")
     private ExistingIdDTO course;
+    @NotNull(message = "Обов'язково має бути ступінь")
+    private ExistingIdDTO degree;
     private ExistingIdDTO teacher;
     @NotNull(message = "Обов'язково має бути рік")
     private Integer studyYear;

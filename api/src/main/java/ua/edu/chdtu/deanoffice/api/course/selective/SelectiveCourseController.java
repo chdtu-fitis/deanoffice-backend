@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.api.course.selective;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -28,16 +27,18 @@ public class SelectiveCourseController {
     private TeacherService teacherService;
     private CourseService courseService;
 
-    @Autowired
     public SelectiveCourseController(SelectiveCourseService selectiveCourseService, TeacherService teacherService, CourseService courseService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
     }
 
+//studyYear - рік навчання, наприклад 2020; year - курс на якому навчаються студенти, наприклад, 1,2,3
     @GetMapping
-    public ResponseEntity getAllAvailableSelectiveCourses(@RequestParam(required = false) Integer studyYear) {
-        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesInCurrentYear(studyYear);
+    public ResponseEntity getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemester(@RequestParam(required = false) Integer studyYear,
+                                                                                      @RequestParam int degreeId,
+                                                                                      @RequestParam int semester) {
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
         return ResponseEntity.ok(map(selectiveCourses, SelectiveCourseDTO.class));
     }
 
