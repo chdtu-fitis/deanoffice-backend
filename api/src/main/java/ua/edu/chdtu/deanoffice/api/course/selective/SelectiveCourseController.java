@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.Degree;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import javax.validation.constraints.Min;
 import java.util.List;
@@ -29,15 +28,20 @@ public class SelectiveCourseController {
     private TeacherService teacherService;
     private CourseService courseService;
     private DegreeService degreeService;
+    private DepartmentService departmentService;
+    private FieldOfKnowledgeService fieldOfKnowledgeService;
 
-    public SelectiveCourseController(SelectiveCourseService selectiveCourseService, TeacherService teacherService, CourseService courseService, DegreeService degreeService) {
+    public SelectiveCourseController(SelectiveCourseService selectiveCourseService,
+                                     TeacherService teacherService, FieldOfKnowledgeService fieldOfKnowledgeService,
+                                     CourseService courseService, DegreeService degreeService, DepartmentService departmentService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
         this.degreeService = degreeService;
+        this.departmentService = departmentService;
+        this.fieldOfKnowledgeService = fieldOfKnowledgeService;
     }
 
-    //studyYear - рік навчання, наприклад 2020; year - курс на якому навчаються студенти, наприклад, 1,2,3
     @GetMapping
     public ResponseEntity getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemester(@RequestParam(required = false) Integer studyYear,
                                                                                       @RequestParam int degreeId,
@@ -69,6 +73,19 @@ public class SelectiveCourseController {
             throw new OperationCannotBePerformedException("Неправильний ідентифікатор ступеню");
         }
         selectiveCourse.setDegree(degree);
+
+        Department department = departmentService.getById(selectiveCourseWriteDTO.getDepartment().getId());
+        if (department == null) {
+            throw new OperationCannotBePerformedException("Неправильний ідентифікатор кафедри");
+        }
+        selectiveCourse.setDepartment(department);
+
+        FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(selectiveCourseWriteDTO.getBasicFieldOfKnowledge().getId());
+        if (fieldOfKnowledge == null) {
+            throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+        }
+        selectiveCourse.setBasicFieldOfKnowledge(fieldOfKnowledge);
+
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
         return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
@@ -138,6 +155,20 @@ public class SelectiveCourseController {
                 throw new OperationCannotBePerformedException("Неправильний ідентифікатор ступеню");
             }
             selectiveCourse.setDegree(degree);
+        }
+        if (selectiveCourse.getDepartment().getId() != selectiveCourseWriteDTO.getDepartment().getId()) {
+            Department department = departmentService.getById(selectiveCourseWriteDTO.getDepartment().getId());
+            if (department == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор кафедри");
+            }
+            selectiveCourse.setDepartment(department);
+        }
+        if (selectiveCourse.getBasicFieldOfKnowledge().getId() != selectiveCourseWriteDTO.getBasicFieldOfKnowledge().getId()) {
+            FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(selectiveCourseWriteDTO.getBasicFieldOfKnowledge().getId());
+            if (fieldOfKnowledge == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+            }
+            selectiveCourse.setBasicFieldOfKnowledge(fieldOfKnowledge);
         }
         Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
         return selectiveCourse;
