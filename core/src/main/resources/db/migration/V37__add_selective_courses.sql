@@ -16,6 +16,7 @@ CREATE TABLE selective_course (
     course_id INTEGER NOT NULL,
     teacher_id INTEGER,
     study_year INTEGER NOT NULL,
+    degree_id INTEGER NOT NULL,
     available BOOLEAN NOT NULL DEFAULT TRUE
 );
 
@@ -24,7 +25,9 @@ ALTER TABLE selective_course
 ALTER TABLE selective_course
     ADD CONSTRAINT fk_selective_course_course_id FOREIGN KEY (course_id) REFERENCES course(id);
 ALTER TABLE selective_course
-    ADD CONSTRAINT uk_selective_course_course_id_study_year UNIQUE(course_id, study_year);
+    ADD CONSTRAINT fk_selective_course_degree_id FOREIGN KEY (degree_id) REFERENCES degree(id);
+ALTER TABLE selective_course
+    ADD CONSTRAINT uk_selective_course_course_id_study_year UNIQUE(course_id, study_year, degree_id);
 
 
 CREATE TABLE selective_courses_student_degrees(

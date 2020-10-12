@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.api.course.selective;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -10,9 +9,11 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
@@ -27,17 +28,21 @@ public class SelectiveCourseController {
     private SelectiveCourseService selectiveCourseService;
     private TeacherService teacherService;
     private CourseService courseService;
+    private DegreeService degreeService;
 
-    @Autowired
-    public SelectiveCourseController(SelectiveCourseService selectiveCourseService, TeacherService teacherService, CourseService courseService) {
+    public SelectiveCourseController(SelectiveCourseService selectiveCourseService, TeacherService teacherService, CourseService courseService, DegreeService degreeService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
+        this.degreeService = degreeService;
     }
 
+    //studyYear - рік навчання, наприклад 2020; year - курс на якому навчаються студенти, наприклад, 1,2,3
     @GetMapping
-    public ResponseEntity getAllAvailableSelectiveCourses(@RequestParam(required = false) Integer studyYear) {
-        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesInCurrentYear(studyYear);
+    public ResponseEntity getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemester(@RequestParam(required = false) Integer studyYear,
+                                                                                      @RequestParam int degreeId,
+                                                                                      @RequestParam int semester) {
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
         return ResponseEntity.ok(map(selectiveCourses, SelectiveCourseDTO.class));
     }
 
@@ -58,6 +63,12 @@ public class SelectiveCourseController {
             throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
         }
         selectiveCourse.setCourse(course);
+
+        Degree degree = degreeService.getById(selectiveCourseWriteDTO.getDegree().getId());
+        if (degree == null) {
+            throw new OperationCannotBePerformedException("Неправильний ідентифікатор ступеню");
+        }
+        selectiveCourse.setDegree(degree);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
         return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
@@ -83,7 +94,7 @@ public class SelectiveCourseController {
     @PutMapping("/{id}")
     public ResponseEntity updateSelectiveCourse(@PathVariable("id") @Min(1) int id,
                                                 @Validated @RequestBody SelectiveCourseWriteDTO selectiveCourseWriteDTO)
-                                                throws OperationCannotBePerformedException {
+            throws OperationCannotBePerformedException {
         SelectiveCourse selectiveCourse = selectiveCourseService.getById(id);
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
@@ -92,7 +103,7 @@ public class SelectiveCourseController {
     }
 
     private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO)
-                                                        throws OperationCannotBePerformedException {
+            throws OperationCannotBePerformedException {
         if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
             if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
                 Teacher teacher = teacherService.getTeacher(selectiveCourseWriteDTO.getTeacher().getId());
@@ -120,6 +131,13 @@ public class SelectiveCourseController {
                 throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмету");
             }
             selectiveCourse.setCourse(course);
+        }
+        if (selectiveCourse.getDegree().getId() != selectiveCourseWriteDTO.getDegree().getId()) {
+            Degree degree = degreeService.getById(selectiveCourseWriteDTO.getDegree().getId());
+            if (degree == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор ступеню");
+            }
+            selectiveCourse.setDegree(degree);
         }
         Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
         return selectiveCourse;
