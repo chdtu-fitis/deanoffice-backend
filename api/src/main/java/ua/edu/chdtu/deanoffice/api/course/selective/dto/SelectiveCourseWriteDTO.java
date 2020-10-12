@@ -19,6 +19,13 @@ public class SelectiveCourseWriteDTO {
     @NotNull(message = "Обов'язково має бути ступінь")
     private ExistingIdDTO degree;
     private ExistingIdDTO teacher;
+    @NotNull(message = "Обов'язково має бути кафедра")
+    private ExistingIdDTO department;
+    @NotNull(message = "Обов'язково має бути галузь знань")
+    private ExistingIdDTO basicFieldOfKnowledge;
+    private String otherFieldOfKnowledge;
+    private String trainingCycle;
+    private String description;
     @NotNull(message = "Обов'язково має бути рік")
     private Integer studyYear;
 }
