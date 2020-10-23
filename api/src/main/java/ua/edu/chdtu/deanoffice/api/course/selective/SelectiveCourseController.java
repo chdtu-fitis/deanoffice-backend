@@ -5,9 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
-import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
@@ -17,7 +18,10 @@ import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import javax.validation.constraints.Min;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
@@ -46,8 +50,25 @@ public class SelectiveCourseController {
     public ResponseEntity getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemester(@RequestParam(required = false) Integer studyYear,
                                                                                       @RequestParam int degreeId,
                                                                                       @RequestParam int semester) {
+        List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
         List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
-        return ResponseEntity.ok(map(selectiveCourses, SelectiveCourseDTO.class));
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
+            if (selectiveCourse.getFieldOfKnowledge() != null) {
+                List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>();
+                fieldsOfKnowledge.add(selectiveCourse.getFieldOfKnowledge());
+                if (selectiveCourse.getOtherFieldsOfKnowledge() != null) {
+                    String[] ids = selectiveCourse.getOtherFieldsOfKnowledge().split(",");
+                    List<Integer> idsInt = Arrays.asList(ids).stream().map(Integer::parseInt).collect(Collectors.toList());
+                    List<FieldOfKnowledge> otherFieldsOfKnowledge = fieldOfKnowledgeService.getFieldsOfKnowledge(idsInt);
+                    fieldsOfKnowledge.addAll(otherFieldsOfKnowledge);
+                }
+                List<NamedDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, NamedDTO.class);
+                selectiveCourseDTO.setFieldsOfKnowledge(fieldOfKnowledgeDTOS);
+            }
+            selectiveCourseDTOS.add(selectiveCourseDTO);
+        }
+        return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCourseDTO.class));
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
@@ -80,12 +101,25 @@ public class SelectiveCourseController {
         }
         selectiveCourse.setDepartment(department);
 
-        FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(selectiveCourseWriteDTO.getBasicFieldOfKnowledge().getId());
-        if (fieldOfKnowledge == null) {
-            throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+        List<Integer> fieldsOfKnowledgeIds = selectiveCourseWriteDTO.getFieldsOfKnowledge();
+        if (fieldsOfKnowledgeIds != null && fieldsOfKnowledgeIds.size() != 0) {
+            FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(fieldsOfKnowledgeIds.get(0));
+            if (fieldOfKnowledge == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+            } else {
+                selectiveCourse.setFieldOfKnowledge(fieldOfKnowledge);
+            }
+            if (fieldsOfKnowledgeIds.size() > 1) {
+                String idsStr = "";
+                for (int i = 1; i < fieldsOfKnowledgeIds.size(); i++) {
+                    idsStr += fieldsOfKnowledgeIds.get(i);
+                    if (i != fieldsOfKnowledgeIds.size() - 1) {
+                        idsStr += ",";
+                    }
+                }
+                selectiveCourse.setOtherFieldsOfKnowledge(idsStr);
+            }
         }
-        selectiveCourse.setBasicFieldOfKnowledge(fieldOfKnowledge);
-
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
         return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
@@ -119,7 +153,8 @@ public class SelectiveCourseController {
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
 
-    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO)
+    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO
+            selectiveCourseWriteDTO)
             throws OperationCannotBePerformedException {
         if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
             if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
@@ -163,13 +198,30 @@ public class SelectiveCourseController {
             }
             selectiveCourse.setDepartment(department);
         }
-        if (selectiveCourse.getBasicFieldOfKnowledge().getId() != selectiveCourseWriteDTO.getBasicFieldOfKnowledge().getId()) {
-            FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(selectiveCourseWriteDTO.getBasicFieldOfKnowledge().getId());
-            if (fieldOfKnowledge == null) {
-                throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+        if (selectiveCourse.getFieldOfKnowledge() != null || selectiveCourseWriteDTO.getFieldsOfKnowledge() != null) {
+            if (selectiveCourse.getFieldOfKnowledge() == null && selectiveCourseWriteDTO.getFieldsOfKnowledge() != null) {
+                List<Integer> fieldsOfKnowledgeIds = selectiveCourseWriteDTO.getFieldsOfKnowledge();
+                if (fieldsOfKnowledgeIds != null && fieldsOfKnowledgeIds.size() != 0) {
+                    FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(fieldsOfKnowledgeIds.get(0));
+                    if (fieldOfKnowledge == null) {
+                        throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+                    } else {
+                        selectiveCourse.setFieldOfKnowledge(fieldOfKnowledge);
+                    }
+                    if (fieldsOfKnowledgeIds.size() > 1) {
+                        String idsStr = "";
+                        for (int i = 1; i < fieldsOfKnowledgeIds.size(); i++) {
+                            idsStr += fieldsOfKnowledgeIds.get(i);
+                            if (i != fieldsOfKnowledgeIds.size() - 1) {
+                                idsStr += ",";
+                            }
+                        }
+                        selectiveCourse.setOtherFieldsOfKnowledge(idsStr);
+                    }
+                }
             }
-            selectiveCourse.setBasicFieldOfKnowledge(fieldOfKnowledge);
         }
+
         Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
         return selectiveCourse;
     }

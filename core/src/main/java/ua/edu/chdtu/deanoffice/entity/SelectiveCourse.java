@@ -2,10 +2,11 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ManyToAny;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,9 +21,10 @@ public class SelectiveCourse extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Department department;
     @ManyToOne(fetch = FetchType.LAZY)
-    private FieldOfKnowledge basicFieldOfKnowledge;
-    private String otherFieldOfKnowledge;
-    private String trainingCycle;
+    private FieldOfKnowledge fieldOfKnowledge;
+    private String otherFieldsOfKnowledge;
+    @Enumerated(value = EnumType.STRING)
+    private TypeCycle trainingCycle;
     private String description;
     private int studyYear;
     private boolean available;
