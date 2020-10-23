@@ -12,7 +12,6 @@ import java.util.List;
 @Getter
 @Setter
 public class SelectiveCourseWriteDTO {
-
     @AssertTrue(message = "Не можна змінювати не чинну дисципліну")
     private boolean available;
     @NotNull(message = "Обов'язково має бути назва")
@@ -23,8 +22,9 @@ public class SelectiveCourseWriteDTO {
     @NotNull(message = "Обов'язково має бути кафедра")
     private ExistingIdDTO department;
     private List<Integer> fieldsOfKnowledge;
-    private String otherFieldsOfKnowledge;
+    @NotNull(message = "Обов'язково має бути цикл підготовки")
     private String trainingCycle;
+    @NotNull(message = "Обов'язково має бути опис")
     private String description;
     @NotNull(message = "Обов'язково має бути рік")
     private Integer studyYear;

@@ -6,7 +6,6 @@ import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.DepartmentDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.teacher.TeacherDTO;
-import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 
 import javax.persistence.EnumType;

@@ -54,21 +54,25 @@ public class SelectiveCourseController {
         List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
-            if (selectiveCourse.getFieldOfKnowledge() != null) {
-                List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>();
-                fieldsOfKnowledge.add(selectiveCourse.getFieldOfKnowledge());
-                if (selectiveCourse.getOtherFieldsOfKnowledge() != null) {
-                    String[] ids = selectiveCourse.getOtherFieldsOfKnowledge().split(",");
-                    List<Integer> idsInt = Arrays.asList(ids).stream().map(Integer::parseInt).collect(Collectors.toList());
-                    List<FieldOfKnowledge> otherFieldsOfKnowledge = fieldOfKnowledgeService.getFieldsOfKnowledge(idsInt);
-                    fieldsOfKnowledge.addAll(otherFieldsOfKnowledge);
-                }
-                List<NamedDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, NamedDTO.class);
-                selectiveCourseDTO.setFieldsOfKnowledge(fieldOfKnowledgeDTOS);
-            }
+            setFieldsOfKnowledge(selectiveCourse, selectiveCourseDTO);
             selectiveCourseDTOS.add(selectiveCourseDTO);
         }
         return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCourseDTO.class));
+    }
+
+    private void setFieldsOfKnowledge(SelectiveCourse selectiveCourse, SelectiveCourseDTO selectiveCourseDTO) {
+        if (selectiveCourse.getFieldOfKnowledge() != null) {
+            List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>();
+            fieldsOfKnowledge.add(selectiveCourse.getFieldOfKnowledge());
+            if (selectiveCourse.getOtherFieldsOfKnowledge() != null) {
+                String[] ids = selectiveCourse.getOtherFieldsOfKnowledge().split(",");
+                List<Integer> idsInt = Arrays.asList(ids).stream().map(Integer::parseInt).collect(Collectors.toList());
+                List<FieldOfKnowledge> otherFieldsOfKnowledge = fieldOfKnowledgeService.getFieldsOfKnowledge(idsInt);
+                fieldsOfKnowledge.addAll(otherFieldsOfKnowledge);
+            }
+            List<NamedDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, NamedDTO.class);
+            selectiveCourseDTO.setFieldsOfKnowledge(fieldOfKnowledgeDTOS);
+        }
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
@@ -109,19 +113,11 @@ public class SelectiveCourseController {
             } else {
                 selectiveCourse.setFieldOfKnowledge(fieldOfKnowledge);
             }
-            if (fieldsOfKnowledgeIds.size() > 1) {
-                String idsStr = "";
-                for (int i = 1; i < fieldsOfKnowledgeIds.size(); i++) {
-                    idsStr += fieldsOfKnowledgeIds.get(i);
-                    if (i != fieldsOfKnowledgeIds.size() - 1) {
-                        idsStr += ",";
-                    }
-                }
-                selectiveCourse.setOtherFieldsOfKnowledge(idsStr);
-            }
+            setOtherFieldsOfKnowledge(fieldsOfKnowledgeIds, selectiveCourse);
         }
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
+        setFieldsOfKnowledge(selectiveCourseAfterSave, selectiveCourseAfterSaveDTO);
         return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
     }
 
@@ -150,6 +146,7 @@ public class SelectiveCourseController {
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
+        setFieldsOfKnowledge(selectiveCourseAfterSave, selectiveCourseSavedDTO);
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
 
@@ -199,29 +196,50 @@ public class SelectiveCourseController {
         }
         if (selectiveCourse.getFieldOfKnowledge() != null || selectiveCourseWriteDTO.getFieldsOfKnowledge() != null) {
             if (selectiveCourse.getFieldOfKnowledge() == null && selectiveCourseWriteDTO.getFieldsOfKnowledge() != null) {
-                List<Integer> fieldsOfKnowledgeIds = selectiveCourseWriteDTO.getFieldsOfKnowledge();
-                if (fieldsOfKnowledgeIds != null && fieldsOfKnowledgeIds.size() != 0) {
-                    FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(fieldsOfKnowledgeIds.get(0));
-                    if (fieldOfKnowledge == null) {
-                        throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
-                    } else {
-                        selectiveCourse.setFieldOfKnowledge(fieldOfKnowledge);
-                    }
-                    if (fieldsOfKnowledgeIds.size() > 1) {
-                        String idsStr = "";
-                        for (int i = 1; i < fieldsOfKnowledgeIds.size(); i++) {
-                            idsStr += fieldsOfKnowledgeIds.get(i);
-                            if (i != fieldsOfKnowledgeIds.size() - 1) {
-                                idsStr += ",";
-                            }
-                        }
-                        selectiveCourse.setOtherFieldsOfKnowledge(idsStr);
+                setFieldsOfKnowledge(selectiveCourse, selectiveCourseWriteDTO);
+            } else {
+                if (selectiveCourse.getFieldOfKnowledge() != null && selectiveCourseWriteDTO.getFieldsOfKnowledge() == null) {
+                    selectiveCourse.setFieldOfKnowledge(null);
+                    selectiveCourse.setOtherFieldsOfKnowledge(null);
+                } else {
+                    String other = selectiveCourse.getOtherFieldsOfKnowledge();
+                    String fullFieldsOfKnowledge = selectiveCourse.getFieldOfKnowledge().getId() + (other == null ? "" : "," + other);
+                    String fullFieldsOfKnowledgeDtoStr = selectiveCourseWriteDTO.getFieldsOfKnowledge().toString()
+                            .replaceAll("(^\\[|\\]$)", "").replaceAll("\\s+","");
+                    if (!fullFieldsOfKnowledge.equals(fullFieldsOfKnowledgeDtoStr )) {
+                        setFieldsOfKnowledge(selectiveCourse, selectiveCourseWriteDTO);
                     }
                 }
             }
         }
-
         Mapper.strictMap(selectiveCourseWriteDTO, selectiveCourse);
         return selectiveCourse;
+    }
+
+    private void setFieldsOfKnowledge(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO) throws OperationCannotBePerformedException {
+        List<Integer> fieldsOfKnowledgeIds = selectiveCourseWriteDTO.getFieldsOfKnowledge();
+        if (fieldsOfKnowledgeIds.size() != 0) {
+            FieldOfKnowledge fieldOfKnowledge = fieldOfKnowledgeService.getFieldOfKnowledgeById(fieldsOfKnowledgeIds.get(0));
+            if (fieldOfKnowledge == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор галузі знань");
+            }
+            selectiveCourse.setFieldOfKnowledge(fieldOfKnowledge);
+            setOtherFieldsOfKnowledge(fieldsOfKnowledgeIds, selectiveCourse);
+        }
+    }
+
+    private void setOtherFieldsOfKnowledge(List<Integer> fieldsOfKnowledgeIds, SelectiveCourse selectiveCourse) {
+        if (fieldsOfKnowledgeIds.size() > 1) {
+            String idsStr = "";
+            for (int i = 1; i < fieldsOfKnowledgeIds.size(); i++) {
+                idsStr += fieldsOfKnowledgeIds.get(i);
+                if (i != fieldsOfKnowledgeIds.size() - 1) {
+                    idsStr += ",";
+                }
+            }
+            selectiveCourse.setOtherFieldsOfKnowledge(idsStr);
+        } else {
+            selectiveCourse.setOtherFieldsOfKnowledge(null);
+        }
     }
 }

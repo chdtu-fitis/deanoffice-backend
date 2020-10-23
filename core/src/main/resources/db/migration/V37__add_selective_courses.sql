@@ -11,16 +11,15 @@ ALTER TABLE one_course_groups_student_degrees
 ALTER TABLE one_course_groups_student_degrees
     ADD CONSTRAINT uk_one_course_groups_student_degrees_student_degree_id_student_group_id UNIQUE(student_degree_id, student_group_id);
 
-
 CREATE TABLE field_of_knowledge(
-    id SERIAL PRIMARY KEY,
-    code VARCHAR(15),
-    name VARCHAR(50),
-    name_eng VARCHAR(50)
+    id SERIAL NOT NULL PRIMARY KEY,
+    code NOT NULL VARCHAR(15),
+    name NOT NULL VARCHAR(100),
+    name_eng NOT NULL VARCHAR(100)
 );
 
 ALTER TABLE field_of_knowledge
-    ADD CONSTRAINT uk_field_of_knowledge_name_code UNIQUE (code, name, name_eng);
+    ADD CONSTRAINT uk_field_of_knowledge_name_code UNIQUE (code, name);
 
 CREATE TABLE selective_course (
     id SERIAL PRIMARY KEY,
@@ -30,8 +29,8 @@ CREATE TABLE selective_course (
     degree_id INTEGER NOT NULL,
     training_cycle VARCHAR(15) NOT NULL,
     department_id INTEGER NOT NULL,
-    field_of_knowledge_id INTEGER NOT NULL,
-    other_field_of_knowledge VARCHAR(25),
+    field_of_knowledge_id INTEGER,
+    other_fields_of_knowledge VARCHAR(25),
     description VARCHAR(200) NOt NULL,
     available BOOLEAN NOT NULL DEFAULT TRUE
 );
@@ -47,7 +46,7 @@ ALTER TABLE selective_course
 ALTER TABLE selective_course
     ADD CONSTRAINT fk_selective_course_field_of_knowledge_id FOREIGN KEY (field_of_knowledge_id) REFERENCES field_of_knowledge(id);
 ALTER TABLE selective_course
-    ADD CONSTRAINT uk_selective_course_course_id_study_year_degree_id_department_id UNIQUE(course_id, study_year, degree_id, department_id);
+    ADD CONSTRAINT uk_selective_course_course_id_study_year_degree_id UNIQUE(course_id, study_year, degree_id);
 
 CREATE TABLE selective_courses_student_degrees(
     id SERIAL PRIMARY KEY,
