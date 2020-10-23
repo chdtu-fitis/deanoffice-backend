@@ -11,4 +11,5 @@ import javax.persistence.Entity;
 public class FieldOfKnowledge extends BaseEntity {
     private String name;
     private String nameEng;
+    private String code;
 }

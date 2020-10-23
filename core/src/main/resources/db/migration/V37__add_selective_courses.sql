@@ -14,9 +14,13 @@ ALTER TABLE one_course_groups_student_degrees
 
 CREATE TABLE field_of_knowledge(
     id SERIAL PRIMARY KEY,
+    code VARCHAR(15),
     name VARCHAR(50),
     name_eng VARCHAR(50)
 );
+
+ALTER TABLE field_of_knowledge
+    ADD CONSTRAINT uk_field_of_knowledge_name_code UNIQUE (code, name, name_eng);
 
 CREATE TABLE selective_course (
     id SERIAL PRIMARY KEY,

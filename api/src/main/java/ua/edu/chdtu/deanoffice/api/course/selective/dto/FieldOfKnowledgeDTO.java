@@ -9,4 +9,5 @@ public class FieldOfKnowledgeDTO {
     private int id;
     private String name;
     private String nameEng;
+    private String code;
 }
