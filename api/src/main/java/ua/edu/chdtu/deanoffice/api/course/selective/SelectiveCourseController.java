@@ -153,7 +153,8 @@ public class SelectiveCourseController {
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
 
-    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO selectiveCourseWriteDTO)
+    private SelectiveCourse mapSelectiveCourseForUpdate(SelectiveCourse selectiveCourse, SelectiveCourseWriteDTO
+            selectiveCourseWriteDTO)
             throws OperationCannotBePerformedException {
         if (selectiveCourse.getTeacher() != null || selectiveCourseWriteDTO.getTeacher() != null) {
             if (selectiveCourse.getTeacher() == null && selectiveCourseWriteDTO.getTeacher() != null) {
