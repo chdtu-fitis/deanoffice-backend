@@ -12,10 +12,10 @@ ALTER TABLE one_course_groups_student_degrees
     ADD CONSTRAINT uk_one_course_groups_student_degrees_student_degree_id_student_group_id UNIQUE(student_degree_id, student_group_id);
 
 CREATE TABLE field_of_knowledge(
-    id SERIAL NOT NULL PRIMARY KEY,
-    code NOT NULL VARCHAR(15),
-    name NOT NULL VARCHAR(100),
-    name_eng NOT NULL VARCHAR(100)
+    id SERIAL PRIMARY KEY,
+    code VARCHAR(15) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    name_eng VARCHAR(100) NOT NULL
 );
 
 ALTER TABLE field_of_knowledge
