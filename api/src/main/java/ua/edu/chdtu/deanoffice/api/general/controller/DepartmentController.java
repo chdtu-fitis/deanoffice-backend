@@ -28,6 +28,12 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
+    @GetMapping("/all")
+    public ResponseEntity getAllDepartments() {
+        List<Department> departments = departmentService.getAllUniversityDepartments();
+        return ResponseEntity.ok(map(departments, DepartmentDTO.class));
+    }
+
     @GetMapping
     public ResponseEntity getDepartments(@RequestParam(value = "active", required = false, defaultValue = "true") boolean active) {
         List<Department> departments = departmentService.getFacultyDepartmentsByActive(active);

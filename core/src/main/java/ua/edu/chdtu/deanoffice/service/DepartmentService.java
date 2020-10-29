@@ -22,6 +22,10 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
+    public List<Department> getAllUniversityDepartments() {
+        return departmentRepository.getAllByActive(true);
+    }
+
     public List<Department> getFacultyDepartmentsByActive(boolean active) {
         int facultyId = FacultyUtil.getUserFacultyIdInt();
         if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
