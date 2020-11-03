@@ -31,7 +31,7 @@ CREATE TABLE selective_course (
     department_id INTEGER NOT NULL,
     field_of_knowledge_id INTEGER,
     other_fields_of_knowledge VARCHAR(25),
-    description VARCHAR(200) NOt NULL,
+    description VARCHAR(1024) NOT NULL,
     available BOOLEAN NOT NULL DEFAULT TRUE
 );
 
