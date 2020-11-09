@@ -253,11 +253,11 @@ public class SelectiveCourseController {
         }
     }
 
-    @PutMapping
+    @PostMapping
     public ResponseEntity recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreesDTO selectiveCoursesStudentDegreesDTO) throws OperationCannotBePerformedException {
         SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees = Mapper.strictMap(selectiveCoursesStudentDegreesDTO, SelectiveCoursesStudentDegrees.class);
-        if (selectiveCoursesStudentDegreesDTO.getSelectiveCourse() != null) {
-            List<SelectiveCourse> selectiveCourse = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourse());
+        if (selectiveCoursesStudentDegreesDTO.getSelectiveCourses() != null) {
+            List<SelectiveCourse> selectiveCourse = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
             if (selectiveCourse == null) {
                 throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмета");
             }
