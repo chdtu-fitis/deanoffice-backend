@@ -7,21 +7,26 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreesDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
+
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
@@ -34,16 +39,21 @@ public class SelectiveCourseController {
     private DegreeService degreeService;
     private DepartmentService departmentService;
     private FieldOfKnowledgeService fieldOfKnowledgeService;
+    private StudentDegreeService studentDegreeService;
+    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     public SelectiveCourseController(SelectiveCourseService selectiveCourseService,
                                      TeacherService teacherService, FieldOfKnowledgeService fieldOfKnowledgeService,
-                                     CourseService courseService, DegreeService degreeService, DepartmentService departmentService) {
+                                     CourseService courseService, DegreeService degreeService, DepartmentService departmentService,
+                                     StudentDegreeService studentDegreeService, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
         this.degreeService = degreeService;
         this.departmentService = departmentService;
         this.fieldOfKnowledgeService = fieldOfKnowledgeService;
+        this.studentDegreeService = studentDegreeService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     @GetMapping
@@ -205,8 +215,8 @@ public class SelectiveCourseController {
                     String other = selectiveCourse.getOtherFieldsOfKnowledge();
                     String fullFieldsOfKnowledge = selectiveCourse.getFieldOfKnowledge().getId() + (other == null ? "" : "," + other);
                     String fullFieldsOfKnowledgeDtoStr = selectiveCourseWriteDTO.getFieldsOfKnowledge().toString()
-                            .replaceAll("(^\\[|\\]$)", "").replaceAll("\\s+","");
-                    if (!fullFieldsOfKnowledge.equals(fullFieldsOfKnowledgeDtoStr )) {
+                            .replaceAll("(^\\[|\\]$)", "").replaceAll("\\s+", "");
+                    if (!fullFieldsOfKnowledge.equals(fullFieldsOfKnowledgeDtoStr)) {
                         setFieldsOfKnowledge(selectiveCourse, selectiveCourseWriteDTO);
                     }
                 }
@@ -241,5 +251,28 @@ public class SelectiveCourseController {
         } else {
             selectiveCourse.setOtherFieldsOfKnowledge(null);
         }
+    }
+
+    @PutMapping
+    public ResponseEntity recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreesDTO selectiveCoursesStudentDegreesDTO) throws OperationCannotBePerformedException {
+        SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees = Mapper.strictMap(selectiveCoursesStudentDegreesDTO, SelectiveCoursesStudentDegrees.class);
+        if (selectiveCoursesStudentDegreesDTO.getSelectiveCourse() != null) {
+            List<SelectiveCourse> selectiveCourse = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourse());
+            if (selectiveCourse == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор предмета");
+            }
+            selectiveCoursesStudentDegrees.setSelectiveCourse(selectiveCourse);
+        }
+
+        if (selectiveCoursesStudentDegrees.getStudentDegree() != null) {
+            StudentDegree studentDegree = studentDegreeService.getById(selectiveCoursesStudentDegreesDTO.getStudentDegree().getId());
+            if (studentDegree == null) {
+                throw new OperationCannotBePerformedException("Неправильний ідентифікатор студента");
+            }
+            selectiveCoursesStudentDegrees.setStudentDegree(studentDegree);
+        }
+            SelectiveCoursesStudentDegrees selectiveCourseAfterSave = selectiveCoursesStudentDegreesService.create(selectiveCoursesStudentDegrees);
+            SelectiveCoursesStudentDegreesDTO AfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCoursesStudentDegreesDTO.class);
+            return new ResponseEntity(AfterSaveDTO, HttpStatus.CREATED);
     }
 }

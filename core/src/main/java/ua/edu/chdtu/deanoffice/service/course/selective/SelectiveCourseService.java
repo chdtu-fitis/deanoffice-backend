@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
@@ -26,6 +27,10 @@ public class SelectiveCourseService {
 
     public SelectiveCourse getById(Integer id) {
         return selectiveCourseRepository.findOne(id);
+    }
+
+    public List<SelectiveCourse> getSelectiveCourses(List<Integer> ids) {
+        return selectiveCourseRepository.findAll(ids);
     }
 
     public void delete(SelectiveCourse selectiveCourse) {
