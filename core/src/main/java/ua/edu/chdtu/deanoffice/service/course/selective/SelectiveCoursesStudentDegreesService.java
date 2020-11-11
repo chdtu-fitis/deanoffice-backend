@@ -1,8 +1,12 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
+
+import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 public class SelectiveCoursesStudentDegreesService {
@@ -13,7 +17,12 @@ public class SelectiveCoursesStudentDegreesService {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
     }
 
-    public SelectiveCoursesStudentDegrees create(SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees) {
+    @Transactional
+    public List<SelectiveCoursesStudentDegrees> create(List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees) {
         return this.selectiveCoursesStudentDegreesRepository.save(selectiveCoursesStudentDegrees);
+    }
+
+    public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId) {
+        return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndStudentDegree(studyYear, studentDegreeId);
     }
 }

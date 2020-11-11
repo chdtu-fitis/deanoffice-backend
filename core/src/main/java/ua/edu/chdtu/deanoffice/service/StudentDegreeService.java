@@ -250,4 +250,11 @@ public class StudentDegreeService {
         return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
                 ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
+
+    public int getStudentDegreeYear(StudentDegree studentDegree) {
+        int currentYear = currentYearService.getYear();
+        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
+        return currentYear - groupCreationYear + groupFirstYear;
+    }
 }

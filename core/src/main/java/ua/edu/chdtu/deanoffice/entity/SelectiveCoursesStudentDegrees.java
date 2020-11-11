@@ -15,6 +15,6 @@ import java.util.List;
 public class SelectiveCoursesStudentDegrees extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     StudentDegree studentDegree;
-    @OneToMany(fetch = FetchType.LAZY)
-    List<SelectiveCourse> selectiveCourse;
+    @ManyToOne(fetch = FetchType.LAZY)
+    SelectiveCourse selectiveCourse;
 }
