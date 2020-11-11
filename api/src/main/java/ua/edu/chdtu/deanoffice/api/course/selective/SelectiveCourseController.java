@@ -7,22 +7,31 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
+
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_REGISTRATION_YEAR;
 
 @RestController
 @RequestMapping("/selective-courses")
@@ -34,16 +43,21 @@ public class SelectiveCourseController {
     private DegreeService degreeService;
     private DepartmentService departmentService;
     private FieldOfKnowledgeService fieldOfKnowledgeService;
+    private StudentDegreeService studentDegreeService;
+    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     public SelectiveCourseController(SelectiveCourseService selectiveCourseService,
                                      TeacherService teacherService, FieldOfKnowledgeService fieldOfKnowledgeService,
-                                     CourseService courseService, DegreeService degreeService, DepartmentService departmentService) {
+                                     CourseService courseService, DegreeService degreeService, DepartmentService departmentService,
+                                     StudentDegreeService studentDegreeService, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
         this.degreeService = degreeService;
         this.departmentService = departmentService;
         this.fieldOfKnowledgeService = fieldOfKnowledgeService;
+        this.studentDegreeService = studentDegreeService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     @GetMapping
@@ -205,8 +219,8 @@ public class SelectiveCourseController {
                     String other = selectiveCourse.getOtherFieldsOfKnowledge();
                     String fullFieldsOfKnowledge = selectiveCourse.getFieldOfKnowledge().getId() + (other == null ? "" : "," + other);
                     String fullFieldsOfKnowledgeDtoStr = selectiveCourseWriteDTO.getFieldsOfKnowledge().toString()
-                            .replaceAll("(^\\[|\\]$)", "").replaceAll("\\s+","");
-                    if (!fullFieldsOfKnowledge.equals(fullFieldsOfKnowledgeDtoStr )) {
+                            .replaceAll("(^\\[|\\]$)", "").replaceAll("\\s+", "");
+                    if (!fullFieldsOfKnowledge.equals(fullFieldsOfKnowledgeDtoStr)) {
                         setFieldsOfKnowledge(selectiveCourse, selectiveCourseWriteDTO);
                     }
                 }
@@ -241,5 +255,44 @@ public class SelectiveCourseController {
         } else {
             selectiveCourse.setOtherFieldsOfKnowledge(null);
         }
+    }
+
+    @Secured({"ROLE_NAVCH_METHOD", "ROLE_STUDENT"})
+    @PostMapping("/registration")
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO) {
+        StudentDegree studentDegree = studentDegreeService.getById(selectiveCoursesStudentDegreesDTO.getStudentDegree().getId());
+        if (studentDegree == null || !studentDegree.isActive()) {
+            return new ResponseEntity("Неправильний ідентифікатор студента", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(SELECTIVE_COURSES_REGISTRATION_YEAR, studentDegree.getId()).size() > 0) {
+            return new ResponseEntity("Даний студент вже зареєстрований на вибіркові дисципліни", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
+        if (selectiveCourses == null || selectiveCourses.size() == 0) {
+            return new ResponseEntity("Неправильні ідентифікатори предметів", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+            return new ResponseEntity("Кількість або семестри вибіркових предметів не відповідають правилам", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = new ArrayList<>();
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            SelectiveCoursesStudentDegrees selectiveCoursesForStudentDegree = new SelectiveCoursesStudentDegrees();
+            selectiveCoursesForStudentDegree.setStudentDegree(studentDegree);
+            selectiveCoursesForStudentDegree.setSelectiveCourse(selectiveCourse);
+            selectiveCoursesStudentDegrees.add(selectiveCoursesForStudentDegree);
+        }
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudDegreeAfterSave = selectiveCoursesStudentDegreesService.create(selectiveCoursesStudentDegrees);
+
+        ExistingIdDTO studentDegreeDTO = map(selectiveCoursesStudDegreeAfterSave.get(0).getStudentDegree(), ExistingIdDTO.class);
+        List<SelectiveCourse> selectiveCoursesSaved = selectiveCoursesStudDegreeAfterSave.stream()
+                .map(selectiveCourseStudDegree -> selectiveCourseStudDegree.getSelectiveCourse()).collect(Collectors.toList());
+        List<SelectiveCourseDTO> selectiveCoursesSavedDTO = map(selectiveCoursesSaved, SelectiveCourseDTO.class);
+        SelectiveCoursesStudentDegreeDTO afterSaveDTO = new SelectiveCoursesStudentDegreeDTO();
+        afterSaveDTO.setSelectiveCourses(selectiveCoursesSavedDTO);
+        afterSaveDTO.setStudentDegree(studentDegreeDTO);
+        return new ResponseEntity(afterSaveDTO, HttpStatus.CREATED);
     }
 }
