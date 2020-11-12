@@ -2,13 +2,18 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentGroupRepository;
 import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,15 +21,15 @@ import java.util.Set;
 @Service
 public class CourseForGroupService {
     private final CourseForGroupRepository courseForGroupRepository;
-    private final StudentGroupRepository studentGroupRepository;
     private final GradeRepository gradeRepository;
+    private final GradeService gradeService;
 
     @Autowired
-    public CourseForGroupService(CourseForGroupRepository courseForGroupRepository, StudentGroupRepository studentGroupRepository,
-                                 GradeRepository gradeRepository) {
+    public CourseForGroupService(CourseForGroupRepository courseForGroupRepository, GradeRepository gradeRepository,
+                                 GradeService gradeService) {
         this.courseForGroupRepository = courseForGroupRepository;
-        this.studentGroupRepository = studentGroupRepository;
         this.gradeRepository = gradeRepository;
+        this.gradeService = gradeService;
     }
 
     public CourseForGroup getCourseForGroup(int id) {
@@ -68,16 +73,35 @@ public class CourseForGroupService {
             );
         }
     }
+
     @Transactional
     public void addCourseForGroupAndNewChanges(
             Set<CourseForGroup> newCourses,
             Map<Boolean, Set<CourseForGroup>> updatedCourses,
             List<Integer> deleteCoursesIds
-    ) {
+    ) throws UnauthorizedFacultyDataException {
+        checkFacultyAccessBeforeStoring(updatedCourses, deleteCoursesIds);
         courseForGroupRepository.save(newCourses);
         saveUpdatedCoursesForGroup(updatedCourses);
         for (Integer courseId : deleteCoursesIds) {
             courseForGroupRepository.delete(courseId);
+        }
+    }
+
+    private void checkFacultyAccessBeforeStoring(Map<Boolean, Set<CourseForGroup>> updatedCourses,
+                                                 List<Integer> deleteCoursesIds) throws UnauthorizedFacultyDataException {
+        for (Map.Entry<Boolean, Set<CourseForGroup>> entry : updatedCourses.entrySet()) {
+            Set<CourseForGroup> coursesForGroup = entry.getValue();
+            checkFacultyAccess(new ArrayList<>(coursesForGroup));
+        }
+        List<CourseForGroup> coursesForGroupForDelete = courseForGroupRepository.findAll(deleteCoursesIds);
+        checkFacultyAccess(coursesForGroupForDelete);
+    }
+
+    private void checkFacultyAccess(List<CourseForGroup> coursesForGroup) throws UnauthorizedFacultyDataException {
+        for (CourseForGroup courseForGroup : coursesForGroup) {
+            if (courseForGroup.getStudentGroup().getSpecialization().getFaculty().getId() != FacultyUtil.getUserFacultyIdInt())
+                throw new UnauthorizedFacultyDataException();
         }
     }
 
@@ -89,6 +113,15 @@ public class CourseForGroupService {
         }
         courseForGroupRepository.save(coursesWithChangedAcademicDifference);
         courseForGroupRepository.save(coursesLessChangedAcademicDifference);
+    }
+
+    @Transactional
+    public void updateCourseInCoursesForGroupsAndGrade(CourseForGroup courseForGroup, Course newCourse, int oldCourseId, int groupId, int oldKnowledgeControlId) {
+        courseForGroup.setCourse(newCourse);
+        save(courseForGroup);
+        List<Grade> grades = gradeService.getGradesByCourseAndGroup(oldCourseId, groupId);
+        Map<String, Boolean> gradedChange = gradeService.evaluateGradedChange(oldKnowledgeControlId, newCourse.getKnowledgeControl().getId());
+        gradeService.saveGradesByCourse(newCourse, grades, gradedChange);
     }
 
     public void save(CourseForGroup courseForGroup) {
