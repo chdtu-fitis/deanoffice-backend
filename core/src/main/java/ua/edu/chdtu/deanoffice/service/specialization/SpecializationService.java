@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service;
+package ua.edu.chdtu.deanoffice.service.specialization;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
