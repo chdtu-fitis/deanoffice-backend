@@ -295,4 +295,30 @@ public class SelectiveCourseController {
         afterSaveDTO.setStudentDegree(studentDegreeDTO);
         return new ResponseEntity(afterSaveDTO, HttpStatus.CREATED);
     }
+
+
+    @Secured("ROLE_NAVCH_METHOD")
+    @GetMapping("/info")
+    public ResponseEntity getInfoAboutStudentAndCourse(@RequestParam(required = false) Integer studyYear,
+                                                       @RequestParam int studentDegreeId) {
+        List<SelectiveCoursesStudentDegreeWriteDTO> selectiveCourseDTOS = new ArrayList<>();
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
+        for (SelectiveCoursesStudentDegrees coursesStudentDegrees : selectiveCoursesForStudentDegree) {
+            SelectiveCoursesStudentDegreeWriteDTO selectiveCourseDTO = map(coursesStudentDegrees, SelectiveCoursesStudentDegreeWriteDTO.class);
+            setSelectiveCourse(coursesStudentDegrees, selectiveCourseDTO);
+            selectiveCourseDTOS.add(selectiveCourseDTO);
+        }
+        return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCoursesStudentDegreeWriteDTO.class));
+    }
+
+    private void setSelectiveCourse(SelectiveCoursesStudentDegrees selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreeDTO) {
+        if (selectiveCoursesStudentDegree.getSelectiveCourse() != null) {
+            List<SelectiveCourse> selectiveCourseList = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreeDTO.getSelectiveCourses());
+            List<SelectiveCourse> selectiveCourseWriteDTOS = map(selectiveCourseList, SelectiveCourse.class);
+            for (SelectiveCourse selectiveCourseWriteDTO : selectiveCourseWriteDTOS) {
+                selectiveCoursesStudentDegree.setSelectiveCourse(selectiveCourseWriteDTO);
+            }
+        }
+    }
 }
+
