@@ -329,7 +329,7 @@ public class SelectiveCourseController {
         }
     }
 
-    /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на даниу вибіркову дисципліну*/
+    /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на дану вибіркову дисципліну*/
     @GetMapping("/course-students")
     public ResponseEntity<SelectiveCourseStudentDegreesDTO> getSelectiveCourseStudents(@RequestParam int selectiveCourseId) {
         SelectiveCourseStudentDegreesDTO selectiveCourseStudentDegreesDTO = new SelectiveCourseStudentDegreesDTO();

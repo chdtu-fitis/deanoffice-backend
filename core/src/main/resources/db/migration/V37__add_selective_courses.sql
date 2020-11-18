@@ -1,16 +1,3 @@
-CREATE TABLE one_course_groups_student_degrees(
-    id SERIAL PRIMARY KEY,
-    student_group_id INTEGER NOT NULL,
-    student_degree_id INTEGER NOT NULL
-);
-
-ALTER TABLE one_course_groups_student_degrees
-    ADD CONSTRAINT fk_one_course_groups_student_degrees_student_group_id FOREIGN KEY (student_group_id) REFERENCES student_group(id);
-ALTER TABLE one_course_groups_student_degrees
-    ADD CONSTRAINT fk_one_course_groups_student_degrees_student_degree_id FOREIGN KEY (student_degree_id) REFERENCES student_degree(id);
-ALTER TABLE one_course_groups_student_degrees
-    ADD CONSTRAINT uk_one_course_groups_student_degrees_student_degree_id_student_group_id UNIQUE(student_degree_id, student_group_id);
-
 CREATE TABLE field_of_knowledge(
     id SERIAL PRIMARY KEY,
     code VARCHAR(15) NOT NULL,
@@ -32,7 +19,8 @@ CREATE TABLE selective_course (
     field_of_knowledge_id INTEGER,
     other_fields_of_knowledge VARCHAR(25),
     description VARCHAR(1024) NOT NULL,
-    available BOOLEAN NOT NULL DEFAULT TRUE
+    available BOOLEAN NOT NULL DEFAULT TRUE,
+    group_name VARCHAR(20)
 );
 
 ALTER TABLE selective_course
@@ -61,5 +49,22 @@ ALTER TABLE selective_courses_student_degrees
 ALTER TABLE selective_courses_student_degrees
     ADD CONSTRAINT uk_selective_course_student_degrees_course_id_student_degree_id UNIQUE(selective_course_id, student_degree_id);
 
-ALTER TABLE student_group
-    ADD COLUMN one_course BOOLEAN DEFAULT FALSE;
+INSERT INTO field_of_knowledge (code, name, name_eng) VALUES
+	('02', 'Культура і мистецтво', 'Culture and Arts'),
+	('03', 'Гуманітарні науки', 'Humanities'),
+	('05', 'Соціальні та поведінкові науки', 'Social and Behavioral Studies'),
+	('07', 'Управління та адміністрування', 'Management and Administration'),
+	('08', 'Право', 'Law'),
+	('10', 'Природничі науки', 'Natural Sciences'),
+	('12', 'Інформаційні технології', 'Information Technologies'),
+	('13', 'Механічна інженерія', 'Mechanical Engineering'),
+	('14', 'Електрична інженерія', 'Electrical Engineering'),
+	('15', 'Автоматизація та приладобудування', 'Automation and Instrumentation'),
+	('16', 'Хімічна та біоінженерія', 'Chemical and Bioengineering'),
+	('17', 'Електроніка та телекомунікації', 'Electronics and Telecommunications'),
+	('18', 'Виробництво та технології', 'Manufacturing and Technology'),
+	('19', 'Архітектура та будівництво', 'Architecture and Construction'),
+	('23', 'Соціальна робота', 'Social Work'),
+	('24', 'Сфера обслуговування', 'Services'),
+	('27', 'Транспорт', 'Transport Services'),
+	('28', 'Публічне управління та адміністрування', 'Public Administration');
