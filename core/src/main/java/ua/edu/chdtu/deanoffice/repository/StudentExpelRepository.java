@@ -36,7 +36,7 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
     List <StudentExpel> findByStudentDegreeIdOrderByExpelDate(@Param("student_degree_id") Integer studentDegreeId);
 
     @Query(value =
-            "SELECT count(se.id) FROM student_expel AS se " +
+            "SELECT count(DISTINCT se.student_degree_id) FROM student_expel AS se " +
             "INNER JOIN student_degree AS sd ON se.student_degree_id = sd.id " +
             "WHERE se.student_group_id = :studentGroupId " +
             "AND se.expel_date > :sessionStartDate " +
@@ -47,7 +47,7 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
 
     //TODO чи може не бути кінця академ. відпустки?
     @Query(value =
-            "SELECT count(se.id) FROM student_expel AS se " +
+            "SELECT count(DISTINCT se.id) FROM student_expel AS se " +
             "INNER JOIN student_degree AS sd " +
             "ON se.student_degree_id = sd.id " +
             "INNER JOIN student_academic_vacation AS sav " +

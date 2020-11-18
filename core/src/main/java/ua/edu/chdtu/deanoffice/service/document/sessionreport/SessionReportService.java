@@ -10,10 +10,7 @@ import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
-import ua.edu.chdtu.deanoffice.service.DegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentExpelService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,26 +32,38 @@ public class SessionReportService {
     private final BorderStyle GLOBAL_BORDER_STYLE = BorderStyle.THIN;
     private final String BACHELOR_NAME_ENG_IN_DATABASE = "Bachelor";
     private final String MASTER_NAME_ENG_IN_DATABASE = "Master";
-    private Set<Integer> semesters;
-    private int maxSemesterForBachelor;
+//    private Set<Integer> semesters;
+//    private int maxSemesterForBachelor;
 
     private final DegreeService degreeService;
     private final StudentGroupService studentGroupService;
     private final StudentDegreeService studentDegreeService;
     private final StudentExpelService studentExpelService;
+    private final CurrentYearService currentYearService;
 
     @Autowired
     public SessionReportService(DegreeService degreeService,
                                 StudentGroupService studentGroupService,
                                 StudentDegreeService studentDegreeService,
-                                StudentExpelService studentExpelService) {
+                                StudentExpelService studentExpelService,
+                                CurrentYearService currentYearService) {
         this.degreeService = degreeService;
         this.studentGroupService = studentGroupService;
         this.studentDegreeService = studentDegreeService;
         this.studentExpelService = studentExpelService;
+        this.currentYearService = currentYearService;
     }
 
-    public File createSessionReportInXLSX(ApplicationUser user, LocalDate sessionStartDate, TuitionForm tuitionForm) throws Exception {
+    public File createSessionReportInXLSX(ApplicationUser user, int dayOfMonth, TuitionForm tuitionForm) throws Exception {
+        LocalDate sessionStartDate;
+        int currentYear = currentYearService.getYear();
+
+        if (getCurrentSemester() == 0) {
+            sessionStartDate = LocalDate.of(currentYear, 6, dayOfMonth);
+        } else {
+            sessionStartDate = LocalDate.of(currentYear - 1, 12, dayOfMonth);
+        }
+
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
             Workbook wb = new XSSFWorkbook();
             Sheet sheet = wb.createSheet(SHEET_NAME);
@@ -63,8 +72,8 @@ public class SessionReportService {
 
             setWidthsForColumns(sheet);
             addMergeRegions(sheet);
-            createHead(wb, user, sessionStartDate, tuitionForm);
-            createBody(user.getFaculty().getId(), wb, 15, sessionStartDate, tuitionForm);
+            DataAboutSemesters dataAboutSemesters = createHead(sheet, user, sessionStartDate, tuitionForm);
+            createBody(user.getFaculty().getId(), wb, 15, sessionStartDate, tuitionForm, dataAboutSemesters);
 
             wb.write(outputStream);
         }
@@ -112,9 +121,8 @@ public class SessionReportService {
         sheet.addMergedRegion(new CellRangeAddress(11, 11, 20, 21));
     }
 
-    private void createHead(Workbook wb, ApplicationUser user, LocalDate sessionStartDate, TuitionForm tuitionForm) {
-        Sheet sheet = wb.getSheet(SHEET_NAME);
-
+    private DataAboutSemesters createHead(Sheet sheet, ApplicationUser user, LocalDate sessionStartDate, TuitionForm tuitionForm) {
+        Workbook wb = sheet.getWorkbook();
         List<Cell> similarCells = new ArrayList<>();
 
         Row row1 = sheet.createRow(1);
@@ -144,7 +152,8 @@ public class SessionReportService {
         row6.setHeightInPoints((float) 19.5);
         currentCell = createCellForHeadAndSetThisValue(row6, 5, "Семестри");
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 12, false);
-        currentCell = createCellForHeadAndSetThisValue(row6, 7, getCorrectSemesters(user, tuitionForm));
+        DataAboutSemesters dataAboutSemesters = getCorrectSemesters(user, tuitionForm);
+        currentCell = createCellForHeadAndSetThisValue(row6, 7, dataAboutSemesters.getSemestersForHead());
         setCellStyleAndFontForCell(currentCell, wb, HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 10, false);
 
         Row row7 = sheet.createRow(7);
@@ -266,16 +275,15 @@ public class SessionReportService {
         similarCells.clear();
         addBordersToHead(sheet);
 
+        return dataAboutSemesters;
     }
 
-    //TODO треба уточнити які можуть бути семестри
-    private String getCorrectSemesters(ApplicationUser user, TuitionForm tuitionForm) {
+    private DataAboutSemesters getCorrectSemesters(ApplicationUser user, TuitionForm tuitionForm) {
         int facultyId = user.getFaculty().getId();
         int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
-        int bachelorMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(BACHELOR_NAME_ENG_IN_DATABASE, facultyId, tuitionForm);
-        this.maxSemesterForBachelor = bachelorMaxSemester;
-        int masterMaxSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(MASTER_NAME_ENG_IN_DATABASE, facultyId, tuitionForm);
-        int totalMaxSemesterForCurrentDegree = bachelorMaxSemester;
+        int theLastBachelorSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(BACHELOR_NAME_ENG_IN_DATABASE, facultyId, tuitionForm);
+        int theLastMasterSemester = degreeService.getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(MASTER_NAME_ENG_IN_DATABASE, facultyId, tuitionForm);
+        int totalMaxSemesterForCurrentDegree = theLastBachelorSemester;
         int StartFromSemester = 0;
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -283,24 +291,58 @@ public class SessionReportService {
         List<String> degreeNames = Arrays.asList("Бакалаври: ", "; Магістри: ");
 
         for (String degreeName : degreeNames) {
+
+            if (degreeName.equals(degreeNames.get(0)) && previousSemester == 1 && theLastBachelorSemester < 3) {
+                continue;
+            }
+
+            if (degreeName.equals(degreeNames.get(1)) && previousSemester == 1 && theLastMasterSemester < 3) {
+                break;
+            }
+
             stringBuilder.append(degreeName);
 
             for (int semester = previousSemester + 1; semester <= totalMaxSemesterForCurrentDegree; semester += 2) {
                 stringBuilder.append(semester);
                 semesters.add(semester + StartFromSemester);
-
-                if (semester + 1 < totalMaxSemesterForCurrentDegree) {
-                    stringBuilder.append(", ");
-                }
+                stringBuilder.append(", ");
             }
 
-            StartFromSemester += bachelorMaxSemester;
-            totalMaxSemesterForCurrentDegree = masterMaxSemester;
+            stringBuilder.deleteCharAt(stringBuilder.length() - 2);
+
+            StartFromSemester += theLastBachelorSemester;
+            totalMaxSemesterForCurrentDegree = theLastMasterSemester;
         }
 
-        this.semesters = semesters;
+        return new DataAboutSemesters(stringBuilder.toString(), semesters, theLastBachelorSemester);
+    }
 
-        return stringBuilder.toString();
+    private class DataAboutSemesters {
+        private final String semestersForHead;
+        private final Set<Integer> semesters;
+        private final int maxSemesterForBachelor;
+
+        public DataAboutSemesters(
+                String semestersForHead,
+                Set<Integer> semesters,
+                int maxSemesterForBachelor
+        ) {
+            this.semestersForHead = semestersForHead;
+            this.semesters = semesters;
+            this.maxSemesterForBachelor = maxSemesterForBachelor;
+        }
+
+        public String getSemestersForHead() {
+            return semestersForHead;
+        }
+
+        public Set<Integer> getSemesters() {
+            return semesters;
+        }
+
+        public int getMaxSemesterForBachelor() {
+            return maxSemesterForBachelor;
+        }
     }
 
     private Cell createCellForHeadAndSetThisValue(Row row, int columnNumber, String text) {
@@ -502,12 +544,20 @@ public class SessionReportService {
         }
     }
 
-    private void createBody(int facultyId, Workbook workbook, int numberOfRow, LocalDate sessionStartDate, TuitionForm tuitionForm) {
+    private void createBody(
+            int facultyId, Workbook workbook, int numberOfRow,
+            LocalDate sessionStartDate, TuitionForm tuitionForm, DataAboutSemesters dataAboutSemesters) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         int degreeId = degreeService.getByNameEng(BACHELOR_NAME_ENG_IN_DATABASE).getId();
         int degreeIdOfMaster = degreeService.getByNameEng(MASTER_NAME_ENG_IN_DATABASE).getId();
         boolean isMasterDegree = false;
+        int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
+        int maxSemesterForBachelor = dataAboutSemesters.getMaxSemesterForBachelor();
+
+        List<Cell> totalCellsPerSemester = new ArrayList<>();
+        Map<Integer, List<Cell>> totalInFaculty = new HashMap<>();
+        Set<Integer> semesters = dataAboutSemesters.getSemesters();
 
         for (Integer semester : semesters) {
 
@@ -516,7 +566,12 @@ public class SessionReportService {
 
             if (semester > maxSemesterForBachelor) {
                 semester = semester - maxSemesterForBachelor;
-                yearOfStudy = semester % 2 == 0 ? semester / 2 : semester / 2 + 1;
+
+                if (previousSemester == 0) {//я в 1-му семестрі
+                    yearOfStudy = semester / 2 + 1;
+                } else {//я в 2-му семестрі
+                    yearOfStudy = semester / 2;
+                }
                 numberOfCourse.setCellValue("Магістри курс " + yearOfStudy + ", сем. " + semester);
 
                 if (!isMasterDegree) {
@@ -524,7 +579,11 @@ public class SessionReportService {
                     isMasterDegree = true;
                 }
             } else {
-                yearOfStudy = semester % 2 == 0 ? semester / 2 : semester / 2 + 1;
+                if (previousSemester == 0) {//я в 1-му семестрі
+                    yearOfStudy = semester / 2 + 1;
+                } else {//я в 2-му семестрі
+                    yearOfStudy = semester / 2;
+                }
                 numberOfCourse.setCellValue("Бакалаври курс " + yearOfStudy + ", сем. " + semester);
             }
 
@@ -533,24 +592,55 @@ public class SessionReportService {
 
             List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, yearOfStudy, facultyId, tuitionForm);
             numberOfRow++;
-            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy, semester);
+            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy - 1, semester);
         }
+
+        Row totalOnFacultyRowPart1 = sheet.createRow(numberOfRow);
+        Row totalOnFacultyRowPart2 = sheet.createRow(numberOfRow + 1);
+        Cell totalOnFacultyCell = totalOnFacultyRowPart1.createCell(0);
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
+        totalOnFacultyCell.setCellValue("Усього по факультету:");
+        setCellStyleAndFontForCell(totalOnFacultyCell, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+
+        numberOfRow += 3;
+
+        Row paymentTypesRowPart1 = sheet.createRow(numberOfRow);
+        Row paymentTypesRowPart2 = sheet.createRow(numberOfRow + 1);
+        Cell paymentTypesCell = paymentTypesRowPart1.createCell(0);
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
+        paymentTypesCell.setCellValue("Форма фінансування");
+        setCellStyleAndFontForCell(paymentTypesCell, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+
+        Cell budget = paymentTypesRowPart1.createCell(1);
+        budget.setCellValue("бюджет");
+        setCellStyleAndFontForCell(budget, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, false);
+
+        Cell contract = paymentTypesRowPart2.createCell(1);
+        contract.setCellValue("контракт");
+        setCellStyleAndFontForCell(contract, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, false);
+
+        Cell budgetColorCell = paymentTypesRowPart1.createCell(2);
+            //Cell budgetColorCellPart2 = paymentTypesRowPart1.createCell(3);
+        budgetColorCell.setCellStyle(workbook.createCellStyle());
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow, 2, 3));
+        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, Collections.singletonList(budgetColorCell));
+
+        Cell contractColorCell = paymentTypesRowPart2.createCell(2);
+        contractColorCell.setCellStyle(workbook.createCellStyle());
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow + 1, numberOfRow + 1, 2, 3));
+        setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, Collections.singletonList(contractColorCell));
+
+        numberOfRow += 3;
+
+
+
     }
 
     private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse, int semester) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
-        List<Cell> budgetOnSessionStartList = new ArrayList<>();
-        List<Cell> bungedOnSessionStartWhoHaveAcademicVacationList = new ArrayList<>();
-        List<Cell> budgetOnSessionStartWhoHaveNotAcademicVacationList = new ArrayList<>();
-        List<Cell> budgetWhoPassAllExamOnTimeList = new ArrayList<>();
-        List<Cell> budgetThatDidNotComeToExamWithImportantReason = new ArrayList<>();
-
-        List<Cell> contractOnSessionStartList = new ArrayList<>();
-        List<Cell> contractOnSessionStartWhoHaveAcademicVacationList = new ArrayList<>();
-        List<Cell> contractOnSessionStartWhoHaveNotAcademicVacationList = new ArrayList<>();
-        List<Cell> contractWhoPassAllExamOnTimeList = new ArrayList<>();
-        List<Cell> contractThatDidNotComeToExamWithImportantReason = new ArrayList<>();
+        Map<String, List<Cell>> dataAboutBudgetStudents = createMapWithNeedLists();
+        Map<String, List<Cell>> dataAboutContractStudents = createMapWithNeedLists();
 
         for (StudentGroup studentGroup : groups) {
             Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
@@ -564,92 +654,31 @@ public class SessionReportService {
             groupName.setCellValue(studentGroup.getName());
             setCellStyleAndFontForCell(groupName, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
 
-            int countBudgetStudentsOnSessionStart =
-                    studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
-                            studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.BUDGET);
-
-            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart1, 1, countBudgetStudentsOnSessionStart, budgetOnSessionStartList);
-
-            int countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation =
-                    studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
-                        studentGroup.getId(), sessionStartDate, Payment.BUDGET) +
-                    studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
-                        studentGroup.getId(), sessionStartDate, Payment.BUDGET);
-
-            createCellAndSetHereValueAndAddToList(
-                    dataAboutOneStudentGroupPart1, 2, countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation, bungedOnSessionStartWhoHaveAcademicVacationList);
-
-            Cell countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell = dataAboutOneStudentGroupPart1.createCell(3);
-
-            countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell.setCellFormula(
-                    dataAboutOneStudentGroupPart1.getCell(1).getAddress().toString() +
-                    "-" +
-                    dataAboutOneStudentGroupPart1.getCell(2).getAddress().toString()
-            );
-
-            budgetOnSessionStartWhoHaveNotAcademicVacationList.add(countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
-
-            int countBudgetStudentsWhoWasPassExamInTime = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamInTime(
-                    studentGroup.getId(), semester, Payment.BUDGET
-            );
-
-            createCellAndSetHereValueAndAddToList(
-                    dataAboutOneStudentGroupPart1, 4, countBudgetStudentsWhoWasPassExamInTime, budgetWhoPassAllExamOnTimeList);
-
-            budgetThatDidNotComeToExamWithImportantReason.add(dataAboutOneStudentGroupPart1.createCell(5));
-
-            int countContractStudentsOnSessionStart =
-                    studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
-                            studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
-
-            createCellAndSetHereValueAndAddToList(dataAboutOneStudentGroupPart2, 1, countContractStudentsOnSessionStart, contractOnSessionStartList);
-
-            int countContractStudentsOnSessionStartAndWhoHaveAcademicVacation =
-                    studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
-                            studentGroup.getId(), sessionStartDate, Payment.CONTRACT) +
-                    studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
-                            studentGroup.getId(), sessionStartDate, Payment.CONTRACT);
-
-            createCellAndSetHereValueAndAddToList(
-                    dataAboutOneStudentGroupPart2, 2, countContractStudentsOnSessionStartAndWhoHaveAcademicVacation, contractOnSessionStartWhoHaveAcademicVacationList
-            );
-
-            Cell countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell = dataAboutOneStudentGroupPart2.createCell(3);
-
-            countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell.setCellFormula(
-                    dataAboutOneStudentGroupPart2.getCell(1).getAddress().toString() +
-                    "-" +
-                    dataAboutOneStudentGroupPart2.getCell(2).getAddress().toString()
-            );
-
-
-            contractOnSessionStartWhoHaveNotAcademicVacationList.add(countContractStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
-
-            int countContractStudentsWhoWasPassExamInTime = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamInTime(
-                    studentGroup.getId(), semester, Payment.CONTRACT
-            );
-
-            createCellAndSetHereValueAndAddToList(
-                    dataAboutOneStudentGroupPart2, 4, countContractStudentsWhoWasPassExamInTime, contractWhoPassAllExamOnTimeList);
-
-            contractThatDidNotComeToExamWithImportantReason.add(dataAboutOneStudentGroupPart2.createCell(5));
+            calculateDataOnOneGroupByPayment(dataAboutOneStudentGroupPart1, dataAboutBudgetStudents, Payment.BUDGET,
+                    studentGroup.getId(), sessionStartDate, semester);
+            calculateDataOnOneGroupByPayment(dataAboutOneStudentGroupPart2, dataAboutContractStudents, Payment.CONTRACT,
+                    studentGroup.getId(), sessionStartDate, semester);
 
             numberOfRow += 2;
         }
 
         List<Cell> budgedCells = new ArrayList<>();
-        budgedCells.addAll(budgetOnSessionStartList);
-        budgedCells.addAll(bungedOnSessionStartWhoHaveAcademicVacationList);
-        budgedCells.addAll(budgetOnSessionStartWhoHaveNotAcademicVacationList);
-        budgedCells.addAll(budgetWhoPassAllExamOnTimeList);
-        budgedCells.addAll(budgetThatDidNotComeToExamWithImportantReason);
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsOnSessionStart"));
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsOnSessionStartWhoHaveAcademicVacation"));
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsOnSessionStartWhoHaveNotAcademicVacation"));
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsWhoPassAllExamOnTime"));
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsThatDidNotComeToExamsWithAnImportantReason"));
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsThatDidNotComeToExamsWithANotImportantReason"));
+        budgedCells.addAll(dataAboutBudgetStudents.get("studentsThatPassedAllCourses"));
 
         List<Cell> contractCells = new ArrayList<>();
-        contractCells.addAll(contractOnSessionStartList);
-        contractCells.addAll(contractOnSessionStartWhoHaveAcademicVacationList);
-        contractCells.addAll(contractOnSessionStartWhoHaveNotAcademicVacationList);
-        contractCells.addAll(contractWhoPassAllExamOnTimeList);
-        contractCells.addAll(contractThatDidNotComeToExamWithImportantReason);
+        contractCells.addAll(dataAboutContractStudents.get("studentsOnSessionStart"));
+        contractCells.addAll(dataAboutContractStudents.get("studentsOnSessionStartWhoHaveAcademicVacation"));
+        contractCells.addAll(dataAboutContractStudents.get("studentsOnSessionStartWhoHaveNotAcademicVacation"));
+        contractCells.addAll(dataAboutContractStudents.get("studentsWhoPassAllExamOnTime"));
+        contractCells.addAll(dataAboutContractStudents.get("studentsThatDidNotComeToExamsWithAnImportantReason"));
+        contractCells.addAll(dataAboutContractStudents.get("studentsThatDidNotComeToExamsWithANotImportantReason"));
+        contractCells.addAll(dataAboutContractStudents.get("studentsThatPassedAllCourses"));
 
         setCellStyleAndFontForCells(budgedCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
         setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
@@ -657,26 +686,103 @@ public class SessionReportService {
         setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgedCells);
         setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, contractCells);
 
+        //-------------------------------------------------------------
+        return calculateDataForOneYearOfStudy(numberOfRow, numberOfCourse, workbook,
+                dataAboutBudgetStudents, dataAboutContractStudents);
+    }
+
+    private Map<String, List<Cell>> createMapWithNeedLists() {
+        Map<String, List<Cell>> informationAboutStudentsByPayment = new HashMap<>();
+        informationAboutStudentsByPayment.put("studentsOnSessionStart", new ArrayList<>());
+        informationAboutStudentsByPayment.put("studentsOnSessionStartWhoHaveAcademicVacation", new ArrayList<>());
+        informationAboutStudentsByPayment.put("studentsOnSessionStartWhoHaveNotAcademicVacation", new ArrayList<>());
+        informationAboutStudentsByPayment.put("studentsWhoPassAllExamOnTime", new ArrayList<>());
+        informationAboutStudentsByPayment.put("studentsThatDidNotComeToExamsWithAnImportantReason", new ArrayList<>());
+        informationAboutStudentsByPayment.put("studentsThatDidNotComeToExamsWithANotImportantReason", new ArrayList<>());
+        informationAboutStudentsByPayment.put("studentsThatPassedAllCourses", new ArrayList<>());
+
+        return informationAboutStudentsByPayment;
+    }
+
+    private void calculateDataOnOneGroupByPayment(Row row, Map<String, List<Cell>> map, Payment payment,
+                                                  int studentGroupId, LocalDate sessionStartDate, int semester) {
+        int countBudgetStudentsOnSessionStart =
+                studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroupId, sessionStartDate, payment) +
+                        studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroupId, sessionStartDate, payment);
+        createCellAndSetHereValueAndAddToList(row, 1, countBudgetStudentsOnSessionStart, map.get("studentsOnSessionStart"));
+
+        int countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation =
+                studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+                        studentGroupId, sessionStartDate, payment) +
+                        studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+                                studentGroupId, sessionStartDate, payment);
+        createCellAndSetHereValueAndAddToList(
+                row, 2, countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation, map.get("studentsOnSessionStartWhoHaveAcademicVacation"));
+
+        Cell countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell = row.createCell(3);
+        countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell.setCellFormula(
+                row.getCell(1).getAddress().toString() +
+                "-" +
+                row.getCell(2).getAddress().toString()
+        );
+        map.get("studentsOnSessionStartWhoHaveNotAcademicVacation").add(countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
+        //цей код може бути використаний для підрахунку кількості студентів, що вчасно все здали
+            /*int countBudgetStudentsWhoWasPassExamInTime = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(
+                    studentGroup.getId(), semester, payment
+            );
+            createCellAndSetHereValueAndAddToList(
+                    dataAboutOneStudentGroupPart1, 4, countBudgetStudentsWhoWasPassExamInTime, budgetWhoPassAllExamOnTimeList);*/
+
+        Cell countBudgetStudentsWhoWasPassExamInTime = row.createCell(4);
+        countBudgetStudentsWhoWasPassExamInTime.setCellFormula(row.getCell(3).getAddress().toString());
+        map.get("studentsWhoPassAllExamOnTime").add(countBudgetStudentsWhoWasPassExamInTime);
+
+        map.get("studentsThatDidNotComeToExamsWithAnImportantReason").add(row.createCell(5));
+
+        Cell countBudgetThatDidNotComeToExamWithNotImportantReasonCell = row.createCell(6);
+        countBudgetThatDidNotComeToExamWithNotImportantReasonCell.setCellFormula(
+                row.getCell(1).getAddress().toString() +
+                "-" +
+                row.getCell(4).getAddress().toString()
+        );
+        map.get("studentsThatDidNotComeToExamsWithANotImportantReason").add(countBudgetThatDidNotComeToExamWithNotImportantReasonCell);
+
+        int countBudgetThatPassedAllCourses =
+                studentDegreeService.getCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(
+                        studentGroupId, semester, payment
+                );
+
+        createCellAndSetHereValueAndAddToList(
+                row, 7, countBudgetThatPassedAllCourses, map.get("studentsThatPassedAllCourses")
+        );
+    }
+
+    private int calculateDataForOneYearOfStudy(int numberOfRow, int numberOfCourse, Workbook workbook,
+                                               Map<String, List<Cell>> budgetMap, Map<String, List<Cell>> contractMap) {
+        Sheet sheet = workbook.getSheet(SHEET_NAME);
+
         Row rowPart1 = sheet.createRow(numberOfRow);
         Row rowPart2 = sheet.createRow(numberOfRow + 1);
 
-        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
-
         Cell numberOfCourseCell = rowPart1.createCell(0);
-        numberOfCourseCell.setCellValue("По " + numberOfCourse + " курсу");
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
+        numberOfCourseCell.setCellValue("По " + (numberOfCourse + 1) + " курсу");
         setCellStyleAndFontForCell(numberOfCourseCell, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
 
         List<Cell> totalBudgetCells = new ArrayList<>();
         List<Cell> totalContractCells = new ArrayList<>();
 
-        calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-                rowPart1, rowPart2, 1, budgetOnSessionStartList, contractOnSessionStartList,
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 1,
+                budgetMap.get("studentsOnSessionStart"),
+                contractMap.get("studentsOnSessionStart"),
                 totalBudgetCells, totalContractCells
         );
 
-        calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
                 rowPart1, rowPart2, 2,
-                bungedOnSessionStartWhoHaveAcademicVacationList, contractOnSessionStartWhoHaveAcademicVacationList,
+                budgetMap.get("studentsOnSessionStartWhoHaveAcademicVacation"),
+                contractMap.get("studentsOnSessionStartWhoHaveAcademicVacation"),
                 totalBudgetCells, totalContractCells
         );
 
@@ -688,8 +794,6 @@ public class SessionReportService {
         );
         totalBudgetCells.add(budgetTotalCountStudentsWhoHaveNotAcademicVacation);
 
-        totalBudgetCells.add(rowPart1.createCell(5));
-
         Cell contractTotalCountStudentsWhoHaveNotAcademicVacation = rowPart2.createCell(3);
         contractTotalCountStudentsWhoHaveNotAcademicVacation.setCellFormula(
                 rowPart2.getCell(1).getAddress().toString() +
@@ -698,11 +802,36 @@ public class SessionReportService {
         );
         totalContractCells.add(contractTotalCountStudentsWhoHaveNotAcademicVacation);
 
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 4,
+                budgetMap.get("studentsWhoPassAllExamOnTime"),
+                contractMap.get("studentsWhoPassAllExamOnTime"),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalBudgetCells.add(rowPart1.createCell(5));
         totalContractCells.add(rowPart2.createCell(5));
 
-        calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
-                rowPart1, rowPart2, 4,
-                budgetWhoPassAllExamOnTimeList, contractWhoPassAllExamOnTimeList,
+        Cell totalBudgetThatDidNotComeToExamWithNotImportantReasonCell = rowPart1.createCell(6);
+        totalBudgetThatDidNotComeToExamWithNotImportantReasonCell.setCellFormula(
+                rowPart1.getCell(1).getAddress().toString() +
+                "-" +
+                rowPart1.getCell(4).getAddress().toString()
+        );
+        totalBudgetCells.add(totalBudgetThatDidNotComeToExamWithNotImportantReasonCell);
+
+        Cell totalContractThatDidNotComeToExamWithNotImportantReasonCell = rowPart2.createCell(6);
+        totalContractThatDidNotComeToExamWithNotImportantReasonCell.setCellFormula(
+                rowPart2.getCell(1).getAddress().toString() +
+                "-" +
+                rowPart2.getCell(4).getAddress().toString()
+        );
+        totalContractCells.add(totalContractThatDidNotComeToExamWithNotImportantReasonCell);
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 7,
+                budgetMap.get("studentsThatPassedAllCourses"),
+                contractMap.get("studentsThatPassedAllCourses"),
                 totalBudgetCells, totalContractCells
         );
 
@@ -712,20 +841,18 @@ public class SessionReportService {
         setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, totalBudgetCells);
         setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, totalContractCells);
 
-        numberOfRow += 2;
-
-        return numberOfRow;
+        return numberOfRow += 2;
     }
 
-    private void setCellColorForPaymentCells(FillPatternType fillPatternType, IndexedColors color, List<Cell> budgedCells) {
-        for (Cell budgetCell : budgedCells) {
-            CellStyle cellStyle = budgetCell.getCellStyle();
+    private void setCellColorForPaymentCells(FillPatternType fillPatternType, IndexedColors color, List<Cell> cells) {
+        for (Cell cell : cells) {
+            CellStyle cellStyle = cell.getCellStyle();
             cellStyle.setFillPattern(fillPatternType);
             cellStyle.setFillForegroundColor(color.getIndex());
         }
     }
 
-    private void calculateTotalCountOfBungedAndContractStudentsInColumnForOneCourse(
+    private void calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
             Row rowPart1, Row rowPart2, int columnNumber,
             List<Cell> budgedCells, List<Cell> contractCell, List<Cell> totalBudgetCells, List<Cell> totalContractCells
     ) {

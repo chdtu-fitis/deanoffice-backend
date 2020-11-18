@@ -507,8 +507,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query(value =
             "WITH query1(num) AS ( " +
-                    "SELECT count(c.id) FROM courses_for_groups AS cfg " +
-                    "INNER JOIN course AS c ON cfg.course_id = c.id " +
+                    "SELECT count(c.id) FROM course AS c " +
+                    "INNER JOIN courses_for_groups AS cfg ON cfg.course_id = c.id " +
                     "WHERE c.semester = :semester " +
                     "AND cfg.student_group_id = :studentGroupId), " +
                 "query2(id) AS ( " +
