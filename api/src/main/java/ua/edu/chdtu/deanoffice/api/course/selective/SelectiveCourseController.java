@@ -331,9 +331,9 @@ public class SelectiveCourseController {
 
     /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на даниу вибіркову дисципліну*/
     @GetMapping("/course-students")
-    public ResponseEntity<SelectiveCourseStudentDegreesDTO> getSelectiveCourseStudents(@RequestParam int studyYear, @RequestParam int selectiveCourseId) {
+    public ResponseEntity<SelectiveCourseStudentDegreesDTO> getSelectiveCourseStudents(@RequestParam int selectiveCourseId) {
         SelectiveCourseStudentDegreesDTO selectiveCourseStudentDegreesDTO = new SelectiveCourseStudentDegreesDTO();
-        List<SelectiveCoursesStudentDegrees> studentDegreesForSelectiveCourse = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(studyYear, selectiveCourseId);
+        List<SelectiveCoursesStudentDegrees> studentDegreesForSelectiveCourse = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(selectiveCourseId);
         if (studentDegreesForSelectiveCourse.size() > 0) {
             selectiveCourseStudentDegreesDTO.setSelectiveCourse(map(studentDegreesForSelectiveCourse.get(0).getSelectiveCourse(), SelectiveCourseDTO.class));
             List<StudentDegreeDTO> studentDegreeDTOs = studentDegreesForSelectiveCourse.stream().map(selectiveCourseStudentDegree ->

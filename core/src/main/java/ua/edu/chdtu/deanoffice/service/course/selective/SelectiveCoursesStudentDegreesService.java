@@ -25,7 +25,7 @@ public class SelectiveCoursesStudentDegreesService {
         return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndStudentDegree(studyYear, studentDegreeId);
     }
 
-    public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int studyYear, int selectiveCourseId) {
-        return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndSelectiveCourse(studyYear, selectiveCourseId);
+    public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId) {
+        return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndSelectiveCourse(selectiveCourseId);
     }
 }
