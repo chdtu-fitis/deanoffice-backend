@@ -299,24 +299,27 @@ public class SelectiveCourseController {
 
     @Secured("ROLE_NAVCH_METHOD")
     @GetMapping("/info")
-    public ResponseEntity getInfoAboutStudentAndCourse(@RequestParam(required = false) Integer studyYear,
+    public ResponseEntity getInfoAboutStudentAndCourse(@RequestParam Integer studyYear,
                                                        @RequestParam int studentDegreeId) {
-        List<SelectiveCoursesStudentDegreeWriteDTO> selectiveCourseDTOS = new ArrayList<>();
+        List<SelectiveCoursesStudentDegreeDTO> selectiveCourseDTOS = new ArrayList<>();
         List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
         for (SelectiveCoursesStudentDegrees coursesStudentDegrees : selectiveCoursesForStudentDegree) {
-            SelectiveCoursesStudentDegreeWriteDTO selectiveCourseDTO = map(coursesStudentDegrees, SelectiveCoursesStudentDegreeWriteDTO.class);
+            SelectiveCoursesStudentDegreeDTO selectiveCourseDTO = map(coursesStudentDegrees, SelectiveCoursesStudentDegreeDTO.class);
+            StudentDegree studentDegree = studentDegreeService.getById(selectiveCourseDTO.getStudentDegree().getId());
+            SelectiveCoursesStudentDegreeDTO studentDegreeDTO = map(studentDegree, SelectiveCoursesStudentDegreeDTO.class);
             setSelectiveCourse(coursesStudentDegrees, selectiveCourseDTO);
             selectiveCourseDTOS.add(selectiveCourseDTO);
+            selectiveCourseDTOS.add(studentDegreeDTO);
         }
-        return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCoursesStudentDegreeWriteDTO.class));
+        return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCoursesStudentDegreeDTO.class));
     }
 
-    private void setSelectiveCourse(SelectiveCoursesStudentDegrees selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreeDTO) {
+    private void setSelectiveCourse(SelectiveCoursesStudentDegrees selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO selectiveCoursesStudentDegreeDTO) {
         if (selectiveCoursesStudentDegree.getSelectiveCourse() != null) {
-            List<SelectiveCourse> selectiveCourseList = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreeDTO.getSelectiveCourses());
-            List<SelectiveCourse> selectiveCourseWriteDTOS = map(selectiveCourseList, SelectiveCourse.class);
-            for (SelectiveCourse selectiveCourseWriteDTO : selectiveCourseWriteDTOS) {
-                selectiveCoursesStudentDegree.setSelectiveCourse(selectiveCourseWriteDTO);
+            List<SelectiveCourseDTO> selectiveCourses = selectiveCoursesStudentDegreeDTO.getSelectiveCourses();
+            List<SelectiveCourse> selectiveCourseDTOS = map(selectiveCourses, SelectiveCourse.class);
+            for (SelectiveCourse selectiveCourseDTO : selectiveCourseDTOS) {
+                selectiveCoursesStudentDegree.setSelectiveCourse(selectiveCourseDTO);
             }
         }
     }
