@@ -304,32 +304,19 @@ public class SelectiveCourseController {
         return new ResponseEntity(afterSaveDTO, HttpStatus.CREATED);
     }
 
-
-    @Secured("ROLE_NAVCH_METHOD")
-    @GetMapping("/info")
-    public ResponseEntity getInfoAboutStudentAndCourse(@RequestParam Integer studyYear,
-                                                       @RequestParam int studentDegreeId) {
-        List<SelectiveCoursesStudentDegreeDTO> selectiveCourseDTOS = new ArrayList<>();
+    /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
+    @GetMapping("/student-courses")
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear,  @RequestParam int studentDegreeId) {
+        SelectiveCoursesStudentDegreeDTO selectiveCoursesForStudentDegreeDTO = new SelectiveCoursesStudentDegreeDTO();
         List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
-        for (SelectiveCoursesStudentDegrees coursesStudentDegrees : selectiveCoursesForStudentDegree) {
-            SelectiveCoursesStudentDegreeDTO selectiveCourseDTO = map(coursesStudentDegrees, SelectiveCoursesStudentDegreeDTO.class);
-            StudentDegree studentDegree = studentDegreeService.getById(selectiveCourseDTO.getStudentDegree().getId());
-            SelectiveCoursesStudentDegreeDTO studentDegreeDTO = map(studentDegree, SelectiveCoursesStudentDegreeDTO.class);
-            setSelectiveCourse(coursesStudentDegrees, selectiveCourseDTO);
-            selectiveCourseDTOS.add(selectiveCourseDTO);
-            selectiveCourseDTOS.add(studentDegreeDTO);
-        }
-        return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCoursesStudentDegreeDTO.class));
-    }
+        if (selectiveCoursesForStudentDegree.size() > 0) {
+            selectiveCoursesForStudentDegreeDTO.setStudentDegree(map(selectiveCoursesForStudentDegree.get(0).getStudentDegree(), ExistingIdDTO.class));
+            List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
+                    map(selectiveCourseStudentDegree.getSelectiveCourse(), SelectiveCourseDTO.class)).collect(Collectors.toList());
+            selectiveCoursesForStudentDegreeDTO.setSelectiveCourses(selectiveCourseDTOs);
 
-    private void setSelectiveCourse(SelectiveCoursesStudentDegrees selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO selectiveCoursesStudentDegreeDTO) {
-        if (selectiveCoursesStudentDegree.getSelectiveCourse() != null) {
-            List<SelectiveCourseDTO> selectiveCourses = selectiveCoursesStudentDegreeDTO.getSelectiveCourses();
-            List<SelectiveCourse> selectiveCourseDTOS = map(selectiveCourses, SelectiveCourse.class);
-            for (SelectiveCourse selectiveCourseDTO : selectiveCourseDTOS) {
-                selectiveCoursesStudentDegree.setSelectiveCourse(selectiveCourseDTO);
-            }
         }
+        return ResponseEntity.ok(map(selectiveCoursesForStudentDegreeDTO, SelectiveCoursesStudentDegreeDTO.class));
     }
 
     /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на дану вибіркову дисципліну*/
