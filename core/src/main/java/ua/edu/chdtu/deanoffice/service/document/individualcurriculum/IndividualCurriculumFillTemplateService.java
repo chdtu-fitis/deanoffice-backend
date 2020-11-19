@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
@@ -51,11 +52,14 @@ public class IndividualCurriculumFillTemplateService {
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
+    private final SelectiveCourseService selectiveCourseService;
 
     public IndividualCurriculumFillTemplateService(DocumentIOService documentIOService,
-                                                   CourseForGroupService courseForGroupService) {
+                                                   CourseForGroupService courseForGroupService,
+                                                   SelectiveCourseService selectiveCourseService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
+        this.selectiveCourseService = selectiveCourseService;
     }
 
     public WordprocessingMLPackage fillTemplate(Set<StudentDegree> degrees, int studyYears) {
