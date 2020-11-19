@@ -8,13 +8,7 @@ import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.Speciality;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -231,6 +225,27 @@ public class IndividualCurriculumFillTemplateService {
         ).collect(Collectors.toList());
         List<CourseForGroup> practical = courseForGroups.stream().filter(courses ->
                 courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        ).collect(Collectors.toList());
+
+        container.put(key, lessPractical);
+        container.put(PRACTICAL_COURSES_KEY, practical);
+
+        return container;
+    }
+
+    private Map<String, List<SelectiveCourse>> getSelectiveCourses(int studentDegreeId, int semester) {
+        Map<String, List<SelectiveCourse>> container = new HashMap<>();
+
+        List<SelectiveCourse> selectiveCourses =
+                selectiveCourseService.getSelectiveCoursesByStudentDegreeIdAndSemester(studentDegreeId, semester);
+
+        String key = getKeyBySemester(semester);
+
+        List<SelectiveCourse> lessPractical = selectiveCourses.stream().filter(selectiveCourse ->
+                !selectiveCourse.getFieldOfKnowledge().getName().toLowerCase().contains("практика")
+        ).collect(Collectors.toList());
+        List<SelectiveCourse> practical = selectiveCourses.stream().filter(selectiveCourse ->
+                selectiveCourse.getFieldOfKnowledge().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
 
         container.put(key, lessPractical);
