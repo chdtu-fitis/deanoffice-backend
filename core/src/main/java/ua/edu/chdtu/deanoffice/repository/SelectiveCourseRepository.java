@@ -17,15 +17,4 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             @Param("degreeId") int degreeId,
             @Param("semester") int semester
     );
-
-    @Query(value = 
-            "SELECT sc FROM selective_course AS sc " +
-            "INNER JOIN course AS c ON sc.course_id = c.id " +
-            "INNER JOIN selective_courses_student_degrees AS scsd ON scsd.selective_course_id = sc.id " +
-            "WHERE scsd.student_degree_id = :studentDegreeId " +
-            "AND c.semester = :semester", nativeQuery = true)
-    List<SelectiveCourse> findAllByStudentDegreeIdAndSemester(
-            @Param("studentDegreeId") Integer studentDegreeId,
-            @Param("semester") Integer semester
-    );
 }

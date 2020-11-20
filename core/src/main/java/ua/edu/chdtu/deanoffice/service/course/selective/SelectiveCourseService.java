@@ -46,10 +46,6 @@ public class SelectiveCourseService {
         return selectiveCourseRepository.findAll(ids);
     }
 
-    public List<SelectiveCourse> getSelectiveCoursesByStudentDegreeIdAndSemester(Integer studentDegreeId, Integer semester) {
-        return selectiveCourseRepository.findAllByStudentDegreeIdAndSemester(studentDegreeId, semester);
-    }
-
     public void delete(SelectiveCourse selectiveCourse) {
         selectiveCourse.setAvailable(false);
         selectiveCourseRepository.save(selectiveCourse);
