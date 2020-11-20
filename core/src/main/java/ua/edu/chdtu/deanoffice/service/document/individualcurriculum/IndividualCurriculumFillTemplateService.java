@@ -47,13 +47,16 @@ public class IndividualCurriculumFillTemplateService {
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
     private final SelectiveCourseService selectiveCourseService;
+    private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     public IndividualCurriculumFillTemplateService(DocumentIOService documentIOService,
                                                    CourseForGroupService courseForGroupService,
-                                                   SelectiveCourseService selectiveCourseService) {
+                                                   SelectiveCourseService selectiveCourseService,
+                                                   SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
         this.selectiveCourseService = selectiveCourseService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     public WordprocessingMLPackage fillTemplate(Set<StudentDegree> degrees, int studyYears) {
