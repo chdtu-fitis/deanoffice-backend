@@ -1,7 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 
@@ -24,5 +23,9 @@ public class SelectiveCoursesStudentDegreesService {
 
     public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId) {
         return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndStudentDegree(studyYear, studentDegreeId);
+    }
+
+    public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId) {
+        return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndSelectiveCourse(selectiveCourseId);
     }
 }
