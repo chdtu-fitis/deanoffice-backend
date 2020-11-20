@@ -28,4 +28,8 @@ public class SelectiveCoursesStudentDegreesService {
     public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId) {
         return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndSelectiveCourse(selectiveCourseId);
     }
+
+    public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesByStudentDegreeId(int studentDegreeId) {
+        return selectiveCoursesStudentDegreesRepository.findAllByStudentDegreeId(studentDegreeId);
+    }
 }
