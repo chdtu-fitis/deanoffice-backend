@@ -29,7 +29,7 @@ public class SelectiveCoursesStudentDegreesService {
         return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndSelectiveCourse(selectiveCourseId);
     }
 
-    public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesByStudentDegreeId(int studentDegreeId) {
-        return selectiveCoursesStudentDegreesRepository.findAllByStudentDegreeId(studentDegreeId);
+    public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesByStudentDegreeIdAndSemester(int studentDegreeId, int semester) {
+        return selectiveCoursesStudentDegreesRepository.findAllByStudentDegreeIdAndSemester(studentDegreeId, semester);
     }
 }
