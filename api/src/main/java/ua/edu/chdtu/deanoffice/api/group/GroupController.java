@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
@@ -114,6 +115,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/groups/copy")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroupsForCopy(
@@ -132,6 +134,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentGroupView.AllGroupData.class)
     @PostMapping("/groups")
     public ResponseEntity createGroup(
@@ -162,6 +165,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping("/groups")
     public ResponseEntity updateGroup(@RequestBody StudentGroupDTO studentGroupDTO,
                                       @CurrentUser ApplicationUser user) {
@@ -180,6 +184,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentGroupView.Basic.class)
     @PutMapping("/groups/restore")
     public ResponseEntity restoreGroup(@RequestParam List<Integer> groupIds,
@@ -195,6 +200,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @DeleteMapping("/groups/{group_ids}")
     public ResponseEntity deleteGroup(@PathVariable("group_ids") List<Integer> groupIds,
                                       @CurrentUser ApplicationUser user) {
