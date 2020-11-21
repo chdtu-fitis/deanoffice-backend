@@ -130,7 +130,7 @@ public class StudentDegreeController {
         return studentDegreeService.save(newStudentDegree);
     }
 
-    @Secured("ROLE_DEANOFFICER")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_STUDENT"})
     @JsonView(StudentView.Degrees.class)
     @GetMapping("/students/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
