@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.specialization;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +51,6 @@ public class ProfessionalQualificationController {
         }
     }
 
-
     @GetMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity getQualificationsForSpecialization(@PathVariable("specialization-id") int specializationsId) {
         try {
@@ -72,6 +72,7 @@ public class ProfessionalQualificationController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PostMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity changeQualification(
         @PathVariable("specialization-id") int specializationId,
@@ -90,6 +91,7 @@ public class ProfessionalQualificationController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PostMapping("/professional-qualifications")
     public ResponseEntity create(@RequestBody ProfessionalQualification body) {
         try {
