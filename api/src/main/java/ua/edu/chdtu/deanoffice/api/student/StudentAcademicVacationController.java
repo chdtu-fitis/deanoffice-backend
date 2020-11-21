@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,6 +58,7 @@ public class StudentAcademicVacationController {
         this.studentUtil = studentUtil;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping
     @JsonView(StudentView.AcademicVacation.class)
     public ResponseEntity giveAcademicVacationToStudent(@RequestBody StudentAcademicVacationDTO studentAcademicVacationDTO) {
@@ -90,6 +92,7 @@ public class StudentAcademicVacationController {
         return studentAcademicVacation;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping
     @JsonView(StudentView.AcademicVacation.class)
     public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user) {
@@ -101,6 +104,7 @@ public class StudentAcademicVacationController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/renewed")
     public ResponseEntity renewAcademicVacation(
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
