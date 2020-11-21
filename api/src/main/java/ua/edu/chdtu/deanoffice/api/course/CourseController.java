@@ -37,8 +37,6 @@ import ua.edu.chdtu.deanoffice.service.course.CoursePaginationBean;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
