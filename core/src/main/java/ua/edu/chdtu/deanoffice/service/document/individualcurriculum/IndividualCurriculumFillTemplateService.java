@@ -212,19 +212,21 @@ public class IndividualCurriculumFillTemplateService {
         tempTable.getContent().remove(currentRowIndex);
     }
 
-    private Map<String, List<CourseForGroup>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
-        Map<String, List<CourseForGroup>> container = new HashMap<>();
+    private Map<String, List<Course>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
+        Map<String, List<Course>> container = new HashMap<>();
 
         List<CourseForGroup> courseForGroups =
                 courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
 
+        List<Course> courses = courseForGroups.stream().map(CourseForGroup::getCourse).collect(Collectors.toList());
+        
         String key = getKeyBySemester(semester);
 
-        List<CourseForGroup> lessPractical = courseForGroups.stream().filter(courses ->
-                !courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        List<Course> lessPractical = courses.stream().filter(course ->
+                !course.getKnowledgeControl().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
-        List<CourseForGroup> practical = courseForGroups.stream().filter(courses ->
-                courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        List<Course> practical = courses.stream().filter(course ->
+                course.getKnowledgeControl().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
 
         container.put(key, lessPractical);
