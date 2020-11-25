@@ -153,26 +153,50 @@ public class IndividualCurriculumFillTemplateService {
         return replacements;
     }
 
-    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, int studyYear) {
+    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, int studyYear) throws Docx4JException {
         StudentGroup studentGroup = degree.getStudentGroup();
         List<Integer> semesters = getSemestersByCourseForGroup(studentGroup, studyYear);
 
-        Map<String, List<CourseForGroup>> autumnSemester = getCoursesBySemester(studentGroup, semesters.get(0));
-        Map<String, List<CourseForGroup>> springSemester = getCoursesBySemester(studentGroup, semesters.get(1));
+        Map<String, List<CourseForGroup>> autumnSemesterPart1 = getCoursesBySemester(studentGroup, semesters.get(0));
+        List<SelectiveCourse> autumnSelectiveCourses = getSelectiveCourses(degree.getId(), semesters.get(0));
 
-        List<CourseForGroup> autumnCourses = autumnSemester.get(AUTUMN_COURSES_KEY);
-        fillCourseTable(template, autumnCourses, STARTING_ROW_INDEX_AUTUMN_TABLE);
+        Map<String, List<CourseForGroup>> springSemesterPart1 = getCoursesBySemester(studentGroup, semesters.get(1));
+        List<SelectiveCourse> springSelectiveCourses = getSelectiveCourses(degree.getId(), semesters.get(1));
 
-        List<CourseForGroup> springCourses = springSemester.get(SPRING_COURSES_KEY);
-        fillCourseTable(template, springCourses, STARTING_ROW_INDEX_SPRING_TABLE + autumnCourses.size());
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
+        if (!Objects.nonNull(tempTable)) {
+            throw new Docx4JException("Проблеми з шаблоном на сервері.");
+        }
 
-        List<CourseForGroup> practical = autumnSemester.get(PRACTICAL_COURSES_KEY);
-        practical.addAll(springSemester.get(PRACTICAL_COURSES_KEY));
+        int numberOfRow = STARTING_ROW_INDEX_AUTUMN_TABLE;
 
-        int startRowIndexForPracticalTable = STARTING_ROW_INDEX_PRACTICAL_TABLE + autumnCourses.size() + springCourses.size();
-        fillCourseTable(template, practical, startRowIndexForPracticalTable);
+        List<CourseForGroup> autumnMainCourses = autumnSemesterPart1.get(AUTUMN_COURSES_KEY);
+        addMainCoursesToTable(tempTable, autumnMainCourses, numberOfRow);
 
-        fillConclusionTable(autumnCourses, springCourses, practical, template);
+        numberOfRow = numberOfRow + autumnMainCourses.size() + 1;
+
+        addSelectiveCoursesToTable(tempTable, autumnSelectiveCourses, numberOfRow);
+
+        numberOfRow += autumnSelectiveCourses.size() + 2;
+
+        List<CourseForGroup> springMainCourses = springSemesterPart1.get(SPRING_COURSES_KEY);
+        addMainCoursesToTable(tempTable, springMainCourses, numberOfRow);
+
+        numberOfRow += springMainCourses.size() + 1;
+
+        addSelectiveCoursesToTable(tempTable, springSelectiveCourses, numberOfRow);
+
+        numberOfRow += springSelectiveCourses.size() + 1;
+
+        List<CourseForGroup> practical = autumnSemesterPart1.get(PRACTICAL_COURSES_KEY);
+        practical.addAll(springSemesterPart1.get(PRACTICAL_COURSES_KEY));
+
+        addMainCoursesToTable(tempTable, practical, numberOfRow);
+
+        numberOfRow += practical.size() + 1;
+
+        fillConclusionTable(autumnMainCourses, autumnSelectiveCourses, springMainCourses, springSelectiveCourses,
+                practical, template, numberOfRow);
 
         removeUnfilledPlaceholders(template);
     }
