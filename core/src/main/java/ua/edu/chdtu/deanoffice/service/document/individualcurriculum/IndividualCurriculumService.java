@@ -37,7 +37,6 @@ public class IndividualCurriculumService {
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(studentDegreeIds);
         Set<StudentDegree> collect = sortByFullName(studentDegrees);
         WordprocessingMLPackage file = fillTemplateService.fillTemplate(collect, studyYear);
-
         return documentIOService.saveDocumentToTemp(file, FILE_NAME, FileFormatEnum.DOCX);
     }
 
