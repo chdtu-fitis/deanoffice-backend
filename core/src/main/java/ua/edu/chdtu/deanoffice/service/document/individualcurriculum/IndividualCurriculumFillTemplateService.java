@@ -28,9 +28,6 @@ public class IndividualCurriculumFillTemplateService {
 
     private final static String TEMPLATE_PATH = TEMPLATES_PATH + "IndividualCurriculum.docx";
     private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
-    private static final int STARTING_ROW_INDEX_SPRING_TABLE = 9;
-    private static final int STARTING_ROW_INDEX_PRACTICAL_TABLE = 15;
-    private static final int STARTING_ROW_INDEX_CONCLUSION_TABLE = 16;
     private static final int TABLE_INDEX = 4;
     private static final String SPRING_COURSES_KEY = "Spring";
     private static final String AUTUMN_COURSES_KEY = "Autumn";
