@@ -325,8 +325,7 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("H", String.valueOf(course.getHours()));
             replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
             replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
-            Department department =
-                    Objects.nonNull(selectiveCourse.getTeacher()) ? selectiveCourse.getTeacher().getDepartment() : null;
+            Department department = selectiveCourse.getDepartment();
             replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
