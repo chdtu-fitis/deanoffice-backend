@@ -259,25 +259,10 @@ public class IndividualCurriculumFillTemplateService {
         return container;
     }
 
-    private Map<String, List<SelectiveCourse>> getSelectiveCourses(int studentDegreeId, int semester) {
-        Map<String, List<SelectiveCourse>> container = new HashMap<>();
-
-        List<SelectiveCourse> selectiveCourses =
-                selectiveCourseService.getSelectiveCoursesByStudentDegreeIdAndSemester(studentDegreeId, semester);
-
-        String key = getKeyBySemester(semester);
-
-        List<SelectiveCourse> lessPractical = selectiveCourses.stream().filter(selectiveCourse ->
-                !selectiveCourse.getFieldOfKnowledge().getName().toLowerCase().contains("практика")
-        ).collect(Collectors.toList());
-        List<SelectiveCourse> practical = selectiveCourses.stream().filter(selectiveCourse ->
-                selectiveCourse.getFieldOfKnowledge().getName().toLowerCase().contains("практика")
-        ).collect(Collectors.toList());
-
-        container.put(key, lessPractical);
-        container.put(PRACTICAL_COURSES_KEY, practical);
-
-        return container;
+    private List<SelectiveCourse> getSelectiveCourses(int studentDegreeId, int semester) {
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees =
+                selectiveCoursesStudentDegreesService.getSelectiveCoursesByStudentDegreeIdAndSemester(studentDegreeId, semester);
+        return selectiveCoursesStudentDegrees.stream().map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
     }
 
     private String getKeyBySemester(int semester) {
