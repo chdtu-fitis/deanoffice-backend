@@ -201,10 +201,13 @@ public class IndividualCurriculumFillTemplateService {
         removeUnfilledPlaceholders(template);
     }
 
-    private void fillConclusionTable(List<CourseForGroup> autumnSemester,
-                                     List<CourseForGroup> springSemester,
+    private void fillConclusionTable(List<CourseForGroup> autumnMainCourses,
+                                     List<SelectiveCourse> autumnSelectiveCourses,
+                                     List<CourseForGroup> springMainCourses,
+                                     List<SelectiveCourse> springSelectiveCourses,
                                      List<CourseForGroup> practicals,
-                                     WordprocessingMLPackage template) {
+                                     WordprocessingMLPackage template,
+                                     int numberOfRow) {
         Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
 
         if (!Objects.nonNull(tempTable)) {
@@ -212,28 +215,35 @@ public class IndividualCurriculumFillTemplateService {
         }
 
         List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
-        int currentRowIndex = STARTING_ROW_INDEX_CONCLUSION_TABLE + autumnSemester.size() + springSemester.size() + practicals.size();
 
-        Tr blankRow = (Tr) tableRows.get(currentRowIndex);
+        Tr blankRow = (Tr) tableRows.get(numberOfRow);
 //        Tr currentRow = XmlUtils.deepCopy(blankRow);
-        int hourSumAutumn = autumnSemester.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
-        int hourSumSpring = springSemester.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumAutumnMainCourses = autumnMainCourses.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumAutumnSelectiveCourses = autumnSelectiveCourses.stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHours()).sum();
+        int hourSumSpringMainCourses = springMainCourses.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumSpringSelectiveCourses = springSelectiveCourses.stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHours()).sum();
         int hourSumPracticals = practicals.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
 
-        int hourPerCreditSumAutumn = autumnSemester
+        int hourPerCreditSumAutumnMainCourses = autumnMainCourses
                 .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
-        int hourPerCreditSumSpring = springSemester
+        int hourPerCreditSumAutumnSelectiveCourses = autumnSelectiveCourses
+                .stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHoursPerCredit()).sum();
+        int hourPerCreditSumSpringMainCourses = springMainCourses
                 .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
+        int hourPerCreditSumSpringSelectiveCourses = springSelectiveCourses
+                .stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHoursPerCredit()).sum();
         int hourPerCreditSumPracticals = practicals.stream()
                 .mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
 
         Map<String, String> replacements = new HashMap<>();
-        replacements.put("TH", String.valueOf(hourSumAutumn + hourSumSpring + hourSumPracticals));
-        replacements.put("TCr", String.valueOf(hourPerCreditSumAutumn + hourPerCreditSumPracticals + hourPerCreditSumSpring));
+        replacements.put("TH", String.valueOf(hourSumAutumnMainCourses + hourSumAutumnSelectiveCourses +
+                hourSumSpringMainCourses + hourSumSpringSelectiveCourses + hourSumPracticals));
+        replacements.put("TCr", String.valueOf(hourPerCreditSumAutumnMainCourses + hourPerCreditSumAutumnSelectiveCourses +
+                hourPerCreditSumSpringMainCourses + hourPerCreditSumSpringSelectiveCourses + hourPerCreditSumPracticals));
 
         replaceInRow(blankRow, replacements);
-        tempTable.getContent().add(currentRowIndex, blankRow);
-        tempTable.getContent().remove(currentRowIndex);
+        tempTable.getContent().add(numberOfRow, blankRow);
+        tempTable.getContent().remove(numberOfRow);
     }
 
     private Map<String, List<Course>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
