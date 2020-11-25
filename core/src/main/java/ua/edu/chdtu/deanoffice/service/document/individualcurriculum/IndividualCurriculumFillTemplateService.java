@@ -269,14 +269,8 @@ public class IndividualCurriculumFillTemplateService {
         return semester % 2 == 0 ? SPRING_COURSES_KEY : AUTUMN_COURSES_KEY;
     }
 
-    private void fillCourseTable(WordprocessingMLPackage template, List<CourseForGroup> courseForGroups,
-                                 int startingRowIndex) {
-        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
-
-        if (!Objects.nonNull(tempTable)) {
-            return;
-        }
-
+    private void addMainCoursesToTable(Tbl tempTable, List<CourseForGroup> courseForGroups,
+                                       int startingRowIndex) {
         List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
         int currentRowIndex = startingRowIndex;
         int numberOfRow = 1;
@@ -291,10 +285,17 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("H", String.valueOf(course.getHours()));
             replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
             replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
-
             Department department =
                     Objects.nonNull(courseForGroup.getTeacher()) ? courseForGroup.getTeacher().getDepartment() : null;
             replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
+            replaceInRow(currentRow, replacements);
+            tempTable.getContent().add(currentRowIndex, currentRow);
+            currentRowIndex++;
+            numberOfRow++;
+        }
+
+        tempTable.getContent().remove(currentRowIndex);
+    }
 
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
