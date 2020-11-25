@@ -318,10 +318,10 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
-
             currentRowIndex++;
             numberOfRow++;
         }
+
         tempTable.getContent().remove(currentRowIndex);
     }
 
