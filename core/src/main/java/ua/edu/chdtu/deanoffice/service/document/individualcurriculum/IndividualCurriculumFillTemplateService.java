@@ -297,6 +297,25 @@ public class IndividualCurriculumFillTemplateService {
         tempTable.getContent().remove(currentRowIndex);
     }
 
+    private void addSelectiveCoursesToTable(Tbl tempTable, List<SelectiveCourse> selectiveCourses,
+                                            int startingRowIndex) {
+        List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+        int currentRowIndex = startingRowIndex;
+        int numberOfRow = 1;
+        Tr blankRow = (Tr) tableRows.get(currentRowIndex);
+
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            Tr currentRow = XmlUtils.deepCopy(blankRow);
+            Course course = selectiveCourse.getCourse();
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("N", String.valueOf(numberOfRow));
+            replacements.put("CourseName", course.getCourseName().getName());
+            replacements.put("H", String.valueOf(course.getHours()));
+            replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
+            replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
+            Department department =
+                    Objects.nonNull(selectiveCourse.getTeacher()) ? selectiveCourse.getTeacher().getDepartment() : null;
+            replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
 
