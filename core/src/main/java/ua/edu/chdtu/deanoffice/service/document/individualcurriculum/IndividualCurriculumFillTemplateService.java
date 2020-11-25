@@ -10,21 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
@@ -36,7 +28,7 @@ public class IndividualCurriculumFillTemplateService {
 
     private final static String TEMPLATE_PATH = TEMPLATES_PATH + "IndividualCurriculum.docx";
     private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
-    private static final int STARTING_ROW_INDEX_SPRING_TABLE = 10;
+    private static final int STARTING_ROW_INDEX_SPRING_TABLE = 9;
     private static final int STARTING_ROW_INDEX_PRACTICAL_TABLE = 15;
     private static final int STARTING_ROW_INDEX_CONCLUSION_TABLE = 16;
     private static final int TABLE_INDEX = 4;
@@ -246,21 +238,19 @@ public class IndividualCurriculumFillTemplateService {
         tempTable.getContent().remove(numberOfRow);
     }
 
-    private Map<String, List<Course>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
-        Map<String, List<Course>> container = new HashMap<>();
+    private Map<String, List<CourseForGroup>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
+        Map<String, List<CourseForGroup>> container = new HashMap<>();
 
         List<CourseForGroup> courseForGroups =
                 courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
 
-        List<Course> courses = courseForGroups.stream().map(CourseForGroup::getCourse).collect(Collectors.toList());
-        
         String key = getKeyBySemester(semester);
 
-        List<Course> lessPractical = courses.stream().filter(course ->
-                !course.getKnowledgeControl().getName().toLowerCase().contains("практика")
+        List<CourseForGroup> lessPractical = courseForGroups.stream().filter(cfg ->
+                !cfg.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
-        List<Course> practical = courses.stream().filter(course ->
-                course.getKnowledgeControl().getName().toLowerCase().contains("практика")
+        List<CourseForGroup> practical = courseForGroups.stream().filter(cfg ->
+                cfg.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
 
         container.put(key, lessPractical);
