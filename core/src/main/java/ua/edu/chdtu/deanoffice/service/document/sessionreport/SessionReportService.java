@@ -693,6 +693,7 @@ public class SessionReportService {
 
     private Map<String, List<Cell>> createMapWithNeedLists() {
         Map<String, List<Cell>> informationAboutStudentsByPayment = new HashMap<>();
+
         informationAboutStudentsByPayment.put("studentsOnSessionStart", new ArrayList<>());
         informationAboutStudentsByPayment.put("studentsOnSessionStartWhoHaveAcademicVacation", new ArrayList<>());
         informationAboutStudentsByPayment.put("studentsOnSessionStartWhoHaveNotAcademicVacation", new ArrayList<>());
@@ -706,54 +707,54 @@ public class SessionReportService {
 
     private void calculateDataOnOneGroupByPayment(Row row, Map<String, List<Cell>> map, Payment payment,
                                                   int studentGroupId, LocalDate sessionStartDate, int semester) {
-        int countBudgetStudentsOnSessionStart =
+        int countStudentsOnSessionStartByPayment =
                 studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroupId, sessionStartDate, payment) +
                         studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroupId, sessionStartDate, payment);
-        createCellAndSetHereValueAndAddToList(row, 1, countBudgetStudentsOnSessionStart, map.get("studentsOnSessionStart"));
+        createCellAndSetHereValueAndAddToList(row, 1, countStudentsOnSessionStartByPayment, map.get("studentsOnSessionStart"));
 
-        int countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation =
+        int countStudentsOnSessionStartAndWhoHaveAcademicVacationByPayment =
                 studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
                         studentGroupId, sessionStartDate, payment) +
                         studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
                                 studentGroupId, sessionStartDate, payment);
         createCellAndSetHereValueAndAddToList(
-                row, 2, countBudgetStudentsOnSessionStartAndWhoHaveAcademicVacation, map.get("studentsOnSessionStartWhoHaveAcademicVacation"));
+                row, 2, countStudentsOnSessionStartAndWhoHaveAcademicVacationByPayment, map.get("studentsOnSessionStartWhoHaveAcademicVacation"));
 
-        Cell countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell = row.createCell(3);
-        countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell.setCellFormula(
+        Cell countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment = row.createCell(3);
+        countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment.setCellFormula(
                 row.getCell(1).getAddress().toString() +
                 "-" +
                 row.getCell(2).getAddress().toString()
         );
-        map.get("studentsOnSessionStartWhoHaveNotAcademicVacation").add(countBudgetStudentsOnSessionStartAndWhoHaveNotAcademicVacationCell);
+        map.get("studentsOnSessionStartWhoHaveNotAcademicVacation").add(countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment);
         //цей код може бути використаний для підрахунку кількості студентів, що вчасно все здали
-            /*int countBudgetStudentsWhoWasPassExamInTime = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(
+            /*int countStudentsWhoWasPassExamInTimeByPayment = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(
                     studentGroup.getId(), semester, payment
             );
             createCellAndSetHereValueAndAddToList(
-                    dataAboutOneStudentGroupPart1, 4, countBudgetStudentsWhoWasPassExamInTime, budgetWhoPassAllExamOnTimeList);*/
+                    dataAboutOneStudentGroupPart1, 4, countStudentsWhoWasPassExamInTimeByPayment, budgetWhoPassAllExamOnTimeList);*/
 
-        Cell countBudgetStudentsWhoWasPassExamInTime = row.createCell(4);
-        countBudgetStudentsWhoWasPassExamInTime.setCellFormula(row.getCell(3).getAddress().toString());
-        map.get("studentsWhoPassAllExamOnTime").add(countBudgetStudentsWhoWasPassExamInTime);
+        Cell countStudentsWhoWasPassExamInTimeByPayment = row.createCell(4);
+        countStudentsWhoWasPassExamInTimeByPayment.setCellFormula(row.getCell(3).getAddress().toString());
+        map.get("studentsWhoPassAllExamOnTime").add(countStudentsWhoWasPassExamInTimeByPayment);
 
         map.get("studentsThatDidNotComeToExamsWithAnImportantReason").add(row.createCell(5));
 
-        Cell countBudgetThatDidNotComeToExamWithNotImportantReasonCell = row.createCell(6);
-        countBudgetThatDidNotComeToExamWithNotImportantReasonCell.setCellFormula(
+        Cell countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment = row.createCell(6);
+        countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment.setCellFormula(
                 row.getCell(1).getAddress().toString() +
                 "-" +
                 row.getCell(4).getAddress().toString()
         );
-        map.get("studentsThatDidNotComeToExamsWithANotImportantReason").add(countBudgetThatDidNotComeToExamWithNotImportantReasonCell);
+        map.get("studentsThatDidNotComeToExamsWithANotImportantReason").add(countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment);
 
-        int countBudgetThatPassedAllCourses =
+        int countStudentsThatPassedAllCoursesByPayment =
                 studentDegreeService.getCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(
                         studentGroupId, semester, payment
                 );
 
         createCellAndSetHereValueAndAddToList(
-                row, 7, countBudgetThatPassedAllCourses, map.get("studentsThatPassedAllCourses")
+                row, 7, countStudentsThatPassedAllCoursesByPayment, map.get("studentsThatPassedAllCourses")
         );
     }
 
