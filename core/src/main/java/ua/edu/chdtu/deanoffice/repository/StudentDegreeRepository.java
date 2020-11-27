@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.Date;
 import java.util.List;
@@ -509,8 +511,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             "WITH query1(num) AS ( " +
                     "SELECT count(c.id) FROM course AS c " +
                     "INNER JOIN courses_for_groups AS cfg ON cfg.course_id = c.id " +
+                    "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
                     "WHERE c.semester = :semester " +
-                    "AND cfg.student_group_id = :studentGroupId), " +
+                    "AND cfg.student_group_id = :studentGroupId " +
+                    "AND kc.graded = true), " +
                 "query2(id) AS ( " +
                     "SELECT sd.id FROM student_degree AS sd " +
                     "WHERE sd.student_group_id = :studentGroupId AND " +
@@ -518,9 +522,11 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "(SELECT count(g.id) FROM grade g " +
                     "INNER JOIN course AS c ON g.course_id = c.id " +
                     "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
+                    "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
                     "WHERE g.on_time = true " +
                     "AND sd.student_group_id = :studentGroupId " +
-                    "AND c.semester = :semester) = (SELECT num FROM query1) " +
+                    "AND c.semester = :semester " +
+                    "AND kc.graded = true) = (SELECT num FROM query1) " +
                     "GROUP BY sd.id) " +
             "SELECT count(id) FROM query2", nativeQuery = true)
     int findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(@Param("studentGroupId") int studentGroupId,
