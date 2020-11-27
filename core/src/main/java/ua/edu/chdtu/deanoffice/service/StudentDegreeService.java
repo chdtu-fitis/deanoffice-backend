@@ -253,7 +253,7 @@ public class StudentDegreeService {
                 ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
 
-    public int getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(int studentGroupId, int semester, Payment payment) {
-        return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(studentGroupId, semester, payment.toString());
+    public int getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(int studentGroupId, int semester, Payment payment, List<Integer> grades) {
+        return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(studentGroupId, semester, payment.toString(), grades);
     }
 }

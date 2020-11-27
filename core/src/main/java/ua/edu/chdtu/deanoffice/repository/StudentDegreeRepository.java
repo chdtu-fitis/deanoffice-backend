@@ -523,14 +523,16 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "INNER JOIN course AS c ON g.course_id = c.id " +
                     "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
                     "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
-                    "WHERE g.on_time = true " +
-                    "AND sd.student_group_id = :studentGroupId " +
+                    //"WHERE g.on_time = true " + - якщо потрібно лише ті, що здані вчасно
+                    "WHERE sd.student_group_id = :studentGroupId " +
                     "AND c.semester = :semester " +
-                    "AND kc.graded = true) = (SELECT num FROM query1) " +
+                    "AND kc.graded = true " +
+                    "AND g.grade IN (:grades)) = (SELECT num FROM query1) " +
                     "GROUP BY sd.id) " +
             "SELECT count(id) FROM query2", nativeQuery = true)
     int findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(@Param("studentGroupId") int studentGroupId,
                                                                 @Param("semester") int semester,
-                                                                @Param("payment") String payment);
+                                                                @Param("payment") String payment,
+                                                                @Param("grades") List<Integer> grades);
 
 }
