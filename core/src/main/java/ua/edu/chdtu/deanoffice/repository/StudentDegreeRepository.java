@@ -530,9 +530,9 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "AND g.grade IN (:grades)) = (SELECT num FROM query1) " +
                     "GROUP BY sd.id) " +
             "SELECT count(id) FROM query2", nativeQuery = true)
-    int findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(@Param("studentGroupId") int studentGroupId,
-                                                                @Param("semester") int semester,
-                                                                @Param("payment") String payment,
-                                                                @Param("grades") List<Integer> grades);
+    int findCountAllStudentsInStudentGroupWhoWerePassExamByGrades(@Param("studentGroupId") int studentGroupId,
+                                                                  @Param("semester") int semester,
+                                                                  @Param("payment") String payment,
+                                                                  @Param("grades") List<Integer> grades);
 
 }
