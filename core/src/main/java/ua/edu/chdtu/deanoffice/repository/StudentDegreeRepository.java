@@ -533,15 +533,4 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                                                                 @Param("semester") int semester,
                                                                 @Param("payment") String payment);
 
-    @Query(value =
-            "SELECT count(DISTINCT sd.id) FROM student_degree AS sd " +
-            "INNER JOIN grade AS g ON sd.id = g.student_degree_id " +
-            "INNER JOIN course AS c ON c.id = g.course_id " +
-            "WHERE c.semester = :semester " +
-            "AND sd.student_group_id = :studentGroupId " +
-            "AND g.points > 60 " +
-            "AND sd.payment = :payment", nativeQuery = true)
-    int findCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(@Param("studentGroupId") int studentGroupId,
-                                                                         @Param("semester") int semester,
-                                                                         @Param("payment") String payment);
 }

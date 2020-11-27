@@ -3,22 +3,12 @@ package ua.edu.chdtu.deanoffice.service;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -265,11 +255,5 @@ public class StudentDegreeService {
 
     public int getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(int studentGroupId, int semester, Payment payment) {
         return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoWerePassExamOnTime(studentGroupId, semester, payment.toString());
-    }
-
-    public int getCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(int studentGroupId, int semester, Payment payment) {
-        return studentDegreeRepository.findCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(
-                studentGroupId, semester, payment.toString()
-        );
     }
 }
