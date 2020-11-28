@@ -515,21 +515,18 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "WHERE c.semester = :semester " +
                     "AND cfg.student_group_id = :studentGroupId " +
                     "AND kc.graded = true), " +
-                "query2(id) AS ( " +
-                    "SELECT sd.id FROM student_degree AS sd " +
-                    "WHERE sd.student_group_id = :studentGroupId AND " +
-                    "sd.payment = :payment AND " +
-                    "(SELECT count(g.id) FROM grade g " +
+            "query2(id) AS ( " +
+                    "SELECT count(g.id) FROM grade g " +
                     "INNER JOIN course AS c ON g.course_id = c.id " +
                     "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
                     "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
-                    //"WHERE g.on_time = true " + - якщо потрібно лише ті, що здані вчасно
                     "WHERE sd.student_group_id = :studentGroupId " +
+                    "AND sd.payment = :payment " +
                     "AND c.semester = :semester " +
                     "AND kc.graded = true " +
-                    "AND g.grade IN (:grades)) = (SELECT num FROM query1) " +
-                    "GROUP BY sd.id) " +
-            "SELECT count(id) FROM query2", nativeQuery = true)
+                    "AND g.grade IN (:grades) " +
+                    "GROUP BY sd.id HAVING count(g.id) = (SELECT num FROM query1)) " +
+    "SELECT count(id) FROM query2", nativeQuery = true)
     int findCountAllStudentsInStudentGroupWhoWerePassExamByGrades(@Param("studentGroupId") int studentGroupId,
                                                                   @Param("semester") int semester,
                                                                   @Param("payment") String payment,
