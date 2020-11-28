@@ -532,4 +532,24 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                                                                   @Param("payment") String payment,
                                                                   @Param("grades") List<Integer> grades);
 
+    @Query(value =
+            "query(id) AS ( " +
+                    "SELECT count(g.id) FROM grade g " +
+                    "INNER JOIN course AS c ON g.course_id = c.id " +
+                    "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
+                    "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
+                    "WHERE sd.student_group_id = :studentGroupId " +
+                    "AND sd.payment = :payment " +
+                    "AND c.semester = :semester " +
+                    "AND kc.graded = true " +
+                    "AND g.grade IN (NULL, 1, 2) " +
+                    "GROUP BY sd.id HAVING count(g.id) = :countOfBadGrades) " +
+            "SELECT count(id) FROM query", nativeQuery = true)
+    int findCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+            @Param("studentGroupId") int studentGroupId,
+            @Param("semester") int semester,
+            @Param("payment") String payment,
+            @Param("countOfBadGrades") int countOfBadGrades
+    );
+
 }

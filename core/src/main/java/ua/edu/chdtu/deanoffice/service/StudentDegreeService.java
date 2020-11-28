@@ -256,4 +256,12 @@ public class StudentDegreeService {
     public int getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(int studentGroupId, int semester, Payment payment, List<Integer> grades) {
         return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoWerePassExamByGrades(studentGroupId, semester, payment.toString(), grades);
     }
+
+    public int getCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+            int studentGroupId, int semester, Payment payment, int countOfBadGrades
+    ) {
+        return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+                studentGroupId, semester, payment.toString(), countOfBadGrades
+        );
+    }
 }
