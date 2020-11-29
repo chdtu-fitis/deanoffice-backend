@@ -533,7 +533,7 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                                                                   @Param("grades") List<Integer> grades);
 
     @Query(value =
-            "query(id) AS ( " +
+            "WITH query(id) AS ( " +
                     "SELECT count(g.id) FROM grade g " +
                     "INNER JOIN course AS c ON g.course_id = c.id " +
                     "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
