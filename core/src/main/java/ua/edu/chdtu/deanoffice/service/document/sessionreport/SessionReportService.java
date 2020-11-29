@@ -32,26 +32,49 @@ public class SessionReportService {
     private final BorderStyle GLOBAL_BORDER_STYLE = BorderStyle.THIN;
     private final String BACHELOR_NAME_ENG_IN_DATABASE = "Bachelor";
     private final String MASTER_NAME_ENG_IN_DATABASE = "Master";
-//    private Set<Integer> semesters;
-//    private int maxSemesterForBachelor;
+
+    private final String COLUMN_2 = "studentsOnSessionStart";
+    private final String COLUMN_3 = "studentsOnSessionStartWhoHaveAcademicVacation";
+    private final String COLUMN_4 = "studentsOnSessionStartWhoHaveNotAcademicVacation";
+    private final String COLUMN_5 = "studentsWhoPassAllExamOnTime";
+    private final String COLUMN_6 = "studentsThatDidNotComeToExamsWithAnImportantReason";
+    private final String COLUMN_7 = "studentsThatDidNotComeToExamsWithANotImportantReason";
+    private final String COLUMN_8 = "studentsThatPassedAllCourses";
+    private final String COLUMN_9 = "studentsThatPassedAllCoursesOnlyFor5";
+    private final String COLUMN_10 = "studentsThatPassedAllCoursesOnlyFor4Or5";
+    private final String COLUMN_11 = "studentsThatPassedAllCoursesOnlyFor3Or4Or5";
+    private final String COLUMN_12 = "studentsThatPassedAllCoursesOnlyFor3";
+    private final String COLUMN_13 = "studentsInStudentGroupWhoHaveOneOrMoreBadGrades";
+    private final String COLUMN_14 = "studentsInStudentGroupWhoHaveOneBadGrade";
+    private final String COLUMN_15 = "studentsInStudentGroupWhoHaveTwoBadGrades";
+    private final String COLUMN_16 = "studentsInStudentGroupWhoHaveThreeBadGrades";
+    private final String COLUMN_17 = "absoluteSuccess";
+    private final String COLUMN_18 = "studentsWhoHaveCompletedTheTheoreticalCourse";
+    private final String COLUMN_19 = "studentsWhoStayForSecondYear";
+    private final String COLUMN_20 = "studentsWhoWereExpelled";
+    private final String COLUMN_21 = "studentsWhoEnterToNextCourseInExtramural";
+    private final String COLUMN_22 = "studentsWhoEnterToNextCourseInFullTime";
 
     private final DegreeService degreeService;
     private final StudentGroupService studentGroupService;
     private final StudentDegreeService studentDegreeService;
     private final StudentExpelService studentExpelService;
     private final CurrentYearService currentYearService;
+    private final FacultyService facultyService;
 
     @Autowired
     public SessionReportService(DegreeService degreeService,
                                 StudentGroupService studentGroupService,
                                 StudentDegreeService studentDegreeService,
                                 StudentExpelService studentExpelService,
-                                CurrentYearService currentYearService) {
+                                CurrentYearService currentYearService,
+                                FacultyService facultyService) {
         this.degreeService = degreeService;
         this.studentGroupService = studentGroupService;
         this.studentDegreeService = studentDegreeService;
         this.studentExpelService = studentExpelService;
         this.currentYearService = currentYearService;
+        this.facultyService = facultyService;
     }
 
     public File createSessionReportInXLSX(ApplicationUser user, int dayOfMonth, TuitionForm tuitionForm) throws Exception {
@@ -267,6 +290,7 @@ public class SessionReportService {
         similarCells.addAll(
                 Arrays.asList(
                         createCellForHeadAndSetThisValue(row14, 7, "плану"),
+                        createCellForHeadAndSetThisValue(row14, 16, "%"),
                         createCellForHeadAndSetThisValue(row14, 19, "екзаменів"),
                         createCellForHeadAndSetThisValue(row14, 20, "ф.н.")
                 )
@@ -555,8 +579,8 @@ public class SessionReportService {
         int previousSemester = getCurrentSemester() == 0 ? 1 : 0;
         int maxSemesterForBachelor = dataAboutSemesters.getMaxSemesterForBachelor();
 
-        List<Cell> totalCellsPerSemester = new ArrayList<>();
-        Map<Integer, List<Cell>> totalInFaculty = new HashMap<>();
+        Map<String, List<Cell>> totalDataAboutBudgetStudents = createMapWithNeedLists();
+        Map<String, List<Cell>> totalDataAboutContractStudents = createMapWithNeedLists();
         Set<Integer> semesters = dataAboutSemesters.getSemesters();
 
         for (Integer semester : semesters) {
@@ -592,7 +616,14 @@ public class SessionReportService {
 
             List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndYearAndTuitionForm(degreeId, yearOfStudy, facultyId, tuitionForm);
             numberOfRow++;
-            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy - 1, semester);
+
+            if (groups.size() == 0) {
+                numberOfCourse.setCellValue("");
+                continue;
+            }
+
+            numberOfRow = addDataForOneCourse(groups, numberOfRow, workbook, sessionStartDate, yearOfStudy - 1, semester,
+                    totalDataAboutBudgetStudents, totalDataAboutContractStudents);
         }
 
         Row totalOnFacultyRowPart1 = sheet.createRow(numberOfRow);
@@ -601,6 +632,167 @@ public class SessionReportService {
         sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
         totalOnFacultyCell.setCellValue("Усього по факультету:");
         setCellStyleAndFontForCell(totalOnFacultyCell, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
+
+        List<Cell> totalBudgetCells = new ArrayList<>();
+        List<Cell> totalContractCells = new ArrayList<>();
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 1,
+                totalDataAboutBudgetStudents.get(COLUMN_2),
+                totalDataAboutContractStudents.get(COLUMN_2),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 2,
+                totalDataAboutBudgetStudents.get(COLUMN_3),
+                totalDataAboutContractStudents.get(COLUMN_3),
+                totalBudgetCells, totalContractCells
+        );
+
+        Cell budgetTotalCountOfStudentsWhoHaveNotAcademicVacation = totalOnFacultyRowPart1.createCell(3);
+        budgetTotalCountOfStudentsWhoHaveNotAcademicVacation.setCellFormula(
+                totalOnFacultyRowPart1.getCell(1).getAddress().toString() +
+                "-" +
+                totalOnFacultyRowPart1.getCell(2).getAddress().toString()
+        );
+        totalBudgetCells.add(budgetTotalCountOfStudentsWhoHaveNotAcademicVacation);
+
+        Cell contractTotalCountOfStudentsWhoHaveNotAcademicVacation = totalOnFacultyRowPart2.createCell(3);
+        contractTotalCountOfStudentsWhoHaveNotAcademicVacation.setCellFormula(
+                totalOnFacultyRowPart2.getCell(1).getAddress().toString() +
+                "-" +
+                totalOnFacultyRowPart2.getCell(2).getAddress().toString()
+        );
+        totalContractCells.add(contractTotalCountOfStudentsWhoHaveNotAcademicVacation);
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 4,
+                totalDataAboutBudgetStudents.get(COLUMN_5),
+                totalDataAboutContractStudents.get(COLUMN_5),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalBudgetCells.add(totalOnFacultyRowPart1.createCell(5));
+        totalContractCells.add(totalOnFacultyRowPart2.createCell(5));
+
+        Cell totalBudgetThatDidNotComeToExamWithNotImportantReasonCell = totalOnFacultyRowPart1.createCell(6);
+        totalBudgetThatDidNotComeToExamWithNotImportantReasonCell.setCellFormula(
+                totalOnFacultyRowPart1.getCell(1).getAddress().toString() +
+                "-" +
+                totalOnFacultyRowPart1.getCell(4).getAddress().toString()
+        );
+        totalBudgetCells.add(totalBudgetThatDidNotComeToExamWithNotImportantReasonCell);
+
+        Cell totalContractThatDidNotComeToExamWithNotImportantReasonCell = totalOnFacultyRowPart2.createCell(6);
+        totalContractThatDidNotComeToExamWithNotImportantReasonCell.setCellFormula(
+                totalOnFacultyRowPart2.getCell(1).getAddress().toString() +
+                "-" +
+                totalOnFacultyRowPart2.getCell(4).getAddress().toString()
+        );
+        totalContractCells.add(totalContractThatDidNotComeToExamWithNotImportantReasonCell);
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 7,
+                totalDataAboutBudgetStudents.get(COLUMN_8),
+                totalDataAboutContractStudents.get(COLUMN_8),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 8,
+                totalDataAboutBudgetStudents.get(COLUMN_9),
+                totalDataAboutContractStudents.get(COLUMN_9),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 9,
+                totalDataAboutBudgetStudents.get(COLUMN_10),
+                totalDataAboutContractStudents.get(COLUMN_10),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 10,
+                totalDataAboutBudgetStudents.get(COLUMN_11),
+                totalDataAboutContractStudents.get(COLUMN_11),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 11,
+                totalDataAboutBudgetStudents.get(COLUMN_12),
+                totalDataAboutContractStudents.get(COLUMN_12),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 12,
+                totalDataAboutBudgetStudents.get(COLUMN_13),
+                totalDataAboutContractStudents.get(COLUMN_13),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 13,
+                totalDataAboutBudgetStudents.get(COLUMN_14),
+                totalDataAboutContractStudents.get(COLUMN_14),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 14,
+                totalDataAboutBudgetStudents.get(COLUMN_15),
+                totalDataAboutContractStudents.get(COLUMN_15),
+                totalBudgetCells, totalContractCells
+        );
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                totalOnFacultyRowPart1, totalOnFacultyRowPart2, 15,
+                totalDataAboutBudgetStudents.get(COLUMN_16),
+                totalDataAboutContractStudents.get(COLUMN_16),
+                totalBudgetCells, totalContractCells
+        );
+
+        Cell totalAbsoluteSuccessOfBudgets = totalOnFacultyRowPart1.createCell(16);
+        totalAbsoluteSuccessOfBudgets.setCellFormula(
+                totalOnFacultyRowPart1.getCell(7).getAddress().toString() +
+                "/" +
+                totalOnFacultyRowPart1.getCell(3).getAddress().toString() +
+                "* 100"
+        );
+        totalBudgetCells.add(totalAbsoluteSuccessOfBudgets);
+
+        Cell totalAbsoluteSuccessOfContracts = totalOnFacultyRowPart2.createCell(16);
+        totalAbsoluteSuccessOfContracts.setCellFormula(
+                totalOnFacultyRowPart2.getCell(7).getAddress().toString() +
+                "/" +
+                totalOnFacultyRowPart2.getCell(3).getAddress().toString() +
+                "* 100"
+        );
+        totalContractCells.add(totalAbsoluteSuccessOfContracts);
+
+        totalBudgetCells.add(totalOnFacultyRowPart1.createCell(17));
+        totalContractCells.add(totalOnFacultyRowPart2.createCell(17));
+
+        totalBudgetCells.add(totalOnFacultyRowPart1.createCell(18));
+        totalContractCells.add(totalOnFacultyRowPart2.createCell(18));
+
+        totalBudgetCells.add(totalOnFacultyRowPart1.createCell(19));
+        totalContractCells.add(totalOnFacultyRowPart2.createCell(19));
+
+        totalBudgetCells.add(totalOnFacultyRowPart1.createCell(20));
+        totalContractCells.add(totalOnFacultyRowPart2.createCell(20));
+
+        totalBudgetCells.add(totalOnFacultyRowPart1.createCell(21));
+        totalContractCells.add(totalOnFacultyRowPart2.createCell(21));
+
+        setCellStyleAndFontForCells(totalBudgetCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true);
+        setCellStyleAndFontForCells(totalContractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true);
+
+        setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, totalBudgetCells);
+        setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, totalContractCells);
 
         numberOfRow += 3;
 
@@ -620,7 +812,6 @@ public class SessionReportService {
         setCellStyleAndFontForCell(contract, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, false);
 
         Cell budgetColorCell = paymentTypesRowPart1.createCell(2);
-            //Cell budgetColorCellPart2 = paymentTypesRowPart1.createCell(3);
         budgetColorCell.setCellStyle(workbook.createCellStyle());
         sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow, 2, 3));
         setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, Collections.singletonList(budgetColorCell));
@@ -632,53 +823,62 @@ public class SessionReportService {
 
         numberOfRow += 3;
 
+        Row deanRowPart1 = sheet.createRow(numberOfRow);
+        Cell positionCell = deanRowPart1.createCell(0);
+        positionCell.setCellValue("Декан");
+        setBorders(new CellRangeAddress(numberOfRow, numberOfRow, 1, 9), sheet,
+                false, false, false, true);
 
+        Cell dean = deanRowPart1.createCell(10);
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow, 10, 15));
+        dean.setCellValue(facultyService.getById(facultyId).getDean());
 
+        Cell date = deanRowPart1.createCell(17);
+        date.setCellValue("'___',_______________, " + currentYearService.getYear() + "p.");
+        setCellStyleAndFontForCells(Arrays.asList(positionCell, dean, date), workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 14, false);
+        sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow, 17, 20));
+
+        Row deanRowPart2 = sheet.createRow(++numberOfRow);
+        Cell signature = deanRowPart2.createCell(5);
+        signature.setCellValue("(Підпис)");
     }
 
-    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse, int semester) {
+    private int addDataForOneCourse(List<StudentGroup> groups, int numberOfRow, Workbook workbook, LocalDate sessionStartDate, int numberOfCourse, int semester,
+                                    Map<String, List<Cell>> totalDataAboutBudgetStudents, Map<String, List<Cell>> totalDataAboutContractStudents) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         Map<String, List<Cell>> dataAboutBudgetStudents = createMapWithNeedLists();
         Map<String, List<Cell>> dataAboutContractStudents = createMapWithNeedLists();
 
         for (StudentGroup studentGroup : groups) {
-            Row dataAboutOneStudentGroupPart1 = sheet.createRow(numberOfRow);
-            dataAboutOneStudentGroupPart1.setHeightInPoints((float) 12.75);
+            Row dataAboutBudgetStudentsInGroup = sheet.createRow(numberOfRow);
+            dataAboutBudgetStudentsInGroup.setHeightInPoints((float) 12.75);
 
-            Row dataAboutOneStudentGroupPart2 = sheet.createRow(numberOfRow + 1);
-            dataAboutOneStudentGroupPart2.setHeightInPoints((float) 12.75);
+            Row dataAboutContractStudentsInGroup = sheet.createRow(numberOfRow + 1);
+            dataAboutContractStudentsInGroup.setHeightInPoints((float) 12.75);
 
-            Cell groupName = dataAboutOneStudentGroupPart1.createCell(0);
+            Cell groupName = dataAboutBudgetStudentsInGroup.createCell(0);
             sheet.addMergedRegion(new CellRangeAddress(numberOfRow, numberOfRow + 1, 0, 0));
             groupName.setCellValue(studentGroup.getName());
             setCellStyleAndFontForCell(groupName, workbook, HorizontalAlignment.LEFT, VerticalAlignment.CENTER, 10, true);
 
-            calculateDataOnOneGroupByPayment(dataAboutOneStudentGroupPart1, dataAboutBudgetStudents, Payment.BUDGET,
+            calculateDataOnOneGroupByPayment(dataAboutBudgetStudentsInGroup, dataAboutBudgetStudents, Payment.BUDGET,
                     studentGroup.getId(), sessionStartDate, semester);
-            calculateDataOnOneGroupByPayment(dataAboutOneStudentGroupPart2, dataAboutContractStudents, Payment.CONTRACT,
+            calculateDataOnOneGroupByPayment(dataAboutContractStudentsInGroup, dataAboutContractStudents, Payment.CONTRACT,
                     studentGroup.getId(), sessionStartDate, semester);
 
             numberOfRow += 2;
         }
 
         List<Cell> budgedCells = new ArrayList<>();
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsOnSessionStart"));
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsOnSessionStartWhoHaveAcademicVacation"));
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsOnSessionStartWhoHaveNotAcademicVacation"));
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsWhoPassAllExamOnTime"));
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsThatDidNotComeToExamsWithAnImportantReason"));
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsThatDidNotComeToExamsWithANotImportantReason"));
-        budgedCells.addAll(dataAboutBudgetStudents.get("studentsThatPassedAllCourses"));
+        for (List<Cell> cells : dataAboutBudgetStudents.values()) {
+            budgedCells.addAll(cells);
+        }
 
         List<Cell> contractCells = new ArrayList<>();
-        contractCells.addAll(dataAboutContractStudents.get("studentsOnSessionStart"));
-        contractCells.addAll(dataAboutContractStudents.get("studentsOnSessionStartWhoHaveAcademicVacation"));
-        contractCells.addAll(dataAboutContractStudents.get("studentsOnSessionStartWhoHaveNotAcademicVacation"));
-        contractCells.addAll(dataAboutContractStudents.get("studentsWhoPassAllExamOnTime"));
-        contractCells.addAll(dataAboutContractStudents.get("studentsThatDidNotComeToExamsWithAnImportantReason"));
-        contractCells.addAll(dataAboutContractStudents.get("studentsThatDidNotComeToExamsWithANotImportantReason"));
-        contractCells.addAll(dataAboutContractStudents.get("studentsThatPassedAllCourses"));
+        for (List<Cell> cells : dataAboutContractStudents.values()) {
+            contractCells.addAll(cells);
+        }
 
         setCellStyleAndFontForCells(budgedCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
         setCellStyleAndFontForCells(contractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, false);
@@ -688,19 +888,34 @@ public class SessionReportService {
 
         //-------------------------------------------------------------
         return calculateDataForOneYearOfStudy(numberOfRow, numberOfCourse, workbook,
-                dataAboutBudgetStudents, dataAboutContractStudents);
+                dataAboutBudgetStudents, dataAboutContractStudents,
+                totalDataAboutBudgetStudents, totalDataAboutContractStudents);
     }
 
     private Map<String, List<Cell>> createMapWithNeedLists() {
         Map<String, List<Cell>> informationAboutStudentsByPayment = new HashMap<>();
 
-        informationAboutStudentsByPayment.put("studentsOnSessionStart", new ArrayList<>());
-        informationAboutStudentsByPayment.put("studentsOnSessionStartWhoHaveAcademicVacation", new ArrayList<>());
-        informationAboutStudentsByPayment.put("studentsOnSessionStartWhoHaveNotAcademicVacation", new ArrayList<>());
-        informationAboutStudentsByPayment.put("studentsWhoPassAllExamOnTime", new ArrayList<>());
-        informationAboutStudentsByPayment.put("studentsThatDidNotComeToExamsWithAnImportantReason", new ArrayList<>());
-        informationAboutStudentsByPayment.put("studentsThatDidNotComeToExamsWithANotImportantReason", new ArrayList<>());
-        informationAboutStudentsByPayment.put("studentsThatPassedAllCourses", new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_2, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_3, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_4, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_5, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_6, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_7, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_8, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_9, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_10, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_11, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_12, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_13, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_14, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_15, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_16, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_17, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_18, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_19, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_20, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_21, new ArrayList<>());
+        informationAboutStudentsByPayment.put(COLUMN_22, new ArrayList<>());
 
         return informationAboutStudentsByPayment;
     }
@@ -710,7 +925,7 @@ public class SessionReportService {
         int countStudentsOnSessionStartByPayment =
                 studentDegreeService.getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroupId, sessionStartDate, payment) +
                         studentExpelService.getCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(studentGroupId, sessionStartDate, payment);
-        createCellAndSetHereValueAndAddToList(row, 1, countStudentsOnSessionStartByPayment, map.get("studentsOnSessionStart"));
+        createCellAndSetHereValueAndAddToList(row, 1, countStudentsOnSessionStartByPayment, map.get(COLUMN_2));
 
         int countStudentsOnSessionStartAndWhoHaveAcademicVacationByPayment =
                 studentDegreeService.getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
@@ -718,7 +933,7 @@ public class SessionReportService {
                         studentExpelService.getCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
                                 studentGroupId, sessionStartDate, payment);
         createCellAndSetHereValueAndAddToList(
-                row, 2, countStudentsOnSessionStartAndWhoHaveAcademicVacationByPayment, map.get("studentsOnSessionStartWhoHaveAcademicVacation"));
+                row, 2, countStudentsOnSessionStartAndWhoHaveAcademicVacationByPayment, map.get(COLUMN_3));
 
         Cell countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment = row.createCell(3);
         countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment.setCellFormula(
@@ -726,19 +941,13 @@ public class SessionReportService {
                 "-" +
                 row.getCell(2).getAddress().toString()
         );
-        map.get("studentsOnSessionStartWhoHaveNotAcademicVacation").add(countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment);
-        //цей код може бути використаний для підрахунку кількості студентів, що вчасно все здали
-            /*int countStudentsWhoWasPassExamInTimeByPayment = studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamOnTime(
-                    studentGroup.getId(), semester, payment
-            );
-            createCellAndSetHereValueAndAddToList(
-                    dataAboutOneStudentGroupPart1, 4, countStudentsWhoWasPassExamInTimeByPayment, budgetWhoPassAllExamOnTimeList);*/
+        map.get(COLUMN_4).add(countStudentsOnSessionStartAndWhoHaveNotAcademicVacationCellByPayment);
 
         Cell countStudentsWhoWasPassExamInTimeByPayment = row.createCell(4);
         countStudentsWhoWasPassExamInTimeByPayment.setCellFormula(row.getCell(3).getAddress().toString());
-        map.get("studentsWhoPassAllExamOnTime").add(countStudentsWhoWasPassExamInTimeByPayment);
+        map.get(COLUMN_5).add(countStudentsWhoWasPassExamInTimeByPayment);
 
-        map.get("studentsThatDidNotComeToExamsWithAnImportantReason").add(row.createCell(5));
+        map.get(COLUMN_6).add(row.createCell(5));
 
         Cell countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment = row.createCell(6);
         countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment.setCellFormula(
@@ -746,20 +955,121 @@ public class SessionReportService {
                 "-" +
                 row.getCell(4).getAddress().toString()
         );
-        map.get("studentsThatDidNotComeToExamsWithANotImportantReason").add(countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment);
+        map.get(COLUMN_7).add(countStudentsThatDidNotComeToExamWithNotImportantReasonCellByPayment);
 
         int countStudentsThatPassedAllCoursesByPayment =
-                studentDegreeService.getCountAllStudentsInGroupThatPassedAllExamBySemesterAndPayment(
-                        studentGroupId, semester, payment
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(
+                        studentGroupId, semester, payment, Arrays.asList( 3, 4, 5)
                 );
 
         createCellAndSetHereValueAndAddToList(
-                row, 7, countStudentsThatPassedAllCoursesByPayment, map.get("studentsThatPassedAllCourses")
+                row, 7, countStudentsThatPassedAllCoursesByPayment, map.get(COLUMN_8)
         );
+
+        int countStudentsThatPassedAllCoursesOnlyFor5 =
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(
+                        studentGroupId, semester, payment, Arrays.asList(5)
+                );
+
+        createCellAndSetHereValueAndAddToList(
+                row, 8, countStudentsThatPassedAllCoursesOnlyFor5, map.get(COLUMN_9)
+        );
+
+        int countStudentsThatPassedAllCoursesOnlyFor4Or5 =
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(
+                        studentGroupId, semester, payment, Arrays.asList(4, 5)
+                ) - countStudentsThatPassedAllCoursesOnlyFor5;
+
+        createCellAndSetHereValueAndAddToList(
+                row, 9, countStudentsThatPassedAllCoursesOnlyFor4Or5, map.get(COLUMN_10)
+        );
+
+        int countStudentsThatPassedAllCoursesOnlyFor3 =
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(
+                        studentGroupId, semester, payment, Arrays.asList(3)
+                );
+
+        createCellAndSetHereValueAndAddToList(
+                row, 11, countStudentsThatPassedAllCoursesOnlyFor3, map.get(COLUMN_12)
+        );
+
+        int countStudentsThatPassedAllCoursesOnlyFor3Or4Or5 =
+                countStudentsThatPassedAllCoursesByPayment - countStudentsThatPassedAllCoursesOnlyFor5 -
+                        countStudentsThatPassedAllCoursesOnlyFor4Or5 - countStudentsThatPassedAllCoursesOnlyFor3;
+
+        createCellAndSetHereValueAndAddToList(
+                row, 10, countStudentsThatPassedAllCoursesOnlyFor3Or4Or5, map.get(COLUMN_11)
+        );
+
+        int countAllStudentsInStudentGroupWhoHaveOneBadGrade =
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+                  studentGroupId, semester, payment, 1
+                );
+
+        createCellAndSetHereValueAndAddToList(
+                row, 13, countAllStudentsInStudentGroupWhoHaveOneBadGrade,
+                map.get(COLUMN_14)
+        );
+
+        int countAllStudentsInStudentGroupWhoHaveTwoBadGrades =
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+                        studentGroupId, semester, payment, 2
+                );
+
+        createCellAndSetHereValueAndAddToList(
+                row, 14, countAllStudentsInStudentGroupWhoHaveTwoBadGrades,
+                map.get(COLUMN_15)
+        );
+
+        int countAllStudentsInStudentGroupWhoHaveThreeBadGrades =
+                studentDegreeService.getCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+                        studentGroupId, semester, payment, 3
+                );
+
+        createCellAndSetHereValueAndAddToList(
+                row, 15, countAllStudentsInStudentGroupWhoHaveThreeBadGrades,
+                map.get(COLUMN_16)
+        );
+
+        Cell countAllStudentsInStudentGroupWhoHaveOneOrMoreBadGrades = row.createCell(12);
+        countAllStudentsInStudentGroupWhoHaveOneOrMoreBadGrades.setCellFormula(
+                row.getCell(13).getAddress().toString() +
+                "+" +
+                row.getCell(14).getAddress().toString() +
+                "+" +
+                row.getCell(15).getAddress().toString()
+        );
+        map.get(COLUMN_13).add(countAllStudentsInStudentGroupWhoHaveOneOrMoreBadGrades);
+
+        Cell absoluteSuccess = row.createCell(16);
+        absoluteSuccess.setCellFormula(
+                row.getCell(7).getAddress().toString() +
+                "/" +
+                row.getCell(3).getAddress().toString() +
+                "* 100"
+        );
+        map.get(COLUMN_17).add(absoluteSuccess);
+
+        Cell studentsWhoHaveCompletedTheTheoreticalCourse = row.createCell(17);
+        map.get(COLUMN_18).add(studentsWhoHaveCompletedTheTheoreticalCourse);
+
+        Cell studentsWhoStayForSecondYear = row.createCell(18);
+        map.get(COLUMN_19).add(studentsWhoStayForSecondYear);
+
+        Cell studentsWhoWereExpelled = row.createCell(19);
+        map.get(COLUMN_20).add(studentsWhoWereExpelled);
+
+        Cell studentsWhoEnterToNextCourseInExtramural = row.createCell(20);
+        map.get(COLUMN_21).add(studentsWhoEnterToNextCourseInExtramural);
+
+        Cell studentsWhoEnterToNextCourseInFullTime = row.createCell(21);
+        map.get(COLUMN_22).add(studentsWhoEnterToNextCourseInFullTime);
     }
 
     private int calculateDataForOneYearOfStudy(int numberOfRow, int numberOfCourse, Workbook workbook,
-                                               Map<String, List<Cell>> budgetMap, Map<String, List<Cell>> contractMap) {
+                                   Map<String, List<Cell>> budgetMap, Map<String, List<Cell>> contractMap,
+                                   Map<String, List<Cell>> totalDataAboutBudgetStudents,
+                                   Map<String, List<Cell>> totalDataAboutContractStudents) {
         Sheet sheet = workbook.getSheet(SHEET_NAME);
 
         Row rowPart1 = sheet.createRow(numberOfRow);
@@ -775,17 +1085,22 @@ public class SessionReportService {
 
         calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
                 rowPart1, rowPart2, 1,
-                budgetMap.get("studentsOnSessionStart"),
-                contractMap.get("studentsOnSessionStart"),
+                budgetMap.get(COLUMN_2),
+                contractMap.get(COLUMN_2),
                 totalBudgetCells, totalContractCells
         );
+        totalDataAboutBudgetStudents.get(COLUMN_2).add(rowPart1.getCell(1));
+        totalDataAboutContractStudents.get(COLUMN_2).add(rowPart2.getCell(1));
 
         calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
                 rowPart1, rowPart2, 2,
-                budgetMap.get("studentsOnSessionStartWhoHaveAcademicVacation"),
-                contractMap.get("studentsOnSessionStartWhoHaveAcademicVacation"),
+                budgetMap.get(COLUMN_3),
+                contractMap.get(COLUMN_3),
                 totalBudgetCells, totalContractCells
         );
+
+        totalDataAboutBudgetStudents.get(COLUMN_3).add(rowPart1.getCell(2));
+        totalDataAboutContractStudents.get(COLUMN_3).add(rowPart2.getCell(2));
 
         Cell budgetTotalCountStudentsWhoHaveNotAcademicVacation = rowPart1.createCell(3);
         budgetTotalCountStudentsWhoHaveNotAcademicVacation.setCellFormula(
@@ -805,10 +1120,13 @@ public class SessionReportService {
 
         calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
                 rowPart1, rowPart2, 4,
-                budgetMap.get("studentsWhoPassAllExamOnTime"),
-                contractMap.get("studentsWhoPassAllExamOnTime"),
+                budgetMap.get(COLUMN_5),
+                contractMap.get(COLUMN_5),
                 totalBudgetCells, totalContractCells
         );
+
+        totalDataAboutBudgetStudents.get(COLUMN_5).add(rowPart1.getCell(4));
+        totalDataAboutContractStudents.get(COLUMN_5).add(rowPart2.getCell(4));
 
         totalBudgetCells.add(rowPart1.createCell(5));
         totalContractCells.add(rowPart2.createCell(5));
@@ -831,10 +1149,126 @@ public class SessionReportService {
 
         calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
                 rowPart1, rowPart2, 7,
-                budgetMap.get("studentsThatPassedAllCourses"),
-                contractMap.get("studentsThatPassedAllCourses"),
+                budgetMap.get(COLUMN_8),
+                contractMap.get(COLUMN_8),
                 totalBudgetCells, totalContractCells
         );
+
+        totalDataAboutBudgetStudents.get(COLUMN_8).add(rowPart1.getCell(7));
+        totalDataAboutContractStudents.get(COLUMN_8).add(rowPart2.getCell(7));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 8,
+                budgetMap.get(COLUMN_9),
+                contractMap.get(COLUMN_9),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_9).add(rowPart1.getCell(8));
+        totalDataAboutContractStudents.get(COLUMN_9).add(rowPart2.getCell(8));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 9,
+                budgetMap.get(COLUMN_10),
+                contractMap.get(COLUMN_10),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_10).add(rowPart1.getCell(9));
+        totalDataAboutContractStudents.get(COLUMN_10).add(rowPart2.getCell(9));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 10,
+                budgetMap.get(COLUMN_11),
+                contractMap.get(COLUMN_11),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_11).add(rowPart1.getCell(10));
+        totalDataAboutContractStudents.get(COLUMN_11).add(rowPart2.getCell(10));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 11,
+                budgetMap.get(COLUMN_12),
+                contractMap.get(COLUMN_12),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_12).add(rowPart1.getCell(11));
+        totalDataAboutContractStudents.get(COLUMN_12).add(rowPart2.getCell(11));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 12,
+                budgetMap.get(COLUMN_13),
+                contractMap.get(COLUMN_13),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_13).add(rowPart1.getCell(12));
+        totalDataAboutContractStudents.get(COLUMN_13).add(rowPart2.getCell(12));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 13,
+                budgetMap.get(COLUMN_14),
+                contractMap.get(COLUMN_14),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_14).add(rowPart1.getCell(13));
+        totalDataAboutContractStudents.get(COLUMN_14).add(rowPart2.getCell(13));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 14,
+                budgetMap.get(COLUMN_15),
+                contractMap.get(COLUMN_15),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_15).add(rowPart1.getCell(14));
+        totalDataAboutContractStudents.get(COLUMN_15).add(rowPart2.getCell(14));
+
+        calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
+                rowPart1, rowPart2, 15,
+                budgetMap.get(COLUMN_16),
+                contractMap.get(COLUMN_16),
+                totalBudgetCells, totalContractCells
+        );
+
+        totalDataAboutBudgetStudents.get(COLUMN_16).add(rowPart1.getCell(15));
+        totalDataAboutContractStudents.get(COLUMN_16).add(rowPart2.getCell(15));
+
+        Cell totalAbsoluteSuccessOfBudgets = rowPart1.createCell(16);
+        totalAbsoluteSuccessOfBudgets.setCellFormula(
+                rowPart1.getCell(7).getAddress().toString() +
+                "/" +
+                rowPart1.getCell(3).getAddress().toString() +
+                "* 100"
+        );
+        totalBudgetCells.add(totalAbsoluteSuccessOfBudgets);
+
+        Cell totalAbsoluteSuccessOfContracts = rowPart2.createCell(16);
+        totalAbsoluteSuccessOfContracts.setCellFormula(
+                rowPart2.getCell(7).getAddress().toString() +
+                "/" +
+                rowPart2.getCell(3).getAddress().toString() +
+                "* 100"
+        );
+        totalContractCells.add(totalAbsoluteSuccessOfContracts);
+
+        totalBudgetCells.add(rowPart1.createCell(17));
+        totalContractCells.add(rowPart2.createCell(17));
+
+        totalBudgetCells.add(rowPart1.createCell(18));
+        totalContractCells.add(rowPart2.createCell(18));
+
+        totalBudgetCells.add(rowPart1.createCell(19));
+        totalContractCells.add(rowPart2.createCell(19));
+
+        totalBudgetCells.add(rowPart1.createCell(20));
+        totalContractCells.add(rowPart2.createCell(20));
+
+        totalBudgetCells.add(rowPart1.createCell(21));
+        totalContractCells.add(rowPart2.createCell(21));
 
         setCellStyleAndFontForCells(totalBudgetCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true);
         setCellStyleAndFontForCells(totalContractCells, workbook, HorizontalAlignment.CENTER, VerticalAlignment.CENTER, 10, true);
@@ -854,13 +1288,14 @@ public class SessionReportService {
     }
 
     private void calculateTotalCountOfBudgedAndContractStudentsInColumnForOneCourse(
-            Row rowPart1, Row rowPart2, int columnNumber,
+            Row budgetRow, Row contractRow, int columnNumber,
             List<Cell> budgedCells, List<Cell> contractCell, List<Cell> totalBudgetCells, List<Cell> totalContractCells
     ) {
-        Cell totalCountBudgetStudents = rowPart1.createCell(columnNumber);
+        Cell totalCountBudgetStudents = budgetRow.createCell(columnNumber);
         createFormulaForCell(budgedCells, totalCountBudgetStudents);
         totalBudgetCells.add(totalCountBudgetStudents);
-        Cell totalCountContractStudents = rowPart2.createCell(columnNumber);
+
+        Cell totalCountContractStudents = contractRow.createCell(columnNumber);
         createFormulaForCell(contractCell, totalCountContractStudents);
         totalContractCells.add(totalCountContractStudents);
     }
@@ -879,7 +1314,11 @@ public class SessionReportService {
             formulaForStudentsByPayment.append("+");
         }
 
-        formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
+        if (formulaForStudentsByPayment.toString().length() > 2) {
+            formulaForStudentsByPayment.deleteCharAt(formulaForStudentsByPayment.length() - 1);
+        } else {
+            return;
+        }
         totalCountCell.setCellFormula(formulaForStudentsByPayment.toString());
     }
 
