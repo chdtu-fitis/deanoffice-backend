@@ -89,12 +89,12 @@ public class SessionReportService {
 
         try (OutputStream outputStream = new FileOutputStream(TEMP_DiRECTORY + FILE_NAME)) {
             Workbook wb = new XSSFWorkbook();
+
             Sheet sheet = wb.createSheet(SHEET_NAME);
-
             sheet.createFreezePane(1, 15);
-
             setWidthsForColumns(sheet);
             addMergeRegions(sheet);
+
             DataAboutSemesters dataAboutSemesters = createHead(sheet, user, sessionStartDate, tuitionForm);
             createBody(user.getFaculty().getId(), wb, 15, sessionStartDate, tuitionForm, dataAboutSemesters);
 
@@ -591,9 +591,9 @@ public class SessionReportService {
             if (semester > maxSemesterForBachelor) {
                 semester = semester - maxSemesterForBachelor;
 
-                if (previousSemester == 0) {//я в 1-му семестрі
+                if (previousSemester == 0) {
                     yearOfStudy = semester / 2 + 1;
-                } else {//я в 2-му семестрі
+                } else {
                     yearOfStudy = semester / 2;
                 }
                 numberOfCourse.setCellValue("Магістри курс " + yearOfStudy + ", сем. " + semester);
@@ -603,9 +603,9 @@ public class SessionReportService {
                     isMasterDegree = true;
                 }
             } else {
-                if (previousSemester == 0) {//я в 1-му семестрі
+                if (previousSemester == 0) {
                     yearOfStudy = semester / 2 + 1;
-                } else {//я в 2-му семестрі
+                } else {
                     yearOfStudy = semester / 2;
                 }
                 numberOfCourse.setCellValue("Бакалаври курс " + yearOfStudy + ", сем. " + semester);
@@ -886,7 +886,6 @@ public class SessionReportService {
         setCellColorForPaymentCells(FillPatternType.SOLID_FOREGROUND, IndexedColors.GREY_25_PERCENT, budgedCells);
         setCellColorForPaymentCells(FillPatternType.NO_FILL, IndexedColors.WHITE, contractCells);
 
-        //-------------------------------------------------------------
         return calculateDataForOneYearOfStudy(numberOfRow, numberOfCourse, workbook,
                 dataAboutBudgetStudents, dataAboutContractStudents,
                 totalDataAboutBudgetStudents, totalDataAboutContractStudents);
