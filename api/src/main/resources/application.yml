@@ -10,7 +10,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
-flyway.baseline-on-migrate: true
+flyway:
+  baseline-on-migrate: true
+
 #  hibernate:
 #    dialect: org.hibernate.dialect.PostgreSQLDialect
 #    show_sql: true

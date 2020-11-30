@@ -14,6 +14,6 @@ public class ScientificDegreeService {
     }
 
     public List<ScientificDegree> getScientificDegrees() {
-        return scientificDegreeRepository.findAll();
+        return scientificDegreeRepository.findAllByOrderByName();
     }
 }

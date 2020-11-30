@@ -8,7 +8,12 @@ import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -251,6 +256,13 @@ public class StudentDegreeService {
             List<Integer> ids, Payment payment, TuitionForm tuitionForm, int semester) {
         return studentDegreeRepository.findCountAllActiveDebtorsInStudentGroupsWithThreeOrMoreDebs(
                 ids, payment.toString(), tuitionForm.toString(), semester).length;
+    }
+
+    public int getStudentDegreeYear(StudentDegree studentDegree) {
+        int currentYear = currentYearService.getYear();
+        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
+        return currentYear - groupCreationYear + groupFirstYear;
     }
 
     public int getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(int studentGroupId, int semester, Payment payment, List<Integer> grades) {
