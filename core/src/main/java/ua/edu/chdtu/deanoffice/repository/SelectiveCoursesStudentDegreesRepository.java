@@ -18,16 +18,16 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     );
 
     @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
-            "WHERE sc.selectiveCourse.available = true " +
-            "AND sc.selectiveCourse.id = :selectiveCourseId ")
-    List<SelectiveCoursesStudentDegrees> findAllAvailableByStudyYearAndSelectiveCourse(
+            "WHERE sc.selectiveCourse.id = :selectiveCourseId " +
+            "ORDER BY sc.studentDegree.student.surname, sc.studentDegree.student.name, sc.studentDegree.student.patronimic")
+    List<SelectiveCoursesStudentDegrees> findBySelectiveCourse(
             @Param("selectiveCourseId") int selectiveCourseId
     );
 
     @Query("SELECT scsd FROM SelectiveCoursesStudentDegrees scsd " +
             "WHERE scsd.studentDegree.id = :studentDegreeId " +
             "AND scsd.selectiveCourse.course.semester = :semester")
-    List<SelectiveCoursesStudentDegrees> findAllByStudentDegreeIdAndSemester(
+    List<SelectiveCoursesStudentDegrees> findByStudentDegreeAndSemester(
             @Param("studentDegreeId") int studentDegreeId,
             @Param("semester") int semester
     );
