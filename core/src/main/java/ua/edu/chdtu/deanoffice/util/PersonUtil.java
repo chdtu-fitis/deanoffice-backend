@@ -77,4 +77,9 @@ public class PersonUtil {
                 + word.substring(word.indexOf("-") + 2);
         return processedWord;
     }
+
+    public static String getInitials(String surname, String name, String patronymic) {
+        String result = surname + " " + name.substring(0, 1) + ". ";
+        return result + (patronymic.length() > 0 ? patronymic.substring(0, 1) + "." : "");
+    }
 }

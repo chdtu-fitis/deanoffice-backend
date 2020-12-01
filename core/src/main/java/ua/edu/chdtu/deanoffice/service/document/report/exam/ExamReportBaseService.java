@@ -3,6 +3,8 @@ package ua.edu.chdtu.deanoffice.service.document.report.exam;
 import org.springframework.beans.factory.annotation.Autowired;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.CourseExamReportDataBean;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.GroupExamReportDataBean;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,6 +22,32 @@ public class ExamReportBaseService {
     @Autowired
     public ExamReportBaseService(CurrentYearService currentYearService) {
         this.currentYearService = currentYearService;
+    }
+
+    Map<String, String> getCourseInfoReplacements(CourseExamReportDataBean course) {
+        Map<String, String> result = new HashMap<>();
+        result.put("CourseName", course.getCourseName());
+        result.put("Hours", course.getHours());
+        result.put("ExamDate", course.getExamDate());
+        result.put("Year", course.getYearShort());
+        result.put("KCType", course.getKnowledgeControlName());
+        result.put("TeacherName", course.getTeacherName());
+        result.put("TeacherInitials", course.getTeacherInitials());
+        result.put("Semester", course.getSemester() + "-й");
+        return result;
+    }
+
+    Map<String, String> getGroupInfoReplacements(GroupExamReportDataBean group) {
+        Map<String, String> result = new HashMap<>();
+        result.put("GroupName", group.getGroupName());
+        result.put("Speciality", group.getSpeciality());
+        result.put("Specialization", group.getSpecializationName());
+        result.put("FacultyAbbr", group.getFacultyAbbr());
+        result.put("DeanInitials", group.getDeanInitials());
+        result.put("Degree", group.getDegreeName());
+        result.put("Course", group.getGroupStudyYear());
+        result.put("StudyYear", group.getAcademicYear());
+        return result;
     }
 
     Map<String, String> getCourseInfoReplacements(CourseForGroup courseForGroup) {
