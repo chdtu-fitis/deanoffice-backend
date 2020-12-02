@@ -26,10 +26,10 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId) {
-        return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndSelectiveCourse(selectiveCourseId);
+        return selectiveCoursesStudentDegreesRepository.findBySelectiveCourse(selectiveCourseId);
     }
 
     public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesByStudentDegreeIdAndSemester(int studentDegreeId, int semester) {
-        return selectiveCoursesStudentDegreesRepository.findAllByStudentDegreeIdAndSemester(studentDegreeId, semester);
+        return selectiveCoursesStudentDegreesRepository.findByStudentDegreeAndSemester(studentDegreeId, semester);
     }
 }

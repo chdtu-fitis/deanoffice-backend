@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.ExamReportDataBean;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
@@ -40,6 +41,17 @@ public class ExamReportService {
             String fileName = LanguageUtil.transliterate(coursesForGroups.get(0).getStudentGroup().getName());
             WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, coursesForGroups);
             return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
-        } else throw new Exception();
+        } else
+            throw new Exception();
+    }
+
+    public File createExamReport(List<ExamReportDataBean> examReportDataBeans, FileFormatEnum format) throws Exception {
+        if (examReportDataBeans.size() > 0) {
+
+            String fileName = LanguageUtil.transliterate(examReportDataBeans.get(0).getGroupExamReportDataBean().getGroupName());
+            WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, examReportDataBeans, 0);
+            return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
+        } else
+            throw new Exception();
     }
 }

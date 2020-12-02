@@ -17,4 +17,6 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             @Param("degreeId") int degreeId,
             @Param("semester") int semester
     );
+
+    List<SelectiveCourse> findByIdIn(List<Integer> ids);
 }

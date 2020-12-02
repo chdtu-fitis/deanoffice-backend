@@ -14,6 +14,9 @@ import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.ExamReportDataBean;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.StudentExamReportDataBean;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.IOException;
 import java.text.Collator;
@@ -36,6 +39,58 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         super(currentYearService);
         this.documentIOService = documentIOService;
     }
+
+    WordprocessingMLPackage fillTemplate(String templateName, ExamReportDataBean examReportDataBean)
+            throws IOException, Docx4JException {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
+        fillTableWithStudentInitials(template, examReportDataBean.getStudentExamReportDataBeans());
+        Map<String, String> commonDict = new HashMap<>();
+        commonDict.putAll(getGroupInfoReplacements(examReportDataBean.getGroupExamReportDataBean()));
+        commonDict.putAll(getCourseInfoReplacements(examReportDataBean.getCourseExamReportDataBean()));
+        TemplateUtil.replaceTextPlaceholdersInTemplate(template, commonDict);
+        return template;
+    }
+
+    WordprocessingMLPackage fillTemplate(String templateName, List<ExamReportDataBean> examReportDataBeans, int x)
+            throws IOException, Docx4JException {
+        WordprocessingMLPackage reportsDocument = fillTemplate(templateName, examReportDataBeans.get(0));
+        examReportDataBeans.remove(0);
+        if (examReportDataBeans.size() > 0) {
+            examReportDataBeans.forEach(examReportDataBean -> {
+                TemplateUtil.addPageBreak(reportsDocument);
+                try {
+                    reportsDocument.getMainDocumentPart().getContent()
+                            .addAll(fillTemplate(templateName, examReportDataBean).getMainDocumentPart().getContent());
+                } catch (IOException | Docx4JException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return reportsDocument;
+    }
+
+    private void fillTableWithStudentInitials(WordprocessingMLPackage template, List<StudentExamReportDataBean> students) {
+        Tbl tempTable = TemplateUtil.findTable(template, "№");
+        if (tempTable == null) {
+            return;
+        }
+        List<Object> gradeTableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+
+        int currentRowIndex = STARTING_ROW_INDEX;
+        for (StudentExamReportDataBean student : students) {
+            Tr currentRow = (Tr) gradeTableRows.get(currentRowIndex);
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("StudentInitials", PersonUtil.getInitials(student.getSurname(), student.getName(), student.getPatronimic()));
+            replacements.put("RecBook", student.getRecordBookNumber());
+            TemplateUtil.replaceInRow(currentRow, replacements);
+            currentRowIndex++;
+        }
+        removeUnfilledPlaceholders(template);
+    }
+
+
+
+
 
     WordprocessingMLPackage fillTemplate(String templateName, CourseForGroup courseForGroup)
             throws IOException, Docx4JException {

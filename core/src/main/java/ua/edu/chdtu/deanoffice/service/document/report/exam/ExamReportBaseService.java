@@ -3,18 +3,16 @@ package ua.edu.chdtu.deanoffice.service.document.report.exam;
 import org.springframework.beans.factory.annotation.Autowired;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
-import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.SemesterDetails;
-import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.StudentSummaryForAcademicReference;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.CourseExamReportDataBean;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.GroupExamReportDataBean;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
-
 
 public class ExamReportBaseService {
 
@@ -24,6 +22,32 @@ public class ExamReportBaseService {
     @Autowired
     public ExamReportBaseService(CurrentYearService currentYearService) {
         this.currentYearService = currentYearService;
+    }
+
+    Map<String, String> getCourseInfoReplacements(CourseExamReportDataBean course) {
+        Map<String, String> result = new HashMap<>();
+        result.put("CourseName", course.getCourseName());
+        result.put("Hours", course.getHours());
+        result.put("ExamDate", course.getExamDate());
+        result.put("Year", course.getYearShort());
+        result.put("KCType", course.getKnowledgeControlName());
+        result.put("TeacherName", course.getTeacherName());
+        result.put("TeacherInitials", course.getTeacherInitials());
+        result.put("Semester", course.getSemester() + "-й");
+        return result;
+    }
+
+    Map<String, String> getGroupInfoReplacements(GroupExamReportDataBean group) {
+        Map<String, String> result = new HashMap<>();
+        result.put("GroupName", group.getGroupName());
+        result.put("Speciality", group.getSpeciality());
+        result.put("Specialization", group.getSpecializationName());
+        result.put("FacultyAbbr", group.getFacultyAbbr());
+        result.put("DeanInitials", group.getDeanInitials());
+        result.put("Degree", group.getDegreeName());
+        result.put("Course", group.getGroupStudyYear());
+        result.put("StudyYear", group.getAcademicYear());
+        return result;
     }
 
     Map<String, String> getCourseInfoReplacements(CourseForGroup courseForGroup) {
@@ -42,14 +66,12 @@ public class ExamReportBaseService {
         int dbCurrentYear = currentYearService.get().getCurrYear();
         int currentYear = dbCurrentYear + 1 - (course.getSemester() % 2);
         result.put("Year", String.valueOf(currentYear).substring(2));
-        result.put("Course", String.format("%d", dbCurrentYear - courseForGroup.getStudentGroup().getCreationYear() + courseForGroup.getStudentGroup().getBeginYears()));
         result.put("KCType", course.getKnowledgeControl().getName());
         if (courseForGroup.getTeacher() != null) {
             result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
             result.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
         }
         result.put("Semester", String.format("%d-й", courseForGroup.getCourse().getSemester()));
-
         return result;
     }
 
@@ -63,8 +85,9 @@ public class ExamReportBaseService {
         result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
         result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
+        int dbCurrentYear = currentYearService.get().getCurrYear();
+        result.put("Course", String.format("%d", dbCurrentYear - courseForGroup.getStudentGroup().getCreationYear() + courseForGroup.getStudentGroup().getBeginYears()));
         result.put("StudyYear", getStudyYear());
-
         return result;
     }
 
