@@ -299,6 +299,49 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("currentYear") int currentYear);
 
 
+    @Query(value =
+            "SELECT student_degree.id, " +
+                    "       student.surname, " +
+                    "       student.name, " +
+                    "       student.patronimic, " +
+                    "       degree.name                                                    as degreeName, " +
+                    "       student_group.name                                             as groupName, " +
+                    "       :currentYear - student_group.creation_year + student_group.begin_years as year, " +
+                    "       student_group.tuition_term                                     as tuitionTerm, " +
+                    "       speciality.code                                                as specialityCode, " +
+                    "       speciality.name                                                as specialityName, " +
+                    "       specialization.name                                            as specializationName, " +
+                    "       department.abbr                                                as departmentAbbreviation, " +
+                    "       grade.points                                                   as averageGrade, " +
+                    "       course_name.name                                               as courseName, " +
+                    "       knowledge_control.name                                         as knowledgeControlName, " +
+                    "       course.semester " +
+                    "FROM student " +
+                    "       INNER JOIN student_degree ON student_degree.student_id = student.id " +
+                    "       INNER JOIN specialization ON student_degree.specialization_id = specialization.id " +
+                    "       INNER JOIN speciality ON specialization.speciality_id = speciality.id " +
+                    "       INNER JOIN degree ON specialization.degree_id = degree.id " +
+                    "       INNER JOIN student_group ON student_degree.student_group_id = student_group.id " +
+                    "       INNER JOIN selective_courses_student_degrees ON selective_courses_student_degrees.student_degree_id = student_degree.id " +
+                    "       INNER JOIN course ON course.id = selective_courses_student_degrees.selective_course_id " +
+                    "       INNER JOIN course_name ON course.course_name_id = course_name.id " +
+                    "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
+                    "       INNER JOIN department ON specialization.department_id = department.id " +
+                    "       INNER JOIN grade ON grade.student_degree_id = student_degree.id AND grade.course_id = course.id " +
+                    "WHERE specialization.faculty_id = :facultyId " +
+                    "  AND student_degree.active = true " +
+                    "  AND student_group.tuition_form = 'FULL_TIME' " +
+                    "  AND student_degree.payment = 'BUDGET' " +
+                    "  AND (grade.points IS NULL OR grade.points < 60 OR (grade.on_time = false AND course.semester = (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester)) " +
+                    "  AND grade.academic_difference = false " +
+                    "  AND course.semester <= (:currentYear - student_group.creation_year + student_group.begin_years) * 2 - 2 + :semester " +
+                    "ORDER BY degree.id, speciality.code, student_group.name, student.surname, student.name, student.patronimic, student.birth_date, semester, course_name.name", nativeQuery = true)
+    List<Object[]> findDebtorStudentsWithSelectiveCourseRaw(
+            @Param("facultyId") int facultyId,
+            @Param("semester") int semester,
+            @Param("currentYear") int currentYear);
+
+
     @Query(value = "SELECT student_degree.id, \n" +
             "student.surname, \n" +
             "student.name, \n" +

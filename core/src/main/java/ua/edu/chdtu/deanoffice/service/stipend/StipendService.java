@@ -82,6 +82,8 @@ public class StipendService {
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
         int currentYear = currentYearService.getYear();
         List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
+        List<Object[]> rawData1 = studentDegreeRepository.findDebtorStudentsWithSelectiveCourseRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
+        rawData.addAll(rawData1);
         List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
         rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
