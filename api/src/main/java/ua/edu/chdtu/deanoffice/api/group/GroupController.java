@@ -93,11 +93,10 @@ public class GroupController {
     @GetMapping("/groups")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroups(
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
-            @CurrentUser ApplicationUser user
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
         try {
-            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(active, user.getFaculty().getId());
+            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(active);
             return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
@@ -115,7 +114,7 @@ public class GroupController {
         }
     }
 
-    @Secured("ROLE_DEANOFFICER")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @GetMapping("/groups/copy")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroupsForCopy(
@@ -127,7 +126,7 @@ public class GroupController {
                 List<StudentGroup> studentGroups = studentGroupService.getAllGroups(true);
                 return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
             } else {
-                return getActiveGroups(true, user);
+                return getActiveGroups(true);
             }
         } catch (Exception exception) {
             return handleException(exception);
