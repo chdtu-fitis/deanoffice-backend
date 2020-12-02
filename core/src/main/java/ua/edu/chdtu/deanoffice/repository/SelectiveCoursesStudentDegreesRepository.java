@@ -3,8 +3,8 @@ package ua.edu.chdtu.deanoffice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
+
 import java.util.List;
 
 public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<SelectiveCoursesStudentDegrees, Integer> {
@@ -22,5 +22,13 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "AND sc.selectiveCourse.id = :selectiveCourseId ")
     List<SelectiveCoursesStudentDegrees> findAllAvailableByStudyYearAndSelectiveCourse(
             @Param("selectiveCourseId") int selectiveCourseId
+    );
+
+    @Query("SELECT scsd FROM SelectiveCoursesStudentDegrees scsd " +
+            "WHERE scsd.studentDegree.id = :studentDegreeId " +
+            "AND scsd.selectiveCourse.course.semester = :semester")
+    List<SelectiveCoursesStudentDegrees> findAllByStudentDegreeIdAndSemester(
+            @Param("studentDegreeId") int studentDegreeId,
+            @Param("semester") int semester
     );
 }
