@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.grade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,6 +48,7 @@ public class GradeController {
         this.courseForGroupService = courseForGroupService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping
     public ResponseEntity putGrades(@RequestBody List<Grade> grades) {
         try {
@@ -57,6 +59,7 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping("/academic-difference")
     public ResponseEntity putAcademicDifference(@RequestBody Map<Boolean, List<Integer>> gradesIds){
         if (gradesIds == null || gradesIds.isEmpty()){
@@ -70,6 +73,7 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{groupId}")
     public ResponseEntity getGrades(
             @PathVariable Integer groupId,
@@ -93,6 +97,7 @@ public class GradeController {
         return courses.stream().map(course -> course.getCourse().getId()).collect(Collectors.toList());
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{groupId}/{courseId}")
     public ResponseEntity getGradesByGroupIdAndCourseId(
             @PathVariable Integer groupId,
@@ -105,6 +110,7 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @DeleteMapping
     public ResponseEntity deleteGrades(@RequestParam(value = "gradeId") Integer gradeId) {
         try {

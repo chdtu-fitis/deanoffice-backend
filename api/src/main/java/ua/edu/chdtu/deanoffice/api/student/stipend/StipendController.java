@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.api.student.stipend;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -35,6 +36,7 @@ public class StipendController extends DocumentResponseController {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping
     public ResponseEntity<List<SpecialityStudentsInfoForStipendDTO>> getStipendInfo() {
         try {
@@ -48,6 +50,7 @@ public class StipendController extends DocumentResponseController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/docx")
     public ResponseEntity<File> generateStipendDocument() {
         try {
@@ -58,7 +61,7 @@ public class StipendController extends DocumentResponseController {
         }
     }
 
-
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/extra-points-update")
     public ResponseEntity updateExtraPoints(@RequestBody List <ExtraPointsDTO> extraPointsDTO,
                                             @CurrentUser ApplicationUser user){

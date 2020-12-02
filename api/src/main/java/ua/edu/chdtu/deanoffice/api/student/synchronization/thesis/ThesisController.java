@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.student.synchronization.thesis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -42,6 +43,7 @@ public class ThesisController {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/thesis-import")
     public ResponseEntity importThesis(@RequestParam("file") MultipartFile uploadFile,
                                        @CurrentUser ApplicationUser user) {
@@ -64,6 +66,7 @@ public class ThesisController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping("/thesis-import")
     public ResponseEntity thesisSaveChanges(@RequestBody ThesisDataForSaveDTO[] thesisDataForSaveDTOs,
                                             @CurrentUser ApplicationUser user) {

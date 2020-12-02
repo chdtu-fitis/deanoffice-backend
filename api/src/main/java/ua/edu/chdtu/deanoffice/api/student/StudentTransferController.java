@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentTransferDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentTransfer;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
@@ -17,7 +19,6 @@ import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentTransferService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-
 
 @RestController
 @RequestMapping("/students/degrees/transfers")
@@ -40,6 +41,7 @@ public class StudentTransferController {
         this.dataVerificationService = dataVerificationService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping
     public ResponseEntity createStudentTransfer(@RequestBody StudentTransferDTO studentTransferDTO,
                                            @CurrentUser ApplicationUser user){

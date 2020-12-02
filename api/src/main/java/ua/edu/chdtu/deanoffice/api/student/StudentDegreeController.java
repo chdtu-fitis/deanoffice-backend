@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,6 +59,7 @@ public class StudentDegreeController {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentView.Simple.class)
     @GetMapping("/students/degrees")
     public ResponseEntity getActiveStudentsDegree(@CurrentUser ApplicationUser user) {
@@ -68,6 +70,7 @@ public class StudentDegreeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentView.Detail.class)
     @GetMapping("/students/degrees/more-detail")
     public ResponseEntity getActiveStudentsDegree_moreDetail(@CurrentUser ApplicationUser user) {
@@ -82,6 +85,7 @@ public class StudentDegreeController {
         return Mapper.map(studentDegreeService.getAllByActive(true, facultyId), StudentDegreeDTO.class);
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentView.Degree.class)
     @PostMapping("/students/degrees")
     public ResponseEntity createNewStudentDegree(
@@ -126,6 +130,7 @@ public class StudentDegreeController {
         return studentDegreeService.save(newStudentDegree);
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_STUDENT"})
     @JsonView(StudentView.Degrees.class)
     @GetMapping("/students/{id}/degrees")
     public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
@@ -137,6 +142,7 @@ public class StudentDegreeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
 //    @JsonView(StudentView.Degrees.class)
     @PutMapping("/students/{id}/degrees")
     public ResponseEntity updateStudentDegrees(
@@ -188,6 +194,7 @@ public class StudentDegreeController {
         return this.studentGroupService.getById(groupId);
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @GetMapping("/groups/{group_id}/students")
     public ResponseEntity getStudentsByGroupId(@PathVariable("group_id") Integer groupId) {
         try {
@@ -198,6 +205,7 @@ public class StudentDegreeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/group/{groupId}/add-students")
     public ResponseEntity assignStudentsToGroup(
             @PathVariable("groupId") Integer groupId,
@@ -225,6 +233,7 @@ public class StudentDegreeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/students/record-book-numbers")
     public ResponseEntity assignRecordBookNumbersToStudents(
             @RequestBody Map<Integer, String> studentDegreeIdsAndRecordBooksNumbers,

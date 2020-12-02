@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.general.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.dto.DepartmentDTO;
@@ -46,6 +47,7 @@ public class DepartmentController {
         return ResponseEntity.ok(Mapper.strictMap(department, DepartmentDTO.class));
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping
     public ResponseEntity createDepartment(@Validated @RequestBody DepartmentWriteDTO departmentDTO) throws UnauthorizedFacultyDataException {
         Department department = Mapper.strictMap(departmentDTO, Department.class);
@@ -56,6 +58,7 @@ public class DepartmentController {
         return new ResponseEntity(departmentSavedDTO, HttpStatus.CREATED);
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/{id}")
     public ResponseEntity updateDepartment(@PathVariable("id") @Min(1) int id,
                                            @Validated @RequestBody DepartmentWriteDTO departmentDTO) throws UnauthorizedFacultyDataException {
@@ -66,6 +69,7 @@ public class DepartmentController {
         return new ResponseEntity(departmentSavedDTO, HttpStatus.CREATED);
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @DeleteMapping("/{id}")
     public ResponseEntity deleteDepartment(@PathVariable("id") @Min(1) int departmentId) throws UnauthorizedFacultyDataException {
         Department department = departmentService.getById(departmentId);
@@ -73,6 +77,7 @@ public class DepartmentController {
         return ResponseEntity.ok().build();
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/restore")
     public ResponseEntity restoreDepartment(@RequestParam @Min(1) int departmentId) throws UnauthorizedFacultyDataException {
         Department department = departmentService.getById(departmentId);

@@ -45,8 +45,8 @@ public enum EctsGrade {
     }
 
     public static Integer getGrade(Integer points, boolean graded) {
-        if(!graded) return getGraded(points);
-        if(points == null) return null;
+        if (!graded) return getGraded(points);
+        if (points == null) return null;
         return getEctsGrade(points).getGrade();
     }
 

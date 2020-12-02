@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.specialization;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,6 +67,7 @@ public class AcquiredCompetenciesController {
         return (AcquiredCompetenciesDTO) map(acquiredCompetencies, AcquiredCompetenciesDTO.class);
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PutMapping("/acquired-competencies/{acquired-competencies-id}/ukr")
     public ResponseEntity updateAcquiredCompetenciesUkr(
             @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
@@ -89,6 +91,7 @@ public class AcquiredCompetenciesController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PutMapping("/acquired-competencies/{acquired-competencies-id}/eng")
     public ResponseEntity updateAcquiredCompetenciesEng(
             @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
@@ -102,6 +105,7 @@ public class AcquiredCompetenciesController {
         }
     }
 
+    @Secured("ROLE_NAVCH_METHOD")
     @PostMapping("/acquired-competencies")
     public ResponseEntity create(@RequestBody AcquiredCompetenciesDTO acquiredCompetenciesDTO) {
         if (!acquiredCompetenciesService.isNotExist(acquiredCompetenciesDTO.getSpecializationId(), true)) {

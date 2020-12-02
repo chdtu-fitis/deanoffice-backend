@@ -314,7 +314,6 @@ public class SelectiveCourseController {
             List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
                     map(selectiveCourseStudentDegree.getSelectiveCourse(), SelectiveCourseDTO.class)).collect(Collectors.toList());
             selectiveCoursesForStudentDegreeDTO.setSelectiveCourses(selectiveCourseDTOs);
-
         }
         return ResponseEntity.ok(map(selectiveCoursesForStudentDegreeDTO, SelectiveCoursesStudentDegreeDTO.class));
     }

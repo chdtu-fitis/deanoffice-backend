@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.order;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -37,6 +38,7 @@ public class StudentSurnameChangeController {
         this.studentDegree = studentDegree;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping
     public ResponseEntity getAllForUserWhichHasEqualsSurname(@CurrentUser ApplicationUser user) {
         try {
@@ -47,6 +49,7 @@ public class StudentSurnameChangeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping
     public ResponseEntity addStudentSurnameChange(@RequestBody StudentSurnameChangeInputDTO studentSurnameChangeInputDTO,
                                                   @CurrentUser ApplicationUser user) {

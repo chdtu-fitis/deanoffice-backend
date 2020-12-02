@@ -3,10 +3,12 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.api.student.dto.ExpelledOrRenewedStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.RenewedExpelledStudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentExpelDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -58,7 +60,7 @@ public class StudentExpelController {
         this.studentUtil = studentUtil;
     }
 
-
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentView.Expel.class)
     @PostMapping
     public ResponseEntity expelStudent(@RequestBody StudentExpelDTO studentExpelDTO) {
@@ -83,6 +85,7 @@ public class StudentExpelController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/search")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchByShortNameAndDate(
@@ -108,6 +111,7 @@ public class StudentExpelController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{id}/expels-and-renews")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchExpelsAndRenewsByStudentDegreeId(
@@ -155,6 +159,7 @@ public class StudentExpelController {
         return studentExpel;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping
     @JsonView(StudentView.Expel.class)
     public ResponseEntity getAllExpelledStudents(@CurrentUser ApplicationUser user) {
@@ -166,6 +171,7 @@ public class StudentExpelController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/renewed")
     public ResponseEntity renewExpelledStudent(@RequestBody RenewedExpelledStudentDTO renewedExpelledStudentDTO) {
         try {

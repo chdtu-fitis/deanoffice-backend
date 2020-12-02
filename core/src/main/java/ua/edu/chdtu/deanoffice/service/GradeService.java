@@ -9,7 +9,6 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.util.*;
@@ -29,16 +28,14 @@ public class GradeService {
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
     private final StudentDegreeRepository studentDegreeRepository;
-    private CourseService courseService;
     private KnowledgeControlService knowledgeControlService;
 
     @Autowired
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
-                        StudentDegreeRepository studentDegreeRepository, CourseService courseService, KnowledgeControlService knowledgeControlService) {
+                        StudentDegreeRepository studentDegreeRepository, KnowledgeControlService knowledgeControlService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
         this.studentDegreeRepository = studentDegreeRepository;
-        this.courseService = courseService;
         this.knowledgeControlService = knowledgeControlService;
     }
 
@@ -88,7 +85,7 @@ public class GradeService {
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
         grades.forEach(grade -> {
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-            Course course = courseService.getById(grade.getCourse().getId());
+            Course course = courseRepository.findOne(grade.getCourse().getId());
             grade.setGrade(EctsGrade.getGrade(grade.getPoints(), course.getKnowledgeControl().isGraded()));
         });
         return grades;
@@ -140,8 +137,17 @@ public class GradeService {
         return gradeRepository.findByCourseAndGroup(courseId, groupId);
     }
 
+    @Transactional
     public void saveGradesByCourse(Course course, List<Grade> grades, Map<String, Boolean> gradedDefinition) {
+        List<Grade> gradesToDelete = new ArrayList<>();
         for (Grade grade : grades) {
+            Grade possibleOldGrade = gradeRepository.getByStudentDegreeIdAndCourseId(grade.getStudentDegree().getId(), course.getId());
+            if (possibleOldGrade != null) {
+                gradesToDelete.add(grade);
+                synchronizeGrades(grade, possibleOldGrade);
+                gradeRepository.save(possibleOldGrade);
+                continue;
+            }
             grade.setCourse(course);
             Boolean newGradedValue = gradedDefinition.get(NEW_GRADED_VALUE);
             if (newGradedValue != null) {
@@ -153,6 +159,15 @@ public class GradeService {
             }
             gradeRepository.save(grade);
         }
+        gradeRepository.delete(gradesToDelete);
+    }
+
+    private void synchronizeGrades(Grade gradeFrom, Grade gradeTo) {
+        gradeTo.setPoints(gradeFrom.getPoints());
+        gradeTo.setEcts(EctsGrade.getEctsGrade(gradeFrom.getPoints()));
+        gradeTo.setAcademicDifference(gradeFrom.isAcademicDifference());
+        gradeTo.setOnTime(gradeFrom.getOnTime());
+        gradeTo.setGrade(EctsGrade.getGrade(gradeFrom.getPoints(), gradeTo.getCourse().getKnowledgeControl().isGraded()));
     }
 
     public void deleteGradeById(Integer gradeId) {

@@ -37,12 +37,12 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(req, res);
             return;
         }
-        UsernamePasswordAuthenticationToken authentication = getAuthentication(token);
+        UsernamePasswordAuthenticationToken authentication = getAuthentication(token, req);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(req, res);
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(String token) {
+    private UsernamePasswordAuthenticationToken getAuthentication(String token, HttpServletRequest req) {
         String user;
         String facultyId;
         List<GrantedAuthority> roles = new ArrayList<>();
@@ -55,10 +55,13 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                 user = claims.getSubject();
                 facultyId = claims.getIssuer();
                 List<String> roleStrs = claims.get("rol", List.class);
-                if (roleStrs != null)
+                if (roleStrs != null) {
                     roles = roleStrs.stream()
-                            .map(role -> new SimpleGrantedAuthority((String)role))
+                            .map(role -> new SimpleGrantedAuthority((String) role))
                             .collect(Collectors.toList());
+                    if (roleStrs.contains("ROLE_NAVCH_METHOD"))
+                        facultyId = req.getHeader("X-FacultyId");
+                }
             } catch (JwtException e) {
                 return null;
             }
