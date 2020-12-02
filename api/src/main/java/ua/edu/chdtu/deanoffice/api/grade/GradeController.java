@@ -18,12 +18,16 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,16 +40,19 @@ public class GradeController {
     private GradeService gradeService;
     private StudentDegreeService studentDegreeService;
     private CourseForGroupService courseForGroupService;
+    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     @Autowired
     public GradeController(
             GradeService gradeService,
             StudentDegreeService studentDegreeService,
-            CourseForGroupService courseForGroupService
+            CourseForGroupService courseForGroupService,
+            SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService
     ) {
         this.gradeService = gradeService;
         this.studentDegreeService = studentDegreeService;
         this.courseForGroupService = courseForGroupService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     @Secured("ROLE_DEANOFFICER")
@@ -85,6 +92,26 @@ public class GradeController {
         } catch (Exception exception) {
             return handleException(exception);
         }
+    }
+
+    @Secured("ROLE_DEANOFFICER")
+    @GetMapping("/selective-courses/{id}")
+    public ResponseEntity getGradesForSelectiveCourseAndFacultyStudents(
+            @PathVariable Integer id) {
+        List<SelectiveCoursesStudentDegrees> scStudentDegrees = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(id);
+        if (scStudentDegrees.size() > 0) {
+            List<Integer> studentDegreeIds = scStudentDegrees.stream()
+                    .filter(scsd -> scsd.getStudentDegree().getSpecialization().getFaculty().getId() == FacultyUtil.getUserFacultyIdInt())
+                    .map(scsd -> scsd.getStudentDegree().getId())
+                    .collect(Collectors.toList());
+            if (studentDegreeIds.size() > 0) {
+                List<Integer> courseIds = new ArrayList<>();
+                courseIds.add(scStudentDegrees.get(0).getSelectiveCourse().getCourse().getId());
+                List<Grade> grades = this.gradeService.getGradesForStudents(studentDegreeIds, courseIds);
+                return ResponseEntity.ok(map(grades, GradeDTO.class));
+            }
+        }
+        return ResponseEntity.ok(new ArrayList<>());
     }
 
     private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
