@@ -29,4 +29,5 @@ public class SelectiveCourse extends BaseEntity {
     private String description;
     private int studyYear;
     private boolean available;
+    private String groupName;
 }

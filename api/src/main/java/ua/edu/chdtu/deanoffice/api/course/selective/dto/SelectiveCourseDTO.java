@@ -26,4 +26,5 @@ public class SelectiveCourseDTO {
     private TypeCycle trainingCycle;
     private String description;
     private Integer studyYear;
+    private String groupName;
 }
