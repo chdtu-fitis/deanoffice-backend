@@ -11,7 +11,8 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
     @Query("SELECT sc FROM SelectiveCourse AS sc WHERE sc.available = true " +
             "AND sc.studyYear = :studyYear " +
             "AND sc.degree.id = :degreeId " +
-            "AND sc.course.semester = :semester")
+            "AND sc.course.semester = :semester " +
+            "ORDER BY sc.course.courseName.name")
     List<SelectiveCourse> findAllAvailableByStudyYearAndDegreeAndSemester(
             @Param("studyYear") Integer studyYear,
             @Param("degreeId") int degreeId,
