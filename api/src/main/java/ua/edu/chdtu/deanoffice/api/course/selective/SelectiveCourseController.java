@@ -71,9 +71,10 @@ public class SelectiveCourseController {
     @GetMapping
     public ResponseEntity getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemester(@RequestParam(required = false) Integer studyYear,
                                                                                       @RequestParam int degreeId,
-                                                                                      @RequestParam int semester) {
+                                                                                      @RequestParam int semester,
+                                                                                      @RequestParam(required = false) boolean thisYear) {
         List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
-        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, thisYear);
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
             setFieldsOfKnowledge(selectiveCourse, selectiveCourseDTO);
