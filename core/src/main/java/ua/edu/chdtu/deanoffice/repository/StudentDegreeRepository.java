@@ -323,7 +323,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
                     "       INNER JOIN degree ON specialization.degree_id = degree.id " +
                     "       INNER JOIN student_group ON student_degree.student_group_id = student_group.id " +
                     "       INNER JOIN selective_courses_student_degrees ON selective_courses_student_degrees.student_degree_id = student_degree.id " +
-                    "       INNER JOIN course ON course.id = selective_courses_student_degrees.selective_course_id " +
+                    "       INNER JOIN selective_course ON selective_course.id=selective_courses_student_degrees.selective_course_id " +
+                    "       INNER JOIN course ON course.id = selective_course.course_id " +
                     "       INNER JOIN course_name ON course.course_name_id = course_name.id " +
                     "       INNER JOIN knowledge_control ON course.kc_id = knowledge_control.id " +
                     "       INNER JOIN department ON specialization.department_id = department.id " +

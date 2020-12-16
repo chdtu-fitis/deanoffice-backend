@@ -81,11 +81,11 @@ public class StipendService {
 
     public List<DebtorStudentDegreesBean> getDebtorStudentDegrees(int facultyId) {
         int currentYear = currentYearService.getYear();
-        List<Object[]> rawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
-        List<Object[]> rawData1 = studentDegreeRepository.findDebtorStudentsWithSelectiveCourseRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
-        rawData.addAll(rawData1);
-        List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(rawData.size());
-        rawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
+        List<Object[]> regularCoursesRawData = studentDegreeRepository.findDebtorStudentDegreesRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
+        List<Object[]> selectiveCoursesRawData = studentDegreeRepository.findDebtorStudentsWithSelectiveCourseRaw(facultyId, SemesterUtil.getCurrentSemester(), currentYear);
+        regularCoursesRawData.addAll(selectiveCoursesRawData);
+        List<DebtorStudentDegreesBean> debtorStudentDegreesBeans = new ArrayList<>(regularCoursesRawData.size());
+        regularCoursesRawData.forEach(item -> debtorStudentDegreesBeans.add(new DebtorStudentDegreesBean(
                 (Integer)item[0]/*degreeId*/,
                 (String)item[1]/*surname*/,
                 (String)item[2]/*name*/,
