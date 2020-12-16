@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,6 +39,7 @@ public class StudentController {
         this.studentService = studentService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentView.Search.class)
     @GetMapping("/search")
     public List searchStudentByFullName(
@@ -63,6 +65,7 @@ public class StudentController {
                 .collect(Collectors.joining(", "));
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentView.Personal.class)
     @GetMapping("/{student_id}")
     public ResponseEntity getStudentsById(@PathVariable("student_id") Integer studentId) {
@@ -74,6 +77,7 @@ public class StudentController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping
     public ResponseEntity updateStudent(@RequestBody Student student) {
         try {
@@ -87,6 +91,7 @@ public class StudentController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping("/{student_id}/photo")
     public ResponseEntity uploadPhotoForStudent(@RequestBody String photoUrl, @PathVariable(value = "student_id") int studentId) {
         try {
@@ -97,6 +102,7 @@ public class StudentController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{student_id}/photo")
     public ResponseEntity getStudentPhoto(@PathVariable(value = "student_id") Integer id) {
         try {

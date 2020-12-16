@@ -11,25 +11,27 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Department;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
@@ -41,9 +43,6 @@ public class IndividualCurriculumFillTemplateService {
 
     private final static String TEMPLATE_PATH = TEMPLATES_PATH + "IndividualCurriculum.docx";
     private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
-    private static final int STARTING_ROW_INDEX_SPRING_TABLE = 10;
-    private static final int STARTING_ROW_INDEX_PRACTICAL_TABLE = 15;
-    private static final int STARTING_ROW_INDEX_CONCLUSION_TABLE = 16;
     private static final int TABLE_INDEX = 4;
     private static final String SPRING_COURSES_KEY = "Spring";
     private static final String AUTUMN_COURSES_KEY = "Autumn";
@@ -51,11 +50,14 @@ public class IndividualCurriculumFillTemplateService {
 
     private final DocumentIOService documentIOService;
     private final CourseForGroupService courseForGroupService;
+    private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     public IndividualCurriculumFillTemplateService(DocumentIOService documentIOService,
-                                                   CourseForGroupService courseForGroupService) {
+                                                   CourseForGroupService courseForGroupService,
+                                                   SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
         this.documentIOService = documentIOService;
         this.courseForGroupService = courseForGroupService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     public WordprocessingMLPackage fillTemplate(Set<StudentDegree> degrees, int studyYears) {
@@ -155,34 +157,61 @@ public class IndividualCurriculumFillTemplateService {
         return replacements;
     }
 
-    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, int studyYear) {
+    private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, int studyYear) throws Docx4JException {
         StudentGroup studentGroup = degree.getStudentGroup();
         List<Integer> semesters = getSemestersByCourseForGroup(studentGroup, studyYear);
 
-        Map<String, List<CourseForGroup>> autumnSemester = getCoursesBySemester(studentGroup, semesters.get(0));
-        Map<String, List<CourseForGroup>> springSemester = getCoursesBySemester(studentGroup, semesters.get(1));
+        Map<String, List<CourseForGroup>> autumnSemesterPart1 = getCoursesBySemester(studentGroup, semesters.get(0));
+        List<SelectiveCourse> autumnSelectiveCourses = getSelectiveCourses(degree.getId(), semesters.get(0));
 
-        List<CourseForGroup> autumnCourses = autumnSemester.get(AUTUMN_COURSES_KEY);
-        fillCourseTable(template, autumnCourses, STARTING_ROW_INDEX_AUTUMN_TABLE);
+        Map<String, List<CourseForGroup>> springSemesterPart1 = getCoursesBySemester(studentGroup, semesters.get(1));
+        List<SelectiveCourse> springSelectiveCourses = getSelectiveCourses(degree.getId(), semesters.get(1));
 
-        List<CourseForGroup> springCourses = springSemester.get(SPRING_COURSES_KEY);
-        fillCourseTable(template, springCourses, STARTING_ROW_INDEX_SPRING_TABLE + autumnCourses.size());
+        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
+        if (!Objects.nonNull(tempTable)) {
+            throw new Docx4JException("Проблеми з шаблоном на сервері.");
+        }
 
-        List<CourseForGroup> practical = autumnSemester.get(PRACTICAL_COURSES_KEY);
-        practical.addAll(springSemester.get(PRACTICAL_COURSES_KEY));
+        int numberOfRow = STARTING_ROW_INDEX_AUTUMN_TABLE;
 
-        int startRowIndexForPracticalTable = STARTING_ROW_INDEX_PRACTICAL_TABLE + autumnCourses.size() + springCourses.size();
-        fillCourseTable(template, practical, startRowIndexForPracticalTable);
+        List<CourseForGroup> autumnMainCourses = autumnSemesterPart1.get(AUTUMN_COURSES_KEY);
+        addMainCoursesToTable(tempTable, autumnMainCourses, numberOfRow);
 
-        fillConclusionTable(autumnCourses, springCourses, practical, template);
+        numberOfRow = numberOfRow + autumnMainCourses.size() + 1;
+
+        addSelectiveCoursesToTable(tempTable, autumnSelectiveCourses, numberOfRow);
+
+        numberOfRow += autumnSelectiveCourses.size() + 2;
+
+        List<CourseForGroup> springMainCourses = springSemesterPart1.get(SPRING_COURSES_KEY);
+        addMainCoursesToTable(tempTable, springMainCourses, numberOfRow);
+
+        numberOfRow += springMainCourses.size() + 1;
+
+        addSelectiveCoursesToTable(tempTable, springSelectiveCourses, numberOfRow);
+
+        numberOfRow += springSelectiveCourses.size() + 1;
+
+        List<CourseForGroup> practical = autumnSemesterPart1.get(PRACTICAL_COURSES_KEY);
+        practical.addAll(springSemesterPart1.get(PRACTICAL_COURSES_KEY));
+
+        addMainCoursesToTable(tempTable, practical, numberOfRow);
+
+        numberOfRow += practical.size() + 1;
+
+        fillConclusionTable(autumnMainCourses, autumnSelectiveCourses, springMainCourses, springSelectiveCourses,
+                practical, template, numberOfRow);
 
         removeUnfilledPlaceholders(template);
     }
 
-    private void fillConclusionTable(List<CourseForGroup> autumnSemester,
-                                     List<CourseForGroup> springSemester,
+    private void fillConclusionTable(List<CourseForGroup> autumnMainCourses,
+                                     List<SelectiveCourse> autumnSelectiveCourses,
+                                     List<CourseForGroup> springMainCourses,
+                                     List<SelectiveCourse> springSelectiveCourses,
                                      List<CourseForGroup> practicals,
-                                     WordprocessingMLPackage template) {
+                                     WordprocessingMLPackage template,
+                                     int numberOfRow) {
         Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
 
         if (!Objects.nonNull(tempTable)) {
@@ -190,28 +219,35 @@ public class IndividualCurriculumFillTemplateService {
         }
 
         List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
-        int currentRowIndex = STARTING_ROW_INDEX_CONCLUSION_TABLE + autumnSemester.size() + springSemester.size() + practicals.size();
 
-        Tr blankRow = (Tr) tableRows.get(currentRowIndex);
+        Tr blankRow = (Tr) tableRows.get(numberOfRow);
 //        Tr currentRow = XmlUtils.deepCopy(blankRow);
-        int hourSumAutumn = autumnSemester.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
-        int hourSumSpring = springSemester.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumAutumnMainCourses = autumnMainCourses.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumAutumnSelectiveCourses = autumnSelectiveCourses.stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHours()).sum();
+        int hourSumSpringMainCourses = springMainCourses.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
+        int hourSumSpringSelectiveCourses = springSelectiveCourses.stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHours()).sum();
         int hourSumPracticals = practicals.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
 
-        int hourPerCreditSumAutumn = autumnSemester
+        int hourPerCreditSumAutumnMainCourses = autumnMainCourses
                 .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
-        int hourPerCreditSumSpring = springSemester
+        int hourPerCreditSumAutumnSelectiveCourses = autumnSelectiveCourses
+                .stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHoursPerCredit()).sum();
+        int hourPerCreditSumSpringMainCourses = springMainCourses
                 .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
+        int hourPerCreditSumSpringSelectiveCourses = springSelectiveCourses
+                .stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHoursPerCredit()).sum();
         int hourPerCreditSumPracticals = practicals.stream()
                 .mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
 
         Map<String, String> replacements = new HashMap<>();
-        replacements.put("TH", String.valueOf(hourSumAutumn + hourSumSpring + hourSumPracticals));
-        replacements.put("TCr", String.valueOf(hourPerCreditSumAutumn + hourPerCreditSumPracticals + hourPerCreditSumSpring));
+        replacements.put("TH", String.valueOf(hourSumAutumnMainCourses + hourSumAutumnSelectiveCourses +
+                hourSumSpringMainCourses + hourSumSpringSelectiveCourses + hourSumPracticals));
+        replacements.put("TCr", String.valueOf(hourPerCreditSumAutumnMainCourses + hourPerCreditSumAutumnSelectiveCourses +
+                hourPerCreditSumSpringMainCourses + hourPerCreditSumSpringSelectiveCourses + hourPerCreditSumPracticals));
 
         replaceInRow(blankRow, replacements);
-        tempTable.getContent().add(currentRowIndex, blankRow);
-        tempTable.getContent().remove(currentRowIndex);
+        tempTable.getContent().add(numberOfRow, blankRow);
+        tempTable.getContent().remove(numberOfRow);
     }
 
     private Map<String, List<CourseForGroup>> getCoursesBySemester(StudentGroup studentGroup, int semester) {
@@ -222,11 +258,11 @@ public class IndividualCurriculumFillTemplateService {
 
         String key = getKeyBySemester(semester);
 
-        List<CourseForGroup> lessPractical = courseForGroups.stream().filter(courses ->
-                !courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        List<CourseForGroup> lessPractical = courseForGroups.stream().filter(cfg ->
+                !cfg.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
-        List<CourseForGroup> practical = courseForGroups.stream().filter(courses ->
-                courses.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
+        List<CourseForGroup> practical = courseForGroups.stream().filter(cfg ->
+                cfg.getCourse().getKnowledgeControl().getName().toLowerCase().contains("практика")
         ).collect(Collectors.toList());
 
         container.put(key, lessPractical);
@@ -235,18 +271,18 @@ public class IndividualCurriculumFillTemplateService {
         return container;
     }
 
+    private List<SelectiveCourse> getSelectiveCourses(int studentDegreeId, int semester) {
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees =
+                selectiveCoursesStudentDegreesService.getSelectiveCoursesByStudentDegreeIdAndSemester(studentDegreeId, semester);
+        return selectiveCoursesStudentDegrees.stream().map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
+    }
+
     private String getKeyBySemester(int semester) {
         return semester % 2 == 0 ? SPRING_COURSES_KEY : AUTUMN_COURSES_KEY;
     }
 
-    private void fillCourseTable(WordprocessingMLPackage template, List<CourseForGroup> courseForGroups,
-                                 int startingRowIndex) {
-        Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
-
-        if (!Objects.nonNull(tempTable)) {
-            return;
-        }
-
+    private void addMainCoursesToTable(Tbl tempTable, List<CourseForGroup> courseForGroups,
+                                       int startingRowIndex) {
         List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
         int currentRowIndex = startingRowIndex;
         int numberOfRow = 1;
@@ -261,17 +297,42 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("H", String.valueOf(course.getHours()));
             replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
             replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
-
             Department department =
                     Objects.nonNull(courseForGroup.getTeacher()) ? courseForGroup.getTeacher().getDepartment() : null;
             replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
-
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
-
             currentRowIndex++;
             numberOfRow++;
         }
+
+        tempTable.getContent().remove(currentRowIndex);
+    }
+
+    private void addSelectiveCoursesToTable(Tbl tempTable, List<SelectiveCourse> selectiveCourses,
+                                            int startingRowIndex) {
+        List<Object> tableRows = TemplateUtil.getAllElementsFromObject(tempTable, Tr.class);
+        int currentRowIndex = startingRowIndex;
+        int numberOfRow = 1;
+        Tr blankRow = (Tr) tableRows.get(currentRowIndex);
+
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            Tr currentRow = XmlUtils.deepCopy(blankRow);
+            Course course = selectiveCourse.getCourse();
+            Map<String, String> replacements = new HashMap<>();
+            replacements.put("N", String.valueOf(numberOfRow));
+            replacements.put("CourseName", course.getCourseName().getName());
+            replacements.put("H", String.valueOf(course.getHours()));
+            replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
+            replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
+            Department department = selectiveCourse.getDepartment();
+            replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
+            replaceInRow(currentRow, replacements);
+            tempTable.getContent().add(currentRowIndex, currentRow);
+            currentRowIndex++;
+            numberOfRow++;
+        }
+
         tempTable.getContent().remove(currentRowIndex);
     }
 

@@ -71,9 +71,10 @@ public class SelectiveCourseController {
     @GetMapping
     public ResponseEntity getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemester(@RequestParam(required = false) Integer studyYear,
                                                                                       @RequestParam int degreeId,
-                                                                                      @RequestParam int semester) {
+                                                                                      @RequestParam int semester,
+                                                                                      @RequestParam(required = false) boolean thisYear) {
         List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
-        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, thisYear);
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
             setFieldsOfKnowledge(selectiveCourse, selectiveCourseDTO);
@@ -314,16 +315,16 @@ public class SelectiveCourseController {
             List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
                     map(selectiveCourseStudentDegree.getSelectiveCourse(), SelectiveCourseDTO.class)).collect(Collectors.toList());
             selectiveCoursesForStudentDegreeDTO.setSelectiveCourses(selectiveCourseDTOs);
-
         }
         return ResponseEntity.ok(map(selectiveCoursesForStudentDegreeDTO, SelectiveCoursesStudentDegreeDTO.class));
     }
 
     /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на дану вибіркову дисципліну*/
     @GetMapping("/course-students")
-    public ResponseEntity<SelectiveCourseStudentDegreesDTO> getSelectiveCourseStudents(@RequestParam int selectiveCourseId) {
+    public ResponseEntity<SelectiveCourseStudentDegreesDTO> getSelectiveCourseStudents(@RequestParam int selectiveCourseId,
+                                                                                       @RequestParam(required = false) boolean forFaculty) {
         SelectiveCourseStudentDegreesDTO selectiveCourseStudentDegreesDTO = new SelectiveCourseStudentDegreesDTO();
-        List<SelectiveCoursesStudentDegrees> studentDegreesForSelectiveCourse = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(selectiveCourseId);
+        List<SelectiveCoursesStudentDegrees> studentDegreesForSelectiveCourse = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(selectiveCourseId, forFaculty);
         if (studentDegreesForSelectiveCourse.size() > 0) {
             selectiveCourseStudentDegreesDTO.setSelectiveCourse(map(studentDegreesForSelectiveCourse.get(0).getSelectiveCourse(), SelectiveCourseDTO.class));
             List<StudentDegreeDTO> studentDegreeDTOs = studentDegreesForSelectiveCourse.stream().map(selectiveCourseStudentDegree ->

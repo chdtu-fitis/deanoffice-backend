@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
@@ -45,6 +46,7 @@ public class DiplomaNumberController {
         this.facultyAuthorizationService = facultyAuthorizationService;
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping("/edebo-diploma-number-synchronization")
     public ResponseEntity diplomaNumberSynchronization(@RequestParam("file") MultipartFile uploadFile,
                                                        @CurrentUser ApplicationUser user) {
@@ -73,6 +75,7 @@ public class DiplomaNumberController {
 
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/edebo-diploma-number-synchronization")
     public ResponseEntity diplomaNumberSaveChanges(@RequestBody DiplomaNumberDataForSaveDTO[] diplomaNumberDataForSaveDTOS,
                                                    @CurrentUser ApplicationUser user,

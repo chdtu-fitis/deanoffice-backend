@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,6 +68,7 @@ public class TeacherController {
         return ResponseEntity.ok(map(teachers, TeacherDTO.class));
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping("/teachers")
     public ResponseEntity addTeacher(@Validated @RequestBody TeacherWriteDTO teacherDTO) {
         Teacher teacher = Mapper.strictMap(teacherDTO, Teacher.class);
@@ -75,6 +77,7 @@ public class TeacherController {
         return new ResponseEntity(teacherAfterSaveDTO, HttpStatus.CREATED);
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/teachers/{id}")
     public ResponseEntity changeTeacher(@PathVariable @Min(1) int id, @Validated @RequestBody TeacherWriteDTO teacherDTO)
             throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
@@ -84,12 +87,14 @@ public class TeacherController {
         return new ResponseEntity(map(savedTeacher, TeacherDTO.class), HttpStatus.OK);
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @DeleteMapping("/teachers/{teachersIds}")
     public ResponseEntity deleteTeachers(@PathVariable List<Integer> teachersIds) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         teacherService.deleteByIds(teachersIds);
         return ResponseEntity.noContent().build();
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/teachers/restore")
     public ResponseEntity restoreTeachers(@RequestParam @NotEmpty(message="Потрібно вказати хоча б одного викладача для відновлення")
                                             List<Integer> teachersIds) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {

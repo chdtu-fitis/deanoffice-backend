@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseForGroupView;
@@ -92,11 +93,10 @@ public class GroupController {
     @GetMapping("/groups")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroups(
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
-            @CurrentUser ApplicationUser user
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active
     ) {
         try {
-            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(active, user.getFaculty().getId());
+            List<StudentGroup> studentGroups = studentGroupService.getAllByActive(active);
             return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
@@ -114,6 +114,7 @@ public class GroupController {
         }
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @GetMapping("/groups/copy")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroupsForCopy(
@@ -125,13 +126,14 @@ public class GroupController {
                 List<StudentGroup> studentGroups = studentGroupService.getAllGroups(true);
                 return ResponseEntity.ok(Mapper.map(studentGroups, StudentGroupDTO.class));
             } else {
-                return getActiveGroups(true, user);
+                return getActiveGroups(true);
             }
         } catch (Exception exception) {
             return handleException(exception);
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentGroupView.AllGroupData.class)
     @PostMapping("/groups")
     public ResponseEntity createGroup(
@@ -162,6 +164,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping("/groups")
     public ResponseEntity updateGroup(@RequestBody StudentGroupDTO studentGroupDTO,
                                       @CurrentUser ApplicationUser user) {
@@ -180,6 +183,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @JsonView(StudentGroupView.Basic.class)
     @PutMapping("/groups/restore")
     public ResponseEntity restoreGroup(@RequestParam List<Integer> groupIds,
@@ -195,6 +199,7 @@ public class GroupController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @DeleteMapping("/groups/{group_ids}")
     public ResponseEntity deleteGroup(@PathVariable("group_ids") List<Integer> groupIds,
                                       @CurrentUser ApplicationUser user) {

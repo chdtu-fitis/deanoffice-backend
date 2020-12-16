@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.grade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +18,16 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,18 +40,22 @@ public class GradeController {
     private GradeService gradeService;
     private StudentDegreeService studentDegreeService;
     private CourseForGroupService courseForGroupService;
+    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     @Autowired
     public GradeController(
             GradeService gradeService,
             StudentDegreeService studentDegreeService,
-            CourseForGroupService courseForGroupService
+            CourseForGroupService courseForGroupService,
+            SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService
     ) {
         this.gradeService = gradeService;
         this.studentDegreeService = studentDegreeService;
         this.courseForGroupService = courseForGroupService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping
     public ResponseEntity putGrades(@RequestBody List<Grade> grades) {
         try {
@@ -57,6 +66,7 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PutMapping("/academic-difference")
     public ResponseEntity putAcademicDifference(@RequestBody Map<Boolean, List<Integer>> gradesIds){
         if (gradesIds == null || gradesIds.isEmpty()){
@@ -70,6 +80,7 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{groupId}")
     public ResponseEntity getGrades(
             @PathVariable Integer groupId,
@@ -83,6 +94,26 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
+    @GetMapping("/selective-courses/{id}")
+    public ResponseEntity getGradesForSelectiveCourseAndFacultyStudents(
+            @PathVariable Integer id) {
+        List<SelectiveCoursesStudentDegrees> scStudentDegrees = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(id, false);
+        if (scStudentDegrees.size() > 0) {
+            List<Integer> studentDegreeIds = scStudentDegrees.stream()
+                    .filter(scsd -> scsd.getStudentDegree().getSpecialization().getFaculty().getId() == FacultyUtil.getUserFacultyIdInt())
+                    .map(scsd -> scsd.getStudentDegree().getId())
+                    .collect(Collectors.toList());
+            if (studentDegreeIds.size() > 0) {
+                List<Integer> courseIds = new ArrayList<>();
+                courseIds.add(scStudentDegrees.get(0).getSelectiveCourse().getCourse().getId());
+                List<Grade> grades = this.gradeService.getGradesForStudents(studentDegreeIds, courseIds);
+                return ResponseEntity.ok(map(grades, GradeDTO.class));
+            }
+        }
+        return ResponseEntity.ok(new ArrayList<>());
+    }
+
     private List<Integer> getStudentsIdsByGroupId(Integer groupId) {
         List<StudentDegree> students = this.studentDegreeService.getAllByGroupId(groupId);
         return students.stream().map(BaseEntity::getId).collect(Collectors.toList());
@@ -93,6 +124,7 @@ public class GradeController {
         return courses.stream().map(course -> course.getCourse().getId()).collect(Collectors.toList());
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{groupId}/{courseId}")
     public ResponseEntity getGradesByGroupIdAndCourseId(
             @PathVariable Integer groupId,
@@ -105,6 +137,7 @@ public class GradeController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @DeleteMapping
     public ResponseEntity deleteGrades(@RequestParam(value = "gradeId") Integer gradeId) {
         try {

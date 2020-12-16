@@ -28,4 +28,5 @@ public class SelectiveCourseWriteDTO {
     private String description;
     @NotNull(message = "Обов'язково має бути рік")
     private Integer studyYear;
+    private String groupName;
 }

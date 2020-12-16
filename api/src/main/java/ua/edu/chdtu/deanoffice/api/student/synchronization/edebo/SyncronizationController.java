@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.api.student.synchronization.edebo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,8 +26,10 @@ import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.EdeboStudentDataSy
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.StudentDegreePrimaryEdeboDataDTO;
 import ua.edu.chdtu.deanoffice.api.student.synchronization.edebo.dto.MissingPrimaryDataRedDTO;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.*;
 
@@ -44,6 +47,7 @@ public class SyncronizationController {
         this.studentService = studentService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/edebo-synchronization/process-file")
     public ResponseEntity studentsEdeboSynchronization(@RequestParam("file") MultipartFile uploadfile,
                                                        @CurrentUser ApplicationUser user,
@@ -90,6 +94,7 @@ public class SyncronizationController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping("/edebo-synchronization/save")
     public ResponseEntity studentSaveChanges(@RequestBody NewAndUpdatedStudentDegreesDTO newAndUpdatedStudentDegreesDTO) {
         try {

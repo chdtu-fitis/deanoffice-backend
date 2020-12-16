@@ -27,10 +27,13 @@ import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.service.DataVerificationService;
+import ua.edu.chdtu.deanoffice.service.DegreeService;
+import ua.edu.chdtu.deanoffice.service.DepartmentService;
+import ua.edu.chdtu.deanoffice.service.SpecialityService;
+import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
-
 import java.util.List;
 
 @RestController
@@ -145,7 +148,7 @@ public class SpecializationController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/restore")
     public ResponseEntity restoreSpecialization(@CurrentUser ApplicationUser user, @RequestParam int specializationId){
         try {
@@ -159,7 +162,7 @@ public class SpecializationController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @DeleteMapping("/{specialization_id}")
     public ResponseEntity deleteSpecialization(@PathVariable("specialization_id") int specializationId) {
         try {

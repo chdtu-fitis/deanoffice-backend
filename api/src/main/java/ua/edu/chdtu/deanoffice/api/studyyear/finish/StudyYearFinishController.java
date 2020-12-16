@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.studyyear.finish;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -39,6 +40,7 @@ public class StudyYearFinishController {
         this.studentDegreeService = studentDegreeService;
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @PostMapping
     public ResponseEntity finishStudyYear(@RequestBody StudyYearFinishDTO studyYearFinishDTO, @CurrentUser ApplicationUser user){
         try {
@@ -67,6 +69,7 @@ public class StudyYearFinishController {
         }
     }
 
+    @Secured("ROLE_DEANOFFICER")
     @GetMapping("/graduate-student-degrees")
     public ResponseEntity<Map<String, List<StudentDegreeShortDTO>>> getShortGraduateStudentDegree(@RequestParam List<Integer> groupIds) {
         try {
