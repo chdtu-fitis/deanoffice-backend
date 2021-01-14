@@ -86,10 +86,10 @@ public class SelectiveCourseService {
             if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
                 professional[1 - semester % 2]++;
         }
-        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-            return false;
-        }
+//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
+//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
+//            return false;
+//        }
         return true;
     }
 }

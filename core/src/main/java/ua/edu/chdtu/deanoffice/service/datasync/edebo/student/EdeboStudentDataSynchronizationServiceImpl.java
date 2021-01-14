@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import com.google.common.base.Strings;
+import com.opencsv.exceptions.CsvException;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
 import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
@@ -39,7 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Service
+//@Service
 public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
     private static final String SPECIALIZATION_REGEXP = "([\\d]+\\.[\\d]+)\\s([\\w\\W]+)";
     private static final String SPECIALITY_REGEXP_OLD = "([\\d]\\.[\\d]+)\\s([\\w\\W]+)";
@@ -51,7 +52,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
             "surnameEng", "nameEng", "patronimicEng", "sex"};
-    private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
+    protected static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
     private final DocumentIOService documentIOService;
     private final StudentService studentService;
     private final StudentDegreeService studentDegreeService;
@@ -73,7 +74,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         this.facultyService = facultyService;
     }
 
-    private List<ImportedData> getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
+    protected List<ImportedData> getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException, CsvException {
         return getEdeboStudentDegreesInfo(xlsxInputStream);
     }
 
@@ -210,7 +211,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     @Override
     public Student getStudentFromData(ImportedData data) {
         Student student = new Student();
-        Date birthDate = parseDate(data.getBirthday());
+        Date birthDate = parseDate("");//(data.getBirthday());
         student.setBirthDate(birthDate);
         student.setName(data.getFirstName());
         student.setSurname(data.getLastName());
@@ -274,12 +275,12 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     @Override
     public StudentPreviousUniversity getStudentPreviousUniversityFromData(ImportedData data) {
         StudentPreviousUniversity studentPreviousUniversity = null;
-        if (!Strings.isNullOrEmpty(data.getUniversityFrom()) && !Strings.isNullOrEmpty(data.getEduFromInfo())) {
-            studentPreviousUniversity = new StudentPreviousUniversity();
-            studentPreviousUniversity.setUniversityName(data.getUniversityFrom());
-            studentPreviousUniversity.setStudyStartDate(parseDate(data.getEducationDateBegin()));
-            studentPreviousUniversity.setStudyEndDate(getDeductionDateFromPreviousUniversity(data.getEduFromInfo()));
-        }
+//        if (!Strings.isNullOrEmpty(data.getUniversityFrom()) && !Strings.isNullOrEmpty(data.getEduFromInfo())) {
+//            studentPreviousUniversity = new StudentPreviousUniversity();
+//            studentPreviousUniversity.setUniversityName(data.getUniversityFrom());
+//            studentPreviousUniversity.setStudyStartDate(parseDate(data.getEducationDateBegin()));
+//            studentPreviousUniversity.setStudyEndDate(getDeductionDateFromPreviousUniversity(data.getEduFromInfo()));
+//        }
         return studentPreviousUniversity;
     }
 
@@ -317,14 +318,14 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
         studentDegree.setTuitionForm(TuitionForm.getTuitionFormFromUkrName(data.getEducationFormName()));
         if (studentDegree.getSpecialization().getDegree().getName().toUpperCase().equals(DegreeEnum.BACHELOR.getNameUkr().toUpperCase()))
-            studentDegree.setTuitionTerm(evaluateTuitionTermGuess(data.getEducationDateBegin(), data.getEducationDateEnd()));
+            studentDegree.setTuitionTerm(TuitionTerm.REGULAR);//(evaluateTuitionTermGuess(data.getEducationDateBegin(), data.getEducationDateEnd()));
         else
             studentDegree.setTuitionTerm(TuitionTerm.REGULAR);
-        studentDegree.setPreviousDiplomaDate(parseDate(data.getDocumentDateGet2()));
-        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
-        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
-        studentDegree.setPreviousDiplomaType(EducationDocument.getEducationDocumentByName(data.getPersonDocumentTypeName()));
-        studentDegree.setAdmissionDate(parseDate(data.getEducationDateBegin()));
+//        studentDegree.setPreviousDiplomaDate(parseDate(data.getDocumentDateGet2()));
+//        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
+//        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
+//        studentDegree.setPreviousDiplomaType(EducationDocument.getEducationDocumentByName(data.getPersonDocumentTypeName()));
+//        studentDegree.setAdmissionDate(parseDate(data.getEducationDateBegin()));
         Map<String, Object> admissionOrderNumberAndDate = getAdmissionOrderNumberAndDate(data.getRefillInfo());
         studentDegree.setAdmissionOrderNumber((String) admissionOrderNumberAndDate.get("admissionOrderNumber"));
         studentDegree.setAdmissionOrderDate((Date) admissionOrderNumberAndDate.get("admissionOrderDate"));

@@ -9,7 +9,10 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
-
+  http:
+    multipart:
+      max-file-size: 3MB
+      max-request-size: 3MB
 flyway:
   baseline-on-migrate: true
 

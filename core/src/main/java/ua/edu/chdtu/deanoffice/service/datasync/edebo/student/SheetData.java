@@ -39,21 +39,21 @@ class SheetData {
             case HeaderPatterns.MIDDLE_NAME_EN:
                 headerData.setMiddleNameEn(columnName);
                 break;
-            case HeaderPatterns.BIRTHDAY:
-                headerData.setBirthday(columnName);
-                break;
+//            case HeaderPatterns.BIRTHDAY:
+//                headerData.setBirthday(columnName);
+//                break;
             case HeaderPatterns.EDUCATION_ID:
                 headerData.setEducationId(columnName);
                 break;
             case HeaderPatterns.PERSONS_SEX_NAME:
                 headerData.setPersonsSexName(columnName);
                 break;
-            case HeaderPatterns.EDUCATION_DATE_BEGIN:
-                headerData.setEducationDateBegin(columnName);
-                break;
-            case HeaderPatterns.EDUCATION_DATE_END:
-                headerData.setEducationDateEnd(columnName);
-                break;
+//            case HeaderPatterns.EDUCATION_DATE_BEGIN:
+//                headerData.setEducationDateBegin(columnName);
+//                break;
+//            case HeaderPatterns.EDUCATION_DATE_END:
+//                headerData.setEducationDateEnd(columnName);
+//                break;
             case HeaderPatterns.FACULTY_NAME:
                 headerData.setFacultyName(columnName);
                 break;
@@ -78,63 +78,63 @@ class SheetData {
             case HeaderPatterns.PROGRAM_NAME:
                 headerData.setProgramName(columnName);
                 break;
-            case HeaderPatterns.PROGRAM_NAME_EN:
-                headerData.setProgramNameEn(columnName);
-                break;
-            case HeaderPatterns.PERSON_SEX_ID:
-                headerData.setPersonSexId(columnName);
-                break;
+//            case HeaderPatterns.PROGRAM_NAME_EN:
+//                headerData.setProgramNameEn(columnName);
+//                break;
+//            case HeaderPatterns.PERSON_SEX_ID:
+//                headerData.setPersonSexId(columnName);
+//                break;
             case HeaderPatterns.COUNTRY_ID:
                 headerData.setCountryId(columnName);
                 break;
-            case HeaderPatterns.IPN_NUMBER:
-                headerData.setIpnNumber(columnName);
-                break;
-            case HeaderPatterns.PERSON_DOCUMENT_TYPE_ID:
-                headerData.setPersonDocumentTypeId(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_SERIES:
-                headerData.setDocumentSeries(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_NUMBERS:
-                headerData.setDocumentNumbers(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_DATE_GET:
-                headerData.setDocumentDateGet(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_ISSUED:
-                headerData.setDocumentIssued(columnName);
-                break;
+//            case HeaderPatterns.IPN_NUMBER:
+//                headerData.setIpnNumber(columnName);
+//                break;
+//            case HeaderPatterns.PERSON_DOCUMENT_TYPE_ID:
+//                headerData.setPersonDocumentTypeId(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_SERIES:
+//                headerData.setDocumentSeries(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_NUMBERS:
+//                headerData.setDocumentNumbers(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_DATE_GET:
+//                headerData.setDocumentDateGet(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_ISSUED:
+//                headerData.setDocumentIssued(columnName);
+//                break;
             case HeaderPatterns.EDU_DOC_INFO:
                 headerData.setEduDocInfo(columnName);
                 break;
-            case HeaderPatterns.UNIVERSITY_FROM:
-                headerData.setUniversityFrom(columnName);
-                break;
+//            case HeaderPatterns.UNIVERSITY_FROM:
+//                headerData.setUniversityFrom(columnName);
+//                break;
             case HeaderPatterns.REFILL_INFO:
                 headerData.setRefillInfo(columnName);
                 break;
-            case HeaderPatterns.EDU_FROM_INFO:
-                headerData.setEduFromInfo(columnName);
-                break;
-            case HeaderPatterns.PERSON_DOCUMENT_TYPE:
-                headerData.setPersonDocumentType(columnName);
-                break;
-            case HeaderPatterns.PERSON_DOCUMENT_TYPE_NAME:
-                headerData.setPersonDocumentTypeName(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_SERIES_2:
-                headerData.setDocumentSeries2(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_NUMBERS_2:
-                headerData.setDocumentNumbers2(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_DATE_GET_2:
-                headerData.setDocumentDateGet2(columnName);
-                break;
-            case HeaderPatterns.DOCUMENT_ISSUED_2:
-                headerData.setDocumentIssued2(columnName);
-                break;
+//            case HeaderPatterns.EDU_FROM_INFO:
+//                headerData.setEduFromInfo(columnName);
+//                break;
+//            case HeaderPatterns.PERSON_DOCUMENT_TYPE:
+//                headerData.setPersonDocumentType(columnName);
+//                break;
+//            case HeaderPatterns.PERSON_DOCUMENT_TYPE_NAME:
+//                headerData.setPersonDocumentTypeName(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_SERIES_2:
+//                headerData.setDocumentSeries2(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_NUMBERS_2:
+//                headerData.setDocumentNumbers2(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_DATE_GET_2:
+//                headerData.setDocumentDateGet2(columnName);
+//                break;
+//            case HeaderPatterns.DOCUMENT_ISSUED_2:
+//                headerData.setDocumentIssued2(columnName);
+//                break;
         }
     }
 
