@@ -61,8 +61,6 @@ public class SupplementTemplateFillService {
             throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateFilepath);
 
-        prepareTrainingDirectionPlaceholders(template, studentSummary);
-
         fillAcquiredCompetencies(template, studentSummary);
         fillTableWithGrades(template, studentSummary);
         fillProfessionalQualificationsTable(template, studentSummary);
@@ -72,16 +70,6 @@ public class SupplementTemplateFillService {
         TemplateUtil.replacePlaceholdersInFooter(template, commonDict);
 
         return template;
-    }
-
-    private void prepareTrainingDirectionPlaceholders(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        Map<String, String> replacements = new HashMap<>();
-        if (hasDirectionOfTraining(studentSummary.getStudentDegree())) {
-            insertSpecializationPlaceholders(template);
-        }
-        replacements.put("TrainingDirectionType", "спеціальність");
-        replacements.put("TrainingDirectionTypeEng", "Speciality");
-        TemplateUtil.replaceTextPlaceholdersInTemplate(template, replacements, false);
     }
 
     private Map<String, String> getCertificationType(StudentSummary studentSummary) {
@@ -292,8 +280,8 @@ public class SupplementTemplateFillService {
 
         result.put("SpecializationUkr", TemplateUtil.getValueSafely(specialization.getName()));
         result.put("SpecializationEng", TemplateUtil.getValueSafely(specialization.getNameEng()));
-        result.put("SpecialityUkr", TemplateUtil.getValueSafely(speciality.getName()));
-        result.put("SpecialityEng", TemplateUtil.getValueSafely(speciality.getNameEng()));
+        result.put("SpecialityUkr", TemplateUtil.getValueSafely(speciality.getCode() + " " + speciality.getName()));
+        result.put("SpecialityEng", TemplateUtil.getValueSafely(speciality.getCode() + " " + speciality.getNameEng()));
         result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
         result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
@@ -625,59 +613,6 @@ public class SupplementTemplateFillService {
         int intPart = years.intValue();
         int monthsPerYear = 12;
         return ((years.doubleValue() - intPart) * monthsPerYear);
-    }
-
-    private void insertSpecializationPlaceholders(WordprocessingMLPackage template) {
-        List<Text> placeholders = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart());
-        Text trainingDirectionTypeEngPlaceholder = placeholders.stream()
-                .filter(text -> text.getValue().contains("TrainingDirectionTypeEng")).findFirst().get();
-        ContentAccessor parentR = (ContentAccessor) trainingDirectionTypeEngPlaceholder.getParent();
-        ContentAccessor parentP = (ContentAccessor) ((Child) parentR).getParent();
-
-        Text trainingDirectionTypePlaceholder = placeholders.stream()
-                .filter(text -> text.getValue().endsWith("TrainingDirectionType")).findFirst().get();
-
-        R r1 = XmlUtils.deepCopy((R) trainingDirectionTypePlaceholder.getParent());
-        r1.getContent().clear();
-        r1.getContent().add(TemplateUtil.createLineBreak());
-        Text newSpecializationName = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
-        newSpecializationName.setValue("освітня програма");
-        r1.getContent().add(newSpecializationName);
-        parentP.getContent().add(r1);
-
-        R r2 = XmlUtils.deepCopy((R) trainingDirectionTypeEngPlaceholder.getParent());
-        r2.getContent().clear();
-        Text space = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
-        space.setValue(" / ");
-        space.setSpace("preserve");
-        r2.getContent().add(space);
-
-        Text newSpecializationNameEng = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
-        newSpecializationNameEng.setValue("Educational program");
-        r2.getContent().add(newSpecializationNameEng);
-        parentP.getContent().add(r2);
-
-        Text specialityEngPlaceholder = placeholders.stream()
-                .filter(text -> text.getValue().contains("SpecialityEng")).findFirst().get();
-        ContentAccessor specialityPlaceholderR = (ContentAccessor) specialityEngPlaceholder.getParent();
-        ContentAccessor specialityPlaceholderP = (ContentAccessor) ((Child) specialityPlaceholderR).getParent();
-
-        R r3 = XmlUtils.deepCopy((R) trainingDirectionTypePlaceholder.getParent());
-        r3.getContent().clear();
-        r3.getContent().add(TemplateUtil.createLineBreak());
-        Text newSpecializationPlaceholderUkr = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
-        newSpecializationPlaceholderUkr.setValue("#SpecializationUkr");
-        r3.getContent().add(newSpecializationPlaceholderUkr);
-        specialityPlaceholderP.getContent().add(r3);
-
-        R r4 = XmlUtils.deepCopy((R) trainingDirectionTypeEngPlaceholder.getParent());
-        r4.getContent().clear();
-        r4.getContent().add(space);
-
-        Text newSpecializationPlaceholderEng = XmlUtils.deepCopy(trainingDirectionTypePlaceholder);
-        newSpecializationPlaceholderEng.setValue("#SpecializationEng");
-        r4.getContent().add(newSpecializationPlaceholderEng);
-        specialityPlaceholderP.getContent().add(r4);
     }
 
     private boolean hasDirectionOfTraining(StudentDegree studentDegree) {
