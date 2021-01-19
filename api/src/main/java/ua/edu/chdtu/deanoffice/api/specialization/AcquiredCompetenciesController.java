@@ -67,7 +67,7 @@ public class AcquiredCompetenciesController {
         return (AcquiredCompetenciesDTO) map(acquiredCompetencies, AcquiredCompetenciesDTO.class);
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/acquired-competencies/{acquired-competencies-id}/ukr")
     public ResponseEntity updateAcquiredCompetenciesUkr(
             @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
@@ -91,7 +91,7 @@ public class AcquiredCompetenciesController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PutMapping("/acquired-competencies/{acquired-competencies-id}/eng")
     public ResponseEntity updateAcquiredCompetenciesEng(
             @PathVariable("acquired-competencies-id") Integer acquiredCompetenciesId,
@@ -105,7 +105,7 @@ public class AcquiredCompetenciesController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping("/acquired-competencies")
     public ResponseEntity create(@RequestBody AcquiredCompetenciesDTO acquiredCompetenciesDTO) {
         if (!acquiredCompetenciesService.isNotExist(acquiredCompetenciesDTO.getSpecializationId(), true)) {

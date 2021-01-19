@@ -33,6 +33,7 @@ import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
 import ua.edu.chdtu.deanoffice.service.SpecializationService;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 import java.util.List;
 
@@ -68,13 +69,12 @@ public class SpecializationController {
     public ResponseEntity getSpecializationByActive(
             @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @RequestParam(value = "facultyId", required = false) Integer facultyId,
-            @RequestParam(value = "degreeId", required = false) Integer degreeId,
-            @CurrentUser ApplicationUser user
+            @RequestParam(value = "degreeId", required = false) Integer degreeId
     ) {
         try {
             List<Specialization> specializations;
             if (facultyId == null)
-                facultyId = user.getFaculty().getId();
+                facultyId = FacultyUtil.getUserFacultyIdInt();;
             if (degreeId == null) {
                 specializations = specializationService.getAllByActive(active, facultyId);
             } else {

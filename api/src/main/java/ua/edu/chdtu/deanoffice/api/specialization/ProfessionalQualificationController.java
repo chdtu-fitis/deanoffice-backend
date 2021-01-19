@@ -72,7 +72,7 @@ public class ProfessionalQualificationController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping("/specializations/{specialization-id}/professional-qualifications")
     public ResponseEntity changeQualification(
         @PathVariable("specialization-id") int specializationId,
@@ -91,7 +91,7 @@ public class ProfessionalQualificationController {
         }
     }
 
-    @Secured("ROLE_NAVCH_METHOD")
+    @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping("/professional-qualifications")
     public ResponseEntity create(@RequestBody ProfessionalQualification body) {
         try {
