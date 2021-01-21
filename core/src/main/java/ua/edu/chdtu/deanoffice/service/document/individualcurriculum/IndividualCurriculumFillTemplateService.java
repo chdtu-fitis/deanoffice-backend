@@ -297,7 +297,7 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("CourseName", course.getCourseName().getName());
             replacements.put("H", String.valueOf(course.getHours()));
             DecimalFormat df = new DecimalFormat("##.##");
-            replacements.put("Cred", String.valueOf(df.format(course.getCredits())));
+            replacements.put("Cred", df.format(course.getCredits()));
             replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
             Department department =
                     Objects.nonNull(courseForGroup.getTeacher()) ? courseForGroup.getTeacher().getDepartment() : null;
@@ -325,7 +325,8 @@ public class IndividualCurriculumFillTemplateService {
             replacements.put("N", String.valueOf(numberOfRow));
             replacements.put("CourseName", course.getCourseName().getName());
             replacements.put("H", String.valueOf(course.getHours()));
-            replacements.put("Cred", String.valueOf(course.getHoursPerCredit()));
+            DecimalFormat df = new DecimalFormat("##.##");
+            replacements.put("Cred", df.format(course.getCredits()));
             replacements.put("KC", String.valueOf(getKnowledgeControl(course)));
             Department department = selectiveCourse.getDepartment();
             replacements.put("Dep", Objects.nonNull(department) ? TemplateUtil.getValueSafely(department.getAbbr()) : "");
