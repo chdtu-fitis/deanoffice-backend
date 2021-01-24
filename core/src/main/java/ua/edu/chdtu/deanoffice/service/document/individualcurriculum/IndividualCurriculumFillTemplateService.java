@@ -23,6 +23,7 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -229,22 +230,24 @@ public class IndividualCurriculumFillTemplateService {
         int hourSumSpringSelectiveCourses = springSelectiveCourses.stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHours()).sum();
         int hourSumPracticals = practicals.stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHours()).sum();
 
-        int hourPerCreditSumAutumnMainCourses = autumnMainCourses
-                .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
-        int hourPerCreditSumAutumnSelectiveCourses = autumnSelectiveCourses
-                .stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHoursPerCredit()).sum();
-        int hourPerCreditSumSpringMainCourses = springMainCourses
-                .stream().mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
-        int hourPerCreditSumSpringSelectiveCourses = springSelectiveCourses
-                .stream().mapToInt(selectiveCourse -> selectiveCourse.getCourse().getHoursPerCredit()).sum();
-        int hourPerCreditSumPracticals = practicals.stream()
-                .mapToInt(courseForGroup -> courseForGroup.getCourse().getHoursPerCredit()).sum();
+        BigDecimal hourPerCreditSumAutumnMainCourses = autumnMainCourses
+                .stream().map(courseForGroup -> courseForGroup.getCourse().getCredits()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal hourPerCreditSumAutumnSelectiveCourses = autumnSelectiveCourses
+                .stream().map(selectiveCourse -> selectiveCourse.getCourse().getCredits()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal hourPerCreditSumSpringMainCourses = springMainCourses
+                .stream().map(courseForGroup -> courseForGroup.getCourse().getCredits()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal hourPerCreditSumSpringSelectiveCourses = springSelectiveCourses
+                .stream().map(selectiveCourse -> selectiveCourse.getCourse().getCredits()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal hourPerCreditSumPracticals = practicals.stream()
+                .map(courseForGroup -> courseForGroup.getCourse().getCredits()).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Map<String, String> replacements = new HashMap<>();
         replacements.put("TH", String.valueOf(hourSumAutumnMainCourses + hourSumAutumnSelectiveCourses +
                 hourSumSpringMainCourses + hourSumSpringSelectiveCourses + hourSumPracticals));
-        replacements.put("TCr", String.valueOf(hourPerCreditSumAutumnMainCourses + hourPerCreditSumAutumnSelectiveCourses +
-                hourPerCreditSumSpringMainCourses + hourPerCreditSumSpringSelectiveCourses + hourPerCreditSumPracticals));
+        BigDecimal creditSum = hourPerCreditSumAutumnMainCourses.add(hourPerCreditSumAutumnSelectiveCourses).add(hourPerCreditSumSpringMainCourses)
+                .add(hourPerCreditSumSpringSelectiveCourses).add(hourPerCreditSumPracticals);
+        DecimalFormat df = new DecimalFormat("##.##");
+        replacements.put("TCr", df.format(creditSum));
 
         replaceInRow(blankRow, replacements);
         tempTable.getContent().add(numberOfRow, blankRow);
