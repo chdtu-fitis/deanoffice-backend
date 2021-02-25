@@ -159,11 +159,11 @@ public class SupplementTemplateFillService {
             Br pageBreak = TemplateUtil.createPageBreak();
             run.getContent().add(pageBreak);
 
-            Text pageBreakPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart())
-                    .stream().filter(text -> "#PossiblePageBreak".equals(text.getValue().trim())).findFirst().get();
-            P parentParagraph = (P) TemplateUtil.findParentNode(pageBreakPlaceholder, P.class);
-            parentParagraph.getContent().add(run);
-            template.getMainDocumentPart().getContent().remove(pageBreakPlaceholder);
+//            Text pageBreakPlaceholder = TemplateUtil.getTextsPlaceholdersFromContentAccessor(template.getMainDocumentPart())
+//                    .stream().filter(text -> "#PossiblePageBreak".equals(text.getValue().trim())).findFirst().get();
+//            P parentParagraph = (P) TemplateUtil.findParentNode(pageBreakPlaceholder, P.class);
+//            parentParagraph.getContent().add(run);
+//            template.getMainDocumentPart().getContent().remove(pageBreakPlaceholder);
         }
     }
 
@@ -262,7 +262,7 @@ public class SupplementTemplateFillService {
         String modeOfStudyUkrAblativeCase = "";
         switch (tuitionForm) {
             case FULL_TIME:
-                modeOfStudyUkr = "Денна";
+                modeOfStudyUkr = "Очна (денна)";
                 modeOfStudyUkrAblativeCase = "денною";
                 modeOfStudyEng = "Full-time";
                 break;
@@ -273,17 +273,24 @@ public class SupplementTemplateFillService {
                 break;
         }
 
+        result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
+        result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
+        result.put("QualUkr", TemplateUtil.getValueSafely(degree.getName()) + " з " + speciality.getNameGenitive());
+        result.put("QualEng", TemplateUtil.getValueSafely(degree.getNameEng()) + " of " + speciality.getNameEng());
+
         result.put("ModeOfStudyUkr", modeOfStudyUkr);
         result.put("ModeOfStudyEng", modeOfStudyEng);
         result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
         result.put("ModeOfStudyEngAblativeCase", modeOfStudyEng.toLowerCase());
 
-        result.put("SpecializationUkr", TemplateUtil.getValueSafely(specialization.getName()));
-        result.put("SpecializationEng", TemplateUtil.getValueSafely(specialization.getNameEng()));
         result.put("SpecialityUkr", TemplateUtil.getValueSafely(speciality.getCode() + " " + speciality.getName()));
         result.put("SpecialityEng", TemplateUtil.getValueSafely(speciality.getCode() + " " + speciality.getNameEng()));
-        result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
-        result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
+        result.put("OPUkr", TemplateUtil.getValueSafely(specialization.getName()));
+        result.put("OPEng", TemplateUtil.getValueSafely(specialization.getNameEng()));
+        result.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfKnowledge().getName()));
+        result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfKnowledge().getNameEng()));
+        result.put("MCKOStudyEng", "(ISCE - "+TemplateUtil.getValueSafely(speciality.getFieldOfKnowledge().getNameInternational())+")");
+
         result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
         result.put("DEGREEENG", TemplateUtil.getValueSafely(degree.getNameEng()).toUpperCase());
         result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))
@@ -297,8 +304,6 @@ public class SupplementTemplateFillService {
                 ? simpleDateFormat.format(specialization.getCertificateDate())
                 : "CertificateDate");
 
-        result.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfStudy()));
-        result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfStudyEng()));
         result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
         result.put("QualificationLevelEng", TemplateUtil.getValueSafely(degree.getQualificationLevelDescriptionEng()));
 
