@@ -127,6 +127,7 @@ public class SupplementTemplateFillService {
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, StudentSummary studentSummary) {
+        final int COURSE_PAPER_SECTION_NUMBER_IN_GRADES = 1;
         int firstSectionRowIndex = 2;
         int templateRowIndex = 1;
         Tbl tableWithGrades = TemplateUtil.findTable(template, "#Number");
@@ -141,6 +142,7 @@ public class SupplementTemplateFillService {
         Tr templateRow = gradeTableRows.get(templateRowIndex);
         int rowToAddIndex = firstSectionRowIndex;
         int gradeNumber = 1;
+        int sectionNumber = 0;
 
         for (List<Grade> gradesSection : studentSummary.getGrades()) {
             for (Grade grade : gradesSection) {
@@ -149,8 +151,10 @@ public class SupplementTemplateFillService {
                 TemplateUtil.addRowToTable(tableWithGrades, templateRow, rowToAddIndex, replacements);
                 rowToAddIndex++;
             }
+            sectionNumber++;
             //Need to skip header of the next section
-            rowToAddIndex++;
+            if (sectionNumber != COURSE_PAPER_SECTION_NUMBER_IN_GRADES)
+                rowToAddIndex++;
         }
         tableWithGrades.getContent().remove(templateRow);
 
