@@ -45,6 +45,8 @@ public class Specialization extends NameWithEngAndActiveEntity {
     @Temporal(TemporalType.DATE)
     @Column(name = "certificate_date", nullable = false)
     private Date certificateDate;
+    private String certificateIssuedBy;
+    private String certificateIssuedByEng;
 
     public Specialization() {
         educationalProgramHeadName = "";

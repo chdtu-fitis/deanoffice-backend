@@ -14,4 +14,5 @@ public class Department extends NameWithActiveEntity {
     private String abbr;
     @ManyToOne(fetch = FetchType.LAZY)
     private Faculty faculty;
+    private String webSite;
 }
