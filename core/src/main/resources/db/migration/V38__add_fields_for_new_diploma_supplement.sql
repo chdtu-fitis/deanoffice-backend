@@ -7,8 +7,11 @@ ALTER TABLE field_of_knowledge ADD COLUMN name_international VARCHAR(100) NOT NU
 
 ALTER TABLE specialization ADD COLUMN certificate_issued_by VARCHAR(100) NOT NULL DEFAULT '';
 ALTER TABLE specialization ADD COLUMN certificate_issued_by_eng VARCHAR(100) NOT NULL DEFAULT '';
+ALTER TABLE specialization ADD COLUMN specialization_name VARCHAR(100);
+ALTER TABLE specialization ADD COLUMN specialization_name_eng VARCHAR(100);
 
 ALTER TABLE department ADD COLUMN web_site VARCHAR(120) NOT NULL DEFAULT '';
+ALTER TABLE department ADD COLUMN name_eng VARCHAR(100) NOT NULL DEFAULT '';
 
 INSERT INTO field_of_knowledge (code, name, name_eng) VALUES
 	('11', 'Математика та статистика', 'Mathematics and Statistics'),
