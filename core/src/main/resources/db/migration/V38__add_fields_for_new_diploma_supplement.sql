@@ -3,7 +3,7 @@ ALTER TABLE speciality ADD COLUMN field_of_knowledge_id INTEGER NOT NULL DEFAULT
 ALTER TABLE speciality
   ADD CONSTRAINT FK_speciality_field_of_knowledge FOREIGN KEY (field_of_knowledge_id) references field_of_knowledge;
 
-ALTER TABLE field_of_knowledge ADD COLUMN name_international VARCHAR(100) NOT NULL DEFAULT '';
+ALTER TABLE speciality ADD COLUMN name_international VARCHAR(100) NOT NULL DEFAULT '';
 
 ALTER TABLE specialization ADD COLUMN certificate_issued_by VARCHAR(100) NOT NULL DEFAULT '';
 ALTER TABLE specialization ADD COLUMN certificate_issued_by_eng VARCHAR(100) NOT NULL DEFAULT '';

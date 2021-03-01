@@ -47,6 +47,8 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private Date certificateDate;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
+    private String specializationName;
+    private String specializationNameEng;
 
     public Specialization() {
         educationalProgramHeadName = "";

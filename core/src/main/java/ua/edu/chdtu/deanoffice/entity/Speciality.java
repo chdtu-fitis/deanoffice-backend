@@ -17,4 +17,5 @@ public class Speciality extends NameWithEngAndActiveEntity {
     private String nameGenitive;
     @ManyToOne
     private FieldOfKnowledge fieldOfKnowledge;
+    private String nameInternational;
 }

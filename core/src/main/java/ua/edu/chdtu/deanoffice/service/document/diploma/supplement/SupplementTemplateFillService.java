@@ -11,7 +11,6 @@ import org.docx4j.wml.R;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
-import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
-import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -32,9 +30,8 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getTextsPlac
 
 @Service
 public class SupplementTemplateFillService {
-
     private static final Logger log = LoggerFactory.getLogger(SupplementTemplateFillService.class);
-    private static final String STATE_EXAM = "Кваліфікаційний іспит.";
+
     private final DocumentIOService documentIOService;
     private QualificationForSpecializationService qualificationForSpecializationService;
     private AcquiredCompetenciesService acquiredCompetenciesService;
@@ -72,51 +69,6 @@ public class SupplementTemplateFillService {
         return template;
     }
 
-    private Map<String, String> getCertificationType(StudentSummary studentSummary) {
-        Map<String, String> result = new HashMap<>();
-
-        String certificationName = "";
-        String certificationNameEng = "";
-
-        if (studentSummary.getGrades().get(3).stream().allMatch(grade -> {
-            String courseNameUkr = grade.getCourse().getCourseName().getName();
-            return (!Strings.isNullOrEmpty(courseNameUkr)
-                    && (courseNameUkr.contains("іспит") || courseNameUkr.contains("екзамен")));
-        })
-        ) {
-            certificationName = STATE_EXAM;
-            certificationNameEng = "Qualification exam.";
-        } else {
-            String degreeName = "";
-            String degreeNameEng = "";
-            switch (studentSummary.getStudentGroup().getSpecialization().getDegree().getId()) {
-                case 1: {
-                    degreeName = "бакалавра";
-                    degreeNameEng = "bachelor's";
-                    break;
-                }
-                case 2: {
-                    degreeName = "спеціаліста";
-                    degreeNameEng = "specialists's";
-                    break;
-                }
-
-                case 3: {
-                    degreeName = "магістра";
-                    degreeNameEng = "master's";
-                    break;
-                }
-
-            }
-            certificationName += "Кваліфікаційна робота " + degreeName + " на тему:";
-            certificationNameEng += "Qualification work of a " + degreeNameEng + " degree on a subject:";
-        }
-        result.put("CertificationName", certificationName);
-        result.put("CertificationNameEng", certificationNameEng);
-
-        return result;
-    }
-
     private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
         AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
                 studentSummary.getStudentGroup().getSpecialization().getId());
@@ -127,7 +79,6 @@ public class SupplementTemplateFillService {
     }
 
     private void fillTableWithGrades(WordprocessingMLPackage template, StudentSummary studentSummary) {
-        final int COURSE_PAPER_SECTION_NUMBER_IN_GRADES = 1;
         int firstSectionRowIndex = 2;
         int templateRowIndex = 1;
         Tbl tableWithGrades = TemplateUtil.findTable(template, "#Number");
@@ -153,7 +104,7 @@ public class SupplementTemplateFillService {
             }
             sectionNumber++;
             //Need to skip header of the next section
-            if (sectionNumber != COURSE_PAPER_SECTION_NUMBER_IN_GRADES)
+            if (sectionNumber != StudentSummary.COURSE_PAPER_SECTION_NUMBER_IN_GRADES)
                 rowToAddIndex++;
         }
         tableWithGrades.getContent().remove(templateRow);
@@ -246,10 +197,10 @@ public class SupplementTemplateFillService {
         Degree degree = specialization.getDegree();
         StudentGroup group = studentSummary.getStudentGroup();
 
-        result.put("SurnameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurname().toUpperCase(), "Ім'я"));
-        result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname").toUpperCase());
-        result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName().toUpperCase(), "Прізвище"));
-        result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name").toUpperCase());
+        result.put("SurnameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurname(), "Ім'я"));
+        result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname"));
+        result.put("NameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getName(), "Прізвище"));
+        result.put("NameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getNameEng(), "Name"));
 
 //        result.put("PatronimicUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimic(), "").toUpperCase());
 //        result.put("PatronimicEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getPatronimicEng(), "").toUpperCase());
@@ -267,12 +218,10 @@ public class SupplementTemplateFillService {
         switch (tuitionForm) {
             case FULL_TIME:
                 modeOfStudyUkr = "Очна (денна)";
-                modeOfStudyUkrAblativeCase = "денною";
                 modeOfStudyEng = "Full-time";
                 break;
             case EXTRAMURAL:
                 modeOfStudyUkr = "Заочна";
-                modeOfStudyUkrAblativeCase = "заочною";
                 modeOfStudyEng = "Part-time";
                 break;
         }
@@ -287,13 +236,23 @@ public class SupplementTemplateFillService {
 //        result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
 //        result.put("ModeOfStudyEngAblativeCase", modeOfStudyEng.toLowerCase());
 
-        result.put("SpecialityUkr", TemplateUtil.getValueSafely(speciality.getCode() + " " + speciality.getName()));
-        result.put("SpecialityEng", TemplateUtil.getValueSafely(speciality.getCode() + " " + speciality.getNameEng()));
-        result.put("OPUkr", TemplateUtil.getValueSafely(specialization.getName()));
-        result.put("OPEng", TemplateUtil.getValueSafely(specialization.getNameEng()));
-        result.put("FieldOfStudy", TemplateUtil.getValueSafely(speciality.getFieldOfKnowledge().getName()));
-        result.put("FieldOfStudyEng", TemplateUtil.getValueSafely(speciality.getFieldOfKnowledge().getNameEng()));
-        result.put("MCKOStudyEng", "(ISCE - "+TemplateUtil.getValueSafely(speciality.getFieldOfKnowledge().getNameInternational())+")");
+        result.put("SpecialityUkr", speciality.getCode() + " " + speciality.getName());
+        result.put("SpecialityEng", speciality.getCode() + " " + speciality.getNameEng());
+        result.put("OPUkr", specialization.getName());
+        result.put("OPEng", specialization.getNameEng());
+        String specializationName, specializationNameEng;
+        if (specialization.getSpecializationName() == null || specialization.getSpecializationName().equals("")) {
+            specializationName = "Не передбачено";
+            specializationNameEng = "Not applicable";
+        } else {
+            specializationName = specialization.getCode() + " " + specialization.getSpecializationName();
+            specializationNameEng = specialization.getCode() + " " + specialization.getSpecializationNameEng();
+        }
+        result.put("SpecializationUkr", specializationName);
+        result.put("SpecializationEng", specializationNameEng);
+        result.put("FieldOfStudy", speciality.getFieldOfKnowledge().getCode() + " " + speciality.getFieldOfKnowledge().getName());
+        result.put("FieldOfStudyEng", speciality.getFieldOfKnowledge().getCode() + " " + speciality.getFieldOfKnowledge().getNameEng());
+        result.put("MCKOStudyEng", "(ISCE - " + speciality.getNameInternational()+")");
 
 //        result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
 //        result.put("DEGREEENG", TemplateUtil.getValueSafely(degree.getNameEng()).toUpperCase());
@@ -307,6 +266,8 @@ public class SupplementTemplateFillService {
         result.put("CertificateDate", specialization.getCertificateDate() != null
                 ? simpleDateFormat.format(specialization.getCertificateDate())
                 : "CertificateDate");
+        result.put("CertificateIssuedBy", specialization.getCertificateIssuedBy());
+        result.put("CertificateIssuedByEng", specialization.getCertificateIssuedByEng());
 
         result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
         result.put("QualificationLevelEng", TemplateUtil.getValueSafely(degree.getQualificationLevelDescriptionEng()));
@@ -349,13 +310,7 @@ public class SupplementTemplateFillService {
 //        result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
 //        result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
 
-        result.putAll(getCertificationType(studentSummary));
-        if (!result.get("CertificationName").equals(STATE_EXAM)) {
-            result.put("ThesisNameUkr", "«" + TemplateUtil.getValueSafely(studentDegree.getThesisName()) + "»");
-            result.put("ThesisNameEng", "\"" + TemplateUtil.getValueSafely(studentDegree.getThesisNameEng()) + "\"");
-        }
 //        result.put("ProtocolNumber", TemplateUtil.getValueSafely(studentDegree.getProtocolNumber()));
-        result.put("PreviousDiplomaNumber", TemplateUtil.getValueSafely(studentDegree.getPreviousDiplomaNumber()));
 
 //        int dateStyle = DateFormat.LONG;
 //        DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
@@ -375,6 +330,9 @@ public class SupplementTemplateFillService {
         if (studentDegree.isDiplomaWithHonours()) {
             result.put("DiplomaHonours", "З ВІДЗНАКОЮ");
             result.put("DiplomaHonoursEng", "WITH HONOURS");
+        } else {
+            result.put("DiplomaHonours", "Не передбачено");
+            result.put("DiplomaHonoursEng", "Not applicable");
         }
 
         result.put("CurrentYear", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
@@ -384,7 +342,9 @@ public class SupplementTemplateFillService {
         result.put("PreviousDiplomaNameEng", studentDegree.getPreviousDiplomaType().getNameEng());
         result.put("PreviousDiplomaOrigin", studentDegree.getPreviousDiplomaIssuedBy());
         result.put("PreviousDiplomaOriginEng", studentDegree.getPreviousDiplomaIssuedByEng());
-        result.put("PreviousDiplomaNumber", studentDegree.getPreviousDiplomaNumber());
+        result.put("PreviousDiplomaNumber", TemplateUtil.getValueSafely(studentDegree.getPreviousDiplomaNumber()));
+        result.put("PreviousDiplomaIssuedBy", studentDegree.getPreviousDiplomaIssuedBy());
+        result.put("PreviousDiplomaIssuedByEng", studentDegree.getPreviousDiplomaIssuedByEng());
         if (studentDegree.getPreviousDiplomaDate() != null) {
             result.put("PreviousDiplomaDate", simpleDateFormat.format(studentDegree.getPreviousDiplomaDate()) + " р.");
             DateFormat englishDateFormat = SimpleDateFormat.getDateInstance(DateFormat.LONG, Locale.ENGLISH);
