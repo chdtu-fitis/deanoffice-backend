@@ -85,7 +85,7 @@ class SheetData {
 //                headerData.setPersonSexId(columnName);
 //                break;
             case HeaderPatterns.COUNTRY_ID:
-                headerData.setCountryId(columnName);
+                headerData.setCountry(columnName);
                 break;
 //            case HeaderPatterns.IPN_NUMBER:
 //                headerData.setIpnNumber(columnName);

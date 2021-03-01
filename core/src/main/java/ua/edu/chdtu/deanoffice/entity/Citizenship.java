@@ -58,4 +58,12 @@ public enum Citizenship {
         }
         return null;
     }
+
+    public static Citizenship getCitizenshipByCountryUkrName(String nameUkr) {
+        for (Citizenship citizenship : Citizenship.values()) {
+            if (citizenship.getNameUkr().equals(nameUkr))
+                return citizenship;
+        }
+        return null;
+    }
 }

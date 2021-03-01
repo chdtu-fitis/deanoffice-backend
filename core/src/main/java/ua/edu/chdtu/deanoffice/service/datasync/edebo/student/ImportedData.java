@@ -50,7 +50,7 @@ public class ImportedData {
 //    @CsvBindByName(column = "")
 //    private String personSexId;
     @CsvBindByName(column = "Громадянство")
-    private String countryId;
+    private String country;
 //    @CsvBindByName(column = "")
 //    private String ipnNumber;
 //    @CsvBindByName(column = "")
@@ -115,7 +115,7 @@ public class ImportedData {
         this.programName = "";
 //        this.programNameEn = "";
 //        this.personSexId = "";
-        this.countryId = "";
+        this.country = "";
 //        this.ipnNumber = "";
 //        this.personDocumentTypeId = "";
 //        this.documentSeries = "";

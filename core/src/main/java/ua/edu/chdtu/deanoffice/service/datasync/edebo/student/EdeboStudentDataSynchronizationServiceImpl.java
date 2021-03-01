@@ -40,8 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-//@Service
-public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
+public abstract class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
     private static final String SPECIALIZATION_REGEXP = "([\\d]+\\.[\\d]+)\\s([\\w\\W]+)";
     private static final String SPECIALITY_REGEXP_OLD = "([\\d]\\.[\\d]+)\\s([\\w\\W]+)";
     private static final String SPECIALITY_REGEXP_NEW = "([\\d]{3})\\s([\\w\\W]+)";
@@ -53,7 +52,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
             "surnameEng", "nameEng", "patronimicEng", "sex"};
     protected static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
-    private final DocumentIOService documentIOService;
+    protected final DocumentIOService documentIOService;
     private final StudentService studentService;
     private final StudentDegreeService studentDegreeService;
     private final DegreeService degreeService;
@@ -74,68 +73,14 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         this.facultyService = facultyService;
     }
 
-    protected List<ImportedData> getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException, CsvException {
-        return getEdeboStudentDegreesInfo(xlsxInputStream);
-    }
-
-    private List<ImportedData> getEdeboStudentDegreesInfo(Object source) throws IOException, Docx4JException {
-        SpreadsheetMLPackage xlsxPkg;
-        if (source instanceof String) {
-            xlsxPkg = documentIOService.loadSpreadsheetDocument((String) source);
-        } else {
-            xlsxPkg = documentIOService.loadSpreadsheetDocument((InputStream) source);
-        }
-        return getImportedDataFromXlsxPkg(xlsxPkg);
-    }
-
-    private List<ImportedData> getImportedDataFromXlsxPkg(SpreadsheetMLPackage xlsxPkg) {
-        try {
-            WorkbookPart workbookPart = xlsxPkg.getWorkbookPart();
-            WorksheetPart sheetPart = workbookPart.getWorksheet(0);
-            Worksheet worksheet = sheetPart.getContents();
-            org.xlsx4j.sml.SheetData sheetData = worksheet.getSheetData();
-            DataFormatter formatter = new DataFormatter();
-            SheetData sd = new SheetData();
-            List<ImportedData> importedData = new ArrayList<>();
-            String cellValue;
-
-            for (Row r : sheetData.getRow()) {
-                log.debug("importing row: " + r.getR());
-                for (Cell c : r.getC()) {
-                    cellValue = "";
-                    try {
-                        if (c.getF() != null)
-                            cellValue = c.getF().getValue();
-                        else
-                            cellValue = StringUtil.replaceSingleQuotes(formatter.formatCellValue(c));
-                    } catch (Exception e) {
-                        log.debug(e.getMessage());
-                    }
-                    if (r.getR() == 1) {
-                        sd.assignHeader(cellValue, c.getR());
-                    } else {
-                        sd.setCellData(c.getR(), cellValue.trim());
-                    }
-                }
-                if (r.getR() == 1) {
-                    continue;
-                }
-                importedData.add(sd.getStudentData());
-                sd.cleanStudentData();
-            }
-            return importedData;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Collections.emptyList();
-        }
-    }
+    protected abstract List<ImportedData> getStudentDegreesFromStream(InputStream inputStream) throws IOException;
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, int facultyId, Map<String, String> selectionParams) throws Exception {
-        if (xlsxInputStream == null)
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream inputStream, int facultyId, Map<String, String> selectionParams) throws Exception {
+        if (inputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
-            List<ImportedData> importedData = getStudentDegreesFromStream(xlsxInputStream);
+            List<ImportedData> importedData = getStudentDegreesFromStream(inputStream);
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
@@ -147,14 +92,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             sortingMissingPrimaryDataRed(edeboDataSyncronizationReport);
             sortingNoSuchStudentOrStudentDegreeInDbOrange(edeboDataSyncronizationReport);
             return edeboDataSyncronizationReport;
-        } catch (Docx4JException e) {
-            e.printStackTrace();
-            throw new Exception("Помилка обробки файлу");
         } catch (IOException e) {
             e.printStackTrace();
             throw new Exception("Помилка читання файлу");
         } finally {
-            xlsxInputStream.close();
+            inputStream.close();
         }
     }
 
@@ -329,8 +271,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Map<String, Object> admissionOrderNumberAndDate = getAdmissionOrderNumberAndDate(data.getRefillInfo());
         studentDegree.setAdmissionOrderNumber((String) admissionOrderNumberAndDate.get("admissionOrderNumber"));
         studentDegree.setAdmissionOrderDate((Date) admissionOrderNumberAndDate.get("admissionOrderDate"));
-        if (!data.getCountryId().equals(""))
-            studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryCode(Integer.valueOf(data.getCountryId())));
+        if (!data.getCountry().equals(""))
+            studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryUkrName(data.getCountry()));
         else
             studentDegree.setCitizenship(Citizenship.UKR);
         return studentDegree;
