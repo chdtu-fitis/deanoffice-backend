@@ -10,9 +10,9 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class Degree extends NameWithEngEntity {
-    @Column(name = "qualification_level_descr")
+    @Column(name="qualification_level_descr")
     private String qualificationLevelDescription;
-    @Column(name = "qualification_level_descr_eng")
+    @Column(name="qualification_level_descr_eng")
     private String qualificationLevelDescriptionEng;
     private String admissionRequirements;
     private String admissionRequirementsEng;
@@ -22,8 +22,6 @@ public class Degree extends NameWithEngEntity {
     private String admissionShortenedRequirementsEng;
     private String furtherStudyAccess;
     private String furtherStudyAccessEng;
-    private String professionalStatus;
-    private String professionalStatusEng;
 
     public Degree() {
     }
