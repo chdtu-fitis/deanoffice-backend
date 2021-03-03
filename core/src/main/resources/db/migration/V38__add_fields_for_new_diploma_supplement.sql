@@ -1,5 +1,7 @@
 ALTER TABLE speciality ADD COLUMN name_genitive VARCHAR(100) NOT NULL DEFAULT '';
 ALTER TABLE speciality ADD COLUMN field_of_knowledge_id INTEGER NOT NULL DEFAULT 7;
+ALTER TABLE speciality ADD COLUMN regulated_profession_access VARCHAR(120) NOT NULL DEFAULT 'Не передбачено';
+ALTER TABLE speciality ADD COLUMN regulated_profession_access_eng VARCHAR(120) NOT NULL DEFAULT 'Not applicable';
 ALTER TABLE speciality
   ADD CONSTRAINT FK_speciality_field_of_knowledge FOREIGN KEY (field_of_knowledge_id) references field_of_knowledge;
 

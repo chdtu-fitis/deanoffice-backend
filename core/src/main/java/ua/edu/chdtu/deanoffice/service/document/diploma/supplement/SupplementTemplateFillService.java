@@ -288,6 +288,9 @@ public class SupplementTemplateFillService {
 
         result.put("FurtherStudyAccess", TemplateUtil.getValueSafely(degree.getFurtherStudyAccess()));
         result.put("FurtherStudyAccessEng", TemplateUtil.getValueSafely(degree.getFurtherStudyAccessEng()));
+        result.put("RegulatedProfessionAccess", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccess()));
+        result.put("RegulatedProfessionAccessEng", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccessEng()));
+
 //        result.put("ProfessionalStatus", TemplateUtil.getValueSafely(degree.getProfessionalStatus()));
 //        result.put("ProfessionalStatusEng", TemplateUtil.getValueSafely(degree.getProfessionalStatusEng()));
 

@@ -18,4 +18,6 @@ public class Speciality extends NameWithEngAndActiveEntity {
     @ManyToOne
     private FieldOfKnowledge fieldOfKnowledge;
     private String nameInternational;
+    private String regulatedProfessionAccess;
+    private String regulatedProfessionAccessEng;
 }
