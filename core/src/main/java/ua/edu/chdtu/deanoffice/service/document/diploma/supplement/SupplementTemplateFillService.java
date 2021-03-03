@@ -122,34 +122,6 @@ public class SupplementTemplateFillService {
         }
     }
 
-//    private void fillProfessionalQualificationsTable(WordprocessingMLPackage template, StudentSummary studentSummary) {
-//        int templateRowIndex = 0;
-//
-//        List<ProfessionalQualification> professionalQualifications = getProfessionalQualifications(studentSummary);
-//        if (professionalQualifications == null) {
-//            return;
-//        }
-//        Tbl professionalQualificationsTable = TemplateUtil.findTable(template, "ProfCode");
-//        if (professionalQualificationsTable == null) {
-//            return;
-//        }
-//        Text tablePlaceholder = getTextsPlaceholdersFromContentAccessor(professionalQualificationsTable)
-//                .stream().filter(text -> "#ProfCode".equals(text.getValue().trim())).findFirst().get();
-//
-//        professionalQualificationsTable = (Tbl) TemplateUtil.findParentNode(tablePlaceholder, Tbl.class);
-//
-//        List<Tr> tableRows = TemplateUtil.getAllRowsFromTable(professionalQualificationsTable);
-//        Tr templateRow = tableRows.get(templateRowIndex);
-//        int rowToAddIndex = templateRowIndex + 1;
-//
-//        for (ProfessionalQualification qualification : professionalQualifications) {
-//            Map<String, String> replacements = SupplementTemplateFillService.getProfessionalQualificationDictionary(qualification);
-//            TemplateUtil.addRowToTable(professionalQualificationsTable, templateRow, rowToAddIndex, replacements);
-//            rowToAddIndex++;
-//        }
-//        professionalQualificationsTable.getContent().remove(templateRow);
-//    }
-
     private Map<String, String> getReplacementsDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
         result.putAll(getStudentInfoDictionary(studentSummary));
@@ -163,7 +135,6 @@ public class SupplementTemplateFillService {
         result.put("LocalGrade", grade.getPoints() == null ? "" : String.format("%d", grade.getPoints()));
         result.put("NationalGradeUkr", grade.getNationalGradeUkr());
         result.put("NationalGradeEng", grade.getNationalGradeEng());
-//        result.put("ECTSGrade", GradeUtil.getEctsGrade(grade));
         result.put("CourseNameUkr", grade.getCourse().getCourseName().getName());
         result.put("CourseNameEng", grade.getCourse().getCourseName().getNameEng());
         return result;
@@ -174,19 +145,10 @@ public class SupplementTemplateFillService {
         result.put("TotalHours", String.format("%4d", studentSummary.getTotalHours()));
         result.put("TotalCredits", formatCredits(studentSummary.getTotalCredits()));
         result.put("TotalGrade", String.format("%2d", Math.round(studentSummary.getTotalGrade())));
-//        result.put("TotalECTS", studentSummary.getTotalEcts().toString());
         result.put("TotalNGradeUkr", studentSummary.getTotalNationalGradeUkr());
         result.put("TotalNGradeEng", studentSummary.getTotalNationalGradeEng());
         return result;
     }
-
-//    private static Map<String, String> getProfessionalQualificationDictionary(ProfessionalQualification qualification) {
-//        Map<String, String> result = new HashMap<>();
-//        result.put("ProfCode", qualification.getCode());
-//        result.put("ProfName", qualification.getName());
-//        result.put("ProfNameEng", qualification.getNameEng());
-//        return result;
-//    }
 
     private Map<String, String> getStudentInfoDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
@@ -233,8 +195,6 @@ public class SupplementTemplateFillService {
 
         result.put("ModeOfStudyUkr", modeOfStudyUkr);
         result.put("ModeOfStudyEng", modeOfStudyEng);
-//        result.put("ModeOfStudyUkrAblativeCase", modeOfStudyUkrAblativeCase);
-//        result.put("ModeOfStudyEngAblativeCase", modeOfStudyEng.toLowerCase());
 
         result.put("SpecialityUkr", speciality.getCode() + " " + speciality.getName());
         result.put("SpecialityEng", speciality.getCode() + " " + speciality.getNameEng());
@@ -254,8 +214,6 @@ public class SupplementTemplateFillService {
         result.put("FieldOfStudyEng", speciality.getFieldOfKnowledge().getCode() + " " + speciality.getFieldOfKnowledge().getNameEng());
         result.put("MCKOStudyEng", "(ISCE - " + speciality.getNameInternational()+")");
 
-//        result.put("DEGREEUKR", TemplateUtil.getValueSafely(degree.getName()).toUpperCase());
-//        result.put("DEGREEENG", TemplateUtil.getValueSafely(degree.getNameEng()).toUpperCase());
         result.put("TheoreticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(0))
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))));
@@ -291,9 +249,6 @@ public class SupplementTemplateFillService {
         result.put("RegulatedProfessionAccess", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccess()));
         result.put("RegulatedProfessionAccessEng", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccessEng()));
 
-//        result.put("ProfessionalStatus", TemplateUtil.getValueSafely(degree.getProfessionalStatus()));
-//        result.put("ProfessionalStatusEng", TemplateUtil.getValueSafely(degree.getProfessionalStatusEng()));
-
         result.put("TrainingDuration", getTrainingDuration(group));
         result.put("TrainingDurationEng", getTrainingDurationEng(group));
 
@@ -303,25 +258,6 @@ public class SupplementTemplateFillService {
 
         String allTrainingDurationsFromUniversity = getAllTrainingDurationsFromUniversity(studentDegree);
         result.put("TrainingDurations", TemplateUtil.getValueSafely(allTrainingDurationsFromUniversity));
-
-//        Map<String, String> academicBackground = getAcademicBackground(studentDegree);
-//        result.put("AcademicBackgroundUkr", academicBackground == null ? "" : TemplateUtil.getValueSafely(academicBackground.get("ukr")));
-//        result.put("AcademicBackgroundEng", academicBackground == null ? "" : TemplateUtil.getValueSafely(academicBackground.get("eng")));
-
-//        result.put("ProgramHeadName", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadName()));
-//        result.put("ProgramHeadNameEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadNameEng()));
-//        result.put("ProgramHeadInfo", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfo()));
-//        result.put("ProgramHeadInfoEng", TemplateUtil.getValueSafely(specialization.getEducationalProgramHeadInfoEng()));
-
-//        result.put("ProtocolNumber", TemplateUtil.getValueSafely(studentDegree.getProtocolNumber()));
-
-//        int dateStyle = DateFormat.LONG;
-//        DateFormat protocolDateFormatUkr = DateFormat.getDateInstance(dateStyle, new Locale("uk", "UA"));
-//        result.put("ProtocolDateUkr", studentDegree.getProtocolDate() == null ? ""
-//                : protocolDateFormatUkr.format(studentDegree.getProtocolDate()));
-//        DateFormat protocolDateFormatEng = DateFormat.getDateInstance(dateStyle, Locale.ENGLISH);
-//        result.put("ProtocolDateEng", studentDegree.getProtocolDate() == null ? ""
-//                : protocolDateFormatEng.format(studentDegree.getProtocolDate()));
 
         result.put("SupplNumber", TemplateUtil.getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
         result.put("SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
@@ -628,18 +564,4 @@ public class SupplementTemplateFillService {
             paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
         }
     }
-
-    private List<ProfessionalQualification> getProfessionalQualifications(StudentSummary studentSummary) {
-        StudentGroup studentGroup = studentSummary.getStudentGroup();
-        List<QualificationForSpecialization> qualificationsForSpecialization = qualificationForSpecializationService
-                .findAllBySpecializationIdAndYear(studentGroup.getSpecialization().getId());
-        List<ProfessionalQualification> professionalQualifications = qualificationsForSpecialization
-                .stream().map(QualificationForSpecialization::getProfessionalQualification).collect(Collectors.toList());
-        if (professionalQualifications.isEmpty()) {
-            log.debug("There are no qualifications for this group");
-            return null;
-        }
-        return professionalQualifications;
-    }
-
 }

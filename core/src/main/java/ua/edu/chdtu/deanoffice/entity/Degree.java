@@ -22,8 +22,6 @@ public class Degree extends NameWithEngEntity {
     private String admissionShortenedRequirementsEng;
     private String furtherStudyAccess;
     private String furtherStudyAccessEng;
-    private String professionalStatus;
-    private String professionalStatusEng;
 
     public Degree() {
     }

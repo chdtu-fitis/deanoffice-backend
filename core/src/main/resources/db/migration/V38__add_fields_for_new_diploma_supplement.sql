@@ -15,6 +15,9 @@ ALTER TABLE specialization ADD COLUMN specialization_name_eng VARCHAR(100);
 ALTER TABLE department ADD COLUMN web_site VARCHAR(120) NOT NULL DEFAULT '';
 ALTER TABLE department ADD COLUMN name_eng VARCHAR(100) NOT NULL DEFAULT '';
 
+ALTER TABLE degree DROP COLUMN professional_status;
+ALTER TABLE degree DROP COLUMN professional_status_eng;
+
 INSERT INTO field_of_knowledge (code, name, name_eng) VALUES
 	('11', 'Математика та статистика', 'Mathematics and Statistics'),
 	('20', 'Аграрні науки та продовольство', 'Agrarian Science and Food');
