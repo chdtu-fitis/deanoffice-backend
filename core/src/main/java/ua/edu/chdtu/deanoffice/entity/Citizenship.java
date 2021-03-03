@@ -18,7 +18,7 @@ public enum Citizenship {
     JOR(400, "Йорданія", "Jordan"),
     IRQ(368, "Ірак", "Iraq"),
     ISR(376, "Ізраїль", "Israel"),
-    CIV(384, "Кот-Д'Івуар", "Cote d'Ivoire"),
+    CIV(384, "Кот-Д'Івуар",  "Cote d'Ivoire"),
     MDA(498, "Молдова", "Moldova"),
     MAR(504, "Марокко", "Morocco"),
     POL(616, "Польща", "Poland"),

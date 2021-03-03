@@ -39,10 +39,10 @@ public class StudentDegreePrimaryDataBean {
         this.lastName=data.getLastName();
         this.firstName=data.getFirstName();
         this.middleName= data.getMiddleName();
-//        this.birthday=data.getBirthday();
+        this.birthday=data.getBirthday();
         this.degreeName=data.getQualificationGroupName();
         this.fullSpecialityName=data.getFullSpecialityName();
-        this.fullSpecializationName=data.getFullSpecializationName();
+        this.fullSpecializationName=data.getProgramName();
     }
 
 

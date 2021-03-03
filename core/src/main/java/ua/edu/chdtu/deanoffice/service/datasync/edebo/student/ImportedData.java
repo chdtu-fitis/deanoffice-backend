@@ -17,16 +17,16 @@ public class ImportedData {
     private String firstNameEn;
     @CsvBindByName(column = "Прізвище англійською")
     private String lastNameEn;
-    @CsvBindByName(column = "По-батькові англійською")
-    private String middleNameEn;
-
-//    private String birthday;
+//    @CsvBindByName(column = "По-батькові англійською")
+//    private String middleNameEn;
+    @CsvBindByName(column = "Дата народження")
+    private String birthday;
     @CsvBindByName(column = "ID картки")
     private String educationId;
     @CsvBindByName(column = "Стать")
     private String personsSexName;
-
-//    private String educationDateBegin;
+    @CsvBindByName(column = "Початок навчання")
+    private String educationDateBegin;
 
 //    private String educationDateEnd;
     @CsvBindByName(column = "Структурний підрозділ")
@@ -41,10 +41,12 @@ public class ImportedData {
     private String personEducationPaymentTypeName;
     @CsvBindByName(column = "Спеціальність")
     private String fullSpecialityName;
-    @CsvBindByName(column = "Спеціалізація")
-    private String fullSpecializationName;
+//    @CsvBindByName(column = "Спеціалізація")
+//    private String fullSpecializationName;
     @CsvBindByName(column = "Освітня програма")
     private String programName;
+    @CsvBindByName(column = "Чи скорочений термін навчання")
+    private String isShortened;
 //    @CsvBindByName(column = "")
 //    private String programNameEn;
 //    @CsvBindByName(column = "")
@@ -65,10 +67,10 @@ public class ImportedData {
 //    private String documentIssued;
     @CsvBindByName(column = "Документ про освіту")
     private String eduDocInfo;
+    @CsvBindByName(column = "Інформація про зарахування")
+    private String refillInfo;
     @CsvBindByName(column = "Попередній заклад освіти")
     private String universityFrom;
-    @CsvBindByName(column = "Наказ про зарахування")
-    private String refillInfo;
     @CsvBindByName(column = "Інформація про попереднє навчання")
     private String eduFromInfo;
 //    @CsvBindByName(column = "")
@@ -84,14 +86,8 @@ public class ImportedData {
 //
 //    private String documentIssued2;
 
-    @CsvBindByName(column = "Чи здобувався ступень за іншою спеціальністю")
-    private String x1;
-    @CsvBindByName(column = "Чи скорочений термін навчання")
-    private String x2;
     @CsvBindByName(column = "Академічна довідка (освітня декларація)")
     private String x3;
-    @CsvBindByName(column = "Інформація про зарахування")
-    private String x4;
 
     public ImportedData() {
         this.firstName = "";
@@ -99,11 +95,11 @@ public class ImportedData {
         this.middleName = "";
         this.firstNameEn = "";
         this.lastNameEn = "";
-        this.middleNameEn = "";
-//        this.birthday = "";
+//        this.middleNameEn = "";
+        this.birthday = "";
         this.educationId = "";
         this.personsSexName = "";
-//        this.educationDateBegin = "";
+        this.educationDateBegin = "";
 //        this.educationDateEnd = "";
         this.facultyName = "";
         this.qualificationGroupName = "";
@@ -111,7 +107,7 @@ public class ImportedData {
         this.educationFormName = "";
         this.personEducationPaymentTypeName = "";
         this.fullSpecialityName = "";
-        this.fullSpecializationName = "";
+//        this.fullSpecializationName = "";
         this.programName = "";
 //        this.programNameEn = "";
 //        this.personSexId = "";

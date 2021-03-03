@@ -11,8 +11,8 @@ spring:
     show-sql: true
   http:
     multipart:
-      max-file-size: 3MB
-      max-request-size: 3MB
+      max-file-size: 4MB
+      max-request-size: 4MB
 flyway:
   baseline-on-migrate: true
 

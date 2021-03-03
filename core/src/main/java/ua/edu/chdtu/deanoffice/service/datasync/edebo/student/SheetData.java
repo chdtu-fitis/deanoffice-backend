@@ -36,9 +36,9 @@ class SheetData {
             case HeaderPatterns.LAST_NAME_EN:
                 headerData.setLastNameEn(columnName);
                 break;
-            case HeaderPatterns.MIDDLE_NAME_EN:
-                headerData.setMiddleNameEn(columnName);
-                break;
+//            case HeaderPatterns.MIDDLE_NAME_EN:
+//                headerData.setMiddleNameEn(columnName);
+//                break;
 //            case HeaderPatterns.BIRTHDAY:
 //                headerData.setBirthday(columnName);
 //                break;
@@ -72,9 +72,9 @@ class SheetData {
             case HeaderPatterns.FULL_SPECIALITY_NAME:
                 headerData.setFullSpecialityName(columnName);
                 break;
-            case HeaderPatterns.FULL_SPECIALIZATION_NAME:
-                headerData.setFullSpecializationName(columnName);
-                break;
+//            case HeaderPatterns.FULL_SPECIALIZATION_NAME:
+//                headerData.setFullSpecializationName(columnName);
+//                break;
             case HeaderPatterns.PROGRAM_NAME:
                 headerData.setProgramName(columnName);
                 break;
