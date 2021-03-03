@@ -18,7 +18,7 @@ public enum Citizenship {
     JOR(400, "Йорданія", "Jordan"),
     IRQ(368, "Ірак", "Iraq"),
     ISR(376, "Ізраїль", "Israel"),
-    CIV(384, "Кот-Д'Івуар", "Cote d'Ivoire"),
+    CIV(384, "Кот-Д'Івуар",  "Cote d'Ivoire"),
     MDA(498, "Молдова", "Moldova"),
     MAR(504, "Марокко", "Morocco"),
     POL(616, "Польща", "Poland"),
@@ -54,6 +54,14 @@ public enum Citizenship {
     public static Citizenship getCitizenshipByCountryCode(Integer countryCode) {
         for (Citizenship citizenship : Citizenship.values()) {
             if (citizenship.getCountryCode().equals(countryCode))
+                return citizenship;
+        }
+        return null;
+    }
+
+    public static Citizenship getCitizenshipByCountryUkrName(String nameUkr) {
+        for (Citizenship citizenship : Citizenship.values()) {
+            if (citizenship.getNameUkr().equals(nameUkr))
                 return citizenship;
         }
         return null;

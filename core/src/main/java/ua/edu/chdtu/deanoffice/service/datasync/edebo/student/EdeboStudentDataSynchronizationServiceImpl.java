@@ -1,18 +1,9 @@
 package ua.edu.chdtu.deanoffice.service.datasync.edebo.student;
 
 import com.google.common.base.Strings;
-import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.SpreadsheetMLPackage;
-import org.docx4j.openpackaging.parts.SpreadsheetML.WorkbookPart;
-import org.docx4j.openpackaging.parts.SpreadsheetML.WorksheetPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.xlsx4j.org.apache.poi.ss.usermodel.DataFormatter;
-import org.xlsx4j.sml.Cell;
-import org.xlsx4j.sml.Row;
-import org.xlsx4j.sml.Worksheet;
 
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.Sex;
@@ -26,7 +17,6 @@ import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegre
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataWithGroupBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
-import ua.edu.chdtu.deanoffice.util.StringUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.EntityUtil;
 
 import java.io.IOException;
@@ -39,8 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@Service
-public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
+public abstract class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentDataSyncronizationService {
     private static final String SPECIALIZATION_REGEXP = "([\\d]+\\.[\\d]+)\\s([\\w\\W]+)";
     private static final String SPECIALITY_REGEXP_OLD = "([\\d]\\.[\\d]+)\\s([\\w\\W]+)";
     private static final String SPECIALITY_REGEXP_NEW = "([\\d]{3})\\s([\\w\\W]+)";
@@ -50,9 +39,9 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "tuitionForm", "citizenship", "previousDiplomaNumber", "previousDiplomaDate",
             "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
-            "surnameEng", "nameEng", "patronimicEng", "sex"};
-    private static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
-    private final DocumentIOService documentIOService;
+            "surnameEng", "nameEng", "sex"};
+    protected static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
+    protected final DocumentIOService documentIOService;
     private final StudentService studentService;
     private final StudentDegreeService studentDegreeService;
     private final DegreeService degreeService;
@@ -73,68 +62,14 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         this.facultyService = facultyService;
     }
 
-    private List<ImportedData> getStudentDegreesFromStream(InputStream xlsxInputStream) throws IOException, Docx4JException {
-        return getEdeboStudentDegreesInfo(xlsxInputStream);
-    }
-
-    private List<ImportedData> getEdeboStudentDegreesInfo(Object source) throws IOException, Docx4JException {
-        SpreadsheetMLPackage xlsxPkg;
-        if (source instanceof String) {
-            xlsxPkg = documentIOService.loadSpreadsheetDocument((String) source);
-        } else {
-            xlsxPkg = documentIOService.loadSpreadsheetDocument((InputStream) source);
-        }
-        return getImportedDataFromXlsxPkg(xlsxPkg);
-    }
-
-    private List<ImportedData> getImportedDataFromXlsxPkg(SpreadsheetMLPackage xlsxPkg) {
-        try {
-            WorkbookPart workbookPart = xlsxPkg.getWorkbookPart();
-            WorksheetPart sheetPart = workbookPart.getWorksheet(0);
-            Worksheet worksheet = sheetPart.getContents();
-            org.xlsx4j.sml.SheetData sheetData = worksheet.getSheetData();
-            DataFormatter formatter = new DataFormatter();
-            SheetData sd = new SheetData();
-            List<ImportedData> importedData = new ArrayList<>();
-            String cellValue;
-
-            for (Row r : sheetData.getRow()) {
-                log.debug("importing row: " + r.getR());
-                for (Cell c : r.getC()) {
-                    cellValue = "";
-                    try {
-                        if (c.getF() != null)
-                            cellValue = c.getF().getValue();
-                        else
-                            cellValue = StringUtil.replaceSingleQuotes(formatter.formatCellValue(c));
-                    } catch (Exception e) {
-                        log.debug(e.getMessage());
-                    }
-                    if (r.getR() == 1) {
-                        sd.assignHeader(cellValue, c.getR());
-                    } else {
-                        sd.setCellData(c.getR(), cellValue.trim());
-                    }
-                }
-                if (r.getR() == 1) {
-                    continue;
-                }
-                importedData.add(sd.getStudentData());
-                sd.cleanStudentData();
-            }
-            return importedData;
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return Collections.emptyList();
-        }
-    }
+    protected abstract List<ImportedData> getStudentDegreesFromStream(InputStream inputStream) throws IOException;
 
     @Override
-    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream xlsxInputStream, int facultyId, Map<String, String> selectionParams) throws Exception {
-        if (xlsxInputStream == null)
+    public EdeboStudentDataSynchronizationReport getEdeboDataSynchronizationReport(InputStream inputStream, int facultyId, Map<String, String> selectionParams) throws Exception {
+        if (inputStream == null)
             throw new Exception("Помилка читання файлу");
         try {
-            List<ImportedData> importedData = getStudentDegreesFromStream(xlsxInputStream);
+            List<ImportedData> importedData = getStudentDegreesFromStream(inputStream);
             Objects.requireNonNull(importedData);
             EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport = new EdeboStudentDataSynchronizationReport();
             for (ImportedData data : importedData) {
@@ -146,14 +81,11 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             sortingMissingPrimaryDataRed(edeboDataSyncronizationReport);
             sortingNoSuchStudentOrStudentDegreeInDbOrange(edeboDataSyncronizationReport);
             return edeboDataSyncronizationReport;
-        } catch (Docx4JException e) {
-            e.printStackTrace();
-            throw new Exception("Помилка обробки файлу");
         } catch (IOException e) {
             e.printStackTrace();
             throw new Exception("Помилка читання файлу");
         } finally {
-            xlsxInputStream.close();
+            inputStream.close();
         }
     }
 
@@ -181,29 +113,13 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
 
     private boolean isSpecializationPatternMatch(ImportedData importedData) {
         String specialityName = importedData.getFullSpecialityName();
-        String specializationName = importedData.getFullSpecializationName();
         String programName = importedData.getProgramName();
-        Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_OLD);
+        Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
         Matcher specialityMatcher = specialityPattern.matcher(specialityName);
-        if (specialityMatcher.matches()) {
+        if (specialityMatcher.matches() && !Strings.isNullOrEmpty(programName)) {
             return true;
         } else {
-            specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
-            specialityMatcher = specialityPattern.matcher(specialityName);
-            if (specialityMatcher.matches()) {
-                Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
-                Matcher specializationMatcher = specializationPattern.matcher(specializationName);
-                if (specializationMatcher.matches()) {
-                    return true;
-                } else {
-                    if (!Strings.isNullOrEmpty(specializationName)) {
-                        return false;
-                    } else
-                        return true;
-                }
-            } else {
-                return false;
-            }
+            return false;
         }
     }
 
@@ -217,7 +133,6 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         student.setPatronimic(data.getMiddleName());
         student.setNameEng(data.getFirstNameEn());
         student.setSurnameEng(data.getLastNameEn());
-        student.setPatronimicEng(data.getMiddleNameEn());
         student.setSex("Чоловіча".equals(data.getPersonsSexName()) ? Sex.MALE : Sex.FEMALE);
         return student;
     }
@@ -252,18 +167,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         Speciality speciality = getSpecialityFromData(data);
         specialization.setSpeciality(speciality);
         Faculty faculty = new Faculty();
-        String specializationName = data.getFullSpecializationName();
         if ((speciality.getCode() + " " + speciality.getName()).matches(SPECIALITY_REGEXP_NEW)) {
-            if (!Strings.isNullOrEmpty(specializationName)) {
-                Pattern specializationPattern = Pattern.compile(SPECIALIZATION_REGEXP);
-                Matcher spMatcher = specializationPattern.matcher(specializationName);
-                if (spMatcher.matches() && spMatcher.groupCount() > 1) {
-                    specialization.setCode(spMatcher.group(1));
-                    specialization.setName(spMatcher.group(2));
-                }
-            } else {
-                specialization.setName(data.getProgramName());
-            }
+            specialization.setName(data.getProgramName());
         }
         specialization.setDegree(DegreeEnum.getDegreeFromEnumByName(data.getQualificationGroupName()));
         faculty.setName(data.getFacultyName());
@@ -278,12 +183,12 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             studentPreviousUniversity = new StudentPreviousUniversity();
             studentPreviousUniversity.setUniversityName(data.getUniversityFrom());
             studentPreviousUniversity.setStudyStartDate(parseDate(data.getEducationDateBegin()));
-            studentPreviousUniversity.setStudyEndDate(getDeductionDateFromPreviousUniversity(data.getEduFromInfo()));
+            studentPreviousUniversity.setStudyEndDate(getExpelDateFromPreviousUniversity(data.getEduFromInfo()));
         }
         return studentPreviousUniversity;
     }
 
-    private Date getDeductionDateFromPreviousUniversity(String eduFromInfo) {
+    private Date getExpelDateFromPreviousUniversity(String eduFromInfo) {
         Date deductionDateFromPreviousUniversity = null;
         DateFormat deductionDateFormatter = new SimpleDateFormat("dd.MM.yyyy");
         Pattern pattern = Pattern.compile(EXPEL_DATE_REGEXP);
@@ -316,20 +221,36 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         studentDegree.setSupplementNumber(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
         studentDegree.setTuitionForm(TuitionForm.getTuitionFormFromUkrName(data.getEducationFormName()));
-        if (studentDegree.getSpecialization().getDegree().getName().toUpperCase().equals(DegreeEnum.BACHELOR.getNameUkr().toUpperCase()))
-            studentDegree.setTuitionTerm(evaluateTuitionTermGuess(data.getEducationDateBegin(), data.getEducationDateEnd()));
+        if (data.getIsShortened().toUpperCase().equals("ТАК"))
+            studentDegree.setTuitionTerm(TuitionTerm.SHORTENED);//(evaluateTuitionTermGuess(data.getEducationDateBegin(), data.getEducationDateEnd()));
         else
             studentDegree.setTuitionTerm(TuitionTerm.REGULAR);
-        studentDegree.setPreviousDiplomaDate(parseDate(data.getDocumentDateGet2()));
-        studentDegree.setPreviousDiplomaIssuedBy(data.getDocumentIssued2());
-        studentDegree.setPreviousDiplomaNumber(data.getDocumentSeries2() + " № " + data.getDocumentNumbers2());
-        studentDegree.setPreviousDiplomaType(EducationDocument.getEducationDocumentByName(data.getPersonDocumentTypeName()));
+
+        String previousEducationInfo[] = data.getEduDocInfo().split(";");
+        for (int i = 0; i < previousEducationInfo.length; i++) previousEducationInfo[i] = previousEducationInfo[i].trim();
+        if (previousEducationInfo.length > 0) {
+            if (previousEducationInfo[0].indexOf('(') > 0)
+                previousEducationInfo[0] = previousEducationInfo[0].substring(0, previousEducationInfo[0].indexOf('(')).trim();
+            studentDegree.setPreviousDiplomaType(EducationDocument.getEducationDocumentByName(previousEducationInfo[0]));
+        }
+        if (previousEducationInfo.length > 1 && !previousEducationInfo[1].equals("")) {
+            String number[] = previousEducationInfo[1].split(" ");
+            studentDegree.setPreviousDiplomaNumber(number[0] + " № " + (number.length > 1 ? number[1] : ""));
+        }
+        try {
+            studentDegree.setPreviousDiplomaDate(new SimpleDateFormat("dd.MM.yyyy").parse(previousEducationInfo[2]));
+        } catch(Exception e) {}
+        if (previousEducationInfo.length > 3) {
+            String parts[] = previousEducationInfo[3].split(":");
+            if (parts[1] != null) studentDegree.setPreviousDiplomaIssuedBy(parts[1]);
+        }
+
         studentDegree.setAdmissionDate(parseDate(data.getEducationDateBegin()));
         Map<String, Object> admissionOrderNumberAndDate = getAdmissionOrderNumberAndDate(data.getRefillInfo());
         studentDegree.setAdmissionOrderNumber((String) admissionOrderNumberAndDate.get("admissionOrderNumber"));
         studentDegree.setAdmissionOrderDate((Date) admissionOrderNumberAndDate.get("admissionOrderDate"));
-        if (!data.getCountryId().equals(""))
-            studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryCode(Integer.valueOf(data.getCountryId())));
+        if (!data.getCountry().equals(""))
+            studentDegree.setCitizenship(Citizenship.getCitizenshipByCountryUkrName(data.getCountry()));
         else
             studentDegree.setCitizenship(Citizenship.UKR);
         return studentDegree;
@@ -355,8 +276,8 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
         try {
             Matcher matcher = admissionPattern.matcher(refillInfo);
             if (matcher.find()) {
-                admissionOrderNumberAndDate.put("admissionOrderNumber", matcher.groupCount() > 0 ? matcher.group(1) : "");
-                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionOrderDateFormatter.parse(matcher.group(2)) : null;
+                admissionOrderNumberAndDate.put("admissionOrderNumber", matcher.groupCount() > 0 ? matcher.group(1).trim() : "");
+                Date admissionOrderDate = matcher.groupCount() > 1 ? admissionOrderDateFormatter.parse(matcher.group(2).trim()) : null;
                 admissionOrderNumberAndDate.put("admissionOrderDate", admissionOrderDate);
                 return admissionOrderNumberAndDate;
             }
@@ -384,7 +305,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
                 return;
             }
         } else {
-            String message = "Неправильна спеціалізація";
+            String message = "Неправильна освітня програма";
             edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
@@ -419,7 +340,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
             }
         }
         if (specializationFromDB == null) {
-            String message = "Дана спеціалізація відсутня";
+            String message = "Дана освітня програма відсутня";
             edeboDataSyncronizationReport.addMissingPrimaryDataRed(new MissingPrimaryDataRedMessageBean(message, new StudentDegreePrimaryDataBean(importedData)));
             return;
         }
@@ -534,7 +455,7 @@ public class EdeboStudentDataSynchronizationServiceImpl implements EdeboStudentD
 
     private Date parseDate(String fileDate) {
         try {
-            DateFormat formatter = new SimpleDateFormat("M/dd/yy H:mm");
+            DateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
             formatter.setTimeZone(TimeZone.getTimeZone("EET"));
             return formatter.parse(fileDate);
         } catch (ParseException e) {

@@ -27,6 +27,7 @@ dependencies {
 	compile (
 			"com.zaxxer:HikariCP:${hikariVersion}"
 	)
+	implementation 'com.opencsv:opencsv:5.3'
 	testCompile(
 			"org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
 	)

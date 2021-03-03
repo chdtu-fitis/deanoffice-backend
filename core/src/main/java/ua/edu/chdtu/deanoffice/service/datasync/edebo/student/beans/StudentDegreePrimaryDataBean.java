@@ -42,7 +42,7 @@ public class StudentDegreePrimaryDataBean {
         this.birthday=data.getBirthday();
         this.degreeName=data.getQualificationGroupName();
         this.fullSpecialityName=data.getFullSpecialityName();
-        this.fullSpecializationName=data.getFullSpecializationName();
+        this.fullSpecializationName=data.getProgramName();
     }
 
 
