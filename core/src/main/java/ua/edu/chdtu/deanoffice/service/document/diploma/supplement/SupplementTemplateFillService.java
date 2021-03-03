@@ -534,8 +534,8 @@ public class SupplementTemplateFillService {
     }
 
     private void fillCompetenciesTable(WordprocessingMLPackage template, AcquiredCompetencies competencies, String placeholder) {
-        String competencySeparator = "\\.";
-        String endOfTheSentence = ".";
+        String competencySeparator = "\\;";
+        String endOfTheSentence = ";";
 
         Tbl table = TemplateUtil.findTable(template, "AcquiredCompetencies");
         if (table == null) {
