@@ -551,14 +551,16 @@ public class SupplementTemplateFillService {
                 ? competencies.getCompetencies()
                 : competencies.getCompetenciesEng();
 
-        for (String item : competenciesString.split(competencySeparator)) {
+        String[] competenciesStrings = competenciesString.split(competencySeparator);
+        for (int i = 0; i < competenciesStrings.length; i++) {
+            String item = competenciesStrings[i];
             P newParagraph = XmlUtils.deepCopy(parentParagraph);
             newParagraph.getContent().clear();
 
             R container = XmlUtils.deepCopy(parentContainer);
             container.getContent().clear();
             Text competency = XmlUtils.deepCopy(textWithAcquiredCompetenciesPlaceholder);
-            competency.setValue(item + endOfTheSentence);
+            competency.setValue(item + (i != competenciesStrings.length-1 ? endOfTheSentence : ""));
             container.getContent().add(competency);
             newParagraph.getContent().add(container);
             paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
