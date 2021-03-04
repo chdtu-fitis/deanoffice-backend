@@ -131,9 +131,7 @@ public class EdeboDiplomaNumberSynchronizationService {
             );
         }
 
-        StudentDegree studentDegreefromDb = studentDegreeService.getBySupplementNumber(
-                importData.getEducationId()
-        );
+        StudentDegree studentDegreefromDb = studentDegreeService.getBySupplementNumber(importData.getEducationId());
         if (studentDegreefromDb == null) {
             String message = "Даного студента не існує в базі даних";
             diplomaSynchronizationReport.addBeanToMissingDataList(
@@ -144,7 +142,7 @@ public class EdeboDiplomaNumberSynchronizationService {
             );
         } else {
             boolean diplomaHonor = false;
-            if (importData.getAwardTypeId().toLowerCase().equals(HONOR_OF_DIPLOMA)){
+            if (importData.getAwardTypeId().toLowerCase().contains(HONOR_OF_DIPLOMA)){
                 diplomaHonor = true;
             }
             diplomaSynchronizationReport.addBeanToSynchronizedList(

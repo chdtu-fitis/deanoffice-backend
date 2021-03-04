@@ -8,6 +8,6 @@ final class DiplomaHeaderPatterns {
     final static String FACULTY_NAME= "facultyname";
     final static String DOCUMENT_SERIES = "documentseries";
     final static String DOCUMENT_NUMBER = "documentnumber";
-    final static String AWARD_TYPE_ID = "awardtypename";
+    final static String AWARD_TYPE_ID = "additionalawardinfo";
     final static String EDUCATION_ID = "personeducationid";
 }
