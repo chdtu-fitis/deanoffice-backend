@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class StudentSummary {
-    public static final int COURSE_PAPER_SECTION_NUMBER_IN_GRADES = 1;
     public static final int QUALIFICATION_SECTION_NUMBER_IN_GRADES = 3;
 
     private static Logger log = LoggerFactory.getLogger(StudentSummary.class);

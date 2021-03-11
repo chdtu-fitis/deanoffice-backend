@@ -104,8 +104,7 @@ public class SupplementTemplateFillService {
             }
             sectionNumber++;
             //Need to skip header of the next section
-            if (sectionNumber != StudentSummary.COURSE_PAPER_SECTION_NUMBER_IN_GRADES)
-                rowToAddIndex++;
+            rowToAddIndex++;
         }
         tableWithGrades.getContent().remove(templateRow);
 
