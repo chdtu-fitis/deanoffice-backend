@@ -266,8 +266,8 @@ public class SupplementTemplateFillService {
                 : simpleDateFormat.format(studentDegree.getDiplomaDate()));
 
         if (studentDegree.isDiplomaWithHonours()) {
-            result.put("DiplomaHonours", "З ВІДЗНАКОЮ");
-            result.put("DiplomaHonoursEng", "WITH HONOURS");
+            result.put("DiplomaHonours", "ДИПЛОМ З ВІДЗНАКОЮ");
+            result.put("DiplomaHonoursEng", "DIPLOMA WITH HONOURS");
         } else {
             result.put("DiplomaHonours", "Не передбачено");
             result.put("DiplomaHonoursEng", "Not applicable");
