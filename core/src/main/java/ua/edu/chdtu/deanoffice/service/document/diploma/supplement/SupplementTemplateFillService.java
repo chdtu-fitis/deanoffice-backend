@@ -19,6 +19,7 @@ import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.util.DocumentUtil;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -172,28 +173,14 @@ public class SupplementTemplateFillService {
                 ? simpleDateFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
 
-        TuitionForm tuitionForm = studentSummary.getStudentGroup().getTuitionForm();
-        String modeOfStudyUkr = "";
-        String modeOfStudyEng = "";
-        String modeOfStudyUkrAblativeCase = "";
-        switch (tuitionForm) {
-            case FULL_TIME:
-                modeOfStudyUkr = "Очна (денна)";
-                modeOfStudyEng = "Full-time";
-                break;
-            case EXTRAMURAL:
-                modeOfStudyUkr = "Заочна";
-                modeOfStudyEng = "Part-time";
-                break;
-        }
-
         result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
         result.put("QualUkr", TemplateUtil.getValueSafely(degree.getName()) + " з " + speciality.getNameGenitive());
         result.put("QualEng", TemplateUtil.getValueSafely(degree.getNameEng()) + " of " + speciality.getNameEng());
 
-        result.put("ModeOfStudyUkr", modeOfStudyUkr);
-        result.put("ModeOfStudyEng", modeOfStudyEng);
+        DocumentUtil.ModeOfStudyUkrEngNames mode = DocumentUtil.getModeOfStudyUkrEngNames(studentSummary.getStudentGroup().getTuitionForm());
+        result.put("ModeOfStudyUkr", mode.getModeOfStudyUkr());
+        result.put("ModeOfStudyEng", mode.getModeOfStudyEng());
 
         result.put("SpecialityUkr", speciality.getCode() + " " + speciality.getName());
         result.put("SpecialityEng", speciality.getCode() + " " + speciality.getNameEng());

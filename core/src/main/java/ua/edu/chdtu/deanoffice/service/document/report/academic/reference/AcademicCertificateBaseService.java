@@ -4,11 +4,14 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
+import ua.edu.chdtu.deanoffice.util.DocumentUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -18,7 +21,7 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 public class AcademicCertificateBaseService {
 
-    private static final int INDEX_OF_TABLE_WITH_GRADES = 11;
+    private static final int INDEX_OF_TABLE_WITH_GRADES = 1;
     private static final String DOCUMENT_DELIMITER = "/";
     private static final String NO_GRADES_DESCRIPTION_UKR = "Заліків та іспитів не здавав(ла).";
     private static final String NO_GRADES_DESCRIPTION_EN = "No credits and exams.";
@@ -28,37 +31,54 @@ public class AcademicCertificateBaseService {
         HashMap<String, String> result = new HashMap();
         StudentDegree studentDegree = studentSummary.getStudentDegree();
         Student student = studentDegree.getStudent();
-        result.put("studentNameUkr", student.getFullNameUkr());
-        String studentNameEng;
-        if (student.getNameEng() == null || student.getSurnameEng() == null) {
-            studentNameEng = transliterate(student.getName() + " " + student.getSurname());
-        } else {
-            studentNameEng = student.getSurnameEng() + " " + student.getNameEng();
-        }
-        result.put("studentNameEng", studentNameEng);
+        result.put("nameUkr", student.getName());
+        result.put("surnameUkr", student.getSurname());
+        result.put("nameEng", student.getNameEng() == null ? "" : student.getNameEng());
+        result.put("surnameEng", student.getSurnameEng() == null ? "" : student.getSurnameEng());
+        result.put("birthDate", formatDate(student.getBirthDate()));
+        result.put("individualNumber", studentDegree.getSupplementNumber());
+
         result.put("facultyNameUkr", studentDegree.getSpecialization().getFaculty().getName());
         result.put("facultyNameEng", studentDegree.getSpecialization().getFaculty().getNameEng());
         result.put("degreeUkr", studentDegree.getSpecialization().getDegree().getName());
         result.put("degreeEng", studentDegree.getSpecialization().getDegree().getNameEng());
-        String code = studentDegree.getSpecialization().getSpeciality().getCode();
-        result.put("specialityUkr", code + " " + studentDegree.getSpecialization().getSpeciality().getName());
-        result.put("specialityEng", code + " " + studentDegree.getSpecialization().getSpeciality().getNameEng());
-        result.put("educationalProgramUkr", studentDegree.getSpecialization().getName());
-        result.put("educationalProgramEng", studentDegree.getSpecialization().getNameEng());
-        result.put("birthDate", formatDate(student.getBirthDate()));
-        result.put("individualNumber",studentDegree.getSupplementNumber());
-        result.put("countryOfBirthUkr", "Україна");
-        result.put("countryOfBirthEng", "Ukraine");
+        Speciality speciality = studentDegree.getSpecialization().getSpeciality();
+        result.put("fieldOfStudyUkr", speciality.getFieldOfStudyCode() + " " + speciality.getFieldOfStudy());
+        result.put("fieldOfStudyEng", speciality.getFieldOfStudyCode() + " " + speciality.getFieldOfStudyEng());
+        result.put("specialityUkr", speciality.getCode() + " " + speciality.getName());
+        result.put("specialityEng", speciality.getCode() + " " + speciality.getNameEng());
+        result.put("educationProgramUkr", studentDegree.getSpecialization().getName());
+        result.put("educationProgramEng", studentDegree.getSpecialization().getNameEng());
+        String specializationUkr = TemplateUtil.getValueSafely(studentDegree.getSpecialization().getCode()) + " "
+                + TemplateUtil.getValueSafely(studentDegree.getSpecialization().getSpecializationName());
+        result.put("specializationUkr", specializationUkr);
+        String specializationEng = TemplateUtil.getValueSafely(studentDegree.getSpecialization().getCode()) + " "
+                + TemplateUtil.getValueSafely(studentDegree.getSpecialization().getSpecializationNameEng());
+        result.put("specializationEng", specializationEng);
+        result.put("CertificateIssuedBy", TemplateUtil.getValueSafely(studentDegree.getSpecialization().getCertificateIssuedBy()));
+        result.put("CertificateIssuedByEng", TemplateUtil.getValueSafely(studentDegree.getSpecialization().getCertificateIssuedByEng()));
+
+        DocumentUtil.ModeOfStudyUkrEngNames mode = DocumentUtil.getModeOfStudyUkrEngNames(studentDegree.getTuitionForm());
+        result.put("ModeOfStudyUkr", mode.getModeOfStudyUkr());
+        result.put("ModeOfStudyEng", mode.getModeOfStudyEng());
 
         result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
         result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
-        result.put("programHeadNameUkr", studentDegree.getSpecialization().getEducationalProgramHeadName());
-        result.put("programHeadInfoUkr", studentDegree.getSpecialization().getEducationalProgramHeadInfo());
-        result.put("programHeadNameEng", studentDegree.getSpecialization().getEducationalProgramHeadNameEng());
-        result.put("programHeadInfoEng", studentDegree.getSpecialization().getEducationalProgramHeadInfoEng());
 
         result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
         result.put("today", formatDate(new Date()));
+
+        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        result.put("PreviousDiplomaName", studentDegree.getPreviousDiplomaType().getNameUkr());
+        result.put("PreviousDiplomaNameEng", studentDegree.getPreviousDiplomaType().getNameEng());
+        result.put("PreviousDiplomaNumber", TemplateUtil.getValueSafely(studentDegree.getPreviousDiplomaNumber()));
+        result.put("PreviousDiplomaIssuedBy", studentDegree.getPreviousDiplomaIssuedBy());
+        result.put("PreviousDiplomaIssuedByEng", studentDegree.getPreviousDiplomaIssuedByEng());
+        if (studentDegree.getPreviousDiplomaDate() != null) {
+            result.put("PreviousDiplomaDate", simpleDateFormat.format(studentDegree.getPreviousDiplomaDate()) + " р.");
+            DateFormat englishDateFormat = SimpleDateFormat.getDateInstance(DateFormat.LONG, Locale.ENGLISH);
+            result.put("PreviousDiplomaDateEng", englishDateFormat.format(studentDegree.getPreviousDiplomaDate()));
+        }
         return result;
     }
 
@@ -101,10 +121,10 @@ public class AcademicCertificateBaseService {
 
     private void prepareRows(Tbl table, StudentSummaryForAcademicReference studentSummary) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
-        Tr rowWithSignature = tableRows.get(1);
-        Tr rowWithCourse = tableRows.get(2);
+        Tr rowWithSignature = tableRows.get(2);
+        Tr rowWithCourse = tableRows.get(3);
         Set<Integer> semestersSet = studentSummary.getSemesters().keySet();
-        int currentRow = 2;
+        int currentRow = 3;
         int currentSemester;
         Iterator<Integer> setIterator = semestersSet.iterator();
         if (setIterator.hasNext()) {
@@ -127,7 +147,7 @@ public class AcademicCertificateBaseService {
             replacements.put("n","Практики / Internships");
             insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(1));
         }
-        table.getContent().remove(1);
+        table.getContent().remove(2);
         table.getContent().remove(table.getContent().size()-1);
     }
 
@@ -190,10 +210,11 @@ public class AcademicCertificateBaseService {
 
     private String getGradeDisplay(Grade grade) {
         String result = "";
-        result += grade.getPoints() + DOCUMENT_DELIMITER;
-        result += grade.getEcts() + DOCUMENT_DELIMITER;
-        result += grade.getEcts().getNationalGradeUkr(grade) + DOCUMENT_DELIMITER;
-        result += grade.getEcts().getNationalGradeEng(grade);
+        result += grade.getPoints();
+//        + DOCUMENT_DELIMITER;
+//        result += grade.getEcts() + DOCUMENT_DELIMITER;
+//        result += grade.getEcts().getNationalGradeUkr(grade) + DOCUMENT_DELIMITER;
+//        result += grade.getEcts().getNationalGradeEng(grade);
         return result;
     }
 
