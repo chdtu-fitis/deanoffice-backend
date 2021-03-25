@@ -85,7 +85,7 @@ public class AcademicCertificateBaseService {
     public void prepareTable(WordprocessingMLPackage template, StudentSummaryForAcademicReference studentSummary) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(INDEX_OF_TABLE_WITH_GRADES);
         if(studentSummary.semesters.isEmpty()){
-            table.getContent().remove(2);
+            table.getContent().remove(3);
             showNoGradesMessage(table);
         } else {
             prepareRows(table, studentSummary);
@@ -148,7 +148,7 @@ public class AcademicCertificateBaseService {
             insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(1));
         }
         table.getContent().remove(2);
-        table.getContent().remove(table.getContent().size()-1);
+        table.getContent().remove(table.getContent().size()-2);
     }
 
     private int insertOneKcSortRows(Tbl table, Tr rowWithSignature, Tr rowWithCourse, int currentRow, Map<String,String> header, List<Grade> gradeSet) {
@@ -210,11 +210,9 @@ public class AcademicCertificateBaseService {
 
     private String getGradeDisplay(Grade grade) {
         String result = "";
-        result += grade.getPoints();
-//        + DOCUMENT_DELIMITER;
-//        result += grade.getEcts() + DOCUMENT_DELIMITER;
-//        result += grade.getEcts().getNationalGradeUkr(grade) + DOCUMENT_DELIMITER;
-//        result += grade.getEcts().getNationalGradeEng(grade);
+        result += grade.getPoints() + DOCUMENT_DELIMITER;
+        result += grade.getEcts().getNationalGradeUkr(grade) + DOCUMENT_DELIMITER;
+        result += grade.getEcts().getNationalGradeEng(grade);
         return result;
     }
 
