@@ -79,12 +79,13 @@ public class AcademicCertificateBaseService {
             DateFormat englishDateFormat = SimpleDateFormat.getDateInstance(DateFormat.LONG, Locale.ENGLISH);
             result.put("PreviousDiplomaDateEng", englishDateFormat.format(studentDegree.getPreviousDiplomaDate()));
         }
+        result.put("totalCredits", studentSummary.getTotalCredits().toString());
         return result;
     }
 
     public void prepareTable(WordprocessingMLPackage template, StudentSummaryForAcademicReference studentSummary) {
         Tbl table = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(INDEX_OF_TABLE_WITH_GRADES);
-        if(studentSummary.semesters.isEmpty()){
+        if(studentSummary.getSemesters().isEmpty()){
             table.getContent().remove(3);
             showNoGradesMessage(table);
         } else {
@@ -147,11 +148,12 @@ public class AcademicCertificateBaseService {
             replacements.put("n","Практики / Internships");
             insertOneKcSortRows(table, rowWithSignature, rowWithCourse, currentRow, replacements, coursePapersAndInternships.get(1));
         }
+
         table.getContent().remove(2);
         table.getContent().remove(table.getContent().size()-2);
     }
 
-    private int insertOneKcSortRows(Tbl table, Tr rowWithSignature, Tr rowWithCourse, int currentRow, Map<String,String> header, List<Grade> gradeSet) {
+    private int insertOneKcSortRows(Tbl table, Tr rowWithSignature, Tr rowWithCourse, int currentRow, Map<String, String> header, List<Grade> gradeSet) {
         Tr newRowWithSignature = XmlUtils.deepCopy(rowWithSignature);
         replaceInRow(newRowWithSignature, header);
         table.getContent().add(currentRow, newRowWithSignature);

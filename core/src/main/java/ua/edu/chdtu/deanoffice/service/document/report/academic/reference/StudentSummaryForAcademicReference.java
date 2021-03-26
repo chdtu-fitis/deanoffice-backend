@@ -6,18 +6,20 @@ import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Getter
 @Setter
 public class StudentSummaryForAcademicReference {
-
-    Map<Integer, SemesterDetails> semesters;
+    private Map<Integer, SemesterDetails> semesters;
+    private BigDecimal totalCredits;
     private StudentDegree studentDegree;
 
     public StudentSummaryForAcademicReference(StudentDegree studentDegree, List<List<Grade>> allGrades) {
         this.studentDegree = studentDegree;
         semesters = new TreeMap<>();
+        totalCredits = new BigDecimal(0);
         for (List<Grade> gradeList : allGrades) {
             for (Grade grade : gradeList) {
                 if (isGradeValid(grade)) {
@@ -37,10 +39,11 @@ public class StudentSummaryForAcademicReference {
                     if (knowledgeControlId == Constants.INTERNSHIP || knowledgeControlId == Constants.NON_GRADED_INTERNSHIP) {
                         semesterDetails.getGrades().get(2).add(grade);
                     }
-                    if (knowledgeControlId == Constants.ATTESTATION || knowledgeControlId == Constants.STATE_EXAM) {
-                        semesterDetails.getGrades().get(3).add(grade);
-                    }
+//                    if (knowledgeControlId == Constants.ATTESTATION || knowledgeControlId == Constants.STATE_EXAM) {
+//                        semesterDetails.getGrades().get(3).add(grade);
+//                    }
                     semesters.replace(currentSemester, semesterDetails);
+                    totalCredits = totalCredits.add(grade.getCourse().getCredits());
                 }
             }
         }

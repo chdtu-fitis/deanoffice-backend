@@ -12,7 +12,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.AcademicReferenceService;
+import ua.edu.chdtu.deanoffice.service.document.report.academic.reference.AcademicCertificateService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
@@ -22,11 +22,11 @@ import java.io.IOException;
 @RequestMapping("/documents/academic-certificate")
 public class AcademicCertificateController extends DocumentResponseController {
 
-    private AcademicReferenceService academicReferenceService;
+    private AcademicCertificateService academicReferenceService;
 
     private FacultyService facultyService;
 
-    public AcademicCertificateController(AcademicReferenceService academicReferenceService, FacultyService facultyService) {
+    public AcademicCertificateController(AcademicCertificateService academicReferenceService, FacultyService facultyService) {
         this.academicReferenceService = academicReferenceService;
         this.facultyService = facultyService;
     }

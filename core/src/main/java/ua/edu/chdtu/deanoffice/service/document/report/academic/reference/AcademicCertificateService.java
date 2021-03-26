@@ -22,7 +22,7 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
-public class AcademicReferenceService extends AcademicCertificateBaseService {
+public class AcademicCertificateService extends AcademicCertificateBaseService {
 
     @Autowired
     private DocumentIOService documentIOService;
