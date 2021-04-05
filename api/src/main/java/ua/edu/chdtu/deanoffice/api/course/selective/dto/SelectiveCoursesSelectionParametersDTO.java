@@ -10,9 +10,7 @@ public class SelectiveCoursesSelectionParametersDTO {
     @JsonFormat(pattern="dd-MM-yyyy")
     private Date firstRoundStartDate;
     @JsonFormat(pattern="dd-MM-yyyy")
-    private Date firstRoundEndDate;
-    @JsonFormat(pattern="dd-MM-yyyy")
-    private Date secondRoundStartDate;
+    private Date firstRoundEndSecondRoundStartDate;
     @JsonFormat(pattern="dd-MM-yyyy")
     private Date secondRoundEndDate;
     private int minimumCountOfStudents;

@@ -14,9 +14,7 @@ public class SelectiveCoursesSelectionParameters extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date firstRoundStartDate;
     @Temporal(TemporalType.DATE)
-    private Date firstRoundEndDate;
-    @Temporal(TemporalType.DATE)
-    private Date secondRoundStartDate;
+    private Date firstRoundEndSecondRoundStartDate;
     @Temporal(TemporalType.DATE)
     private Date secondRoundEndDate;
     private int minimumCountOfStudents;

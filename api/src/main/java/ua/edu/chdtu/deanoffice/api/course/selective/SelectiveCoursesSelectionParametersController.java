@@ -12,7 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionParametersDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionParametersWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesSelectionParameters;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.SelectiveCoursesSelectionParametersService;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
@@ -28,10 +33,27 @@ public class SelectiveCoursesSelectionParametersController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PostMapping
-    public ResponseEntity createSelectiveCoursesSelectionParameters(@Validated @RequestBody SelectiveCoursesSelectionParametersWriteDTO selectiveCoursesSelectionParametersWriteDTO) {
+    public ResponseEntity createSelectiveCoursesSelectionParameters(@Validated @RequestBody SelectiveCoursesSelectionParametersWriteDTO selectiveCoursesSelectionParametersWriteDTO)
+            throws OperationCannotBePerformedException {
         SelectiveCoursesSelectionParameters selectiveCoursesSelectionParameters = map(selectiveCoursesSelectionParametersWriteDTO, SelectiveCoursesSelectionParameters.class);
-        SelectiveCoursesSelectionParameters selectiveCoursesSelectionParametersAfterSave = selectiveCoursesSelectionParametersService.create(selectiveCoursesSelectionParameters);
-        SelectiveCoursesSelectionParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesSelectionParametersAfterSave, SelectiveCoursesSelectionParametersDTO.class);
-        return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);
+
+        int yearOfFirstRoundStartDate = getYearOfDate(selectiveCoursesSelectionParameters.getFirstRoundStartDate());
+        int yearOfFirstRoundEndSecondRoundStartDate = getYearOfDate(selectiveCoursesSelectionParameters.getFirstRoundEndSecondRoundStartDate());
+        int yearOfSecondRoundEndDate = getYearOfDate(selectiveCoursesSelectionParameters.getSecondRoundEndDate());
+
+        if (yearOfFirstRoundStartDate == yearOfFirstRoundEndSecondRoundStartDate && yearOfFirstRoundStartDate == yearOfSecondRoundEndDate) {
+            SelectiveCoursesSelectionParameters selectiveCoursesSelectionParametersAfterSave = selectiveCoursesSelectionParametersService.create(selectiveCoursesSelectionParameters);
+            SelectiveCoursesSelectionParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesSelectionParametersAfterSave, SelectiveCoursesSelectionParametersDTO.class);
+            return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);
+        } else
+            throw new OperationCannotBePerformedException("Роки в датах повинні бути однакові");
+    }
+
+    private int getYearOfDate(Date targetDate) {
+        Date date = targetDate;
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Kiev"));
+        cal.setTime(date);
+        int year = cal.get(Calendar.YEAR);
+        return year;
     }
 }

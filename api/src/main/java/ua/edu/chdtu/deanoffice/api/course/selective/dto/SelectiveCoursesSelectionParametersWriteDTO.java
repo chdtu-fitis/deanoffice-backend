@@ -11,9 +11,7 @@ public class SelectiveCoursesSelectionParametersWriteDTO {
     @NotNull
     private Date firstRoundStartDate;
     @NotNull
-    private Date firstRoundEndDate;
-    @NotNull
-    private Date secondRoundStartDate;
+    private Date firstRoundEndSecondRoundStartDate;
     @NotNull
     private Date secondRoundEndDate;
     @NotNull
