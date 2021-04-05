@@ -14,6 +14,7 @@ public class DocumentResponseController {
 
     protected static final String MEDIA_TYPE_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     protected static final String MEDIA_TYPE_PDF = "application/pdf";
+    protected static final String MEDIA_TYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
     protected static ResponseEntity buildDocumentResponseEntity(File result, String asciiName, String mediaType) {
         try {

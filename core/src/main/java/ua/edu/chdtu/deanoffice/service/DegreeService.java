@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Degree;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.DegreeRepository;
 
 import java.util.List;
@@ -24,5 +25,13 @@ public class DegreeService {
 
     public Degree getByName(String degreeName) {
         return degreeRepository.findByName(degreeName);
+    }
+
+    public Degree getByNameEng(String nameEng) {
+        return degreeRepository.findByNameEng(nameEng);
+    }
+
+    public int getMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(String nameEng, int facultyId, TuitionForm tuitionForm) {
+        return degreeRepository.findMaxSemesterForDegreeByNameEngAndFacultyIdAndTuitionForm(nameEng, facultyId, tuitionForm.toString());
     }
 }

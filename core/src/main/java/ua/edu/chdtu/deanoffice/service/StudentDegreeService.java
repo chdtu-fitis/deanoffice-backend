@@ -3,15 +3,11 @@ package ua.edu.chdtu.deanoffice.service;
 import com.google.common.base.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.Payment;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,6 +48,17 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllByGroupId(Integer groupId) {
         return this.studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
+    }
+
+    public int getCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(int studentGroupId, LocalDate sessionStartDate, Payment payment) {
+        return this.studentDegreeRepository.findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString());
+    }
+
+    public int getCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+            int studentGroupId, LocalDate sessionStartDate, Payment payment) {
+        return this.studentDegreeRepository.findCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+                studentGroupId, java.sql.Date.valueOf(sessionStartDate), payment.toString()
+        );
     }
 
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
@@ -256,5 +263,17 @@ public class StudentDegreeService {
         int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
         int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
         return currentYear - groupCreationYear + groupFirstYear;
+    }
+
+    public int getCountAllStudentsInStudentGroupWhoWerePassExamByGrades(int studentGroupId, int semester, Payment payment, List<Integer> grades) {
+        return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoWerePassExamByGrades(studentGroupId, semester, payment.toString(), grades);
+    }
+
+    public int getCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+            int studentGroupId, int semester, Payment payment, int countOfBadGrades
+    ) {
+        return studentDegreeRepository.findCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+                studentGroupId, semester, payment.toString(), countOfBadGrades
+        );
     }
 }

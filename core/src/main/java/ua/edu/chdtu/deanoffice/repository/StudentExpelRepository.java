@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.entity.Payment;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 
 import java.util.Date;
@@ -33,5 +34,32 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
     List<StudentExpel> findAll(Specification<StudentExpel> spec);
 
     List <StudentExpel> findByStudentDegreeIdOrderByExpelDate(@Param("student_degree_id") Integer studentDegreeId);
+
+    @Query(value =
+            "SELECT count(DISTINCT se.student_degree_id) FROM student_expel AS se " +
+            "INNER JOIN student_degree AS sd ON se.student_degree_id = sd.id " +
+            "WHERE se.student_group_id = :studentGroupId " +
+            "AND se.expel_date > :sessionStartDate " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountStudentsInStudentGroupIdWhoExpelAfterSessionStartDateAndByPayment(@Param("studentGroupId") int studentGroupId,
+                                                                                   @Param("sessionStartDate") java.sql.Date sessionStartDate,
+                                                                                   @Param("payment") String payment);
+
+    //TODO чи може не бути кінця академ. відпустки?
+    @Query(value =
+            "SELECT count(DISTINCT se.id) FROM student_expel AS se " +
+            "INNER JOIN student_degree AS sd " +
+            "ON se.student_degree_id = sd.id " +
+            "INNER JOIN student_academic_vacation AS sav " +
+            "ON sav.student_degree_id = sd.id " +
+            "WHERE se.student_group_id = :studentGroupId " +
+            "AND se.expel_date > :sessionStartDate " +
+            "AND sav.vacation_start_date < :sessionStartDate " +
+            "AND sav.vacation_end_date > :sessionStartDate " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountStudentsInStudentGroupWhoExpelAfterSessionStartDateAndHaveAcademicVacationAndByPayment(
+            @Param("studentGroupId") int studentGroupId,
+            @Param("sessionStartDate") java.sql.Date sessionStartDate,
+            @Param("payment") String payment);
 
 }

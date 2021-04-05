@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.ExtraPoints;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 
 import java.util.Date;
 import java.util.List;
@@ -43,6 +45,32 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("groupId") Integer groupId,
             @Param("active") boolean active
     );
+
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree AS sd " +
+            "WHERE sd.student_group_id = :studentGroupId " +
+            "AND sd.active = true " +
+            "AND sd.admission_date < :sessionStartDate " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountAllActiveStudentsByBeforeSessionStartDateAndStudentGroupIdAndPayment(@Param("studentGroupId") int studentGroupId,
+                                                                                      @Param("sessionStartDate") java.sql.Date sessionStartDate,
+                                                                                      @Param("payment") String payment);
+
+    //TODO чи може не бути вказано кінця академ. відпустки? + чи потрібно вставляти дату вступу, якщо вказано академ. відпустку?
+    @Query(value =
+            "SELECT count(sd.id) FROM student_degree AS sd " +
+            "INNER JOIN student_academic_vacation AS sav " +
+            "ON sav.student_degree_id = sd.id " +
+            "WHERE sd.student_group_id = :studentGroupId " +
+            "AND sd.active = true " +
+            "AND sd.admission_date < :sessionStartDate " +
+            "AND sav.vacation_start_date < :sessionStartDate " +
+            "AND sav.vacation_end_date > :sessionStartDate " +
+            "AND sd.payment = :payment", nativeQuery = true)
+    int findCountAllActiveStudentsBeforeSessionStartDateWhoHaveAcademicVacationAndByStudentGroupIdAndPayment(
+            @Param("studentGroupId") int studentGroupId,
+            @Param("sessionStartDate") java.sql.Date sessionStartDate,
+            @Param("payment") String payment);
 
     @Query(value = "SELECT * FROM student_degree sd " +
             "INNER JOIN specialization s ON s.id = sd.specialization_id " +
@@ -522,4 +550,50 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("payment") String payment,
             @Param("semester") int semester
     );
+
+    @Query(value =
+            "WITH query1(num) AS ( " +
+                    "SELECT count(c.id) FROM course AS c " +
+                    "INNER JOIN courses_for_groups AS cfg ON cfg.course_id = c.id " +
+                    "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
+                    "WHERE c.semester = :semester " +
+                    "AND cfg.student_group_id = :studentGroupId " +
+                    "AND kc.graded = true), " +
+            "query2(id) AS ( " +
+                    "SELECT count(g.id) FROM grade g " +
+                    "INNER JOIN course AS c ON g.course_id = c.id " +
+                    "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
+                    "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
+                    "WHERE sd.student_group_id = :studentGroupId " +
+                    "AND sd.payment = :payment " +
+                    "AND c.semester = :semester " +
+                    "AND kc.graded = true " +
+                    "AND g.grade IN (:grades) " +
+                    "GROUP BY sd.id HAVING count(g.id) = (SELECT num FROM query1)) " +
+    "SELECT count(id) FROM query2", nativeQuery = true)
+    int findCountAllStudentsInStudentGroupWhoWerePassExamByGrades(@Param("studentGroupId") int studentGroupId,
+                                                                  @Param("semester") int semester,
+                                                                  @Param("payment") String payment,
+                                                                  @Param("grades") List<Integer> grades);
+
+    @Query(value =
+            "WITH query(id) AS ( " +
+                    "SELECT count(g.id) FROM grade g " +
+                    "INNER JOIN course AS c ON g.course_id = c.id " +
+                    "INNER JOIN student_degree AS sd ON sd.id = g.student_degree_id " +
+                    "INNER JOIN knowledge_control AS kc ON c.kc_id = kc.id " +
+                    "WHERE sd.student_group_id = :studentGroupId " +
+                    "AND sd.payment = :payment " +
+                    "AND c.semester = :semester " +
+                    "AND kc.graded = true " +
+                    "AND g.grade IN (NULL, 1, 2) " +
+                    "GROUP BY sd.id HAVING count(g.id) = :countOfBadGrades) " +
+            "SELECT count(id) FROM query", nativeQuery = true)
+    int findCountAllStudentsInStudentGroupWhoHaveBadGradesByCountOfBadGrades(
+            @Param("studentGroupId") int studentGroupId,
+            @Param("semester") int semester,
+            @Param("payment") String payment,
+            @Param("countOfBadGrades") int countOfBadGrades
+    );
+
 }

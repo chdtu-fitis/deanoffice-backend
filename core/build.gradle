@@ -24,6 +24,16 @@ dependencies {
 	compile group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'
 	compile('org.modelmapper:modelmapper:1.1.0')
 
+	// https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+	compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+
+	// https://mvnrepository.com/artifact/org.apache.poi/poi
+	compile group: 'org.apache.poi', name: 'poi', version: '4.1.2'
+
+	// https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas
+	compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.2'
+
+
 	compile (
 			"com.zaxxer:HikariCP:${hikariVersion}"
 	)
