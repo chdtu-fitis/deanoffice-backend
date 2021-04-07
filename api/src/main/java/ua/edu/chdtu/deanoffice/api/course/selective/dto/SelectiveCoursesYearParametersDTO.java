@@ -3,16 +3,17 @@ package ua.edu.chdtu.deanoffice.api.course.selective.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class SelectiveCoursesYearParametersDTO {
     private int id;
     @JsonFormat(pattern="dd-MM-yyyy")
-    private LocalDate firstRoundStartDate;
+    private Date firstRoundStartDate;
     @JsonFormat(pattern="dd-MM-yyyy")
-    private LocalDate firstRoundEndDate;
+    private Date firstRoundEndDate;
     @JsonFormat(pattern="dd-MM-yyyy")
-    private LocalDate secondRoundEndDate;
+    private Date secondRoundEndDate;
+    private int dateYear;
     private int minStudentsCount;
 }

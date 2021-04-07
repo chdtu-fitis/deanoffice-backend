@@ -4,14 +4,20 @@ import lombok.Data;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
 import javax.persistence.Entity;
-import java.time.LocalDate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Date;
 
 @Entity
 @Data
 public class SelectiveCoursesYearParameters extends BaseEntity {
-    private LocalDate firstRoundStartDate;
-    private LocalDate firstRoundEndDate;
-    private LocalDate secondRoundEndDate;
+    @Temporal(TemporalType.DATE)
+    private Date firstRoundStartDate;
+    @Temporal(TemporalType.DATE)
+    private Date firstRoundEndDate;
+    @Temporal(TemporalType.DATE)
+    private Date secondRoundEndDate;
+    private int dateYear;
     private int minStudentsCount;
 }
 
