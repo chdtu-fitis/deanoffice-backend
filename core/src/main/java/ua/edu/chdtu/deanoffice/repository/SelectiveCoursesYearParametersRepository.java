@@ -7,6 +7,6 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 
 public interface SelectiveCoursesYearParametersRepository extends JpaRepository<SelectiveCoursesYearParameters, Integer> {
 
-    @Query("SELECT scyp FROM SelectiveCoursesYearParameters AS scyp WHERE scyp.dateYear = :year")
+    @Query("SELECT scyp FROM SelectiveCoursesYearParameters AS scyp WHERE scyp.studyYear = :year")
     SelectiveCoursesYearParameters findByYear(@Param("year") Integer year);
 }

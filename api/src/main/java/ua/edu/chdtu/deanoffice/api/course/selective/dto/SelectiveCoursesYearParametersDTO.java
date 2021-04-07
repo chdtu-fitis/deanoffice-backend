@@ -14,6 +14,6 @@ public class SelectiveCoursesYearParametersDTO {
     private Date firstRoundEndDate;
     @JsonFormat(pattern="dd-MM-yyyy")
     private Date secondRoundEndDate;
-    private int dateYear;
+    private int studyYear;
     private int minStudentsCount;
 }

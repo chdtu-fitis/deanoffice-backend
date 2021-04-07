@@ -32,15 +32,12 @@ public class SelectiveCoursesYearParametersController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PostMapping
-    public ResponseEntity createSelectiveCoursesYearParameters(@Validated @RequestBody SelectiveCoursesYearParametersWriteDTO selectiveCoursesYearParametersWriteDTO) {
-        SelectiveCoursesYearParameters selectiveCoursesYearParameters = strictMap(selectiveCoursesYearParametersWriteDTO, SelectiveCoursesYearParameters.class);
+    public ResponseEntity createSelectiveCoursesYearParameters(@Validated @RequestBody SelectiveCoursesYearParametersWriteDTO selectiveCoursesYearParametersWriteDTO)
+        throws OperationCannotBePerformedException {
 
-        try {
-            SelectiveCoursesYearParameters selectiveCoursesYearParametersAfterSave = selectiveCoursesYearParametersService.create(selectiveCoursesYearParameters);
-            SelectiveCoursesYearParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, SelectiveCoursesYearParametersDTO.class);
-            return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);
-        } catch (OperationCannotBePerformedException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+        SelectiveCoursesYearParameters selectiveCoursesYearParameters = strictMap(selectiveCoursesYearParametersWriteDTO, SelectiveCoursesYearParameters.class);
+        SelectiveCoursesYearParameters selectiveCoursesYearParametersAfterSave = selectiveCoursesYearParametersService.create(selectiveCoursesYearParameters);
+        SelectiveCoursesYearParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, SelectiveCoursesYearParametersDTO.class);
+        return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);
     }
 }

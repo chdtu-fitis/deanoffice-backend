@@ -32,7 +32,7 @@ public class SelectiveCoursesYearParametersService {
         int firstRoundEndDateYear = getDateYear(firstRoundEndDate);
         int secondRoundEndDateYear = getDateYear(secondRoundEndDate);
 
-        selectiveCoursesYearParameters.setDateYear(firstRoundEndDateYear);
+        selectiveCoursesYearParameters.setStudyYear(firstRoundEndDateYear);
 
         if (!(firstRoundStartDateYear == firstRoundEndDateYear && firstRoundStartDateYear == secondRoundEndDateYear))
             throw new OperationCannotBePerformedException("Роки в датах повинні бути однакові");

@@ -3,7 +3,7 @@ CREATE TABLE selective_courses_year_parameters(
     first_round_start_date DATE NOT NULL,
     first_round_end_date DATE NOT NULL,
     second_round_end_date DATE NOT NULL,
-    date_year INTEGER NOT NULL,
+    study_year INTEGER NOT NULL,
     min_students_count INTEGER NOT NULL
 );
 
@@ -17,4 +17,4 @@ ALTER TABLE selective_courses_year_parameters
     ADD CONSTRAINT uk_sc_year_parameters_sr_end_date UNIQUE(second_round_end_date);
 
 ALTER TABLE selective_courses_year_parameters
-    ADD CONSTRAINT uk_sc_year_parameters_date_year UNIQUE(date_year);
+    ADD CONSTRAINT uk_sc_year_parameters_study_year UNIQUE(study_year);

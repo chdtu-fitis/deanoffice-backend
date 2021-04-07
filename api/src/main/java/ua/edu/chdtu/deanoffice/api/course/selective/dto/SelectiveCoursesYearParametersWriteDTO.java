@@ -8,12 +8,13 @@ import java.util.Date;
 
 @Data
 public class SelectiveCoursesYearParametersWriteDTO {
-    @NotNull
+    @NotNull(message = "Обов'язково повинна бути дата початку першого туру")
     private Date firstRoundStartDate;
-    @NotNull
+    @NotNull(message = "Обов'язково повинна бути дата кінця першого туру")
     private Date firstRoundEndDate;
-    @NotNull
+    @NotNull(message = "Обов'язково повинна бути дата кінця другого туру")
     private Date secondRoundEndDate;
-    @Min(1)
+    @NotNull(message = "Обов'язково повинна бути вказана мінімальна кількість студентів")
+    @Min(value = 1, message = "Мінімальна кількість студентів повинна бути додатним числом")
     private int minStudentsCount;
 }
