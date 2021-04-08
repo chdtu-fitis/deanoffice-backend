@@ -5,23 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseStudentDegreesDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.*;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.Degree;
-import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
@@ -33,9 +21,11 @@ import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -307,7 +297,7 @@ public class SelectiveCourseController {
 
     /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
     @GetMapping("/student-courses")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear,  @RequestParam int studentDegreeId) {
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId) {
         SelectiveCoursesStudentDegreeDTO selectiveCoursesForStudentDegreeDTO = new SelectiveCoursesStudentDegreeDTO();
         List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
         if (selectiveCoursesForStudentDegree.size() > 0) {
@@ -333,5 +323,20 @@ public class SelectiveCourseController {
         }
         return ResponseEntity.ok(selectiveCourseStudentDegreesDTO);
     }
-}
 
+    @GetMapping("/students-count")
+    public ResponseEntity<List<SelectiveCourseWithStudentsCountDTO>> getSelectiveCoursesWithStudentsCount(@RequestParam @NotNull @Min(2010) int studyYear) {
+        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear);
+        List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = map(
+                selectiveCoursesStudentDegrees.keySet().stream().collect(Collectors.toList()),
+                SelectiveCourseWithStudentsCountDTO.class);
+
+        List<Long> counts = selectiveCoursesStudentDegrees.values().stream().collect(Collectors.toList());
+
+        for (int i = 0; i < selectiveCourseWithStudentsCountDTOS.size(); i++) {
+            selectiveCourseWithStudentsCountDTOS.get(i).setStudentsCount(counts.get(i));
+        }
+
+        return ResponseEntity.ok(selectiveCourseWithStudentsCountDTOS);
+    }
+}
