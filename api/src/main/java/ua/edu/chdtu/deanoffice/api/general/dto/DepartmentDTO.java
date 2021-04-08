@@ -12,6 +12,8 @@ public class DepartmentDTO {
     @JsonView(GeneralView.Department.class)
     private String name;
     @JsonView(GeneralView.Department.class)
+    private FacultyDTO faculty;
+    @JsonView(GeneralView.Department.class)
     private boolean active = true;
     @JsonView(GeneralView.Department.class)
     private String abbr;
