@@ -41,8 +41,8 @@ public class SelectiveCoursesStudentDegreesService {
         return selectiveCoursesStudentDegreesRepository.findByStudentDegreeAndSemester(studentDegreeId, semester);
     }
 
-    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear) {
-        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findByYear(studyYear);
+    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester) {
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findByYearAndSemester(studyYear, semester);
         Map<SelectiveCourse, Long> selectiveCourseWithStudentsNumber = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));
 

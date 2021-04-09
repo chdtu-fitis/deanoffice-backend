@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class SelectiveCourseWithStudentsCountDTO extends SelectiveCourseDTO {
-    private Long studentsCount;
+    private int studentsCount;
 }
