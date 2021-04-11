@@ -16,7 +16,7 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 @RestController
-@RequestMapping("/selective-courses-selection-parameters")
+@RequestMapping("/selective-courses-year-parameters")
 public class SelectiveCoursesYearParametersController {
     private SelectiveCoursesYearParametersService selectiveCoursesYearParametersService;
 
