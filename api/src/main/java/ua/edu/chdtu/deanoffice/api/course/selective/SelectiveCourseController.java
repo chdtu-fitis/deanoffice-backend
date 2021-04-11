@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -347,6 +348,8 @@ public class SelectiveCourseController {
                     selectiveCourseWithStudentsCountDTO.setStudentsCount(entry.getValue().intValue());
                     return selectiveCourseWithStudentsCountDTO;
                 }).collect(Collectors.toList());
+
+        Collections.sort(selectiveCourseWithStudentsCountDTOS);
 
         return ResponseEntity.ok(selectiveCourseWithStudentsCountDTOS);
     }
