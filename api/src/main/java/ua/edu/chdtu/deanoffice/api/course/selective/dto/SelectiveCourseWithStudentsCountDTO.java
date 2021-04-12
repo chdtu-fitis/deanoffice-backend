@@ -4,10 +4,10 @@ import lombok.Data;
 
 @Data
 public class SelectiveCourseWithStudentsCountDTO extends SelectiveCourseDTO implements Comparable<SelectiveCourseWithStudentsCountDTO>{
-    private int studentsCount;
+    private Integer studentsCount;
 
     @Override
     public int compareTo(SelectiveCourseWithStudentsCountDTO o) {
-        return this.studentsCount - o.getStudentsCount();
+        return studentsCount.compareTo(o.getStudentsCount());
     }
 }
