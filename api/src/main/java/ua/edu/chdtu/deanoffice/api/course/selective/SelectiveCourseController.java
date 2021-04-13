@@ -11,6 +11,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -33,9 +34,12 @@ import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -307,7 +311,7 @@ public class SelectiveCourseController {
 
     /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
     @GetMapping("/student-courses")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear,  @RequestParam int studentDegreeId) {
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId) {
         SelectiveCoursesStudentDegreeDTO selectiveCoursesForStudentDegreeDTO = new SelectiveCoursesStudentDegreeDTO();
         List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
         if (selectiveCoursesForStudentDegree.size() > 0) {
@@ -333,5 +337,20 @@ public class SelectiveCourseController {
         }
         return ResponseEntity.ok(selectiveCourseStudentDegreesDTO);
     }
-}
 
+    @GetMapping("/students-count")
+    public ResponseEntity<List<SelectiveCourseWithStudentsCountDTO>> getSelectiveCoursesWithStudentsCount(@RequestParam @NotNull @Min(2010) int studyYear,
+                                                                                                          @RequestParam @NotNull int semester) {
+        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester);
+        List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = selectiveCoursesStudentDegrees.entrySet().stream()
+                .map(entry -> {
+                    SelectiveCourseWithStudentsCountDTO selectiveCourseWithStudentsCountDTO = map(entry.getKey(), SelectiveCourseWithStudentsCountDTO.class);
+                    selectiveCourseWithStudentsCountDTO.setStudentsCount(entry.getValue().intValue());
+                    return selectiveCourseWithStudentsCountDTO;
+                }).collect(Collectors.toList());
+
+        Collections.sort(selectiveCourseWithStudentsCountDTOS, Collections.reverseOrder());
+
+        return ResponseEntity.ok(selectiveCourseWithStudentsCountDTOS);
+    }
+}
