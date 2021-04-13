@@ -349,7 +349,7 @@ public class SelectiveCourseController {
                     return selectiveCourseWithStudentsCountDTO;
                 }).collect(Collectors.toList());
 
-        Collections.sort(selectiveCourseWithStudentsCountDTOS);
+        Collections.sort(selectiveCourseWithStudentsCountDTOS, Collections.reverseOrder());
 
         return ResponseEntity.ok(selectiveCourseWithStudentsCountDTOS);
     }
