@@ -353,4 +353,11 @@ public class SelectiveCourseController {
 
         return ResponseEntity.ok(selectiveCourseWithStudentsCountDTOS);
     }
+
+    @Secured({"ROLE_NAVCH_METHOD"})
+    @PatchMapping("/disqualification")
+    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester) {
+        selectiveCoursesStudentDegreesService.update(semester);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

@@ -17,4 +17,5 @@ public class SelectiveCoursesStudentDegrees extends BaseEntity {
     StudentDegree studentDegree;
     @ManyToOne(fetch = FetchType.LAZY)
     SelectiveCourse selectiveCourse;
+    private boolean active;
 }
