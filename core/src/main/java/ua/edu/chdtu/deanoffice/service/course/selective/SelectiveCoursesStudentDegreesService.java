@@ -36,6 +36,8 @@ public class SelectiveCoursesStudentDegreesService {
 
     @Transactional
     public List<SelectiveCoursesStudentDegrees> create(List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees) {
+        for (SelectiveCoursesStudentDegrees selectiveCourseStudentDegree : selectiveCoursesStudentDegrees)
+            selectiveCourseStudentDegree.setActive(true);
         return this.selectiveCoursesStudentDegreesRepository.save(selectiveCoursesStudentDegrees);
     }
 
