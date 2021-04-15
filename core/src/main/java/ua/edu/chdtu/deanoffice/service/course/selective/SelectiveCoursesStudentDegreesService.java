@@ -64,7 +64,7 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     @Transactional
-    public void disqualifySelectiveCoursesAndCancelRegistrationOnThem(int semester) {
+    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester) {
         int currentYear = currentYearService.getYear();
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear, semester);
         SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersRepository.findByYear(currentYear);
@@ -75,7 +75,7 @@ public class SelectiveCoursesStudentDegreesService {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
         }
 
-        selectiveCoursesStudentDegreesRepository.updateSelectiveCoursesStudentDegreesActiveBySelectiveCourseIds(selectiveCourseIds);
-        selectiveCourseRepository.updateSelectiveCoursesAvailableByIds(selectiveCourseIds);
+        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(selectiveCourseIds);
+        selectiveCourseRepository.setSelectiveCoursesUnavailableByIds(selectiveCourseIds);
     }
 }

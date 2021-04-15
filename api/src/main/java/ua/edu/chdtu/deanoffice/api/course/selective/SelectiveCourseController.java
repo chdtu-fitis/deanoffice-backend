@@ -357,7 +357,7 @@ public class SelectiveCourseController {
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/disqualification")
     public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester) {
-        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelRegistrationOnThem(semester);
+        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester);
         return new ResponseEntity(HttpStatus.OK);
     }
 }
