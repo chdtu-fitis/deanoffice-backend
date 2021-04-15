@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
+import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
@@ -20,14 +21,17 @@ public class SelectiveCoursesStudentDegreesService {
 
     private SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
     private SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository;
+    private SelectiveCourseRepository selectiveCourseRepository;
     private CurrentYearService currentYearService;
 
     public SelectiveCoursesStudentDegreesService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
                                                  SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository,
-                                                 CurrentYearService currentYearService) {
+                                                 CurrentYearService currentYearService,
+                                                 SelectiveCourseRepository selectiveCourseRepository) {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
         this.selectiveCoursesYearParametersRepository = selectiveCoursesYearParametersRepository;
         this.currentYearService = currentYearService;
+        this.selectiveCourseRepository = selectiveCourseRepository;
     }
 
     @Transactional
@@ -52,7 +56,7 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester) {
-        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findByYearAndSemester(studyYear, semester);
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemester(studyYear, semester);
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));
 
@@ -60,7 +64,7 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     @Transactional
-    public void update(int semester) {
+    public void disqualifySelectiveCoursesAndCancelRegistrationOnThem(int semester) {
         int currentYear = currentYearService.getYear();
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear, semester);
         SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersRepository.findByYear(currentYear);
@@ -70,6 +74,8 @@ public class SelectiveCoursesStudentDegreesService {
             if (selectiveCourseWithStudentsCount.getValue().intValue() < selectiveCoursesYearParameters.getMinStudentsCount())
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
         }
-        selectiveCoursesStudentDegreesRepository.updateSelectiveCoursesStudentDegreesBySelectiveCourseIds(selectiveCourseIds);
+
+        selectiveCoursesStudentDegreesRepository.updateSelectiveCoursesStudentDegreesActiveBySelectiveCourseIds(selectiveCourseIds);
+        selectiveCourseRepository.updateSelectiveCoursesAvailableByIds(selectiveCourseIds);
     }
 }

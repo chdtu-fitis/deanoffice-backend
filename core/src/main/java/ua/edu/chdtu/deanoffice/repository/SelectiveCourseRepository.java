@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
@@ -20,4 +21,9 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
     );
 
     List<SelectiveCourse> findByIdIn(List<Integer> ids);
+
+    @Modifying
+    @Query("UPDATE SelectiveCourse sc SET sc.available = false " +
+            "WHERE sc.id IN :selectiveCourseIds")
+    void updateSelectiveCoursesAvailableByIds(@Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
 }
