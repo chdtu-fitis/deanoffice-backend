@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
@@ -41,9 +42,15 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
     @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
             "WHERE sc.selectiveCourse.studyYear = :studyYear " +
-            "AND sc.selectiveCourse.course.semester = :semester")
-    List<SelectiveCoursesStudentDegrees> findByYearAndSemester(
+            "AND sc.selectiveCourse.course.semester = :semester " +
+            "AND sc.active = true")
+    List<SelectiveCoursesStudentDegrees> findActiveByYearAndSemester(
             @Param("studyYear") int studyYear,
             @Param("semester") int semester
     );
+
+    @Modifying
+    @Query("UPDATE SelectiveCoursesStudentDegrees scsd SET scsd.active = false " +
+            "WHERE scsd.selectiveCourse.id IN :selectiveCourseIds")
+    void setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(@Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
 }
