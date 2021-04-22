@@ -12,6 +12,8 @@ public class SelectiveCoursesYearParametersWriteDTO {
     private Date firstRoundStartDate;
     @NotNull(message = "Обов'язково повинна бути дата кінця першого туру")
     private Date firstRoundEndDate;
+    @NotNull(message = "Обов'язково повинна бути дата початку другого туру")
+    private Date secondRoundStartDate;
     @NotNull(message = "Обов'язково повинна бути дата кінця другого туру")
     private Date secondRoundEndDate;
     @NotNull(message = "Обов'язково повинна бути вказана мінімальна кількість студентів")
