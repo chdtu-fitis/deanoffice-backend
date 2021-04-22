@@ -16,6 +16,8 @@ public class SelectiveCoursesYearParameters extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date firstRoundEndDate;
     @Temporal(TemporalType.DATE)
+    private Date secondRoundStartDate;
+    @Temporal(TemporalType.DATE)
     private Date secondRoundEndDate;
     private int studyYear;
     private int minStudentsCount;
