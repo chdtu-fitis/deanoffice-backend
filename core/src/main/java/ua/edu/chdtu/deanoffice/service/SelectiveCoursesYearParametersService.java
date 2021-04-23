@@ -13,10 +13,13 @@ import java.util.TimeZone;
 @Service
 public class SelectiveCoursesYearParametersService {
     private SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository;
+    private CurrentYearService currentYearService;
 
     @Autowired
-    public SelectiveCoursesYearParametersService(SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository) {
+    public SelectiveCoursesYearParametersService(SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository,
+                                                 CurrentYearService currentYearService) {
         this.selectiveCoursesYearParametersRepository = selectiveCoursesYearParametersRepository;
+        this.currentYearService = currentYearService;
     }
 
     public SelectiveCoursesYearParameters getSelectiveCoursesYearParametersByYear(int year) {
@@ -32,7 +35,7 @@ public class SelectiveCoursesYearParametersService {
         int firstRoundEndDateYear = getDateYear(firstRoundEndDate);
         int secondRoundEndDateYear = getDateYear(secondRoundEndDate);
 
-        selectiveCoursesYearParameters.setStudyYear(firstRoundEndDateYear);
+        selectiveCoursesYearParameters.setStudyYear(currentYearService.getYear());
 
         if (!(firstRoundStartDateYear == firstRoundEndDateYear && firstRoundStartDateYear == secondRoundEndDateYear))
             throw new OperationCannotBePerformedException("Роки в датах повинні бути однакові");

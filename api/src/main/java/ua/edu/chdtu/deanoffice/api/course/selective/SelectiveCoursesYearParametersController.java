@@ -27,7 +27,11 @@ public class SelectiveCoursesYearParametersController {
 
     @GetMapping
     public ResponseEntity getSelectiveCoursesYearParameters(@RequestParam Integer year) {
-        return new ResponseEntity(map(selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year), SelectiveCoursesYearParametersDTO.class), HttpStatus.OK);
+        SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+        if (selectiveCoursesYearParameters == null)
+            return ResponseEntity.ok().build();
+
+        return new ResponseEntity(map(selectiveCoursesYearParameters, SelectiveCoursesYearParametersDTO.class), HttpStatus.OK);
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
