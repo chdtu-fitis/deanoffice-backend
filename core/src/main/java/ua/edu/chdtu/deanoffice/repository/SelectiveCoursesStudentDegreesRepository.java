@@ -40,13 +40,15 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             @Param("semester") int semester
     );
 
-    @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
-            "WHERE sc.selectiveCourse.studyYear = :studyYear " +
-            "AND sc.selectiveCourse.course.semester = :semester " +
-            "AND sc.active = true")
-    List<SelectiveCoursesStudentDegrees> findActiveByYearAndSemester(
+    @Query("SELECT scsd FROM SelectiveCoursesStudentDegrees scsd " +
+            "WHERE scsd.selectiveCourse.studyYear = :studyYear " +
+            "AND scsd.selectiveCourse.course.semester = :semester " +
+            "AND scsd.selectiveCourse.degree.id = :degreeId " +
+            "AND scsd.active = true")
+    List<SelectiveCoursesStudentDegrees> findActiveByYearAndSemesterAndDegree(
             @Param("studyYear") int studyYear,
-            @Param("semester") int semester
+            @Param("semester") int semester,
+            @Param("degreeId") int degreeId
     );
 
     @Modifying

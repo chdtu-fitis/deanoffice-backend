@@ -57,18 +57,24 @@ public class SelectiveCoursesStudentDegreesService {
         return selectiveCoursesStudentDegreesRepository.findByStudentDegreeAndSemester(studentDegreeId, semester);
     }
 
-    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester) {
-        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemester(studyYear, semester);
+    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester, int degreeId) {
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findAllAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemesterAndDegree(studyYear, semester, degreeId);
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));
+
+        selectiveCourses.stream().forEach(selectiveCourse -> {
+            if (!selectiveCoursesWithStudentsCount.keySet().contains(selectiveCourse))
+                selectiveCoursesWithStudentsCount.put(selectiveCourse, 0L);
+        });
 
         return selectiveCoursesWithStudentsCount;
     }
 
     @Transactional
-    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester) {
+    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester, int degreeId) {
         int currentYear = currentYearService.getYear();
-        Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear, semester);
+        Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear, semester, degreeId);
         SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersRepository.findByYear(currentYear);
         List<Integer> selectiveCourseIds = new ArrayList<>();
 
