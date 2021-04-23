@@ -340,8 +340,9 @@ public class SelectiveCourseController {
 
     @GetMapping("/students-count")
     public ResponseEntity<List<SelectiveCourseWithStudentsCountDTO>> getSelectiveCoursesWithStudentsCount(@RequestParam @NotNull @Min(2010) int studyYear,
-                                                                                                          @RequestParam @NotNull int semester) {
-        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester);
+                                                                                                          @RequestParam @NotNull int semester,
+                                                                                                          @RequestParam @NotNull int degreeId) {
+        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester, degreeId);
         List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = selectiveCoursesStudentDegrees.entrySet().stream()
                 .map(entry -> {
                     SelectiveCourseWithStudentsCountDTO selectiveCourseWithStudentsCountDTO = map(entry.getKey(), SelectiveCourseWithStudentsCountDTO.class);
@@ -356,8 +357,9 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/disqualification")
-    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester) {
-        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester);
+    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester,
+                                                               @RequestParam @NotNull int degreeId) {
+        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester, degreeId);
         return new ResponseEntity(HttpStatus.OK);
     }
 }
