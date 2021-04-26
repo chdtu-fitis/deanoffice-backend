@@ -23,15 +23,18 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
+import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -41,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.Date;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_REGISTRATION_YEAR;
@@ -57,11 +61,15 @@ public class SelectiveCourseController {
     private FieldOfKnowledgeService fieldOfKnowledgeService;
     private StudentDegreeService studentDegreeService;
     private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
+    private SelectiveCoursesYearParametersService selectiveCoursesYearParametersService;
+    private CurrentYearService currentYearService;
 
     public SelectiveCourseController(SelectiveCourseService selectiveCourseService,
                                      TeacherService teacherService, FieldOfKnowledgeService fieldOfKnowledgeService,
                                      CourseService courseService, DegreeService degreeService, DepartmentService departmentService,
-                                     StudentDegreeService studentDegreeService, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
+                                     StudentDegreeService studentDegreeService, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService,
+                                     SelectiveCoursesYearParametersService selectiveCoursesYearParametersService,
+                                     CurrentYearService currentYearService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
@@ -70,6 +78,8 @@ public class SelectiveCourseController {
         this.fieldOfKnowledgeService = fieldOfKnowledgeService;
         this.studentDegreeService = studentDegreeService;
         this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
+        this.selectiveCoursesYearParametersService = selectiveCoursesYearParametersService;
+        this.currentYearService = currentYearService;
     }
 
     @GetMapping
@@ -272,31 +282,71 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD", "ROLE_STUDENT"})
     @PostMapping("/registration")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO) {
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
+            throws OperationCannotBePerformedException {
+
+        int selectiveCoursesRegistrationYear = currentYearService.getYear() + 1;
+
         StudentDegree studentDegree = studentDegreeService.getById(selectiveCoursesStudentDegreesDTO.getStudentDegree().getId());
         if (studentDegree == null || !studentDegree.isActive()) {
             return new ResponseEntity("Неправильний ідентифікатор студента", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        if (selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(SELECTIVE_COURSES_REGISTRATION_YEAR, studentDegree.getId()).size() > 0) {
-            return new ResponseEntity("Даний студент вже зареєстрований на вибіркові дисципліни", HttpStatus.UNPROCESSABLE_ENTITY);
+        else if (selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size() == 0) {
+            return new ResponseEntity("Не надіслано дані для збереження", HttpStatus.UNPROCESSABLE_ENTITY);
         }
+
+        Date today = new Date();
+        SelectiveCoursesYearParameters selectiveCoursesYearParameters =
+                    selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(selectiveCoursesRegistrationYear);
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
-        if (selectiveCourses == null || selectiveCourses.size() == 0) {
-            return new ResponseEntity("Неправильні ідентифікатори предметів", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
 
-        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
-            return new ResponseEntity("Кількість або семестри вибіркових предметів не відповідають правилам", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (today.after(selectiveCoursesYearParameters.getFirstRoundStartDate()) && today.before(selectiveCoursesYearParameters.getFirstRoundEndDate())) {
+            checkRecordOnSelectiveCoursesData(studentDegree, false, selectiveCourses);
+            return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
+        else if (today.after(selectiveCoursesYearParameters.getSecondRoundStartDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundEndDate())) {
+            List<SelectiveCourse> selectiveCoursesFromDB =
+                    selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear, studentDegree.getId()).stream()
+                            .map(selectiveCoursesStudentDegrees -> selectiveCoursesStudentDegrees.getSelectiveCourse())
+                            .collect(Collectors.toList());
 
+            selectiveCoursesFromDB.addAll(selectiveCourses);
+            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCoursesFromDB);
+
+            return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
+        }
+        else
+            return ResponseEntity.ok().build();
+    }
+
+    private boolean checkRecordOnSelectiveCoursesData(StudentDegree studentDegree, boolean isSecondRound, List<SelectiveCourse> selectiveCourses)
+            throws OperationCannotBePerformedException {
+
+        if (!isSecondRound) {
+            if (selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(SELECTIVE_COURSES_REGISTRATION_YEAR, studentDegree.getId()).size() > 0) {
+                throw new OperationCannotBePerformedException("Даний студент вже зареєстрований на вибіркові дисципліни");
+            }
+        }
+        else if (selectiveCourses == null || selectiveCourses.size() == 0) {
+            throw new OperationCannotBePerformedException("Неправильні ідентифікатори предметів");
+        }
+        else if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+            throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
+        }
+        return true;
+    }
+
+    private ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCoursesByRules(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = new ArrayList<>();
+
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             SelectiveCoursesStudentDegrees selectiveCoursesForStudentDegree = new SelectiveCoursesStudentDegrees();
             selectiveCoursesForStudentDegree.setStudentDegree(studentDegree);
             selectiveCoursesForStudentDegree.setSelectiveCourse(selectiveCourse);
             selectiveCoursesStudentDegrees.add(selectiveCoursesForStudentDegree);
         }
+
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudDegreeAfterSave = selectiveCoursesStudentDegreesService.create(selectiveCoursesStudentDegrees);
 
         ExistingIdDTO studentDegreeDTO = map(selectiveCoursesStudDegreeAfterSave.get(0).getStudentDegree(), ExistingIdDTO.class);
