@@ -30,6 +30,7 @@ import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.TeacherService;
 import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
@@ -61,12 +62,14 @@ public class SelectiveCourseController {
     private StudentDegreeService studentDegreeService;
     private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
     private SelectiveCoursesYearParametersService selectiveCoursesYearParametersService;
+    private CurrentYearService currentYearService;
 
     public SelectiveCourseController(SelectiveCourseService selectiveCourseService,
                                      TeacherService teacherService, FieldOfKnowledgeService fieldOfKnowledgeService,
                                      CourseService courseService, DegreeService degreeService, DepartmentService departmentService,
                                      StudentDegreeService studentDegreeService, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService,
-                                     SelectiveCoursesYearParametersService selectiveCoursesYearParametersService) {
+                                     SelectiveCoursesYearParametersService selectiveCoursesYearParametersService,
+                                     CurrentYearService currentYearService) {
         this.selectiveCourseService = selectiveCourseService;
         this.teacherService = teacherService;
         this.courseService = courseService;
@@ -76,6 +79,7 @@ public class SelectiveCourseController {
         this.studentDegreeService = studentDegreeService;
         this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
         this.selectiveCoursesYearParametersService = selectiveCoursesYearParametersService;
+        this.currentYearService = currentYearService;
     }
 
     @GetMapping
@@ -281,17 +285,19 @@ public class SelectiveCourseController {
     public ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
             throws OperationCannotBePerformedException {
 
+        int selectiveCoursesRegistrationYear = currentYearService.getYear() + 1;
+
         StudentDegree studentDegree = studentDegreeService.getById(selectiveCoursesStudentDegreesDTO.getStudentDegree().getId());
         if (studentDegree == null || !studentDegree.isActive()) {
             return new ResponseEntity("Неправильний ідентифікатор студента", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if (selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size() != 0) {
-            return new ResponseEntity("Студент вже записаний на потрібні вибіркові дисципліни", HttpStatus.UNPROCESSABLE_ENTITY);
+        else if (selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size() == 0) {
+            return new ResponseEntity("Не надіслано дані для збереження", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         Date today = new Date();
         SelectiveCoursesYearParameters selectiveCoursesYearParameters =
-                    selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(SELECTIVE_COURSES_REGISTRATION_YEAR);
+                    selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(selectiveCoursesRegistrationYear);
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
 
@@ -301,7 +307,7 @@ public class SelectiveCourseController {
         }
         else if (today.after(selectiveCoursesYearParameters.getSecondRoundStartDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundEndDate())) {
             List<SelectiveCourse> selectiveCoursesFromDB =
-                    selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(SELECTIVE_COURSES_REGISTRATION_YEAR, studentDegree.getId()).stream()
+                    selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear, studentDegree.getId()).stream()
                             .map(selectiveCoursesStudentDegrees -> selectiveCoursesStudentDegrees.getSelectiveCourse())
                             .collect(Collectors.toList());
 
