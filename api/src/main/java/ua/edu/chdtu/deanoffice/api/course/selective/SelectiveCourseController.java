@@ -285,7 +285,7 @@ public class SelectiveCourseController {
     public ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
             throws OperationCannotBePerformedException {
 
-        int selectiveCoursesRegistrationYear = currentYearService.getYear() + 1;
+        int selectiveCoursesRegistrationYear = currentYearService.getYear();
 
         StudentDegree studentDegree = studentDegreeService.getById(selectiveCoursesStudentDegreesDTO.getStudentDegree().getId());
         if (studentDegree == null || !studentDegree.isActive()) {
