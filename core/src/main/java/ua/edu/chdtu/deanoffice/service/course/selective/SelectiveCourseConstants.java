@@ -9,7 +9,6 @@ public class SelectiveCourseConstants {
     //Map structure: degree id -> Map(student study year -> array of selective courses number:
     // element 0 - 1st semester, element 1 - 2nd semester
     public static final Map<Integer, Map<String, Integer[]>[]> SELECTIVE_COURSES_NUMBER = new HashMap<>();
-    public static final int SELECTIVE_COURSES_REGISTRATION_YEAR = 2020;
 
     static {
         Map<String, Integer[]>[] bachelor = new Map[4];

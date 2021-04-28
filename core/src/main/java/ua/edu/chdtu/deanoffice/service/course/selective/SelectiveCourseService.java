@@ -1,13 +1,10 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.stereotype.Service;
-import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
-import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
@@ -16,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
-import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_REGISTRATION_YEAR;
 
 @Service
 public class SelectiveCourseService {
@@ -69,13 +65,13 @@ public class SelectiveCourseService {
     2.if courses semesters correspond student year;
     3. if all selective courses are for right registration year (usually, the next of the current study year)*/
     public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
-        int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree);
+        int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
         Integer general[] = {0, 0};
         Integer professional[] = {0, 0};
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            if (selectiveCourse.getStudyYear() != SELECTIVE_COURSES_REGISTRATION_YEAR
+            if (selectiveCourse.getStudyYear() != currentYearService.getYear() + 1
                     || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
                 return false;
             int semester = selectiveCourse.getCourse().getSemester();
