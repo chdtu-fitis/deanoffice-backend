@@ -5,7 +5,13 @@ CREATE TABLE selective_courses_year_parameters(
     second_round_start_date DATE NOT NULL,
     second_round_end_date DATE NOT NULL,
     study_year INTEGER NOT NULL,
-    min_students_count INTEGER NOT NULL
+    bachelor_general_min_students_count INTEGER NOT NULL,
+    bachelor_professional_min_students_count INTEGER NOT NULL,
+    master_general_min_students_count INTEGER NOT NULL,
+    master_professional_min_students_count INTEGER NOT NULL,
+    phd_general_min_students_count INTEGER NOT NULL,
+    phd_professional_min_students_count INTEGER NOT NULL,
+    max_students_count INTEGER NOT NULL
 );
 
 ALTER TABLE selective_courses_year_parameters

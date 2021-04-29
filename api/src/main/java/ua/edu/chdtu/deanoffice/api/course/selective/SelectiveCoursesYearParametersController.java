@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.FullSelectiveCoursesYearParametersDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesYearParametersDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesYearParametersWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
@@ -26,12 +27,46 @@ public class SelectiveCoursesYearParametersController {
     }
 
     @GetMapping
-    public ResponseEntity getSelectiveCoursesYearParameters(@RequestParam Integer year) {
-        SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
-        if (selectiveCoursesYearParameters == null)
-            return ResponseEntity.ok().build();
+    public ResponseEntity getSelectiveCoursesYearParameters(@RequestParam Integer year,
+                                                            @RequestParam(required = false) Integer degreeId) {
+        if (degreeId == null) {
+            SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+            if (selectiveCoursesYearParameters == null)
+                return ResponseEntity.ok().build();
 
-        return new ResponseEntity(map(selectiveCoursesYearParameters, SelectiveCoursesYearParametersDTO.class), HttpStatus.OK);
+            return new ResponseEntity(map(selectiveCoursesYearParameters, FullSelectiveCoursesYearParametersDTO.class), HttpStatus.OK);
+        }
+        else {
+            SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO = new SelectiveCoursesYearParametersDTO();
+            SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+            strictMap(selectiveCoursesYearParameters, selectiveCoursesYearParametersDTO);
+            if (degreeId == 1) {
+                setMinStudentsCount(selectiveCoursesYearParametersDTO,
+                        selectiveCoursesYearParameters.getBachelorGeneralMinStudentsCount(),
+                        selectiveCoursesYearParameters.getBachelorProfessionalMinStudentsCount()
+                );
+            }
+            else if (degreeId == 3) {
+                setMinStudentsCount(selectiveCoursesYearParametersDTO,
+                        selectiveCoursesYearParameters.getMasterGeneralMinStudentsCount(),
+                        selectiveCoursesYearParameters.getMasterProfessionalMinStudentsCount()
+                );
+            }
+            else if (degreeId == 4) {
+                setMinStudentsCount(selectiveCoursesYearParametersDTO,
+                        selectiveCoursesYearParameters.getPhdGeneralMinStudentsCount(),
+                        selectiveCoursesYearParameters.getPhdProfessionalMinStudentsCount()
+                );
+            }
+            else
+                return new ResponseEntity("Не існує ступеня з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity(selectiveCoursesYearParametersDTO, HttpStatus.OK);
+        }
+    }
+
+    private void setMinStudentsCount(SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO, int generalMinStudentsCount, int professionalMinStudentsCount) {
+        selectiveCoursesYearParametersDTO.setGeneralMinStudentsCount(generalMinStudentsCount);
+        selectiveCoursesYearParametersDTO.setProfessionalMinStudentsCount(professionalMinStudentsCount);
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
@@ -41,7 +76,7 @@ public class SelectiveCoursesYearParametersController {
 
         SelectiveCoursesYearParameters selectiveCoursesYearParameters = strictMap(selectiveCoursesYearParametersWriteDTO, SelectiveCoursesYearParameters.class);
         SelectiveCoursesYearParameters selectiveCoursesYearParametersAfterSave = selectiveCoursesYearParametersService.create(selectiveCoursesYearParameters);
-        SelectiveCoursesYearParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, SelectiveCoursesYearParametersDTO.class);
+        FullSelectiveCoursesYearParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, FullSelectiveCoursesYearParametersDTO.class);
         return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);
     }
 }
