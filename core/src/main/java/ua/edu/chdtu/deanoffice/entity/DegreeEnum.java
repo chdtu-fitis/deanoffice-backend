@@ -3,7 +3,8 @@ package ua.edu.chdtu.deanoffice.entity;
 public enum DegreeEnum {
     BACHELOR(1, "Бакалавр", "Bachelor"),
     SPECIALIST(2, "Спеціаліст", "Specialist"),
-    MASTER(3, "Магістр", "Master");
+    MASTER(3, "Магістр", "Master"),
+    PHD(4, "Доктор філософії", "Philosophy Doctor");
 
     private final int id;
     private final String nameUkr;

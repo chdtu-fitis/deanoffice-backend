@@ -17,6 +17,17 @@ public class SelectiveCoursesYearParametersWriteDTO {
     @NotNull(message = "Обов'язково повинна бути дата кінця другого туру")
     private Date secondRoundEndDate;
     @NotNull(message = "Обов'язково повинна бути вказана мінімальна кількість студентів")
-    @Min(value = 1, message = "Мінімальна кількість студентів повинна бути додатним числом")
-    private int minStudentsCount;
+    @Min(value = 1, message = "Мінімальна кількість бакалаврів на цикл загальної підготовки повинна бути додатним числом")
+    private int bachelorGeneralMinStudentsCount;
+    @Min(value = 1, message = "Мінімальна кількість бакалаврів на предмети циклу професійної підготовки повинна бути додатним числом")
+    private int bachelorProfessionalMinStudentsCount;
+    @Min(value = 1, message = "Мінімальна кількість магістрів на предмети циклу загальної підготовки повинна бути додатним числом")
+    private int masterGeneralMinStudentsCount;
+    @Min(value = 1, message = "Мінімальна кількість магістрів на предмети циклу професійної підготовки повинна бути додатним числом")
+    private int masterProfessionalMinStudentsCount;
+    @Min(value = 1, message = "Мінімальна кількість докторів філософії на предмети циклу загальної підготовки повинна бути додатним числом")
+    private int phdGeneralMinStudentsCount;
+    private int phdProfessionalMinStudentsCount;
+    @Min(value = 1, message = "Максимальна кількість студентів повинна бути додатним числом")
+    private int maxStudentsCount;
 }
