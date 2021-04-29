@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import java.util.Date;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
-import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_REGISTRATION_YEAR;
 
 @RestController
 @RequestMapping("/selective-courses")
@@ -307,7 +306,7 @@ public class SelectiveCourseController {
         }
         else if (today.after(selectiveCoursesYearParameters.getSecondRoundStartDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundEndDate())) {
             List<SelectiveCourse> selectiveCoursesFromDB =
-                    selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear, studentDegree.getId()).stream()
+                    selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear + 1, studentDegree.getId()).stream()
                             .map(selectiveCoursesStudentDegrees -> selectiveCoursesStudentDegrees.getSelectiveCourse())
                             .collect(Collectors.toList());
 
@@ -324,7 +323,7 @@ public class SelectiveCourseController {
             throws OperationCannotBePerformedException {
 
         if (!isSecondRound) {
-            if (selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(SELECTIVE_COURSES_REGISTRATION_YEAR, studentDegree.getId()).size() > 0) {
+            if (selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(currentYearService.getYear() + 1, studentDegree.getId()).size() > 0) {
                 throw new OperationCannotBePerformedException("Даний студент вже зареєстрований на вибіркові дисципліни");
             }
         }
