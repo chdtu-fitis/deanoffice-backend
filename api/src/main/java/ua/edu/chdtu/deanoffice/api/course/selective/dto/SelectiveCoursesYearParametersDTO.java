@@ -6,4 +6,5 @@ import lombok.Data;
 public class SelectiveCoursesYearParametersDTO extends BaseSelectiveCoursesYearParametersDTO {
     private int generalMinStudentsCount;
     private int professionalMinStudentsCount;
+    private int maxStudentsCount;
 }
