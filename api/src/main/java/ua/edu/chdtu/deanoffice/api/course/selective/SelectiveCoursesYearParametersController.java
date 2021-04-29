@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.FullSelectiveCoursesYearParametersDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesYearParametersDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesYearParametersWriteDTO;
+import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
@@ -40,19 +41,19 @@ public class SelectiveCoursesYearParametersController {
             SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO = new SelectiveCoursesYearParametersDTO();
             SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
             strictMap(selectiveCoursesYearParameters, selectiveCoursesYearParametersDTO);
-            if (degreeId == 1) {
+            if (degreeId == DegreeEnum.BACHELOR.getId()) {
                 setMinStudentsCount(selectiveCoursesYearParametersDTO,
                         selectiveCoursesYearParameters.getBachelorGeneralMinStudentsCount(),
                         selectiveCoursesYearParameters.getBachelorProfessionalMinStudentsCount()
                 );
             }
-            else if (degreeId == 3) {
+            else if (degreeId == DegreeEnum.MASTER.getId()) {
                 setMinStudentsCount(selectiveCoursesYearParametersDTO,
                         selectiveCoursesYearParameters.getMasterGeneralMinStudentsCount(),
                         selectiveCoursesYearParameters.getMasterProfessionalMinStudentsCount()
                 );
             }
-            else if (degreeId == 4) {
+            else if (degreeId == DegreeEnum.PHD.getId()) {
                 setMinStudentsCount(selectiveCoursesYearParametersDTO,
                         selectiveCoursesYearParameters.getPhdGeneralMinStudentsCount(),
                         selectiveCoursesYearParameters.getPhdProfessionalMinStudentsCount()

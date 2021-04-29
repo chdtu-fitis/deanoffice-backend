@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
@@ -102,11 +103,11 @@ public class SelectiveCoursesStudentDegreesService {
         for (Map.Entry<SelectiveCourse, Long> selectiveCourseWithStudentsCount : selectiveCoursesWithStudentsCount.entrySet()) {
             int count = selectiveCourseWithStudentsCount.getValue().intValue();
 
-            if (degreeId == 1 && count < selectiveCoursesYearParameters.getBachelorGeneralMinStudentsCount()) {
+            if (degreeId == DegreeEnum.BACHELOR.getId() && count < selectiveCoursesYearParameters.getBachelorGeneralMinStudentsCount()) {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == 3 && count < selectiveCoursesYearParameters.getMasterGeneralMinStudentsCount()) {
+            } else if (degreeId == DegreeEnum.MASTER.getId() && count < selectiveCoursesYearParameters.getMasterGeneralMinStudentsCount()) {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == 4 && count < selectiveCoursesYearParameters.getPhdGeneralMinStudentsCount()) {
+            } else if (degreeId == DegreeEnum.PHD.getId() && count < selectiveCoursesYearParameters.getPhdGeneralMinStudentsCount()) {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
             }
         }
@@ -120,11 +121,11 @@ public class SelectiveCoursesStudentDegreesService {
         for(Map.Entry<SelectiveCourse, Long> selectiveCourseWithStudentsCount : selectiveCoursesWithStudentsCount.entrySet()) {
             int count = selectiveCourseWithStudentsCount.getValue().intValue();
 
-            if (degreeId == 1 && count < selectiveCoursesYearParameters.getBachelorProfessionalMinStudentsCount()) {
+            if (degreeId == DegreeEnum.BACHELOR.getId() && count < selectiveCoursesYearParameters.getBachelorProfessionalMinStudentsCount()) {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == 3 && count < selectiveCoursesYearParameters.getMasterProfessionalMinStudentsCount()) {
+            } else if (degreeId == DegreeEnum.MASTER.getId() && count < selectiveCoursesYearParameters.getMasterProfessionalMinStudentsCount()) {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == 4 && count < selectiveCoursesYearParameters.getPhdProfessionalMinStudentsCount()) {
+            } else if (degreeId == DegreeEnum.PHD.getId() && count < selectiveCoursesYearParameters.getPhdProfessionalMinStudentsCount()) {
                 selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
             }
         }
