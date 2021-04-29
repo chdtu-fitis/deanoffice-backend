@@ -28,7 +28,7 @@ public class DepartmentService {
 
     public List<Department> getFacultyDepartmentsByActive(boolean active) {
         int facultyId = FacultyUtil.getUserFacultyIdInt();
-        if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
+        if (facultyId == Constants.FOREIGN_STUDENTS_FACULTY_ID || facultyId == Constants.PHD_FACULTY_ID) {
             return departmentRepository.getAllByActive(active);
         } else {
             return departmentRepository.getAllByActive(active, facultyId);
