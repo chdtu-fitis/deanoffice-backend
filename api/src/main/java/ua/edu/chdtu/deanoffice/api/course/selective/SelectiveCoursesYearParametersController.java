@@ -40,6 +40,10 @@ public class SelectiveCoursesYearParametersController {
         else {
             SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO = new SelectiveCoursesYearParametersDTO();
             SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+
+            if (selectiveCoursesYearParameters == null)
+                return ResponseEntity.ok().build();
+
             strictMap(selectiveCoursesYearParameters, selectiveCoursesYearParametersDTO);
             if (degreeId == DegreeEnum.BACHELOR.getId()) {
                 setMinStudentsCount(selectiveCoursesYearParametersDTO,
