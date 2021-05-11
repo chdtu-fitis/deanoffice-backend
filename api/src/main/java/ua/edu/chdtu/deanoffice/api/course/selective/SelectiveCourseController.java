@@ -306,7 +306,7 @@ public class SelectiveCourseController {
         }
         else if (today.after(selectiveCoursesYearParameters.getSecondRoundStartDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundEndDate())) {
             List<SelectiveCourse> selectiveCoursesFromDB =
-                    selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear + 1, studentDegree.getId()).stream()
+                    selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear + 1, studentDegree.getId()).stream()
                             .map(selectiveCoursesStudentDegrees -> selectiveCoursesStudentDegrees.getSelectiveCourse())
                             .collect(Collectors.toList());
 
@@ -323,7 +323,7 @@ public class SelectiveCourseController {
             throws OperationCannotBePerformedException {
 
         if (!isSecondRound) {
-            if (selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(currentYearService.getYear() + 1, studentDegree.getId()).size() > 0) {
+            if (selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(currentYearService.getYear() + 1, studentDegree.getId()).size() > 0) {
                 throw new OperationCannotBePerformedException("Даний студент вже зареєстрований на вибіркові дисципліни");
             }
         }
@@ -360,9 +360,15 @@ public class SelectiveCourseController {
 
     /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
     @GetMapping("/student-courses")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId) {
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId, @RequestParam(required = false) boolean all) {
         SelectiveCoursesStudentDegreeDTO selectiveCoursesForStudentDegreeDTO = new SelectiveCoursesStudentDegreeDTO();
-        List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
+
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = new ArrayList<>();
+        if (all)
+            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getAllSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
+        else
+            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
+
         if (selectiveCoursesForStudentDegree.size() > 0) {
             selectiveCoursesForStudentDegreeDTO.setStudentDegree(map(selectiveCoursesForStudentDegree.get(0).getStudentDegree(), ExistingIdDTO.class));
             List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
