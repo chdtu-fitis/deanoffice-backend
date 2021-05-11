@@ -360,11 +360,11 @@ public class SelectiveCourseController {
 
     /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
     @GetMapping("/student-courses")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId, @RequestParam(required = false) Boolean all) {
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId, @RequestParam(required = false) boolean all) {
         SelectiveCoursesStudentDegreeDTO selectiveCoursesForStudentDegreeDTO = new SelectiveCoursesStudentDegreeDTO();
 
         List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = new ArrayList<>();
-        if (all != null && all == true)
+        if (all)
             selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getAllSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
         else
             selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
