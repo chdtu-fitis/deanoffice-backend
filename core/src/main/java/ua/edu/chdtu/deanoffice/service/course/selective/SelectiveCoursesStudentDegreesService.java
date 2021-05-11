@@ -43,8 +43,12 @@ public class SelectiveCoursesStudentDegreesService {
         return this.selectiveCoursesStudentDegreesRepository.save(selectiveCoursesStudentDegrees);
     }
 
-    public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId) {
+    public List<SelectiveCoursesStudentDegrees> getActiveSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId) {
         return selectiveCoursesStudentDegreesRepository.findAllAvailableByStudyYearAndStudentDegree(studyYear, studentDegreeId);
+    }
+
+    public List<SelectiveCoursesStudentDegrees> getAllSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId) {
+        return selectiveCoursesStudentDegreesRepository.findAllByStudyYearAndStudentDegree(studyYear, studentDegreeId);
     }
 
     public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId, boolean forFaculty) {
