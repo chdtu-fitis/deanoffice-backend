@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentD
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionRulesDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 import java.util.Date;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
 
 @RestController
 @RequestMapping("/selective-courses")
@@ -416,5 +418,20 @@ public class SelectiveCourseController {
                                                                @RequestParam @NotNull int degreeId) {
         selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester, degreeId);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping("/selection-rules")
+    public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(@RequestParam int studentDegreeId) {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        if (studentDegree == null)
+           return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
+
+        int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree);
+        List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = SELECTIVE_COURSES_NUMBER
+                .get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear].entrySet().stream()
+                .map(entry -> new SelectiveCoursesSelectionRulesDTO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(selectiveCoursesSelectionRulesDTO);
     }
 }
