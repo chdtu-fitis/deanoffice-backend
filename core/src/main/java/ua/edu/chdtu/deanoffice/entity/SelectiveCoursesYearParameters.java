@@ -4,8 +4,10 @@ import lombok.Data;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Enumerated;
 import java.util.Date;
 
 @Entity
@@ -27,4 +29,6 @@ public class SelectiveCoursesYearParameters extends BaseEntity {
     private int phdGeneralMinStudentsCount;
     private int phdProfessionalMinStudentsCount;
     private int maxStudentsCount;
+    @Enumerated(EnumType.STRING)
+    private PeriodCaseEnum periodCase;
 }

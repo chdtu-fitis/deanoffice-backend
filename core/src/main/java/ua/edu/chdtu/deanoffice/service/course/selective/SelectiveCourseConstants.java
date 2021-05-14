@@ -1,5 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
+import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 
 import java.util.HashMap;
@@ -9,14 +11,24 @@ public class SelectiveCourseConstants {
     //Map structure: degree id -> Map(student study year -> array of selective courses number:
     // element 0 - 1st semester, element 1 - 2nd semester
     public static final Map<Integer, Map<String, Integer[]>[]> SELECTIVE_COURSES_NUMBER = new HashMap<>();
+    public static final PeriodCase[] periodCases = new PeriodCase[8];
 
     private static final int bachelorId = 1;
     private static final int masterId = 3;
     private static final int phdId = 4;
 
     static {
-        Map<String, Integer[]>[] bachelor = new Map[4];
+        for (int i = 0; i < 3; i++) {
+            periodCases[i] = new PeriodCase(bachelorId, i + 1, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
+        }
 
+        periodCases[3] = new PeriodCase(bachelorId, bachelorId, TuitionTerm.SHORTENED, PeriodCaseEnum.LATE);
+        periodCases[4] = new PeriodCase(masterId, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
+        periodCases[5] = new PeriodCase(phdId, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
+        periodCases[6] = new PeriodCase(phdId, 2, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
+        periodCases[7] = new PeriodCase(phdId, 3, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
+
+        Map<String, Integer[]>[] bachelor = new Map[4];
         Map<String, Integer[]> bachelor2 = new HashMap<>();
         bachelor2.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{0, 0});
         bachelor2.put(TypeCycle.GENERAL.toString(), new Integer[]{3, 2});
@@ -45,6 +57,22 @@ public class SelectiveCourseConstants {
         phd1.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{0, 0});
         phd1.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         phd[0] = phd1;
+
+        Map<String, Integer[]> phd2 = new HashMap<>();
+        phd2.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{0, 0});
+        phd2.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
+        phd[1] = phd2;
+
+        Map<String, Integer[]> phd3 = new HashMap<>();
+        phd3.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{0, 0});
+        phd3.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
+        phd[2] = phd3;
+
+        Map<String, Integer[]> phd4 = new HashMap<>();
+        phd4.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{0, 0});
+        phd4.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
+        phd[3] = phd4;
+
         SELECTIVE_COURSES_NUMBER.put(phdId, phd);
     }
 }

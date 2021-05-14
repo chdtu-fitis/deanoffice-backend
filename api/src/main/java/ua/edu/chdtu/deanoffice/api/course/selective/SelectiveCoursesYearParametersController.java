@@ -10,9 +10,15 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.FullSelectiveCoursesYear
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesYearParametersDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesYearParametersWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
+import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+
+import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
@@ -21,28 +27,42 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 @RequestMapping("/selective-courses-year-parameters")
 public class SelectiveCoursesYearParametersController {
     private SelectiveCoursesYearParametersService selectiveCoursesYearParametersService;
+    private SelectiveCourseService selectiveCourseService;
+    private StudentDegreeService studentDegreeService;
 
     @Autowired
-    public SelectiveCoursesYearParametersController(SelectiveCoursesYearParametersService selectiveCoursesYearParametersService) {
+    public SelectiveCoursesYearParametersController(SelectiveCoursesYearParametersService selectiveCoursesYearParametersService,
+                                                    SelectiveCourseService selectiveCourseService,
+                                                    StudentDegreeService studentDegreeService) {
         this.selectiveCoursesYearParametersService = selectiveCoursesYearParametersService;
+        this.selectiveCourseService = selectiveCourseService;
+        this.studentDegreeService = studentDegreeService;
     }
 
     @GetMapping
     public ResponseEntity getSelectiveCoursesYearParameters(@RequestParam Integer year,
-                                                            @RequestParam(required = false) Integer degreeId) {
-        if (degreeId == null) {
-            SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+                                                            @RequestParam(required = false) Integer studentDegreeId) {
+        if (studentDegreeId == null) {
+            List<SelectiveCoursesYearParameters> selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
             if (selectiveCoursesYearParameters == null)
                 return ResponseEntity.ok().build();
 
             return new ResponseEntity(map(selectiveCoursesYearParameters, FullSelectiveCoursesYearParametersDTO.class), HttpStatus.OK);
         }
         else {
-            SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO = new SelectiveCoursesYearParametersDTO();
-            SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+            StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+            int degreeId = studentDegree.getSpecialization().getDegree().getId();
 
-            if (selectiveCoursesYearParameters == null)
+            SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO = new SelectiveCoursesYearParametersDTO();
+            List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
+
+            if (selectiveCoursesYearParametersFromDB == null)
                 return ResponseEntity.ok().build();
+
+            PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseEnumByStudentDegreeId(studentDegree);
+            SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersFromDB.stream()
+                    .filter(elem -> elem.getPeriodCase() == periodCase)
+                    .findFirst().orElse(null);
 
             strictMap(selectiveCoursesYearParameters, selectiveCoursesYearParametersDTO);
             if (degreeId == DegreeEnum.BACHELOR.getId()) {
@@ -76,12 +96,12 @@ public class SelectiveCoursesYearParametersController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PostMapping
-    public ResponseEntity createSelectiveCoursesYearParameters(@Validated @RequestBody SelectiveCoursesYearParametersWriteDTO selectiveCoursesYearParametersWriteDTO)
+    public ResponseEntity createSelectiveCoursesYearParameters(@Validated @RequestBody List<SelectiveCoursesYearParametersWriteDTO> selectiveCoursesYearParametersWriteDTO)
         throws OperationCannotBePerformedException {
 
-        SelectiveCoursesYearParameters selectiveCoursesYearParameters = strictMap(selectiveCoursesYearParametersWriteDTO, SelectiveCoursesYearParameters.class);
-        SelectiveCoursesYearParameters selectiveCoursesYearParametersAfterSave = selectiveCoursesYearParametersService.create(selectiveCoursesYearParameters);
-        FullSelectiveCoursesYearParametersDTO selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, FullSelectiveCoursesYearParametersDTO.class);
+        List<SelectiveCoursesYearParameters> selectiveCoursesYearParameters = strictMap(selectiveCoursesYearParametersWriteDTO, SelectiveCoursesYearParameters.class);
+        List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersAfterSave = selectiveCoursesYearParametersService.create(selectiveCoursesYearParameters);
+        List<FullSelectiveCoursesYearParametersDTO> selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, FullSelectiveCoursesYearParametersDTO.class);
         return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);
     }
 }
