@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentD
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionRulesDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -19,11 +20,14 @@ import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
+import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
+import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
@@ -47,6 +51,7 @@ import java.util.stream.Collectors;
 import java.util.Date;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
 
 @RestController
 @RequestMapping("/selective-courses")
@@ -295,8 +300,19 @@ public class SelectiveCourseController {
         }
 
         Date today = new Date();
-        SelectiveCoursesYearParameters selectiveCoursesYearParameters =
+        List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB =
                     selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(selectiveCoursesRegistrationYear);
+
+        PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
+        if (periodCase == null)
+            return new ResponseEntity("Даний студент не може реєструватись на вибіркові дисципліни" ,HttpStatus.UNPROCESSABLE_ENTITY);
+
+        SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersFromDB.stream()
+                .filter(elem -> elem.getPeriodCase() == periodCase)
+                .findFirst().orElse(null);
+
+        if (selectiveCoursesYearParameters == null)
+            return new ResponseEntity("Для даного студента відсутні параметри вибору вибіркових дисциплін", HttpStatus.UNPROCESSABLE_ENTITY);
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
 
@@ -327,10 +343,10 @@ public class SelectiveCourseController {
                 throw new OperationCannotBePerformedException("Даний студент вже зареєстрований на вибіркові дисципліни");
             }
         }
-        else if (selectiveCourses == null || selectiveCourses.size() == 0) {
+        if (selectiveCourses == null || selectiveCourses.size() == 0) {
             throw new OperationCannotBePerformedException("Неправильні ідентифікатори предметів");
         }
-        else if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
             throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
         }
         return true;
@@ -413,8 +429,34 @@ public class SelectiveCourseController {
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/disqualification")
     public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester,
-                                                               @RequestParam @NotNull int degreeId) {
+                                                               @RequestParam @NotNull int degreeId) throws OperationCannotBePerformedException {
         selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester, degreeId);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping("/selection-rules")
+    public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(@RequestParam int studentDegreeId) throws NotFoundException {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        if (studentDegree == null)
+           return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
+
+        int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree);
+
+        PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
+        if (periodCase == null) {
+            return new ResponseEntity("Для даного студента відсутні правила вибору вибіркових дисциплін" ,HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        if (periodCase == PeriodCaseEnum.LATE)
+            studentDegreeYear -= 1;
+
+        List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = new ArrayList<>();
+
+        for (Map.Entry<String, Integer[]> entry : SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear].entrySet()) {
+            TypeCycle typeCycle = TypeCycle.getTypeCycleByName(entry.getKey());
+            selectiveCoursesSelectionRulesDTO.add(new SelectiveCoursesSelectionRulesDTO(typeCycle, entry.getValue()));
+        }
+
+        return ResponseEntity.ok(selectiveCoursesSelectionRulesDTO);
     }
 }

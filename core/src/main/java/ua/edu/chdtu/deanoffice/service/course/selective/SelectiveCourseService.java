@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
+import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.PERIOD_CASES;
 
 @Service
 public class SelectiveCourseService {
@@ -87,5 +89,16 @@ public class SelectiveCourseService {
             return false;
         }
         return true;
+    }
+
+    public PeriodCaseEnum getPeriodCaseByStudentDegree(StudentDegree studentDegree) {
+        for (PeriodCase periodCase : PERIOD_CASES) {
+            if ((studentDegree.getSpecialization().getDegree().getId() == periodCase.getDegreeId()
+                    && studentDegreeService.getStudentDegreeYear(studentDegree) == periodCase.getYear())
+                    && studentDegree.getTuitionTerm() == periodCase.getTuitionTerm())
+                return periodCase.getPeriodCase();
+        }
+
+        return null;
     }
 }

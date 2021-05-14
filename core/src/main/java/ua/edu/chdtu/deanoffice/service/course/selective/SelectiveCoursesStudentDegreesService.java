@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
@@ -14,6 +15,7 @@ import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,10 +80,24 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     @Transactional
-    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester, int degreeId) {
+    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester, int degreeId) throws OperationCannotBePerformedException {
         int currentYear = currentYearService.getYear();
+        List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB = selectiveCoursesYearParametersRepository.findAllByYear(currentYear);
+        if (selectiveCoursesYearParametersFromDB == null)
+            throw new OperationCannotBePerformedException("Параметри вибору вибіркових дисциплін за вказаним роком відсутні");
+
+        SelectiveCoursesYearParameters selectiveCoursesYearParametersByDate = null;
+        Date today = new Date();
+
+        for (SelectiveCoursesYearParameters selectiveCoursesYearParameters : selectiveCoursesYearParametersFromDB) {
+            if (today.after(selectiveCoursesYearParameters.getFirstRoundEndDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundStartDate()))
+                selectiveCoursesYearParametersByDate = selectiveCoursesYearParameters;
+        }
+
+        if (selectiveCoursesYearParametersByDate == null)
+            throw new OperationCannotBePerformedException("Не можна проводити дискваліфікацію в даний проміжок часу");
+
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear + 1, semester, degreeId);
-        SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersRepository.findByYear(currentYear);
         List<Integer> selectiveCourseIds = new ArrayList<>();
 
         Map<SelectiveCourse, Long> generalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
@@ -92,8 +108,8 @@ public class SelectiveCoursesStudentDegreesService {
                 .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.PROFESSIONAL)
                 .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
 
-        setGeneralSelectiveCourseIdsForRegistration(generalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParameters, degreeId, selectiveCourseIds);
-        setProfessionalSelectiveCourseIdsForRegistration(professionalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParameters, degreeId, selectiveCourseIds);
+        setGeneralSelectiveCourseIdsForRegistration(generalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
+        setProfessionalSelectiveCourseIdsForRegistration(professionalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
 
         selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(selectiveCourseIds);
         selectiveCourseRepository.setSelectiveCoursesUnavailableByIds(selectiveCourseIds);
