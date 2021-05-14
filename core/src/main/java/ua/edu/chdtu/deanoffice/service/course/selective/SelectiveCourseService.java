@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
-import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.periodCases;
+import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.PERIOD_CASES;
 
 @Service
 public class SelectiveCourseService {
@@ -91,12 +91,12 @@ public class SelectiveCourseService {
         return true;
     }
 
-    public PeriodCaseEnum getPeriodCaseEnumByStudentDegreeId(StudentDegree studentDegree) {
-        for (PeriodCase periodCase : periodCases) {
+    public PeriodCaseEnum getPeriodCaseByStudentDegree(StudentDegree studentDegree) {
+        for (PeriodCase periodCase : PERIOD_CASES) {
             if ((studentDegree.getSpecialization().getDegree().getId() == periodCase.getDegreeId()
                     && studentDegreeService.getStudentDegreeYear(studentDegree) == periodCase.getYear())
                     && studentDegree.getTuitionTerm() == periodCase.getTuitionTerm())
-                return periodCase.getPeriodCaseEnum();
+                return periodCase.getPeriodCase();
         }
 
         return null;

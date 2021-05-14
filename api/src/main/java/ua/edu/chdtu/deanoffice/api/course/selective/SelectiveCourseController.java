@@ -26,6 +26,8 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
+import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
@@ -301,10 +303,16 @@ public class SelectiveCourseController {
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB =
                     selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(selectiveCoursesRegistrationYear);
 
-        PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseEnumByStudentDegreeId(studentDegree);
+        PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
+        if (periodCase == null)
+            return new ResponseEntity("Даний студент не може реєструватись на вибіркові дисципліни" ,HttpStatus.UNPROCESSABLE_ENTITY);
+
         SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersFromDB.stream()
                 .filter(elem -> elem.getPeriodCase() == periodCase)
                 .findFirst().orElse(null);
+
+        if (selectiveCoursesYearParameters == null)
+            return new ResponseEntity("Для даного студента відсутні параметри вибору вибіркових дисциплін", HttpStatus.UNPROCESSABLE_ENTITY);
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
 
@@ -427,21 +435,27 @@ public class SelectiveCourseController {
     }
 
     @GetMapping("/selection-rules")
-    public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(@RequestParam int studentDegreeId) {
+    public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(@RequestParam int studentDegreeId) throws NotFoundException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         if (studentDegree == null)
            return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
 
         int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree);
 
-        PeriodCaseEnum periodCaseEnum = selectiveCourseService.getPeriodCaseEnumByStudentDegreeId(studentDegree);
-        if (periodCaseEnum == PeriodCaseEnum.LATE)
+        PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
+        if (periodCase == null) {
+            return new ResponseEntity("Для даного студента відсутні правила вибору вибіркових дисциплін" ,HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        if (periodCase == PeriodCaseEnum.LATE)
             studentDegreeYear -= 1;
 
-        List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = SELECTIVE_COURSES_NUMBER
-                .get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear].entrySet().stream()
-                .map(entry -> new SelectiveCoursesSelectionRulesDTO(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+        List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = new ArrayList<>();
+
+        for (Map.Entry<String, Integer[]> entry : SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear].entrySet()) {
+            TypeCycle typeCycle = TypeCycle.getTypeCycleByName(entry.getKey());
+            selectiveCoursesSelectionRulesDTO.add(new SelectiveCoursesSelectionRulesDTO(typeCycle, entry.getValue()));
+        }
 
         return ResponseEntity.ok(selectiveCoursesSelectionRulesDTO);
     }

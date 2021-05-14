@@ -59,10 +59,16 @@ public class SelectiveCoursesYearParametersController {
             if (selectiveCoursesYearParametersFromDB == null)
                 return ResponseEntity.ok().build();
 
-            PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseEnumByStudentDegreeId(studentDegree);
+            PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
+            if (periodCase == null)
+                return new ResponseEntity("Для даного студента відсутній період вибору вибіркових дисциплін", HttpStatus.UNPROCESSABLE_ENTITY);
+
             SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersFromDB.stream()
                     .filter(elem -> elem.getPeriodCase() == periodCase)
                     .findFirst().orElse(null);
+
+            if (selectiveCoursesYearParameters == null)
+                return new ResponseEntity("Для даного студента відсутні параметри вибору вибіркових дисциплін", HttpStatus.UNPROCESSABLE_ENTITY);
 
             strictMap(selectiveCoursesYearParameters, selectiveCoursesYearParametersDTO);
             if (degreeId == DegreeEnum.BACHELOR.getId()) {

@@ -33,17 +33,23 @@ public class SelectiveCoursesYearParametersService {
         for (SelectiveCoursesYearParameters selectiveCoursesYearParameters : selectiveCoursesYearParametersList) {
             Date firstRoundStartDate = selectiveCoursesYearParameters.getFirstRoundStartDate();
             Date firstRoundEndDate = selectiveCoursesYearParameters.getFirstRoundEndDate();
+            Date secondRoundStartDate = selectiveCoursesYearParameters.getSecondRoundStartDate();
             Date secondRoundEndDate = selectiveCoursesYearParameters.getSecondRoundEndDate();
 
             int firstRoundStartDateYear = getDateYear(firstRoundStartDate);
             int firstRoundEndDateYear = getDateYear(firstRoundEndDate);
+            int secondRoundStartDateYear = getDateYear(secondRoundStartDate);
             int secondRoundEndDateYear = getDateYear(secondRoundEndDate);
 
             selectiveCoursesYearParameters.setStudyYear(currentYearService.getYear());
 
-            if (!(firstRoundStartDateYear == firstRoundEndDateYear && firstRoundStartDateYear == secondRoundEndDateYear))
+            if (!(firstRoundStartDateYear == firstRoundEndDateYear
+                    && firstRoundStartDateYear == secondRoundStartDateYear
+                    && firstRoundStartDateYear == secondRoundEndDateYear))
                 throw new OperationCannotBePerformedException("Роки в датах повинні бути однакові");
-            else if (firstRoundStartDate.before(firstRoundEndDate) && firstRoundEndDate.before(secondRoundEndDate))
+            else if (firstRoundStartDate.before(firstRoundEndDate)
+                    && firstRoundEndDate.before(secondRoundStartDate)
+                    && secondRoundStartDate.before(secondRoundEndDate))
                 selectiveCoursesYearParametersAfterSave.add(selectiveCoursesYearParametersRepository.save(selectiveCoursesYearParameters));
             else
                 throw new OperationCannotBePerformedException("Дати повинні йти за правилом 'дата початку першого туру < дата закінчення першого туру і початку другого < дата закінчення другого туру'");

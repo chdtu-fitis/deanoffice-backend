@@ -11,5 +11,5 @@ public class PeriodCase {
     private int degreeId;
     private int year;
     private TuitionTerm tuitionTerm;
-    private PeriodCaseEnum periodCaseEnum;
+    private PeriodCaseEnum periodCase;
 }

@@ -11,22 +11,22 @@ public class SelectiveCourseConstants {
     //Map structure: degree id -> Map(student study year -> array of selective courses number:
     // element 0 - 1st semester, element 1 - 2nd semester
     public static final Map<Integer, Map<String, Integer[]>[]> SELECTIVE_COURSES_NUMBER = new HashMap<>();
-    public static final PeriodCase[] periodCases = new PeriodCase[8];
+    public static final PeriodCase[] PERIOD_CASES = new PeriodCase[8];
 
-    private static final int bachelorId = 1;
-    private static final int masterId = 3;
-    private static final int phdId = 4;
+    private static final int BACHELOR_ID = 1;
+    private static final int MASTER_ID = 3;
+    private static final int PHD_ID = 4;
 
     static {
         for (int i = 0; i < 3; i++) {
-            periodCases[i] = new PeriodCase(bachelorId, i + 1, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
+            PERIOD_CASES[i] = new PeriodCase(BACHELOR_ID, i + 1, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
         }
 
-        periodCases[3] = new PeriodCase(bachelorId, bachelorId, TuitionTerm.SHORTENED, PeriodCaseEnum.LATE);
-        periodCases[4] = new PeriodCase(masterId, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
-        periodCases[5] = new PeriodCase(phdId, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
-        periodCases[6] = new PeriodCase(phdId, 2, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
-        periodCases[7] = new PeriodCase(phdId, 3, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
+        PERIOD_CASES[3] = new PeriodCase(BACHELOR_ID, BACHELOR_ID, TuitionTerm.SHORTENED, PeriodCaseEnum.LATE);
+        PERIOD_CASES[4] = new PeriodCase(MASTER_ID, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
+        PERIOD_CASES[5] = new PeriodCase(PHD_ID, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
+        PERIOD_CASES[6] = new PeriodCase(PHD_ID, 2, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
+        PERIOD_CASES[7] = new PeriodCase(PHD_ID, 3, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
 
         Map<String, Integer[]>[] bachelor = new Map[4];
         Map<String, Integer[]> bachelor2 = new HashMap<>();
@@ -43,14 +43,14 @@ public class SelectiveCourseConstants {
         bachelor4.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{3, 2});
         bachelor4.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         bachelor[3] = bachelor4;
-        SELECTIVE_COURSES_NUMBER.put(bachelorId, bachelor);
+        SELECTIVE_COURSES_NUMBER.put(BACHELOR_ID, bachelor);
 
         Map<String, Integer[]>[] master = new Map[1];
         Map<String, Integer[]> master1 = new HashMap<>();
         master1.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{2, 2});
         master1.put(TypeCycle.GENERAL.toString(), new Integer[]{1, 1});
         master[0] = master1;
-        SELECTIVE_COURSES_NUMBER.put(masterId, master);
+        SELECTIVE_COURSES_NUMBER.put(MASTER_ID, master);
 
         Map<String, Integer[]>[] phd = new Map[4];
         Map<String, Integer[]> phd1 = new HashMap<>();
@@ -73,6 +73,6 @@ public class SelectiveCourseConstants {
         phd4.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         phd[3] = phd4;
 
-        SELECTIVE_COURSES_NUMBER.put(phdId, phd);
+        SELECTIVE_COURSES_NUMBER.put(PHD_ID, phd);
     }
 }

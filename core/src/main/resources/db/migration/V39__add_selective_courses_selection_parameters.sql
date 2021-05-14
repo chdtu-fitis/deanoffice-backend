@@ -25,3 +25,6 @@ ALTER TABLE selective_courses_year_parameters
 
 ALTER TABLE selective_courses_year_parameters
     ADD CONSTRAINT uk_sc_year_parameters_sr_end_date UNIQUE(second_round_end_date);
+
+ALTER TABLE selective_courses_year_parameters
+    ADD CONSTRAINT uk_sc_year_parameters_study_year UNIQUE(study_year);
