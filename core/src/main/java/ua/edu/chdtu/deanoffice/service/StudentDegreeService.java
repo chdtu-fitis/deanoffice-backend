@@ -257,4 +257,11 @@ public class StudentDegreeService {
         int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
         return currentYear - groupCreationYear + groupFirstYear;
     }
+
+    public int getShortenedRealStudentDegreeYear(StudentDegree studentDegree) {
+        int currentYear = currentYearService.getYear();
+        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+        int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
+        return currentYear - groupCreationYear + groupFirstYear;
+    }
 }

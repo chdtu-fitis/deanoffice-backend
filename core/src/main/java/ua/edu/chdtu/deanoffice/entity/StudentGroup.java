@@ -31,6 +31,7 @@ public class StudentGroup extends NameWithActiveEntity {
     private TuitionTerm tuitionTerm = TuitionTerm.REGULAR;
     private int studySemesters;
     private BigDecimal studyYears;
+    private int realBeginYear;
     private int beginYears;
     @OneToMany(mappedBy = "studentGroup", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Where(clause = "active = true")

@@ -26,6 +26,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
@@ -440,7 +441,8 @@ public class SelectiveCourseController {
         if (studentDegree == null)
            return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
 
-        int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree);
+        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
 
         PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
         if (periodCase == null) {

@@ -1,0 +1,1 @@
+ALTER TABLE student_group ADD COLUMN real_begin_year integer NOT NULL DEFAULT 1;

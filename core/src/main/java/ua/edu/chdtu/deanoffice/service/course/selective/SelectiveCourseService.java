@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
@@ -67,7 +68,9 @@ public class SelectiveCourseService {
     2.if courses semesters correspond student year;
     3. if all selective courses are for right registration year (usually, the next of the current study year)*/
     public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
-        int studentDegreeYear = studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) + 1 : studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
         Integer general[] = {0, 0};
@@ -92,9 +95,12 @@ public class SelectiveCourseService {
     }
 
     public PeriodCaseEnum getPeriodCaseByStudentDegree(StudentDegree studentDegree) {
+        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
+
         for (PeriodCase periodCase : PERIOD_CASES) {
             if ((studentDegree.getSpecialization().getDegree().getId() == periodCase.getDegreeId()
-                    && studentDegreeService.getStudentDegreeYear(studentDegree) == periodCase.getYear())
+                    && studentDegreeYear == periodCase.getYear())
                     && studentDegree.getTuitionTerm() == periodCase.getTuitionTerm())
                 return periodCase.getPeriodCase();
         }
