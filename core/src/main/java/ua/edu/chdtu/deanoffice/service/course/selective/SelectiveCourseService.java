@@ -69,7 +69,7 @@ public class SelectiveCourseService {
     3. if all selective courses are for right registration year (usually, the next of the current study year)*/
     public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
         int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedStudentDegreeYear(studentDegree) + 1 : studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) + 1 : studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
 
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
@@ -96,7 +96,7 @@ public class SelectiveCourseService {
 
     public PeriodCaseEnum getPeriodCaseByStudentDegree(StudentDegree studentDegree) {
         int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
 
         for (PeriodCase periodCase : PERIOD_CASES) {
             if ((studentDegree.getSpecialization().getDegree().getId() == periodCase.getDegreeId()
