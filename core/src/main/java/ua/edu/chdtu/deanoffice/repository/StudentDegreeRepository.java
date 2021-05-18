@@ -522,4 +522,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
             @Param("payment") String payment,
             @Param("semester") int semester
     );
+
+    @Query(value =
+            "SELECT sd FROM StudentDegree AS sd " +
+            "WHERE sd.active = true " +
+            "AND LOWER(sd.student.surname) LIKE LOWER(CONCAT(:surname, '%'))")
+    List<StudentDegree> findAllStudentDegreesByStudentSurname(@Param("surname") String surname);
 }

@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseStudentDegreesDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeIdDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
@@ -287,7 +288,7 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD", "ROLE_STUDENT"})
     @PostMapping("/registration")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
+    public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
             throws OperationCannotBePerformedException {
 
         int selectiveCoursesRegistrationYear = currentYearService.getYear();
@@ -353,7 +354,7 @@ public class SelectiveCourseController {
         return true;
     }
 
-    private ResponseEntity<SelectiveCoursesStudentDegreeDTO> recordOnSelectiveCoursesByRules(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
+    private ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> recordOnSelectiveCoursesByRules(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = new ArrayList<>();
 
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
@@ -369,7 +370,7 @@ public class SelectiveCourseController {
         List<SelectiveCourse> selectiveCoursesSaved = selectiveCoursesStudDegreeAfterSave.stream()
                 .map(selectiveCourseStudDegree -> selectiveCourseStudDegree.getSelectiveCourse()).collect(Collectors.toList());
         List<SelectiveCourseDTO> selectiveCoursesSavedDTO = map(selectiveCoursesSaved, SelectiveCourseDTO.class);
-        SelectiveCoursesStudentDegreeDTO afterSaveDTO = new SelectiveCoursesStudentDegreeDTO();
+        SelectiveCoursesStudentDegreeIdDTO afterSaveDTO = new SelectiveCoursesStudentDegreeIdDTO();
         afterSaveDTO.setSelectiveCourses(selectiveCoursesSavedDTO);
         afterSaveDTO.setStudentDegree(studentDegreeDTO);
         return new ResponseEntity(afterSaveDTO, HttpStatus.CREATED);
@@ -377,22 +378,9 @@ public class SelectiveCourseController {
 
     /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
     @GetMapping("/student-courses")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId, @RequestParam(required = false) boolean all) {
-        SelectiveCoursesStudentDegreeDTO selectiveCoursesForStudentDegreeDTO = new SelectiveCoursesStudentDegreeDTO();
-
-        List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = new ArrayList<>();
-        if (all)
-            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getAllSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
-        else
-            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
-
-        if (selectiveCoursesForStudentDegree.size() > 0) {
-            selectiveCoursesForStudentDegreeDTO.setStudentDegree(map(selectiveCoursesForStudentDegree.get(0).getStudentDegree(), ExistingIdDTO.class));
-            List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
-                    map(selectiveCourseStudentDegree.getSelectiveCourse(), SelectiveCourseDTO.class)).collect(Collectors.toList());
-            selectiveCoursesForStudentDegreeDTO.setSelectiveCourses(selectiveCourseDTOs);
-        }
-        return ResponseEntity.ok(map(selectiveCoursesForStudentDegreeDTO, SelectiveCoursesStudentDegreeDTO.class));
+    public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId, @RequestParam(required = false) boolean all) {
+        SelectiveCoursesStudentDegreeIdDTO selectiveCoursesForStudentDegreeIdDTO = getSelectiveCoursesStudentDegreeDTOByStudyYearAndStudentDegreeId(all, studyYear, studentDegreeId);
+        return ResponseEntity.ok(map(selectiveCoursesForStudentDegreeIdDTO, SelectiveCoursesStudentDegreeIdDTO.class));
     }
 
     /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на дану вибіркову дисципліну*/
@@ -460,5 +448,36 @@ public class SelectiveCourseController {
         }
 
         return ResponseEntity.ok(selectiveCoursesSelectionRulesDTO);
+    }
+
+    @GetMapping("/student-courses-by-surname")
+    public ResponseEntity<List<SelectiveCoursesStudentDegreeDTO>> getStudentSelectiveCoursesBySurname(@RequestParam(required = false) boolean all, int studyYear, String surname) {
+        List<SelectiveCoursesStudentDegreeDTO> selectiveCoursesForStudentDegreesDTO = new ArrayList<>();
+        List<StudentDegree> studentDegrees = studentDegreeService.getAllStudentDegreesByStudentSurname(surname);
+
+        for (StudentDegree studentDegree : studentDegrees) {
+            SelectiveCoursesStudentDegreeIdDTO selectiveCoursesStudentDegreeIdDTO = getSelectiveCoursesStudentDegreeDTOByStudyYearAndStudentDegreeId(all, studyYear, studentDegree.getId());
+            if (selectiveCoursesStudentDegreeIdDTO.getStudentDegree() != null)
+                selectiveCoursesForStudentDegreesDTO.add(new SelectiveCoursesStudentDegreeDTO(map(studentDegree, StudentDegreeDTO.class), selectiveCoursesStudentDegreeIdDTO.getSelectiveCourses()));
+        }
+        return ResponseEntity.ok(selectiveCoursesForStudentDegreesDTO);
+    }
+
+    private SelectiveCoursesStudentDegreeIdDTO getSelectiveCoursesStudentDegreeDTOByStudyYearAndStudentDegreeId(boolean all, int studyYear, int studentDegreeId) {
+        SelectiveCoursesStudentDegreeIdDTO selectiveCoursesForStudentDegreeIdDTO = new SelectiveCoursesStudentDegreeIdDTO();
+
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = new ArrayList<>();
+        if (all)
+            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getAllSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
+        else
+            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
+
+        if (selectiveCoursesForStudentDegree.size() > 0) {
+            selectiveCoursesForStudentDegreeIdDTO.setStudentDegree(map(selectiveCoursesForStudentDegree.get(0).getStudentDegree(), ExistingIdDTO.class));
+            List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
+                    map(selectiveCourseStudentDegree.getSelectiveCourse(), SelectiveCourseDTO.class)).collect(Collectors.toList());
+            selectiveCoursesForStudentDegreeIdDTO.setSelectiveCourses(selectiveCourseDTOs);
+        }
+        return selectiveCoursesForStudentDegreeIdDTO;
     }
 }
