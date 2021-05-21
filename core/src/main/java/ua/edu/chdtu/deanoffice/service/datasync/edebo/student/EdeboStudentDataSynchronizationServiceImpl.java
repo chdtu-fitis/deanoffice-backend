@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegre
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.MissingPrimaryDataRedMessageBean;
 import ua.edu.chdtu.deanoffice.service.datasync.edebo.student.beans.StudentDegreePrimaryDataWithGroupBean;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.util.comparators.EntityUtil;
 
 import java.io.IOException;
@@ -291,7 +292,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
 
     @Override
     public void addSynchronizationReportForImportedData(ImportedData importedData, EdeboStudentDataSynchronizationReport edeboDataSyncronizationReport, int facultyId, Map<String, String> selectionParams) {
-        if (!(selectionParams.get("faculty").toUpperCase().equals(importedData.getFacultyName().toUpperCase()))
+        if ((!(selectionParams.get("faculty").toUpperCase().equals(importedData.getFacultyName().toUpperCase())) && FacultyUtil.getUserFacultyIdInt()!=12)
                 || !(selectionParams.get("degree") == null || selectionParams.get("degree").toUpperCase().equals(importedData.getQualificationGroupName().toUpperCase()))
                 || !(selectionParams.get("speciality") == null || selectionParams.get("speciality").toUpperCase().equals(importedData.getFullSpecialityName().toUpperCase()))
         )

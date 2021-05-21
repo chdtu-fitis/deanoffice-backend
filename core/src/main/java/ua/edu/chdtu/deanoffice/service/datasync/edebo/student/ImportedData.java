@@ -87,7 +87,7 @@ public class ImportedData {
 //    private String documentIssued2;
 
     @CsvBindByName(column = "Академічна довідка (освітня декларація)")
-    private String x3;
+    private String x3 = "";
 
     public ImportedData() {
         this.firstName = "";
@@ -111,6 +111,7 @@ public class ImportedData {
         this.programName = "";
 //        this.programNameEn = "";
 //        this.personSexId = "";
+        this.isShortened = "";
         this.country = "";
 //        this.ipnNumber = "";
 //        this.personDocumentTypeId = "";

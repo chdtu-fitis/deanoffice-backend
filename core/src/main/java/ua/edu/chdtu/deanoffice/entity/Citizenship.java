@@ -52,7 +52,7 @@ public enum Citizenship {
     }
 
     public static Citizenship getCitizenshipByCountryCode(Integer countryCode) {
-        for (Citizenship citizenship : Citizenship.values()) {
+        for (Citizenship citizenship : values()) {
             if (citizenship.getCountryCode().equals(countryCode))
                 return citizenship;
         }
@@ -60,7 +60,7 @@ public enum Citizenship {
     }
 
     public static Citizenship getCitizenshipByCountryUkrName(String nameUkr) {
-        for (Citizenship citizenship : Citizenship.values()) {
+        for (Citizenship citizenship : values()) {
             if (citizenship.getNameUkr().equals(nameUkr))
                 return citizenship;
         }
