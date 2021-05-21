@@ -264,4 +264,9 @@ public class StudentDegreeService {
         int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
         return currentYear - groupCreationYear + groupFirstYear;
     }
+
+    public List<StudentDegree> getAllStudentDegreesByStudentSurname(String surname) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findAllStudentDegreesByStudentSurname(surname);
+        return studentDegrees;
+    }
 }
