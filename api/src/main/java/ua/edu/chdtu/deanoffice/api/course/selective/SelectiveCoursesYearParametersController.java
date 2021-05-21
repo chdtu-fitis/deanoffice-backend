@@ -106,6 +106,8 @@ public class SelectiveCoursesYearParametersController {
         throws OperationCannotBePerformedException {
 
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParameters = strictMap(selectiveCoursesYearParametersWriteDTO, SelectiveCoursesYearParameters.class);
+        selectiveCoursesYearParameters.get(0).setPeriodCase(PeriodCaseEnum.EARLY);
+        selectiveCoursesYearParameters.get(1).setPeriodCase(PeriodCaseEnum.LATE);
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersAfterSave = selectiveCoursesYearParametersService.create(selectiveCoursesYearParameters);
         List<FullSelectiveCoursesYearParametersDTO> selectiveCoursesSelectionParametersAfterSaveDTO = map(selectiveCoursesYearParametersAfterSave, FullSelectiveCoursesYearParametersDTO.class);
         return new ResponseEntity(selectiveCoursesSelectionParametersAfterSaveDTO, HttpStatus.CREATED);

@@ -31,6 +31,4 @@ public class SelectiveCoursesYearParametersWriteDTO {
     private int phdProfessionalMinStudentsCount;
     @Min(value = 1, message = "Максимальна кількість студентів повинна бути додатним числом")
     private int maxStudentsCount;
-    @NotNull(message = "Обов'язково потрібно вказати період запису")
-    private PeriodCaseEnum periodCase;
 }

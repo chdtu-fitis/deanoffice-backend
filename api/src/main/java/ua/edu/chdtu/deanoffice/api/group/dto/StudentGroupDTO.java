@@ -35,7 +35,8 @@ public class StudentGroupDTO {
     @JsonView(StudentGroupView.AllGroupData.class)
     private BigDecimal studyYears;
     @JsonView(StudentGroupView.AllGroupData.class)
+    private int realBeginYear;
+    @JsonView(StudentGroupView.AllGroupData.class)
     private int beginYears;
-
     private int specializationId;
 }
