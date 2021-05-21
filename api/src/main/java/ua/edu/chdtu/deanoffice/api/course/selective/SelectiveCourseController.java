@@ -323,12 +323,15 @@ public class SelectiveCourseController {
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
         else if (today.after(selectiveCoursesYearParameters.getSecondRoundStartDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundEndDate())) {
-            List<SelectiveCourse> selectiveCoursesFromDB =
-                    selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(selectiveCoursesRegistrationYear + 1, studentDegree.getId()).stream()
-                            .map(selectiveCoursesStudentDegrees -> selectiveCoursesStudentDegrees.getSelectiveCourse())
-                            .collect(Collectors.toList());
+            List<SelectiveCourse> selectiveCoursesFromDB = selectiveCoursesStudentDegreesService
+                    .getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, selectiveCoursesRegistrationYear + 1, studentDegree.getId())
+                    .getSelectiveCourses();
 
-            selectiveCoursesFromDB.addAll(selectiveCourses);
+            if (selectiveCoursesFromDB == null)
+                selectiveCoursesFromDB = selectiveCourses;
+            else
+                selectiveCoursesFromDB.addAll(selectiveCourses);
+
             checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCoursesFromDB);
 
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
@@ -341,7 +344,9 @@ public class SelectiveCourseController {
             throws OperationCannotBePerformedException {
 
         if (!isSecondRound) {
-            if (selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(currentYearService.getYear() + 1, studentDegree.getId()).size() > 0) {
+            if (selectiveCoursesStudentDegreesService
+                    .getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false,currentYearService.getYear() + 1, studentDegree.getId())
+                    .getSelectiveCourses().size() > 0) {
                 throw new OperationCannotBePerformedException("Даний студент вже зареєстрований на вибіркові дисципліни");
             }
         }
@@ -379,8 +384,8 @@ public class SelectiveCourseController {
     /*Повертає об'єкт зі значеннями полів null, якщо студент не зареєстрований на жодну вибіркову дисципліну*/
     @GetMapping("/student-courses")
     public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> getStudentSelectiveCourses(@RequestParam int studyYear, @RequestParam int studentDegreeId, @RequestParam(required = false) boolean all) {
-        SelectiveCoursesStudentDegreeIdDTO selectiveCoursesForStudentDegreeIdDTO = getSelectiveCoursesStudentDegreeDTOByStudyYearAndStudentDegreeId(all, studyYear, studentDegreeId);
-        return ResponseEntity.ok(map(selectiveCoursesForStudentDegreeIdDTO, SelectiveCoursesStudentDegreeIdDTO.class));
+        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.
+                getSelectiveCoursesStudentDegreeIdByStudentDegreeId(all, studyYear, studentDegreeId), SelectiveCoursesStudentDegreeIdDTO.class));
     }
 
     /*Повертає об'єкт зі значеннями полів null, якщо жоден студент не зареєстрований на дану вибіркову дисципліну*/
@@ -452,32 +457,10 @@ public class SelectiveCourseController {
 
     @GetMapping("/student-courses-by-surname")
     public ResponseEntity<List<SelectiveCoursesStudentDegreeDTO>> getStudentSelectiveCoursesBySurname(@RequestParam(required = false) boolean all, int studyYear, String surname) {
-        List<SelectiveCoursesStudentDegreeDTO> selectiveCoursesForStudentDegreesDTO = new ArrayList<>();
-        List<StudentDegree> studentDegrees = studentDegreeService.getAllStudentDegreesByStudentSurname(surname);
+        List<Integer> studentDegreeIds = studentDegreeService.getAllStudentDegreesByStudentSurname(surname).stream()
+                .map(studentDegree -> studentDegree.getId()).collect(Collectors.toList());
 
-        for (StudentDegree studentDegree : studentDegrees) {
-            SelectiveCoursesStudentDegreeIdDTO selectiveCoursesStudentDegreeIdDTO = getSelectiveCoursesStudentDegreeDTOByStudyYearAndStudentDegreeId(all, studyYear, studentDegree.getId());
-            if (selectiveCoursesStudentDegreeIdDTO.getStudentDegree() != null)
-                selectiveCoursesForStudentDegreesDTO.add(new SelectiveCoursesStudentDegreeDTO(map(studentDegree, StudentDegreeDTO.class), selectiveCoursesStudentDegreeIdDTO.getSelectiveCourses()));
-        }
-        return ResponseEntity.ok(selectiveCoursesForStudentDegreesDTO);
-    }
-
-    private SelectiveCoursesStudentDegreeIdDTO getSelectiveCoursesStudentDegreeDTOByStudyYearAndStudentDegreeId(boolean all, int studyYear, int studentDegreeId) {
-        SelectiveCoursesStudentDegreeIdDTO selectiveCoursesForStudentDegreeIdDTO = new SelectiveCoursesStudentDegreeIdDTO();
-
-        List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegree = new ArrayList<>();
-        if (all)
-            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getAllSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
-        else
-            selectiveCoursesForStudentDegree = selectiveCoursesStudentDegreesService.getActiveSelectiveCoursesForStudentDegree(studyYear, studentDegreeId);
-
-        if (selectiveCoursesForStudentDegree.size() > 0) {
-            selectiveCoursesForStudentDegreeIdDTO.setStudentDegree(map(selectiveCoursesForStudentDegree.get(0).getStudentDegree(), ExistingIdDTO.class));
-            List<SelectiveCourseDTO> selectiveCourseDTOs = selectiveCoursesForStudentDegree.stream().map(selectiveCourseStudentDegree ->
-                    map(selectiveCourseStudentDegree.getSelectiveCourse(), SelectiveCourseDTO.class)).collect(Collectors.toList());
-            selectiveCoursesForStudentDegreeIdDTO.setSelectiveCourses(selectiveCourseDTOs);
-        }
-        return selectiveCoursesForStudentDegreeIdDTO;
+        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.
+                getSelectiveCoursesStudentDegreesByStudentDegreeIds(all, studyYear, studentDegreeIds), SelectiveCoursesStudentDegreeDTO.class));
     }
 }
