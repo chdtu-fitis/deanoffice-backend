@@ -42,8 +42,8 @@ public class StudentDegreeSpecification {
                 List<Predicate> predicates = new ArrayList<>();
                 predicates.add(cb.greaterThanOrEqualTo(root.get("expelDate"),startDate));
                 predicates.add(cb.lessThanOrEqualTo(root.get("expelDate"),endDate));
-                Join <StudentExpel ,StudentDegree> studentDegree = root.join("studentDegree");
-                Join <StudentDegree ,Student> student = studentDegree.join("student");
+                Join <StudentExpel, StudentDegree> studentDegree = root.join("studentDegree");
+                Join <StudentDegree, Student> student = studentDegree.join("student");
                 if (surname != null && !surname.isEmpty()){
                     predicates.add(cb.like(cb.lower(student.get("surname")),surname.toLowerCase()+"%"));
                 }

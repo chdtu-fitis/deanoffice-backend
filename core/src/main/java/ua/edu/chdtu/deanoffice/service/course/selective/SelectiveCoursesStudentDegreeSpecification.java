@@ -1,6 +1,8 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.data.jpa.domain.Specification;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -27,6 +29,9 @@ public class SelectiveCoursesStudentDegreeSpecification {
                 Join<SelectiveCoursesStudentDegrees, StudentDegree> studentDegree = root.join("studentDegree");
                 Expression<Integer> studentDegreeIdExpression = studentDegree.get("id");
                 predicates.add(studentDegreeIdExpression.in(studentDegreeIds));
+                Join<SelectiveCourse, Course> course = selectiveCourse.join("course");
+                Join<Course, CourseName> courseName = course.join("courseName");
+                query.orderBy(cb.desc(root.get("active")), cb.asc(courseName.get("name")));
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
         };

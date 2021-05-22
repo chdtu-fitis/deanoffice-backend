@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.service.document.report.journal;
 
-
 import org.springframework.data.jpa.domain.Specification;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
