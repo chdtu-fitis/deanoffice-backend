@@ -44,9 +44,11 @@ import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -415,7 +417,9 @@ public class SelectiveCourseController {
                     return selectiveCourseWithStudentsCountDTO;
                 }).collect(Collectors.toList());
 
-        Collections.sort(selectiveCourseWithStudentsCountDTOS, Collections.reverseOrder());
+        Collator uaCollator = Collator.getInstance(new Locale("uk", "UA"));
+        Collections.sort(selectiveCourseWithStudentsCountDTOS,
+                (sc1, sc2) -> uaCollator.compare(sc1.getCourse().getCourseName().getName(), sc2.getCourse().getCourseName().getName()));
 
         return ResponseEntity.ok(selectiveCourseWithStudentsCountDTOS);
     }
