@@ -165,17 +165,19 @@ public class SelectiveCoursesStudentDegreesService {
     public List<SelectiveCoursesStudentDegree> getSelectiveCoursesStudentDegreesByStudentDegreeIds(boolean all, int studyYear, List<Integer> studentDegreeIds) {
         List<SelectiveCoursesStudentDegree> selectiveCoursesForStudentDegrees = new ArrayList<>();
 
-        Map<StudentDegree, List<SelectiveCoursesStudentDegrees>> selectiveCoursesStudentDegreesFromDB = selectiveCoursesStudentDegreesRepository
-                .findAll(SelectiveCoursesStudentDegreeSpecification.getSelectiveCoursesStudentDegree(all, studyYear, studentDegreeIds))
-                .stream()
-                .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getStudentDegree));
+        if (studentDegreeIds.size() != 0) {
+            Map<StudentDegree, List<SelectiveCoursesStudentDegrees>> selectiveCoursesStudentDegreesFromDB = selectiveCoursesStudentDegreesRepository
+                    .findAll(SelectiveCoursesStudentDegreeSpecification.getSelectiveCoursesStudentDegree(all, studyYear, studentDegreeIds))
+                    .stream()
+                    .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getStudentDegree));
 
-        for (Map.Entry<StudentDegree, List<SelectiveCoursesStudentDegrees>> entry : selectiveCoursesStudentDegreesFromDB.entrySet()) {
-            SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = new SelectiveCoursesStudentDegree();
-            selectiveCoursesStudentDegree.setStudentDegree(entry.getKey());
-            List<SelectiveCourse> selectiveCourses = entry.getValue().stream().map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
-            selectiveCoursesStudentDegree.setSelectiveCourses(selectiveCourses);
-            selectiveCoursesForStudentDegrees.add(selectiveCoursesStudentDegree);
+            for (Map.Entry<StudentDegree, List<SelectiveCoursesStudentDegrees>> entry : selectiveCoursesStudentDegreesFromDB.entrySet()) {
+                SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = new SelectiveCoursesStudentDegree();
+                selectiveCoursesStudentDegree.setStudentDegree(entry.getKey());
+                List<SelectiveCourse> selectiveCourses = entry.getValue().stream().map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
+                selectiveCoursesStudentDegree.setSelectiveCourses(selectiveCourses);
+                selectiveCoursesForStudentDegrees.add(selectiveCoursesStudentDegree);
+            }
         }
 
         return selectiveCoursesForStudentDegrees;
