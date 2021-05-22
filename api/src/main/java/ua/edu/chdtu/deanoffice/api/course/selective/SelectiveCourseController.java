@@ -39,6 +39,7 @@ import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
 
@@ -463,8 +464,8 @@ public class SelectiveCourseController {
     public ResponseEntity<List<SelectiveCoursesStudentDegreeDTO>> getStudentSelectiveCoursesBySurname(@RequestParam(required = false) boolean all, int studyYear, String surname) {
         List<Integer> studentDegreeIds = studentDegreeService.getAllStudentDegreesByStudentSurname(surname).stream()
                 .map(studentDegree -> studentDegree.getId()).collect(Collectors.toList());
-
-        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.
-                getSelectiveCoursesStudentDegreesByStudentDegreeIds(all, studyYear, studentDegreeIds), SelectiveCoursesStudentDegreeDTO.class));
+        List<SelectiveCoursesStudentDegree> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService
+            .getSelectiveCoursesStudentDegreesByStudentDegreeIds(all, studyYear, studentDegreeIds);
+        return ResponseEntity.ok(map(selectiveCoursesStudentDegrees, SelectiveCoursesStudentDegreeDTO.class));
     }
 }
