@@ -347,9 +347,10 @@ public class SelectiveCourseController {
             throws OperationCannotBePerformedException {
 
         if (!isSecondRound) {
-            if (selectiveCoursesStudentDegreesService
+            List<SelectiveCourse> actualSelectiveCourses = selectiveCoursesStudentDegreesService
                     .getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false,currentYearService.getYear() + 1, studentDegree.getId())
-                    .getSelectiveCourses().size() > 0) {
+                    .getSelectiveCourses();
+            if (actualSelectiveCourses != null && actualSelectiveCourses.size() > 0) {
                 throw new OperationCannotBePerformedException("Даний студент вже зареєстрований на вибіркові дисципліни");
             }
         }
