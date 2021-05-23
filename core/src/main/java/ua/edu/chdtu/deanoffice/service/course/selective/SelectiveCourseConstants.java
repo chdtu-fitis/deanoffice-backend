@@ -23,6 +23,7 @@ public class SelectiveCourseConstants {
         }
 
         PERIOD_CASES[3] = new PeriodCase(BACHELOR_ID, 2, TuitionTerm.SHORTENED, PeriodCaseEnum.LATE);
+        PERIOD_CASES[3] = new PeriodCase(BACHELOR_ID, 3, TuitionTerm.SHORTENED, PeriodCaseEnum.EARLY);
         PERIOD_CASES[4] = new PeriodCase(MASTER_ID, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
         PERIOD_CASES[5] = new PeriodCase(PHD_ID, 1, TuitionTerm.REGULAR, PeriodCaseEnum.LATE);
         PERIOD_CASES[6] = new PeriodCase(PHD_ID, 2, TuitionTerm.REGULAR, PeriodCaseEnum.EARLY);
