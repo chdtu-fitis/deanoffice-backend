@@ -26,4 +26,12 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
     @Query("UPDATE SelectiveCourse sc SET sc.available = false " +
             "WHERE sc.id IN :selectiveCourseIds")
     void setSelectiveCoursesUnavailableByIds(@Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
+
+    @Query("SELECT sc FROM SelectiveCourse AS sc WHERE sc.available = true " +
+            "AND sc.studyYear = :studyYear " +
+            "AND sc.id IN (:selectiveCourseIds)")
+    List<SelectiveCourse> findAllAvailableByStudyYearAndIds(
+            @Param("studyYear") int studyYear,
+            @Param("selectiveCourseIds") List<Integer> selectiveCourseIds
+    );
 }

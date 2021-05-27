@@ -51,4 +51,15 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query("UPDATE SelectiveCoursesStudentDegrees scsd SET scsd.active = false " +
             "WHERE scsd.selectiveCourse.id IN :selectiveCourseIds")
     void setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(@Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
+
+    @Modifying
+    @Query(value = "UPDATE selective_courses_student_degrees AS scsd SET active = false " +
+            "FROM selective_course AS sc, student_degree AS sd " +
+            "WHERE sc.id = scsd.selective_course_id AND sd.id = scsd.student_degree_id " +
+            "AND sd.id = :studentDegreeId " +
+            "AND sc.study_year = :studyYear " +
+            "AND sc.id IN (:selectiveCourseIds)", nativeQuery = true)
+    void setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(@Param("studyYear") int studyYear,
+                                                                                                     @Param("studentDegreeId") int studentDegreeId,
+                                                                                                     @Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
 }

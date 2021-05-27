@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import javax.transaction.Transactional;
@@ -29,15 +30,18 @@ public class SelectiveCoursesStudentDegreesService {
     private SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository;
     private SelectiveCourseRepository selectiveCourseRepository;
     private CurrentYearService currentYearService;
+    private StudentDegreeService studentDegreeService;
 
     public SelectiveCoursesStudentDegreesService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
                                                  SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository,
                                                  CurrentYearService currentYearService,
-                                                 SelectiveCourseRepository selectiveCourseRepository) {
+                                                 SelectiveCourseRepository selectiveCourseRepository,
+                                                 StudentDegreeService studentDegreeService) {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
         this.selectiveCoursesYearParametersRepository = selectiveCoursesYearParametersRepository;
         this.currentYearService = currentYearService;
         this.selectiveCourseRepository = selectiveCourseRepository;
+        this.studentDegreeService = studentDegreeService;
     }
 
     @Transactional
@@ -181,5 +185,33 @@ public class SelectiveCoursesStudentDegreesService {
         }
 
         return selectiveCoursesForStudentDegrees;
+    }
+
+    @Transactional
+    public void expelStudentDegreeFromSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds) {
+        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCourseIds);
+    }
+
+    public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds) {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findAllAvailableByStudyYearAndIds(studyYear, selectiveCourseIds);
+
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegreesForSave = new ArrayList();
+
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees = new SelectiveCoursesStudentDegrees();
+            selectiveCoursesStudentDegrees.setStudentDegree(studentDegree);
+            selectiveCoursesStudentDegrees.setSelectiveCourse(selectiveCourse);
+            selectiveCoursesStudentDegreesForSave.add(selectiveCoursesStudentDegrees);
+        }
+
+        List<SelectiveCourse> selectiveCoursesAfterSave = create(selectiveCoursesStudentDegreesForSave).stream()
+                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
+
+        SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = new SelectiveCoursesStudentDegree();
+        selectiveCoursesStudentDegree.setStudentDegree(studentDegree);
+        selectiveCoursesStudentDegree.setSelectiveCourses(selectiveCoursesAfterSave);
+
+        return selectiveCoursesStudentDegree;
     }
 }
