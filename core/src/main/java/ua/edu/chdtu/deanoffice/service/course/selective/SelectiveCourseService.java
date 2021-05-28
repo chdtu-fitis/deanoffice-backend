@@ -30,11 +30,14 @@ public class SelectiveCourseService {
         this.studentDegreeService = studentDegreeService;
     }
 
-    public List<SelectiveCourse> getSelectiveCoursesByStudyYearAndDegreeAndSemester(Integer studyYear, int degreeId, int semester, boolean thisYear) {
+    public List<SelectiveCourse> getSelectiveCoursesByStudyYearAndDegreeAndSemester(Integer studyYear, int degreeId, int semester, boolean thisYear, boolean all) {
         if (studyYear == null) {
             studyYear = thisYear ? currentYearService.getYear() : currentYearService.getYear() + 1;
         }
-        return selectiveCourseRepository.findAllAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        if (all)
+            return selectiveCourseRepository.findAllByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        else
+            return selectiveCourseRepository.findAllAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
     }
 
     public SelectiveCourse getById(Integer id) {
