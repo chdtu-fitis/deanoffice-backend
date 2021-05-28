@@ -18,6 +18,7 @@ import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,17 +32,20 @@ public class SelectiveCoursesStudentDegreesService {
     private SelectiveCourseRepository selectiveCourseRepository;
     private CurrentYearService currentYearService;
     private StudentDegreeService studentDegreeService;
+    private SelectiveCourseService selectiveCourseService;
 
     public SelectiveCoursesStudentDegreesService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
                                                  SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository,
                                                  CurrentYearService currentYearService,
                                                  SelectiveCourseRepository selectiveCourseRepository,
+                                                 SelectiveCourseService selectiveCourseService,
                                                  StudentDegreeService studentDegreeService) {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
         this.selectiveCoursesYearParametersRepository = selectiveCoursesYearParametersRepository;
         this.currentYearService = currentYearService;
         this.selectiveCourseRepository = selectiveCourseRepository;
         this.studentDegreeService = studentDegreeService;
+        this.selectiveCourseService = selectiveCourseService;
     }
 
     @Transactional
@@ -188,14 +192,68 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     @Transactional
-    public void expelStudentDegreeFromSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds) {
-        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCourseIds);
+    public SelectiveCoursesStudentDegree expelStudentDegreeFromSelectiveCourses(int studyYear, int studentDegreeId,
+                                                                                List<Integer> selectiveCourseIdsForExpelling,
+                                                                                List<Integer> selectiveCourseIdsForEnrolling) throws OperationCannotBePerformedException {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        List<SelectiveCourse> selectiveCoursesForEnrolling = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIdsForEnrolling);
+        List<SelectiveCourse> selectiveCoursesForExpelling = selectiveCoursesStudentDegreesRepository.
+                findAllSelectiveCoursesByIdsAndStudentDegreeId(studentDegreeId, selectiveCourseIdsForExpelling);
+
+        List<Integer> semestersForEnrolling = getSelectiveCoursesSemesters(selectiveCoursesForEnrolling);
+        List<Integer> semestersForExpelling = getSelectiveCoursesSemesters(selectiveCoursesForExpelling);
+
+        if (selectiveCourseIdsForEnrolling.size() != selectiveCoursesForExpelling.size())
+            throw new OperationCannotBePerformedException("Кількість вибіркових дисциплін на відрахування не відповідає кількості на запис");
+
+        if (!semestersForEnrolling.equals(semestersForExpelling))
+            throw new OperationCannotBePerformedException("Семестри вибіркових дисциплін на відрахування та запис не збігаються");
+
+        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCourseIdsForExpelling);
+        return enrollStudentDegreeInSelectiveCourses(selectiveCoursesForEnrolling, studentDegree);
     }
 
-    public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds) {
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findAllAvailableByStudyYearAndIds(studyYear, selectiveCourseIds);
+    private List<Integer> getSelectiveCoursesSemesters(List<SelectiveCourse> selectiveCourses) {
+        List<Integer> semesters = selectiveCourses.stream().map(selectiveCourse -> selectiveCourse.getCourse().getSemester()).collect(Collectors.toList());
+        Collections.sort(semesters);
+        return semesters;
+    }
 
+    public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds)
+            throws OperationCannotBePerformedException {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        List<SelectiveCourse> selectiveCourses = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIds);
+
+        List<SelectiveCourse> activeStudentDegreeSelectiveCoursesFromDB =
+                getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, studyYear, studentDegreeId).getSelectiveCourses();
+        if (activeStudentDegreeSelectiveCoursesFromDB == null)
+            activeStudentDegreeSelectiveCoursesFromDB = selectiveCourses;
+        else
+            activeStudentDegreeSelectiveCoursesFromDB.addAll(selectiveCourses);
+
+        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, activeStudentDegreeSelectiveCoursesFromDB))
+            throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
+
+        return enrollStudentDegreeInSelectiveCourses(selectiveCourses, studentDegree);
+    }
+
+    private List<SelectiveCourse> getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(int studyYear, StudentDegree studentDegree, List<Integer> selectiveCourseIds)
+            throws OperationCannotBePerformedException {
+        if (studentDegree == null)
+            throw new OperationCannotBePerformedException("Не існує student degree за таким id");
+
+        int studentYear = studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+        List<Integer> semesters = Arrays.asList(studentYear * 2 - 1, studentYear * 2);
+
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.
+                findAllAvailableByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree.getSpecialization().getDegree().getId(), semesters, selectiveCourseIds);
+        if (selectiveCourses.size() == 0)
+            throw new OperationCannotBePerformedException("Для даного студента відсутні задані вибіркові дисципліни");
+
+        return selectiveCourses;
+    }
+
+    private SelectiveCoursesStudentDegree enrollStudentDegreeInSelectiveCourses(List<SelectiveCourse> selectiveCourses, StudentDegree studentDegree) {
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegreesForSave = new ArrayList();
 
         for (SelectiveCourse selectiveCourse : selectiveCourses) {

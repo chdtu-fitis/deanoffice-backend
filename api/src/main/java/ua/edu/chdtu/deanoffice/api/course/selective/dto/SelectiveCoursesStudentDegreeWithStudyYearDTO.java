@@ -6,4 +6,3 @@ import lombok.Data;
 public class SelectiveCoursesStudentDegreeWithStudyYearDTO extends SelectiveCoursesStudentDegreeWriteDTO {
     private int studyYear;
 }
-

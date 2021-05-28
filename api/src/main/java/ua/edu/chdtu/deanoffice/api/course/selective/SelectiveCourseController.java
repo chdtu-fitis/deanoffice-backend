@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseStudentDegreesDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeExpellingDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeIdDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
@@ -40,6 +41,7 @@ import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.FieldOfKnowledgeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
 
@@ -466,18 +468,24 @@ public class SelectiveCourseController {
     }
 
     @PatchMapping("/expelling")
-    public ResponseEntity expelStudentDegreeFromSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentExpellingFromSelectiveCoursesDTO) {
-        if (studentExpellingFromSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> expelStudentDegreeFromSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeExpellingDTO selectiveCoursesStudentDegreeExpellingDTO)
+            throws OperationCannotBePerformedException {
+        if (selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCourses().size() == 0)
             return new ResponseEntity("Відсутні дисципліни для відрахування", HttpStatus.UNPROCESSABLE_ENTITY);
-        selectiveCoursesStudentDegreesService.expelStudentDegreeFromSelectiveCourses(
-                studentExpellingFromSelectiveCoursesDTO.getStudyYear(),
-                studentExpellingFromSelectiveCoursesDTO.getStudentDegree().getId(),
-                studentExpellingFromSelectiveCoursesDTO.getSelectiveCourses());
-        return new ResponseEntity(HttpStatus.OK);
+        if (selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCoursesInsteadOfExpelled().size() == 0)
+            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
+        SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = selectiveCoursesStudentDegreesService.expelStudentDegreeFromSelectiveCourses(
+                selectiveCoursesStudentDegreeExpellingDTO.getStudyYear(),
+                selectiveCoursesStudentDegreeExpellingDTO.getStudentDegree().getId(),
+                selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCourses(),
+                selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCoursesInsteadOfExpelled());
+        return ResponseEntity.ok(map(selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO.class));
     }
 
     @PostMapping("/enrolling")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO) {
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO)
+            throws OperationCannotBePerformedException {
+
         if (studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
             return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
         return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.enrollStudentInSelectiveCourses(
