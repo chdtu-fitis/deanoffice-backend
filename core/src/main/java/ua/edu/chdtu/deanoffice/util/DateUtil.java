@@ -11,6 +11,13 @@ public class DateUtil {
         return String.valueOf(calendar.get(Calendar.YEAR));
     }
 
+    public static int getYearInt(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        int year = calendar.get(Calendar.YEAR);
+        return year;
+    }
+
     public static String getMonth(Date date) {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
@@ -34,4 +41,12 @@ public class DateUtil {
                 makeFormat(calendar.get(Calendar.MONTH) + 1), calendar.get(Calendar.YEAR));
     }
 
+    public static Date setDateHours(Date date, int hours, int minutes) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, hours);
+        calendar.set(Calendar.MINUTE, minutes);
+        date = calendar.getTime();
+        return date;
+    }
 }
