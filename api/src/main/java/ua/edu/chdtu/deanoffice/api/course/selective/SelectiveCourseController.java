@@ -9,7 +9,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseStudentDegreesDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeExpellingDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeSubstitutionDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeIdDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
@@ -467,18 +467,18 @@ public class SelectiveCourseController {
                 getSelectiveCoursesStudentDegreesByStudentDegreeIds(all, studyYear, studentDegreeIds), SelectiveCoursesStudentDegreeDTO.class));
     }
 
-    @PatchMapping("/expelling")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> expelStudentDegreeFromSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeExpellingDTO selectiveCoursesStudentDegreeExpellingDTO)
+    @PatchMapping("/substitution")
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> substituteSelectiveCoursesForStudentDegree(@RequestBody SelectiveCoursesStudentDegreeSubstitutionDTO selectiveCoursesStudentDegreeSubstitutionDTO)
             throws OperationCannotBePerformedException {
-        if (selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCourses().size() == 0)
+        if (selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCourses().size() == 0)
             return new ResponseEntity("Відсутні дисципліни для відрахування", HttpStatus.UNPROCESSABLE_ENTITY);
-        if (selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCoursesInsteadOfExpelled().size() == 0)
+        if (selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesInsteadOfExpelled().size() == 0)
             return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
-        SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = selectiveCoursesStudentDegreesService.expelStudentDegreeFromSelectiveCourses(
-                selectiveCoursesStudentDegreeExpellingDTO.getStudyYear(),
-                selectiveCoursesStudentDegreeExpellingDTO.getStudentDegree().getId(),
-                selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCourses(),
-                selectiveCoursesStudentDegreeExpellingDTO.getSelectiveCoursesInsteadOfExpelled());
+        SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = selectiveCoursesStudentDegreesService.substituteSelectiveCoursesForStudentDegree(
+                selectiveCoursesStudentDegreeSubstitutionDTO.getStudyYear(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getStudentDegree().getId(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCourses(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesInsteadOfExpelled());
         return ResponseEntity.ok(map(selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO.class));
     }
 

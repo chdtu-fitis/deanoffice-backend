@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SelectiveCoursesStudentDegreeExpellingDTO extends SelectiveCoursesStudentDegreeWithStudyYearDTO {
+public class SelectiveCoursesStudentDegreeSubstitutionDTO extends SelectiveCoursesStudentDegreeWithStudyYearDTO {
     private List<Integer> selectiveCoursesInsteadOfExpelled;
 }

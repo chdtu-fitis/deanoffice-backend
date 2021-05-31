@@ -32,7 +32,7 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             "AND sc.degree.id = :degreeId " +
             "AND sc.course.semester IN (:semesters)" +
             "AND sc.id IN (:selectiveCourseIds)")
-    List<SelectiveCourse> findAllAvailableByStudyYearAndDegreeAndSemestersAndIds(
+    List<SelectiveCourse> findAvailableByStudyYearAndDegreeAndSemestersAndIds(
             @Param("studyYear") int studyYear,
             @Param("degreeId") int degreeId,
             @Param("semesters") List<Integer> semesters,
