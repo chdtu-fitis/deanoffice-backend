@@ -1,10 +1,22 @@
 package ua.edu.chdtu.deanoffice.api.course.selective.dto;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
+import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
-public class SelectiveCoursesStudentDegreeSubstitutionDTO extends SelectiveCoursesStudentDegreeWithStudyYearDTO {
-    private List<Integer> selectiveCoursesInsteadOfExpelled;
+public class SelectiveCoursesStudentDegreeSubstitutionDTO {
+    @NotNull
+    @NotEmpty
+    private List<Integer> selectiveCoursesIdsToAdd;
+    @NotNull
+    @NotEmpty
+    private List<Integer> selectiveCoursesIdsToDrop;
+    @NotNull
+    private ExistingIdDTO studentDegree;
+    @NotNull
+    private int studyYear;
 }

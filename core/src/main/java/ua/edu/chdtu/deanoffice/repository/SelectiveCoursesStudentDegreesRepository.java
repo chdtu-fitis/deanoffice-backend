@@ -54,19 +54,14 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     void setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(@Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
 
     @Modifying
-    @Query(value = "UPDATE selective_courses_student_degrees AS scsd SET active = false " +
+    @Query(value = "UPDATE selective_courses_student_degrees AS scsd SET active = :status " +
             "FROM selective_course AS sc, student_degree AS sd " +
             "WHERE sc.id = scsd.selective_course_id AND sd.id = scsd.student_degree_id " +
             "AND sd.id = :studentDegreeId " +
             "AND sc.study_year = :studyYear " +
             "AND sc.id IN (:selectiveCourseIds)", nativeQuery = true)
-    void setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(@Param("studyYear") int studyYear,
-                                                                                                     @Param("studentDegreeId") int studentDegreeId,
-                                                                                                     @Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
-
-    @Query("SELECT scsd.selectiveCourse FROM SelectiveCoursesStudentDegrees scsd " +
-            "WHERE scsd.studentDegree.id = :studentDegreeId " +
-            "AND scsd.selectiveCourse.id IN (:selectiveCourseIds)")
-    List<SelectiveCourse> findSelectiveCoursesByIdsAndStudentDegreeId(@Param("studentDegreeId") int studentDegreeId,
-                                                                      @Param("selectiveCourseIds") List<Integer> selectiveCourseIds);
+    void setSelectiveCoursesStudentDegreesStatusBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(@Param("studyYear") int studyYear,
+                                                                                                   @Param("studentDegreeId") int studentDegreeId,
+                                                                                                   @Param("selectiveCourseIds") List<Integer> selectiveCourseIds,
+                                                                                                   @Param("status") boolean status);
 }

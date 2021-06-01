@@ -300,9 +300,6 @@ public class SelectiveCourseController {
         if (studentDegree == null || !studentDegree.isActive()) {
             return new ResponseEntity("Неправильний ідентифікатор студента", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if (selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size() == 0) {
-            return new ResponseEntity("Не надіслано дані для збереження", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
 
         Date today = new Date();
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB =
@@ -468,17 +465,16 @@ public class SelectiveCourseController {
     }
 
     @PatchMapping("/substitution")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> substituteSelectiveCoursesForStudentDegree(@RequestBody SelectiveCoursesStudentDegreeSubstitutionDTO selectiveCoursesStudentDegreeSubstitutionDTO)
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> substituteSelectiveCoursesForStudentDegree(@RequestBody @Validated SelectiveCoursesStudentDegreeSubstitutionDTO selectiveCoursesStudentDegreeSubstitutionDTO)
             throws OperationCannotBePerformedException {
-        if (selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCourses().size() == 0)
-            return new ResponseEntity("Відсутні дисципліни для відрахування", HttpStatus.UNPROCESSABLE_ENTITY);
-        if (selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesInsteadOfExpelled().size() == 0)
-            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToAdd().size()
+                != selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToDrop().size())
+            return new ResponseEntity("Кількість дисциплін для запису та відрахування має бути однаковою", HttpStatus.BAD_REQUEST);
         SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = selectiveCoursesStudentDegreesService.substituteSelectiveCoursesForStudentDegree(
                 selectiveCoursesStudentDegreeSubstitutionDTO.getStudyYear(),
                 selectiveCoursesStudentDegreeSubstitutionDTO.getStudentDegree().getId(),
-                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCourses(),
-                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesInsteadOfExpelled());
+                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToAdd(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToDrop());
         return ResponseEntity.ok(map(selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO.class));
     }
 

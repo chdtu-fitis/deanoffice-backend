@@ -18,7 +18,6 @@ import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -191,31 +190,58 @@ public class SelectiveCoursesStudentDegreesService {
 
     @Transactional
     public SelectiveCoursesStudentDegree substituteSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId,
-                                                                                    List<Integer> selectiveCourseIdsForExpelling,
-                                                                                    List<Integer> selectiveCourseIdsForEnrolling) throws OperationCannotBePerformedException {
+                                                                                    List<Integer> selectiveCoursesIdsToAdd,
+                                                                                    List<Integer> selectiveCoursesIdsToDrop) throws OperationCannotBePerformedException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        List<SelectiveCourse> selectiveCoursesForEnrolling = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIdsForEnrolling);
-        List<SelectiveCourse> selectiveCoursesForExpelling = selectiveCoursesStudentDegreesRepository.
-                findSelectiveCoursesByIdsAndStudentDegreeId(studentDegreeId, selectiveCourseIdsForExpelling);
-        if (selectiveCoursesForEnrolling.size() != selectiveCoursesForExpelling.size())
+
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegreesFromDB = selectiveCoursesStudentDegreesRepository
+                .findAll(SelectiveCoursesStudentDegreeSpecification.getSelectiveCoursesStudentDegree(true, studyYear, Arrays.asList(studentDegreeId)));
+
+        List<SelectiveCourse> selectiveCoursesToAdd = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCoursesIdsToAdd);
+        List<SelectiveCourse> selectiveCoursesToDrop = selectiveCoursesStudentDegreesFromDB.stream()
+                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
+                .filter(selectiveCourse -> selectiveCoursesIdsToDrop.contains(selectiveCourse.getId()))
+                .collect(Collectors.toList());
+
+        if (selectiveCoursesToAdd.size() != selectiveCoursesToDrop.size())
             throw new OperationCannotBePerformedException("Кількість вибіркових дисциплін на відрахування не відповідає кількості на запис");
 
-        List<Integer> semestersForEnrolling = getSelectiveCoursesSemesters(selectiveCoursesForEnrolling);
-        List<Integer> semestersForExpelling = getSelectiveCoursesSemesters(selectiveCoursesForExpelling);
-        if (!semestersForEnrolling.equals(semestersForExpelling))
+        List<Integer> semestersToAdd = getSelectiveCoursesSemesters(selectiveCoursesToAdd);
+        List<Integer> semestersToDrop = getSelectiveCoursesSemesters(selectiveCoursesToDrop);
+        if (!semestersToAdd.equals(semestersToDrop))
             throw new OperationCannotBePerformedException("Семестри вибіркових дисциплін на відрахування та запис не збігаються");
 
-        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCourseIdsForExpelling);
+        List<Integer> selectiveCoursesToActivate = new ArrayList<>();
+        for (SelectiveCoursesStudentDegrees selectiveCoursesForStudentDegree : selectiveCoursesStudentDegreesFromDB) {
+            for (int selectiveCourseIdToAdd : selectiveCoursesIdsToAdd) {
+                if (selectiveCoursesForStudentDegree.getSelectiveCourse().getId() == selectiveCourseIdToAdd) {
+                    if (selectiveCoursesForStudentDegree.isActive())
+                        throw new OperationCannotBePerformedException("Не можна записати студента на дисципліну, на яку він уже записаний");
+                    selectiveCoursesToAdd.remove(selectiveCoursesForStudentDegree.getSelectiveCourse());
+                    selectiveCoursesToActivate.add(selectiveCoursesForStudentDegree.getSelectiveCourse().getId());
+                }
+            }
+        }
 
-        List<SelectiveCourse> selectiveCoursesAfterSave = create(createSelectiveCoursesStudentDegreesList(selectiveCoursesForEnrolling, studentDegree)).stream()
+        for (SelectiveCoursesStudentDegrees selectiveCoursesForStudentDegree : selectiveCoursesStudentDegreesFromDB) {
+            for (int selectiveCourseIdToDrop : selectiveCoursesIdsToDrop) {
+                if (selectiveCoursesForStudentDegree.getSelectiveCourse().getId() == selectiveCourseIdToDrop && !selectiveCoursesForStudentDegree.isActive())
+                    throw new OperationCannotBePerformedException("Не можна відрахувати студента з дисципліни, з якої він уже відрахований");
+            }
+        }
+
+        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesStatusBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCoursesIdsToDrop, false);
+        if (selectiveCoursesToActivate.size() != 0)
+            selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesStatusBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCoursesToActivate, true);
+
+        List<SelectiveCourse> selectiveCoursesAfterSave = create(createSelectiveCoursesStudentDegreesList(selectiveCoursesToAdd, studentDegree)).stream()
                 .map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
 
         return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
     }
 
     private List<Integer> getSelectiveCoursesSemesters(List<SelectiveCourse> selectiveCourses) {
-        List<Integer> semesters = selectiveCourses.stream().map(selectiveCourse -> selectiveCourse.getCourse().getSemester()).collect(Collectors.toList());
-        Collections.sort(semesters);
+        List<Integer> semesters = selectiveCourses.stream().map(selectiveCourse -> selectiveCourse.getCourse().getSemester()).sorted().collect(Collectors.toList());
         return semesters;
     }
 
