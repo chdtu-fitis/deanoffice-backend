@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import javax.transaction.Transactional;
@@ -29,15 +30,21 @@ public class SelectiveCoursesStudentDegreesService {
     private SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository;
     private SelectiveCourseRepository selectiveCourseRepository;
     private CurrentYearService currentYearService;
+    private StudentDegreeService studentDegreeService;
+    private SelectiveCourseService selectiveCourseService;
 
     public SelectiveCoursesStudentDegreesService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
                                                  SelectiveCoursesYearParametersRepository selectiveCoursesYearParametersRepository,
                                                  CurrentYearService currentYearService,
-                                                 SelectiveCourseRepository selectiveCourseRepository) {
+                                                 SelectiveCourseRepository selectiveCourseRepository,
+                                                 SelectiveCourseService selectiveCourseService,
+                                                 StudentDegreeService studentDegreeService) {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
         this.selectiveCoursesYearParametersRepository = selectiveCoursesYearParametersRepository;
         this.currentYearService = currentYearService;
         this.selectiveCourseRepository = selectiveCourseRepository;
+        this.studentDegreeService = studentDegreeService;
+        this.selectiveCourseService = selectiveCourseService;
     }
 
     @Transactional
@@ -172,14 +179,119 @@ public class SelectiveCoursesStudentDegreesService {
                     .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getStudentDegree));
 
             for (Map.Entry<StudentDegree, List<SelectiveCoursesStudentDegrees>> entry : selectiveCoursesStudentDegreesFromDB.entrySet()) {
-                SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = new SelectiveCoursesStudentDegree();
-                selectiveCoursesStudentDegree.setStudentDegree(entry.getKey());
                 List<SelectiveCourse> selectiveCourses = entry.getValue().stream().map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
-                selectiveCoursesStudentDegree.setSelectiveCourses(selectiveCourses);
+                SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = new SelectiveCoursesStudentDegree(entry.getKey(), selectiveCourses);
                 selectiveCoursesForStudentDegrees.add(selectiveCoursesStudentDegree);
             }
         }
 
         return selectiveCoursesForStudentDegrees;
+    }
+
+    @Transactional
+    public SelectiveCoursesStudentDegree substituteSelectiveCoursesForStudentDegree(int studyYear, int studentDegreeId,
+                                                                                    List<Integer> selectiveCoursesIdsToAdd,
+                                                                                    List<Integer> selectiveCoursesIdsToDrop) throws OperationCannotBePerformedException {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegreesFromDB = selectiveCoursesStudentDegreesRepository
+                .findAll(SelectiveCoursesStudentDegreeSpecification.getSelectiveCoursesStudentDegree(true, studyYear, Arrays.asList(studentDegreeId)));
+
+        List<SelectiveCourse> selectiveCoursesToAdd = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCoursesIdsToAdd);
+        List<SelectiveCourse> selectiveCoursesToDrop = selectiveCoursesStudentDegreesFromDB.stream()
+                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
+                .filter(selectiveCourse -> selectiveCoursesIdsToDrop.contains(selectiveCourse.getId()))
+                .collect(Collectors.toList());
+
+        if (selectiveCoursesToAdd.size() != selectiveCoursesToDrop.size())
+            throw new OperationCannotBePerformedException("Кількість вибіркових дисциплін на відрахування не відповідає кількості на запис");
+
+        List<Integer> semestersToAdd = getSelectiveCoursesSemesters(selectiveCoursesToAdd);
+        List<Integer> semestersToDrop = getSelectiveCoursesSemesters(selectiveCoursesToDrop);
+        if (!semestersToAdd.equals(semestersToDrop))
+            throw new OperationCannotBePerformedException("Семестри вибіркових дисциплін на відрахування та запис не збігаються");
+
+        List<Integer> selectiveCoursesToActivate = new ArrayList<>();
+        for (SelectiveCoursesStudentDegrees selectiveCoursesForStudentDegree : selectiveCoursesStudentDegreesFromDB) {
+            for (int selectiveCourseIdToAdd : selectiveCoursesIdsToAdd) {
+                if (selectiveCoursesForStudentDegree.getSelectiveCourse().getId() == selectiveCourseIdToAdd) {
+                    if (selectiveCoursesForStudentDegree.isActive())
+                        throw new OperationCannotBePerformedException("Не можна записати студента на дисципліну, на яку він уже записаний");
+                    selectiveCoursesToAdd.remove(selectiveCoursesForStudentDegree.getSelectiveCourse());
+                    selectiveCoursesToActivate.add(selectiveCoursesForStudentDegree.getSelectiveCourse().getId());
+                }
+            }
+        }
+
+        for (SelectiveCoursesStudentDegrees selectiveCoursesForStudentDegree : selectiveCoursesStudentDegreesFromDB) {
+            for (int selectiveCourseIdToDrop : selectiveCoursesIdsToDrop) {
+                if (selectiveCoursesForStudentDegree.getSelectiveCourse().getId() == selectiveCourseIdToDrop && !selectiveCoursesForStudentDegree.isActive())
+                    throw new OperationCannotBePerformedException("Не можна відрахувати студента з дисципліни, з якої він уже відрахований");
+            }
+        }
+
+        selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesStatusBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCoursesIdsToDrop, false);
+        if (selectiveCoursesToActivate.size() != 0)
+            selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesStatusBySelectiveCourseIdsAndStudentDegreeIdAndStudyYear(studyYear, studentDegreeId, selectiveCoursesToActivate, true);
+
+        List<SelectiveCourse> selectiveCoursesAfterSave = create(createSelectiveCoursesStudentDegreesList(selectiveCoursesToAdd, studentDegree)).stream()
+                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
+
+        return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
+    }
+
+    private List<Integer> getSelectiveCoursesSemesters(List<SelectiveCourse> selectiveCourses) {
+        List<Integer> semesters = selectiveCourses.stream().map(selectiveCourse -> selectiveCourse.getCourse().getSemester()).sorted().collect(Collectors.toList());
+        return semesters;
+    }
+
+    public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds)
+            throws OperationCannotBePerformedException {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        List<SelectiveCourse> selectiveCourses = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIds);
+
+        List<SelectiveCourse> activeStudentDegreeSelectiveCoursesFromDB =
+                getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, studyYear, studentDegreeId).getSelectiveCourses();
+        if (activeStudentDegreeSelectiveCoursesFromDB == null)
+            activeStudentDegreeSelectiveCoursesFromDB = selectiveCourses;
+        else
+            activeStudentDegreeSelectiveCoursesFromDB.addAll(selectiveCourses);
+
+        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, activeStudentDegreeSelectiveCoursesFromDB))
+            throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
+
+        List<SelectiveCourse> selectiveCoursesAfterSave = create(createSelectiveCoursesStudentDegreesList(selectiveCourses, studentDegree)).stream()
+                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
+
+        return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
+    }
+
+    private List<SelectiveCourse> getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(int studyYear, StudentDegree studentDegree, List<Integer> selectiveCourseIds)
+            throws OperationCannotBePerformedException {
+        if (studentDegree == null)
+            throw new OperationCannotBePerformedException("Не існує student degree за таким id");
+
+        int studentYear = studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+        List<Integer> semesters = Arrays.asList(studentYear * 2 - 1, studentYear * 2);
+
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.
+                findAvailableByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree.getSpecialization().getDegree().getId(), semesters, selectiveCourseIds);
+        if (selectiveCourses.size() == 0)
+            throw new OperationCannotBePerformedException("Для даного студента відсутні задані вибіркові дисципліни");
+
+        return selectiveCourses;
+    }
+
+    private List<SelectiveCoursesStudentDegrees> createSelectiveCoursesStudentDegreesList(List<SelectiveCourse> selectiveCourses, StudentDegree studentDegree) {
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegreesList = new ArrayList();
+
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees = new SelectiveCoursesStudentDegrees();
+            selectiveCoursesStudentDegrees.setStudentDegree(studentDegree);
+            selectiveCoursesStudentDegrees.setSelectiveCourse(selectiveCourse);
+            selectiveCoursesStudentDegreesList.add(selectiveCoursesStudentDegrees);
+        }
+
+        return selectiveCoursesStudentDegreesList;
     }
 }

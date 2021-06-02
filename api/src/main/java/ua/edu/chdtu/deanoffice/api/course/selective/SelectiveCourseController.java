@@ -9,11 +9,13 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseStudentDegreesDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeSubstitutionDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeIdDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionRulesDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWithStudyYearDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -301,9 +303,6 @@ public class SelectiveCourseController {
         if (studentDegree == null || !studentDegree.isActive()) {
             return new ResponseEntity("Неправильний ідентифікатор студента", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if (selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size() == 0) {
-            return new ResponseEntity("Не надіслано дані для збереження", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
 
         Date today = new Date();
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB =
@@ -469,5 +468,31 @@ public class SelectiveCourseController {
         List<SelectiveCoursesStudentDegree> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService
             .getSelectiveCoursesStudentDegreesByStudentDegreeIds(all, studyYear, studentDegreeIds);
         return ResponseEntity.ok(map(selectiveCoursesStudentDegrees, SelectiveCoursesStudentDegreeDTO.class));
+    }
+
+    @PatchMapping("/substitution")
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> substituteSelectiveCoursesForStudentDegree(@RequestBody @Validated SelectiveCoursesStudentDegreeSubstitutionDTO selectiveCoursesStudentDegreeSubstitutionDTO)
+            throws OperationCannotBePerformedException {
+        if (selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToAdd().size()
+                != selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToDrop().size())
+            return new ResponseEntity("Кількість дисциплін для запису та відрахування має бути однаковою", HttpStatus.BAD_REQUEST);
+        SelectiveCoursesStudentDegree selectiveCoursesStudentDegree = selectiveCoursesStudentDegreesService.substituteSelectiveCoursesForStudentDegree(
+                selectiveCoursesStudentDegreeSubstitutionDTO.getStudyYear(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getStudentDegree().getId(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToAdd(),
+                selectiveCoursesStudentDegreeSubstitutionDTO.getSelectiveCoursesIdsToDrop());
+        return ResponseEntity.ok(map(selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO.class));
+    }
+
+    @PostMapping("/enrolling")
+    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO)
+            throws OperationCannotBePerformedException {
+
+        if (studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
+            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
+        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.enrollStudentInSelectiveCourses(
+                studentEnrollingInSelectiveCoursesDTO.getStudyYear(),
+                studentEnrollingInSelectiveCoursesDTO.getStudentDegree().getId(),
+                studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
     }
 }
