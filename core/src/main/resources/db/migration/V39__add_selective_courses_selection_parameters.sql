@@ -1,9 +1,9 @@
 CREATE TABLE selective_courses_year_parameters(
     id SERIAL PRIMARY KEY,
-    first_round_start_date DATE NOT NULL,
-    first_round_end_date DATE NOT NULL,
-    second_round_start_date DATE NOT NULL,
-    second_round_end_date DATE NOT NULL,
+    first_round_start_date TIMESTAMP NOT NULL,
+    first_round_end_date TIMESTAMP NOT NULL,
+    second_round_start_date TIMESTAMP NOT NULL,
+    second_round_end_date TIMESTAMP NOT NULL,
     study_year INTEGER NOT NULL,
     bachelor_general_min_students_count INTEGER NOT NULL,
     bachelor_professional_min_students_count INTEGER NOT NULL,

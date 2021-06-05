@@ -8,13 +8,13 @@ import java.util.Date;
 @Data
 public class BaseSelectiveCoursesYearParametersDTO {
     private int id;
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private Date firstRoundStartDate;
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private Date firstRoundEndDate;
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private Date secondRoundStartDate;
-    @JsonFormat(pattern="dd-MM-yyyy")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private Date secondRoundEndDate;
     private int studyYear;
 }

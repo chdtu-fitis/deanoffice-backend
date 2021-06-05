@@ -6,11 +6,12 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.List;
 import java.util.ArrayList;
+
+import static ua.edu.chdtu.deanoffice.util.DateUtil.getYearInt;
+import static ua.edu.chdtu.deanoffice.util.DateUtil.setDateHours;
 
 @Service
 public class SelectiveCoursesYearParametersService {
@@ -31,17 +32,21 @@ public class SelectiveCoursesYearParametersService {
     public List<SelectiveCoursesYearParameters> create(List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersList) throws OperationCannotBePerformedException {
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersAfterSave = new ArrayList<>();
         for (SelectiveCoursesYearParameters selectiveCoursesYearParameters : selectiveCoursesYearParametersList) {
-            Date firstRoundStartDate = selectiveCoursesYearParameters.getFirstRoundStartDate();
-            Date firstRoundEndDate = selectiveCoursesYearParameters.getFirstRoundEndDate();
-            Date secondRoundStartDate = selectiveCoursesYearParameters.getSecondRoundStartDate();
-            Date secondRoundEndDate = selectiveCoursesYearParameters.getSecondRoundEndDate();
+            Date firstRoundStartDate = setDateHours(selectiveCoursesYearParameters.getFirstRoundStartDate(), 0, 1);
+            Date firstRoundEndDate = setDateHours(selectiveCoursesYearParameters.getFirstRoundEndDate(), 23, 59);
+            Date secondRoundStartDate = setDateHours(selectiveCoursesYearParameters.getSecondRoundStartDate(), 0, 1);
+            Date secondRoundEndDate = setDateHours(selectiveCoursesYearParameters.getSecondRoundEndDate(), 23, 59);
 
-            int firstRoundStartDateYear = getDateYear(firstRoundStartDate);
-            int firstRoundEndDateYear = getDateYear(firstRoundEndDate);
-            int secondRoundStartDateYear = getDateYear(secondRoundStartDate);
-            int secondRoundEndDateYear = getDateYear(secondRoundEndDate);
+            int firstRoundStartDateYear = getYearInt(firstRoundStartDate);
+            int firstRoundEndDateYear = getYearInt(firstRoundEndDate);
+            int secondRoundStartDateYear = getYearInt(secondRoundStartDate);
+            int secondRoundEndDateYear = getYearInt(secondRoundEndDate);
 
             selectiveCoursesYearParameters.setStudyYear(currentYearService.getYear());
+            selectiveCoursesYearParameters.setFirstRoundStartDate(firstRoundStartDate);
+            selectiveCoursesYearParameters.setFirstRoundEndDate(firstRoundEndDate);
+            selectiveCoursesYearParameters.setSecondRoundStartDate(secondRoundStartDate);
+            selectiveCoursesYearParameters.setSecondRoundEndDate(secondRoundEndDate);
 
             if (!(firstRoundStartDateYear == firstRoundEndDateYear
                     && firstRoundStartDateYear == secondRoundStartDateYear
@@ -56,13 +61,5 @@ public class SelectiveCoursesYearParametersService {
         }
 
         return selectiveCoursesYearParametersAfterSave;
-    }
-
-    private int getDateYear(Date targetDate) {
-        Date date = targetDate;
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Kiev"));
-        cal.setTime(date);
-        int year = cal.get(Calendar.YEAR);
-        return year;
     }
 }

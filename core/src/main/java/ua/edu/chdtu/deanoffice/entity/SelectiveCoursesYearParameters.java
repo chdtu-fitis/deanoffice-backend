@@ -13,13 +13,13 @@ import java.util.Date;
 @Entity
 @Data
 public class SelectiveCoursesYearParameters extends BaseEntity {
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date firstRoundStartDate;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date firstRoundEndDate;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date secondRoundStartDate;
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date secondRoundEndDate;
     private int studyYear;
     private int bachelorGeneralMinStudentsCount;
