@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class SelectiveCoursesYearParametersService {
         return selectiveCoursesYearParametersRepository.findAllByYear(year);
     }
 
+    @Transactional
     public List<SelectiveCoursesYearParameters> create(List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersList) throws OperationCannotBePerformedException {
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersAfterSave = new ArrayList<>();
         for (SelectiveCoursesYearParameters selectiveCoursesYearParameters : selectiveCoursesYearParametersList) {

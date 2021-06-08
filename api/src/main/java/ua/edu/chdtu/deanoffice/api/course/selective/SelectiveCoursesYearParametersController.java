@@ -56,7 +56,7 @@ public class SelectiveCoursesYearParametersController {
             SelectiveCoursesYearParametersDTO selectiveCoursesYearParametersDTO = new SelectiveCoursesYearParametersDTO();
             List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB = selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(year);
 
-            if (selectiveCoursesYearParametersFromDB == null)
+            if (selectiveCoursesYearParametersFromDB.size() == 0)
                 return ResponseEntity.ok().build();
 
             PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);

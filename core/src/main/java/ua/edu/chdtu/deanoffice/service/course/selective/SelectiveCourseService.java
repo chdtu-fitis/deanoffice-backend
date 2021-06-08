@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
-import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.PERIOD_CASES;
 
 @Service
 public class SelectiveCourseService {
@@ -35,9 +34,9 @@ public class SelectiveCourseService {
             studyYear = thisYear ? currentYearService.getYear() : currentYearService.getYear() + 1;
         }
         if (all)
-            return selectiveCourseRepository.findAllByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+            return selectiveCourseRepository.findByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
         else
-            return selectiveCourseRepository.findAllAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+            return selectiveCourseRepository.findAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
     }
 
     public SelectiveCourse getById(Integer id) {
@@ -101,13 +100,9 @@ public class SelectiveCourseService {
         int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
                 studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
 
-        for (PeriodCase periodCase : PERIOD_CASES) {
-            if ((studentDegree.getSpecialization().getDegree().getId() == periodCase.getDegreeId()
-                    && studentDegreeYear == periodCase.getYear())
-                    && studentDegree.getTuitionTerm() == periodCase.getTuitionTerm())
-                return periodCase.getPeriodCase();
-        }
-
-        return null;
+        if (studentDegreeYear < studentDegree.getStudentGroup().getRealBeginYear())
+            return PeriodCaseEnum.LATE;
+        else
+            return PeriodCaseEnum.EARLY;
     }
 }

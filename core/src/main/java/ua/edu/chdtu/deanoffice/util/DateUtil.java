@@ -49,4 +49,8 @@ public class DateUtil {
         date = calendar.getTime();
         return date;
     }
+
+    public static Date getTodayDate() {
+        return new Date();
+    }
 }

@@ -44,6 +44,7 @@ import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.SelectiveCoursesYearParametersService;
+import ua.edu.chdtu.deanoffice.util.DateUtil;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -304,13 +305,13 @@ public class SelectiveCourseController {
             return new ResponseEntity("Неправильний ідентифікатор студента", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        Date today = new Date();
+        Date today = DateUtil.getTodayDate();
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB =
                     selectiveCoursesYearParametersService.getSelectiveCoursesYearParametersByYear(selectiveCoursesRegistrationYear);
 
         PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
         if (periodCase == null)
-            return new ResponseEntity("Даний студент не може реєструватись на вибіркові дисципліни" ,HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity("Даний студент не може реєструватись на вибіркові дисципліни", HttpStatus.UNPROCESSABLE_ENTITY);
 
         SelectiveCoursesYearParameters selectiveCoursesYearParameters = selectiveCoursesYearParametersFromDB.stream()
                 .filter(elem -> elem.getPeriodCase() == periodCase)
@@ -410,8 +411,9 @@ public class SelectiveCourseController {
     @GetMapping("/students-count")
     public ResponseEntity<List<SelectiveCourseWithStudentsCountDTO>> getSelectiveCoursesWithStudentsCount(@RequestParam @NotNull @Min(2010) int studyYear,
                                                                                                           @RequestParam @NotNull int semester,
-                                                                                                          @RequestParam @NotNull int degreeId) {
-        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester, degreeId);
+                                                                                                          @RequestParam @NotNull int degreeId,
+                                                                                                          @RequestParam(required = false) boolean all) {
+        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester, degreeId, all);
         List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = selectiveCoursesStudentDegrees.entrySet().stream()
                 .map(entry -> {
                     SelectiveCourseWithStudentsCountDTO selectiveCourseWithStudentsCountDTO = map(entry.getKey(), SelectiveCourseWithStudentsCountDTO.class);
@@ -442,14 +444,6 @@ public class SelectiveCourseController {
 
         int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
                 studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
-
-        PeriodCaseEnum periodCase = selectiveCourseService.getPeriodCaseByStudentDegree(studentDegree);
-        if (periodCase == null) {
-            return new ResponseEntity("Для даного студента відсутні правила вибору вибіркових дисциплін" ,HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-
-        if (periodCase == PeriodCaseEnum.LATE)
-            studentDegreeYear -= 1;
 
         List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = new ArrayList<>();
 
