@@ -13,6 +13,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesReposito
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesYearParametersRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.util.DateUtil;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import javax.transaction.Transactional;
@@ -66,8 +67,13 @@ public class SelectiveCoursesStudentDegreesService {
         return selectiveCoursesStudentDegreesRepository.findByStudentDegreeAndSemester(studentDegreeId, semester);
     }
 
-    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester, int degreeId) {
-        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findAllAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester, int degreeId, boolean all) {
+        List<SelectiveCourse> selectiveCourses;
+        if (all)
+            selectiveCourses = selectiveCourseRepository.findByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        else
+            selectiveCourses = selectiveCourseRepository.findAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemesterAndDegree(studyYear, semester, degreeId);
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));
@@ -88,7 +94,7 @@ public class SelectiveCoursesStudentDegreesService {
             throw new OperationCannotBePerformedException("Параметри вибору вибіркових дисциплін за вказаним роком відсутні");
 
         SelectiveCoursesYearParameters selectiveCoursesYearParametersByDate = null;
-        Date today = new Date();
+        Date today = DateUtil.getTodayDate();
 
         for (SelectiveCoursesYearParameters selectiveCoursesYearParameters : selectiveCoursesYearParametersFromDB) {
             if (today.after(selectiveCoursesYearParameters.getFirstRoundEndDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundStartDate()))
@@ -98,7 +104,7 @@ public class SelectiveCoursesStudentDegreesService {
         if (selectiveCoursesYearParametersByDate == null)
             throw new OperationCannotBePerformedException("Не можна проводити дискваліфікацію в даний проміжок часу");
 
-        Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear + 1, semester, degreeId);
+        Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear + 1, semester, degreeId, false);
         List<Integer> selectiveCourseIds = new ArrayList<>();
 
         Map<SelectiveCourse, Long> generalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
