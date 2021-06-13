@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
@@ -68,12 +69,18 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester, int degreeId, boolean all) {
-        List<SelectiveCourse> selectiveCourses;
-        if (all)
-            selectiveCourses = selectiveCourseRepository.findByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
-        else
-            selectiveCourses = selectiveCourseRepository.findAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, false, all);
+        return calculateSelectiveCoursesStudentsCount(studyYear, semester, degreeId, selectiveCourses);
+    }
 
+    public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCountByStudentDegree(int studyYear, int semester, int degreeId, boolean all, int studentDegreeId)
+            throws NotFoundException {
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudentDegree(studyYear, degreeId, semester, false, all, studentDegreeId);
+
+        return calculateSelectiveCoursesStudentsCount(studyYear, semester, degreeId, selectiveCourses);
+    }
+
+    private Map<SelectiveCourse, Long> calculateSelectiveCoursesStudentsCount(int studyYear, int semester, int degreeId, List<SelectiveCourse> selectiveCourses) {
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemesterAndDegree(studyYear, semester, degreeId);
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));

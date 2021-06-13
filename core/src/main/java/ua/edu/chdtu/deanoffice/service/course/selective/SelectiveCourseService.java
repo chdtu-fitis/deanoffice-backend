@@ -6,6 +6,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
@@ -37,6 +38,23 @@ public class SelectiveCourseService {
             return selectiveCourseRepository.findByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
         else
             return selectiveCourseRepository.findAvailableByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester);
+    }
+
+    public List<SelectiveCourse> getSelectiveCoursesByStudentDegree(Integer studyYear, int degreeId, int semester, boolean thisYear, boolean all, int studentDegreeId)
+            throws NotFoundException {
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        if (studentDegree == null)
+            throw new NotFoundException("Не існує student degree з таким id");
+
+        if (studyYear == null) {
+            studyYear = thisYear ? currentYearService.getYear() : currentYearService.getYear() + 1;
+        }
+
+        int fieldOfKnowledgeId = studentDegree.getSpecialization().getSpeciality().getFieldOfKnowledge().getId();
+        if (all)
+            return selectiveCourseRepository.findByStudyYearAndDegreeAndSemesterAndFk(studyYear, degreeId, semester, fieldOfKnowledgeId);
+        else
+            return selectiveCourseRepository.findAvailableByStudyYearAndDegreeAndSemesterAndFk(studyYear, degreeId, semester, fieldOfKnowledgeId);
     }
 
     public SelectiveCourse getById(Integer id) {
