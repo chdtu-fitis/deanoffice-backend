@@ -31,6 +31,37 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             @Param("semester") int semester
     );
 
+    @Query("SELECT sc FROM SelectiveCourse AS sc " +
+            "JOIN sc.course AS c " +
+            "LEFT JOIN sc.fieldOfKnowledge AS fk " +
+            "WHERE sc.available = true " +
+            "AND sc.studyYear = :studyYear " +
+            "AND sc.degree.id = :degreeId " +
+            "AND sc.course.semester = :semester " +
+            "AND (fk.id = :fieldOfKnowledgeId OR fk.id IS NULL) " +
+            "ORDER BY sc.course.courseName.name")
+    List<SelectiveCourse> findAvailableByStudyYearAndDegreeAndSemesterAndFk(
+            @Param("studyYear") Integer studyYear,
+            @Param("degreeId") int degreeId,
+            @Param("semester") int semester,
+            @Param("fieldOfKnowledgeId") int fieldOfKnowledgeId
+    );
+
+    @Query("SELECT sc FROM SelectiveCourse AS sc " +
+            "JOIN sc.course AS c " +
+            "LEFT JOIN sc.fieldOfKnowledge AS fk " +
+            "WHERE sc.studyYear = :studyYear " +
+            "AND sc.degree.id = :degreeId " +
+            "AND sc.course.semester = :semester " +
+            "AND (fk.id = :fieldOfKnowledgeId OR fk.id IS NULL) " +
+            "ORDER BY sc.course.courseName.name")
+    List<SelectiveCourse> findByStudyYearAndDegreeAndSemesterAndFk(
+            @Param("studyYear") Integer studyYear,
+            @Param("degreeId") int degreeId,
+            @Param("semester") int semester,
+            @Param("fieldOfKnowledgeId") int fieldOfKnowledgeId
+    );
+
     List<SelectiveCourse> findByIdIn(List<Integer> ids);
 
     @Modifying

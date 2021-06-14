@@ -99,9 +99,15 @@ public class SelectiveCourseController {
                                                                                       @RequestParam int degreeId,
                                                                                       @RequestParam int semester,
                                                                                       @RequestParam(required = false) boolean thisYear,
-                                                                                      @RequestParam(required = false) boolean all) {
+                                                                                      @RequestParam(required = false) boolean all,
+                                                                                      @RequestParam(required = false) Integer studentDegreeId) throws NotFoundException {
+        List<SelectiveCourse> selectiveCourses;
+        if (studentDegreeId != null)
+            selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudentDegree(studyYear, degreeId, semester, thisYear, all, studentDegreeId);
+        else
+            selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, thisYear, all);
+
         List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
-        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, thisYear, all);
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
             setFieldsOfKnowledge(selectiveCourse, selectiveCourseDTO);
@@ -412,8 +418,15 @@ public class SelectiveCourseController {
     public ResponseEntity<List<SelectiveCourseWithStudentsCountDTO>> getSelectiveCoursesWithStudentsCount(@RequestParam @NotNull @Min(2010) int studyYear,
                                                                                                           @RequestParam @NotNull int semester,
                                                                                                           @RequestParam @NotNull int degreeId,
-                                                                                                          @RequestParam(required = false) boolean all) {
-        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester, degreeId, all);
+                                                                                                          @RequestParam(required = false) boolean all,
+                                                                                                          @RequestParam(required = false) Integer studentDegreeId)
+            throws NotFoundException {
+        Map<SelectiveCourse, Long> selectiveCoursesStudentDegrees;
+        if (studentDegreeId != null)
+            selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCountByStudentDegree(studyYear, semester, degreeId, all, studentDegreeId);
+        else
+            selectiveCoursesStudentDegrees = selectiveCoursesStudentDegreesService.getSelectiveCoursesWithStudentsCount(studyYear, semester, degreeId, all);
+
         List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = selectiveCoursesStudentDegrees.entrySet().stream()
                 .map(entry -> {
                     SelectiveCourseWithStudentsCountDTO selectiveCourseWithStudentsCountDTO = map(entry.getKey(), SelectiveCourseWithStudentsCountDTO.class);
