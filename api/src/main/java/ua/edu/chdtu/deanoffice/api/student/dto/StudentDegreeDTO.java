@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.group.dto.StudentGroupBasicDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.entity.*;
 
@@ -19,7 +20,7 @@ public class StudentDegreeDTO {
     @JsonView(StudentView.Simple.class)
     private StudentDTO student;
     @JsonView(StudentView.SimpleAndDegrees.class)
-    private NamedDTO studentGroup;
+    private StudentGroupBasicDTO studentGroup;
     @JsonView(StudentView.SimpleAndDegrees.class)
     private String recordBookNumber;
     @JsonView(StudentView.DetailAndDegree.class)
