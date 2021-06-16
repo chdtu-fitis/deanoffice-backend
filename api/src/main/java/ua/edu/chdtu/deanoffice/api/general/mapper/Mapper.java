@@ -61,9 +61,19 @@ public class Mapper {
         return map(source, destination, STRICT_MATCHING_STRATEGY);
     }
 
+    public static void mapWithoutNullValues(Object source, Object destination) {
+        createModelMapperWithSkipNullEnabled().map(source, destination);
+    }
+
     private static ModelMapper createModelMapperWithStrategy(MatchingStrategy matchingStrategy) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(matchingStrategy);
+        return modelMapper;
+    }
+
+    private static ModelMapper createModelMapperWithSkipNullEnabled() {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
         return modelMapper;
     }
 

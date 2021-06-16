@@ -139,8 +139,12 @@ public class SpecializationController {
                         new OperationCannotBePerformedException("Не можна змінювати неактивну освітню програму")
                 );
             }
+            Specialization specializationForUpdate = specializationService.getById(specializationDTO.getId());
+            if (specializationForUpdate == null)
+                return handleException(new OperationCannotBePerformedException("Освітня програма з таким id відсутня"));
             Specialization specialization = create(specializationDTO, user.getFaculty());
-            Specialization specializationAfterSave = specializationService.save(specialization);
+            Mapper.mapWithoutNullValues(specialization, specializationForUpdate);
+            Specialization specializationAfterSave = specializationService.save(specializationForUpdate);
             SpecializationDTO specializationSavedDTO = Mapper.strictMap(specializationAfterSave, SpecializationDTO.class);
             return new ResponseEntity(specializationSavedDTO, HttpStatus.CREATED);
         } catch (Exception exception) {
