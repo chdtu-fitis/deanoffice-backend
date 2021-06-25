@@ -62,6 +62,7 @@ public class Mapper {
     }
 
     public static void mapWithoutNullValues(Object source, Object destination) {
+        createModelMapperWithStrategy(STRICT_MATCHING_STRATEGY);
         createModelMapperWithSkipNullEnabled().map(source, destination);
     }
 
