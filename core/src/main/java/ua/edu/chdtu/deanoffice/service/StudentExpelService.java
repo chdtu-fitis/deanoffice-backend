@@ -33,6 +33,7 @@ public class StudentExpelService {
     private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
     private final StudentUtil studentUtil;
     private final OrderReasonService orderReasonService;
+    private final StudentAcademicVacationService studentAcademicVacationService;
 
     @Autowired
     public StudentExpelService(
@@ -41,7 +42,8 @@ public class StudentExpelService {
             CurrentYearRepository currentYearRepository,
             RenewedExpelledStudentRepository renewedExpelledStudentRepository,
             StudentUtil studentUtil,
-            OrderReasonService orderReasonService
+            OrderReasonService orderReasonService,
+            StudentAcademicVacationService studentAcademicVacationService
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
@@ -49,8 +51,10 @@ public class StudentExpelService {
         this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
         this.studentUtil = studentUtil;
         this.orderReasonService = orderReasonService;
+        this.studentAcademicVacationService = studentAcademicVacationService;
     }
 
+    @Transactional
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
         List<Integer> ids = studentExpels.stream()
                 .map(studentExpel -> studentExpel.getStudentDegree().getId())
@@ -59,6 +63,7 @@ public class StudentExpelService {
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(ids);
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
         studentDegreeRepository.save(studentDegrees);
+        studentAcademicVacationService.setStudentAcademicVacationsInactiveByStudentDegreeIds(ids);
 
         return studentExpelRepository.save(studentExpels);
     }

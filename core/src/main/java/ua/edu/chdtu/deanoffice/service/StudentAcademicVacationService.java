@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -10,6 +11,7 @@ import ua.edu.chdtu.deanoffice.repository.StudentAcademicVacationRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -39,17 +41,20 @@ public class StudentAcademicVacationService {
         studentDegree.setActive(false);
         studentDegreeRepository.save(studentDegree);
 
+        studentAcademicVacation.setActive(true);
         return studentAcademicVacationRepository.save(studentAcademicVacation);
     }
 
-    public List<StudentAcademicVacation> getAll(Integer facultyId) {
-        return studentAcademicVacationRepository.findAllInactive(facultyId);
+    public List<StudentAcademicVacation> getAll(Integer facultyId, boolean onlyActive) {
+        return onlyActive ? studentAcademicVacationRepository.findActive() : studentAcademicVacationRepository.findAllInactive(facultyId);
     }
 
+    @Transactional
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
         updateStudentDegree(renewedAcademicVacationStudent);
+        setStudentAcademicVacationsInactiveByStudentDegreeIds(Arrays.asList(studentDegreeId));
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
     }
 
@@ -60,6 +65,10 @@ public class StudentAcademicVacationService {
         studentDegree.setPayment(renewedAcademicVacationStudent.getPayment());
 
         studentDegreeRepository.save(studentDegree);
+    }
+
+    public void setStudentAcademicVacationsInactiveByStudentDegreeIds(List<Integer> studentDegreeIds) {
+        studentAcademicVacationRepository.setStudentAcademicVacationInactive(studentDegreeIds);
     }
 
     public List<StudentAcademicVacation> getByDegreeId(Integer studentDegreeId){

@@ -30,4 +30,5 @@ public class StudentAcademicVacation extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date applicationDate;
     private String extraInformation;
+    private boolean active;
 }
