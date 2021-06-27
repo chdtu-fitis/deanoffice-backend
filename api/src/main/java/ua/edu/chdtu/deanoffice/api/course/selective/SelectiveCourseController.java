@@ -502,4 +502,10 @@ public class SelectiveCourseController {
                 studentEnrollingInSelectiveCoursesDTO.getStudentDegree().getId(),
                 studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
     }
+
+    @PatchMapping("/group-name-generating")
+    public ResponseEntity generateSelectiveCourseGroupName() {
+        selectiveCourseService.updateGroupNames();
+        return ResponseEntity.ok().build();
+    }
 }
