@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -122,5 +123,41 @@ public class SelectiveCourseService {
             return PeriodCaseEnum.LATE;
         else
             return PeriodCaseEnum.EARLY;
+    }
+
+    @Transactional
+    public void updateGroupNames() {
+        List<SelectiveCourse> selectiveCoursesWithGroupNames = generateSelectiveCoursesGroupNames();
+        for (SelectiveCourse selectiveCourse: selectiveCoursesWithGroupNames)
+            selectiveCourseRepository.updateGroupNameById(selectiveCourse.getGroupName(), selectiveCourse.getId());
+    }
+    
+    private List<SelectiveCourse> generateSelectiveCoursesGroupNames() {
+        int studyYear = currentYearService.getYear() + 1;
+
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findByAvailableTrueAndStudyYear(studyYear);
+
+        String studyYearLastTwoDigits = String.valueOf(studyYear).substring(2);
+
+        int sequenceNumber = 1;
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            StringBuilder groupName = new StringBuilder();
+
+            int semester = selectiveCourse.getCourse().getSemester();
+            int year = (int) Math.ceil((double)semester / 2); /* курс, на якому вивчається дисципліна */
+
+            char typeCycleFirstLetter = selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL ? 'з' : 'п';
+
+            groupName
+                    .append(selectiveCourse.getDegree().getName().substring(0, 1)).append(studyYearLastTwoDigits)
+                    .append("-")
+                    .append(year).append("к")
+                    .append("-")
+                    .append(sequenceNumber++).append(typeCycleFirstLetter);
+
+            selectiveCourse.setGroupName(groupName.toString());
+        }
+
+        return selectiveCourses;
     }
 }

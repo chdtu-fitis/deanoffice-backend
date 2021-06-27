@@ -80,4 +80,12 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             @Param("semesters") List<Integer> semesters,
             @Param("selectiveCourseIds") List<Integer> selectiveCourseIds
     );
+
+    List<SelectiveCourse> findByAvailableTrueAndStudyYear(int studyYear);
+
+    @Modifying
+    @Query("UPDATE SelectiveCourse SET groupName = :groupName WHERE id = :selectiveCourseId")
+    void updateGroupNameById(@Param("groupName") String groupName,
+                             @Param("selectiveCourseId") int selectiveCourseId
+    );
 }
