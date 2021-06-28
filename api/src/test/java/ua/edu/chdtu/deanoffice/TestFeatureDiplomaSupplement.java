@@ -85,8 +85,6 @@ public class TestFeatureDiplomaSupplement {
         Specialization specialization = new Specialization();
         specialization.setName("Спеціалізація");
         specialization.setNameEng("Specialization");
-        specialization.setQualification("Кваліфікація 1  Кваліфікація 2");
-        specialization.setQualificationEng("Qualification 1  Qualification 2");
         return specialization;
     }
 
