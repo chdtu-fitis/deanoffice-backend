@@ -27,8 +27,8 @@ public class SpecializationDTO {
     private NamedDTO degree;
     private NamedDTO department;
     private String code;
-    private BigDecimal paymentFulltime;
-    private BigDecimal paymentExtramural;
+    private String specializationName;
+    private String specializationNameEng;
     @JsonView(SpecializationView.Extended.class)
     private TeacherDTO programHead;
     private String certificateNumber;
