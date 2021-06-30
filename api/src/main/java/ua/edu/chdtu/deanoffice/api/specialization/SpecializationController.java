@@ -19,12 +19,15 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationDTO;
 import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationView;
+import ua.edu.chdtu.deanoffice.api.specialization.dto.SpecializationWriteDTO;
+import ua.edu.chdtu.deanoffice.entity.AcademicTitle;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Degree;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.DataVerificationService;
@@ -89,32 +92,17 @@ public class SpecializationController {
     @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping
     public ResponseEntity createSpecialization(
-            @RequestBody SpecializationDTO specializationDTO,
+            @RequestBody SpecializationWriteDTO specializationDTO,
             @CurrentUser ApplicationUser user
     ) {
         try {
-            Specialization specialization = create(specializationDTO, user.getFaculty());
-            specialization.setActive(true);
-            Specialization specializationAfterSave = specializationService.save(specialization);
+            Specialization specialization = Mapper.strictMap(specializationDTO, Specialization.class);
+            Specialization specializationAfterSave = specializationService.create(specialization);
             SpecializationDTO specializationSavedDTO = Mapper.strictMap(specializationAfterSave, SpecializationDTO.class);
             return new ResponseEntity(specializationSavedDTO, HttpStatus.CREATED);
         } catch (Exception exception) {
             return handleException(exception);
         }
-    }
-
-    private Specialization create(SpecializationDTO specializationDTO, Faculty faculty) throws UnauthorizedFacultyDataException {
-        Specialization specialization = Mapper.strictMap(specializationDTO, Specialization.class);
-        Speciality speciality = this.specialityService.getById(specializationDTO.getSpecialityId());
-        specialization.setSpeciality(speciality);
-        if (specializationDTO.getDepartmentId() != null && specializationDTO.getDepartmentId() != 0) {
-            Department department = departmentService.getById(specializationDTO.getDepartmentId());
-            specialization.setDepartment(department);
-        }
-        Degree degree = degreeService.getById(specializationDTO.getDegreeId());
-        specialization.setDegree(degree);
-        specialization.setFaculty(faculty);
-        return specialization;
     }
 
     @GetMapping("{specialization_id}")
@@ -128,19 +116,17 @@ public class SpecializationController {
     }
 
     @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
-    @PutMapping
-    public ResponseEntity updateSpecialization(
-            @RequestBody SpecializationDTO specializationDTO,
-            @CurrentUser ApplicationUser user
-    ) {
+    @PutMapping("{id}")
+    public ResponseEntity updateSpecialization(@PathVariable int id, @RequestBody SpecializationWriteDTO specializationDTO) {
         try {
             if (!specializationDTO.isActive()) {
                 return handleException(
                         new OperationCannotBePerformedException("Не можна змінювати неактивну освітню програму")
                 );
             }
-            Specialization specialization = create(specializationDTO, user.getFaculty());
-            Specialization specializationAfterSave = specializationService.save(specialization);
+            Specialization specialization = Mapper.strictMap(specializationDTO, Specialization.class);
+            specialization.setId(id);
+            Specialization specializationAfterSave = specializationService.update(specialization);
             SpecializationDTO specializationSavedDTO = Mapper.strictMap(specializationAfterSave, SpecializationDTO.class);
             return new ResponseEntity(specializationSavedDTO, HttpStatus.CREATED);
         } catch (Exception exception) {
