@@ -7,6 +7,8 @@ import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedWithAbbrDTO;
 import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 import ua.edu.chdtu.deanoffice.api.teacher.TeacherDTO;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -34,6 +36,8 @@ public class SpecializationDTO {
     private Date certificateDate;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
+    private int normativeCreditsNumber;
+    private BigDecimal normativeTermOfStudy;
 
     @JsonView(SpecializationView.Faculty.class)
     private Integer facultyId;

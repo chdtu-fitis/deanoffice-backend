@@ -3,6 +3,8 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithEngAndActiveEntity;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
@@ -36,6 +38,10 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String certificateIssuedByEng;
     private String specializationName;
     private String specializationNameEng;
+    @Column(updatable = false)
+    private int normativeCreditsNumber;
+    @Column(updatable = false)
+    private BigDecimal normativeTermOfStudy;
 
     public Specialization() {
         certificateNumber = "";
