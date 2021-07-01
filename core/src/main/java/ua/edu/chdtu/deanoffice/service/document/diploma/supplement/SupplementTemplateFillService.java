@@ -72,7 +72,7 @@ public class SupplementTemplateFillService {
 
     private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
         AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
-                studentSummary.getStudentGroup().getSpecialization().getId());
+                studentSummary.getStudentDegree().getSpecialization().getId());
         if (competencies != null) {
             fillCompetenciesTable(template, competencies, "#AcquiredCompetencies");
             fillCompetenciesTable(template, competencies, "#AcquiredCompetenciesEng");
@@ -154,10 +154,9 @@ public class SupplementTemplateFillService {
         Map<String, String> result = new HashMap<>();
 
         StudentDegree studentDegree = studentSummary.getStudentDegree();
-        Specialization specialization = studentSummary.getStudentGroup().getSpecialization();
+        Specialization specialization = studentSummary.getStudentDegree().getSpecialization();
         Speciality speciality = specialization.getSpeciality();
         Degree degree = specialization.getDegree();
-        StudentGroup group = studentSummary.getStudentGroup();
 
         result.put("SurnameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurname(), "Ім'я"));
         result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname"));
@@ -175,7 +174,7 @@ public class SupplementTemplateFillService {
 
         result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
-        result.put("QualUkr", TemplateUtil.getValueSafely(degree.getName()) + " з " + speciality.getNameGenitive());
+        result.put("QualUkr", TemplateUtil.getValueSafely(degree.getName()) + " " + speciality.getNameGenitive());
         result.put("QualEng", TemplateUtil.getValueSafely(degree.getNameEng()) + " of " + speciality.getNameEng());
 
         DocumentUtil.ModeOfStudyUkrEngNames mode = DocumentUtil.getModeOfStudyUkrEngNames(studentSummary.getStudentGroup().getTuitionForm());
@@ -204,7 +203,7 @@ public class SupplementTemplateFillService {
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
-        result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
+        result.put("DegreeRequiredCredits", "" + specialization.getNormativeCreditsNumber());
 
         result.put("CertificateNum", specialization.getCertificateNumber());
         result.put("CertificateDate", specialization.getCertificateDate() != null
@@ -216,27 +215,17 @@ public class SupplementTemplateFillService {
         result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
         result.put("QualificationLevelEng", TemplateUtil.getValueSafely(degree.getQualificationLevelDescriptionEng()));
 
-        String admissionRequirementsPlaceholder = "AdmissionRequirements";
-        String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
-        if (studentDegree.getStudentGroup().getSpecialization().getFaculty().getId()
-                == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
-            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
-            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
-        } else if (studentSummary.getStudentGroup().getTuitionTerm().equals(TuitionTerm.SHORTENED)) {
-            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionShortenedRequirements()));
-            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionShortenedRequirementsEng()));
-        } else {
-            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionRequirements()));
-            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionRequirementsEng()));
-        }
+        Map<String, String> admissionRequirements = getAdmissionRequirements(degree, specialization, speciality);
+        result.put("AdmissionRequirements", admissionRequirements.get("ukr"));
+        result.put("AdmissionRequirementsEng", admissionRequirements.get("eng"));
 
         result.put("FurtherStudyAccess", TemplateUtil.getValueSafely(degree.getFurtherStudyAccess()));
         result.put("FurtherStudyAccessEng", TemplateUtil.getValueSafely(degree.getFurtherStudyAccessEng()));
         result.put("RegulatedProfessionAccess", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccess()));
         result.put("RegulatedProfessionAccessEng", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccessEng()));
 
-        result.put("TrainingDuration", getTrainingDuration(group));
-        result.put("TrainingDurationEng", getTrainingDurationEng(group));
+        result.put("TrainingDuration", getTrainingDuration(specialization));
+        result.put("TrainingDurationEng", getTrainingDurationEng(specialization));
 
         Map<String, String> allPreviousUniversities = getAllPreviousUniversities(studentDegree);
         result.put("AllTrainingDurationsAndUniversitiesUkr", TemplateUtil.getValueSafely(allPreviousUniversities.get("ukr")));
@@ -279,6 +268,19 @@ public class SupplementTemplateFillService {
         result.put("DepartmentEng", studentDegree.getSpecialization().getDepartment().getNameEng());
         result.put("DepartmentURL", studentDegree.getSpecialization().getDepartment().getWebSite());
 
+        return result;
+    }
+
+    private Map<String, String> getAdmissionRequirements(Degree degree, Specialization specialization, Speciality speciality) {
+        Map<String, String> result = new HashMap<>();
+
+        if (specialization.getFaculty().getId() == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
+            result.put("ukr", degree.getAdmissionForeignRequirements());
+            result.put("eng", degree.getAdmissionForeignRequirementsEng());
+        } else {
+            result.put("ukr", degree.getAdmissionRequirements().replace("$courses$", speciality.getEntranceCertificates()));
+            result.put("eng", degree.getAdmissionRequirementsEng().replace("$courses$", speciality.getEntranceCertificatesEng()));
+        }
         return result;
     }
 
@@ -397,21 +399,17 @@ public class SupplementTemplateFillService {
         return dates.toString();
     }
 
-    private static String getTrainingDuration(StudentGroup studentGroup) {
+    private static String getTrainingDuration(Specialization specialization) {
         StringBuilder result = new StringBuilder();
-        if (studentGroup.getStudyYears().intValue() >= 1) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+        if (specialization.getNormativeTermOfStudy().intValue() >= 1) {
+            result.append(String.format("%1d", specialization.getNormativeTermOfStudy().intValue()));
             result.append(" ");
-            switch (studentGroup.getStudyYears().intValue()) {
+            switch (specialization.getNormativeTermOfStudy().intValue()) {
                 case 1:
                     result.append("рік");
                     break;
                 case 2:
-                    result.append("роки");
-                    break;
                 case 3:
-                    result.append("роки");
-                    break;
                 case 4:
                     result.append("роки");
                     break;
@@ -421,21 +419,17 @@ public class SupplementTemplateFillService {
             }
         }
 
-        Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
+        int monthsOfStudying = getMonthsFromYears(specialization.getNormativeTermOfStudy());
         if (monthsOfStudying != 0) {
             result.append(" ");
-            result.append(String.format("%1d", monthsOfStudying.intValue()));
+            result.append(String.format("%1d", monthsOfStudying));
             result.append(" ");
-            switch (monthsOfStudying.intValue()) {
+            switch (monthsOfStudying) {
                 case 1:
                     result.append("місяць");
                     break;
                 case 2:
-                    result.append("місяці");
-                    break;
                 case 3:
-                    result.append("місяці");
-                    break;
                 case 4:
                     result.append("місяці");
                     break;
@@ -448,18 +442,18 @@ public class SupplementTemplateFillService {
         return result.toString();
     }
 
-    private static String getTrainingDurationEng(StudentGroup studentGroup) {
+    private static String getTrainingDurationEng(Specialization specialization) {
         StringBuilder result = new StringBuilder();
-        if (studentGroup.getStudyYears().intValue() >= 1) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+        if (specialization.getNormativeTermOfStudy().intValue() >= 1) {
+            result.append(String.format("%1d", specialization.getNormativeTermOfStudy().intValue()));
             result.append(" ");
-            result.append(studentGroup.getStudyYears().intValue() == 1 ? "year" : "years");
+            result.append(specialization.getNormativeTermOfStudy().intValue() == 1 ? "year" : "years");
         }
 
-        Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
+        int monthsOfStudying = getMonthsFromYears(specialization.getNormativeTermOfStudy());
         if (monthsOfStudying != 0) {
             result.append(" ");
-            result.append(String.format("%1d", monthsOfStudying.intValue()));
+            result.append(String.format("%1d", monthsOfStudying));
             result.append(" ");
             result.append(Math.round(monthsOfStudying) == 1 ? "month" : "months");
         }
@@ -506,10 +500,10 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private static Double getMonthsFromYears(BigDecimal years) {
+    private static int getMonthsFromYears(BigDecimal years) {
         int intPart = years.intValue();
         int monthsPerYear = 12;
-        return ((years.doubleValue() - intPart) * monthsPerYear);
+        return (int)Math.round((years.doubleValue() - intPart) * monthsPerYear);
     }
 
     private boolean hasDirectionOfTraining(StudentDegree studentDegree) {
