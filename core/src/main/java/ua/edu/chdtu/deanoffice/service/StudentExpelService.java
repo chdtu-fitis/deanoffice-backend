@@ -54,7 +54,6 @@ public class StudentExpelService {
         this.studentAcademicVacationService = studentAcademicVacationService;
     }
 
-    @Transactional
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
         List<Integer> ids = studentExpels.stream()
                 .map(studentExpel -> studentExpel.getStudentDegree().getId())
@@ -63,7 +62,6 @@ public class StudentExpelService {
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(ids);
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
         studentDegreeRepository.save(studentDegrees);
-        studentAcademicVacationService.setStudentAcademicVacationsInactiveByStudentDegreeIds(ids);
 
         return studentExpelRepository.save(studentExpels);
     }

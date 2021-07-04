@@ -16,12 +16,11 @@ public interface StudentAcademicVacationRepository extends JpaRepository<Student
             "sac.studentDegree.student.patronimic, sac.studentDegree.studentGroup.name")
     List<StudentAcademicVacation> findAllInactive(@Param("faculty_id") Integer facultyId);
 
-    @Query("select sac from StudentAcademicVacation  sac " +
+    @Query("select sac from StudentAcademicVacation sac " +
             "where sac.active = true " +
             "and sac.studentDegree.active = false " +
-            "order by sac.studentDegree.student.surname, sac.studentDegree.student.name, " +
-            "sac.studentDegree.student.patronimic, sac.studentDegree.studentGroup.name")
-    List<StudentAcademicVacation> findActive();
+            "and sac.studentDegree.id in(:studentDegreeIds)")
+    List<StudentAcademicVacation> findActive(@Param("studentDegreeIds") List<Integer> studentDegreeIds);
 
     @Query("select sac from StudentAcademicVacation  sac " +
             "where sac.studentDegree.id =:student_degree_id " +
@@ -30,6 +29,6 @@ public interface StudentAcademicVacationRepository extends JpaRepository<Student
 
     @Modifying
     @Query(value = "UPDATE student_academic_vacation AS sac SET active = false " +
-            "WHERE student_degree_id IN(:studentDegreeIds)", nativeQuery = true)
-    void setStudentAcademicVacationInactive(@Param("studentDegreeIds") List<Integer> studentDegreeIds);
+            "WHERE student_degree_id = studentDegreeId)", nativeQuery = true)
+    void setStudentAcademicVacationInactive(@Param("studentDegreeId") int studentDegreeId);
 }

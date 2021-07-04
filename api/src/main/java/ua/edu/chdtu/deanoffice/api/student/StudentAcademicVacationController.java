@@ -98,7 +98,19 @@ public class StudentAcademicVacationController {
     @JsonView(StudentView.AcademicVacation.class)
     public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user, @RequestParam(required = false) boolean onlyActive) {
         try {
-            List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId(), onlyActive);
+            List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId());
+            return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
+    @Secured("ROLE_STUDENT")
+    @GetMapping("active")
+    @JsonView(StudentView.AcademicVacation.class)
+    public ResponseEntity getActiveAcademicVacations(@RequestParam(value = "studentDegreeIds") List<Integer> studentDegreeIds) {
+        try {
+            List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getActive(studentDegreeIds);
             return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);

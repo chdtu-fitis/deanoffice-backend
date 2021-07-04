@@ -11,7 +11,6 @@ import ua.edu.chdtu.deanoffice.repository.StudentAcademicVacationRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -45,8 +44,12 @@ public class StudentAcademicVacationService {
         return studentAcademicVacationRepository.save(studentAcademicVacation);
     }
 
-    public List<StudentAcademicVacation> getAll(Integer facultyId, boolean onlyActive) {
-        return onlyActive ? studentAcademicVacationRepository.findActive() : studentAcademicVacationRepository.findAllInactive(facultyId);
+    public List<StudentAcademicVacation> getAll(Integer facultyId) {
+        return studentAcademicVacationRepository.findAllInactive(facultyId);
+    }
+
+    public List<StudentAcademicVacation> getActive(List<Integer> studentDegreeIds) {
+        return studentAcademicVacationRepository.findActive(studentDegreeIds);
     }
 
     @Transactional
@@ -54,7 +57,7 @@ public class StudentAcademicVacationService {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
         updateStudentDegree(renewedAcademicVacationStudent);
-        setStudentAcademicVacationsInactiveByStudentDegreeIds(Arrays.asList(studentDegreeId));
+        setStudentAcademicVacationInactiveByStudentDegreeId(studentDegreeId);
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
     }
 
@@ -67,8 +70,8 @@ public class StudentAcademicVacationService {
         studentDegreeRepository.save(studentDegree);
     }
 
-    public void setStudentAcademicVacationsInactiveByStudentDegreeIds(List<Integer> studentDegreeIds) {
-        studentAcademicVacationRepository.setStudentAcademicVacationInactive(studentDegreeIds);
+    public void setStudentAcademicVacationInactiveByStudentDegreeId(int studentDegreeId) {
+        studentAcademicVacationRepository.setStudentAcademicVacationInactive(studentDegreeId);
     }
 
     public List<StudentAcademicVacation> getByDegreeId(Integer studentDegreeId){
