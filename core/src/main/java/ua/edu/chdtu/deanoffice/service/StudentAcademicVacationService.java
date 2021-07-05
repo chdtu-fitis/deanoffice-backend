@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
+import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.RenewedAcademicVacationStudentRepository;
@@ -68,5 +69,9 @@ public class StudentAcademicVacationService {
 
     public StudentAcademicVacation getById(Integer studentAcademicVacationId) {
         return studentAcademicVacationRepository.getOne(studentAcademicVacationId);
+    }
+
+    public RenewedAcademicVacationStudent getRenewedByAcademicVacationId(int studentAcademicVacationId) {
+        return renewedAcademicVacationStudentRepository.findByStudentAcademicVacationId(studentAcademicVacationId);
     }
 }
