@@ -30,7 +30,7 @@ public class DocumentUtil {
                 break;
             case EXTRAMURAL:
                 modeOfStudyUkr = "Заочна";
-                modeOfStudyEng = "Part-time";
+                modeOfStudyEng = "Intermittent";
                 break;
         }
         return new ModeOfStudyUkrEngNames(modeOfStudyUkr, modeOfStudyEng);
