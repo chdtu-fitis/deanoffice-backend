@@ -26,9 +26,4 @@ public interface StudentAcademicVacationRepository extends JpaRepository<Student
             "where sac.studentDegree.id =:student_degree_id " +
             "order by sac.vacationStartDate")
     List<StudentAcademicVacation> findAllByDegreeId(@Param("student_degree_id") Integer degreeId);
-
-    @Modifying
-    @Query(value = "UPDATE student_academic_vacation AS sac SET active = false " +
-            "WHERE student_degree_id = studentDegreeId)", nativeQuery = true)
-    void setStudentAcademicVacationInactive(@Param("studentDegreeId") int studentDegreeId);
 }

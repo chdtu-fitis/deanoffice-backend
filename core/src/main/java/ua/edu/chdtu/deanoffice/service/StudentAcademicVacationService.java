@@ -57,7 +57,6 @@ public class StudentAcademicVacationService {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
         updateStudentDegree(renewedAcademicVacationStudent);
-        setStudentAcademicVacationInactiveByStudentDegreeId(studentDegreeId);
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
     }
 
@@ -68,10 +67,6 @@ public class StudentAcademicVacationService {
         studentDegree.setPayment(renewedAcademicVacationStudent.getPayment());
 
         studentDegreeRepository.save(studentDegree);
-    }
-
-    public void setStudentAcademicVacationInactiveByStudentDegreeId(int studentDegreeId) {
-        studentAcademicVacationRepository.setStudentAcademicVacationInactive(studentDegreeId);
     }
 
     public List<StudentAcademicVacation> getByDegreeId(Integer studentDegreeId){

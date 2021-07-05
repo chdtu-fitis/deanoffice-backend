@@ -105,8 +105,7 @@ public class StudentAcademicVacationController {
         }
     }
 
-    @Secured("ROLE_STUDENT")
-    @GetMapping("active")
+    @GetMapping("/active")
     @JsonView(StudentView.AcademicVacation.class)
     public ResponseEntity getActiveAcademicVacations(@RequestParam(value = "studentDegreeIds") List<Integer> studentDegreeIds) {
         try {
