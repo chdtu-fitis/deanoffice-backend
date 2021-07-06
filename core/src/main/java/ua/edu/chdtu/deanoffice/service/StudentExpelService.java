@@ -33,6 +33,7 @@ public class StudentExpelService {
     private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
     private final StudentUtil studentUtil;
     private final OrderReasonService orderReasonService;
+    private final StudentAcademicVacationService studentAcademicVacationService;
 
     @Autowired
     public StudentExpelService(
@@ -41,7 +42,8 @@ public class StudentExpelService {
             CurrentYearRepository currentYearRepository,
             RenewedExpelledStudentRepository renewedExpelledStudentRepository,
             StudentUtil studentUtil,
-            OrderReasonService orderReasonService
+            OrderReasonService orderReasonService,
+            StudentAcademicVacationService studentAcademicVacationService
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
@@ -49,6 +51,7 @@ public class StudentExpelService {
         this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
         this.studentUtil = studentUtil;
         this.orderReasonService = orderReasonService;
+        this.studentAcademicVacationService = studentAcademicVacationService;
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {

@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
@@ -13,7 +14,13 @@ public interface StudentAcademicVacationRepository extends JpaRepository<Student
             "and sac.studentDegree.active = false " +
             "order by sac.studentDegree.student.surname, sac.studentDegree.student.name, " +
             "sac.studentDegree.student.patronimic, sac.studentDegree.studentGroup.name")
-    List<StudentAcademicVacation> findAllInactive(@Param("faculty_id") Integer facultyId);
+    List<StudentAcademicVacation> findAllActiveInFaculty(@Param("faculty_id") Integer facultyId);
+
+    @Query("select sac from StudentAcademicVacation sac " +
+            "where sac.active = true " +
+            "and sac.studentDegree.active = false " +
+            "and sac.studentDegree.id in(:studentDegreeIds)")
+    List<StudentAcademicVacation> findActiveByStudentDegreeIds(@Param("studentDegreeIds") List<Integer> studentDegreeIds);
 
     @Query("select sac from StudentAcademicVacation  sac " +
             "where sac.studentDegree.id =:student_degree_id " +

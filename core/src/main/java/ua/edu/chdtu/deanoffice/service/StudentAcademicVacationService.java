@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
 import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
@@ -40,13 +41,19 @@ public class StudentAcademicVacationService {
         studentDegree.setActive(false);
         studentDegreeRepository.save(studentDegree);
 
+        studentAcademicVacation.setActive(true);
         return studentAcademicVacationRepository.save(studentAcademicVacation);
     }
 
     public List<StudentAcademicVacation> getAll(Integer facultyId) {
-        return studentAcademicVacationRepository.findAllInactive(facultyId);
+        return studentAcademicVacationRepository.findAllActiveInFaculty(facultyId);
     }
 
+    public List<StudentAcademicVacation> getActive(List<Integer> studentDegreeIds) {
+        return studentAcademicVacationRepository.findActiveByStudentDegreeIds(studentDegreeIds);
+    }
+
+    @Transactional
     public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);

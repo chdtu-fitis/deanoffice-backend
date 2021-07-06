@@ -2,13 +2,13 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentStatus;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 
@@ -16,9 +16,11 @@ import static ua.edu.chdtu.deanoffice.util.PersonUtil.toCapitalizedCase;
 public class StudentService {
 
     private final StudentRepository studentRepository;
+    private final StudentAcademicVacationService studentAcademicVacationService;
 
-    public StudentService(StudentRepository studentRepository) {
+    public StudentService(StudentRepository studentRepository, StudentAcademicVacationService studentAcademicVacationService) {
         this.studentRepository = studentRepository;
+        this.studentAcademicVacationService = studentAcademicVacationService;
     }
 
     public Student findById(Integer id) {
@@ -58,5 +60,19 @@ public class StudentService {
         Student student = studentRepository.getOne(studentId);
         student.setPhotoUrl(photoUrl);
         studentRepository.save(student);
+    }
+
+    public StudentStatus getStudentStatus(int studentId) {
+        Student student = findById(studentId);
+
+        if (student == null || student.getDegrees().size() == 0)
+            return StudentStatus.NO;
+
+        if (student.getDegrees().stream().anyMatch(studentDegree -> studentDegree.isActive()))
+            return StudentStatus.ACTIVE;
+        else if (studentAcademicVacationService.getActive(student.getDegrees().stream().map(StudentDegree::getId).collect(Collectors.toList())).size() > 0)
+            return StudentStatus.ACADEMIC_VACATION;
+        else
+            return StudentStatus.NO;
     }
 }
