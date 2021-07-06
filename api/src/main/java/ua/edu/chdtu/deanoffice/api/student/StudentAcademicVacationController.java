@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -96,20 +95,9 @@ public class StudentAcademicVacationController {
     @Secured("ROLE_DEANOFFICER")
     @GetMapping
     @JsonView(StudentView.AcademicVacation.class)
-    public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user, @RequestParam(required = false) boolean onlyActive) {
+    public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user) {
         try {
             List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId());
-            return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));
-        } catch (Exception exception) {
-            return handleException(exception);
-        }
-    }
-
-    @GetMapping("/active")
-    @JsonView(StudentView.AcademicVacation.class)
-    public ResponseEntity getActiveAcademicVacations(@RequestParam(value = "studentDegreeIds") List<Integer> studentDegreeIds) {
-        try {
-            List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getActive(studentDegreeIds);
             return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);

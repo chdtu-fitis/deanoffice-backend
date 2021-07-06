@@ -45,11 +45,11 @@ public class StudentAcademicVacationService {
     }
 
     public List<StudentAcademicVacation> getAll(Integer facultyId) {
-        return studentAcademicVacationRepository.findAllInactive(facultyId);
+        return studentAcademicVacationRepository.findAllActiveInFaculty(facultyId);
     }
 
     public List<StudentAcademicVacation> getActive(List<Integer> studentDegreeIds) {
-        return studentAcademicVacationRepository.findActive(studentDegreeIds);
+        return studentAcademicVacationRepository.findActiveByStudentDegreeIds(studentDegreeIds);
     }
 
     @Transactional
