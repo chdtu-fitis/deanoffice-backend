@@ -30,5 +30,5 @@ public class StudentView {
 
     public interface Expel extends Simple, GeneralView.Named, WithActive {}
 
-    public interface AcademicVacation extends Simple, GeneralView.Named, WithActive {}
+    public interface AcademicVacation extends Simple, GeneralView.Named, WithActive, SpecializationView.Faculty {}
 }
