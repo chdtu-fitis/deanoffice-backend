@@ -1,6 +1,14 @@
 ALTER TABLE degree DROP COLUMN admission_shortened_requirements;
 ALTER TABLE degree DROP COLUMN admission_shortened_requirements_eng;
 
+UPDATE degree SET admission_requirements='' WHERE admission_requirements IS NULL;
+UPDATE degree SET admission_requirements_eng='' WHERE admission_requirements_eng IS NULL;
+UPDATE degree SET admission_foreign_requirements='' WHERE admission_foreign_requirements IS NULL;
+UPDATE degree SET admission_foreign_requirements_eng='' WHERE admission_foreign_requirements_eng IS NULL;
+UPDATE degree SET further_study_access='' WHERE further_study_access IS NULL;
+UPDATE degree SET further_study_access_eng='' WHERE further_study_access_eng IS NULL;
+UPDATE degree SET qualification_level_descr='' WHERE qualification_level_descr IS NULL;
+UPDATE degree SET qualification_level_descr_eng='' WHERE qualification_level_descr_eng IS NULL;
 ALTER TABLE degree ALTER COLUMN name_eng SET NOT NULL;
 ALTER TABLE degree ALTER COLUMN admission_requirements SET NOT NULL;
 ALTER TABLE degree ALTER COLUMN admission_requirements_eng SET NOT NULL;
