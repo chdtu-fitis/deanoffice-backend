@@ -4,7 +4,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
@@ -19,7 +25,12 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
+import ua.edu.chdtu.deanoffice.service.OrderReasonService;
+import ua.edu.chdtu.deanoffice.service.RenewedExpelledStudentService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentExpelService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -89,7 +100,7 @@ public class StudentExpelController {
     @GetMapping("/search")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchByShortNameAndDate(
-            @RequestParam (value = "surname", defaultValue = "", required = false) String surname,
+            @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam (value = "name", defaultValue = "", required = false) String name,
             @RequestParam(required = false) String startDate,
             @RequestParam (required = false) String endDate,
@@ -111,13 +122,24 @@ public class StudentExpelController {
         }
     }
 
+    @Secured({"ROLE_DEANOFFICER", "ROLE_STUDENT"})
+    @GetMapping("/last")
+    @JsonView(StudentView.Expel.class)
+    public ResponseEntity<StudentExpelDTO> getLastExpelForStudentDegree(@RequestParam int studentDegreeId) throws UnauthorizedFacultyDataException {
+        StudentExpel studentExpel = studentExpelService.getLastByStudentDegreeId(studentDegreeId);
+        if (studentExpel != null)
+            return ResponseEntity.ok(Mapper.map(studentExpel, StudentExpelDTO.class));
+        else
+            return ResponseEntity.noContent().build();
+    }
+
     @Secured("ROLE_DEANOFFICER")
     @GetMapping("/{id}/expels-and-renews")
     @JsonView(StudentView.Expel.class)
     public ResponseEntity searchExpelsAndRenewsByStudentDegreeId(
             @PathVariable("id") Integer studentDegreeId,
             @CurrentUser ApplicationUser user){
-        try{
+        try {
            List <StudentExpel> expelledInformation = studentExpelService.getByStudentDegreeId(studentDegreeId);
            List <ExpelledOrRenewedStudentBean> expelledOrRenewedStudentBeans = new ArrayList();
            for (StudentExpel studentExpel : expelledInformation) {

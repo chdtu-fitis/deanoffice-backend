@@ -25,4 +25,6 @@ public class Constants {
 
     public static final String UNIVERSITY_NAME = "Черкаський державний технологічний університет";
     public static final String UNIVERSITY_NAME_ENG = "Cherkasy State Technological University";
+
+    public static final String ROLE_DEANOFFICER = "ROLE_DEANOFFICER";
 }

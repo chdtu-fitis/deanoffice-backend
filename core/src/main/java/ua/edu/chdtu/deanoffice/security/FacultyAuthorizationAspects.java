@@ -10,8 +10,11 @@ import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
+import ua.edu.chdtu.deanoffice.util.UserUtil;
 
 import java.util.List;
+
+import static ua.edu.chdtu.deanoffice.Constants.ROLE_DEANOFFICER;
 
 @Component
 @Aspect
@@ -66,5 +69,18 @@ public class FacultyAuthorizationAspects {
         int specializationFacultyId = specialization.getFaculty().getId();
         if (userFacultyId != specializationFacultyId)
             throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибрана освітня програма належить до іншого факультету");
+    }
+
+    @Before("within(ua.edu.chdtu.deanoffice.service.StudentExpelService) " +
+            "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
+            "&& args(studentDegreeId)")
+    public void beforeGetStudentExpels(Integer studentDegreeId) throws UnauthorizedFacultyDataException {
+        boolean isDeanofficer = UserUtil.getRoles().stream().anyMatch(r -> r.equals(ROLE_DEANOFFICER));
+        if (isDeanofficer) {
+            int userFacultyId = FacultyUtil.getUserFacultyIdInt();
+            int studentFacultyId = facultyRepository.findIdByStudent(studentDegreeId);
+            if (userFacultyId != studentFacultyId)
+                throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вказаний студент належить до іншого факультету");
+        }
     }
 }
