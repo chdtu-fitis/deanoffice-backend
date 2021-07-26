@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
@@ -11,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.service.SpecialityService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
@@ -38,9 +40,11 @@ public class SpecialityController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity getActiveSpecialities(@CurrentUser ApplicationUser user) {
+    public ResponseEntity getActiveSpecialitiesInFaculty(@RequestParam(required = false) Integer facultyId) {
         try {
-            List<Speciality> specialities = specialityService.getAllActiveInFaculty(user.getFaculty().getId());
+            if (facultyId == null)
+                facultyId = FacultyUtil.getUserFacultyIdInt();
+            List<Speciality> specialities = specialityService.getAllActiveInFaculty(facultyId);
             return ResponseEntity.ok(mapToSpecialityDTO(specialities));
         } catch (Exception exception) {
             return handleException(exception);
