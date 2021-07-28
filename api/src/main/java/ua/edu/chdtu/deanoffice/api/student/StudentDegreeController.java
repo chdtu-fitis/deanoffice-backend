@@ -133,7 +133,7 @@ public class StudentDegreeController {
     @Secured({"ROLE_DEANOFFICER", "ROLE_STUDENT"})
     @JsonView(StudentView.Degrees.class)
     @GetMapping("/students/{id}/degrees")
-    public ResponseEntity getAllStudentsDegreeById(@PathVariable("id") Integer studentId) {
+    public ResponseEntity getAllStudentDegreesById(@PathVariable("id") Integer studentId) {
         try {
             Student student = studentService.findById(studentId);
             return ResponseEntity.ok(Mapper.map(student, StudentDTO.class));
