@@ -12,4 +12,5 @@ public class FacultyDTO {
     private String abbr;
     private String dean;
     private String deanEng;
+    private String genitiveCase;
 }
