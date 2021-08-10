@@ -14,7 +14,7 @@ public class Faculty extends NameWithEngAndActiveEntity {
     private String abbr;
     private String dean;
     private String deanEng;
-    private String genitiveCase;
+    private String nameGenitive;
 
     public Faculty(int id) {
         setId(id);
