@@ -64,9 +64,14 @@ public class SpecializationService {
         return specializations.size() == 0 ? null : specializations.get(0);
     }
 
-    public Specialization getForSpecialityIfSole(int specialityId, int facultyId){
-        List<Specialization> specializations = specializationRepository.findAllBySpecialityId(specialityId, facultyId);
-        if (specializations.size() == 1){
+    public List<Specialization> getAllActiveBySpecialityAndDegree(int specialityId, int facultyId, int degreeId) {
+        List<Specialization> specializations = specializationRepository.findAllBySpecialityId(specialityId, facultyId, degreeId);
+        return specializations;
+    }
+
+    public Specialization getForSpecialityIfSole(int specialityId, int facultyId, int degreeId) {
+        List<Specialization> specializations = specializationRepository.findAllBySpecialityId(specialityId, facultyId, degreeId);
+        if (specializations.size() == 1) {
             return specializations.get(0);
         } else
             return null;

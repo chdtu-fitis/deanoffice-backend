@@ -77,7 +77,7 @@ public class SpecializationController {
         try {
             List<Specialization> specializations;
             if (facultyId == null)
-                facultyId = FacultyUtil.getUserFacultyIdInt();;
+                facultyId = FacultyUtil.getUserFacultyIdInt();
             if (degreeId == null) {
                 specializations = specializationService.getAllByActive(active, facultyId);
             } else {
