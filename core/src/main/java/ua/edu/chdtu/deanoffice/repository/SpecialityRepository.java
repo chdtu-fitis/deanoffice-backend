@@ -11,7 +11,7 @@ public interface SpecialityRepository extends JpaRepository<Speciality, Integer>
     @Query(value =
             "select s.* from speciality as s " +
             "inner join specialization as sz on s.id = sz.speciality_id " +
-            "where sz.faculty_id = :faculty_id and s.active = true " +
+            "where sz.faculty_id = :faculty_id and s.active = true and sz.active = true " +
             "group by s.id " +
             "order by s.name, s.code",
             nativeQuery = true)
