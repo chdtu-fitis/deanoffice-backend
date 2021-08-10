@@ -112,12 +112,11 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
         return true;
     }
 
-    private boolean isSpecializationPatternMatch(ImportedData importedData) {
+    private boolean isSpecialityPatternMatch(ImportedData importedData) {
         String specialityName = importedData.getFullSpecialityName();
-        String programName = importedData.getProgramName();
         Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
         Matcher specialityMatcher = specialityPattern.matcher(specialityName);
-        if (specialityMatcher.matches() && !Strings.isNullOrEmpty(programName)) {
+        if (specialityMatcher.matches()) {
             return true;
         } else {
             return false;
@@ -298,7 +297,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
         )
             return;
         StudentDegree studentDegreeFromData;
-        if (isSpecializationPatternMatch(importedData)) {
+        if (isSpecialityPatternMatch(importedData)) {
             studentDegreeFromData = getStudentDegreeFromData(importedData);
             if (!isCriticalDataAvailable(studentDegreeFromData)) {
                 String message = "Недостатньо інформації для синхронізації";
