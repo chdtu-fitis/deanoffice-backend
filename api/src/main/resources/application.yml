@@ -26,3 +26,11 @@ swagger.host: localhost:8080
 
 faculty.foreign.id: 8
 
+security:
+  secret: SecretKe487563465347
+# 5 days
+#  expiration-time: 432_000
+# 1 year
+  expiration-time: 31_536_000
+  token-prefix: Bearer
+  header-string: Authorization
