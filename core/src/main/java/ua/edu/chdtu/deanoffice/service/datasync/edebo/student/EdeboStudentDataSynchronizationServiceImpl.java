@@ -333,9 +333,9 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
                 facultyFromDb.getId());
         if (specializationFromDB == null) {
             if (Strings.isNullOrEmpty(specializationFromData.getName()) && specialityFromDb.getCode().length() == 3) {
-                Specialization soleSpecialization = specializationService.getForSpecialityIfSole(specialityFromDb.getId(), facultyId, specializationFromData.getDegree().getId());
-                if (soleSpecialization != null) {
-                    specializationFromDB = soleSpecialization;
+                List<Specialization> specialitySpecializations = specializationService.getAllActiveBySpecialityAndDegree(specialityFromDb.getId(), facultyId, specializationFromData.getDegree().getId());
+                if (specialitySpecializations.size() >= 0) {
+                    specializationFromDB = specialitySpecializations.get(0);
                 }
             }
         }
