@@ -38,9 +38,7 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String certificateIssuedByEng;
     private String specializationName;
     private String specializationNameEng;
-    @Column(updatable = false)
     private int normativeCreditsNumber;
-    @Column(updatable = false)
     private BigDecimal normativeTermOfStudy;
 
     public Specialization() {

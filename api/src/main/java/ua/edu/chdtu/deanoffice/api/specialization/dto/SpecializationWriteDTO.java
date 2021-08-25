@@ -1,15 +1,11 @@
 package ua.edu.chdtu.deanoffice.api.specialization.dto;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
-import ua.edu.chdtu.deanoffice.api.speciality.dto.SpecialityDTO;
-import ua.edu.chdtu.deanoffice.api.teacher.TeacherDTO;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -34,4 +30,6 @@ public class SpecializationWriteDTO {
     private Date certificateDate;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
+    private int normativeCreditsNumber;
+    private BigDecimal normativeTermOfStudy;
 }
