@@ -138,7 +138,7 @@ public class StudentDegreeService {
 
     @Transactional
     public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
-        studentDegreeRepository.assignStudentsToGroup(students, group);
+        studentDegreeRepository.assignStudentsToGroup(students, group, group.getSpecialization());
     }
 
     @Transactional
