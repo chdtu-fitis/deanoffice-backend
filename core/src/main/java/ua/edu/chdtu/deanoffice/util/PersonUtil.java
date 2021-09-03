@@ -42,6 +42,21 @@ public class PersonUtil {
                 + fullNameParts.get(0);
     }
 
+    public static String makeInitialsSurnameFirst(String fullName) {
+        if (fullName == null)
+            return "";
+        List<String> fullNameParts = Arrays.asList(fullName.split(" "));
+        if (fullNameParts.size() < 3) {
+            if (fullNameParts.size() > 0)
+                return fullNameParts.get(0);
+            else
+                return "";
+        }
+        return fullNameParts.get(0) + " "
+                + fullNameParts.get(1).substring(0, 1).toUpperCase() + "."
+                + fullNameParts.get(2).substring(0, 1).toUpperCase() + ". ";
+    }
+
     /**
      * Даний метод оброблює повне імя за такими правилами:
      * 1 - починає всі частини ім'я з великої літери;
