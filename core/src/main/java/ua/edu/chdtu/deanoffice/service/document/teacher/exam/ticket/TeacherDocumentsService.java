@@ -38,6 +38,7 @@ import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 @Service
 public class TeacherDocumentsService {
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "ExamTasks.docx";
+    private static final String QUESTIONS_PATH = "/docs/data/kpz.txt";
 
     private DocumentIOService documentIOService;
     private TeacherService teacherService;
@@ -65,7 +66,7 @@ public class TeacherDocumentsService {
         Department department = departmentService.getById(departmentId);
         StudentGroup group = groupService.getById(groupId);
         ExamTicketsData etData = new ExamTicketsData(teacher, course, department, group, protocolNumber, protocolDate);
-        generateTicketsDoc(template, etData, "/docs/data/kpz.txt");
+        generateTicketsDoc(template, etData, QUESTIONS_PATH);
         return documentIOService.saveDocumentToTemp(template, transliterate("exam-tickets"), FileFormatEnum.DOCX);
     }
 
