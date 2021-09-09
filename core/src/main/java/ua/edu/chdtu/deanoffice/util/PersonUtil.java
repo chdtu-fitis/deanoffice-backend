@@ -24,7 +24,7 @@ public class PersonUtil {
     }
 
     private static String wordToCapitalizedCase(String string) {
-        return string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
+        return processDashInWord(string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase());
     }
 
     public static String makeInitialsSurnameLast(String fullName) {

@@ -46,10 +46,9 @@ public class StudentController {
     public List searchStudentByFullName(
             @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
             @RequestParam(value = "name", defaultValue = "", required = false) String name,
-            @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic,
-            @CurrentUser ApplicationUser user
+            @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic
             ) {
-        List<Student> foundStudents = studentService.searchByFullName(name, surname, patronimic, user.getFaculty().getId());
+        List<Student> foundStudents = studentService.searchByFullName(name, surname, patronimic);
         List<StudentDTO> foundStudentsDTO = map(foundStudents, StudentDTO.class);
         foundStudentsDTO.forEach(studentDTO -> {
             Student student = foundStudents.get(foundStudentsDTO.indexOf(studentDTO));

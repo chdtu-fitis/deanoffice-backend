@@ -14,26 +14,24 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             "where s.name like %:name% " +
             "and s.surname like %:surname% " +
             "and s.patronimic like %:patronimic% " +
-            "and sd.specialization.faculty.id = :faculty_id " +
             "group by s.id " +
             "order by s.name, s.surname, s.patronimic")
     List<Student> findAllByFullNameUkr(
             @Param("name") String name,
             @Param("surname") String surname,
-            @Param("patronimic") String patronimic,
-            @Param("faculty_id") int facultyId
+            @Param("patronimic") String patronimic
     );
 
-    @Query("select s from Student s " +
-            "where s.name = :name " +
-            "and s.surname = :surname " +
-            "and s.patronimic = :patronimic " +
-            "order by s.surname, s.name, s.patronimic")
-    List<Student> findAllByFullNameUkr(
-            @Param("name") String name,
-            @Param("surname") String surname,
-            @Param("patronimic") String patronimic
-            );
+//    @Query("select s from Student s " +
+//            "where s.name = :name " +
+//            "and s.surname = :surname " +
+//            "and s.patronimic = :patronimic " +
+//            "order by s.surname, s.name, s.patronimic")
+//    List<Student> findAllByFullNameUkr(
+//            @Param("name") String name,
+//            @Param("surname") String surname,
+//            @Param("patronimic") String patronimic
+//            );
 
     @Query("select s from Student s " +
             "where s.name = :name " +
