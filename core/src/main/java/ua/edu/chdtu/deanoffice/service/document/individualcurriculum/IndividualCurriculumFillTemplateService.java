@@ -362,7 +362,7 @@ public class IndividualCurriculumFillTemplateService {
     }
 
     private List<Integer> getSemestersByCourseForGroup(StudentGroup studentGroup, int studyYear) {
-        int course = studyYear - studentGroup.getCreationYear() + studentGroup.getBeginYears();
+        int course = studyYear - studentGroup.getCreationYear() + studentGroup.getRealBeginYear();
         return Arrays.asList(course * 2 - 1, course * 2);
     }
 }
