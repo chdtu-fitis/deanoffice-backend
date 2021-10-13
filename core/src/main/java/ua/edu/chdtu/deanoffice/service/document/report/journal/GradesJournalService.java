@@ -143,10 +143,10 @@ public class GradesJournalService {
                         + studentDegree.getStudent().getName() + " "
                         + studentDegree.getStudent().getPatronimic(), font);
                 PdfPCell studentCell = new PdfPCell(studentText);
-                studentCell.setFixedHeight(28);
+                studentCell.setFixedHeight(21);
                 studentCell.setBorderWidthRight(0);
                 PdfPCell isContractCell = new PdfPCell();
-                isContractCell.setFixedHeight(28);
+                isContractCell.setFixedHeight(21);
                 isContractCell.setBorderWidthLeft(0);
                 if (studentDegree.getPayment() == Payment.CONTRACT) {
                     isContractCell.addElement(new Phrase("к", boldFont));
@@ -246,14 +246,14 @@ public class GradesJournalService {
                 for (CourseForGroup courseForGroup : courseForGroups) {
                     PdfPCell knowledgeControl = new PdfPCell(new Phrase(
                             getKnowledgeControlNameById(courseForGroup.getCourse().getKnowledgeControl().getId()), font2));
-                    knowledgeControl.setFixedHeight(28);
+                    knowledgeControl.setFixedHeight(getCourseLineHeight(j));
                     knowledgeControl.setPadding(0);
                     knowledgeControl.setHorizontalAlignment(Element.ALIGN_CENTER);
                     knowledgeControl.setRotation(270);
                     table.addCell(knowledgeControl);
                     String courseName = courseForGroup.getCourse().getCourseName().getName();
                     PdfPCell courseNameCell = new PdfPCell(new Phrase(courseName, courseName.length() < MAX_CHARS_NUMBER_IN_COURSE_NAME_FOR_BIGGER_FONT ? font1 : font2));
-                    courseNameCell.setFixedHeight(28);
+                    courseNameCell.setFixedHeight(getCourseLineHeight(j));
                     table.addCell(courseNameCell);
                 }
                 if(isOneSemesterOnly)
@@ -273,6 +273,10 @@ public class GradesJournalService {
         }
 
         return tableMain;
+    }
+
+    private int getCourseLineHeight(int j) {
+        return j == 0 ? 27 : 35;
     }
 
     private String getKnowledgeControlNameById(int id) {
