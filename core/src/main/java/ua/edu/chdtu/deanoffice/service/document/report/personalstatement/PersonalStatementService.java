@@ -363,7 +363,7 @@ public class PersonalStatementService {
         commonDict.put("ThesisName", thesis.get(0));
         commonDict.put("ThesisName2", thesis.get(1));
         commonDict.put("DeanName", studentDegree.getSpecialization().getFaculty().getDean() != null ?
-                PersonUtil.makeInitialsSurnameLast(
+                PersonUtil.makeNameThenSurnameInCapital(
                         studentDegree.getSpecialization().getFaculty().getDean()) : "");
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;

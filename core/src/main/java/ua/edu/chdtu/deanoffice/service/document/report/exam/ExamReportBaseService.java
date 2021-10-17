@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeNameThenSurnameInCapital;
 
 public class ExamReportBaseService {
 
@@ -67,9 +67,11 @@ public class ExamReportBaseService {
         int currentYear = dbCurrentYear + 1 - (course.getSemester() % 2);
         result.put("Year", String.valueOf(currentYear).substring(2));
         result.put("KCType", course.getKnowledgeControl().getName());
-        if (courseForGroup.getTeacher() != null) {
-            result.put("TeacherName", courseForGroup.getTeacher().getFullNameUkr());
-            result.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
+        Teacher teacher = courseForGroup.getTeacher();
+        if (teacher != null) {
+            String teacherTitle = teacher.getAcademicTitle() != null ? teacher.getAcademicTitle().getNameUkr() : "";
+            result.put("TeacherName", teacherTitle + " " + teacher.getSurname() + " " + teacher.getName() + " " + teacher.getPatronimic());
+            result.put("TeacherInitials", makeNameThenSurnameInCapital(teacher.getName(), teacher.getSurname()));
         }
         result.put("Semester", String.format("%d-й", courseForGroup.getCourse().getSemester()));
         return result;
@@ -83,7 +85,7 @@ public class ExamReportBaseService {
         result.put("Speciality", speciality.getCode() + " " + speciality.getName());
         result.put("Specialization", studentGroup.getSpecialization().getName());
         result.put("FacultyAbbr", studentGroup.getSpecialization().getFaculty().getAbbr());
-        result.put("DeanInitials", makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()));
+        result.put("DeanInitials", makeNameThenSurnameInCapital(studentGroup.getSpecialization().getFaculty().getDean()));
         result.put("Degree", studentGroup.getSpecialization().getDegree().getName());
         int dbCurrentYear = currentYearService.get().getCurrYear();
         result.put("Course", String.format("%d", dbCurrentYear - courseForGroup.getStudentGroup().getCreationYear() + courseForGroup.getStudentGroup().getBeginYears()));

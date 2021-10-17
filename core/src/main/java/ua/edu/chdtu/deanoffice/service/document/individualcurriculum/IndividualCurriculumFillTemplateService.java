@@ -114,12 +114,11 @@ public class IndividualCurriculumFillTemplateService {
         replacements.put("AG", TemplateUtil.getValueSafely(degree.getStudentGroup().getName()));
 
         String studentName = degree.getStudent().getFullNameUkr();
-        String studentInitials = degree.getStudent().getInitialsUkr();
         replacements.put("StudentName", studentName);
-        replacements.put("StudentAbr", studentInitials);
+        replacements.put("StudentAbr", PersonUtil.makeNameThenSurnameInCapital(degree.getStudent().getName(), degree.getStudent().getSurname()));
 
         String dean = degree.getStudentGroup().getSpecialization().getFaculty().getDean();
-        replacements.put("DeanAbr", PersonUtil.makeInitialsSurnameLast(dean));
+        replacements.put("DeanAbr", PersonUtil.makeNameThenSurnameInCapital(dean));
 
         replacements.put("RecNum", degree.getSupplementNumber());
 

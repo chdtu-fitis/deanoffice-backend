@@ -78,7 +78,7 @@ public class QualificationWorkReportService {
             document.add(fillTable(baseFont, studentGroup));
             Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
                     + "                                                             "
-                    + PersonUtil.makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()), font);
+                    + PersonUtil.makeNameThenSurnameInCapital(studentGroup.getSpecialization().getFaculty().getDean()), font);
             textBottom.setSpacingBefore(50f);
             textBottom.setIndentationLeft(24f);
             document.add(textBottom);

@@ -24,6 +24,7 @@ import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLAT
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.getAllElementsFromObject;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.replaceInRow;
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeNameThenSurnameInCapital;
 
 @Service
 public class ExamReportForForeignStudentService extends ExamReportBaseService {
@@ -165,7 +166,7 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
         Speciality speciality = studentDegree.getSpecialization().getSpeciality();
         result.put("Speciality", speciality.getCode() + " " + speciality.getName());
         result.put("FAbbr", studentDegree.getSpecialization().getFaculty().getAbbr());
-        result.put("DeanInitials", makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));/////
+        result.put("DeanInitials", makeNameThenSurnameInCapital(studentDegree.getSpecialization().getFaculty().getDean()));/////
         result.put("StudyYear", getStudyYear());
         result.put("StudentInitials", studentDegree.getStudent().getFullNameUkr());
         result.put("RecBook", studentDegree.getRecordBookNumber());

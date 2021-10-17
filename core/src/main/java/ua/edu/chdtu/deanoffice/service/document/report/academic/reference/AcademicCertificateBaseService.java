@@ -62,8 +62,8 @@ public class AcademicCertificateBaseService {
         result.put("ModeOfStudyUkr", mode.getModeOfStudyUkr());
         result.put("ModeOfStudyEng", mode.getModeOfStudyEng());
 
-        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
-        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
+//        result.put("dean", PersonUtil.makeNameThenSurnameInCapital(studentDegree.getSpecialization().getFaculty().getDean()));
+//        result.put("deanEng", PersonUtil.makeNameThenSurnameInCapital(studentDegree.getSpecialization().getFaculty().getDeanEng()));
 
         result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
         result.put("today", formatDate(new Date()));

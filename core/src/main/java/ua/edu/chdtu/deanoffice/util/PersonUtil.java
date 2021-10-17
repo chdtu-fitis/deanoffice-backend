@@ -42,6 +42,22 @@ public class PersonUtil {
                 + fullNameParts.get(0);
     }
 
+    public static String makeNameThenSurnameInCapital(String fullName) {
+        if (fullName == null)
+            return "";
+        String[] fullNameParts = fullName.split(" ");
+        if (fullNameParts.length == 1)
+            return fullNameParts[0].toUpperCase();
+        else
+            return fullNameParts[1] + " " + fullNameParts[0].toUpperCase();
+    }
+
+    public static String makeNameThenSurnameInCapital(String name, String surname) {
+        if (name == null || surname == null)
+            return "";
+        return name + " " + surname.toUpperCase();
+    }
+
     /**
      * Даний метод оброблює повне імя за такими правилами:
      * 1 - починає всі частини ім'я з великої літери;
