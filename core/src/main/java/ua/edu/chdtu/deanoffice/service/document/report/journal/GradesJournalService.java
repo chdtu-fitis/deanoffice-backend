@@ -140,8 +140,7 @@ public class GradesJournalService {
             }
             for (StudentDegree studentDegree : studentDegrees) {
                 Phrase studentText = new Phrase(studentDegree.getStudent().getSurname() + " "
-                        + studentDegree.getStudent().getName() + " "
-                        + studentDegree.getStudent().getPatronimic(), font);
+                        + studentDegree.getStudent().getName(), font);
                 PdfPCell studentCell = new PdfPCell(studentText);
                 studentCell.setFixedHeight(21);
                 studentCell.setBorderWidthRight(0);
