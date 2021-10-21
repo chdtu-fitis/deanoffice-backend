@@ -54,10 +54,13 @@ public class StudentAcademicVacationService {
     }
 
     @Transactional
-    public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
+    public RenewedAcademicVacationStudent renew(StudentAcademicVacation studentAcademicVacation,
+                                                RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
         updateStudentDegree(renewedAcademicVacationStudent);
+        studentAcademicVacation.setActive(false);
+        studentAcademicVacationRepository.save(studentAcademicVacation);
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
     }
 

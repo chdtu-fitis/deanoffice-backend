@@ -99,7 +99,7 @@ public class StudentAcademicVacationController {
     public ResponseEntity getAllAcademicVacations(@CurrentUser ApplicationUser user) {
         try {
             List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getAll(user.getFaculty().getId());
-            return ResponseEntity.ok(Mapper.map(academicVacations, StudentAcademicVacationDTO.class));
+            return ResponseEntity.ok(Mapper.strictMap(academicVacations, StudentAcademicVacationDTO.class));
         } catch (Exception exception) {
             return handleException(exception);
         }
@@ -122,14 +122,14 @@ public class StudentAcademicVacationController {
             @RequestBody RenewedAcademicVacationStudentDTO renewedAcademicVacationStudentDTO
     ) {
         try {
-            Integer studentDegreeId = this.studentAcademicVacationService
-                    .getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId())
-                    .getStudentDegree().getId();
+            StudentAcademicVacation studentAV = this.studentAcademicVacationService
+                    .getById(renewedAcademicVacationStudentDTO.getStudentAcademicVacationId());
+            Integer studentDegreeId = studentAV.getStudentDegree().getId();
             if (studentUtil.studentDegreeIsActive(studentDegreeId)) {
                 return handleException(new OperationCannotBePerformedException("Даний студент не брав академвідпустки"));
             }
             Integer id = studentAcademicVacationService
-                    .renew(createRenewedAcademicVacationStudent(renewedAcademicVacationStudentDTO))
+                    .renew(studentAV, createRenewedAcademicVacationStudent(renewedAcademicVacationStudentDTO))
                     .getId();
             URI location = getNewResourceLocation(id);
             return ResponseEntity.created(location).build();
