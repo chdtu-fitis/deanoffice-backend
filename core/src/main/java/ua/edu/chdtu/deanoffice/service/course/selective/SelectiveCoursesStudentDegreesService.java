@@ -210,7 +210,7 @@ public class SelectiveCoursesStudentDegreesService {
         List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegreesFromDB = selectiveCoursesStudentDegreesRepository
                 .findAll(SelectiveCoursesStudentDegreeSpecification.getSelectiveCoursesStudentDegree(true, studyYear, Arrays.asList(studentDegreeId)));
 
-        List<SelectiveCourse> selectiveCoursesToAdd = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCoursesIdsToAdd, false);
+        List<SelectiveCourse> selectiveCoursesToAdd = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCoursesIdsToAdd);
         List<SelectiveCourse> selectiveCoursesToDrop = selectiveCoursesStudentDegreesFromDB.stream()
                 .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
                 .filter(selectiveCourse -> selectiveCoursesIdsToDrop.contains(selectiveCourse.getId()))
@@ -261,7 +261,7 @@ public class SelectiveCoursesStudentDegreesService {
     public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds)
             throws OperationCannotBePerformedException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        List<SelectiveCourse> selectiveCourses = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIds, true);
+        List<SelectiveCourse> selectiveCourses = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIds);
 
         List<SelectiveCourse> activeStudentDegreeSelectiveCoursesFromDB =
                 getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, studyYear, studentDegreeId).getSelectiveCourses();
@@ -280,15 +280,15 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     private List<SelectiveCourse> getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(
-            int studyYear, StudentDegree studentDegree, List<Integer> selectiveCourseIds, boolean nextYearSemesters) throws OperationCannotBePerformedException {
+            int calendarYear, StudentDegree studentDegree, List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
         if (studentDegree == null)
             throw new OperationCannotBePerformedException("Не існує student degree за таким id");
 
-        int studentYear = studentDegreeService.getStudentDegreeYear(studentDegree) + (nextYearSemesters ? 1 : 0);
+        int studentYear = studentDegreeService.getStudentDegreeYear(studentDegree, calendarYear);// + (nextYearSemesters ? 1 : 0);
         List<Integer> semesters = Arrays.asList(studentYear * 2 - 1, studentYear * 2);
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.
-                findAvailableByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree.getSpecialization().getDegree().getId(), semesters, selectiveCourseIds);
+                findAvailableByStudyYearAndDegreeAndSemestersAndIds(calendarYear, studentDegree.getSpecialization().getDegree().getId(), semesters, selectiveCourseIds);
         if (selectiveCourses.size() == 0)
             throw new OperationCannotBePerformedException("Для даного студента відсутні задані вибіркові дисципліни");
 
