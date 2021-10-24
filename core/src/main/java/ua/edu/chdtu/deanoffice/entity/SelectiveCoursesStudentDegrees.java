@@ -14,8 +14,17 @@ import java.util.List;
 @Setter
 public class SelectiveCoursesStudentDegrees extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    StudentDegree studentDegree;
+    private StudentDegree studentDegree;
     @ManyToOne(fetch = FetchType.LAZY)
-    SelectiveCourse selectiveCourse;
+    private SelectiveCourse selectiveCourse;
     private boolean active;
+
+    public SelectiveCoursesStudentDegrees() {
+    }
+
+    public SelectiveCoursesStudentDegrees(StudentDegree studentDegree, SelectiveCourse selectiveCourse) {
+        this.studentDegree = studentDegree;
+        this.selectiveCourse = selectiveCourse;
+        this.active = true;
+    }
 }

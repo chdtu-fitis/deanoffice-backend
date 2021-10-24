@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
@@ -24,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
 
 @Service
 public class SelectiveCoursesStudentDegreesService {
@@ -258,26 +261,26 @@ public class SelectiveCoursesStudentDegreesService {
         return semesters;
     }
 
-    public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds)
-            throws OperationCannotBePerformedException {
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        List<SelectiveCourse> selectiveCourses = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIds);
-
-        List<SelectiveCourse> activeStudentDegreeSelectiveCoursesFromDB =
-                getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, studyYear, studentDegreeId).getSelectiveCourses();
-        if (activeStudentDegreeSelectiveCoursesFromDB == null)
-            activeStudentDegreeSelectiveCoursesFromDB = selectiveCourses;
-        else
-            activeStudentDegreeSelectiveCoursesFromDB.addAll(selectiveCourses);
-
-        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, activeStudentDegreeSelectiveCoursesFromDB))
-            throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
-
-        List<SelectiveCourse> selectiveCoursesAfterSave = create(createSelectiveCoursesStudentDegreesList(selectiveCourses, studentDegree)).stream()
-                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
-
-        return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
-    }
+//    public SelectiveCoursesStudentDegree enrollStudentInSelectiveCourses(int studyYear, int studentDegreeId, List<Integer> selectiveCourseIds)
+//            throws OperationCannotBePerformedException {
+//        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+//        List<SelectiveCourse> selectiveCourses = getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(studyYear, studentDegree, selectiveCourseIds);
+//
+//        List<SelectiveCourse> activeStudentDegreeSelectiveCoursesFromDB =
+//                getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, studyYear, studentDegreeId).getSelectiveCourses();
+//        if (activeStudentDegreeSelectiveCoursesFromDB == null)
+//            activeStudentDegreeSelectiveCoursesFromDB = selectiveCourses;
+//        else
+//            activeStudentDegreeSelectiveCoursesFromDB.addAll(selectiveCourses);
+//
+//        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, activeStudentDegreeSelectiveCoursesFromDB))
+//            throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
+//
+//        List<SelectiveCourse> selectiveCoursesAfterSave = create(createSelectiveCoursesStudentDegreesList(selectiveCourses, studentDegree)).stream()
+//                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse).collect(Collectors.toList());
+//
+//        return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
+//    }
 
     private List<SelectiveCourse> getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(
             int calendarYear, StudentDegree studentDegree, List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
@@ -306,5 +309,91 @@ public class SelectiveCoursesStudentDegreesService {
         }
 
         return selectiveCoursesStudentDegreesList;
+    }
+
+    @Transactional
+    public int registerMultipleStudentsForSelectiveCourses(List<StudentDegree> studentDegrees,
+                                                            List<SelectiveCourse> selectiveCourses,
+                                                            int registrationYear) {
+        List<SelectiveCoursesStudentDegrees> scsdList = new ArrayList<>();
+        int successful = 0;
+        for (StudentDegree studentDegree : studentDegrees) {
+            List<SelectiveCoursesStudentDegrees> alreadyRegistered =
+                    selectiveCoursesStudentDegreesRepository.findActiveByStudentDegreeAndYear(registrationYear, studentDegree.getId());
+            if (checkIntegrityWithIfNumberDoesntExceedAllowed(studentDegree, selectiveCourses, registrationYear)) {
+                for (SelectiveCourse selectiveCourse : selectiveCourses) {
+                    SelectiveCoursesStudentDegrees scsd = new SelectiveCoursesStudentDegrees(studentDegree, selectiveCourse);
+                    scsdList.add(scsd);
+                }
+                successful++;
+            }
+        }
+        this.selectiveCoursesStudentDegreesRepository.save(scsdList);
+        return successful;
+    }
+
+/*checks 1.if the number of courses correspond the rules: number of GENERAL and PROFESSIONAl courses by semesters;
+2.if courses semesters correspond student year;
+3. if all selective courses are for right registration year (usually, the next of the current study year)*/
+    public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
+        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) + 1 : studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+
+        Map<String, Integer[]> selCoursesNumbersByRule =
+                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
+        Integer general[] = {0, 0};
+        Integer professional[] = {0, 0};
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            if (selectiveCourse.getStudyYear() != currentYearService.getYear() + 1
+                    || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
+                return false;
+            int semester = selectiveCourse.getCourse().getSemester();
+            if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
+                return false;
+            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
+                general[1 - semester % 2]++;
+            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
+                professional[1 - semester % 2]++;
+        }
+//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
+//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
+        if (general[0]+general[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
+                || professional[0]+professional[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+            return false;
+        }
+        return true;
+    }
+
+/*checks 1.if the number of courses does not exceed the allowed with rules: number of GENERAL and PROFESSIONAl courses by semesters;
+2.if courses semesters correspond student year;
+3.if all selective courses are for right registration year*/
+    public boolean checkIntegrityWithIfNumberDoesntExceedAllowed(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
+        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
+                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree, registrationYear) :
+                studentDegreeService.getStudentDegreeYear(studentDegree, registrationYear);
+
+        Map<String, Integer[]> selCoursesNumbersByRule =
+                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
+        Integer general[] = {0, 0};
+        Integer professional[] = {0, 0};
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            if (selectiveCourse.getStudyYear() != registrationYear
+                    || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
+                return false;
+            int semester = selectiveCourse.getCourse().getSemester();
+            if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
+                return false;
+            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
+                general[1 - semester % 2]++;
+            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
+                professional[1 - semester % 2]++;
+        }
+//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
+//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
+        if (general[0]+general[1] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
+                || professional[0]+professional[1] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+            return false;
+        }
+        return true;
     }
 }

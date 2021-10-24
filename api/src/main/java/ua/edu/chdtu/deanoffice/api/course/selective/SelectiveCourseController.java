@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentD
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeSubstitutionDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeIdDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteManyDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionRulesDTO;
@@ -301,7 +302,7 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD", "ROLE_STUDENT"})
     @PostMapping("/registration")
-    public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
+    public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> registerOnSelectiveCourses(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
             throws OperationCannotBePerformedException {
 
         int selectiveCoursesRegistrationYear = currentYearService.getYear();
@@ -350,6 +351,30 @@ public class SelectiveCourseController {
             return ResponseEntity.ok().build();
     }
 
+    @Secured({"ROLE_NAVCH_METHOD"})
+    @PostMapping("/registration/multiple")
+    public ResponseEntity registerMultipleOnSelectiveCourses(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteManyDTO selectiveCoursesStudentDegreesDTO)
+            throws OperationCannotBePerformedException {
+        int scRegistrationYear = selectiveCoursesStudentDegreesDTO.getStudyYear();
+        if (scRegistrationYear > currentYearService.getYear() + 1)
+            return new ResponseEntity("Не можна призначати вибіркові дисципліни на багато років вперед", HttpStatus.UNPROCESSABLE_ENTITY);
+        List<StudentDegree> studentDegrees = studentDegreeService.getByIds(selectiveCoursesStudentDegreesDTO.getStudentDegrees());
+        if (studentDegrees.size() != selectiveCoursesStudentDegreesDTO.getStudentDegrees().size())
+            return new ResponseEntity("Не можна призначати вибіркові дисципліни студентам, що не навчаються в даний час", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (studentDegrees.stream().anyMatch(sd -> !sd.isActive()))
+            return new ResponseEntity("Не можна призначати вибіркові дисципліни студентам, що не навчаються в даний час", HttpStatus.UNPROCESSABLE_ENTITY);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
+        if (selectiveCourses.size() != selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size())
+            return new ResponseEntity("Не можна призначати студентам неіснуючі вибіркові дисципліни", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (selectiveCourses.stream().anyMatch(sc -> sc.getStudyYear() != scRegistrationYear))
+            return new ResponseEntity("Рік вибіркової дисципліни не відповідає року, на який ведеться реєстрація", HttpStatus.UNPROCESSABLE_ENTITY);
+        int registered = selectiveCoursesStudentDegreesService.registerMultipleStudentsForSelectiveCourses(studentDegrees, selectiveCourses, scRegistrationYear);
+        String result = "Успішно зареєстровано вибіркові дисципліни для " + registered + " студентів.";
+        if (studentDegrees.size() != registered)
+            result += " " + (studentDegrees.size() - registered) + " студентів не вдалося зареєструвати на вибіркові дисципліни внаслідок порушення кількісних вимог або неправильних атрибутів у дисциплінах";
+        return new ResponseEntity(result, HttpStatus.OK);
+    }
+
     private boolean checkRecordOnSelectiveCoursesData(StudentDegree studentDegree, boolean isSecondRound, List<SelectiveCourse> selectiveCourses)
             throws OperationCannotBePerformedException {
 
@@ -364,7 +389,7 @@ public class SelectiveCourseController {
         if (selectiveCourses == null || selectiveCourses.size() == 0) {
             throw new OperationCannotBePerformedException("Неправильні ідентифікатори предметів");
         }
-        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+        if (!selectiveCoursesStudentDegreesService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
             throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
         }
         return true;
@@ -491,15 +516,15 @@ public class SelectiveCourseController {
         return ResponseEntity.ok(map(selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO.class));
     }
 
-    @PostMapping("/enrolling")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO)
-            throws OperationCannotBePerformedException {
-
-        if (studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
-            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
-        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.enrollStudentInSelectiveCourses(
-                studentEnrollingInSelectiveCoursesDTO.getStudyYear(),
-                studentEnrollingInSelectiveCoursesDTO.getStudentDegree().getId(),
-                studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
-    }
+//    @PostMapping("/enrolling")
+//    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO)
+//            throws OperationCannotBePerformedException {
+//
+//        if (studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
+//            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
+//        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.enrollStudentInSelectiveCourses(
+//                studentEnrollingInSelectiveCoursesDTO.getStudyYear(),
+//                studentEnrollingInSelectiveCoursesDTO.getStudentDegree().getId(),
+//                studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
+//    }
 }

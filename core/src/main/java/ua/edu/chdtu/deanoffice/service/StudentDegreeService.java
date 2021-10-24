@@ -271,6 +271,12 @@ public class StudentDegreeService {
         return currentYear - groupCreationYear + groupFirstYear;
     }
 
+    public int getShortenedRealStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
+        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+        int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
+        return calendarYear - groupCreationYear + groupFirstYear;
+    }
+
     public List<StudentDegree> getAllStudentDegreesByStudentSurname(String surname) {
         List<StudentDegree> studentDegrees = studentDegreeRepository.findAllStudentDegreesByStudentSurname(surname);
         return studentDegrees;
