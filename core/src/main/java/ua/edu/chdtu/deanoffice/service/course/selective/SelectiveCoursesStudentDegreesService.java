@@ -5,7 +5,6 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
@@ -287,7 +286,7 @@ public class SelectiveCoursesStudentDegreesService {
         if (studentDegree == null)
             throw new OperationCannotBePerformedException("Не існує student degree за таким id");
 
-        int studentYear = studentDegreeService.getStudentDegreeYear(studentDegree, calendarYear);// + (nextYearSemesters ? 1 : 0);
+        int studentYear = studentDegreeService.getRealStudentDegreeYear(studentDegree, calendarYear);// + (nextYearSemesters ? 1 : 0);
         List<Integer> semesters = Arrays.asList(studentYear * 2 - 1, studentYear * 2);
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.
@@ -336,8 +335,7 @@ public class SelectiveCoursesStudentDegreesService {
 2.if courses semesters correspond student year;
 3. if all selective courses are for right registration year (usually, the next of the current study year)*/
     public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
-        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) + 1 : studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
+        int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree) + 1;
 
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
@@ -368,9 +366,7 @@ public class SelectiveCoursesStudentDegreesService {
 2.if courses semesters correspond student year;
 3.if all selective courses are for right registration year*/
     public boolean checkIntegrityWithIfNumberDoesntExceedAllowed(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
-        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree, registrationYear) :
-                studentDegreeService.getStudentDegreeYear(studentDegree, registrationYear);
+        int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree, registrationYear);
 
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];

@@ -251,27 +251,27 @@ public class StudentDegreeService {
                 ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
 
-    public int getStudentDegreeYear(StudentDegree studentDegree) {
-        int currentYear = currentYearService.getYear();
-        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
-        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
-        return currentYear - groupCreationYear + groupFirstYear;
-    }
+//    public int getStudentDegreeYear(StudentDegree studentDegree) {
+//        int currentYear = currentYearService.getYear();
+//        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+//        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
+//        return currentYear - groupCreationYear + groupFirstYear;
+//    }
 
-    public int getStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
-        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
-        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
-        return calendarYear - groupCreationYear + groupFirstYear;
-    }
+//    public int getStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
+//        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+//        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
+//        return calendarYear - groupCreationYear + groupFirstYear;
+//    }
 
-    public int getShortenedRealStudentDegreeYear(StudentDegree studentDegree) {
+    public int getRealStudentDegreeYear(StudentDegree studentDegree) {
         int currentYear = currentYearService.getYear();
         int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
         int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
         return currentYear - groupCreationYear + groupFirstYear;
     }
 
-    public int getShortenedRealStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
+    public int getRealStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
         int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
         int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
         return calendarYear - groupCreationYear + groupFirstYear;

@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
@@ -79,8 +78,7 @@ public class SelectiveCourseService {
     }
 
     public PeriodCaseEnum getPeriodCaseByStudentDegree(StudentDegree studentDegree) {
-        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
+        int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree);
 
         if (studentDegreeYear < studentDegree.getStudentGroup().getRealBeginYear())
             return PeriodCaseEnum.LATE;
