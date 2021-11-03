@@ -11,32 +11,58 @@ import org.docx4j.wml.Tr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.EctsGrade;
+import ua.edu.chdtu.deanoffice.entity.Grade;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
+import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
-import ua.edu.chdtu.deanoffice.repository.CourseRepository;
+import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentAcademicVacationService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
-import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.PracticeReport;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.AcademicVacationReport;
+import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.PracticeReport;
 import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.QualificationReport;
-import ua.edu.chdtu.deanoffice.util.*;
+import ua.edu.chdtu.deanoffice.util.DateUtil;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
+import ua.edu.chdtu.deanoffice.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 import static ua.edu.chdtu.deanoffice.util.LanguageUtil.transliterate;
 
 @Service
-public class PersonalStatementService {
+public class StudentOneYearGradesAbstractService {
 
     private static final String TEMPLATE_PATH_FRONT = TEMPLATES_PATH + "PersonalWrapperFront.docx";
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "PersonalStatement.docx";
@@ -49,6 +75,8 @@ public class PersonalStatementService {
     private CourseRepository courseRepository;
     @Autowired
     private GradeService gradeService;
+    @Autowired
+    private GradeRepository gradeRepository;
     @Autowired
     private DocumentIOService documentIOService;
     @Autowired
@@ -95,6 +123,80 @@ public class PersonalStatementService {
         return gradeService.getGradeMapForStudents(groupsWithStudentIds, courseIdsForGroups);
     }
 
+    public Map<StudentDegree, List<StudentGradeAbstractBean>> sortByKnowledgeControls(Map<StudentDegree, List<StudentGradeAbstractBean>> fullGradeMapForStudent) {
+        for (StudentDegree studentDegree :fullGradeMapForStudent.keySet()){
+            Collections.sort(fullGradeMapForStudent.get(studentDegree), new Comparator<StudentGradeAbstractBean>() {
+                @Override
+                public int compare(StudentGradeAbstractBean o1, StudentGradeAbstractBean o2) {
+                    return new Integer(o1.getGrade().getCourse().getKnowledgeControl().getId()).compareTo(
+                            o2.getGrade().getCourse().getKnowledgeControl().getId());
+
+                }
+            });
+        }
+        return fullGradeMapForStudent;
+    }
+
+    //For regular courses
+    public Map<StudentDegree, List<StudentGradeAbstractBean>> getGradeMapForStudents(Map<StudentGroup, List<StudentDegree>> groupsWithStudents,
+                                                                                     Map<StudentGroup, List<CourseForGroup>> coursesForGroup) {
+        Map<StudentDegree, List<StudentGradeAbstractBean>> gradesForStudents = new HashMap<StudentDegree, List<StudentGradeAbstractBean>>();
+
+        for (StudentGroup group : groupsWithStudents.keySet()) {
+            List<StudentDegree> studentDegrees = groupsWithStudents.get(group);
+            Map<Integer, Date> courseIdsWithDate = coursesForGroup.get(group)
+                    .stream()
+                    .collect(HashMap::new, (m,v)->m.put(v.getCourse().getId(), v.getExamDate()), HashMap::putAll);
+
+            Map<StudentDegree, List<StudentGradeAbstractBean>> gradesForGroup = studentDegrees.stream().collect(
+                    toMap(studentDegree -> studentDegree,
+                            studentDegree -> getStudentOneYearGradesBean(studentDegree.getId(),courseIdsWithDate)));
+            gradesForStudents = concatStudentOneYearGrades(gradesForStudents,gradesForGroup);
+        }
+
+        return gradesForStudents;
+    }
+
+    //For selective courses
+    public Map<StudentDegree, List<StudentGradeAbstractBean>> getGradeMapForStudents(Map<StudentDegree, List<Integer>> selectiveCourseIdsForStudent) {
+        Map<StudentDegree, List<StudentGradeAbstractBean>> gradesForSelective = new HashMap<StudentDegree, List<StudentGradeAbstractBean>>();
+        Set<StudentDegree> studentDegrees = selectiveCourseIdsForStudent.keySet();
+        gradesForSelective = studentDegrees.stream().collect(
+                toMap(studentDegree -> studentDegree,
+                        studentDegree -> {
+                            if (!selectiveCourseIdsForStudent.get(studentDegree).isEmpty())
+                                return getStudentOneYearSelectiveGradesBean(studentDegree.getId(), selectiveCourseIdsForStudent.get(studentDegree));
+                            else
+                                return new ArrayList<>();
+                        }));
+        return gradesForSelective;
+    }
+
+    public Map<StudentDegree, List<StudentGradeAbstractBean>> concatStudentOneYearGrades(Map<StudentDegree, List<StudentGradeAbstractBean>> grades1,
+                                                                                         Map<StudentDegree, List<StudentGradeAbstractBean>> grades2){
+        return Stream.of(grades1, grades2)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> new ArrayList<>(e.getValue()),
+                        (left, right) -> {left.addAll(right); return left;}
+                ));
+    }
+
+    public List<StudentGradeAbstractBean> getStudentOneYearGradesBean(Integer studentDegreeId, Map<Integer, Date> courseIdsWithDate) {
+        return gradeRepository.getByStudentDegreeIdAndCourses(studentDegreeId, new ArrayList<>(courseIdsWithDate.keySet()))
+                .stream()
+                .map(grade -> new StudentGradeAbstractBean(grade,courseIdsWithDate.get(grade.getCourse().getId()),false))
+                .collect(toList());
+    }
+
+    public List<StudentGradeAbstractBean> getStudentOneYearSelectiveGradesBean(Integer studentDegreeId, List<Integer> courseIds) {
+        return gradeRepository.getByStudentDegreeIdAndCourses(studentDegreeId, courseIds)
+                .stream()
+                .map(grade -> new StudentGradeAbstractBean(grade,null,true))
+                .collect(toList());
+    }
+
     private void generateTables(WordprocessingMLPackage template, YearGrades yearGrades, Integer year) {
         Tbl templateTable = (Tbl) getAllElementsFromObject(template.getMainDocumentPart(), Tbl.class).get(0);
         List<StudentDegree> studentDegrees = new ArrayList<>(yearGrades.getGradeMapForFirstSemester().keySet());
@@ -115,7 +217,7 @@ public class PersonalStatementService {
         replaceInRow(tableRows.get(0), getStudentDictionary(student));
     }
 
-    private void formSemesterInTable(Tbl table, List<Grade> grades, Integer year, SemesterType semesterType, StudentDegree studentDegree) {
+    private void formSemesterInTable(Tbl table, List<StudentGradeAbstractBean> gradeBeans, Integer year, SemesterType semesterType, StudentDegree studentDegree) {
         List<Tr> tableRows = (List<Tr>) (Object) getAllElementsFromObject(table, Tr.class);
         int currentIndex = 2, rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_FIRST_SEMESTER_TABLE;
         if (semesterType == SemesterType.SECOND) {
@@ -123,11 +225,11 @@ public class PersonalStatementService {
             rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_TABLE;
         }
         Tr rowToCopy = tableRows.get(currentIndex);
-        if (grades != null) {
-            fillRowByGrade(tableRows.get(currentIndex - 1), grades.get(0), year);
-            for (Grade grade : grades.subList(1, grades.size())) {
+        if (gradeBeans != null) {
+            fillRowByGrade(tableRows.get(currentIndex - 1), gradeBeans.get(0), year);
+            for (StudentGradeAbstractBean gradeBean : gradeBeans.subList(1, gradeBeans.size())) {
                 Tr newRow = XmlUtils.deepCopy(rowToCopy);
-                fillRowByGrade(newRow, grade, year);
+                fillRowByGrade(newRow, gradeBean, year);
                 table.getContent().add(currentIndex, newRow);
                 currentIndex++;
             }
@@ -152,32 +254,32 @@ public class PersonalStatementService {
         return result;
     }
 
-    private Map<String, String> getGradeDictionary(Grade grade, Integer year) {
+    private Map<String, String> getGradeDictionary(StudentGradeAbstractBean gradeBean, Integer year) {
         Map<String, String> result = new HashMap<>();
         result.put("sy", "НАВЧАЛЬНИЙ РІК");
         String gradeNumberYear = "";
-        gradeNumberYear = getYearName(getStudentStudyYear(grade.getStudentDegree(), year)).toUpperCase() + " " + year + "-" + (year + 1);
-        result.put("f", getSemesterName(getStudentStudyYear(grade.getStudentDegree(), year) * 2).toUpperCase());
-        result.put("s", getSemesterName((getStudentStudyYear(grade.getStudentDegree(), year) * 2) + 1).toUpperCase());
+        gradeNumberYear = getYearName(getStudentStudyYear(gradeBean.getGrade().getStudentDegree(), year)).toUpperCase() + " " + year + "-" + (year + 1);
+        result.put("f", getSemesterName(getStudentStudyYear(gradeBean.getGrade().getStudentDegree(), year) * 2).toUpperCase());
+        result.put("s", getSemesterName((getStudentStudyYear(gradeBean.getGrade().getStudentDegree(), year) * 2) + 1).toUpperCase());
         result.put("n", gradeNumberYear);
-        result.put("subj", grade.getCourse().getCourseName().getName());
-        result.put("t", resolveTypeField(grade));
-        result.put("h", grade.getCourse().getHours().toString());
-        result.put("c", grade.getCourse().getCredits().toString());
+        result.put("subj", gradeBean.getGrade().getCourse().getCourseName().getName());
+        result.put("t", resolveTypeField(gradeBean));
+        result.put("h", gradeBean.getGrade().getCourse().getHours().toString());
+        result.put("c", gradeBean.getGrade().getCourse().getCredits().toString());
         String gradeFieldValue = "";
-        if (grade.getGrade() != null && GradeUtil.isEnoughToPass(grade.getPoints())) {
-            gradeFieldValue = grade.getCourse().getKnowledgeControl().isGraded() ? grade.getGrade().toString() : "зарах";
+        if (gradeBean.getGrade() != null && GradeUtil.isEnoughToPass(gradeBean.getGrade().getPoints())) {
+            gradeFieldValue = gradeBean.getGrade().getCourse().getKnowledgeControl().isGraded() ? gradeBean.getGrade().getGrade().toString() : "зарах";//psgb.getGrade().toString()
         }
         result.put("g", gradeFieldValue);
-        if (GradeUtil.isEnoughToPass(grade.getPoints())) {
-            result.put("p", grade.getPoints().toString());
+        if (GradeUtil.isEnoughToPass(gradeBean.getGrade().getPoints())) {
+            result.put("p", gradeBean.getGrade().getPoints().toString());
         }
-        if (grade.getEcts() != null && GradeUtil.isEnoughToPass(grade.getPoints())) {
-            result.put("e", grade.getEcts().toString());
+        if (gradeBean.getGrade().getEcts() != null && GradeUtil.isEnoughToPass(gradeBean.getGrade().getPoints())) {
+            result.put("e", gradeBean.getGrade().getEcts().toString());
         }
-        CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(grade.getStudentDegree().getStudentGroup().getId(), grade.getCourse().getId());
-        if (courseForGroup.getExamDate() != null && GradeUtil.isEnoughToPass(grade.getPoints())) {
-            String date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(courseForGroup.getExamDate());
+
+        if (gradeBean.getDate() != null && GradeUtil.isEnoughToPass(gradeBean.getGrade().getPoints())) {
+            String date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(gradeBean.getDate());
             result.put("d", date);
         }
         return result;
@@ -200,16 +302,16 @@ public class PersonalStatementService {
         replaceInRow(row, getGradeDictionaryForEmpty(studentDegree, year));
     }
 
-    private void fillRowByGrade(Tr row, Grade grade, Integer year) {
-        replaceInRow(row, getGradeDictionary(grade, year));
+    private void fillRowByGrade(Tr row, StudentGradeAbstractBean gradeBean, Integer year) {
+        replaceInRow(row, getGradeDictionary(gradeBean, year));
     }
 
     private void fillRowByLost(Tr row) {
         replaceInRow(row, getLostDictionary());
     }
 
-    private String resolveTypeField(Grade grade) {
-        switch (grade.getCourse().getKnowledgeControl().getId()) {
+    private String resolveTypeField(StudentGradeAbstractBean gradeBean) {
+        switch (gradeBean.getGrade().getCourse().getKnowledgeControl().getId()) {
             case Constants.COURSEWORK:
                 return "(КР)";
             case Constants.COURSE_PROJECT:
@@ -224,7 +326,7 @@ public class PersonalStatementService {
             case Constants.STATE_EXAM:
             case Constants.ATTESTATION:
             default:
-                return "(з)";
+                return gradeBean.isSelective() ? "(з/в)" : "(з)";
         }
     }
 

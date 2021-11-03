@@ -2,14 +2,18 @@ package ua.edu.chdtu.deanoffice.api.document.personalstatement;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
 import ua.edu.chdtu.deanoffice.api.document.groupgrade.GroupGradeReportController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.PersonalStatementService;
+import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.StudentOneYearGradesAbstractService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
@@ -17,14 +21,14 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
-@RequestMapping("/documents/personal-file-grades-statement")
-public class PersonalStatementController extends DocumentResponseController {
+@RequestMapping("/documents/student-one-year-grades-abstract")
+public class StudentOneYearGradesAbstractController extends DocumentResponseController {
 
-    private PersonalStatementService personalStatementService;
+    private StudentOneYearGradesAbstractService studentOneYearGradesAbstractService;
     private FacultyService facultyService;
 
-    public PersonalStatementController(PersonalStatementService personalStatementService, FacultyService facultyService) {
-        this.personalStatementService = personalStatementService;
+    public StudentOneYearGradesAbstractController(StudentOneYearGradesAbstractService studentOneYearGradesAbstractService, FacultyService facultyService) {
+        this.studentOneYearGradesAbstractService = studentOneYearGradesAbstractService;
         this.facultyService = facultyService;
     }
 
@@ -36,7 +40,7 @@ public class PersonalStatementController extends DocumentResponseController {
             for (Integer studentDegreeId : studentDegreeIds) {
                 facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
             }
-            File result = personalStatementService.formDocument(year, Arrays.asList(studentDegreeIds));
+            File result = studentOneYearGradesAbstractService.formDocument(year, Arrays.asList(studentDegreeIds));
             return buildDocumentResponseEntity(result, result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
@@ -49,7 +53,7 @@ public class PersonalStatementController extends DocumentResponseController {
         try {
             for (Integer studentDegreeId:studentDegreeIds)
                 facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
-            File result  = personalStatementService.preparePersonalWrapperFront(studentDegreeIds);
+            File result  = studentOneYearGradesAbstractService.preparePersonalWrapperFront(studentDegreeIds);
             return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
@@ -62,7 +66,7 @@ public class PersonalStatementController extends DocumentResponseController {
         try {
             for (Integer studentDegreeId:studentDegreeIds)
                 facultyService.checkStudentDegree(studentDegreeId, user.getFaculty().getId());
-            File result  = personalStatementService.preparePersonalWrapperBack(studentDegreeIds);
+            File result  = studentOneYearGradesAbstractService.preparePersonalWrapperBack(studentDegreeIds);
             return buildDocumentResponseEntity(result , result.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
