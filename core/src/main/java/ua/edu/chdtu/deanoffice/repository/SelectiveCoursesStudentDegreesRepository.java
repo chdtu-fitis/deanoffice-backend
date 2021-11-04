@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 
 import java.util.List;
@@ -54,6 +53,15 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             @Param("studyYear") int studyYear,
             @Param("semester") int semester,
             @Param("degreeId") int degreeId
+    );
+
+    @Query("SELECT DISTINCT scsd.selectiveCourse.course.id FROM SelectiveCoursesStudentDegrees scsd " +
+                  "WHERE scsd.selectiveCourse.course.semester = :semester " +
+                  "AND scsd.studentDegree.id in :studentDegreeIds " +
+                  "AND scsd.active = true")
+    List<Integer> findActiveByYearAndSemesterAndStudentDegrees(
+            @Param("semester") int semester,
+            @Param("studentDegreeIds") List<Integer> studentDegreeIds
     );
 
     @Modifying
