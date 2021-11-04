@@ -12,12 +12,15 @@ import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
+import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
@@ -32,7 +35,8 @@ import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 public class ReportsCoursesService {
 
     private static final String TEMPLATES_PATH = "/docs/templates/";
-    private static final String TEMPLATE = TEMPLATES_PATH + "PredmJourn.docx";
+    private static final String TEMPLATE = TEMPLATES_PATH + "ExamReportRecordBookCourses.docx";
+    private static final String HEADER_TEMPLATE = TEMPLATES_PATH + "ExamReportRecordBookHeader.docx";
     private static final String FILE_NAME= "jurnal-vidom-";
     private static final String KURS= "-kurs";
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
@@ -76,63 +80,71 @@ public class ReportsCoursesService {
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;
         this.currentYearService = currentYearService;
-        formatter = new SimpleDateFormat("dd.MM.yyyy");
+        formatter = new SimpleDateFormat("dd.MM.yy");
     }
 
-    public synchronized File prepareReportForGroup(Integer groupId, Integer semesterId) throws Docx4JException, IOException {
+    public synchronized File prepareReportForGroup(Integer groupId, Integer semesterId, int initialNumber) throws Docx4JException, IOException {
         StudentGroup group = groupService.getById(groupId);
         return documentIOService.saveDocumentToTemp(fillTemplate(TEMPLATE,
-                prepareGroup(groupId,semesterId),group.getName()),
+                prepareGroup(initialNumber, group, semesterId), group.getName()),
                 LanguageUtil.transliterate(group.getName())+".docx", FileFormatEnum.DOCX);
     }
+
     public synchronized File prepareReportForYear(int degreeId,
                                                   int year,
-                                                  Integer semesterId,
+                                                  Integer semester,
                                                   TuitionForm tuitionForm,
                                                   int groupId,
-                                                  int facultyId) throws Docx4JException, IOException {
+                                                  int initialNumber) throws Docx4JException, IOException {
+        int facultyId = FacultyUtil.getUserFacultyIdInt();
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
                 degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
         List<StudentGroup> studentGroups = groupService.getGroupsBySelectionCriteria(specification);
-        WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
-        for(StudentGroup groups:studentGroups){
-            List<CourseReport> courseReports = prepareGroup(groups.getId(),(int)semesterId);
-            if(studentGroups.get(0) == groups){
-                wordMLPackage = fillTemplate(TEMPLATE, courseReports,groups.getName());
-            }
-            else {
-                wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE,
-                        courseReports,
-                        groups.getName()).getMainDocumentPart().getContent());
-
-            }
+        WordprocessingMLPackage wordMLPackage = fillHeader(HEADER_TEMPLATE, year  + " курс");
+        for (StudentGroup group : studentGroups) {
+            List<CourseReport> courseReports = prepareGroup(initialNumber, group, semester);
+            wordMLPackage.getMainDocumentPart().getContent().addAll(fillTemplate(TEMPLATE, courseReports,
+                    group.getName()).getMainDocumentPart().getContent());
+            initialNumber += courseReports.size();
         }
         return documentIOService.saveDocumentToTemp(wordMLPackage,FILE_NAME+year+KURS, FileFormatEnum.DOCX);
     }
 
-    private List<CourseReport> prepareGroup(Integer groupId,Integer semesterId) {
+    private List<CourseReport> prepareGroup(int initialNumber, StudentGroup group, Integer semester) {
         List<CourseReport> courseReports = new ArrayList<>();
-        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(groupId, semesterId);
+        if (group.getTuitionTerm() == TuitionTerm.SHORTENED) {
+            semester = semester - (group.getRealBeginYear() - 1) * 2;
+        }
+        List<CourseForGroup> courseForGroups = courseForGroupService.getCoursesForGroupBySemester(group.getId(), semester);
         courseForGroups.sort(comparator);
-        for(CourseForGroup courseForGroup:courseForGroups){
-            courseReports.add(new CourseReport(courseForGroup.getCourse().getCourseName().getName(),
+        for (CourseForGroup courseForGroup : courseForGroups) {
+            courseReports.add(new CourseReport(""+initialNumber++, courseForGroup.getCourse().getCourseName().getName(),
                     fillFieldHours(courseForGroup),
+                    GradeUtil.getKCUkrShort(courseForGroup.getCourse().getKnowledgeControl().getId()),
                     courseForGroup.getTeacher() == null ? "" : courseForGroup.getTeacher().getInitialsUkr(),
-                    courseForGroup.getExamDate() == null? "" : formatter.format(courseForGroup.getExamDate())));
+                    courseForGroup.getExamDate() == null ? "" : formatter.format(courseForGroup.getExamDate())));
         }
         return courseReports;
     }
 
+    private WordprocessingMLPackage fillHeader(String templateName, String studyYear) throws Docx4JException {
+        WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
+        Map<String, String> commonDict = new HashMap<>();
+        commonDict.put("StudyYear", studyYear);
+        replaceTextPlaceholdersInTemplate(template, commonDict);
+        return template;
+    }
+
     private WordprocessingMLPackage fillTemplate(String templateName, List<CourseReport> courseReports, String groupName) throws Docx4JException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(templateName);
-        fillTableWithGrades(template, courseReports);
+        fillTableWithCourses(template, courseReports);
         Map<String, String> commonDict = new HashMap<>();
         commonDict.put("GroupName", groupName);
         replaceTextPlaceholdersInTemplate(template, commonDict);
         return template;
     }
 
-    private void fillTableWithGrades(WordprocessingMLPackage template, List<CourseReport> courseReports) {
+    private void fillTableWithCourses(WordprocessingMLPackage template, List<CourseReport> courseReports) {
         Tbl tempTable = findTable(template, "#Pred");
         if (tempTable == null) {
             return;

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.gradesjournal;
+package ua.edu.chdtu.deanoffice.api.document.informal.recordbooks;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +14,11 @@ import java.io.File;
 
 @RestController
 @RequestMapping("/documents/grades-journal")
-public class GradesJournalStudentsController extends DocumentResponseController {
+public class GradesRecordBookController extends DocumentResponseController {
 
     private GradesJournalService gradesJournalService;
 
-    public GradesJournalStudentsController(GradesJournalService gradesJournalService){
+    public GradesRecordBookController(GradesJournalService gradesJournalService){
         this.gradesJournalService = gradesJournalService;
     }
 
@@ -63,6 +63,6 @@ public class GradesJournalStudentsController extends DocumentResponseController 
     }
 
     private ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, GradesJournalStudentsController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, GradesRecordBookController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

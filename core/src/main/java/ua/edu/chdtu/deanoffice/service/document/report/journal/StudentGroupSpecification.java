@@ -21,10 +21,12 @@ public class StudentGroupSpecification {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
             predicates.add(cb.equal(root.get("specialization").get("degree").get("id"), degreeId));
-            predicates.add(cb.equal(cb.sum(cb.diff(currentYear, root.get("creationYear")), root.get("beginYears")), year));
+            predicates.add(cb.equal(cb.sum(cb.diff(currentYear, root.get("creationYear")), root.get("realBeginYear")), year));
             predicates.add(cb.equal(root.get("specialization").get("faculty").get("id"), facultyId));
+            predicates.add(cb.equal(root.get("active"), true));
             if (tuitionForm != null)
                 predicates.add(cb.equal(root.get("tuitionForm"), tuitionForm));
+            query.orderBy(cb.desc(root.get("tuitionForm")), cb.asc(root.get("name")));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

@@ -13,22 +13,28 @@ import java.util.Map;
 class CourseReport {
 
     private static Logger log = LoggerFactory.getLogger(CourseReport.class);
+    private String number;
     private String course;
     private String hours;
+    private String knowledgeControl;
     private String teacher;
     private String date;
 
-    CourseReport(String course, String hours, String teacher, String date) {
+    CourseReport(String number, String course, String hours, String knowledgeControl, String teacher, String date) {
+        this.number = number;
         this.course = course;
         this.hours = hours;
+        this.knowledgeControl = knowledgeControl;
         this.teacher = teacher;
         this.date = date;
     }
 
     Map<String, String> getDictionary() {
         Map<String, String> result = new HashMap<>();
+        result.put("N", number);
         result.put("Pred", course);
         result.put("H", hours);
+        result.put("KC", knowledgeControl);
         result.put("V", teacher);
         result.put("D", date);
         return result;

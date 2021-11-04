@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.util;
 
+import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.Grade;
 
 import java.text.Collator;
@@ -128,5 +129,20 @@ public class GradeUtil {
             Collator ukrainianCollator = Collator.getInstance(new Locale("uk", "UA"));
             return ukrainianCollator.compare(o1.getCourse().getCourseName().getName(), o2.getCourse().getCourseName().getName());
         });
+    }
+
+    public static String getKCUkrShort(int kcId) {
+        switch (kcId) {
+            case Constants.EXAM: return "і";
+            case Constants.CREDIT: return "з";
+            case Constants.COURSE_PROJECT: return "КП";
+            case Constants.COURSEWORK: return "КР";
+            case Constants.DIFFERENTIATED_CREDIT: return "д/з";
+            case Constants.INTERNSHIP: return "пр";
+            case Constants.NON_GRADED_INTERNSHIP: return "пр/з";
+            case Constants.ATTESTATION: return "ат";
+            case Constants.STATE_EXAM: return "д/і";
+        }
+        return "";
     }
 }
