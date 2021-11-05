@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.personalstatement;
+package ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract;
 
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;

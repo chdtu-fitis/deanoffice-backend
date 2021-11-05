@@ -1,7 +1,8 @@
-package ua.edu.chdtu.deanoffice.service.document.report.journal;
+package ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.examreport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.examreport.CourseReport;
 
 import java.util.HashMap;
 import java.util.Map;

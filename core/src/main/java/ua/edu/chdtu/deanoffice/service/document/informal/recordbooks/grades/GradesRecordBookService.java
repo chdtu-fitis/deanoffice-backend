@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.journal;
+package ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.grades;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.BaseFont;
@@ -25,6 +25,7 @@ import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
+import ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.StudentGroupSpecification;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,7 +38,7 @@ import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLAT
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
-public class GradesJournalService {
+public class GradesRecordBookService {
     private static final String TEMPLATE = TEMPLATES_PATH + "CourseList.docx";
     private static final Integer THE_LAST_CELL_OF_ROW = 6;
     private static Logger log = LoggerFactory.getLogger(DiplomaSupplementService.class);
@@ -51,10 +52,10 @@ public class GradesJournalService {
     @Value(value = "classpath:fonts/arial/arial.ttf")
     private Resource ttf;
 
-    public GradesJournalService(StudentGroupService studentGroupService,
-                                CourseForGroupService courseForGroupService,
-                                DocumentIOService documentIOService,
-                                CurrentYearService currentYearService) {
+    public GradesRecordBookService(StudentGroupService studentGroupService,
+                                   CourseForGroupService courseForGroupService,
+                                   DocumentIOService documentIOService,
+                                   CurrentYearService currentYearService) {
         this.studentGroupService = studentGroupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.journal;
+package ua.edu.chdtu.deanoffice.service.document.informal.recordbooks;
 
 import org.springframework.data.jpa.domain.Specification;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentGroupSpecification {
-    static Specification<StudentGroup> getStudentGroupsWithImportFilters(
+    public static Specification<StudentGroup> getStudentGroupsWithImportFilters(
             int degreeId, int currentYear, int year, TuitionForm tuitionForm, int facultyId, int groupId) {
         return (Root<StudentGroup> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             List<Predicate> predicates = new ArrayList<>();

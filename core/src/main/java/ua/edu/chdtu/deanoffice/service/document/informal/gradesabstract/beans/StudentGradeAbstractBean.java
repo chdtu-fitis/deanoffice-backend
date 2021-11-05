@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.personalstatement;
+package ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract.beans;
 
 import lombok.Getter;
 import lombok.Setter;

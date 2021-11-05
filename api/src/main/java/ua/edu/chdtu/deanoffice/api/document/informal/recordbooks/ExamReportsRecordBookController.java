@@ -9,7 +9,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.document.report.journal.ExamReportsRecordBookCoursesService;
+import ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.examreport.ExamReportsRecordBookCoursesService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;

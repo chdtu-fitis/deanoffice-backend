@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports;
+package ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract.beans;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.journal;
+package ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.examreport;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -19,6 +19,7 @@ import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.diploma.supplement.DiplomaSupplementService;
+import ua.edu.chdtu.deanoffice.service.document.informal.recordbooks.StudentGroupSpecification;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;

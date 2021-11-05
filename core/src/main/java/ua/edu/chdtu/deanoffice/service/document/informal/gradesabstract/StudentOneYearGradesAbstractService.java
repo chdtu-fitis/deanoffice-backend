@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.document.report.personalstatement;
+package ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,9 +31,10 @@ import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentD
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.TemplateUtil;
-import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.AcademicVacationReport;
-import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.PracticeReport;
-import ua.edu.chdtu.deanoffice.service.document.report.personalstatement.reports.QualificationReport;
+import ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract.beans.StudentGradeAbstractBean;
+import ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract.beans.AcademicVacationReport;
+import ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract.beans.PracticeReport;
+import ua.edu.chdtu.deanoffice.service.document.informal.gradesabstract.beans.QualificationReport;
 import ua.edu.chdtu.deanoffice.util.DateUtil;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 import ua.edu.chdtu.deanoffice.util.PersonUtil;
@@ -99,7 +100,7 @@ public class StudentOneYearGradesAbstractService {
 
     private String generateFileName(Set<StudentGroup> groups) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("PersonalFile_");
+        stringBuilder.append("VypyskaVOsobSpravu_");
         groups.forEach(groupId -> {
             stringBuilder.append(groupId.getName()).append("_");
         });
