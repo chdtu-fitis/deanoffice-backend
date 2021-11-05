@@ -72,11 +72,11 @@ public class StudentOneYearGradesAbstractService {
     @Autowired
     private StudentDegreeRepository studentDegreeRepository;
     @Autowired
-    private CourseRepository courseRepository;
-    @Autowired
     private GradeService gradeService;
     @Autowired
     private GradeRepository gradeRepository;
+    @Autowired
+    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
     @Autowired
     private DocumentIOService documentIOService;
     @Autowired
@@ -106,21 +106,29 @@ public class StudentOneYearGradesAbstractService {
         return stringBuilder.toString();
     }
 
-    private Map<StudentDegree, List<Grade>> getGradeMap(Integer year, List<StudentDegree> studentDegrees, SemesterType semesterType) {
+    private Map<StudentDegree, List<StudentGradeAbstractBean>> getGradeMap(Integer year, List<StudentDegree> studentDegrees, SemesterType semesterType) {
         Map<StudentGroup, List<StudentDegree>> groupsWithStudents = studentDegrees.stream().collect(Collectors.groupingBy(sd -> sd.getStudentGroup()));
-        Map<StudentGroup, List<Integer>> groupsWithStudentIds = groupsWithStudents.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey(),
-                entry -> entry.getValue().stream().map(BaseEntity::getId).collect(Collectors.toList())
-        ));
         Set<StudentGroup> groups = groupsWithStudents.keySet();
-        Map<StudentGroup, List<Integer>> courseIdsForGroups = groups.stream().collect(Collectors.toMap(
+        Map<StudentGroup, List<CourseForGroup>> coursesForGroups = groups.stream().collect(Collectors.toMap(
                 group -> group,
-                group -> courseRepository.getByGroupIdAndSemester(group.getId(), getSemesterByYearForGroup(year, group) + semesterType.getNumber() - 1)
-                        .stream()
-                        .map(BaseEntity::getId)
-                        .collect(Collectors.toList())
+                group -> courseForGroupService.getCoursesForGroupBySemester(group.getId(), getSemesterByYearForGroup(year, group) + semesterType.getNumber() - 1)
         ));
-        return gradeService.getGradeMapForStudents(groupsWithStudentIds, courseIdsForGroups);
+
+        Map<StudentDegree, List<Integer>> selectiveCourseIdsForStudent = studentDegrees.stream().collect(Collectors.toMap(
+                studentDegree -> studentDegree,
+                studentDegree -> selectiveCoursesStudentDegreesService.getSelectiveCoursesByStudentDegreeIdAndSemester(studentDegree.getId(), (studentDegreeService.getRealStudentDegreeYear(studentDegree,year)-1) * 2 + semesterType.getNumber())
+                                                                            .stream()
+                                                                            .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
+                                                                            .map(SelectiveCourse::getCourse)
+                                                                            .map(BaseEntity::getId)
+                                                                            .collect(Collectors.toList())
+        ));
+
+        Map<StudentDegree, List<StudentGradeAbstractBean>> gradeMapForStudentsCourses = getGradeMapForStudents(groupsWithStudents, coursesForGroups);
+        Map<StudentDegree, List<StudentGradeAbstractBean>> gradeMapForStudentsSelectiveCourses = getGradeMapForStudents(selectiveCourseIdsForStudent);
+        Map<StudentDegree, List<StudentGradeAbstractBean>> fullGradeMapForStudent = concatStudentOneYearGrades(gradeMapForStudentsCourses,gradeMapForStudentsSelectiveCourses);
+
+        return sortByKnowledgeControls(fullGradeMapForStudent);
     }
 
     public Map<StudentDegree, List<StudentGradeAbstractBean>> sortByKnowledgeControls(Map<StudentDegree, List<StudentGradeAbstractBean>> fullGradeMapForStudent) {
@@ -641,7 +649,7 @@ public class StudentOneYearGradesAbstractService {
     @Setter
     @AllArgsConstructor
     private class YearGrades {
-        private Map<StudentDegree, List<Grade>> gradeMapForFirstSemester;
-        private Map<StudentDegree, List<Grade>> gradeMapForSecondSemester;
+        private Map<StudentDegree, List<StudentGradeAbstractBean>> gradeMapForFirstSemester;
+        private Map<StudentDegree, List<StudentGradeAbstractBean>> gradeMapForSecondSemester;
     }
 }
