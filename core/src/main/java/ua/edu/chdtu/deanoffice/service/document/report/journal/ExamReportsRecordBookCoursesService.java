@@ -32,7 +32,7 @@ import java.util.*;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.*;
 
 @Service
-public class ReportsCoursesService {
+public class ExamReportsRecordBookCoursesService {
 
     private static final String TEMPLATES_PATH = "/docs/templates/";
     private static final String TEMPLATE = TEMPLATES_PATH + "ExamReportRecordBookCourses.docx";
@@ -72,10 +72,10 @@ public class ReportsCoursesService {
         }
     };
 
-    public ReportsCoursesService(StudentGroupService groupService,
-                                 DocumentIOService documentIOService,
-                                 CourseForGroupService courseForGroupService,
-                                 CurrentYearService currentYearService) {
+    public ExamReportsRecordBookCoursesService(StudentGroupService groupService,
+                                               DocumentIOService documentIOService,
+                                               CourseForGroupService courseForGroupService,
+                                               CurrentYearService currentYearService) {
         this.groupService = groupService;
         this.courseForGroupService = courseForGroupService;
         this.documentIOService = documentIOService;

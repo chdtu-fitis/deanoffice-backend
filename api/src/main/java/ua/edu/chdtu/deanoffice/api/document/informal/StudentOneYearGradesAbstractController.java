@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.api.document.personalstatement;
+package ua.edu.chdtu.deanoffice.api.document.informal;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;

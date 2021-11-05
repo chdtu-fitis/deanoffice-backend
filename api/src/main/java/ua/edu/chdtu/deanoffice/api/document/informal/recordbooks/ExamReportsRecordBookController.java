@@ -9,19 +9,19 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
-import ua.edu.chdtu.deanoffice.service.document.report.journal.ReportsCoursesService;
+import ua.edu.chdtu.deanoffice.service.document.report.journal.ExamReportsRecordBookCoursesService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.io.File;
 
 @RestController
-@RequestMapping("/documents/exam-reports-journal-courses")
+@RequestMapping("/documents/exam-reports-recordbook-courses")
 public class ExamReportsRecordBookController extends DocumentResponseController {
-    private ReportsCoursesService reportsCoursesService;
+    private ExamReportsRecordBookCoursesService examReportsRecordBookCoursesService;
     private FacultyService facultyService;
 
-    public ExamReportsRecordBookController(ReportsCoursesService reportsCoursesService, FacultyService facultyService) {
-        this.reportsCoursesService = reportsCoursesService;
+    public ExamReportsRecordBookController(ExamReportsRecordBookCoursesService examReportsRecordBookCoursesService, FacultyService facultyService) {
+        this.examReportsRecordBookCoursesService = examReportsRecordBookCoursesService;
         this.facultyService = facultyService;
     }
 
@@ -32,7 +32,7 @@ public class ExamReportsRecordBookController extends DocumentResponseController 
                                                      @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File groupDiplomaSupplements = reportsCoursesService.prepareReportForGroup(groupId, semester, initialNumber);
+            File groupDiplomaSupplements = examReportsRecordBookCoursesService.prepareReportForGroup(groupId, semester, initialNumber);
             return buildDocumentResponseEntity(groupDiplomaSupplements, groupDiplomaSupplements.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
@@ -46,7 +46,7 @@ public class ExamReportsRecordBookController extends DocumentResponseController 
                                                     @RequestParam(required = false, defaultValue = "0") int groupId,
                                                     @RequestParam(required = false, defaultValue = "1") int initialNumber)  {
         try {
-            File reportsJournal = reportsCoursesService.prepareReportForYear(degreeId, year, semester, tuitionForm, groupId, initialNumber);
+            File reportsJournal = examReportsRecordBookCoursesService.prepareReportForYear(degreeId, year, semester, tuitionForm, groupId, initialNumber);
             return buildDocumentResponseEntity(reportsJournal, reportsJournal.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
