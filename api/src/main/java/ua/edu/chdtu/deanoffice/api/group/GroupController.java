@@ -90,6 +90,21 @@ public class GroupController {
         }
     }
 
+    @Secured({"ROLE_NAVCH_METHOD"})
+    @GetMapping("/groups/filter/degree-and-real-year")
+    @JsonView(StudentGroupView.WithStudents.class)
+    public ResponseEntity getGroupsByDegreeAndRealYear(
+            @RequestParam Integer degreeId,
+            @RequestParam Integer year
+    ) {
+        try {
+            List<StudentGroup> groups = studentGroupService.getGroupsByDegreeAndRealYear(degreeId, year);
+            return ResponseEntity.ok(Mapper.map(groups, StudentGroupDTO.class));
+        } catch (Exception exception) {
+            return handleException(exception);
+        }
+    }
+
     @GetMapping("/groups")
     @JsonView(StudentGroupView.AllGroupData.class)
     public ResponseEntity getActiveGroups(
