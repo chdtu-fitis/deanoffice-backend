@@ -160,13 +160,14 @@ public class IndividualCurriculumFillTemplateService {
 
     private void fillTableWithCoursesInfo(WordprocessingMLPackage template, StudentDegree degree, int studyYear) throws Docx4JException {
         StudentGroup studentGroup = degree.getStudentGroup();
-        List<Integer> semesters = getSemestersByCourseForGroup(studentGroup, studyYear);
+        List<Integer> selectiveSemesters = getSelectiveSemesters(studentGroup, studyYear);
+        List<Integer> regularSemesters = getRegularSemesters(studentGroup, studyYear);
 
-        Map<String, List<CourseForGroup>> autumnSemesterPart1 = getCoursesBySemester(studentGroup, semesters.get(0));
-        List<SelectiveCourse> autumnSelectiveCourses = getSelectiveCourses(degree.getId(), semesters.get(0));
+        Map<String, List<CourseForGroup>> autumnSemesterPart1 = getCoursesBySemester(studentGroup, regularSemesters.get(0));
+        List<SelectiveCourse> autumnSelectiveCourses = getSelectiveCourses(degree.getId(), selectiveSemesters.get(0));
 
-        Map<String, List<CourseForGroup>> springSemesterPart1 = getCoursesBySemester(studentGroup, semesters.get(1));
-        List<SelectiveCourse> springSelectiveCourses = getSelectiveCourses(degree.getId(), semesters.get(1));
+        Map<String, List<CourseForGroup>> springSemesterPart1 = getCoursesBySemester(studentGroup, regularSemesters.get(1));
+        List<SelectiveCourse> springSelectiveCourses = getSelectiveCourses(degree.getId(), selectiveSemesters.get(1));
 
         Tbl tempTable = TemplateUtil.getAllTablesFromDocument(template).get(TABLE_INDEX);
         if (!Objects.nonNull(tempTable)) {
@@ -174,32 +175,25 @@ public class IndividualCurriculumFillTemplateService {
         }
 
         int numberOfRow = STARTING_ROW_INDEX_AUTUMN_TABLE;
-
         List<CourseForGroup> autumnMainCourses = autumnSemesterPart1.get(AUTUMN_COURSES_KEY);
         addMainCoursesToTable(tempTable, autumnMainCourses, numberOfRow);
 
         numberOfRow = numberOfRow + autumnMainCourses.size() + 1;
-
         addSelectiveCoursesToTable(tempTable, autumnSelectiveCourses, numberOfRow);
 
         numberOfRow += autumnSelectiveCourses.size() + 2;
-
         List<CourseForGroup> springMainCourses = springSemesterPart1.get(SPRING_COURSES_KEY);
         addMainCoursesToTable(tempTable, springMainCourses, numberOfRow);
 
         numberOfRow += springMainCourses.size() + 1;
-
         addSelectiveCoursesToTable(tempTable, springSelectiveCourses, numberOfRow);
 
         numberOfRow += springSelectiveCourses.size() + 1;
-
         List<CourseForGroup> practical = autumnSemesterPart1.get(PRACTICAL_COURSES_KEY);
         practical.addAll(springSemesterPart1.get(PRACTICAL_COURSES_KEY));
-
         addMainCoursesToTable(tempTable, practical, numberOfRow);
 
         numberOfRow += practical.size() + 1;
-
         fillConclusionTable(autumnMainCourses, autumnSelectiveCourses, springMainCourses, springSelectiveCourses,
                 practical, template, numberOfRow);
 
@@ -360,8 +354,13 @@ public class IndividualCurriculumFillTemplateService {
         TemplateUtil.replacePlaceholdersWithBlank(template, placeholdersToRemove);
     }
 
-    private List<Integer> getSemestersByCourseForGroup(StudentGroup studentGroup, int studyYear) {
+    private List<Integer> getSelectiveSemesters(StudentGroup studentGroup, int studyYear) {
         int course = studyYear - studentGroup.getCreationYear() + studentGroup.getRealBeginYear();
+        return Arrays.asList(course * 2 - 1, course * 2);
+    }
+
+    private List<Integer> getRegularSemesters(StudentGroup studentGroup, int studyYear) {
+        int course = studyYear - studentGroup.getCreationYear() + studentGroup.getBeginYears();
         return Arrays.asList(course * 2 - 1, course * 2);
     }
 }
