@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionRulesDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.ResponseMessageDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.Course;
@@ -370,7 +371,7 @@ public class SelectiveCourseController {
         String result = "Успішно зареєстровано вибіркові дисципліни для " + registered + " студентів.";
         if (studentDegrees.size() != registered)
             result += " " + (studentDegrees.size() - registered) + " студентів не вдалося зареєструвати на вибіркові дисципліни внаслідок порушення кількісних вимог або неправильних атрибутів у дисциплінах";
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity(new ResponseMessageDTO(result), HttpStatus.OK);
     }
 
     private boolean checkRecordOnSelectiveCoursesData(StudentDegree studentDegree, boolean isSecondRound, List<SelectiveCourse> selectiveCourses)
