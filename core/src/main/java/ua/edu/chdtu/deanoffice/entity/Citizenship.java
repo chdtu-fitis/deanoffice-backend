@@ -29,7 +29,7 @@ public enum Citizenship {
     RUS(643, "Російська Федерація", "Russia"),
     SYR(760, "Сирійська Арабська Республіка", "Syria"),
     TUR(792, "Туреччина", "Turkey"),
-    TKM(795, "Туркменістан", "Turkmenistan"),
+    TKM(795, "Туркменистан", "Turkmenistan"),
     UZB(860, "Узбекистан", "Uzbekistan"),
     UKR(804, "Україна", "Ukraine");
 
