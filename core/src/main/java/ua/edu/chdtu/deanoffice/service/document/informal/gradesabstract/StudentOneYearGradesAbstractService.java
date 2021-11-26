@@ -193,10 +193,13 @@ public class StudentOneYearGradesAbstractService {
     }
 
     public List<StudentGradeAbstractBean> getStudentOneYearGradesBean(Integer studentDegreeId, Map<Integer, Date> courseIdsWithDate) {
-        return gradeRepository.getByStudentDegreeIdAndCourses(studentDegreeId, new ArrayList<>(courseIdsWithDate.keySet()))
+        if (courseIdsWithDate.size() > 0)
+            return gradeRepository.getByStudentDegreeIdAndCourses(studentDegreeId, new ArrayList<>(courseIdsWithDate.keySet()))
                 .stream()
                 .map(grade -> new StudentGradeAbstractBean(grade,courseIdsWithDate.get(grade.getCourse().getId()),false))
                 .collect(toList());
+        else
+            return new ArrayList<>();
     }
 
     public List<StudentGradeAbstractBean> getStudentOneYearSelectiveGradesBean(Integer studentDegreeId, List<Integer> courseIds) {
@@ -234,7 +237,7 @@ public class StudentOneYearGradesAbstractService {
             rowNumber = NUMBER_OF_MANDATORY_ROWS_IN_TABLE;
         }
         Tr rowToCopy = tableRows.get(currentIndex);
-        if (gradeBeans != null) {
+        if (gradeBeans != null && gradeBeans.size() > 0) {
             fillRowByGrade(tableRows.get(currentIndex - 1), gradeBeans.get(0), year);
             for (StudentGradeAbstractBean gradeBean : gradeBeans.subList(1, gradeBeans.size())) {
                 Tr newRow = XmlUtils.deepCopy(rowToCopy);
@@ -242,7 +245,8 @@ public class StudentOneYearGradesAbstractService {
                 table.getContent().add(currentIndex, newRow);
                 currentIndex++;
             }
-        } else fillRowByEmpty(tableRows.get(currentIndex - 1), studentDegree, year);
+        } else
+            fillRowByEmpty(tableRows.get(currentIndex - 1), studentDegree, year);
         for (int i = currentIndex; i < rowNumber; i++) {
             Tr newRow = XmlUtils.deepCopy(rowToCopy);
             fillRowByLost(newRow);
