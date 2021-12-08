@@ -14,7 +14,7 @@ public enum Citizenship {
     DEU(276, "Німеччина", "Germany"),
     GHA(288, "Гана", "Ghana"),
     GRC(300, "Греція", "Greece"),
-    GIN(324, "Гвинея", "Guinea"),
+    GIN(324, "Гвінея", "Guinea"),
     HUN(348, "Угорщина", "Hungary"),
     JOR(400, "Йорданія", "Jordan"),
     IND(356, "Індія", "India"),
