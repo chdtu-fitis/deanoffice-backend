@@ -5,14 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.Constants;
 
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.EctsGrade;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
+import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
@@ -33,14 +30,16 @@ public class GradeService {
 
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
+    private final SelectiveCoursesStudentDegreesRepository selectiveCourseRepository;
     private final StudentDegreeRepository studentDegreeRepository;
     private KnowledgeControlService knowledgeControlService;
 
     @Autowired
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
-                        StudentDegreeRepository studentDegreeRepository, KnowledgeControlService knowledgeControlService) {
+                        SelectiveCoursesStudentDegreesRepository selectiveCourseRepository, StudentDegreeRepository studentDegreeRepository, KnowledgeControlService knowledgeControlService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
+        this.selectiveCourseRepository = selectiveCourseRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.knowledgeControlService = knowledgeControlService;
     }
@@ -59,6 +58,46 @@ public class GradeService {
         }
 
         List<Integer> courseIds = courses.stream().map(BaseEntity::getId).collect(Collectors.toList());
+
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART3)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART4)));
+
+        return grades;
+    }
+
+    public List<List<Grade>> getGradesByStudentDegreeIdWithSelective(Integer studentDegreeId) {
+        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
+        List<Course> courses = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId());
+        List<Course> selectiveCourses = selectiveCourseRepository.findByStudentDegree(studentDegreeId)
+                                            .stream()
+                                            .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
+                                            .map(SelectiveCourse::getCourse)
+                                            .collect(Collectors.toList());
+
+        List<Course> allCourses = new ArrayList<>(courses);
+
+        StudentGroup studentGroup = studentDegree.getStudentGroup();
+
+        if (studentGroup.getTuitionTerm()==TuitionTerm.SHORTENED) {
+            Integer semesterShift = (studentGroup.getRealBeginYear() - studentGroup.getBeginYears()) * 2;
+            selectiveCourses.forEach(course -> {course.setSemester(course.getSemester() - semesterShift);});
+        }
+
+        allCourses.addAll(selectiveCourses);
+
+        List<List<Grade>> grades = new ArrayList<>();
+
+        if (courses.isEmpty()) {
+            grades.add(new ArrayList<>());
+            grades.add(new ArrayList<>());
+            grades.add(new ArrayList<>());
+            grades.add(new ArrayList<>());
+            return grades;
+        }
+
+        List<Integer> courseIds = allCourses.stream().map(BaseEntity::getId).collect(Collectors.toList());
 
         grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
         grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
