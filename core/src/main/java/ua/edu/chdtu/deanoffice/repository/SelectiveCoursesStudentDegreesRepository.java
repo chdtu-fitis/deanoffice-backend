@@ -14,6 +14,8 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Override
     List<SelectiveCoursesStudentDegrees> findAll(Specification<SelectiveCoursesStudentDegrees> spec);
 
+    List<SelectiveCoursesStudentDegrees> findByStudentDegreeId(int studentDegreeId);
+
     @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
             "WHERE sc.selectiveCourse.id = :selectiveCourseId " +
             "ORDER BY sc.studentDegree.student.surname, sc.studentDegree.student.name, sc.studentDegree.student.patronimic")
@@ -26,12 +28,6 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "ORDER BY sc.studentDegree.student.surname, sc.studentDegree.student.name, sc.studentDegree.student.patronimic")
     List<SelectiveCoursesStudentDegrees> findBySelectiveCourseAndFaculty(
             @Param("selectiveCourseId") int selectiveCourseId, @Param("facultyId") int facultyId
-    );
-
-    @Query("SELECT scsd FROM SelectiveCoursesStudentDegrees scsd " +
-            "WHERE scsd.studentDegree.id = :studentDegreeId ")
-    List<SelectiveCoursesStudentDegrees> findByStudentDegree(
-            @Param("studentDegreeId") int studentDegreeId
     );
 
     @Query("SELECT scsd FROM SelectiveCoursesStudentDegrees scsd " +
