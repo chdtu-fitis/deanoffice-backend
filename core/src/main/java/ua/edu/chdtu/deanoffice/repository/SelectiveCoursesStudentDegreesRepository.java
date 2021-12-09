@@ -14,6 +14,8 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Override
     List<SelectiveCoursesStudentDegrees> findAll(Specification<SelectiveCoursesStudentDegrees> spec);
 
+    List<SelectiveCoursesStudentDegrees> findByStudentDegreeId(int studentDegreeId);
+
     @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
             "WHERE sc.selectiveCourse.id = :selectiveCourseId " +
             "ORDER BY sc.studentDegree.student.surname, sc.studentDegree.student.name, sc.studentDegree.student.patronimic")
