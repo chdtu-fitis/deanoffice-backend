@@ -98,7 +98,7 @@ public class QualificationWorkReportService {
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
         for (StudentDegree studentDegree : studentDegrees) {
-            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegree.getId());
             String grade = "";
 
             if (!isStudentDebtor(grades)) {
