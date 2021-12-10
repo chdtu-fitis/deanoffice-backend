@@ -46,7 +46,7 @@ public class DiplomaSupplementService {
             throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
-        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegreeId);
+        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegreeId);
         StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
         complementQualificationWorkDescription(studentSummary);
 
