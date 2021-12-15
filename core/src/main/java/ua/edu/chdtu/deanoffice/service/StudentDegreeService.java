@@ -80,8 +80,11 @@ public class StudentDegreeService {
 
     private String checkStudentGradesForSupplement(StudentDegree studentDegree) {
         List<Grade> grades = gradeRepository.getByCheckStudentGradesForSupplement(studentDegree.getId());
-        if (grades == null)
+        grades.addAll(gradeRepository.getByCheckStudentSelectiveCoursesGradesForSupplement(studentDegree.getId()));
+
+        if (grades.isEmpty())
             return "";
+
         final StringBuilder message = new StringBuilder();
         grades.forEach(grade -> message.append(grade.getCourse().getCourseName().getName() + ", " + grade.getCourse().getSemester() + "сем; "));
         return message.toString();
@@ -99,10 +102,14 @@ public class StudentDegreeService {
     public Map<StudentDegree, String> checkAllGraduatesGrades(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
         List<StudentDegree> studentDegrees = studentDegreeRepository.findAllGraduates(year, facultyId, degreeId);
-        return studentDegrees
-                .stream()
-                .filter(sd -> !checkStudentGradesForSupplement(sd).equals(""))
-                .collect(Collectors.toMap(sd -> sd, this::checkStudentGradesForSupplement));
+        Map<StudentDegree, String> result = new HashMap<>();
+
+        for (StudentDegree studentDegree: studentDegrees) {
+            String studentDegreeGradesString = checkStudentGradesForSupplement(studentDegree);
+            if (!studentDegreeGradesString.isEmpty())
+                result.put(studentDegree,studentDegreeGradesString);
+        }
+        return result;
     }
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
