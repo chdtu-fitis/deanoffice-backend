@@ -239,7 +239,8 @@ public class SupplementTemplateFillService {
         for (StudyPeriodInAUniversity studyPeriod : studyPeriods) {
             allPreviousUniversities += studyPeriod.getUniversityNameUkr() + "\n";
             allPreviousUniversitiesEng += studyPeriod.getUniversityNameEng() + "\n";
-            allTrainingDurationsFromUniversity += simpleDateFormat.format(studyPeriod.getStartDate()) + " - " + simpleDateFormat.format(studyPeriod.getEndDate()) + "\n";
+            allTrainingDurationsFromUniversity += (studyPeriod.getStartDate() != null ? simpleDateFormat.format(studyPeriod.getStartDate()) : "")
+                    + " - " + (studyPeriod.getEndDate() != null ? simpleDateFormat.format(studyPeriod.getEndDate()) : "") + "\n";
         }
         result.put("AllTrainingDurationsAndUniversitiesUkr", allPreviousUniversities);
         result.put("AllTrainingDurationsAndUniversitiesEng", TemplateUtil.getValueSafely(allPreviousUniversitiesEng));
