@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeNameThenSurnameInCapital;
 
 @Service
@@ -46,7 +45,7 @@ public class SelectiveCourseExamReportDataService {
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findByIdIn(selectiveCourseIds);
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            List<SelectiveCoursesStudentDegrees> coursesDegrees = selectiveCoursesStudentDegreesRepository.findBySelectiveCourse(selectiveCourse.getId());
+            List<SelectiveCoursesStudentDegrees> coursesDegrees = selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourse(selectiveCourse.getId());
             List <StudentDegree> studentDegrees = coursesDegrees.stream()
                     .map(courseDegree -> courseDegree.getStudentDegree())
                     .filter(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() == FacultyUtil.getUserFacultyIdInt())

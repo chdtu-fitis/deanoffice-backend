@@ -60,14 +60,14 @@ public class SelectiveCoursesStudentDegreesService {
 
     public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId, boolean forFaculty) {
         if (forFaculty) {
-            return selectiveCoursesStudentDegreesRepository.findBySelectiveCourseAndFaculty(selectiveCourseId, FacultyUtil.getUserFacultyIdInt());
+            return selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourseAndFaculty(selectiveCourseId, FacultyUtil.getUserFacultyIdInt());
         } else {
-            return selectiveCoursesStudentDegreesRepository.findBySelectiveCourse(selectiveCourseId);
+            return selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourse(selectiveCourseId);
         }
     }
 
     public List<SelectiveCoursesStudentDegrees> getSelectiveCoursesByStudentDegreeIdAndSemester(int studentDegreeId, int semester) {
-        return selectiveCoursesStudentDegreesRepository.findByStudentDegreeAndSemester(studentDegreeId, semester);
+        return selectiveCoursesStudentDegreesRepository.findActiveByStudentDegreeAndSemester(studentDegreeId, semester);
     }
 
     public Map<SelectiveCourse, Long> getSelectiveCoursesWithStudentsCount(int studyYear, int semester, int degreeId, boolean all) {

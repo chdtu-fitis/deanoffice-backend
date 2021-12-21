@@ -17,23 +17,23 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     List<SelectiveCoursesStudentDegrees> findByStudentDegreeId(int studentDegreeId);
 
     @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
-            "WHERE sc.selectiveCourse.id = :selectiveCourseId " +
+            "WHERE sc.selectiveCourse.id = :selectiveCourseId AND sc.active=true " +
             "ORDER BY sc.studentDegree.student.surname, sc.studentDegree.student.name, sc.studentDegree.student.patronimic")
-    List<SelectiveCoursesStudentDegrees> findBySelectiveCourse(
+    List<SelectiveCoursesStudentDegrees> findActiveBySelectiveCourse(
             @Param("selectiveCourseId") int selectiveCourseId
     );
 
     @Query("SELECT sc FROM SelectiveCoursesStudentDegrees sc " +
-            "WHERE sc.selectiveCourse.id = :selectiveCourseId AND sc.studentDegree.specialization.faculty.id = :facultyId " +
+            "WHERE sc.selectiveCourse.id = :selectiveCourseId AND sc.studentDegree.specialization.faculty.id = :facultyId AND sc.active=true " +
             "ORDER BY sc.studentDegree.student.surname, sc.studentDegree.student.name, sc.studentDegree.student.patronimic")
-    List<SelectiveCoursesStudentDegrees> findBySelectiveCourseAndFaculty(
+    List<SelectiveCoursesStudentDegrees> findActiveBySelectiveCourseAndFaculty(
             @Param("selectiveCourseId") int selectiveCourseId, @Param("facultyId") int facultyId
     );
 
     @Query("SELECT scsd FROM SelectiveCoursesStudentDegrees scsd " +
-            "WHERE scsd.studentDegree.id = :studentDegreeId " +
+            "WHERE scsd.studentDegree.id = :studentDegreeId AND scsd.active=true " +
             "AND scsd.selectiveCourse.course.semester = :semester")
-    List<SelectiveCoursesStudentDegrees> findByStudentDegreeAndSemester(
+    List<SelectiveCoursesStudentDegrees> findActiveByStudentDegreeAndSemester(
             @Param("studentDegreeId") int studentDegreeId,
             @Param("semester") int semester
     );

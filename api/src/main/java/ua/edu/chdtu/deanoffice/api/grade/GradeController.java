@@ -96,8 +96,7 @@ public class GradeController {
 
     @Secured("ROLE_DEANOFFICER")
     @GetMapping("/selective-courses/{id}")
-    public ResponseEntity getGradesForSelectiveCourseAndFacultyStudents(
-            @PathVariable Integer id) {
+    public ResponseEntity getGradesForSelectiveCourseAndFacultyStudents(@PathVariable Integer id) {
         List<SelectiveCoursesStudentDegrees> scStudentDegrees = selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(id, false);
         if (scStudentDegrees.size() > 0) {
             List<Integer> studentDegreeIds = scStudentDegrees.stream()
