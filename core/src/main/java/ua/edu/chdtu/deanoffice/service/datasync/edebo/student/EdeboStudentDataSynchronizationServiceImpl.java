@@ -245,7 +245,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
         } catch(Exception e) {}
         if (previousEducationInfo.length > 3) {
             String parts[] = previousEducationInfo[3].split(":");
-            if (parts[1] != null) studentDegree.setPreviousDiplomaIssuedBy(parts[1]);
+            if (parts[1] != null) studentDegree.setPreviousDiplomaIssuedBy(parts[1].trim());
         }
 
         studentDegree.setAdmissionDate(parseDate(data.getEducationDateBegin()));

@@ -13,9 +13,9 @@ public class ImportedData {
     private String lastName;
     @CsvBindByName(column = "По-батькові")
     private String middleName;
-    @CsvBindByName(column = "Ім'я англійською")
+    @CsvBindByName(column = "Name")
     private String firstNameEn;
-    @CsvBindByName(column = "Прізвище англійською")
+    @CsvBindByName(column = "Surname")
     private String lastNameEn;
 //    @CsvBindByName(column = "По-батькові англійською")
 //    private String middleNameEn;
