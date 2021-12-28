@@ -124,7 +124,7 @@ public class ExamReportBaseService {
 
         result.put("Specialization", specialization == null ? "" : specialization.getName());
         result.put("FacultyAbbr", user.getFaculty().getAbbr().toUpperCase());
-        result.put("DeanInitials", user.getFaculty().getDean());
+        result.put("DeanInitials", makeNameThenSurnameInCapital(user.getFaculty().getDean()));
         result.put("Degree", studentGroups.get(0).getSpecialization().getDegree().getName());
         result.put("StudyYear", getStudyYear());
 
