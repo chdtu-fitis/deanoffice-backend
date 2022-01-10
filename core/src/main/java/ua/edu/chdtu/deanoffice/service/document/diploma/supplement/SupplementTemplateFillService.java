@@ -144,7 +144,7 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private static Map<String, String> getTotalDictionary(StudentSummary studentSummary) {
+    private Map<String, String> getTotalDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
         result.put("TotalHours", String.format("%4d", studentSummary.getTotalHours()));
         result.put("TotalCredits", formatCredits(studentSummary.getTotalCredits()));
@@ -175,6 +175,7 @@ public class SupplementTemplateFillService {
         result.put("BirthDate", studentSummary.getStudent().getBirthDate() != null
                 ? simpleDateFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
+        result.put("EdeboId", TemplateUtil.getValueSafely(studentDegree.getEdeboId()));
 
         result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
