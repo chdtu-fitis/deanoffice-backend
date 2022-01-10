@@ -48,6 +48,9 @@ class DiplomaSheetData{
             case DiplomaHeaderPatterns.EDUCATION_ID:
                 headerData.setEducationId(columnName);
                 break;
+            case DiplomaHeaderPatterns.SUPPLEMENT_NUMBER:
+                headerData.setSupplementNumber(columnName);
+                break;
         }
     }
 

@@ -130,8 +130,8 @@ public class StudentDegreeService {
     }
 
     @Transactional
-    public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, boolean honor, Date diplomaDate, Date supplementDate) {
-        studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, honor, diplomaDate, supplementDate);
+    public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, String supplementNumber, boolean honor, Date diplomaDate, Date supplementDate) {
+        studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, supplementNumber, honor, diplomaDate, supplementDate);
     }
 
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId) {

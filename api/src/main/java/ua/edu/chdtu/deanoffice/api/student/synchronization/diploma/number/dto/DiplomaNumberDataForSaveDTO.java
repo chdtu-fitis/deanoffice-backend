@@ -11,5 +11,6 @@ public class DiplomaNumberDataForSaveDTO {
     private String name;
     private String patronimic;
     private String diplomaSeriesAndNumber;
+    private String supplementNumber;
     private boolean honor;
 }

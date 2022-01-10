@@ -249,11 +249,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.diplomaNumber = :diplomaNumber, sd.diplomaWithHonours = :diplomaWithHonours," +
             " sd.diplomaDate = :diplomaDate," +
-            " sd.supplementDate = :supplementDate " +
+            " sd.supplementNumber = :supplementNumber, sd.supplementDate = :supplementDate " +
             "WHERE sd.id = :studentDegreeId")
     void updateDiplomaNumber(
             @Param("studentDegreeId") int studentDegreeId,
             @Param("diplomaNumber") String diplomaNumber,
+            @Param("supplementNumber") String supplementNumber,
             @Param("diplomaWithHonours") boolean diplomaWithHonours,
             @Param("diplomaDate") Date diplomaDate,
             @Param("supplementDate") Date supplementDate);

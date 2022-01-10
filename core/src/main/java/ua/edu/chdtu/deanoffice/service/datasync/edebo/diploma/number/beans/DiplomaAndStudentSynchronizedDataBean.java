@@ -15,11 +15,12 @@ public class DiplomaAndStudentSynchronizedDataBean {
     private String name;
     private String patronimic;
     private String diplomaSeriesAndNumber;
+    private String supplementNumber;
     private String fullSpecialityName;
     private String groupName;
     private boolean honor;
 
-    public DiplomaAndStudentSynchronizedDataBean(StudentDegree studentDegree, String diplomaSeriesAndNumber, boolean honor) {
+    public DiplomaAndStudentSynchronizedDataBean(StudentDegree studentDegree, String diplomaSeriesAndNumber, String supplementNumber, boolean honor) {
         Student student = studentDegree.getStudent();
         Speciality speciality = studentDegree.getSpecialization().getSpeciality();
         this.id = studentDegree.getId();
@@ -27,6 +28,7 @@ public class DiplomaAndStudentSynchronizedDataBean {
         this.name = student.getName();
         this.patronimic = student.getPatronimic();
         this.diplomaSeriesAndNumber = diplomaSeriesAndNumber;
+        this.supplementNumber = supplementNumber;
         this.fullSpecialityName = speciality.getName() + " " + speciality.getCode();
         this.groupName = studentDegree.getStudentGroup() == null ? "" : studentDegree.getStudentGroup().getName();
         this.honor = honor;

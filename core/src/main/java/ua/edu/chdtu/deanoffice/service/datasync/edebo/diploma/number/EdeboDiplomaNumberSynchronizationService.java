@@ -149,6 +149,7 @@ public class EdeboDiplomaNumberSynchronizationService {
                     new DiplomaAndStudentSynchronizedDataBean(
                             studentDegreefromDb,
                             importData.getDocumentSeries() + " № " + importData.getDocumentNumber(),
+                            importData.getSupplementNumber(),
                             diplomaHonor
                     )
             );
