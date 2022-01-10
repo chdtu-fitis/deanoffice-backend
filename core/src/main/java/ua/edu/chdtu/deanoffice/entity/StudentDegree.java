@@ -68,4 +68,5 @@ public class StudentDegree extends BaseEntity {
     private Set<StudentPreviousUniversity> studentPreviousUniversities = new HashSet<>();
     @Enumerated(value = EnumType.STRING)
     private Citizenship citizenship = Citizenship.UKR;
+    private String edeboId;
 }
