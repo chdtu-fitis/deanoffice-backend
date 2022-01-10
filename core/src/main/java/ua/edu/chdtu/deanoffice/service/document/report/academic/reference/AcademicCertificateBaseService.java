@@ -36,7 +36,7 @@ public class AcademicCertificateBaseService {
         result.put("nameEng", student.getNameEng() == null ? "" : student.getNameEng());
         result.put("surnameEng", student.getSurnameEng() == null ? "" : student.getSurnameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
-        result.put("individualNumber", studentDegree.getSupplementNumber());
+        result.put("individualNumber", studentDegree.getEdeboId());
 
         result.put("facultyNameUkr", studentDegree.getSpecialization().getFaculty().getName());
         result.put("facultyNameEng", studentDegree.getSpecialization().getFaculty().getNameEng());

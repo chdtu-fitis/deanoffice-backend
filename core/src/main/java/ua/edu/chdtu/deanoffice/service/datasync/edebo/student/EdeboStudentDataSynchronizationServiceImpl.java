@@ -218,7 +218,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
             studentDegree.setStudentPreviousUniversities(studentPreviousUniversities);
         }
 
-        studentDegree.setSupplementNumber(data.getEducationId());
+        studentDegree.setEdeboId(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
         studentDegree.setTuitionForm(TuitionForm.getTuitionFormFromUkrName(data.getEducationFormName()));
         if (data.getIsShortened().toUpperCase().equals("ТАК"))

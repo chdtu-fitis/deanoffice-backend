@@ -131,7 +131,7 @@ public class EdeboDiplomaNumberSynchronizationService {
             );
         }
 
-        StudentDegree studentDegreefromDb = studentDegreeService.getBySupplementNumber(importData.getEducationId());
+        StudentDegree studentDegreefromDb = studentDegreeService.getByEdeboId(importData.getEducationId());
         if (studentDegreefromDb == null) {
             String message = "Даного студента не існує в базі даних";
             diplomaSynchronizationReport.addBeanToMissingDataList(

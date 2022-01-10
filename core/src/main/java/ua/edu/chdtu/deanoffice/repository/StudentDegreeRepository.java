@@ -207,8 +207,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query("SELECT sd FROM StudentDegree sd " +
             "WHERE sd.active = true " +
-            "AND sd.supplementNumber = :supplementNumper")
-    List<StudentDegree> findBySupplementNumber(@Param("supplementNumper") String supplementNumper);
+            "AND sd.edeboId = :edeboId")
+    List<StudentDegree> findByEdeboId(@Param("edeboId") String edeboId);
 
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);

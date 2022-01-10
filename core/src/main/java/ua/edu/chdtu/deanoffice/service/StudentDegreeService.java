@@ -138,8 +138,8 @@ public class StudentDegreeService {
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
 
-    public StudentDegree getBySupplementNumber(String supplementNumber) {
-        List<StudentDegree> studentDegrees = studentDegreeRepository.findBySupplementNumber(supplementNumber);
+    public StudentDegree getByEdeboId(String supplementNumber) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findByEdeboId(supplementNumber);
         return (studentDegrees.size() == 1) ? studentDegrees.get(0) : null;
     }
 

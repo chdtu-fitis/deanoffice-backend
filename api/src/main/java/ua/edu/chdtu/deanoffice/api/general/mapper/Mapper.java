@@ -94,10 +94,12 @@ public class Mapper {
         entity.setThesisName(dto.getThesisName());
         entity.setThesisNameEng(dto.getThesisNameEng());
         entity.setCitizenship(dto.getCitizenship());
+        entity.setEdeboId(dto.getEdeboId());
         entity.getStudentPreviousUniversities().clear();
         entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));
         entity.getStudentPreviousUniversities().forEach(item -> item.setStudentDegree(entity));
     }
+
     public static void mapStudentDegreeDTOToStudentDegree(StudentDegreeFullEdeboDataDto dto, StudentDegree entity) {
         entity.setId(dto.getId());
         map(dto.getStudent(),entity.getStudent());
@@ -112,8 +114,8 @@ public class Mapper {
         entity.setPreviousDiplomaType(dto.getPreviousDiplomaType());
         entity.setPreviousDiplomaNumber(dto.getPreviousDiplomaNumber());
         entity.setPreviousDiplomaIssuedBy(dto.getPreviousDiplomaIssuedBy());
-        entity.setSupplementNumber(dto.getSupplementNumber());
-        
+        entity.setEdeboId(dto.getEdeboId());
+
         if (dto.getStudentPreviousUniversities().size() > 0){
             entity.getStudentPreviousUniversities().clear();
             entity.getStudentPreviousUniversities().addAll(Mapper.strictMap(dto.getStudentPreviousUniversities(), StudentPreviousUniversity.class));

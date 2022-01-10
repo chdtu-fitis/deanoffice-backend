@@ -82,5 +82,7 @@ public class StudentDegreeDTO {
     @JsonView(StudentView.Degrees.class)
     private boolean diplomaWithHonours;
     @JsonView(StudentView.Degrees.class)
+    private String edeboId;
+    @JsonView(StudentView.Degrees.class)
     private Set<StudentPreviousUniversityDTO> studentPreviousUniversities = new HashSet<>();
 }

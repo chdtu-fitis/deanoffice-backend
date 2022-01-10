@@ -120,7 +120,7 @@ public class IndividualCurriculumFillTemplateService {
         String dean = degree.getStudentGroup().getSpecialization().getFaculty().getDean();
         replacements.put("DeanAbr", PersonUtil.makeNameThenSurnameInCapital(dean));
 
-        replacements.put("RecNum", degree.getSupplementNumber());
+        replacements.put("RecNum", degree.getEdeboId());
 
         String tuitionForm = Objects.requireNonNull(
                 TuitionForm.getTuitionFormFromUkrName(degree.getTuitionForm().getNameUkr())
