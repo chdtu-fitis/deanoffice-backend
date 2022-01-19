@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseNameRepository;
 
@@ -121,8 +122,23 @@ public class CourseNameService {
     public Map<String, String> getGraduatesCoursesWithEmptyEngName(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
         List<Object[]> coursesName = courseNameRepository.findAllForGraduatesWithNoEnglishName(year, facultyId, degreeId);
+
+        int shiftYear = getShiftYearByDegreeId(degreeId);
+        List<Object[]> selectiveCoursesName = courseNameRepository.findAllSelectiveForGraduatesWithNoEnglishName(year, shiftYear, degreeId);
+
+        coursesName.addAll(selectiveCoursesName);
         return coursesName
                 .stream()
                 .collect(Collectors.toMap(cn -> (String)cn[0], cn -> cn[1] + "; ", (e1, e2) -> (e1 + e2), LinkedHashMap::new));
+    }
+
+    public int getShiftYearByDegreeId(int degreeId) {
+        int shiftYear = 4;
+        if (degreeId == DegreeEnum.BACHELOR.getId()) shiftYear = 4;
+        if (degreeId == DegreeEnum.SPECIALIST.getId()) shiftYear = 1;
+        if (degreeId == DegreeEnum.MASTER.getId()) shiftYear = 2;
+        if (degreeId == DegreeEnum.PHD.getId()) shiftYear = 4;
+
+        return shiftYear;
     }
 }
