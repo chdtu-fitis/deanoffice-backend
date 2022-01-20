@@ -69,12 +69,13 @@ public class StudentDegreeService {
         message += (studentDegree.getProtocolDate() == null) ? "Дата протокола. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
         message += (studentDegree.getSupplementDate() == null) ? "Дата додатка. " : "";
-        message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
+        message += (studentDegree.getEdeboId() == null) ? "ЄДЕБО ID. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер додатка. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
-        message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
+//        message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
         return message;
     }
 
