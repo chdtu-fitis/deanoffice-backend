@@ -58,6 +58,10 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
     }
 
+    public void getCoursesList(int degreeId, Integer year) {
+
+    }
+
     private String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
         String message = "";
         message += Strings.isNullOrEmpty(studentDegree.getDiplomaNumber()) ? "Номер диплома. " : "";

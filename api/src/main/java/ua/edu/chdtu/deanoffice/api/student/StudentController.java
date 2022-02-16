@@ -13,16 +13,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.student.dto.StudentCourseDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentStatusDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
-import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentService;
-import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
 import java.util.List;
 import java.util.Objects;
@@ -121,5 +120,11 @@ public class StudentController {
     public ResponseEntity<StudentStatusDTO> getStudentStatus(@RequestParam int studentId) {
         StudentStatusDTO studentStatusDTO = new StudentStatusDTO(studentService.getStudentStatus(studentId));
         return ResponseEntity.ok(studentStatusDTO);
+    }
+
+    @GetMapping("/{id}/courses")
+    public ResponseEntity<StudentCourseDTO> getStudentCourses(@PathVariable int studentId, @RequestParam int x) {
+        StudentCourseDTO studentCourseDTO = new StudentCourseDTO();
+        return ResponseEntity.ok(studentCourseDTO);
     }
 }
