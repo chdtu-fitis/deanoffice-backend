@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
@@ -58,7 +59,11 @@ public class StudentDegreeService {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
     }
 
-    public void getCoursesList(int degreeId, Integer year) {
+    public void getStudentCoursesList(int degreeId, Integer studyYear) throws OperationCannotBePerformedException {
+        StudentDegree studentDegree = getById(degreeId);
+        if (studentDegree == null || studentDegree.getStudentGroup() == null)
+            throw new OperationCannotBePerformedException("Студент не існує або йому не призначено групу");
+        int realStudyYear = getRealStudentDegreeYear(studentDegree, studyYear);
 
     }
 
@@ -287,6 +292,12 @@ public class StudentDegreeService {
         int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
         int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
         return calendarYear - groupCreationYear + groupFirstYear;
+    }
+
+    public int getRealStudentDegreeYear(StudentGroup studentGroup, int studyYear) {
+        int beginYear = studentGroup.getBeginYears();
+        int realBeginYear = studentGroup.getRealBeginYear();
+        return studyYear + (realBeginYear + beginYear);
     }
 
     public List<StudentDegree> getAllStudentDegreesByStudentSurname(String surname) {
