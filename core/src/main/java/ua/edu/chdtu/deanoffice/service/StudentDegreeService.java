@@ -9,7 +9,6 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentDegreeShortBean;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionForm;
-import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 
@@ -57,14 +56,6 @@ public class StudentDegreeService {
 
     public List<StudentDegree> getAllActiveByStudent(Integer studentId) {
         return this.studentDegreeRepository.findAllActiveByStudentId(studentId);
-    }
-
-    public void getStudentCoursesList(int degreeId, Integer studyYear) throws OperationCannotBePerformedException {
-        StudentDegree studentDegree = getById(degreeId);
-        if (studentDegree == null || studentDegree.getStudentGroup() == null)
-            throw new OperationCannotBePerformedException("Студент не існує або йому не призначено групу");
-        int realStudyYear = getRealStudentDegreeYear(studentDegree, studyYear);
-
     }
 
     private String checkGraduateFieldValuesAvailability(StudentDegree studentDegree) {
@@ -297,7 +288,7 @@ public class StudentDegreeService {
     public int getRealStudentDegreeYear(StudentGroup studentGroup, int studyYear) {
         int beginYear = studentGroup.getBeginYears();
         int realBeginYear = studentGroup.getRealBeginYear();
-        return studyYear + (realBeginYear + beginYear);
+        return studyYear + (realBeginYear - beginYear);
     }
 
     public List<StudentDegree> getAllStudentDegreesByStudentSurname(String surname) {

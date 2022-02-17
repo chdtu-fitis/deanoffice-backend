@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
-import ua.edu.chdtu.deanoffice.api.student.dto.StudentCourseDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentStatusDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -120,11 +119,5 @@ public class StudentController {
     public ResponseEntity<StudentStatusDTO> getStudentStatus(@RequestParam int studentId) {
         StudentStatusDTO studentStatusDTO = new StudentStatusDTO(studentService.getStudentStatus(studentId));
         return ResponseEntity.ok(studentStatusDTO);
-    }
-
-    @GetMapping("/{id}/courses")
-    public ResponseEntity<StudentCourseDTO> getStudentCourses(@PathVariable int studentId, @RequestParam int x) {
-        StudentCourseDTO studentCourseDTO = new StudentCourseDTO();
-        return ResponseEntity.ok(studentCourseDTO);
     }
 }

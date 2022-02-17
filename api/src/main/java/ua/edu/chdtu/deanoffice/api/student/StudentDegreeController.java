@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.course.dto.StudentCourseDTO;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
-import ua.edu.chdtu.deanoffice.api.student.dto.PreviousDiplomaDTO;
+import ua.edu.chdtu.deanoffice.api.course.dto.StudentCoursesDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
@@ -25,6 +26,8 @@ import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.service.course.CourseService;
+import ua.edu.chdtu.deanoffice.service.course.StudentCourseBean;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
@@ -46,17 +49,18 @@ public class StudentDegreeController {
     private final StudentService studentService;
     private final StudentGroupService studentGroupService;
     private final FacultyAuthorizationService facultyAuthorizationService;
+    private final CourseService courseService;
 
     @Autowired
     public StudentDegreeController(
             StudentDegreeService studentDegreeService,
-            StudentService studentService,
-            StudentGroupService studentGroupService,
-            FacultyAuthorizationService facultyAuthorizationService) {
+            StudentService studentService, StudentGroupService studentGroupService,
+            FacultyAuthorizationService facultyAuthorizationService, CourseService courseService) {
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
         this.facultyAuthorizationService = facultyAuthorizationService;
+        this.courseService = courseService;
     }
 
     @Secured("ROLE_DEANOFFICER")
@@ -278,6 +282,17 @@ public class StudentDegreeController {
             String message = "Для призначення групи потрібно передати хоча б одного студента.";
             throw new OperationCannotBePerformedException(message);
         }
+    }
+
+    @GetMapping("/students/degrees/{studentDegreeId}/courses")
+    public ResponseEntity<StudentCoursesDTO> getStudentCourses(@PathVariable int studentDegreeId, @RequestParam int studyYear)
+            throws OperationCannotBePerformedException {
+        StudentCoursesDTO studentCoursesDTO = new StudentCoursesDTO();
+        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+        List<StudentCourseBean>[] allCoursesInStudyYear = courseService.getStudentCoursesListInStudyYear(studentDegree, studyYear);
+        studentCoursesDTO.setFirstSemesterCourses(Mapper.strictMap(allCoursesInStudyYear[0], StudentCourseDTO.class));
+        studentCoursesDTO.setSecondSemesterCourses(Mapper.strictMap(allCoursesInStudyYear[1], StudentCourseDTO.class));
+        return ResponseEntity.ok(studentCoursesDTO);
     }
 
     private ResponseEntity handleException(Exception exception) {
