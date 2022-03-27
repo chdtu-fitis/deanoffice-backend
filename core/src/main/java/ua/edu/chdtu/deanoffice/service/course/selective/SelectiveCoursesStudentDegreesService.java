@@ -353,10 +353,10 @@ public class SelectiveCoursesStudentDegreesService {
             if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
                 professional[1 - semester % 2]++;
         }
-//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-        if (general[0]+general[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-                || professional[0]+professional[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
+                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
+//        if (general[0]+general[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
+//                || professional[0]+professional[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
             return false;
         }
         return true;
