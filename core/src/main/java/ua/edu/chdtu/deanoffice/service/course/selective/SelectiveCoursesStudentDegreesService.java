@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -87,12 +88,16 @@ public class SelectiveCoursesStudentDegreesService {
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));
 
+        Map<SelectiveCourse, Long> resultSelectiveCoursesWithStudentsCount = new LinkedHashMap<>();
         selectiveCourses.stream().forEach(selectiveCourse -> {
-            if (!selectiveCoursesWithStudentsCount.keySet().contains(selectiveCourse))
-                selectiveCoursesWithStudentsCount.put(selectiveCourse, 0L);
+            Long count = selectiveCoursesWithStudentsCount.get(selectiveCourse);
+            if (count != null) {
+                resultSelectiveCoursesWithStudentsCount.put(selectiveCourse, count);
+            } else {
+                resultSelectiveCoursesWithStudentsCount.put(selectiveCourse, 0L);
+            }
         });
-
-        return selectiveCoursesWithStudentsCount;
+        return resultSelectiveCoursesWithStudentsCount;
     }
 
     @Transactional
