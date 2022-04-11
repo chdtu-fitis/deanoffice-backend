@@ -474,9 +474,8 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/disqualification")
-    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester,
-                                                               @RequestParam @NotNull int degreeId) throws OperationCannotBePerformedException {
-        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester, degreeId);
+    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestBody List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
+        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(selectiveCourseIds);
         return new ResponseEntity(HttpStatus.OK);
     }
 

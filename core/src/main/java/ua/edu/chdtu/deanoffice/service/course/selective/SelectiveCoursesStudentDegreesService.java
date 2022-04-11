@@ -101,7 +101,7 @@ public class SelectiveCoursesStudentDegreesService {
     }
 
     @Transactional
-    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester, int degreeId) throws OperationCannotBePerformedException {
+    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
         int currentYear = currentYearService.getYear();
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB = selectiveCoursesYearParametersRepository.findAllByYear(currentYear);
         if (selectiveCoursesYearParametersFromDB == null)
@@ -118,58 +118,8 @@ public class SelectiveCoursesStudentDegreesService {
         if (selectiveCoursesYearParametersByDate == null)
             throw new OperationCannotBePerformedException("Не можна проводити дискваліфікацію в даний проміжок часу");
 
-        Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear + 1, semester, degreeId, false);
-        List<Integer> selectiveCourseIds = new ArrayList<>();
-
-        Map<SelectiveCourse, Long> generalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
-                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.GENERAL)
-                .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
-
-        Map<SelectiveCourse, Long> professionalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
-                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.PROFESSIONAL)
-                .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
-
-        setGeneralSelectiveCourseIdsForRegistration(generalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
-        setProfessionalSelectiveCourseIdsForRegistration(professionalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
-
         selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(selectiveCourseIds);
         selectiveCourseRepository.setSelectiveCoursesUnavailableByIds(selectiveCourseIds);
-    }
-
-    private void setGeneralSelectiveCourseIdsForRegistration(Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount,
-                                                             SelectiveCoursesYearParameters selectiveCoursesYearParameters,
-                                                             int degreeId,
-                                                             List<Integer> selectiveCourseIds) {
-
-        for (Map.Entry<SelectiveCourse, Long> selectiveCourseWithStudentsCount : selectiveCoursesWithStudentsCount.entrySet()) {
-            int count = selectiveCourseWithStudentsCount.getValue().intValue();
-
-            if (degreeId == DegreeEnum.BACHELOR.getId() && count < selectiveCoursesYearParameters.getBachelorGeneralMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.MASTER.getId() && count < selectiveCoursesYearParameters.getMasterGeneralMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.PHD.getId() && count < selectiveCoursesYearParameters.getPhdGeneralMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            }
-        }
-    }
-
-    private void setProfessionalSelectiveCourseIdsForRegistration(Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount,
-                                                                  SelectiveCoursesYearParameters selectiveCoursesYearParameters,
-                                                                  int degreeId,
-                                                                  List<Integer> selectiveCourseIds) {
-
-        for(Map.Entry<SelectiveCourse, Long> selectiveCourseWithStudentsCount : selectiveCoursesWithStudentsCount.entrySet()) {
-            int count = selectiveCourseWithStudentsCount.getValue().intValue();
-
-            if (degreeId == DegreeEnum.BACHELOR.getId() && count < selectiveCoursesYearParameters.getBachelorProfessionalMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.MASTER.getId() && count < selectiveCoursesYearParameters.getMasterProfessionalMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.PHD.getId() && count < selectiveCoursesYearParameters.getPhdProfessionalMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            }
-        }
     }
 
     public SelectiveCoursesStudentDegreeId getSelectiveCoursesStudentDegreeIdByStudentDegreeId(boolean all, int studyYear, int studentDegreeId) {
