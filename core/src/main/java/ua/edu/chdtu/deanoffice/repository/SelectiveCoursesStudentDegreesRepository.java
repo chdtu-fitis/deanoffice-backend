@@ -83,12 +83,18 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                    @Param("studentDegreeId") int studentDegreeId,
                                                                                                    @Param("selectiveCourseIds") List<Integer> selectiveCourseIds,
                                                                                                    @Param("status") boolean status);
+    @Query(value =
+            "SELECT curr_year FROM current_year", nativeQuery = true)
+    int getCurrentYear();
 
     @Query(value =
-            "SELECT new ua.edu.chdtu.deanoffice.service.course.selective.statistics.StudentsRegistrationOnCoursesPercent(2021 - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear, " +
+            "SELECT new ua.edu.chdtu.deanoffice.service.course.selective.statistics.StudentsRegistrationOnCoursesPercent((:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear, " +
                     "(COUNT(DISTINCT scsd.studentDegree.id)*100/COUNT(scsd.studentDegree.id))) " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, scsd.studentDegree.active, 2021- scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear " +
+                    "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, " +
+                    "scsd.studentDegree.active, (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear " +
                     "having scsd.selectiveCourse.studyYear = :studyYear AND scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true  ")
-    List<StudentsRegistrationOnCoursesPercent> findPercentStudentsWhoChosenSelectiveCourse(@Param("studyYear") int studyYear, @Param("degreeId") int degreeId);
+    List<StudentsRegistrationOnCoursesPercent> findPercentStudentsWhoChosenSelectiveCourse(@Param("studyYear") int studyYear,
+                                                                                           @Param("degreeId") int degreeId,
+                                                                                           @Param("currentYear") int currentYear);
 }

@@ -13,7 +13,8 @@ public class SelectiveCourseStatisticsService {
     }
 
     public List<StudentsRegistrationOnCoursesPercent> getStudentsPercentWhoChosenSelectiveCourse(int studyYear, int degreeId) {
-        List<StudentsRegistrationOnCoursesPercent> studentDegrees = selectiveCoursesStudentDegreesRepository.findPercentStudentsWhoChosenSelectiveCourse(studyYear, degreeId);
+        int currentYear = selectiveCoursesStudentDegreesRepository.getCurrentYear();
+        List<StudentsRegistrationOnCoursesPercent> studentDegrees = selectiveCoursesStudentDegreesRepository.findPercentStudentsWhoChosenSelectiveCourse(studyYear, degreeId, currentYear);
         return (studentDegrees);
     }
 }
