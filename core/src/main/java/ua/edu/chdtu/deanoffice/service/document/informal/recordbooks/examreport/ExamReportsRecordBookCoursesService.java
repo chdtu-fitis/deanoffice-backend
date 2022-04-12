@@ -99,7 +99,7 @@ public class ExamReportsRecordBookCoursesService {
                                                   int initialNumber) throws Docx4JException, IOException {
         int facultyId = FacultyUtil.getUserFacultyIdInt();
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
-                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId, true);
         List<StudentGroup> studentGroups = groupService.getGroupsBySelectionCriteria(specification);
         WordprocessingMLPackage wordMLPackage = fillHeader(HEADER_TEMPLATE, year  + " курс");
         for (StudentGroup group : studentGroups) {
