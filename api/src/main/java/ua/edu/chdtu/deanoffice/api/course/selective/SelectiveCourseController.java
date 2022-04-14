@@ -348,7 +348,7 @@ public class SelectiveCourseController {
             else
                 selectiveCoursesFromDB.addAll(selectiveCourses);
 
-            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCoursesFromDB);
+            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCourses);
 
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
