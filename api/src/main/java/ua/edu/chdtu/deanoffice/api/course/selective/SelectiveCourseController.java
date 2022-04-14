@@ -394,7 +394,7 @@ public class SelectiveCourseController {
         if (selectiveCourses == null || selectiveCourses.size() == 0) {
             throw new OperationCannotBePerformedException("Неправильні ідентифікатори предметів");
         }
-        if (!selectiveCoursesStudentDegreesService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+        if (!selectiveCoursesStudentDegreesService.checkSelectiveCoursesIntegrityStrict(studentDegree, selectiveCourses)) {
             throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
         }
         return true;
