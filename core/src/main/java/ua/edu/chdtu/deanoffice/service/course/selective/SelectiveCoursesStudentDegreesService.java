@@ -20,9 +20,11 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
@@ -290,7 +292,7 @@ public class SelectiveCoursesStudentDegreesService {
     public boolean checkSelectiveCoursesIntegrityStrict(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
         int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree) + 1;
         int registrationYear = currentYearService.getYear() + 1;
-        List<SelectiveCourse> selectiveCoursesToCheck = buildSelectiveCoursesToCheckList(studentDegree, selectiveCourses, registrationYear);
+        Set<SelectiveCourse> selectiveCoursesToCheck = buildSelectiveCoursesToCheckList(studentDegree, selectiveCourses, registrationYear);
         try {
             checkSemestersAndYearIntegrity(studentDegree, selectiveCoursesToCheck, studentDegreeYear, registrationYear);
             checkCoursesNumbersIntegrityEquals(studentDegree, selectiveCoursesToCheck, studentDegreeYear);
@@ -306,7 +308,7 @@ public class SelectiveCoursesStudentDegreesService {
 3.if all selective courses are for right registration year*/
     public boolean checkSelectiveCoursesIntegrityLoose(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
         int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree, registrationYear);
-        List<SelectiveCourse> selectiveCoursesToCheck = buildSelectiveCoursesToCheckList(studentDegree, selectiveCourses, registrationYear);
+        Set<SelectiveCourse> selectiveCoursesToCheck = buildSelectiveCoursesToCheckList(studentDegree, selectiveCourses, registrationYear);
         try {
             checkSemestersAndYearIntegrity(studentDegree, selectiveCoursesToCheck, studentDegreeYear, registrationYear);
             checkCoursesNumbersIntegrityLessOrEquals(studentDegree, selectiveCoursesToCheck, studentDegreeYear);
@@ -316,19 +318,19 @@ public class SelectiveCoursesStudentDegreesService {
         return true;
     }
 
-    private List<SelectiveCourse> buildSelectiveCoursesToCheckList(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
+    private Set<SelectiveCourse> buildSelectiveCoursesToCheckList(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
         List<SelectiveCourse> alreadyRegistered = selectiveCoursesStudentDegreesRepository
                 .findActiveByStudentDegreeAndYear(studentDegree.getId(), registrationYear)
                 .stream()
                 .map(scsd -> scsd.getSelectiveCourse())
                 .collect(Collectors.toList());
-        List<SelectiveCourse> selectiveCoursesToCheck = new ArrayList<>();
+        Set<SelectiveCourse> selectiveCoursesToCheck = new HashSet<>();
         selectiveCoursesToCheck.addAll(alreadyRegistered);
         selectiveCoursesToCheck.addAll(selectiveCourses);
         return selectiveCoursesToCheck;
     }
 
-    private void checkSemestersAndYearIntegrity(StudentDegree studentDegree, List <SelectiveCourse> selectiveCoursesToCheck, int studentDegreeYear, int registrationYear) throws InconsistentSelectiveCoursesToAddException {
+    private void checkSemestersAndYearIntegrity(StudentDegree studentDegree, Set<SelectiveCourse> selectiveCoursesToCheck, int studentDegreeYear, int registrationYear) throws InconsistentSelectiveCoursesToAddException {
         for (SelectiveCourse selectiveCourse : selectiveCoursesToCheck) {
             if (selectiveCourse.getStudyYear() != registrationYear
                     || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
@@ -339,7 +341,7 @@ public class SelectiveCoursesStudentDegreesService {
         }
     }
 
-    private void checkCoursesNumbersIntegrityLessOrEquals(StudentDegree studentDegree, List <SelectiveCourse> selectiveCourses, int studentDegreeYear) throws InconsistentSelectiveCoursesToAddException {
+    private void checkCoursesNumbersIntegrityLessOrEquals(StudentDegree studentDegree, Set<SelectiveCourse> selectiveCourses, int studentDegreeYear) throws InconsistentSelectiveCoursesToAddException {
         CoursesNumbersByTrainingCycle cn = calculateCoursesNumberByTrainingCycle(selectiveCourses);
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
@@ -351,7 +353,7 @@ public class SelectiveCoursesStudentDegreesService {
         }
     }
 
-    private void checkCoursesNumbersIntegrityEquals(StudentDegree studentDegree, List <SelectiveCourse> selectiveCourses, int studentDegreeYear) throws InconsistentSelectiveCoursesToAddException {
+    private void checkCoursesNumbersIntegrityEquals(StudentDegree studentDegree, Set<SelectiveCourse> selectiveCourses, int studentDegreeYear) throws InconsistentSelectiveCoursesToAddException {
         CoursesNumbersByTrainingCycle cn = calculateCoursesNumberByTrainingCycle(selectiveCourses);
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
@@ -363,7 +365,7 @@ public class SelectiveCoursesStudentDegreesService {
         }
     }
 
-    private CoursesNumbersByTrainingCycle calculateCoursesNumberByTrainingCycle(List <SelectiveCourse> selectiveCourses) throws InconsistentSelectiveCoursesToAddException {
+    private CoursesNumbersByTrainingCycle calculateCoursesNumberByTrainingCycle(Set<SelectiveCourse> selectiveCourses) throws InconsistentSelectiveCoursesToAddException {
         int general[] = {0, 0};
         int professional[] = {0, 0};
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
