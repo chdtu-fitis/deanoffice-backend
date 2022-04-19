@@ -86,7 +86,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
     @Query(value =
             "SELECT (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, scsd.studentDegree.active, 1 " +
                     "HAVING scsd.selectiveCourse.studyYear = :studyYear AND scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
@@ -96,7 +96,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                             @Param("currentYear") int currentYear);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr AS facultyName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, " +
                     "scsd.studentDegree.active, scsd.studentDegree.studentGroup.specialization.faculty.abbr " +
@@ -106,7 +106,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                @Param("degreeId") int degreeId);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.name AS groupName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, " +
                     "scsd.studentDegree.active, scsd.studentDegree.studentGroup.name " +
@@ -117,7 +117,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "scsd.studentDegree.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, " +
                     "scsd.studentDegree.active, scsd.studentDegree.specialization.name, scsd.studentDegree.studentGroup.specialization.faculty.abbr " +
@@ -128,20 +128,20 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr AS facultyName, " +
                     "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, scsd.studentDegree.active, " +
                     "scsd.studentDegree.studentGroup.specialization.faculty.abbr, 2 " +
                     "HAVING scsd.selectiveCourse.studyYear = :studyYear AND scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
                     "ORDER BY facultyName, studyYear")
-    List<IPercentStudentsRegistrationOnCourses> findStudentsRegisteredSelectiveCourseByFacultyAndCourses(@Param("studyYear") int studyYear,
-                                                                                                         @Param("degreeId") int degreeId,
-                                                                                                         @Param("currentYear") int currentYear);
+    List<IPercentStudentsRegistrationOnCourses> findStudentsRegisteredSelectiveCourseByFacultyAndYear(@Param("studyYear") int studyYear,
+                                                                                                      @Param("degreeId") int degreeId,
+                                                                                                      @Param("currentYear") int currentYear);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr AS facultyName, " +
                     "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
                     "scsd.studentDegree.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, scsd.studentDegree.specialization.name, scsd.studentDegree.active, " +
                     "scsd.studentDegree.studentGroup.specialization.faculty.abbr, 2 " +
@@ -153,7 +153,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
     @Query(value =
             "SELECT sd.studentGroup.specialization.faculty.abbr AS facultyName, " +
-                    "COUNT(sd.id) AS percent " +
+                    "COUNT(sd.id) AS count " +
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.studentGroup.specialization.degree.id=:degreeId AND sd.active = true " +
                     "GROUP BY sd.studentGroup.specialization.faculty.abbr " +
@@ -162,7 +162,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.name AS groupName, " +
-                    "COUNT(scsd.studentDegree.id) AS percent " +
+                    "COUNT(scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "WHERE scsd.studentDegree.studentGroup.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
                     "GROUP BY scsd.studentDegree.studentGroup.name " +
@@ -171,7 +171,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
     @Query(value =
             "SELECT (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(scsd.studentDegree.id) AS percent " +
+                    "COUNT(scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "WHERE scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
                     "GROUP BY  scsd.studentDegree.specialization.degree.id, scsd.studentDegree.active, 1 " +
@@ -183,7 +183,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "scsd.studentDegree.specialization.name AS specializationName, " +
-                    "COUNT(scsd.studentDegree.id) AS percent " +
+                    "COUNT(scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.studentDegree.specialization.degree.id, " +
                     "scsd.studentDegree.active, scsd.studentDegree.specialization.name, scsd.studentDegree.studentGroup.specialization.faculty.abbr " +
@@ -194,19 +194,19 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.studentDegree.specialization.degree.id, " +
                     "scsd.studentDegree.active, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 2 " +
                     "HAVING scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
                     "ORDER BY facultyName, studyYear ")
-    List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndCourses(@Param("degreeId") int degreeId,
-                                                                                                             @Param("currentYear") int currentYear);
+    List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYear(@Param("degreeId") int degreeId,
+                                                                                                          @Param("currentYear") int currentYear);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
                     "scsd.studentDegree.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS percent " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.studentDegree.specialization.degree.id, scsd.studentDegree.specialization.name, " +
                     "scsd.studentDegree.active, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 2 " +

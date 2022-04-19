@@ -47,7 +47,7 @@ public class SelectiveCoursesStatisticsController {
         else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.FACULTY_AND_SPECIALIZATION){
             return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO.class));
         }
-        else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.FACULTY_AND_COURSES){
+        else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.FACULTY_AND_YEAR){
             return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO.class));
         }
         else {                         //FACULTY_AND_COURSES_AND_SPECIALIZATION
