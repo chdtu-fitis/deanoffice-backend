@@ -35,23 +35,19 @@ public class SelectiveCoursesStatisticsController {
                                                        @RequestParam @NotNull int degreeId,
                                                        @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
         List<IPercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);
-        if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.YEAR) {
-            return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesPercentDTO.class));
-        }
-        else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.FACULTY){
-            return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyPercentDTO.class));
-        }
-        else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.GROUP) {
-            return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByGroupPercentDTO.class));
-        }
-        else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.FACULTY_AND_SPECIALIZATION){
-            return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO.class));
-        }
-        else if (selectiveStatisticsCriteria == SelectiveStatisticsCriteria.FACULTY_AND_YEAR){
-            return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO.class));
-        }
-        else {                         //FACULTY_AND_COURSES_AND_SPECIALIZATION
-            return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO.class));
+        switch (selectiveStatisticsCriteria){
+            case YEAR:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesPercentDTO.class));
+            case FACULTY:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyPercentDTO.class));
+            case GROUP:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByGroupPercentDTO.class));
+            case FACULTY_AND_SPECIALIZATION:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO.class));
+            case FACULTY_AND_YEAR:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO.class));
+            default:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO.class));
         }
     }
 }
