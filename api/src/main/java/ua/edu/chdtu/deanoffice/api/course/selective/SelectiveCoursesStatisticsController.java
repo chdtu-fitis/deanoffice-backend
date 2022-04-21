@@ -5,12 +5,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.CoursesSelectedByStudentsGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.ICoursesSelectedByStudentsGroup;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
@@ -49,5 +51,11 @@ public class SelectiveCoursesStatisticsController {
             default:
                 return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO.class));
         }
+    }
+    @GetMapping("/registered-name")
+    public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) int studyYear,
+                                                    @RequestParam @NotNull int groupId) {
+        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentsGroup(studyYear, groupId);
+        return ResponseEntity.ok(map(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
     }
 }

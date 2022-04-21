@@ -111,7 +111,6 @@ public class SelectiveCourseStatisticsService {
                 as.setPercent(0);
             }
         }
-
         return allStudentsCounts;
     }
 
@@ -175,5 +174,9 @@ public class SelectiveCourseStatisticsService {
             }
         }
         return allStudentsCounts;
+    }
+    public List<ICoursesSelectedByStudentsGroup> getCoursesSelectedByStudentsGroup(int studyYear, int groupId) {
+        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
+        return coursesSelectedByStudentsGroup;
     }
 }
