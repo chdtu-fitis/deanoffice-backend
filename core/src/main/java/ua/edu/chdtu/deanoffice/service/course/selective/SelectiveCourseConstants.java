@@ -18,16 +18,16 @@ public class SelectiveCourseConstants {
         Map<String, Integer[]>[] bachelor = new Map[4];
         Map<String, Integer[]> bachelor2 = new HashMap<>();
         bachelor2.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{0, 0});
-        bachelor2.put(TypeCycle.GENERAL.toString(), new Integer[]{3, 2});
+        bachelor2.put(TypeCycle.GENERAL.toString(), new Integer[]{2, 3});
         bachelor[1] = bachelor2;
 
         Map<String, Integer[]> bachelor3 = new HashMap<>();
-        bachelor3.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{3, 2});
+        bachelor3.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{2, 3});
         bachelor3.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         bachelor[2] = bachelor3;
 
         Map<String, Integer[]> bachelor4 = new HashMap<>();
-        bachelor4.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{3, 2});
+        bachelor4.put(TypeCycle.PROFESSIONAL.toString(), new Integer[]{2, 3});
         bachelor4.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         bachelor[3] = bachelor4;
         SELECTIVE_COURSES_NUMBER.put(BACHELOR_ID, bachelor);
