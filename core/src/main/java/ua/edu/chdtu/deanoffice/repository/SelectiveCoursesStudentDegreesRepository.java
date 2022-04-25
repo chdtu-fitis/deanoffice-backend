@@ -106,14 +106,19 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                @Param("degreeId") int degreeId);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.name AS groupName, " +
+                    "scsd.studentDegree.studentGroup.specialization.faculty.abbr AS facultyName, " +
+                    "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
+                    "scsd.studentDegree.studentGroup.specialization.department.abbr AS department, " +
                     "COUNT(DISTINCT scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, " +
-                    "scsd.studentDegree.active, scsd.studentDegree.studentGroup.name " +
+                    "scsd.studentDegree.active, scsd.studentDegree.studentGroup.name, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 3, " +
+                    "scsd.studentDegree.studentGroup.specialization.department.abbr " +
                     "HAVING scsd.selectiveCourse.studyYear = :studyYear AND scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
                     "ORDER BY groupName")
     List<IPercentStudentsRegistrationOnCourses> findStudentsRegisteredSelectiveCourseByGroup(@Param("studyYear") int studyYear,
-                                                                                             @Param("degreeId") int degreeId);
+                                                                                             @Param("degreeId") int degreeId,
+                                                                                             @Param("currentYear") int currentYear);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "scsd.studentDegree.specialization.name AS specializationName, " +
@@ -161,13 +166,18 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsOnFaculty(@Param("degreeId") int degreeId);
 
     @Query(value =
-            "SELECT scsd.studentDegree.studentGroup.name AS groupName, " +
+            "SELECT scsd.studentDegree.studentGroup.name AS groupName," +
+                    "scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
+                    "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
+                    "scsd.studentDegree.studentGroup.specialization.department.abbr AS department, " +
                     "COUNT(scsd.studentDegree.id) AS count " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "WHERE scsd.studentDegree.studentGroup.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "GROUP BY scsd.studentDegree.studentGroup.name " +
+                    "GROUP BY scsd.studentDegree.studentGroup.name, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 3," +
+                    "scsd.studentDegree.studentGroup.specialization.department.abbr " +
                     "ORDER BY scsd.studentDegree.studentGroup.name")
-    List<IPercentStudentsRegistrationOnCourses> findCountStudentsOnGroup(@Param("degreeId") int degreeId);
+    List<IPercentStudentsRegistrationOnCourses> findCountStudentsOnGroup(@Param("degreeId") int degreeId,
+                                                                         @Param("currentYear") int currentYear);
 
     @Query(value =
             "SELECT (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +

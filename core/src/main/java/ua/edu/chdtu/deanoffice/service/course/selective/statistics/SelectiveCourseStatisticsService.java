@@ -29,11 +29,11 @@ public class SelectiveCourseStatisticsService {
             case FACULTY:
                 registeredCounts = selectiveCoursesStudentDegreesRepository.findStudentsRegisteredSelectiveCourseByFaculty(studyYear, degreeId);
                 allStudentsCounts = selectiveCoursesStudentDegreesRepository.findCountStudentsOnFaculty(degreeId);
-                registeredPercent = getStudentsPercentWhoChosenSelectiveCourseByАFaculty(registeredCounts, allStudentsCounts);
+                registeredPercent = getStudentsPercentWhoChosenSelectiveCourseByFaculty(registeredCounts, allStudentsCounts);
                 break;
             case GROUP:
-                registeredCounts = selectiveCoursesStudentDegreesRepository.findStudentsRegisteredSelectiveCourseByGroup(studyYear, degreeId);
-                allStudentsCounts = selectiveCoursesStudentDegreesRepository.findCountStudentsOnGroup(degreeId);
+                registeredCounts = selectiveCoursesStudentDegreesRepository.findStudentsRegisteredSelectiveCourseByGroup(studyYear, degreeId, currentYear);
+                allStudentsCounts = selectiveCoursesStudentDegreesRepository.findCountStudentsOnGroup(degreeId, currentYear);
                 registeredPercent = getStudentsPercentWhoChosenSelectiveCourseByGroup(registeredCounts, allStudentsCounts);
                 break;
             case FACULTY_AND_SPECIALIZATION:
@@ -74,7 +74,7 @@ public class SelectiveCourseStatisticsService {
         return allStudentsCounts;
     }
 
-    private List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourseByАFaculty(
+    private List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourseByFaculty(
             List<IPercentStudentsRegistrationOnCourses> registeredCounts,
             List<IPercentStudentsRegistrationOnCourses> allStudentsCounts) {
         int i = 0;
