@@ -38,6 +38,4 @@ public class SelectiveCourseStatisticsController {
         }
         return ResponseEntity.ok(result);
     }
-
 }
-
