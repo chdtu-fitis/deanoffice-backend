@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 
 import java.util.List;
@@ -83,6 +85,15 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                    @Param("studentDegreeId") int studentDegreeId,
                                                                                                    @Param("selectiveCourseIds") List<Integer> selectiveCourseIds,
                                                                                                    @Param("status") boolean status);
+
+    @Query("SELECT sd FROM StudentDegree sd WHERE sd.specialization.degree.id = :degreeId and sd.active=TRUE " +
+            "and sd.id NOT IN " +
+            "(SELECT DISTINCT scsd.studentDegree.id FROM SelectiveCoursesStudentDegrees AS scsd WHERE scsd.selectiveCourse.studyYear= :studyYear)" +
+            "ORDER BY sd.student.surname,sd.student.name,sd.student.patronimic")
+    List<StudentDegree> findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(
+            @Param("studyYear") int studyYear,
+            @Param("degreeId") int degreeId
+    );
 
     @Query(value =
             "SELECT (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
@@ -224,5 +235,4 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "ORDER BY facultyName, studyYear, specializationName ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYearAndSpecialization(@Param("degreeId") int degreeId,
                                                                                                                            @Param("currentYear") int currentYear);
-
 }
