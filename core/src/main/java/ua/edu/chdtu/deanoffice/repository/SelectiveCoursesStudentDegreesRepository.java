@@ -217,18 +217,13 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                                            @Param("currentYear") int currentYear);
 
     @Query(value =
-            "SELECT  cn.name AS nameCourses, " +
-                    "s.name AS studentName, " +
-                    "s.surname AS studentSurname " +
-                    "FROM student AS s " +
-                    "INNER JOIN student_degree sd ON s.id = sd.student_id " +
-                    "INNER JOIN student_group sg ON sd.student_group_id = sg.id " +
-                    "INNER JOIN selective_courses_student_degrees scsd on scsd.student_degree_id = sd.id " +
-                    "INNER JOIN selective_course sc on scsd.selective_course_id = sc.id " +
-                    "INNER JOIN course c ON c.id = sc.course_id " +
-                    "INNER JOIN course_name cn ON cn.id = c.course_name_id " +
-                    "WHERE sg.id = :groupId AND sc.study_year = :studyYear " +
-                    "ORDER BY s.surname ", nativeQuery = true)
+            "SELECT  scsd.selectiveCourse.course.semester AS semester, " +
+                    "scsd.selectiveCourse.id AS selectiveCourseId, " +
+                    "scsd.studentDegree.id AS studentDegreeId, " +
+                    "scsd.selectiveCourse.course.courseName.name AS nameCourses, " +
+                    "CONCAT(scsd.studentDegree.student.surname, ' ', scsd.studentDegree.student.name) AS studentFullName " +
+                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
+                    "WHERE scsd.studentDegree.studentGroup.id = :groupId AND scsd.selectiveCourse.studyYear = :studyYear ")
     List<ICoursesSelectedByStudentsGroup> findCoursesSelectedByStudentsGroup(@Param("studyYear") int studyYear,
                                                                              @Param("groupId") int groupId);
 

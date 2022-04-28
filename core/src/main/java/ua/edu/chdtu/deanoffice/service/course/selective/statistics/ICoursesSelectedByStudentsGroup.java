@@ -1,7 +1,14 @@
 package ua.edu.chdtu.deanoffice.service.course.selective.statistics;
 
+import java.util.Map;
+
 public interface ICoursesSelectedByStudentsGroup {
-    String getStudentSurname();
-    String getStudentName();
+    int getSelectiveCourseId();
+    int getStudentDegreeId();
+    int getSemester();
+    String getStudentFullName();
     String getNameCourses();
+    Map<String, Integer> getRegisteredStudent();
+
+    void setRegisteredStudent(Map<String, Integer> RegisteredStudent);
 }

@@ -3,7 +3,10 @@ package ua.edu.chdtu.deanoffice.service.course.selective.statistics;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SelectiveCourseStatisticsService {
@@ -175,8 +178,29 @@ public class SelectiveCourseStatisticsService {
         }
         return allStudentsCounts;
     }
+
     public List<ICoursesSelectedByStudentsGroup> getCoursesSelectedByStudentsGroup(int studyYear, int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
-        return coursesSelectedByStudentsGroup;
+        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
+        Map<String, Integer> registeredStudent;
+        List<String> listNameCourses = new ArrayList<>();
+        String nameCourses;
+        int i = 0;
+        for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
+            registeredStudent = new HashMap<>();
+            nameCourses = cs.getNameCourses();
+            if (!(listNameCourses.contains(cs.getNameCourses()))) {
+                listNameCourses.add(nameCourses);
+                coursesSelectedByStudentsGroupFiltered.add(cs);
+                i++;
+                for (ICoursesSelectedByStudentsGroup cs2 : coursesSelectedByStudentsGroup) {
+                    if (nameCourses.equals(cs2.getNameCourses())){
+                        registeredStudent.put(cs2.getStudentFullName(), cs2.getStudentDegreeId());
+                    }
+                }
+                coursesSelectedByStudentsGroupFiltered.get(i - 1).setRegisteredStudent(registeredStudent);
+            }
+        }
+        return coursesSelectedByStudentsGroupFiltered;
     }
 }
