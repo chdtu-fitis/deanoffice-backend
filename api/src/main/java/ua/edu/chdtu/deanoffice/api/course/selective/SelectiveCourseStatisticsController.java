@@ -23,10 +23,10 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 @RequestMapping("/selective-courses-statistics")
-public class SelectiveCoursesStatisticsController {
+public class SelectiveCourseStatisticsController {
     private SelectiveCourseStatisticsService selectiveCourseStatisticsService;
 
-    public SelectiveCoursesStatisticsController(SelectiveCourseStatisticsService selectiveCourseStatisticsService) {
+    public SelectiveCourseStatisticsController(SelectiveCourseStatisticsService selectiveCourseStatisticsService) {
         this.selectiveCourseStatisticsService = selectiveCourseStatisticsService;
     }
 
