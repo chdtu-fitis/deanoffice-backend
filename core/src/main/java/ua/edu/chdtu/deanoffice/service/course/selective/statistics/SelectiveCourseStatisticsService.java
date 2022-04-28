@@ -193,9 +193,9 @@ public class SelectiveCourseStatisticsService {
                 listNameCourses.add(nameCourses);
                 coursesSelectedByStudentsGroupFiltered.add(cs);
                 i++;
-                for (ICoursesSelectedByStudentsGroup cs2 : coursesSelectedByStudentsGroup) {
-                    if (nameCourses.equals(cs2.getNameCourses())){
-                        registeredStudent.put(cs2.getStudentFullName(), cs2.getStudentDegreeId());
+                for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
+                    if (nameCourses.equals(csbsg.getNameCourses())){
+                        registeredStudent.put(csbsg.getStudentFullName(), csbsg.getStudentDegreeId());
                     }
                 }
                 coursesSelectedByStudentsGroupFiltered.get(i - 1).setRegisteredStudent(registeredStudent);
