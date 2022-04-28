@@ -12,6 +12,21 @@ import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCour
 import java.util.ArrayList;
 import java.util.List;
 
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyPercentDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+
 @RestController
 @RequestMapping("/selective-courses-statistics")
 public class SelectiveCourseStatisticsController {
@@ -37,5 +52,25 @@ public class SelectiveCourseStatisticsController {
             result.add(studentsNotRegisteredForSelectiveCoursesDTO);
         }
         return ResponseEntity.ok(result);
+
+    @GetMapping("/registered-percent")
+    public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) int studyYear,
+                                                       @RequestParam @NotNull int degreeId,
+                                                       @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
+        List<IPercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);
+        switch (selectiveStatisticsCriteria){
+            case YEAR:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesPercentDTO.class));
+            case FACULTY:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyPercentDTO.class));
+            case GROUP:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByGroupPercentDTO.class));
+            case FACULTY_AND_SPECIALIZATION:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO.class));
+            case FACULTY_AND_YEAR:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO.class));
+            default:
+                return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO.class));
+        }
     }
 }
