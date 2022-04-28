@@ -19,7 +19,6 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegis
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
 
 import javax.validation.constraints.Min;
@@ -52,6 +51,7 @@ public class SelectiveCourseStatisticsController {
             result.add(studentsNotRegisteredForSelectiveCoursesDTO);
         }
         return ResponseEntity.ok(result);
+    }
 
     @GetMapping("/registered-percent")
     public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) int studyYear,
