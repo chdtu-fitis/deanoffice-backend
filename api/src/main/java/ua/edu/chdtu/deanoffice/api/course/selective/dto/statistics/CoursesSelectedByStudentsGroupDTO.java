@@ -11,5 +11,5 @@ public class CoursesSelectedByStudentsGroupDTO {
     int selectiveCourseId;
     int semester;
     String nameCourses;
-    Map<String, Integer> RegisteredStudent;
+    Map<String, Integer> registeredStudents;
 }

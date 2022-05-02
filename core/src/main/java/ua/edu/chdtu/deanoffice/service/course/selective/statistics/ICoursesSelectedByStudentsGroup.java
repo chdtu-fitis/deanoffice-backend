@@ -7,7 +7,7 @@ public interface ICoursesSelectedByStudentsGroup {
     int getStudentDegreeId();
     int getSemester();
     String getStudentFullName();
-    String getNameCourses();
+    String getCourseName();
     Map<String, Integer> getRegisteredStudent();
 
     void setRegisteredStudent(Map<String, Integer> RegisteredStudent);

@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStude
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -53,7 +54,7 @@ public class SelectiveCourseStatisticsController {
         }
     }
     @GetMapping("/registered-name")
-    public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) int studyYear,
+    public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                     @RequestParam @NotNull int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentsGroup(studyYear, groupId);
         return ResponseEntity.ok(map(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));

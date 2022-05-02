@@ -220,7 +220,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "SELECT  scsd.selectiveCourse.course.semester AS semester, " +
                     "scsd.selectiveCourse.id AS selectiveCourseId, " +
                     "scsd.studentDegree.id AS studentDegreeId, " +
-                    "scsd.selectiveCourse.course.courseName.name AS nameCourses, " +
+                    "scsd.selectiveCourse.course.courseName.name AS courseName, " +
                     "CONCAT(scsd.studentDegree.student.surname, ' ', scsd.studentDegree.student.name) AS studentFullName " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
                     "WHERE scsd.studentDegree.studentGroup.id = :groupId AND scsd.selectiveCourse.studyYear = :studyYear ")

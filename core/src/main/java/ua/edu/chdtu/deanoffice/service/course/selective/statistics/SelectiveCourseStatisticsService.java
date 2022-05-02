@@ -184,17 +184,17 @@ public class SelectiveCourseStatisticsService {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
         Map<String, Integer> registeredStudent;
         List<String> listNameCourses = new ArrayList<>();
-        String nameCourses;
+        String courseName;
         int i = 0;
         for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
             registeredStudent = new HashMap<>();
-            nameCourses = cs.getNameCourses();
-            if (!(listNameCourses.contains(cs.getNameCourses()))) {
-                listNameCourses.add(nameCourses);
+            courseName = cs.getCourseName();
+            if (!(listNameCourses.contains(cs.getCourseName()))) {
+                listNameCourses.add(courseName);
                 coursesSelectedByStudentsGroupFiltered.add(cs);
                 i++;
                 for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
-                    if (nameCourses.equals(csbsg.getNameCourses())){
+                    if (courseName.equals(csbsg.getCourseName())){
                         registeredStudent.put(csbsg.getStudentFullName(), csbsg.getStudentDegreeId());
                     }
                 }
