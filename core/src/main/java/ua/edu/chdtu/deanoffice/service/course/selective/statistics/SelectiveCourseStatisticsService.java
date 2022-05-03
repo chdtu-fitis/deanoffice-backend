@@ -4,9 +4,7 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class SelectiveCourseStatisticsService {
@@ -179,26 +177,27 @@ public class SelectiveCourseStatisticsService {
         return allStudentsCounts;
     }
 
-    public List<ICoursesSelectedByStudentsGroup> getCoursesSelectedByStudentsGroup(int studyYear, int groupId) {
+    public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentsGroup(int studyYear, int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
-        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
-        Map<String, Integer> registeredStudent;
+        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
+        List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
         List<String> listNameCourses = new ArrayList<>();
         String courseName;
         int i = 0;
         for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
-            registeredStudent = new HashMap<>();
+            studentsNameAndId = new ArrayList<>();
             courseName = cs.getCourseName();
             if (!(listNameCourses.contains(cs.getCourseName()))) {
                 listNameCourses.add(courseName);
-                coursesSelectedByStudentsGroupFiltered.add(cs);
-                i++;
+                coursesSelectedByStudentsGroupFiltered.add(new CoursesSelectedByStudentsGroupResult(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
+                        cs.getCourseName(), cs.getTrainingCycle(), cs.getFieldOfKnowledgeCode()));
                 for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
                     if (courseName.equals(csbsg.getCourseName())){
-                        registeredStudent.put(csbsg.getStudentFullName(), csbsg.getStudentDegreeId());
+                        studentsNameAndId.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
                     }
                 }
-                coursesSelectedByStudentsGroupFiltered.get(i - 1).setRegisteredStudent(registeredStudent);
+                coursesSelectedByStudentsGroupFiltered.get(i).setStudents(studentsNameAndId);
+                i++;
             }
         }
         return coursesSelectedByStudentsGroupFiltered;

@@ -12,7 +12,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegis
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.ICoursesSelectedByStudentsGroup;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.CoursesSelectedByStudentsGroupResult;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 @RestController
 @RequestMapping("/selective-courses-statistics")
@@ -56,7 +57,7 @@ public class SelectiveCourseStatisticsController {
     @GetMapping("/registered-name")
     public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                     @RequestParam @NotNull int groupId) {
-        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentsGroup(studyYear, groupId);
-        return ResponseEntity.ok(map(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
+        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentsGroup(studyYear, groupId);
+        return ResponseEntity.ok(strictMap(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
     }
 }

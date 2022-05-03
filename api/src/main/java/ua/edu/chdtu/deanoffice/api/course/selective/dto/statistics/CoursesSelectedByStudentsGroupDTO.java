@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics;
 
 import lombok.Getter;
 import lombok.Setter;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.StudentNameAndId;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -10,6 +12,8 @@ import java.util.Map;
 public class CoursesSelectedByStudentsGroupDTO {
     int selectiveCourseId;
     int semester;
-    String nameCourses;
-    Map<String, Integer> registeredStudents;
+    String courseName;
+    String fieldOfKnowledgeCode;
+    String trainingCycle;
+    List<StudentNameAndId> students;
 }
