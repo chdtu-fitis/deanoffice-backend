@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.ICoursesSelectedByStudentsGroup;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 
 import java.util.List;
@@ -235,4 +236,20 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "ORDER BY facultyName, studyYear, specializationName ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYearAndSpecialization(@Param("degreeId") int degreeId,
                                                                                                                            @Param("currentYear") int currentYear);
+
+    @Query(value =
+            "SELECT  scsd.selectiveCourse.course.semester AS semester, " +
+                    "scsd.selectiveCourse.id AS selectiveCourseId, " +
+                    "scsd.studentDegree.id AS studentDegreeId, " +
+                    "scsd.selectiveCourse.course.courseName.name AS courseName, " +
+                    "scsd.selectiveCourse.trainingCycle AS trainingCycle, " +
+                    "fk.code AS fieldOfKnowledgeCode, " +
+                    "CONCAT(scsd.studentDegree.student.surname, ' ', scsd.studentDegree.student.name) AS studentFullName " +
+                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
+                    "JOIN scsd.selectiveCourse AS sc " +
+                    "LEFT JOIN sc.fieldOfKnowledge AS fk " +
+                    "WHERE scsd.active=true AND scsd.studentDegree.studentGroup.id=:groupId AND scsd.selectiveCourse.studyYear=:studyYear ")
+    List<ICoursesSelectedByStudentsGroup> findCoursesSelectedByStudentsGroup(@Param("studyYear") int studyYear,
+                                                                             @Param("groupId") int groupId);
+
 }
