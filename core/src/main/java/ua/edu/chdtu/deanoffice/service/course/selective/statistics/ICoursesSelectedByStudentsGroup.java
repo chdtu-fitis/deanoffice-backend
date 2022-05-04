@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.service.course.selective.statistics;
 
-
 public interface ICoursesSelectedByStudentsGroup {
     int getSelectiveCourseId();
     int getStudentDegreeId();

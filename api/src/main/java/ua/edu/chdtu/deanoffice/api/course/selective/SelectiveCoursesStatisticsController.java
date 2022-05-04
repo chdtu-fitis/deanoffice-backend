@@ -27,10 +27,10 @@ import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 @RestController
 @RequestMapping("/selective-courses-statistics")
-public class SelectiveCourseStatisticsController {
+public class SelectiveCoursesStatisticsController {
     private SelectiveCourseStatisticsService selectiveCourseStatisticsService;
 
-    public SelectiveCourseStatisticsController(SelectiveCourseStatisticsService selectiveCourseStatisticsService) {
+    public SelectiveCoursesStatisticsController(SelectiveCourseStatisticsService selectiveCourseStatisticsService) {
         this.selectiveCourseStatisticsService = selectiveCourseStatisticsService;
     }
 
@@ -54,10 +54,10 @@ public class SelectiveCourseStatisticsController {
                 return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO.class));
         }
     }
-    @GetMapping("/registered-name")
+    @GetMapping("/registered-by-group")
     public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                     @RequestParam @NotNull int groupId) {
-        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentsGroup(studyYear, groupId);
+        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentGroup(studyYear, groupId);
         return ResponseEntity.ok(strictMap(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
     }
 }
