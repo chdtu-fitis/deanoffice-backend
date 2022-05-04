@@ -39,11 +39,11 @@ public class SelectiveCourseStatisticsController {
         this.selectiveCourseStatisticsService = selectiveCourseStatisticsService;
     }
 
-    @GetMapping
+    @GetMapping("/selected-zero")
     public ResponseEntity<List<StudentsNotRegisteredForSelectiveCoursesDTO>> getStudentsNotSelectedSelectiveCourses(
             @RequestParam int degreeId,
             @RequestParam int studyYear) {
-        List<StudentDegree> studentDegrees = selectiveCourseStatisticsService.getStudentsNotSelectedSelectiveCourses(degreeId, studyYear);
+        List<StudentDegree> studentDegrees = selectiveCourseStatisticsService.getStudentsNotSelectedSelectiveCourses(studyYear, degreeId);
         List<StudentsNotRegisteredForSelectiveCoursesDTO> result = new ArrayList<>();
         for (StudentDegree studentDegree : studentDegrees) {
             StudentsNotRegisteredForSelectiveCoursesDTO studentsNotRegisteredForSelectiveCoursesDTO = new StudentsNotRegisteredForSelectiveCoursesDTO(

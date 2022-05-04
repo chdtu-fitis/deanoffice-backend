@@ -17,8 +17,8 @@ public class SelectiveCourseStatisticsService {
         this.currentYearService = currentYearService;
     }
 
-    public List<StudentDegree> getStudentsNotSelectedSelectiveCourses(int degreeId, Integer studyYear) {
-        return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(2022,1);
+    public List<StudentDegree> getStudentsNotSelectedSelectiveCourses(Integer studyYear, int degreeId) {
+        return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(studyYear,degreeId);
     }
 
     public List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourse(int studyYear, int degreeId, SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
