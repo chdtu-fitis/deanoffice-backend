@@ -6,6 +6,7 @@ public interface IPercentStudentsRegistrationOnCourses {
     String getFacultyName();
     String getGroupName();
     String getSpecializationName();
+    String getDepartment();
     Long getPercent();
     Long getCount();
 

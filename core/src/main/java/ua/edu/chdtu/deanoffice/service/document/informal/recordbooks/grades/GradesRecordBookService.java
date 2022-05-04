@@ -174,7 +174,7 @@ public class GradesRecordBookService {
     public File createCoursesListsPdf(int degreeId, int year, int semester, TuitionForm tuitionForm,
                                       int groupId, int facultyId) throws IOException, DocumentException {
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
-                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId, false);
         List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
         if (studentGroups != null && studentGroups.size() != 0) {
             Document document = new Document(PageSize.A4, 5f, 5f, 28f, 28f);
@@ -324,7 +324,7 @@ public class GradesRecordBookService {
     public synchronized File createCoursesListsDocx(int degreeId, int year, int semester, TuitionForm tuitionForm,
                                                     int groupId, int facultyId) throws Docx4JException, IOException {
         Specification<StudentGroup> specification = StudentGroupSpecification.getStudentGroupsWithImportFilters(
-                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId);
+                degreeId, currentYearService.getYear(), year, tuitionForm, facultyId, groupId, false);
         List<StudentGroup> studentGroups = studentGroupService.getGroupsBySelectionCriteria(specification);
         if (studentGroups != null && studentGroups.size() != 0) {
             return documentIOService.saveDocumentToTemp(prepareTemplate(TEMPLATE, studentGroups, year, semester),

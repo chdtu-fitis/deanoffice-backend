@@ -13,6 +13,8 @@ spring:
     multipart:
       max-file-size: 4MB
       max-request-size: 4MB
+  jackson:
+    time-zone: Europe/Minsk
 flyway:
   baseline-on-migrate: true
 

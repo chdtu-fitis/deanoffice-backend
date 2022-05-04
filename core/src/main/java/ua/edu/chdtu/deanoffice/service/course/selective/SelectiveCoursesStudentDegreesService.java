@@ -6,7 +6,6 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
-import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
@@ -21,8 +20,11 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
@@ -87,16 +89,20 @@ public class SelectiveCoursesStudentDegreesService {
         Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = selectiveCoursesStudentDegrees.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse, Collectors.counting()));
 
+        Map<SelectiveCourse, Long> resultSelectiveCoursesWithStudentsCount = new LinkedHashMap<>();
         selectiveCourses.stream().forEach(selectiveCourse -> {
-            if (!selectiveCoursesWithStudentsCount.keySet().contains(selectiveCourse))
-                selectiveCoursesWithStudentsCount.put(selectiveCourse, 0L);
+            Long count = selectiveCoursesWithStudentsCount.get(selectiveCourse);
+            if (count != null) {
+                resultSelectiveCoursesWithStudentsCount.put(selectiveCourse, count);
+            } else {
+                resultSelectiveCoursesWithStudentsCount.put(selectiveCourse, 0L);
+            }
         });
-
-        return selectiveCoursesWithStudentsCount;
+        return resultSelectiveCoursesWithStudentsCount;
     }
 
     @Transactional
-    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(int semester, int degreeId) throws OperationCannotBePerformedException {
+    public void disqualifySelectiveCoursesAndCancelStudentRegistrations(List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
         int currentYear = currentYearService.getYear();
         List<SelectiveCoursesYearParameters> selectiveCoursesYearParametersFromDB = selectiveCoursesYearParametersRepository.findAllByYear(currentYear);
         if (selectiveCoursesYearParametersFromDB == null)
@@ -113,58 +119,8 @@ public class SelectiveCoursesStudentDegreesService {
         if (selectiveCoursesYearParametersByDate == null)
             throw new OperationCannotBePerformedException("Не можна проводити дискваліфікацію в даний проміжок часу");
 
-        Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount = getSelectiveCoursesWithStudentsCount(currentYear + 1, semester, degreeId, false);
-        List<Integer> selectiveCourseIds = new ArrayList<>();
-
-        Map<SelectiveCourse, Long> generalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
-                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.GENERAL)
-                .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
-
-        Map<SelectiveCourse, Long> professionalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
-                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.PROFESSIONAL)
-                .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
-
-        setGeneralSelectiveCourseIdsForRegistration(generalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
-        setProfessionalSelectiveCourseIdsForRegistration(professionalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
-
         selectiveCoursesStudentDegreesRepository.setSelectiveCoursesStudentDegreesInactiveBySelectiveCourseIds(selectiveCourseIds);
         selectiveCourseRepository.setSelectiveCoursesUnavailableByIds(selectiveCourseIds);
-    }
-
-    private void setGeneralSelectiveCourseIdsForRegistration(Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount,
-                                                             SelectiveCoursesYearParameters selectiveCoursesYearParameters,
-                                                             int degreeId,
-                                                             List<Integer> selectiveCourseIds) {
-
-        for (Map.Entry<SelectiveCourse, Long> selectiveCourseWithStudentsCount : selectiveCoursesWithStudentsCount.entrySet()) {
-            int count = selectiveCourseWithStudentsCount.getValue().intValue();
-
-            if (degreeId == DegreeEnum.BACHELOR.getId() && count < selectiveCoursesYearParameters.getBachelorGeneralMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.MASTER.getId() && count < selectiveCoursesYearParameters.getMasterGeneralMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.PHD.getId() && count < selectiveCoursesYearParameters.getPhdGeneralMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            }
-        }
-    }
-
-    private void setProfessionalSelectiveCourseIdsForRegistration(Map<SelectiveCourse, Long> selectiveCoursesWithStudentsCount,
-                                                                  SelectiveCoursesYearParameters selectiveCoursesYearParameters,
-                                                                  int degreeId,
-                                                                  List<Integer> selectiveCourseIds) {
-
-        for(Map.Entry<SelectiveCourse, Long> selectiveCourseWithStudentsCount : selectiveCoursesWithStudentsCount.entrySet()) {
-            int count = selectiveCourseWithStudentsCount.getValue().intValue();
-
-            if (degreeId == DegreeEnum.BACHELOR.getId() && count < selectiveCoursesYearParameters.getBachelorProfessionalMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.MASTER.getId() && count < selectiveCoursesYearParameters.getMasterProfessionalMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            } else if (degreeId == DegreeEnum.PHD.getId() && count < selectiveCoursesYearParameters.getPhdProfessionalMinStudentsCount()) {
-                selectiveCourseIds.add(selectiveCourseWithStudentsCount.getKey().getId());
-            }
-        }
     }
 
     public SelectiveCoursesStudentDegreeId getSelectiveCoursesStudentDegreeIdByStudentDegreeId(boolean all, int studyYear, int studentDegreeId) {
@@ -317,9 +273,7 @@ public class SelectiveCoursesStudentDegreesService {
         List<SelectiveCoursesStudentDegrees> scsdList = new ArrayList<>();
         int successful = 0;
         for (StudentDegree studentDegree : studentDegrees) {
-            List<SelectiveCoursesStudentDegrees> alreadyRegistered =
-                    selectiveCoursesStudentDegreesRepository.findActiveByStudentDegreeAndYear(registrationYear, studentDegree.getId());
-            if (checkIntegrityWithIfNumberDoesntExceedAllowed(studentDegree, selectiveCourses, registrationYear)) {
+            if (checkSelectiveCoursesIntegrityLoose(studentDegree, selectiveCourses, registrationYear)) {
                 for (SelectiveCourse selectiveCourse : selectiveCourses) {
                     SelectiveCoursesStudentDegrees scsd = new SelectiveCoursesStudentDegrees(studentDegree, selectiveCourse);
                     scsdList.add(scsd);
@@ -331,65 +285,116 @@ public class SelectiveCoursesStudentDegreesService {
         return successful;
     }
 
-/*checks 1.if the number of courses correspond the rules: number of GENERAL and PROFESSIONAl courses by semesters;
+/*checks for the year next to current. Призначено конкретно для запису на наступний навчальний рік черед мобільний
+1.if the number of courses correspond the rules: number of GENERAL and PROFESSIONAl courses by semesters are equal to required;
 2.if courses semesters correspond student year;
 3. if all selective courses are for right registration year (usually, the next of the current study year)*/
-    public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
+    public boolean checkSelectiveCoursesIntegrityStrict(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
         int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree) + 1;
-
-        Map<String, Integer[]> selCoursesNumbersByRule =
-                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
-        Integer general[] = {0, 0};
-        Integer professional[] = {0, 0};
-        for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            if (selectiveCourse.getStudyYear() != currentYearService.getYear() + 1
-                    || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
-                return false;
-            int semester = selectiveCourse.getCourse().getSemester();
-            if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
-                return false;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
-                general[1 - semester % 2]++;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
-                professional[1 - semester % 2]++;
-        }
-        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-//        if (general[0]+general[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-//                || professional[0]+professional[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+        int registrationYear = currentYearService.getYear() + 1;
+        Set<SelectiveCourse> selectiveCoursesToCheck = buildSelectiveCoursesToCheckList(studentDegree, selectiveCourses, registrationYear);
+        try {
+            checkSemestersAndYearIntegrity(studentDegree, selectiveCoursesToCheck, studentDegreeYear, registrationYear);
+            checkCoursesNumbersIntegrityEquals(studentDegree, selectiveCoursesToCheck, studentDegreeYear);
+        } catch (InconsistentSelectiveCoursesToAddException e) {
             return false;
         }
         return true;
     }
 
-/*checks 1.if the number of courses does not exceed the allowed with rules: number of GENERAL and PROFESSIONAl courses by semesters;
+/*checks
+1.if the number of courses does not exceed the allowed with rules: number of GENERAL and PROFESSIONAl courses by semesters are less or equal to required;
 2.if courses semesters correspond student year;
 3.if all selective courses are for right registration year*/
-    public boolean checkIntegrityWithIfNumberDoesntExceedAllowed(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
+    public boolean checkSelectiveCoursesIntegrityLoose(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
         int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree, registrationYear);
+        Set<SelectiveCourse> selectiveCoursesToCheck = buildSelectiveCoursesToCheckList(studentDegree, selectiveCourses, registrationYear);
+        try {
+            checkSemestersAndYearIntegrity(studentDegree, selectiveCoursesToCheck, studentDegreeYear, registrationYear);
+            checkCoursesNumbersIntegrityLessOrEquals(studentDegree, selectiveCoursesToCheck, studentDegreeYear);
+        } catch (InconsistentSelectiveCoursesToAddException e) {
+            return false;
+        }
+        return true;
+    }
 
-        Map<String, Integer[]> selCoursesNumbersByRule =
-                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
-        Integer general[] = {0, 0};
-        Integer professional[] = {0, 0};
-        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+    private Set<SelectiveCourse> buildSelectiveCoursesToCheckList(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses, int registrationYear) {
+        List<SelectiveCourse> alreadyRegistered = selectiveCoursesStudentDegreesRepository
+                .findActiveByStudentDegreeAndYear(studentDegree.getId(), registrationYear)
+                .stream()
+                .map(scsd -> scsd.getSelectiveCourse())
+                .collect(Collectors.toList());
+        Set<SelectiveCourse> selectiveCoursesToCheck = new HashSet<>();
+        selectiveCoursesToCheck.addAll(alreadyRegistered);
+        selectiveCoursesToCheck.addAll(selectiveCourses);
+        return selectiveCoursesToCheck;
+    }
+
+    private void checkSemestersAndYearIntegrity(StudentDegree studentDegree, Set<SelectiveCourse> selectiveCoursesToCheck, int studentDegreeYear, int registrationYear) throws InconsistentSelectiveCoursesToAddException {
+        for (SelectiveCourse selectiveCourse : selectiveCoursesToCheck) {
             if (selectiveCourse.getStudyYear() != registrationYear
                     || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
-                return false;
+                throw new InconsistentSelectiveCoursesToAddException();
             int semester = selectiveCourse.getCourse().getSemester();
             if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
-                return false;
+                throw new InconsistentSelectiveCoursesToAddException();
+        }
+    }
+
+    private void checkCoursesNumbersIntegrityLessOrEquals(StudentDegree studentDegree, Set<SelectiveCourse> selectiveCourses, int studentDegreeYear) throws InconsistentSelectiveCoursesToAddException {
+        CoursesNumbersByTrainingCycle cn = calculateCoursesNumberByTrainingCycle(selectiveCourses);
+        Map<String, Integer[]> selCoursesNumbersByRule =
+                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
+        if (cn.getGeneral()[0] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]
+                || cn.getGeneral()[1] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
+                || cn.getProfessional()[0] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]
+                || cn.getProfessional()[1] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+            throw new InconsistentSelectiveCoursesToAddException();
+        }
+    }
+
+    private void checkCoursesNumbersIntegrityEquals(StudentDegree studentDegree, Set<SelectiveCourse> selectiveCourses, int studentDegreeYear) throws InconsistentSelectiveCoursesToAddException {
+        CoursesNumbersByTrainingCycle cn = calculateCoursesNumberByTrainingCycle(selectiveCourses);
+        Map<String, Integer[]> selCoursesNumbersByRule =
+                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
+        if (cn.getGeneral()[0] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]
+                || cn.getGeneral()[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
+                || cn.getProfessional()[0] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]
+                || cn.getProfessional()[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+            throw new InconsistentSelectiveCoursesToAddException();
+        }
+    }
+
+    private CoursesNumbersByTrainingCycle calculateCoursesNumberByTrainingCycle(Set<SelectiveCourse> selectiveCourses) throws InconsistentSelectiveCoursesToAddException {
+        int general[] = {0, 0};
+        int professional[] = {0, 0};
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            int semester = selectiveCourse.getCourse().getSemester();
             if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
                 general[1 - semester % 2]++;
             if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
                 professional[1 - semester % 2]++;
         }
-//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-        if (general[0]+general[1] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-                || professional[0]+professional[1] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
-            return false;
-        }
-        return true;
+        return new CoursesNumbersByTrainingCycle(general, professional);
     }
+
+    private class CoursesNumbersByTrainingCycle {
+        int general[];
+        int professional[];
+
+        public CoursesNumbersByTrainingCycle(int[] general, int[] professional) {
+            this.general = general;
+            this.professional = professional;
+        }
+
+        public int[] getGeneral() {
+            return general;
+        }
+
+        public int[] getProfessional() {
+            return professional;
+        }
+    }
+
+    private class InconsistentSelectiveCoursesToAddException extends Exception {}
 }
