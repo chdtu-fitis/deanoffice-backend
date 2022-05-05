@@ -20,6 +20,17 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             @Param("semester") int semester
     );
 
+    @Query("SELECT sc FROM SelectiveCourse AS sc WHERE sc.available = true " +
+            "AND sc.studyYear = :studyYear " +
+            "AND sc.degree.id = :degreeId " +
+            "AND sc.course.semester IN (:semesters) " +
+            "ORDER BY sc.course.courseName.name")
+    List<SelectiveCourse> findAvailableByStudyYearAndDegreeAndSemesters(
+            @Param("studyYear") Integer studyYear,
+            @Param("degreeId") int degreeId,
+            @Param("semesters") List<Integer> semesters
+    );
+
     @Query("SELECT sc FROM SelectiveCourse AS sc " +
             "WHERE sc.studyYear = :studyYear " +
             "AND sc.degree.id = :degreeId " +
@@ -81,7 +92,7 @@ public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse
             @Param("selectiveCourseIds") List<Integer> selectiveCourseIds
     );
 
-    List<SelectiveCourse> findByAvailableTrueAndStudyYear(int studyYear);
+//    List<SelectiveCourse> findByAvailableTrueAndStudyYear(int studyYear);
 
     @Modifying
     @Query("UPDATE SelectiveCourse SET groupName = :groupName WHERE id = :selectiveCourseId")

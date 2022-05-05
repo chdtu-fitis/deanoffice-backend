@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -125,17 +126,21 @@ public class SelectiveCourseService {
             return PeriodCaseEnum.EARLY;
     }
 
+    /*===== Add selective courses group names to selective courses where group name is null=======*/
     @Transactional
-    public void updateGroupNames() {
-        List<SelectiveCourse> selectiveCoursesWithGroupNames = generateSelectiveCoursesGroupNames();
+    public void setGroupNames(int studentsYear, int degreeId) {
+        List<SelectiveCourse> selectiveCoursesWithGroupNames = generateSelectiveCoursesGroupNamesSequential(studentsYear, degreeId);
         for (SelectiveCourse selectiveCourse: selectiveCoursesWithGroupNames)
             selectiveCourseRepository.updateGroupNameById(selectiveCourse.getGroupName(), selectiveCourse.getId());
     }
-    
-    private List<SelectiveCourse> generateSelectiveCoursesGroupNames() {
+
+    /*For bachelor 2nd year, for instance*/
+    private List<SelectiveCourse> generateSelectiveCoursesGroupNamesSequential(int studentsYear, int degreeId) {
         int studyYear = currentYearService.getYear() + 1;
 
-        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findByAvailableTrueAndStudyYear(studyYear);
+        Integer[] semesters = {studentsYear * 2 - 1, studentsYear * 2};
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository
+                .findAvailableByStudyYearAndDegreeAndSemesters(studyYear, degreeId, Arrays.asList(semesters));
 
         String studyYearLastTwoDigits = String.valueOf(studyYear).substring(2);
 
@@ -143,21 +148,30 @@ public class SelectiveCourseService {
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             StringBuilder groupName = new StringBuilder();
 
-            int semester = selectiveCourse.getCourse().getSemester();
-            int year = (int) Math.ceil((double)semester / 2); /* курс, на якому вивчається дисципліна */
+//            int semester = selectiveCourse.getCourse().getSemester();
+//            int year = (int) Math.ceil((double)semester / 2); /* курс, на якому вивчається дисципліна */
 
-            char typeCycleFirstLetter = selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL ? 'з' : 'п';
+//            char typeCycleFirstLetter = selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL ? 'з' : 'п';
 
             groupName
-                    .append(selectiveCourse.getDegree().getName().substring(0, 1)).append(studyYearLastTwoDigits)
+                    .append(selectiveCourse.getDegree().getName().substring(0, 1))
+                    .append(studyYearLastTwoDigits)
                     .append("-")
-                    .append(year).append("к")
+                    .append(studentsYear)
+                    .append("к")
                     .append("-")
-                    .append(sequenceNumber++).append(typeCycleFirstLetter);
+                    .append(sequenceNumber++);
 
             selectiveCourse.setGroupName(groupName.toString());
+            if (sequenceNumber > 3) break;
         }
 
         return selectiveCourses;
     }
+
+    /*For bachelor 3rd year, for instance, where all group studies the same selective courses*/
+    private List<SelectiveCourse> generateSelectiveCoursesGroupNamesGrouped() {
+        return null;
+    }
+    //==============================
 }

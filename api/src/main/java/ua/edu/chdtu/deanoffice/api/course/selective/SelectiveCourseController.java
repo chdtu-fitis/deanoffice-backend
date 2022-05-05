@@ -503,9 +503,10 @@ public class SelectiveCourseController {
                 studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
     }
 
-    @PatchMapping("/group-name-generating")
-    public ResponseEntity generateSelectiveCourseGroupName() {
-        selectiveCourseService.updateGroupNames();
+    @Secured({"ROLE_NAVCH_METHOD"})
+    @PatchMapping("/group-names-generation")
+    public ResponseEntity generateSelectiveCourseGroupName(@RequestParam int studentsYear, @RequestParam int degreeId) {
+        selectiveCourseService.setGroupNames(studentsYear, degreeId);
         return ResponseEntity.ok().build();
     }
 }
