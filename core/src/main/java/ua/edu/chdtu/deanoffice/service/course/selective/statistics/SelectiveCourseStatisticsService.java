@@ -70,14 +70,17 @@ public class SelectiveCourseStatisticsService {
         for (IPercentStudentsRegistrationOnCourses as : allStudentsCounts) {
             if (i == registeredCounts.size()) {
                 as.setPercent(0);
+                as.setRegisteredCount(0);
                 continue;
             }
             if (statisticsCondition.hasToBeCounted(as, registeredCounts,i)) {
-                as.setPercent((int) (registeredCounts.get(i).getCount() * 100 / as.getCount()));
+                as.setPercent((int) (registeredCounts.get(i).getRegisteredCount() * 100 / as.getTotalCount()));
+                as.setRegisteredCount(registeredCounts.get(i).getRegisteredCount().intValue());
                 i++;
             }
             else {
                 as.setPercent(0);
+                as.setRegisteredCount(0);
             }
         }
         return allStudentsCounts;

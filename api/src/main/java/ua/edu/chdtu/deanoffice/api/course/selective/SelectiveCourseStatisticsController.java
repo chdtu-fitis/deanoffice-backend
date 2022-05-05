@@ -15,6 +15,7 @@ import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStude
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -31,7 +32,7 @@ public class SelectiveCourseStatisticsController {
     }
 
     @GetMapping("/registered-percent")
-    public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) int studyYear,
+    public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                        @RequestParam @NotNull int degreeId,
                                                        @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
         List<IPercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);
