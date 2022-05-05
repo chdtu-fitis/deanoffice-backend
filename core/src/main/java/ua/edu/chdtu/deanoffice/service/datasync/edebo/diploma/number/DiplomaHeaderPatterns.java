@@ -10,4 +10,5 @@ final class DiplomaHeaderPatterns {
     final static String DOCUMENT_NUMBER = "documentnumber";
     final static String AWARD_TYPE_ID = "additionalawardinfo";
     final static String EDUCATION_ID = "personeducationid";
+    final static String SUPPLEMENT_NUMBER = "supplementid";
 }

@@ -178,6 +178,13 @@ public class CourseController {
                 || courseForGroup.getStudentGroup().getId() != groupId) {
             throw new UnauthorizedFacultyDataException();
         }
+        if (courseForGroup.getCourse().getCourseName().getId() == coursesForGroupHolder.getNewCourse().getCourseName().getId()
+                && courseForGroup.getCourse().getHoursPerCredit().equals(coursesForGroupHolder.getNewCourse().getHoursPerCredit())
+                && courseForGroup.getCourse().getHours().equals(coursesForGroupHolder.getNewCourse().getHours())
+                && courseForGroup.getCourse().getKnowledgeControl().getId() == coursesForGroupHolder.getNewCourse().getKnowledgeControl().getId()) {
+            return ResponseEntity.badRequest().body("Не змінено жодного атрибуту предмету");
+        }
+
         Course newCourse = map(coursesForGroupHolder.getNewCourse(), Course.class);
         int oldCourseId = coursesForGroupHolder.getOldCourseId();
         Course oldCourse = courseService.getById(oldCourseId);

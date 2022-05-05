@@ -7,17 +7,24 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.CourseNameService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,19 +33,24 @@ import java.util.Map;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final StudentGroupService studentGroupService;
+    private final StudentDegreeService studentDegreeService;
     private final CourseNameService courseNameService;
     private final CourseForGroupService courseForGroupService;
     private final GradeRepository gradeRepository;
+    private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
     private final int ROWS_PER_PAGE = 50;
 
     public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService,
                          CourseNameService courseNameService, CourseForGroupService courseForGroupService,
-                         GradeRepository gradeRepository) {
+                         GradeRepository gradeRepository, StudentDegreeService studentDegreeService,
+                         SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
         this.courseRepository = courseRepository;
         this.studentGroupService = studentGroupService;
         this.courseNameService = courseNameService;
         this.courseForGroupService = courseForGroupService;
         this.gradeRepository = gradeRepository;
+        this.studentDegreeService = studentDegreeService;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     public Course getCourseByAllAttributes(Course course) {
@@ -205,5 +217,53 @@ public class CourseService {
                 courseNameService.deleteCourseNameById(wrongId);
             }
         }
+    }
+
+    public List<StudentCourseBean>[] getStudentCoursesListInStudyYear(StudentDegree studentDegree, Integer studyYear) throws OperationCannotBePerformedException {
+        if (studentDegree == null || studentDegree.getStudentGroup() == null)
+            throw new OperationCannotBePerformedException("Студент не існує або йому не призначено групу");
+        StudentGroup studentGroup = studentDegree.getStudentGroup();
+        int realStudyYear = studentDegreeService.getRealStudentDegreeYear(studentGroup, studyYear);
+        List<StudentCourseBean>[] allCoursesInYear = new ArrayList[2];
+        List<StudentCourseBean> regularCoursesInSemester1 = getRegularCoursesInSemester(studentGroup, studyYear * 2 - 1);
+        List<StudentCourseBean> selectiveCoursesInSemester1 = getSelectiveCoursesInSemester(studentDegree.getId(), realStudyYear * 2 - 1);
+        regularCoursesInSemester1.addAll(selectiveCoursesInSemester1);
+        allCoursesInYear[0] = regularCoursesInSemester1;
+        List<StudentCourseBean> regularCoursesInSemester2 = getRegularCoursesInSemester(studentGroup, studyYear * 2);
+        List<StudentCourseBean> selectiveCoursesInSemester2 = getSelectiveCoursesInSemester(studentDegree.getId(), realStudyYear * 2);
+        regularCoursesInSemester2.addAll(selectiveCoursesInSemester2);
+        allCoursesInYear[1] = regularCoursesInSemester2;
+        return allCoursesInYear;
+    }
+
+    private List<StudentCourseBean> getRegularCoursesInSemester(StudentGroup studentGroup, int semester) {
+        List<CourseForGroup> coursesForGroup = courseForGroupService.getCoursesForGroupBySemester(studentGroup.getId(), semester);
+        List<StudentCourseBean> studentCourseBeans = new ArrayList<>();
+        coursesForGroup.forEach(cfg -> {
+            Course c = cfg.getCourse();
+            Teacher t = cfg.getTeacher();
+            StudentCourseBean studentCourseBean = createStudentCourseBean(c, t, false);
+            studentCourseBeans.add(studentCourseBean);
+        });
+        return studentCourseBeans;
+    }
+
+    private List<StudentCourseBean> getSelectiveCoursesInSemester(int studentDegreeId, int semester) {
+        List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees =
+                selectiveCoursesStudentDegreesService.getSelectiveCoursesByStudentDegreeIdAndSemester(studentDegreeId, semester);
+        List<StudentCourseBean> studentCourseBeans = new ArrayList<>();
+        selectiveCoursesStudentDegrees.forEach(scsd -> {
+            Course c = scsd.getSelectiveCourse().getCourse();
+            Teacher t = scsd.getSelectiveCourse().getTeacher();
+            StudentCourseBean studentCourseBean = createStudentCourseBean(c, t, true);
+            studentCourseBeans.add(studentCourseBean);
+        });
+        return studentCourseBeans;
+    }
+
+    private StudentCourseBean createStudentCourseBean(Course c, Teacher t, boolean isSelective) {
+        return new StudentCourseBean(c.getCourseName().getName(), c.getHours(),
+                c.getCredits(), c.getSemester(), t != null ? t.getName() + " " + t.getSurname() : "",
+                c.getKnowledgeControl().getName(), isSelective);
     }
 }

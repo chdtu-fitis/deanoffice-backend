@@ -1,8 +1,19 @@
 package ua.edu.chdtu.deanoffice.webstarter.security;
 
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+@Component
 public class SecurityConstants {
-    public static final String SECRET = "SecurityKey";
-    public static final long EXPIRATION_TIME = 864_000_000; // 10 days
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_STRING = "Authorization";
+    public static String SECRET;
+    public static long EXPIRATION_TIME;
+    public static String TOKEN_PREFIX;
+    public static String HEADER_STRING;
+
+    public SecurityConstants(Environment environment) {
+        SECRET = environment.getProperty("security.secret", String.class);
+        EXPIRATION_TIME = environment.getProperty("security.expiration-time", long.class);
+        TOKEN_PREFIX = environment.getProperty("security.token-prefix", String.class);
+        HEADER_STRING = environment.getProperty("security.header-string", String.class);
+    }
 }

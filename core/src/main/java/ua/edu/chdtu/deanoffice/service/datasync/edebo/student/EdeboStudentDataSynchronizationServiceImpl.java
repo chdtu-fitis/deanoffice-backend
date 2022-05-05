@@ -38,7 +38,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
     private static final String EXPEL_DATE_REGEXP = "[\\W\\w]+Дата[\\s]+відрахування[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
     private static final String STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE[] = {"universityName", "studyStartDate", "studyEndDate"};
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "tuitionForm", "citizenship", "previousDiplomaNumber", "previousDiplomaDate",
-            "previousDiplomaType", "previousDiplomaIssuedBy", "supplementNumber", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
+            "previousDiplomaType", "previousDiplomaIssuedBy", "edeboId", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
             "surnameEng", "nameEng", "sex"};
     protected static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);
@@ -112,12 +112,11 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
         return true;
     }
 
-    private boolean isSpecializationPatternMatch(ImportedData importedData) {
+    private boolean isSpecialityPatternMatch(ImportedData importedData) {
         String specialityName = importedData.getFullSpecialityName();
-        String programName = importedData.getProgramName();
         Pattern specialityPattern = Pattern.compile(SPECIALITY_REGEXP_NEW);
         Matcher specialityMatcher = specialityPattern.matcher(specialityName);
-        if (specialityMatcher.matches() && !Strings.isNullOrEmpty(programName)) {
+        if (specialityMatcher.matches()) {
             return true;
         } else {
             return false;
@@ -219,7 +218,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
             studentDegree.setStudentPreviousUniversities(studentPreviousUniversities);
         }
 
-        studentDegree.setSupplementNumber(data.getEducationId());
+        studentDegree.setEdeboId(data.getEducationId());
         studentDegree.setPayment(Payment.getPaymentFromUkrName(data.getPersonEducationPaymentTypeName()));
         studentDegree.setTuitionForm(TuitionForm.getTuitionFormFromUkrName(data.getEducationFormName()));
         if (data.getIsShortened().toUpperCase().equals("ТАК"))
@@ -236,14 +235,17 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
         }
         if (previousEducationInfo.length > 1 && !previousEducationInfo[1].equals("")) {
             String number[] = previousEducationInfo[1].split(" ");
-            studentDegree.setPreviousDiplomaNumber(number[0] + " № " + (number.length > 1 ? number[1] : ""));
+            if (number.length > 1)
+                studentDegree.setPreviousDiplomaNumber(number[0] + " № " + number[1]);
+            else
+                studentDegree.setPreviousDiplomaNumber(number[0]);
         }
         try {
             studentDegree.setPreviousDiplomaDate(new SimpleDateFormat("dd.MM.yyyy").parse(previousEducationInfo[2]));
         } catch(Exception e) {}
         if (previousEducationInfo.length > 3) {
             String parts[] = previousEducationInfo[3].split(":");
-            if (parts[1] != null) studentDegree.setPreviousDiplomaIssuedBy(parts[1]);
+            if (parts[1] != null) studentDegree.setPreviousDiplomaIssuedBy(parts[1].trim());
         }
 
         studentDegree.setAdmissionDate(parseDate(data.getEducationDateBegin()));
@@ -298,7 +300,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
         )
             return;
         StudentDegree studentDegreeFromData;
-        if (isSpecializationPatternMatch(importedData)) {
+        if (isSpecialityPatternMatch(importedData)) {
             studentDegreeFromData = getStudentDegreeFromData(importedData);
             if (!isCriticalDataAvailable(studentDegreeFromData)) {
                 String message = "Недостатньо інформації для синхронізації";
@@ -334,9 +336,9 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
                 facultyFromDb.getId());
         if (specializationFromDB == null) {
             if (Strings.isNullOrEmpty(specializationFromData.getName()) && specialityFromDb.getCode().length() == 3) {
-                Specialization soleSpecialization = specializationService.getForSpecialityIfSole(specialityFromDb.getId(), facultyId);
-                if (soleSpecialization != null) {
-                    specializationFromDB = soleSpecialization;
+                List<Specialization> specialitySpecializations = specializationService.getAllActiveBySpecialityAndDegree(specialityFromDb.getId(), facultyId, specializationFromData.getDegree().getId());
+                if (specialitySpecializations.size() >= 0) {
+                    specializationFromDB = specialitySpecializations.get(0);
                 }
             }
         }

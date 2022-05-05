@@ -78,7 +78,7 @@ public class QualificationWorkReportService {
             document.add(fillTable(baseFont, studentGroup));
             Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
                     + "                                                             "
-                    + PersonUtil.makeInitialsSurnameLast(studentGroup.getSpecialization().getFaculty().getDean()), font);
+                    + PersonUtil.makeNameThenSurnameInCapital(studentGroup.getSpecialization().getFaculty().getDean()), font);
             textBottom.setSpacingBefore(50f);
             textBottom.setIndentationLeft(24f);
             document.add(textBottom);
@@ -98,7 +98,7 @@ public class QualificationWorkReportService {
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = studentGroup.getStudentDegrees();
         for (StudentDegree studentDegree : studentDegrees) {
-            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegree.getId());
             String grade = "";
 
             if (!isStudentDebtor(grades)) {

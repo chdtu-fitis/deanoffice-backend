@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ua.edu.chdtu.deanoffice.api.document.reportsjournal.ReportsJournalController;
+import ua.edu.chdtu.deanoffice.api.document.informal.recordbooks.ExamReportsRecordBookController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.Course;
@@ -70,6 +70,6 @@ public class SingleStudentAndCourseExamReportController extends DocumentResponse
     }
 
     private static ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, ReportsJournalController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, ExamReportsRecordBookController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

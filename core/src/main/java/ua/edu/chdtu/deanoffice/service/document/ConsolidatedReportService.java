@@ -19,7 +19,7 @@ import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLAT
 
 @Service
 public class ConsolidatedReportService {
-    private static final String TEMPLATE = TEMPLATES_PATH + "SingleGroupStatement.docx";
+    private static final String TEMPLATE = TEMPLATES_PATH + "ExamReport.docx";
 
     private DocumentIOService documentIOService;
     private ExamReportTemplateFillService examReportTemplateFillService;

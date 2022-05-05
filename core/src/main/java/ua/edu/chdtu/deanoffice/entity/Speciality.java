@@ -20,4 +20,6 @@ public class Speciality extends NameWithEngAndActiveEntity {
     private String nameInternational;
     private String regulatedProfessionAccess;
     private String regulatedProfessionAccessEng;
+    private String entranceCertificates;
+    private String entranceCertificatesEng;
 }

@@ -39,7 +39,7 @@ public class AcademicCertificateService extends AcademicCertificateBaseService {
         StudentExpel studentExpel = studentExpelService.getById(studentExpelId);
         StudentDegree studentDegree = studentExpel.getStudentDegree();
         Student student = studentDegree.getStudent();
-        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegree.getId());
         StudentSummaryForAcademicReference studentSummary = new StudentSummaryForAcademicReference(studentDegree, grades);
         WordprocessingMLPackage resultTemplate = formDocument(TEMPLATE, studentSummary, studentExpel);
         String fileName = transliterate(student.getName() + " " + student.getSurname());

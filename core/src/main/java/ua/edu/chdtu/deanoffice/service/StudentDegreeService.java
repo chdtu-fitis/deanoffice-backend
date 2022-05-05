@@ -69,19 +69,23 @@ public class StudentDegreeService {
         message += (studentDegree.getProtocolDate() == null) ? "Дата протокола. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getProtocolNumber()) ? "Номер протокола. " : "";
         message += (studentDegree.getSupplementDate() == null) ? "Дата додатка. " : "";
-        message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер диплома. " : "";
+        message += (studentDegree.getEdeboId() == null) ? "ЄДЕБО ID. " : "";
+        message += Strings.isNullOrEmpty(studentDegree.getSupplementNumber()) ? "Номер додатка. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisName()) ? "Тема дипломної роботи. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getThesisNameEng()) ? "Тема дипломної роботи англійською. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getSurnameEng()) ? "Прізвище англійською мовою. " : "";
         message += Strings.isNullOrEmpty(studentDegree.getStudent().getNameEng()) ? "Ім'я англійською мовою. " : "";
-        message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
+//        message += Strings.isNullOrEmpty(studentDegree.getStudent().getPatronimicEng()) ? "По батькові англійською мовою. " : "";
         return message;
     }
 
     private String checkStudentGradesForSupplement(StudentDegree studentDegree) {
         List<Grade> grades = gradeRepository.getByCheckStudentGradesForSupplement(studentDegree.getId());
-        if (grades == null)
+        grades.addAll(gradeRepository.getByCheckStudentSelectiveCoursesGradesForSupplement(studentDegree.getId()));
+
+        if (grades.isEmpty())
             return "";
+
         final StringBuilder message = new StringBuilder();
         grades.forEach(grade -> message.append(grade.getCourse().getCourseName().getName() + ", " + grade.getCourse().getSemester() + "сем; "));
         return message.toString();
@@ -99,10 +103,14 @@ public class StudentDegreeService {
     public Map<StudentDegree, String> checkAllGraduatesGrades(int facultyId, int degreeId) {
         int year = currentYearService.getYear();
         List<StudentDegree> studentDegrees = studentDegreeRepository.findAllGraduates(year, facultyId, degreeId);
-        return studentDegrees
-                .stream()
-                .filter(sd -> !checkStudentGradesForSupplement(sd).equals(""))
-                .collect(Collectors.toMap(sd -> sd, this::checkStudentGradesForSupplement));
+        Map<StudentDegree, String> result = new HashMap<>();
+
+        for (StudentDegree studentDegree: studentDegrees) {
+            String studentDegreeGradesString = checkStudentGradesForSupplement(studentDegree);
+            if (!studentDegreeGradesString.isEmpty())
+                result.put(studentDegree,studentDegreeGradesString);
+        }
+        return result;
     }
 
     public StudentDegree getByStudentIdAndSpecializationId(boolean active, Integer studentId, Integer specializationId) {
@@ -123,22 +131,22 @@ public class StudentDegreeService {
     }
 
     @Transactional
-    public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, boolean honor, Date diplomaDate, Date supplementDate) {
-        studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, honor, diplomaDate, supplementDate);
+    public void updateDiplomaNumber(int studentDegreeId, String diplomaSeriesAndNumber, String supplementNumber, boolean honor, Date diplomaDate, Date supplementDate) {
+        studentDegreeRepository.updateDiplomaNumber(studentDegreeId, diplomaSeriesAndNumber, supplementNumber, honor, diplomaDate, supplementDate);
     }
 
     public List<StudentDegree> getAllNotInImportData(List<Integer> ids, int facultyId, int degreeId, int specialityId) {
         return studentDegreeRepository.findAll(StudentDegreeSpecification.getAbsentStudentDegreeInImportData(ids, facultyId, degreeId, specialityId));
     }
 
-    public StudentDegree getBySupplementNumber(String supplementNumber) {
-        List<StudentDegree> studentDegrees = studentDegreeRepository.findBySupplementNumber(supplementNumber);
+    public StudentDegree getByEdeboId(String supplementNumber) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findByEdeboId(supplementNumber);
         return (studentDegrees.size() == 1) ? studentDegrees.get(0) : null;
     }
 
     @Transactional
     public void assignStudentsToGroup(List<StudentDegree> students, StudentGroup group) {
-        studentDegreeRepository.assignStudentsToGroup(students, group);
+        studentDegreeRepository.assignStudentsToGroup(students, group, group.getSpecialization());
     }
 
     @Transactional
@@ -251,18 +259,36 @@ public class StudentDegreeService {
                 ids, payment.toString(), tuitionForm.toString(), semester).length;
     }
 
-    public int getStudentDegreeYear(StudentDegree studentDegree) {
-        int currentYear = currentYearService.getYear();
-        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
-        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
-        return currentYear - groupCreationYear + groupFirstYear;
-    }
+//    public int getStudentDegreeYear(StudentDegree studentDegree) {
+//        int currentYear = currentYearService.getYear();
+//        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+//        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
+//        return currentYear - groupCreationYear + groupFirstYear;
+//    }
 
-    public int getShortenedRealStudentDegreeYear(StudentDegree studentDegree) {
+//    public int getStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
+//        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+//        int groupFirstYear = studentDegree.getStudentGroup().getBeginYears();
+//        return calendarYear - groupCreationYear + groupFirstYear;
+//    }
+
+    public int getRealStudentDegreeYear(StudentDegree studentDegree) {
         int currentYear = currentYearService.getYear();
         int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
         int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
         return currentYear - groupCreationYear + groupFirstYear;
+    }
+
+    public int getRealStudentDegreeYear(StudentDegree studentDegree, int calendarYear) {
+        int groupCreationYear = studentDegree.getStudentGroup().getCreationYear();
+        int groupFirstYear = studentDegree.getStudentGroup().getRealBeginYear();
+        return calendarYear - groupCreationYear + groupFirstYear;
+    }
+
+    public int getRealStudentDegreeYear(StudentGroup studentGroup, int studyYear) {
+        int beginYear = studentGroup.getBeginYears();
+        int realBeginYear = studentGroup.getRealBeginYear();
+        return studyYear + (realBeginYear - beginYear);
     }
 
     public List<StudentDegree> getAllStudentDegreesByStudentSurname(String surname) {

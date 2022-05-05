@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameWithEngAndActiveEntity;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -28,33 +29,19 @@ public class Specialization extends NameWithEngAndActiveEntity {
     @ManyToOne
     private Teacher programHead;
     private String code;
-    private String qualification;
-    private String qualificationEng;
     private BigDecimal paymentFulltime;
     private BigDecimal paymentExtramural;
-    @Column(name = "program_head_name", nullable = false)
-    private String educationalProgramHeadName;
-    @Column(name = "program_head_name_eng", nullable = false)
-    private String educationalProgramHeadNameEng;
-    @Column(name = "program_head_info", nullable = false)
-    private String educationalProgramHeadInfo;
-    @Column(name = "program_head_info_eng", nullable = false)
-    private String educationalProgramHeadInfoEng;
-    @Column(name = "certificate_number", nullable = false)
     private String certificateNumber;
     @Temporal(TemporalType.DATE)
-    @Column(name = "certificate_date", nullable = false)
     private Date certificateDate;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
     private String specializationName;
     private String specializationNameEng;
+    private int normativeCreditsNumber;
+    private BigDecimal normativeTermOfStudy;
 
     public Specialization() {
-        educationalProgramHeadName = "";
-        educationalProgramHeadNameEng = "";
-        educationalProgramHeadInfo = "";
-        educationalProgramHeadInfoEng = "";
         certificateNumber = "";
         try {
             certificateDate = new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1980");

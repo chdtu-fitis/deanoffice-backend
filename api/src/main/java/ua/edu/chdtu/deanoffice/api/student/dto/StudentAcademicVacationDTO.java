@@ -26,6 +26,8 @@ public class StudentAcademicVacationDTO {
     private NamedDTO orderReason;
     @JsonView(StudentView.AcademicVacation.class)
     private Date applicationDate;
+    @JsonView(StudentView.AcademicVacation.class)
+    private boolean active;
 
     private NamedDTO studentGroup;
     private int studyYear;

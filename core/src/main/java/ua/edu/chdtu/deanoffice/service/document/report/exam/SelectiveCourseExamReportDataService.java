@@ -16,12 +16,13 @@ import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.ExamReportData
 import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.GroupExamReportDataBean;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.StudentExamReportDataBean;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
+import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeInitialsSurnameLast;
+import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeNameThenSurnameInCapital;
 
 @Service
 public class SelectiveCourseExamReportDataService {
@@ -44,7 +45,7 @@ public class SelectiveCourseExamReportDataService {
 
         List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findByIdIn(selectiveCourseIds);
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            List<SelectiveCoursesStudentDegrees> coursesDegrees = selectiveCoursesStudentDegreesRepository.findBySelectiveCourse(selectiveCourse.getId());
+            List<SelectiveCoursesStudentDegrees> coursesDegrees = selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourse(selectiveCourse.getId());
             List <StudentDegree> studentDegrees = coursesDegrees.stream()
                     .map(courseDegree -> courseDegree.getStudentDegree())
                     .filter(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() == FacultyUtil.getUserFacultyIdInt())
@@ -69,8 +70,9 @@ public class SelectiveCourseExamReportDataService {
         courseDataBean.setSemester("" + selectiveCourse.getCourse().getSemester());
         if (selectiveCourse.getTeacher() != null) {
             Teacher teacher = selectiveCourse.getTeacher();
-            courseDataBean.setTeacherInitials(teacher.getSurname()+" "+teacher.getName().substring(0, 1)+"."+teacher.getPatronimic().substring(0, 1)+".");
-            courseDataBean.setTeacherName(teacher.getSurname() + " " + teacher.getName() + " " + teacher.getPatronimic());
+            String teacherTitle = teacher.getAcademicTitle() != null ? teacher.getAcademicTitle().getNameUkr() : "";
+            courseDataBean.setTeacherName(teacherTitle + " " + teacher.getSurname() + " " + teacher.getName() + " " + teacher.getPatronimic());
+            courseDataBean.setTeacherInitials(makeNameThenSurnameInCapital(teacher.getName(), teacher.getSurname()));
         }
         String academicYear = ""+selectiveCourse.getStudyYear();
         courseDataBean.setYearShort(academicYear.substring(academicYear.length() - 2));
@@ -81,7 +83,7 @@ public class SelectiveCourseExamReportDataService {
         GroupExamReportDataBean groupDataBean = new GroupExamReportDataBean();
         groupDataBean.setAcademicYear(getStudyYear());
         Faculty faculty = facultyRepository.findById(FacultyUtil.getUserFacultyIdInt());
-        groupDataBean.setDeanInitials(makeInitialsSurnameLast(faculty.getDean()));
+        groupDataBean.setDeanInitials(PersonUtil.makeNameThenSurnameInCapital(faculty.getDean()));
         groupDataBean.setDegreeName(selectiveCourse.getDegree().getName());
         groupDataBean.setFacultyAbbr(faculty.getAbbr());
         groupDataBean.setGroupName(selectiveCourse.getGroupName());

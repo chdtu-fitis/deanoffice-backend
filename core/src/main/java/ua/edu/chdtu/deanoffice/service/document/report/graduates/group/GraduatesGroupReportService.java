@@ -174,7 +174,7 @@ public class GraduatesGroupReportService {
         int count = 1, studentsCount = 0;
         List<StudentDegree> studentDegrees = group.getStudentDegrees();
         for (StudentDegree studentDegree : studentDegrees) {
-            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+            List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegree.getId());
             if (!isStudentDebtor(grades)) {
                 Student student = studentDegree.getStudent();
                 table.addCell(createCell(count + "", font, 0));

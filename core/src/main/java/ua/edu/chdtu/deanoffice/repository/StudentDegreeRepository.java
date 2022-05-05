@@ -207,8 +207,8 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Query("SELECT sd FROM StudentDegree sd " +
             "WHERE sd.active = true " +
-            "AND sd.supplementNumber = :supplementNumper")
-    List<StudentDegree> findBySupplementNumber(@Param("supplementNumper") String supplementNumper);
+            "AND sd.edeboId = :edeboId")
+    List<StudentDegree> findByEdeboId(@Param("edeboId") String edeboId);
 
     @Override
     List<StudentDegree> findAll(Specification<StudentDegree> spec);
@@ -230,8 +230,10 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
 
     @Modifying
     @Query(value = "UPDATE StudentDegree sd " +
-            "SET sd.studentGroup = :group WHERE sd IN (:studentDegrees)")
-    void assignStudentsToGroup(@Param("studentDegrees") List<StudentDegree> studentDegrees, @Param("group") StudentGroup group);
+            "SET sd.studentGroup = :group, sd.specialization = :specialization WHERE sd IN (:studentDegrees)")
+    void assignStudentsToGroup(@Param("studentDegrees") List<StudentDegree> studentDegrees,
+                               @Param("group") StudentGroup group,
+                               @Param("specialization") Specialization specialization);
 
     @Modifying
     @Query(value = "UPDATE student_degree sd " +
@@ -247,11 +249,12 @@ public interface StudentDegreeRepository extends JpaRepository<StudentDegree, In
     @Query(value = "UPDATE StudentDegree sd " +
             "SET sd.diplomaNumber = :diplomaNumber, sd.diplomaWithHonours = :diplomaWithHonours," +
             " sd.diplomaDate = :diplomaDate," +
-            " sd.supplementDate = :supplementDate " +
+            " sd.supplementNumber = :supplementNumber, sd.supplementDate = :supplementDate " +
             "WHERE sd.id = :studentDegreeId")
     void updateDiplomaNumber(
             @Param("studentDegreeId") int studentDegreeId,
             @Param("diplomaNumber") String diplomaNumber,
+            @Param("supplementNumber") String supplementNumber,
             @Param("diplomaWithHonours") boolean diplomaWithHonours,
             @Param("diplomaDate") Date diplomaDate,
             @Param("supplementDate") Date supplementDate);

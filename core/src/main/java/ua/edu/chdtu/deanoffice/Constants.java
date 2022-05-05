@@ -22,4 +22,9 @@ public class Constants {
     public static final int MINIMAL_SATISFACTORY_POINTS = 60;
     public static final int FOREIGN_STUDENTS_FACULTY_ID = 8;
     public static final int PHD_FACULTY_ID = 12;
+
+    public static final String UNIVERSITY_NAME = "Черкаський державний технологічний університет";
+    public static final String UNIVERSITY_NAME_ENG = "Cherkasy State Technological University";
+
+    public static final String ROLE_DEANOFFICER = "ROLE_DEANOFFICER";
 }

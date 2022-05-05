@@ -98,7 +98,7 @@ public class DiplomaNumberController {
         List<String> notSavedDiplomaData = new ArrayList();
         for (DiplomaNumberDataForSaveDTO diplomaData : diplomaNumberDataForSaveDTOS) {
             try {
-                studentDegreeService.updateDiplomaNumber(diplomaData.getId(), diplomaData.getDiplomaSeriesAndNumber(), diplomaData.isHonor(), diplomaDate, supplementDate);
+                studentDegreeService.updateDiplomaNumber(diplomaData.getId(), diplomaData.getDiplomaSeriesAndNumber(), diplomaData.getSupplementNumber(), diplomaData.isHonor(), diplomaDate, supplementDate);
                 count++;
             } catch (Exception exception) {
                 notSavedDiplomaData.add(diplomaData.getSurname() + " " + diplomaData.getName() + " " + diplomaData.getPatronimic());

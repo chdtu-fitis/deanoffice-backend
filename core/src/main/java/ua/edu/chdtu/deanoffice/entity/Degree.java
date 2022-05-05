@@ -18,8 +18,6 @@ public class Degree extends NameWithEngEntity {
     private String admissionRequirementsEng;
     private String admissionForeignRequirements;
     private String admissionForeignRequirementsEng;
-    private String admissionShortenedRequirements;
-    private String admissionShortenedRequirementsEng;
     private String furtherStudyAccess;
     private String furtherStudyAccessEng;
 

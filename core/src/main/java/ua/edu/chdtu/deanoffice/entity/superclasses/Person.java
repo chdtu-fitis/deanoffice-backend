@@ -21,7 +21,7 @@ public class Person extends BaseEntity {
     }
 
     public String getInitialsUkr() {
-        String result = getSurname() + " " + getName().substring(0, 1) + ". ";
-        return result + (getPatronimic().length()>0? getPatronimic().substring(0, 1) + "." : "");
+        String result = getSurname() + " " + getName().substring(0, 1) + ".";
+        return result; // + (getPatronimic().length()>0 ? getPatronimic().substring(0, 1) + "." : "");
     }
 }

@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.webstarter.security;
 
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -57,7 +56,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String facultyId = "" + ((CurrentUserDetails) auth.getPrincipal()).getCurrentUser().getFaculty().getId();
         String token = Jwts.builder()
                 .setSubject(((User) auth.getPrincipal()).getUsername())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME * 1000))
                 .setIssuer(facultyId)
                 .claim("rol", ((User) auth.getPrincipal()).getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .signWith(SignatureAlgorithm.HS512, SECRET)

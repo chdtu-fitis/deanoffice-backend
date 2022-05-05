@@ -49,6 +49,10 @@ public class StudentGroupService {
         return studentGroupRepository.findGroupsByDegreeAndYear(degreeId, year, getCurrentYear(), facultyId);
     }
 
+    public List<StudentGroup> getGroupsByDegreeAndRealYear(int degreeId, int year) {
+        return studentGroupRepository.findGroupsByDegreeAndRealYear(degreeId, year, getCurrentYear());
+    }
+
     public List<StudentGroup> getGroupsByDegreeAndYearAndTuitionForm(int degreeId, int year, int facultyId, TuitionForm tuitionForm ) {
         return studentGroupRepository.findGroupsByDegreeAndYearAndTuitionForm(degreeId, year, getCurrentYear(), facultyId, tuitionForm);
     }

@@ -2,7 +2,9 @@ package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.RenewedAcademicVacationStudent;
+import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentAcademicVacation;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.RenewedAcademicVacationStudentRepository;
@@ -39,17 +41,26 @@ public class StudentAcademicVacationService {
         studentDegree.setActive(false);
         studentDegreeRepository.save(studentDegree);
 
+        studentAcademicVacation.setActive(true);
         return studentAcademicVacationRepository.save(studentAcademicVacation);
     }
 
     public List<StudentAcademicVacation> getAll(Integer facultyId) {
-        return studentAcademicVacationRepository.findAllInactive(facultyId);
+        return studentAcademicVacationRepository.findAllActiveInFaculty(facultyId);
     }
 
-    public RenewedAcademicVacationStudent renew(RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
+    public List<StudentAcademicVacation> getActive(List<Integer> studentDegreeIds) {
+        return studentAcademicVacationRepository.findActiveByStudentDegreeIds(studentDegreeIds);
+    }
+
+    @Transactional
+    public RenewedAcademicVacationStudent renew(StudentAcademicVacation studentAcademicVacation,
+                                                RenewedAcademicVacationStudent renewedAcademicVacationStudent) {
         Integer studentDegreeId = renewedAcademicVacationStudent.getStudentAcademicVacation().getStudentDegree().getId();
         studentUtil.studentDegreeToActive(studentDegreeId);
         updateStudentDegree(renewedAcademicVacationStudent);
+        studentAcademicVacation.setActive(false);
+        studentAcademicVacationRepository.save(studentAcademicVacation);
         return renewedAcademicVacationStudentRepository.save(renewedAcademicVacationStudent);
     }
 
@@ -68,5 +79,9 @@ public class StudentAcademicVacationService {
 
     public StudentAcademicVacation getById(Integer studentAcademicVacationId) {
         return studentAcademicVacationRepository.getOne(studentAcademicVacationId);
+    }
+
+    public RenewedAcademicVacationStudent getRenewedByAcademicVacationId(int studentAcademicVacationId) {
+        return renewedAcademicVacationStudentRepository.findByStudentAcademicVacationId(studentAcademicVacationId);
     }
 }

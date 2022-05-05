@@ -44,4 +44,21 @@ public interface CourseNameRepository extends JpaRepository<CourseName, Integer>
             @Param("faculty_id") int facultyId,
             @Param("degree_id") int degreeId
     );
+
+    @Query(value = "select " +
+            "distinct cn.name as name, " +
+            "'Семестр: '||c.semester ||' (вибіркова)' as message " +
+            "from course_name cn " +
+            "join course c on c.course_name_id = cn.id " +
+            "join selective_course sc on sc.course_id = c.id " +
+            "join selective_courses_student_degrees scsd ON scsd.selective_course_id = sc.id " +
+            "where scsd.active = true and sc.degree_id = :degree_id " +
+            "and sc.study_year between :year - :shift_year and :year " +
+            "and (cn.name_eng = '' or cn.name_eng is null) " +
+            "order by cn.name", nativeQuery = true)
+    List<Object[]> findAllSelectiveForGraduatesWithNoEnglishName(
+            @Param("year") int year,
+            @Param("shift_year") int shiftYear,
+            @Param("degree_id") int degreeId
+    );
 }

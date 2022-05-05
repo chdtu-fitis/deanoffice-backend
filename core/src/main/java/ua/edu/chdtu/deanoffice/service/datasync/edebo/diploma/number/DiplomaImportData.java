@@ -15,6 +15,7 @@ public class DiplomaImportData {
     private String documentNumber;
     private String awardTypeId;
     private String educationId;
+    private String supplementNumber;
 
     DiplomaImportData(){
         firstName = "";
@@ -26,5 +27,6 @@ public class DiplomaImportData {
         documentNumber = "";
         awardTypeId = "";
         educationId = "";
+        supplementNumber = "";
     }
 }

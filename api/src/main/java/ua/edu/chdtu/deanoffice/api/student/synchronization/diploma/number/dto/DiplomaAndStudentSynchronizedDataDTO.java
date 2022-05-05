@@ -11,6 +11,7 @@ public class DiplomaAndStudentSynchronizedDataDTO {
     private String name;
     private String patronimic;
     private String diplomaSeriesAndNumber;
+    private String supplementNumber;
     private String fullSpecialityName;
     private String groupName;
     private boolean honor;

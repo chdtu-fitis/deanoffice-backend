@@ -12,11 +12,12 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentD
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeSubstitutionDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeIdDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWriteManyDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCourseWithStudentsCountDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectionRulesDTO;
-import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesStudentDegreeWithStudyYearDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.ResponseMessageDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
 import ua.edu.chdtu.deanoffice.entity.Course;
@@ -29,7 +30,6 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
-import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
@@ -107,16 +107,21 @@ public class SelectiveCourseController {
         else
             selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, thisYear, all);
 
-        List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
-        for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
-            setFieldsOfKnowledge(selectiveCourse, selectiveCourseDTO);
-            selectiveCourseDTOS.add(selectiveCourseDTO);
-        }
+        List<SelectiveCourseDTO> selectiveCourseDTOS = processFieldsOfKnowledgeForSelectiveCourses(selectiveCourses);
         return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCourseDTO.class));
     }
 
-    private void setFieldsOfKnowledge(SelectiveCourse selectiveCourse, SelectiveCourseDTO selectiveCourseDTO) {
+    private List<SelectiveCourseDTO> processFieldsOfKnowledgeForSelectiveCourses(List<SelectiveCourse> selectiveCourses) {
+        List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
+            selectiveCourseDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(selectiveCourse));
+            selectiveCourseDTOS.add(selectiveCourseDTO);
+        }
+        return selectiveCourseDTOS;
+    }
+
+    private List<NamedDTO> getFieldsOfKnowledge(SelectiveCourse selectiveCourse) {
         if (selectiveCourse.getFieldOfKnowledge() != null) {
             List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>();
             fieldsOfKnowledge.add(selectiveCourse.getFieldOfKnowledge());
@@ -127,8 +132,9 @@ public class SelectiveCourseController {
                 fieldsOfKnowledge.addAll(otherFieldsOfKnowledge);
             }
             List<NamedDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, NamedDTO.class);
-            selectiveCourseDTO.setFieldsOfKnowledge(fieldOfKnowledgeDTOS);
+            return fieldOfKnowledgeDTOS;
         }
+        return null;
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
@@ -173,7 +179,7 @@ public class SelectiveCourseController {
         }
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
-        setFieldsOfKnowledge(selectiveCourseAfterSave, selectiveCourseAfterSaveDTO);
+        selectiveCourseAfterSaveDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(selectiveCourseAfterSave));
         return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
     }
 
@@ -202,7 +208,7 @@ public class SelectiveCourseController {
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
-        setFieldsOfKnowledge(selectiveCourseAfterSave, selectiveCourseSavedDTO);
+        selectiveCourseSavedDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(selectiveCourseAfterSave));
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
 
@@ -301,7 +307,7 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD", "ROLE_STUDENT"})
     @PostMapping("/registration")
-    public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> recordOnSelectiveCourse(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
+    public ResponseEntity<SelectiveCoursesStudentDegreeIdDTO> registerOnSelectiveCourses(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteDTO selectiveCoursesStudentDegreesDTO)
             throws OperationCannotBePerformedException {
 
         int selectiveCoursesRegistrationYear = currentYearService.getYear();
@@ -342,12 +348,36 @@ public class SelectiveCourseController {
             else
                 selectiveCoursesFromDB.addAll(selectiveCourses);
 
-            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCoursesFromDB);
+            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCourses);
 
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
         else
             return ResponseEntity.ok().build();
+    }
+
+    @Secured({"ROLE_NAVCH_METHOD"})
+    @PostMapping("/registration/multiple")
+    public ResponseEntity registerMultipleOnSelectiveCourses(@Validated @RequestBody SelectiveCoursesStudentDegreeWriteManyDTO selectiveCoursesStudentDegreesDTO)
+            throws OperationCannotBePerformedException {
+        int scRegistrationYear = selectiveCoursesStudentDegreesDTO.getStudyYear();
+        if (scRegistrationYear > currentYearService.getYear() + 1)
+            return new ResponseEntity("Не можна призначати вибіркові дисципліни на багато років вперед", HttpStatus.UNPROCESSABLE_ENTITY);
+        List<StudentDegree> studentDegrees = studentDegreeService.getByIds(selectiveCoursesStudentDegreesDTO.getStudentDegrees());
+        if (studentDegrees.size() != selectiveCoursesStudentDegreesDTO.getStudentDegrees().size())
+            return new ResponseEntity("Не можна призначати вибіркові дисципліни студентам, що не навчаються в даний час", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (studentDegrees.stream().anyMatch(sd -> !sd.isActive()))
+            return new ResponseEntity("Не можна призначати вибіркові дисципліни студентам, що не навчаються в даний час", HttpStatus.UNPROCESSABLE_ENTITY);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseService.getSelectiveCourses(selectiveCoursesStudentDegreesDTO.getSelectiveCourses());
+        if (selectiveCourses.size() != selectiveCoursesStudentDegreesDTO.getSelectiveCourses().size())
+            return new ResponseEntity("Не можна призначати студентам неіснуючі вибіркові дисципліни", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (selectiveCourses.stream().anyMatch(sc -> sc.getStudyYear() != scRegistrationYear))
+            return new ResponseEntity("Рік вибіркової дисципліни не відповідає року, на який ведеться реєстрація", HttpStatus.UNPROCESSABLE_ENTITY);
+        int registered = selectiveCoursesStudentDegreesService.registerMultipleStudentsForSelectiveCourses(studentDegrees, selectiveCourses, scRegistrationYear);
+        String result = "Успішно зареєстровано вибіркові дисципліни для " + registered + " студентів.";
+        if (studentDegrees.size() != registered)
+            result += " " + (studentDegrees.size() - registered) + " студентів не вдалося зареєструвати на вибіркові дисципліни внаслідок порушення кількісних вимог або неправильних атрибутів у дисциплінах";
+        return new ResponseEntity(new ResponseMessageDTO(result), HttpStatus.OK);
     }
 
     private boolean checkRecordOnSelectiveCoursesData(StudentDegree studentDegree, boolean isSecondRound, List<SelectiveCourse> selectiveCourses)
@@ -364,7 +394,7 @@ public class SelectiveCourseController {
         if (selectiveCourses == null || selectiveCourses.size() == 0) {
             throw new OperationCannotBePerformedException("Неправильні ідентифікатори предметів");
         }
-        if (!selectiveCourseService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+        if (!selectiveCoursesStudentDegreesService.checkSelectiveCoursesIntegrityStrict(studentDegree, selectiveCourses)) {
             throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
         }
         return true;
@@ -430,6 +460,7 @@ public class SelectiveCourseController {
         List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = selectiveCoursesStudentDegrees.entrySet().stream()
                 .map(entry -> {
                     SelectiveCourseWithStudentsCountDTO selectiveCourseWithStudentsCountDTO = map(entry.getKey(), SelectiveCourseWithStudentsCountDTO.class);
+                    selectiveCourseWithStudentsCountDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(entry.getKey()));
                     selectiveCourseWithStudentsCountDTO.setStudentsCount(entry.getValue().intValue());
                     return selectiveCourseWithStudentsCountDTO;
                 }).collect(Collectors.toList());
@@ -443,9 +474,8 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/disqualification")
-    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester,
-                                                               @RequestParam @NotNull int degreeId) throws OperationCannotBePerformedException {
-        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester, degreeId);
+    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestBody List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
+        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(selectiveCourseIds);
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -455,8 +485,7 @@ public class SelectiveCourseController {
         if (studentDegree == null)
            return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
 
-        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
+        int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree);
 
         List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = new ArrayList<>();
 
@@ -491,17 +520,17 @@ public class SelectiveCourseController {
         return ResponseEntity.ok(map(selectiveCoursesStudentDegree, SelectiveCoursesStudentDegreeDTO.class));
     }
 
-    @PostMapping("/enrolling")
-    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO)
-            throws OperationCannotBePerformedException {
-
-        if (studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
-            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
-        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.enrollStudentInSelectiveCourses(
-                studentEnrollingInSelectiveCoursesDTO.getStudyYear(),
-                studentEnrollingInSelectiveCoursesDTO.getStudentDegree().getId(),
-                studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
-    }
+//    @PostMapping("/enrolling")
+//    public ResponseEntity<SelectiveCoursesStudentDegreeDTO> enrollStudentInSelectiveCourses(@RequestBody SelectiveCoursesStudentDegreeWithStudyYearDTO studentEnrollingInSelectiveCoursesDTO)
+//            throws OperationCannotBePerformedException {
+//
+//        if (studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses().size() == 0)
+//            return new ResponseEntity("Відсутні дисципліни для зарахування", HttpStatus.UNPROCESSABLE_ENTITY);
+//        return ResponseEntity.ok(map(selectiveCoursesStudentDegreesService.enrollStudentInSelectiveCourses(
+//                studentEnrollingInSelectiveCoursesDTO.getStudyYear(),
+//                studentEnrollingInSelectiveCoursesDTO.getStudentDegree().getId(),
+//                studentEnrollingInSelectiveCoursesDTO.getSelectiveCourses()), SelectiveCoursesStudentDegreeDTO.class));
+//    }
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/group-names-generation")

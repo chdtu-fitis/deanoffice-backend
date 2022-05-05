@@ -36,7 +36,7 @@ public class AbstractScholasticRecordsService extends AcademicCertificateBaseSer
     public File formTranscriptOfRecordsDocument(int studentDegreeId) throws Docx4JException, IOException {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
-        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeId(studentDegree.getId());
+        List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegree.getId());
         StudentSummaryForAcademicReference studentSummary = new StudentSummaryForAcademicReference(studentDegree, grades);
         WordprocessingMLPackage resultTemplate = formTranscriptOfRecordsDocument(TEMPLATE, studentSummary);
         String fileName = transliterate(student.getName() + " " + student.getSurname());

@@ -34,4 +34,11 @@ public interface StudentExpelRepository extends JpaRepository<StudentExpel, Inte
 
     List <StudentExpel> findByStudentDegreeIdOrderByExpelDate(@Param("student_degree_id") Integer studentDegreeId);
 
+    @Query("select se from StudentExpel se " +
+            "where se.orderReason.id not in :success_reason_ids and " +
+            "se.studentDegree.id = :student_degree_id " +
+            "order by se.expelDate desc")
+    List<StudentExpel> findFailsByStudentDegreeIdOrderedByDateDesc(
+            @Param("student_degree_id") Integer studentDegreeId,
+            @Param("success_reason_ids") Integer[] successReasonId);
 }

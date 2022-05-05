@@ -4,30 +4,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
-import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
+import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
-import static ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER;
 
 @Service
 public class SelectiveCourseService {
     private SelectiveCourseRepository selectiveCourseRepository;
+    private SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
     private CurrentYearService currentYearService;
     private StudentDegreeService studentDegreeService;
 
-    public SelectiveCourseService(SelectiveCourseRepository selectiveCourseRepository, CurrentYearService currentYearService,
+    public SelectiveCourseService(SelectiveCourseRepository selectiveCourseRepository,
+                                  SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
+                                  CurrentYearService currentYearService,
                                   StudentDegreeService studentDegreeService) {
         this.selectiveCourseRepository = selectiveCourseRepository;
+        this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
         this.currentYearService = currentYearService;
         this.studentDegreeService = studentDegreeService;
     }
@@ -67,8 +67,14 @@ public class SelectiveCourseService {
         return selectiveCourseRepository.findAll(ids);
     }
 
+    @Transactional
     public void delete(SelectiveCourse selectiveCourse) {
         selectiveCourse.setAvailable(false);
+        List<SelectiveCoursesStudentDegrees> scsd = selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourse(selectiveCourse.getId());
+        scsd.forEach(s -> {
+            s.setActive(false);
+            selectiveCoursesStudentDegreesRepository.save(s);
+        });
         selectiveCourseRepository.save(selectiveCourse);
     }
 
@@ -86,39 +92,8 @@ public class SelectiveCourseService {
         return selectiveCourseRepository.save(selectiveCourse);
     }
 
-    /*checks 1.if the number of courses correspond the rules: number of GENERAL and PROFESSIONAl courses by semesters;
-    2.if courses semesters correspond student year;
-    3. if all selective courses are for right registration year (usually, the next of the current study year)*/
-    public boolean checkSelectiveCoursesIntegrity(StudentDegree studentDegree, List<SelectiveCourse> selectiveCourses) {
-        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) + 1 : studentDegreeService.getStudentDegreeYear(studentDegree) + 1;
-
-        Map<String, Integer[]> selCoursesNumbersByRule =
-                SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
-        Integer general[] = {0, 0};
-        Integer professional[] = {0, 0};
-        for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            if (selectiveCourse.getStudyYear() != currentYearService.getYear() + 1
-                    || selectiveCourse.getDegree().getId() != studentDegree.getSpecialization().getDegree().getId())
-                return false;
-            int semester = selectiveCourse.getCourse().getSemester();
-            if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
-                return false;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
-                general[1 - semester % 2]++;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
-                professional[1 - semester % 2]++;
-        }
-        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-            return false;
-        }
-        return true;
-    }
-
     public PeriodCaseEnum getPeriodCaseByStudentDegree(StudentDegree studentDegree) {
-        int studentDegreeYear = studentDegree.getTuitionTerm() == TuitionTerm.SHORTENED ?
-                studentDegreeService.getShortenedRealStudentDegreeYear(studentDegree) : studentDegreeService.getStudentDegreeYear(studentDegree);
+        int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree);
 
         if (studentDegreeYear < studentDegree.getStudentGroup().getRealBeginYear())
             return PeriodCaseEnum.LATE;

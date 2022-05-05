@@ -36,7 +36,7 @@ public class AcademicCertificateBaseService {
         result.put("nameEng", student.getNameEng() == null ? "" : student.getNameEng());
         result.put("surnameEng", student.getSurnameEng() == null ? "" : student.getSurnameEng());
         result.put("birthDate", formatDate(student.getBirthDate()));
-        result.put("individualNumber", studentDegree.getSupplementNumber());
+        result.put("individualNumber", studentDegree.getEdeboId());
 
         result.put("facultyNameUkr", studentDegree.getSpecialization().getFaculty().getName());
         result.put("facultyNameEng", studentDegree.getSpecialization().getFaculty().getNameEng());
@@ -62,8 +62,8 @@ public class AcademicCertificateBaseService {
         result.put("ModeOfStudyUkr", mode.getModeOfStudyUkr());
         result.put("ModeOfStudyEng", mode.getModeOfStudyEng());
 
-        result.put("dean", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDean()));
-        result.put("deanEng", PersonUtil.makeInitialsSurnameLast(studentDegree.getSpecialization().getFaculty().getDeanEng()));
+//        result.put("dean", PersonUtil.makeNameThenSurnameInCapital(studentDegree.getSpecialization().getFaculty().getDean()));
+//        result.put("deanEng", PersonUtil.makeNameThenSurnameInCapital(studentDegree.getSpecialization().getFaculty().getDeanEng()));
 
         result.put("startStudy", formatDate(studentDegree.getAdmissionDate()));
         result.put("today", formatDate(new Date()));

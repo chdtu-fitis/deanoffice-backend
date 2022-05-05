@@ -36,6 +36,18 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
             @Param("studentDegreeId") Integer studentDegreeId
     );
 
+    @Query(value = "select g.* from grade g" +
+            " inner join course c ON c.id = g.course_id" +
+            " inner join course_name cn ON cn.id = c.course_name_id" +
+            " inner join student_degree sd ON sd.id = g.student_degree_id" +
+            " inner join selective_courses_student_degrees scsd ON scsd.student_degree_id = g.student_degree_id" +
+            " inner join selective_course sc ON sc.course_id = g.course_id AND sc.id = scsd.selective_course_id" +
+            " where scsd.active = true and g.student_degree_id = :studentDegreeId and (g.points is null or g.points < " + Constants.MINIMAL_SATISFACTORY_POINTS + ")" +
+            " order by c.semester, cn.name", nativeQuery = true)
+    List<Grade> getByCheckStudentSelectiveCoursesGradesForSupplement(
+            @Param("studentDegreeId") Integer studentDegreeId
+    );
+
     @Query("select grade from Grade grade " +
             "join grade.course course " +
             "where grade.studentDegree.id in (:studentIds)" +
@@ -129,6 +141,16 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     public List<Grade> getByStudentDegreeIdAndKCTypes(
             @Param("studentDegreeId") Integer studentDegreeId,
             @Param("KnowledgeControlIds") List<Integer> knowledgeControlsIds
+    );
+
+    @Query("Select grade From Grade grade" +
+            " Join grade.course course" +
+            " Where course.id in (:courseIds)" +
+            " and  grade.studentDegree.id = :studentDegreeId" +
+            " Order by course.courseName.name")
+    public List<Grade> getByStudentDegreeIdAndCourses(
+            @Param("studentDegreeId") Integer studentDegreeId,
+            @Param("courseIds") List<Integer> courseIds
     );
 
 }

@@ -1,6 +1,10 @@
 package ua.edu.chdtu.deanoffice.service.document.diploma.supplement;
 
 import com.google.common.base.Strings;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -72,7 +76,7 @@ public class SupplementTemplateFillService {
 
     private void fillAcquiredCompetencies(WordprocessingMLPackage template, StudentSummary studentSummary) {
         AcquiredCompetencies competencies = acquiredCompetenciesService.getLastAcquiredCompetencies(
-                studentSummary.getStudentGroup().getSpecialization().getId());
+                studentSummary.getStudentDegree().getSpecialization().getId());
         if (competencies != null) {
             fillCompetenciesTable(template, competencies, "#AcquiredCompetencies");
             fillCompetenciesTable(template, competencies, "#AcquiredCompetenciesEng");
@@ -140,7 +144,7 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private static Map<String, String> getTotalDictionary(StudentSummary studentSummary) {
+    private Map<String, String> getTotalDictionary(StudentSummary studentSummary) {
         Map<String, String> result = new HashMap<>();
         result.put("TotalHours", String.format("%4d", studentSummary.getTotalHours()));
         result.put("TotalCredits", formatCredits(studentSummary.getTotalCredits()));
@@ -154,10 +158,9 @@ public class SupplementTemplateFillService {
         Map<String, String> result = new HashMap<>();
 
         StudentDegree studentDegree = studentSummary.getStudentDegree();
-        Specialization specialization = studentSummary.getStudentGroup().getSpecialization();
+        Specialization specialization = studentSummary.getStudentDegree().getSpecialization();
         Speciality speciality = specialization.getSpeciality();
         Degree degree = specialization.getDegree();
-        StudentGroup group = studentSummary.getStudentGroup();
 
         result.put("SurnameUkr", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurname(), "Ім'я"));
         result.put("SurnameEng", TemplateUtil.getValueSafely(studentSummary.getStudent().getSurnameEng(), "Surname"));
@@ -172,10 +175,11 @@ public class SupplementTemplateFillService {
         result.put("BirthDate", studentSummary.getStudent().getBirthDate() != null
                 ? simpleDateFormat.format(studentSummary.getStudent().getBirthDate())
                 : "BirthDate");
+        result.put("EdeboId", TemplateUtil.getValueSafely(studentDegree.getEdeboId()));
 
         result.put("DegreeUkr", TemplateUtil.getValueSafely(degree.getName()));
         result.put("DegreeEng", TemplateUtil.getValueSafely(degree.getNameEng()));
-        result.put("QualUkr", TemplateUtil.getValueSafely(degree.getName()) + " з " + speciality.getNameGenitive());
+        result.put("QualUkr", TemplateUtil.getValueSafely(degree.getName()) + " " + speciality.getNameGenitive());
         result.put("QualEng", TemplateUtil.getValueSafely(degree.getNameEng()) + " of " + speciality.getNameEng());
 
         DocumentUtil.ModeOfStudyUkrEngNames mode = DocumentUtil.getModeOfStudyUkrEngNames(studentSummary.getStudentGroup().getTuitionForm());
@@ -204,7 +208,7 @@ public class SupplementTemplateFillService {
                 .add(countCreditsSum(studentSummary.getGrades().get(1)))));
         result.put("PracticalTrainingCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(2))));
         result.put("ThesisDevelopmentCredits", formatCredits(countCreditsSum(studentSummary.getGrades().get(3))));
-        result.put("DegreeRequiredCredits", formatCredits(studentSummary.getTotalCredits()));
+        result.put("DegreeRequiredCredits", "" + specialization.getNormativeCreditsNumber());
 
         result.put("CertificateNum", specialization.getCertificateNumber());
         result.put("CertificateDate", specialization.getCertificateDate() != null
@@ -216,34 +220,34 @@ public class SupplementTemplateFillService {
         result.put("QualificationLevel", TemplateUtil.getValueSafely(degree.getQualificationLevelDescription()));
         result.put("QualificationLevelEng", TemplateUtil.getValueSafely(degree.getQualificationLevelDescriptionEng()));
 
-        String admissionRequirementsPlaceholder = "AdmissionRequirements";
-        String admissionRequirementsPlaceholderEng = "AdmissionRequirementsEng";
-        if (studentDegree.getStudentGroup().getSpecialization().getFaculty().getId()
-                == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
-            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirements()));
-            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionForeignRequirementsEng()));
-        } else if (studentSummary.getStudentGroup().getTuitionTerm().equals(TuitionTerm.SHORTENED)) {
-            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionShortenedRequirements()));
-            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionShortenedRequirementsEng()));
-        } else {
-            result.put(admissionRequirementsPlaceholder, TemplateUtil.getValueSafely(degree.getAdmissionRequirements()));
-            result.put(admissionRequirementsPlaceholderEng, TemplateUtil.getValueSafely(degree.getAdmissionRequirementsEng()));
-        }
+        Map<String, String> admissionRequirements = getAdmissionRequirements(degree, specialization, speciality);
+        result.put("AdmissionRequirements", admissionRequirements.get("ukr"));
+        result.put("AdmissionRequirementsEng", admissionRequirements.get("eng"));
 
         result.put("FurtherStudyAccess", TemplateUtil.getValueSafely(degree.getFurtherStudyAccess()));
         result.put("FurtherStudyAccessEng", TemplateUtil.getValueSafely(degree.getFurtherStudyAccessEng()));
         result.put("RegulatedProfessionAccess", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccess()));
         result.put("RegulatedProfessionAccessEng", TemplateUtil.getValueSafely(speciality.getRegulatedProfessionAccessEng()));
 
-        result.put("TrainingDuration", getTrainingDuration(group));
-        result.put("TrainingDurationEng", getTrainingDurationEng(group));
+        result.put("TrainingDuration", getTrainingDuration(specialization));
+        result.put("TrainingDurationEng", getTrainingDurationEng(specialization));
 
-        Map<String, String> allPreviousUniversities = getAllPreviousUniversities(studentDegree);
-        result.put("AllTrainingDurationsAndUniversitiesUkr", TemplateUtil.getValueSafely(allPreviousUniversities.get("ukr")));
-        result.put("AllTrainingDurationsAndUniversitiesEng", TemplateUtil.getValueSafely(allPreviousUniversities.get("eng")));
+//        Map<String, String> allPreviousUniversities = getAllPreviousUniversities(studentDegree);
+        List<StudyPeriodInAUniversity> studyPeriods = getStudyPeriods(studentDegree);
+        String allPreviousUniversities = "";
+        String allPreviousUniversitiesEng = "";
+        String allTrainingDurationsFromUniversity = "";
+        for (StudyPeriodInAUniversity studyPeriod : studyPeriods) {
+            allPreviousUniversities += studyPeriod.getUniversityNameUkr() + "\n";
+            allPreviousUniversitiesEng += studyPeriod.getUniversityNameEng() + "\n";
+            allTrainingDurationsFromUniversity += (studyPeriod.getStartDate() != null ? simpleDateFormat.format(studyPeriod.getStartDate()) : "")
+                    + " - " + (studyPeriod.getEndDate() != null ? simpleDateFormat.format(studyPeriod.getEndDate()) : "") + "\n";
+        }
+        result.put("AllTrainingDurationsAndUniversitiesUkr", allPreviousUniversities);
+        result.put("AllTrainingDurationsAndUniversitiesEng", TemplateUtil.getValueSafely(allPreviousUniversitiesEng));
 
-        String allTrainingDurationsFromUniversity = getAllTrainingDurationsFromUniversity(studentDegree);
-        result.put("TrainingDurations", TemplateUtil.getValueSafely(allTrainingDurationsFromUniversity));
+//        String allTrainingDurationsFromUniversity = getAllTrainingDurationsFromUniversity(studentDegree);
+        result.put("TrainingDurations", allTrainingDurationsFromUniversity);
 
         result.put("SupplNumber", TemplateUtil.getValueSafely(studentDegree.getSupplementNumber(), "СС № НОМЕРДОД"));
         result.put("SupplDate", studentDegree.getSupplementDate() == null ? "ДАТА ДОД"
@@ -282,136 +286,95 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private Map<String, String> getAcademicBackground(StudentDegree studentDegree) {
-        Map<String, String> academicBackground = new HashMap<>();
+    //---------------------------------------------------
+    private Map<String, String> getAdmissionRequirements(Degree degree, Specialization specialization, Speciality speciality) {
+        Map<String, String> result = new HashMap<>();
 
-        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
-        if (studentPreviousUniversities.isEmpty()) {
-            return null;
+        if (specialization.getFaculty().getId() == Constants.FOREIGN_STUDENTS_FACULTY_ID) {
+            result.put("ukr", degree.getAdmissionForeignRequirements());
+            result.put("eng", degree.getAdmissionForeignRequirementsEng());
+        } else {
+            result.put("ukr", degree.getAdmissionRequirements().replace("$courses$", speciality.getEntranceCertificates()));
+            result.put("eng", degree.getAdmissionRequirementsEng().replace("$courses$", speciality.getEntranceCertificatesEng()));
         }
-
-        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        DateFormat monthDayYearFormat = new SimpleDateFormat("MMMM dd, yyyy", new Locale("en"));
-
-        StringBuilder academicBackgroundUkr = new StringBuilder();
-        StringBuilder academicBackgroundEng = new StringBuilder();
-
-        for (StudentPreviousUniversity university : studentPreviousUniversities) {
-            academicBackgroundUkr.append("Академічна довідка №")
-                    .append(TemplateUtil.getValueSafely(university.getAcademicCertificateNumber()))
-                    .append(" від ")
-                    .append(formatDateSafely(simpleDateFormat, university.getAcademicCertificateDate()))
-                    .append(", ")
-                    .append(TemplateUtil.getValueSafely(university.getUniversityName()));
-        }
-
-        for (StudentPreviousUniversity university : studentPreviousUniversities) {
-            academicBackgroundEng.append("Trascript of records №")
-                    .append(TemplateUtil.getValueSafely(university.getAcademicCertificateNumber()))
-                    .append(" issued on ")
-                    .append(formatDateSafely(monthDayYearFormat, university.getAcademicCertificateDate()))
-                    .append(", ")
-                    .append(TemplateUtil.getValueSafely(university.getUniversityNameEng()));
-        }
-
-        academicBackground.put("ukr", academicBackgroundUkr.toString());
-        academicBackground.put("eng", academicBackgroundEng.toString());
-
-        return academicBackground;
+        return result;
     }
 
-    private Map<String, String> getAllPreviousUniversities(StudentDegree studentDegree) {
-        Map<String, String> durationOfTraining = new HashMap<>();
-        StringBuilder ukr = new StringBuilder();
-        StringBuilder eng = new StringBuilder();
-
-        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-
-        Set<StudentPreviousUniversity> studentPreviousUniversities = studentDegree.getStudentPreviousUniversities();
-        if (!studentPreviousUniversities.isEmpty()) {
-            for (StudentPreviousUniversity university : studentPreviousUniversities) {
-                ukr.append(TemplateUtil.getValueSafely(university.getUniversityName()))
-                        .append(". ")
-                        .append("Строк навчання - ")
-                        .append(formatDateSafely(simpleDateFormat, university.getStudyStartDate()))
-                        .append("-")
-                        .append(formatDateSafely(simpleDateFormat, university.getStudyEndDate()))
-                        .append(". ");
-            }
-
-            for (StudentPreviousUniversity university : studentPreviousUniversities) {
-                eng.append(" ")
-                        .append(TemplateUtil.getValueSafely(university.getUniversityNameEng()))
-                        .append(". ")
-                        .append("Duration of training - ")
-                        .append(formatDateSafely(simpleDateFormat, university.getStudyStartDate()))
-                        .append("-")
-                        .append(formatDateSafely(simpleDateFormat, university.getStudyEndDate()))
-                        .append(". ");
-            }
+    //----------------------------------------------------------
+    private List<StudyPeriodInAUniversity> getStudyPeriods(StudentDegree studentDegree) {
+        List<StudyPeriodInAUniversity> studyPeriods = new ArrayList<>();
+        List<StudyPeriodInAUniversity> previousUniversitiesPeriods = getPreviousUniversitiesPeriods(studentDegree);
+        List<Date[]> studyBreakPeriods = getExpelAndAcademicVacationPeriods(studentDegree);
+        if (previousUniversitiesPeriods.size() == 0 && studyBreakPeriods.size() == 0) {
+            studyPeriods.add(new StudyPeriodInAUniversity(Constants.UNIVERSITY_NAME, Constants.UNIVERSITY_NAME_ENG,
+                    studentDegree.getAdmissionDate(), studentDegree.getDiplomaDate()));
         }
+        if (previousUniversitiesPeriods.size() != 0 && studyBreakPeriods.size() == 0) {
+            studyPeriods.addAll(previousUniversitiesPeriods);
+            studyPeriods.add(new StudyPeriodInAUniversity(Constants.UNIVERSITY_NAME, Constants.UNIVERSITY_NAME_ENG,
+                    studentDegree.getAdmissionDate(), studentDegree.getDiplomaDate()));
+        }
+        if (studyBreakPeriods.size() != 0) {
+            List<StudyPeriodInAUniversity> thisUniversityStudyPeriods = new ArrayList<>();
+            thisUniversityStudyPeriods.add(new StudyPeriodInAUniversity(Constants.UNIVERSITY_NAME, Constants.UNIVERSITY_NAME_ENG,
+                    studentDegree.getAdmissionDate(), studyBreakPeriods.get(0)[0]));
+            for (int i = 0; i < studyBreakPeriods.size(); i++) {
+                Date endDate = i == studyBreakPeriods.size() - 1 ? studentDegree.getDiplomaDate() : studyBreakPeriods.get(i + 1)[0];
+                thisUniversityStudyPeriods.add(new StudyPeriodInAUniversity(Constants.UNIVERSITY_NAME, Constants.UNIVERSITY_NAME_ENG,
+                        studyBreakPeriods.get(i)[1], endDate));
+            }
+            Collections.sort(thisUniversityStudyPeriods);
 
-        durationOfTraining.put("ukr", ukr.toString());
-        durationOfTraining.put("eng", eng.toString());
-
-        return durationOfTraining;
+            studyPeriods.addAll(previousUniversitiesPeriods);
+            studyPeriods.addAll(thisUniversityStudyPeriods);
+        }
+        return studyPeriods;
     }
 
-    private String getAllTrainingDurationsFromUniversity(StudentDegree studentDegree) {
-        StringBuilder dates = new StringBuilder();
+    private List<StudyPeriodInAUniversity> getPreviousUniversitiesPeriods(StudentDegree studentDegree) {
+        return studentDegree.getStudentPreviousUniversities().stream()
+                .map(spu -> new StudyPeriodInAUniversity(spu.getUniversityName(), spu.getUniversityNameEng(), spu.getStudyStartDate(), spu.getStudyEndDate()))
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    private List<Date[]> getExpelAndAcademicVacationPeriods(StudentDegree studentDegree) {
+        List<Date[]> studyBreakPeriods = new ArrayList<>();
         List<StudentAcademicVacation> academicVacations = studentAcademicVacationService.getByDegreeId(studentDegree.getId());
-        List<StudentExpel> studentExpels = studentExpelService.getByStudentDegreeId(studentDegree.getId());
-        List<RenewedExpelledStudent> renewedExpelledStudents = renewedExpelledStudentService.getRenewedStudentsByStudentDegreeId(studentDegree.getId());
-
-        List<Date> expelDates = new ArrayList<>();
-        List<Date> renewDates = new ArrayList<>();
-
-        DateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-
-        dates.append(formatDateSafely(simpleDateFormat, studentDegree.getAdmissionDate()))
-                .append("-");
-
-        if (!studentExpels.isEmpty()) {
-            expelDates.addAll(studentExpels.stream().map(StudentExpel::getExpelDate).collect(Collectors.toList()));
-            renewDates.addAll(renewedExpelledStudents.stream().map(RenewedExpelledStudent::getRenewDate).collect(Collectors.toList()));
-        }
-        if (!academicVacations.isEmpty()) {
-            expelDates.addAll(academicVacations.stream().map(StudentAcademicVacation::getVacationStartDate).collect(Collectors.toList()));
-            renewDates.addAll(academicVacations.stream().map(StudentAcademicVacation::getVacationEndDate).collect(Collectors.toList()));
-        }
-
-        expelDates.sort(Date::compareTo);
-        renewDates.sort(Date::compareTo);
-
-        if (!expelDates.isEmpty() && !renewDates.isEmpty() && expelDates.size() == renewDates.size()) {
-            for (int i = 0; i < expelDates.size(); i++) {
-                dates.append(formatDateSafely(simpleDateFormat, expelDates.get(i)))
-                        .append(", ")
-                        .append(formatDateSafely(simpleDateFormat, renewDates.get(i)))
-                        .append("-");
+        academicVacations.forEach(academicVacation -> {
+            RenewedAcademicVacationStudent renewedStudent = studentAcademicVacationService.getRenewedByAcademicVacationId(academicVacation.getId());
+            if (renewedStudent != null) {
+                Date[] period = new Date[2];
+                period[0] = academicVacation.getVacationStartDate();
+                period[1] = renewedStudent.getRenewDate();
+                studyBreakPeriods.add(period);
             }
-        }
-
-        dates.append(formatDateSafely(simpleDateFormat, studentDegree.getDiplomaDate()));
-
-        return dates.toString();
+        });
+        List<StudentExpel> studentExpels = studentExpelService.getByStudentDegreeId(studentDegree.getId());
+        studentExpels.forEach(studentExpel -> {
+            RenewedExpelledStudent renewedExpelledStudent = renewedExpelledStudentService.getRenewedStudentByExpelledId(studentExpel.getId());
+            if (renewedExpelledStudent != null) {
+                Date[] period = new Date[2];
+                period[0] = studentExpel.getExpelDate();
+                period[1] = renewedExpelledStudent.getRenewDate();
+                studyBreakPeriods.add(period);
+            }
+        });
+        return studyBreakPeriods;
     }
 
-    private static String getTrainingDuration(StudentGroup studentGroup) {
+    //-----------------------------------------------------------------------
+    private static String getTrainingDuration(Specialization specialization) {
         StringBuilder result = new StringBuilder();
-        if (studentGroup.getStudyYears().intValue() >= 1) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+        if (specialization.getNormativeTermOfStudy().intValue() >= 1) {
+            result.append(String.format("%1d", specialization.getNormativeTermOfStudy().intValue()));
             result.append(" ");
-            switch (studentGroup.getStudyYears().intValue()) {
+            switch (specialization.getNormativeTermOfStudy().intValue()) {
                 case 1:
                     result.append("рік");
                     break;
                 case 2:
-                    result.append("роки");
-                    break;
                 case 3:
-                    result.append("роки");
-                    break;
                 case 4:
                     result.append("роки");
                     break;
@@ -421,21 +384,17 @@ public class SupplementTemplateFillService {
             }
         }
 
-        Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
+        int monthsOfStudying = getMonthsFromYears(specialization.getNormativeTermOfStudy());
         if (monthsOfStudying != 0) {
             result.append(" ");
-            result.append(String.format("%1d", monthsOfStudying.intValue()));
+            result.append(String.format("%1d", monthsOfStudying));
             result.append(" ");
-            switch (monthsOfStudying.intValue()) {
+            switch (monthsOfStudying) {
                 case 1:
                     result.append("місяць");
                     break;
                 case 2:
-                    result.append("місяці");
-                    break;
                 case 3:
-                    result.append("місяці");
-                    break;
                 case 4:
                     result.append("місяці");
                     break;
@@ -448,18 +407,18 @@ public class SupplementTemplateFillService {
         return result.toString();
     }
 
-    private static String getTrainingDurationEng(StudentGroup studentGroup) {
+    private static String getTrainingDurationEng(Specialization specialization) {
         StringBuilder result = new StringBuilder();
-        if (studentGroup.getStudyYears().intValue() >= 1) {
-            result.append(String.format("%1d", studentGroup.getStudyYears().intValue()));
+        if (specialization.getNormativeTermOfStudy().intValue() >= 1) {
+            result.append(String.format("%1d", specialization.getNormativeTermOfStudy().intValue()));
             result.append(" ");
-            result.append(studentGroup.getStudyYears().intValue() == 1 ? "year" : "years");
+            result.append(specialization.getNormativeTermOfStudy().intValue() == 1 ? "year" : "years");
         }
 
-        Double monthsOfStudying = getMonthsFromYears(studentGroup.getStudyYears());
+        int monthsOfStudying = getMonthsFromYears(specialization.getNormativeTermOfStudy());
         if (monthsOfStudying != 0) {
             result.append(" ");
-            result.append(String.format("%1d", monthsOfStudying.intValue()));
+            result.append(String.format("%1d", monthsOfStudying));
             result.append(" ");
             result.append(Math.round(monthsOfStudying) == 1 ? "month" : "months");
         }
@@ -506,10 +465,10 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private static Double getMonthsFromYears(BigDecimal years) {
+    private static int getMonthsFromYears(BigDecimal years) {
         int intPart = years.intValue();
         int monthsPerYear = 12;
-        return ((years.doubleValue() - intPart) * monthsPerYear);
+        return (int)Math.round((years.doubleValue() - intPart) * monthsPerYear);
     }
 
     private boolean hasDirectionOfTraining(StudentDegree studentDegree) {
@@ -550,6 +509,21 @@ public class SupplementTemplateFillService {
             container.getContent().add(competency);
             newParagraph.getContent().add(container);
             paragraphsParent.getContent().add(paragraphsParent.getContent().indexOf(parentParagraph), newParagraph);
+        }
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private class StudyPeriodInAUniversity implements Comparable<StudyPeriodInAUniversity> {
+        private String universityNameUkr;
+        private String universityNameEng;
+        private Date startDate;
+        private Date endDate;
+
+        public int compareTo(StudyPeriodInAUniversity studyPeriodInAUniversity) {
+            return startDate.compareTo(studyPeriodInAUniversity.getStartDate());
         }
     }
 }

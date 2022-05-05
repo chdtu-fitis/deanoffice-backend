@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.document.DocumentResponseController;
-import ua.edu.chdtu.deanoffice.api.document.reportsjournal.ReportsJournalController;
+import ua.edu.chdtu.deanoffice.api.document.informal.recordbooks.ExamReportsRecordBookController;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
@@ -42,6 +42,6 @@ public class StudentListController extends DocumentResponseController {
         }
     }
     private static ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, ReportsJournalController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ExceptionHandlerAdvice.handleException(exception, ExamReportsRecordBookController.class, ExceptionToHttpCodeMapUtil.map(exception));
     }
 }

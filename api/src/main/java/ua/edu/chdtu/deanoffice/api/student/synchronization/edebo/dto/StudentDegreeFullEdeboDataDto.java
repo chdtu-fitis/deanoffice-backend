@@ -23,7 +23,7 @@ public class StudentDegreeFullEdeboDataDto {
     private Date previousDiplomaDate;
     private EducationDocument previousDiplomaType;
     private String previousDiplomaIssuedBy;
-    private String supplementNumber;
+    private String edeboId;
     @JsonFormat(pattern="yyyy-MM-dd", locale = "uk_UA", timezone = "EET")
     private Date admissionDate;
     private String admissionOrderNumber;

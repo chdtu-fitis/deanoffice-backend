@@ -8,18 +8,22 @@ import ua.edu.chdtu.deanoffice.entity.OrderReason;
 import ua.edu.chdtu.deanoffice.entity.RenewedExpelledStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentExpel;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.RenewedExpelledStudentRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentExpelRepository;
 
 import ua.edu.chdtu.deanoffice.repository.CurrentYearRepository;
+import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 import ua.edu.chdtu.deanoffice.util.StudentUtil;
+import ua.edu.chdtu.deanoffice.util.UserUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.Constants.EXPELLED_STUDENTS_YEARS_FOR_INITIAL_VIEW;
@@ -33,6 +37,7 @@ public class StudentExpelService {
     private final RenewedExpelledStudentRepository renewedExpelledStudentRepository;
     private final StudentUtil studentUtil;
     private final OrderReasonService orderReasonService;
+    private final StudentAcademicVacationService studentAcademicVacationService;
 
     @Autowired
     public StudentExpelService(
@@ -41,7 +46,8 @@ public class StudentExpelService {
             CurrentYearRepository currentYearRepository,
             RenewedExpelledStudentRepository renewedExpelledStudentRepository,
             StudentUtil studentUtil,
-            OrderReasonService orderReasonService
+            OrderReasonService orderReasonService,
+            StudentAcademicVacationService studentAcademicVacationService
     ) {
         this.studentDegreeRepository = studentDegreeRepository;
         this.studentExpelRepository = studentExpelRepository;
@@ -49,6 +55,7 @@ public class StudentExpelService {
         this.renewedExpelledStudentRepository = renewedExpelledStudentRepository;
         this.studentUtil = studentUtil;
         this.orderReasonService = orderReasonService;
+        this.studentAcademicVacationService = studentAcademicVacationService;
     }
 
     public List<StudentExpel> expelStudents(List<StudentExpel> studentExpels) {
@@ -131,4 +138,12 @@ public class StudentExpelService {
         return expelledStudentInformation;
     }
 
+    @FacultyAuthorized
+    public StudentExpel getLastByStudentDegreeId(Integer studentDegreeId) throws UnauthorizedFacultyDataException {
+        List<StudentExpel> expelledStudentInformation = studentExpelRepository.findFailsByStudentDegreeIdOrderedByDateDesc(studentDegreeId, SUCCESS_REASON_IDS);
+        if (expelledStudentInformation.size() > 0)
+            return expelledStudentInformation.get(0);
+        else
+            return null;
+    }
 }
