@@ -534,7 +534,7 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/group-names-generation")
-    public ResponseEntity generateSelectiveCourseGroupName(@RequestParam int studentsYear, @RequestParam int degreeId) {
+    public ResponseEntity generateSelectiveCourseGroupName(@RequestParam int studentsYear, @RequestParam int degreeId) throws OperationCannotBePerformedException {
         selectiveCourseService.setGroupNames(studentsYear, degreeId);
         return ResponseEntity.ok().build();
     }

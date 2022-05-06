@@ -6,17 +6,23 @@ import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class SelectiveCourseService {
+    private final String[] SPECIAL_FIELDS_OF_KNOWLEDGE = {"07", "12"};
+
     private SelectiveCourseRepository selectiveCourseRepository;
     private SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
     private CurrentYearService currentYearService;
@@ -103,50 +109,63 @@ public class SelectiveCourseService {
 
     /*===== Add selective courses group names to selective courses where group name is null=======*/
     @Transactional
-    public void setGroupNames(int studentsYear, int degreeId) {
-        List<SelectiveCourse> selectiveCoursesWithGroupNames = generateSelectiveCoursesGroupNamesSequential(studentsYear, degreeId);
+    public void setGroupNames(int studentsYear, int degreeId) throws OperationCannotBePerformedException {
+        Set<String> specialFieldsOfKnowledge = new HashSet<>(Arrays.asList(SPECIAL_FIELDS_OF_KNOWLEDGE));
+        List<SelectiveCourse> selectiveCoursesWithGroupNames = generateSelectiveCoursesGroupNamesGeneral(studentsYear, degreeId, specialFieldsOfKnowledge);
         for (SelectiveCourse selectiveCourse: selectiveCoursesWithGroupNames)
             selectiveCourseRepository.updateGroupNameById(selectiveCourse.getGroupName(), selectiveCourse.getId());
     }
 
-    /*For bachelor 2nd year, for instance*/
-    private List<SelectiveCourse> generateSelectiveCoursesGroupNamesSequential(int studentsYear, int degreeId) {
+    private List<SelectiveCourse> generateSelectiveCoursesGroupNamesGeneral(int studentsYear, int degreeId, Set<String> specialFieldsOfKnowledge)
+            throws OperationCannotBePerformedException {
         int studyYear = currentYearService.getYear() + 1;
 
         Integer[] semesters = {studentsYear * 2 - 1, studentsYear * 2};
         List<SelectiveCourse> selectiveCourses = selectiveCourseRepository
                 .findAvailableByStudyYearAndDegreeAndSemesters(studyYear, degreeId, Arrays.asList(semesters));
-
-        String studyYearLastTwoDigits = String.valueOf(studyYear).substring(2);
-
-        int sequenceNumber = 1;
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            StringBuilder groupName = new StringBuilder();
-
-//            int semester = selectiveCourse.getCourse().getSemester();
-//            int year = (int) Math.ceil((double)semester / 2); /* курс, на якому вивчається дисципліна */
-
-//            char typeCycleFirstLetter = selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL ? 'з' : 'п';
-
-            groupName
-                    .append(selectiveCourse.getDegree().getName().substring(0, 1))
-                    .append(studyYearLastTwoDigits)
-                    .append("-")
-                    .append(studentsYear)
-                    .append("к")
-                    .append("-")
-                    .append(sequenceNumber++);
-
-            selectiveCourse.setGroupName(groupName.toString());
-            if (sequenceNumber > 3) break;
+            if (selectiveCourse.getGroupName() != null) {
+                String errorMessage = "Не можна автоматично генерувати назви груп, якщо серед вибіркових предметів є хоча б один з призначеною назвою групи";
+                throw new OperationCannotBePerformedException(errorMessage);
+            }
         }
 
-        return selectiveCourses;
-    }
+        String studyYearLastTwoDigits = String.valueOf(studyYear).substring(2);
+        int genSequenceNumber = 1, sequenceNumberProf = 1;
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            StringBuilder groupName = new StringBuilder();
+            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL) {
+                groupName
+                        .append(selectiveCourse.getDegree().getName().substring(0, 1))
+                        .append(studyYearLastTwoDigits)
+                        .append("-")
+                        .append(studentsYear)
+                        .append("к")
+                        .append("-")
+                        .append(genSequenceNumber++);
+            } else {
+                groupName
+                        .append(selectiveCourse.getDegree().getName().substring(0, 1))
+                        .append(studyYearLastTwoDigits)
+                        .append("-")
+                        .append(studentsYear)
+                        .append("к")
+                        .append("-");
 
-    /*For bachelor 3rd year, for instance, where all group studies the same selective courses*/
-    private List<SelectiveCourse> generateSelectiveCoursesGroupNamesGrouped() {
-        return null;
+                if (specialFieldsOfKnowledge.contains(selectiveCourse.getFieldOfKnowledge().getCode())) {
+                    groupName.append(selectiveCourse.getFieldOfKnowledge().getCode()).append("-").append(sequenceNumberProf++);
+                } else {
+                    List<SelectiveCoursesStudentDegrees> studentDegreesForSelectiveCourse =
+                            selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourse(selectiveCourse.getId());
+                    if (studentDegreesForSelectiveCourse.size() > 0)
+                        groupName.append(studentDegreesForSelectiveCourse.get(0).getStudentDegree().getSpecialization().getSpeciality().getCode());
+                    else
+                        continue;
+                }
+            }
+            selectiveCourse.setGroupName(groupName.toString());
+        }
+        return selectiveCourses;
     }
     //==============================
 }
