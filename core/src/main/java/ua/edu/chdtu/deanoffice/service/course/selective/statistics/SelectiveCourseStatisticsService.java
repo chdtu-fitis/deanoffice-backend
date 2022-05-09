@@ -177,27 +177,26 @@ public class SelectiveCourseStatisticsService {
         return allStudentsCounts;
     }
 
-    public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentsGroup(int studyYear, int groupId) {
+    public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentGroup(int studyYear, int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
         List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
         List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
         List<String> listNameCourses = new ArrayList<>();
         String courseName;
-        int i = 0;
         for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
             studentsNameAndId = new ArrayList<>();
             courseName = cs.getCourseName();
             if (!(listNameCourses.contains(cs.getCourseName()))) {
                 listNameCourses.add(courseName);
-                coursesSelectedByStudentsGroupFiltered.add(new CoursesSelectedByStudentsGroupResult(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
-                        cs.getCourseName(), cs.getTrainingCycle(), cs.getFieldOfKnowledgeCode()));
+                CoursesSelectedByStudentsGroupResult cssgResult = new CoursesSelectedByStudentsGroupResult(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
+                        cs.getCourseName(), cs.getTrainingCycle(), cs.getFieldOfKnowledgeCode());
+                coursesSelectedByStudentsGroupFiltered.add(cssgResult);
                 for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
                     if (courseName.equals(csbsg.getCourseName())){
                         studentsNameAndId.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
                     }
                 }
-                coursesSelectedByStudentsGroupFiltered.get(i).setStudents(studentsNameAndId);
-                i++;
+                cssgResult.setStudents(studentsNameAndId);
             }
         }
         return coursesSelectedByStudentsGroupFiltered;
