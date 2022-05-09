@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
 
 import java.util.List;
 
@@ -60,9 +61,9 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     );
 
     @Query("SELECT DISTINCT scsd.selectiveCourse.course.id FROM SelectiveCoursesStudentDegrees scsd " +
-                  "WHERE scsd.selectiveCourse.course.semester = :semester " +
-                  "AND scsd.studentDegree.id in :studentDegreeIds " +
-                  "AND scsd.active = true")
+            "WHERE scsd.selectiveCourse.course.semester = :semester " +
+            "AND scsd.studentDegree.id in :studentDegreeIds " +
+            "AND scsd.active = true")
     List<Integer> findActiveByYearAndSemesterAndStudentDegrees(
             @Param("semester") int semester,
             @Param("studentDegreeIds") List<Integer> studentDegreeIds
@@ -93,4 +94,37 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             @Param("studyYear") int studyYear,
             @Param("degreeId") int degreeId
     );
+
+    @Query("SELECT scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, scsd.studentDegree.specialization.faculty.name, " +
+            "scsd.studentDegree.specialization.speciality.code, :studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear, " +
+            "scsd.studentDegree.studentGroup.name, COUNT(scsd.id)" +
+            "FROM SelectiveCoursesStudentDegrees AS scsd " +
+            "WHERE scsd.active=true and :studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear = :course " +
+            "GROUP BY 6, scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
+            "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code," +
+            "scsd.selectiveCourse.studyYear, scsd.studentDegree.studentGroup.name, scsd.studentDegree.specialization.degree.id " +
+            "having scsd.selectiveCourse.studyYear=:studyYear AND COUNT(scsd.id) > 5 and scsd.studentDegree.specialization.degree.id = :degreeId " +
+            "order by scsd.studentDegree.studentGroup.name")
+    List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesOverNorm(
+            @Param("studyYear") int studyYear,
+            @Param("degreeId") int degreeId,
+            @Param("course") int course
+    );
+
+    @Query("SELECT scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, scsd.studentDegree.specialization.faculty.name, " +
+            "scsd.studentDegree.specialization.speciality.code, :studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear, " +
+            "scsd.studentDegree.studentGroup.name, COUNT(scsd.id)" +
+            "FROM SelectiveCoursesStudentDegrees AS scsd " +
+            "WHERE scsd.active=true " +
+            "GROUP BY 6, scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
+            "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code," +
+            "scsd.selectiveCourse.studyYear, scsd.studentDegree.studentGroup.name, scsd.studentDegree.specialization.degree.id " +
+            "having scsd.selectiveCourse.studyYear=:studyYear AND COUNT(scsd.id) < 5 and scsd.studentDegree.specialization.degree.id = :degreeId " +
+            "order by scsd.studentDegree.studentGroup.name")
+    List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesLessNorm(
+            @Param("studyYear") int studyYear,
+            @Param("degreeId") int degreeId,
+            @Param("course") int course
+    );
+
 }
