@@ -201,4 +201,10 @@ public class SelectiveCourseStatisticsService {
         }
         return coursesSelectedByStudentsGroupFiltered;
     }
+
+    public List<String> getCoursesSelectedByStudentGroup2(int studyYear, int groupId) {
+        List<String> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup2(studyYear, groupId);
+
+        return coursesSelectedByStudentsGroup;
+    }
 }

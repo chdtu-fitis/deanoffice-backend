@@ -231,4 +231,10 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     List<ICoursesSelectedByStudentsGroup> findCoursesSelectedByStudentsGroup(@Param("studyYear") int studyYear,
                                                                              @Param("groupId") int groupId);
 
+    @Query(value =
+            "SELECT DISTINCT scsd.selectiveCourse.course.courseName.name AS courseName " +
+                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
+                    "WHERE scsd.active=true AND scsd.studentDegree.studentGroup.id=:groupId AND scsd.selectiveCourse.studyYear=:studyYear ")
+    List<String> findCoursesSelectedByStudentsGroup2(@Param("studyYear") int studyYear,
+                                                     @Param("groupId") int groupId);
 }
