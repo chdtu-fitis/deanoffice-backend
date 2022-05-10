@@ -107,16 +107,21 @@ public class SelectiveCourseController {
         else
             selectiveCourses = selectiveCourseService.getSelectiveCoursesByStudyYearAndDegreeAndSemester(studyYear, degreeId, semester, thisYear, all);
 
-        List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
-        for (SelectiveCourse selectiveCourse : selectiveCourses) {
-            SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
-            setFieldsOfKnowledge(selectiveCourse, selectiveCourseDTO);
-            selectiveCourseDTOS.add(selectiveCourseDTO);
-        }
+        List<SelectiveCourseDTO> selectiveCourseDTOS = processFieldsOfKnowledgeForSelectiveCourses(selectiveCourses);
         return ResponseEntity.ok(map(selectiveCourseDTOS, SelectiveCourseDTO.class));
     }
 
-    private void setFieldsOfKnowledge(SelectiveCourse selectiveCourse, SelectiveCourseDTO selectiveCourseDTO) {
+    private List<SelectiveCourseDTO> processFieldsOfKnowledgeForSelectiveCourses(List<SelectiveCourse> selectiveCourses) {
+        List<SelectiveCourseDTO> selectiveCourseDTOS = new ArrayList<>();
+        for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            SelectiveCourseDTO selectiveCourseDTO = map(selectiveCourse, SelectiveCourseDTO.class);
+            selectiveCourseDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(selectiveCourse));
+            selectiveCourseDTOS.add(selectiveCourseDTO);
+        }
+        return selectiveCourseDTOS;
+    }
+
+    private List<NamedDTO> getFieldsOfKnowledge(SelectiveCourse selectiveCourse) {
         if (selectiveCourse.getFieldOfKnowledge() != null) {
             List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>();
             fieldsOfKnowledge.add(selectiveCourse.getFieldOfKnowledge());
@@ -127,8 +132,9 @@ public class SelectiveCourseController {
                 fieldsOfKnowledge.addAll(otherFieldsOfKnowledge);
             }
             List<NamedDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, NamedDTO.class);
-            selectiveCourseDTO.setFieldsOfKnowledge(fieldOfKnowledgeDTOS);
+            return fieldOfKnowledgeDTOS;
         }
+        return null;
     }
 
     @Secured({"ROLE_NAVCH_METHOD"})
@@ -173,7 +179,7 @@ public class SelectiveCourseController {
         }
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.create(selectiveCourse);
         SelectiveCourseDTO selectiveCourseAfterSaveDTO = map(selectiveCourseAfterSave, SelectiveCourseDTO.class);
-        setFieldsOfKnowledge(selectiveCourseAfterSave, selectiveCourseAfterSaveDTO);
+        selectiveCourseAfterSaveDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(selectiveCourseAfterSave));
         return new ResponseEntity(selectiveCourseAfterSaveDTO, HttpStatus.CREATED);
     }
 
@@ -202,7 +208,7 @@ public class SelectiveCourseController {
         selectiveCourse = mapSelectiveCourseForUpdate(selectiveCourse, selectiveCourseWriteDTO);
         SelectiveCourse selectiveCourseAfterSave = selectiveCourseService.update(selectiveCourse);
         SelectiveCourseDTO selectiveCourseSavedDTO = Mapper.strictMap(selectiveCourseAfterSave, SelectiveCourseDTO.class);
-        setFieldsOfKnowledge(selectiveCourseAfterSave, selectiveCourseSavedDTO);
+        selectiveCourseSavedDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(selectiveCourseAfterSave));
         return new ResponseEntity(selectiveCourseSavedDTO, HttpStatus.OK);
     }
 
@@ -342,7 +348,7 @@ public class SelectiveCourseController {
             else
                 selectiveCoursesFromDB.addAll(selectiveCourses);
 
-            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCoursesFromDB);
+            checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCourses);
 
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
@@ -388,7 +394,7 @@ public class SelectiveCourseController {
         if (selectiveCourses == null || selectiveCourses.size() == 0) {
             throw new OperationCannotBePerformedException("Неправильні ідентифікатори предметів");
         }
-        if (!selectiveCoursesStudentDegreesService.checkSelectiveCoursesIntegrity(studentDegree, selectiveCourses)) {
+        if (!selectiveCoursesStudentDegreesService.checkSelectiveCoursesIntegrityStrict(studentDegree, selectiveCourses)) {
             throw new OperationCannotBePerformedException("Кількість або семестри вибіркових предметів не відповідають правилам");
         }
         return true;
@@ -454,6 +460,7 @@ public class SelectiveCourseController {
         List<SelectiveCourseWithStudentsCountDTO> selectiveCourseWithStudentsCountDTOS = selectiveCoursesStudentDegrees.entrySet().stream()
                 .map(entry -> {
                     SelectiveCourseWithStudentsCountDTO selectiveCourseWithStudentsCountDTO = map(entry.getKey(), SelectiveCourseWithStudentsCountDTO.class);
+                    selectiveCourseWithStudentsCountDTO.setFieldsOfKnowledge(getFieldsOfKnowledge(entry.getKey()));
                     selectiveCourseWithStudentsCountDTO.setStudentsCount(entry.getValue().intValue());
                     return selectiveCourseWithStudentsCountDTO;
                 }).collect(Collectors.toList());
@@ -467,9 +474,8 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PatchMapping("/disqualification")
-    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestParam @NotNull int semester,
-                                                               @RequestParam @NotNull int degreeId) throws OperationCannotBePerformedException {
-        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(semester, degreeId);
+    public ResponseEntity updateSelectiveCoursesStudentDegrees(@RequestBody List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
+        selectiveCoursesStudentDegreesService.disqualifySelectiveCoursesAndCancelStudentRegistrations(selectiveCourseIds);
         return new ResponseEntity(HttpStatus.OK);
     }
 
