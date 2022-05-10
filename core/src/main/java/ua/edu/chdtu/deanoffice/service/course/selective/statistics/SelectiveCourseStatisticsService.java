@@ -95,7 +95,7 @@ public class SelectiveCourseStatisticsService {
 
     public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentGroup(int studyYear, int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
-        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
+        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered = new ArrayList<>();
         List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
         List<String> listNameCourses = new ArrayList<>();
         String courseName;
@@ -118,9 +118,27 @@ public class SelectiveCourseStatisticsService {
         return coursesSelectedByStudentsGroupFiltered;
     }
 
-    public List<String> getCoursesSelectedByStudentGroup2(int studyYear, int groupId) {
-        List<String> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup2(studyYear, groupId);
-
-        return coursesSelectedByStudentsGroup;
+    public List<AppointSelectiveCourse> appointSelectiveCourse(int studyYear, int groupId) {
+        List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelected(studyYear, groupId);
+        List<AppointSelectiveCourse> coursesChosenByStudents = new ArrayList<>();
+        List<String> coursesName;
+        List<String> listStudentName = new ArrayList<>();
+        String studentName;
+        for (IAppointSelectiveCourse as : coursesSelectedByStudentsGroup) {
+            coursesName = new ArrayList<>();
+            studentName = as.getStudentName();
+            if (!(listStudentName.contains(as.getStudentName()))) {
+                listStudentName.add(studentName);
+                AppointSelectiveCourse ascResult = new AppointSelectiveCourse(studentName);
+                coursesChosenByStudents.add(ascResult);
+                for (IAppointSelectiveCourse as2 : coursesSelectedByStudentsGroup) {
+                    if (studentName.equals(as2.getStudentName())){
+                        coursesName.add(as2.getCourseName());
+                    }
+                }
+                ascResult.setCourseNam(coursesName);
+            }
+        }
+        return coursesChosenByStudents;
     }
 }

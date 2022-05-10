@@ -2,12 +2,15 @@ package ua.edu.chdtu.deanoffice.api.course.selective;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.CoursesSelectedByStudentsGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsNotRegisteredForSelectiveCoursesDTO;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.AppointSelectiveCourse;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IAppointSelectiveCourse;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 
 import java.util.ArrayList;
@@ -84,4 +87,19 @@ public class SelectiveCourseStatisticsController {
         List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentGroup(studyYear, groupId);
         return ResponseEntity.ok(strictMap(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
     }
+
+    @PostMapping("/appoint-selective")
+    public ResponseEntity appointSelectiveCourse( @RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
+//                                                  @RequestParam @NotNull int degreeId,
+                                                  @RequestParam @NotNull int groupId
+//                                                  @RequestParam @NotNull int course,
+//                                                  @RequestParam @NotNull int fieldOfStudyCode,
+//                                                  @RequestParam @NotNull int appointmentRule
+    )
+    {
+
+        List<AppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.appointSelectiveCourse(studyYear, groupId);
+        return ResponseEntity.ok(coursesSelectedByStudentsGroup);
+    }
+
 }
