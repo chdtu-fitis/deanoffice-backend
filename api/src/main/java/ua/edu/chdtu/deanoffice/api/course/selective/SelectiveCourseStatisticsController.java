@@ -58,7 +58,7 @@ public class SelectiveCourseStatisticsController {
     }
 
     @GetMapping("/registered-percent")
-    public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) int studyYear,
+    public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                        @RequestParam @NotNull int degreeId,
                                                        @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
         List<IPercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);

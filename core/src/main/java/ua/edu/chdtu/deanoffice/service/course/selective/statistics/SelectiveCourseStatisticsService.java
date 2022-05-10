@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -62,8 +61,8 @@ public class SelectiveCourseStatisticsService {
                 allStudentsCounts = selectiveCoursesStudentDegreesRepository.findCountStudentsWhoChosenSelectiveCourseByFacultyAndYearAndSpecialization(degreeId, currentYear);
                 registeredPercent = getStudentsPercentWhoChosenSelectiveCourse(registeredCounts, allStudentsCounts,
                         (as, regCounts,i)->as.getStudyYear() == registeredCounts.get(i).getStudyYear()
-                                            && as.getFacultyName().equals(registeredCounts.get(i).getFacultyName())
-                                            && as.getSpecializationName().equals(registeredCounts.get(i).getSpecializationName()));
+                                && as.getFacultyName().equals(registeredCounts.get(i).getFacultyName())
+                                && as.getSpecializationName().equals(registeredCounts.get(i).getSpecializationName()));
         }
         return registeredPercent;
     }
@@ -76,41 +75,19 @@ public class SelectiveCourseStatisticsService {
         for (IPercentStudentsRegistrationOnCourses as : allStudentsCounts) {
             if (i == registeredCounts.size()) {
                 as.setPercent(0);
+                as.setRegisteredCount(0);
                 continue;
             }
             if (statisticsCondition.hasToBeCounted(as, registeredCounts,i)) {
-                as.setPercent((int) (registeredCounts.get(i).getCount() * 100 / as.getCount()));
+                as.setPercent((int) (registeredCounts.get(i).getRegisteredCount() * 100 / as.getTotalCount()));
+                as.setRegisteredCount(registeredCounts.get(i).getRegisteredCount().intValue());
                 i++;
             }
             else {
                 as.setPercent(0);
+                as.setRegisteredCount(0);
             }
         }
         return allStudentsCounts;
-    }
-
-    public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentGroup(int studyYear, int groupId) {
-        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
-        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
-        List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
-        List<String> listNameCourses = new ArrayList<>();
-        String courseName;
-        for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
-            studentsNameAndId = new ArrayList<>();
-            courseName = cs.getCourseName();
-            if (!(listNameCourses.contains(cs.getCourseName()))) {
-                listNameCourses.add(courseName);
-                CoursesSelectedByStudentsGroupResult cssgResult = new CoursesSelectedByStudentsGroupResult(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
-                        cs.getCourseName(), cs.getTrainingCycle(), cs.getFieldOfKnowledgeCode());
-                coursesSelectedByStudentsGroupFiltered.add(cssgResult);
-                for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
-                    if (courseName.equals(csbsg.getCourseName())){
-                        studentsNameAndId.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
-                    }
-                }
-                cssgResult.setStudents(studentsNameAndId);
-            }
-        }
-        return coursesSelectedByStudentsGroupFiltered;
     }
 }
