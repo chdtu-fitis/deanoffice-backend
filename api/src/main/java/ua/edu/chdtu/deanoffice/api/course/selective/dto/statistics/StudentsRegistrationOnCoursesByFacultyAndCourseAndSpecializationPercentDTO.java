@@ -9,5 +9,7 @@ public class StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPer
     private String facultyName;
     private int studyYear;
     private String specializationName;
+    private int totalCount;
+    private int registeredCount;
     private int percent;
 }

@@ -7,5 +7,7 @@ import lombok.Setter;
 @Setter
 public class StudentsRegistrationOnCoursesPercentDTO {
     private int studyYear;
+    private int totalCount;
+    private int registeredCount;
     private int percent;
 }

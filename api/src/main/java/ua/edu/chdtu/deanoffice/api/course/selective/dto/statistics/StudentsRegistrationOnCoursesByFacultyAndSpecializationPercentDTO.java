@@ -8,5 +8,7 @@ import lombok.Setter;
 public class StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO {
     private String facultyName;
     private String specializationName;
+    private int totalCount;
+    private int registeredCount;
     private int percent;
 }

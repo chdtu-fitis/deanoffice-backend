@@ -2,11 +2,17 @@ package ua.edu.chdtu.deanoffice.api.course.selective;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.CoursesSelectedByStudentsGroupDTO;
+import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsNotRegisteredForSelectiveCoursesDTO;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndCoursesPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyAndSpecializationPercentDTO;
@@ -14,26 +20,41 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegis
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.CoursesSelectedByStudentsGroupResult;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.ICoursesSelectedByStudentsGroup;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.strictMap;
 
 @RestController
 @RequestMapping("/selective-courses-statistics")
-public class SelectiveCoursesStatisticsController {
+public class SelectiveCourseStatisticsController {
     private SelectiveCourseStatisticsService selectiveCourseStatisticsService;
 
-    public SelectiveCoursesStatisticsController(SelectiveCourseStatisticsService selectiveCourseStatisticsService) {
+    public SelectiveCourseStatisticsController(SelectiveCourseStatisticsService selectiveCourseStatisticsService) {
         this.selectiveCourseStatisticsService = selectiveCourseStatisticsService;
+    }
+
+    @GetMapping("/selected-zero")
+    public ResponseEntity<List<StudentsNotRegisteredForSelectiveCoursesDTO>> getStudentsNotSelectedSelectiveCourses(
+            @RequestParam int degreeId,
+            @RequestParam int studyYear) {
+        List<StudentDegree> studentDegrees = selectiveCourseStatisticsService.getStudentsNotSelectedSelectiveCourses(studyYear, degreeId);
+        List<StudentsNotRegisteredForSelectiveCoursesDTO> result = new ArrayList<>();
+        for (StudentDegree studentDegree : studentDegrees) {
+            StudentsNotRegisteredForSelectiveCoursesDTO studentsNotRegisteredForSelectiveCoursesDTO = new StudentsNotRegisteredForSelectiveCoursesDTO(
+                    studentDegree.getStudent().getSurname() + " " + studentDegree.getStudent().getName(),
+                    studentDegree.getSpecialization().getFaculty().getAbbr(),
+                    studentDegree.getSpecialization().getSpeciality().getCode(),
+                    studentDegree.getStudentGroup() != null ? studentDegree.getStudentGroup().getName() : "",
+                    studentDegree.getSpecialization().getDepartment().getAbbr());
+            result.add(studentsNotRegisteredForSelectiveCoursesDTO);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/registered-percent")
@@ -56,24 +77,11 @@ public class SelectiveCoursesStatisticsController {
                 return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPercentDTO.class));
         }
     }
+
     @GetMapping("/registered-by-group")
     public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                     @RequestParam @NotNull int groupId) {
         List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentGroup(studyYear, groupId);
         return ResponseEntity.ok(strictMap(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
-    }
-
-    @PostMapping("/appoint-selective")
-    public ResponseEntity appointSelectiveCourse( @RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
-//                                                  @RequestParam @NotNull int degreeId,
-                                                  @RequestParam @NotNull int groupId
-//                                                  @RequestParam @NotNull int course,
-//                                                  @RequestParam @NotNull int fieldOfStudyCode,
-//                                                  @RequestParam @NotNull int appointmentRule
-                                                    )
-    {
-
-        List<String> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentGroup2(studyYear, groupId);
-        return ResponseEntity.ok(coursesSelectedByStudentsGroup);
     }
 }
