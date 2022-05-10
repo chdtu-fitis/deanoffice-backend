@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -89,5 +91,30 @@ public class SelectiveCourseStatisticsService {
             }
         }
         return allStudentsCounts;
+    }
+
+    public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentGroup(int studyYear, int groupId) {
+        List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
+        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered =  new ArrayList<>();
+        List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
+        List<String> listNameCourses = new ArrayList<>();
+        String courseName;
+        for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
+            studentsNameAndId = new ArrayList<>();
+            courseName = cs.getCourseName();
+            if (!(listNameCourses.contains(cs.getCourseName()))) {
+                listNameCourses.add(courseName);
+                CoursesSelectedByStudentsGroupResult cssgResult = new CoursesSelectedByStudentsGroupResult(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
+                        cs.getCourseName(), cs.getTrainingCycle(), cs.getFieldOfKnowledgeCode());
+                coursesSelectedByStudentsGroupFiltered.add(cssgResult);
+                for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
+                    if (courseName.equals(csbsg.getCourseName())){
+                        studentsNameAndId.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
+                    }
+                }
+                cssgResult.setStudents(studentsNameAndId);
+            }
+        }
+        return coursesSelectedByStudentsGroupFiltered;
     }
 }
