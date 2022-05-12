@@ -118,8 +118,8 @@ public class SelectiveCourseStatisticsService {
         return coursesSelectedByStudentsGroupFiltered;
     }
 
-    public List<AppointSelectiveCourse> appointSelectiveCourse(int studyYear, int groupId) {
-        List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelected(studyYear, groupId);
+    public List<AppointSelectiveCourse> appointSelectiveCourse(int studyYear, int fieldOfKnowledge) {
+        List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelected(studyYear, Integer.toString(fieldOfKnowledge));
         List<AppointSelectiveCourse> coursesChosenByStudents = new ArrayList<>();
         List<String> coursesName;
         List<String> listStudentName = new ArrayList<>();

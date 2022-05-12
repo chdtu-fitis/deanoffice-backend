@@ -91,14 +91,13 @@ public class SelectiveCourseStatisticsController {
     @PostMapping("/appoint-selective")
     public ResponseEntity appointSelectiveCourse( @RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
 //                                                  @RequestParam @NotNull int degreeId,
-                                                  @RequestParam @NotNull int groupId
 //                                                  @RequestParam @NotNull int course,
-//                                                  @RequestParam @NotNull int fieldOfStudyCode,
+                                                  @RequestParam @NotNull int fieldOfStudyCode
 //                                                  @RequestParam @NotNull int appointmentRule
     )
     {
 
-        List<AppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.appointSelectiveCourse(studyYear, groupId);
+        List<AppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.appointSelectiveCourse(studyYear, fieldOfStudyCode);
         return ResponseEntity.ok(coursesSelectedByStudentsGroup);
     }
 

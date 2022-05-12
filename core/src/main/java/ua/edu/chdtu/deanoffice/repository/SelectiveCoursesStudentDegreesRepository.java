@@ -257,7 +257,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "SELECT DISTINCT scsd.selectiveCourse.course.courseName.name AS courseName, " +
                     "CONCAT(scsd.studentDegree.student.surname, ' ', scsd.studentDegree.student.name) AS studentName " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE scsd.active=true AND scsd.studentDegree.studentGroup.id=:groupId AND scsd.selectiveCourse.studyYear=:studyYear ")
+                    "WHERE scsd.active=true AND scsd.selectiveCourse.fieldOfKnowledge.code=:fieldOfKnowledge AND scsd.selectiveCourse.studyYear=:studyYear ")
     List<IAppointSelectiveCourse> findCoursesSelected(@Param("studyYear") int studyYear,
-                                                      @Param("groupId") int groupId);
+                                                      @Param("groupId") String fieldOfKnowledge);
 }
