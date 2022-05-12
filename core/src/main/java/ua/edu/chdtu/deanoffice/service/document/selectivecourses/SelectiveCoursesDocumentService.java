@@ -8,6 +8,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
 import org.springframework.stereotype.Service;
+import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.service.document.DocumentIOService.TEMPLATES_PATH;
 import static ua.edu.chdtu.deanoffice.service.document.TemplateUtil.addRowToTable;
@@ -35,6 +37,7 @@ public class SelectiveCoursesDocumentService {
 
     private static final String TEMPLATE_PATH = TEMPLATES_PATH + "SelectiveCoursesGroupsHeader.docx";
     private static final String TEMPLATE_GENERAL_TABLE = TEMPLATES_PATH + "SelectiveCoursesGeneralTable.docx";
+    private static final String TEMPLATE_PROF_TABLE = TEMPLATES_PATH + "SelectiveCoursesProfessionalTable.docx";
 
     private final DocumentIOService documentIOService;
     private DegreeService degreeService;
@@ -47,24 +50,46 @@ public class SelectiveCoursesDocumentService {
         this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
-    public File formDocument(int studyYear, int course, int degreeId)
-            throws Docx4JException, IOException {
+    public File formDocument(int studyYear, int studentsYear, int degreeId) throws Docx4JException, IOException {
         WordprocessingMLPackage template = documentIOService.loadTemplate(TEMPLATE_PATH);
 
-        int firstSemester =  (course * 2) - 1;
-        int secondSemester = (course * 2);
+        int firstSemester =  (studentsYear * 2) - 1;
+        int secondSemester = (studentsYear * 2);
 
+        fillDocumentHeader(template, studyYear, studentsYear, degreeId);
+
+        if (degreeId == DegreeEnum.BACHELOR.getId()) {
+            switch (studentsYear) {
+                case 2:
+                    fillGeneralTablesBySemester(template,firstSemester,studyYear,degreeId);
+                    fillGeneralTablesBySemester(template,secondSemester,studyYear,degreeId);
+                    break;
+                case 3:
+                    //TODO: fill professional courses
+                    fillProfessionalTablesByFaculty(template,firstSemester,studyYear,degreeId, 5);
+                    break;
+            }
+        }
+
+        if (degreeId == DegreeEnum.MASTER.getId()) {
+            //TODO: fill professional courses
+            fillProfessionalTablesByFaculty(template,firstSemester,studyYear,degreeId, 4);
+            fillGeneralTablesBySemester(template,firstSemester,studyYear,degreeId);
+            fillGeneralTablesBySemester(template,secondSemester,studyYear,degreeId);
+        }
+
+        return documentIOService.saveDocumentToTemp(template, "Selective", FileFormatEnum.DOCX);
+    }
+
+    private void fillDocumentHeader(WordprocessingMLPackage template, int studyYear, int course, int degreeId) {
         Map<String, String> commonDict = new HashMap<>();
+        commonDict.put("appNum", String.valueOf(course));
+        commonDict.put("courseNum", String.valueOf(course));
         commonDict.put("yearFrom", String.valueOf(studyYear));
         commonDict.put("yearTo", String.valueOf(studyYear+1));
         commonDict.put("degree", degreeService.getById(degreeId).getName().toLowerCase());
+        commonDict.put("cycleType", "ЗАГАЛЬНОЇ");
         replaceTextPlaceholdersInTemplate(template, commonDict);
-
-        fillGeneralTablesBySemester(template,firstSemester,studyYear,degreeId);
-
-        fillGeneralTablesBySemester(template,secondSemester,studyYear,degreeId);
-
-        return documentIOService.saveDocumentToTemp(template, "Selective", FileFormatEnum.DOCX);
     }
 
     private void fillGeneralTablesBySemester(WordprocessingMLPackage template,
@@ -74,11 +99,55 @@ public class SelectiveCoursesDocumentService {
                                              ) throws Docx4JException {
         template.getMainDocumentPart()
                 .getContent()
-                .add(createParagraphSemesterText(semester));
+                .add(createParagraphText(semester+" СЕМЕСТР"));
 
         Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = selectiveCoursesStudentDegreesService.getStudentDegreesBySelectiveCourses(studyYear, semester, degreeId);
 
         fillGeneralTablesBySelectiveCourses(template, studentDegreesBySelectiveCourses);
+    }
+
+    private void fillProfessionalTablesByFaculty(WordprocessingMLPackage template,
+                                                 int semester,
+                                                 int studyYear,
+                                                 int degreeId, int coursesCount) throws Docx4JException {
+        Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = selectiveCoursesStudentDegreesService.getStudentDegreesBySelectiveCourses(studyYear, semester, degreeId);
+        Map<String, List<SelectiveCourse>> selectiveByGroupName = studentDegreesBySelectiveCourses.keySet()
+                        .stream()
+                        .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getGroupName()));
+                //.collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getDepartment().getFaculty()));
+
+        selectiveByGroupName.keySet().forEach(groupName -> {
+            template.getMainDocumentPart()
+                    .getContent()
+                    .add(createParagraphText(groupName + " course count: "+selectiveByGroupName.get(groupName).size()));
+
+//            Map<Faculty, List<SelectiveCourse>> selectiveByFaculty = selectiveByGroupName.keySet().stream()
+////                        .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getGroupName()));
+//                    .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getDepartment().getFaculty()));
+//            List<SelectiveCourse> selectiveCoursesForFaculty = selectiveByFaculty.get(faculty);
+//            for (String groupName: coursesByGroup.keySet()) {
+//                    template.getMainDocumentPart()
+//                            .getContent()
+//                            .add(createParagraphText(groupName + " "+coursesByGroup.get(groupName).size()));
+////                    if (coursesByGroup.get(groupName).size() == coursesCount){
+////                        fillProfessionalTablesBySelectiveCourses(template, studentDegreesBySelectiveCourses);
+////                    }
+//                }
+            //TODO: forEach list courses fill table
+            //createParagraphText(faculty.getNameGenitive())
+        });
+    }
+
+    public WordprocessingMLPackage fillProfessionalTablesBySelectiveCourses(WordprocessingMLPackage template,
+                                                                       Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses) throws Docx4JException {
+        for (SelectiveCourse selectiveCourse: studentDegreesBySelectiveCourses.keySet()) {
+            template.getMainDocumentPart()
+                    .getContent()
+                    .addAll(fillGeneralTableTemplate(TEMPLATE_GENERAL_TABLE,studentDegreesBySelectiveCourses.get(selectiveCourse),selectiveCourse)
+                            .getMainDocumentPart()
+                            .getContent());
+        }
+        return template;
     }
 
     public WordprocessingMLPackage fillGeneralTablesBySelectiveCourses(WordprocessingMLPackage template,
@@ -93,11 +162,11 @@ public class SelectiveCoursesDocumentService {
         return template;
     }
 
-    public P createParagraphSemesterText(int semester) {
+    public P createParagraphText(String s) {
         P paragraph = createParagraph();
         R run = createR();
-        Text semesterText = createText(semester + " СЕМЕСТР");
-        run.getContent().add(semesterText);
+        Text text = createText(s);
+        run.getContent().add(text);
         paragraph.getContent().add(run);
 
         return paragraph;

@@ -23,15 +23,15 @@ public class SelectiveCoursesDocumentController extends DocumentResponseControll
         this.selectiveCoursesDocumentService = selectiveCoursesDocumentService;
     }
 
-    @GetMapping("/docx")
-    public ResponseEntity generateIndividualCurriculum(
+    @GetMapping("/order")
+    public ResponseEntity generateSelectiveCoursesGroup (
             @RequestParam int studyYear,
-            @RequestParam int course,
+            @RequestParam int studentsYear,
             @RequestParam int degreeId
     ) {
         File file = null;
         try {
-            file = selectiveCoursesDocumentService.formDocument(studyYear, course, degreeId);
+            file = selectiveCoursesDocumentService.formDocument(studyYear, studentsYear, degreeId);
         } catch (Exception e) {
             return handleException(e);
         }
