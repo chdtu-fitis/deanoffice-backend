@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import org.apache.regexp.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
@@ -123,6 +124,44 @@ public class TeacherService {
         if (teacher.getScientificDegree() != null) {
             teacher.setScientificDegree(scientificDegreeRepository.findOne(teacher.getScientificDegree().getId()));
         }
+    }
+
+    public Teacher getTeacherBySurnameAndInitialsAndDepartment(String[] teacherSurnameAndInitials, String departmentName) {
+        Teacher teacher;
+        List<Teacher> teachersFoundList = teacherRepository.findAllBySurnameAndInitialsAndDepartment(teacherSurnameAndInitials[0], teacherSurnameAndInitials[1], teacherSurnameAndInitials[2], departmentName);
+        teacher = getTeacherFromList(teachersFoundList);
+        if (teacher == null) {
+            List<Teacher> teachersNoDepartmentList = teacherRepository.findAllBySurnameAndInitials(teacherSurnameAndInitials[0], teacherSurnameAndInitials[1], teacherSurnameAndInitials[2]);
+            teacher = getTeacherFromList(teachersNoDepartmentList);
+        }
+        if (teacher == null) {
+            return null;
+            // TODO: FORM EXCEPTION REPORT
+        }
+        return teacher;
+    }
+
+    private Teacher getTeacherFromList(List<Teacher> teachersFoundList) {
+        if (getTeachersNumber(teachersFoundList.size()) == Result.ONE) {
+                return teachersFoundList.get(0);
+        }
+        return null;
+    }
+
+    private Result getTeachersNumber(int teacherListSize) {
+        if (teacherListSize == 0) {
+            return Result.NONE;
+        } else if (teacherListSize > 1) {
+            return Result.MORE_THAN_ONE;
+        } else {
+            return Result.ONE;
+        }
+    }
+
+    private enum Result {
+        NONE,
+        ONE,
+        MORE_THAN_ONE
     }
 }
 

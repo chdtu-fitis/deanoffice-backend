@@ -37,4 +37,22 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     @Transactional
     @Query(value = "UPDATE teacher t SET active = false WHERE t.id IN (:ids)", nativeQuery = true)
     void setTeachersInactiveByIds(@Param("ids") List<Integer> ids);
+
+    @Query("SELECT t FROM Teacher t WHERE t.active=true AND t.surname=:surname AND SUBSTRING(t.name,1,1) =:nameFirstLetter " +
+            "AND SUBSTRING(t.patronimic,1,1)=:patronymicFirstLetter AND t.department.name=:departmentName")
+    List<Teacher> findAllBySurnameAndInitialsAndDepartment(
+            @Param("surname") String surname,
+            @Param("nameFirstLetter") String nameFirstLetter,
+            @Param("patronymicFirstLetter") String patronymicFirstLetter,
+            @Param("departmentName") String departmentName
+    );
+
+    @Query("SELECT t FROM Teacher t WHERE t.active=true AND t.surname=:surname AND SUBSTRING(t.name,1,1) =:nameFirstLetter " +
+            "AND SUBSTRING(t.patronimic,1,1)=:patronymicFirstLetter")
+    List<Teacher> findAllBySurnameAndInitials(
+            @Param("surname") String surname,
+            @Param("nameFirstLetter") String nameFirstLetter,
+            @Param("patronymicFirstLetter") String patronymicFirstLetter
+    );
+
 }

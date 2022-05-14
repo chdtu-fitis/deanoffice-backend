@@ -5,8 +5,8 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
+import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
@@ -117,11 +117,11 @@ public class SelectiveCoursesStudentDegreesService {
         List<Integer> selectiveCourseIds = new ArrayList<>();
 
         Map<SelectiveCourse, Long> generalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
-                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.GENERAL)
+                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TrainingCycle.GENERAL)
                 .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
 
         Map<SelectiveCourse, Long> professionalSelectiveCoursesWithStudentsCount = selectiveCoursesWithStudentsCount.entrySet().stream()
-                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TypeCycle.PROFESSIONAL)
+                .filter(selectiveCourseEntry -> selectiveCourseEntry.getKey().getTrainingCycle() == TrainingCycle.PROFESSIONAL)
                 .collect(Collectors.toMap(selectiveCourseEntry -> selectiveCourseEntry.getKey(), selectiveCourseEntry -> selectiveCourseEntry.getValue()));
 
         setGeneralSelectiveCourseIdsForRegistration(generalSelectiveCoursesWithStudentsCount, selectiveCoursesYearParametersByDate, degreeId, selectiveCourseIds);
@@ -348,15 +348,15 @@ public class SelectiveCoursesStudentDegreesService {
             int semester = selectiveCourse.getCourse().getSemester();
             if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
                 return false;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.GENERAL)
                 general[1 - semester % 2]++;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.PROFESSIONAL)
                 professional[1 - semester % 2]++;
         }
-//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-        if (general[0]+general[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-                || professional[0]+professional[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString()))
+//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString()))) {
+        if (general[0]+general[1] != selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[1]
+                || professional[0]+professional[1] != selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[1]) {
             return false;
         }
         return true;
@@ -379,15 +379,15 @@ public class SelectiveCoursesStudentDegreesService {
             int semester = selectiveCourse.getCourse().getSemester();
             if (semester != studentDegreeYear * 2 - 1 && semester != studentDegreeYear * 2)
                 return false;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.GENERAL)
                 general[1 - semester % 2]++;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.PROFESSIONAL)
                 professional[1 - semester % 2]++;
         }
-//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString()))
-//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString()))) {
-        if (general[0]+general[1] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-                || professional[0]+professional[1] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+//        if (!Arrays.equals(general, selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString()))
+//                || !Arrays.equals(professional, selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString()))) {
+        if (general[0]+general[1] > selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[0]+selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[1]
+                || professional[0]+professional[1] > selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[0]+selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[1]) {
             return false;
         }
         return true;
