@@ -118,7 +118,7 @@ public class SelectiveCourseStatisticsService {
         return coursesSelectedByStudentsGroupFiltered;
     }
 
-    public List<AppointSelectiveCourse> appointSelectiveCourse(int studyYear) {
+    public List<IAppointSelectiveCourse> appointSelectiveCourse(int studyYear) {
         List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelected(studyYear);
         List<AppointSelectiveCourse> coursesChosenByStudents = new ArrayList<>();
         List<String> coursesName;
@@ -139,6 +139,7 @@ public class SelectiveCourseStatisticsService {
                 ascResult.setCourseNam(coursesName);
             }
         }
-        return coursesChosenByStudents;
+        return coursesSelectedByStudentsGroup;
+//        return coursesChosenByStudents;
     }
 }

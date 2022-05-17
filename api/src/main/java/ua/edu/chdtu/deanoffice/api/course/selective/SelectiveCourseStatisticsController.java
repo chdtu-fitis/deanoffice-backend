@@ -97,7 +97,7 @@ public class SelectiveCourseStatisticsController {
     )
     {
 
-        List<AppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.appointSelectiveCourse(studyYear);
+        List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.appointSelectiveCourse(studyYear);
         return ResponseEntity.ok(coursesSelectedByStudentsGroup);
     }
 
