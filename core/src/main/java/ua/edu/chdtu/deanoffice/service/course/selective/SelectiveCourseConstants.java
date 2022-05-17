@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
+import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 
 import java.util.HashMap;
@@ -9,10 +10,11 @@ public class SelectiveCourseConstants {
     //Map structure: degree id -> Map(student study year -> array of selective courses number:
     // element 0 - 1st semester, element 1 - 2nd semester
     public static final Map<Integer, Map<String, Integer[]>[]> SELECTIVE_COURSES_NUMBER = new HashMap<>();
+    public static final Map<Integer, int[]> SELECTIVE_COURSES_CHOOSE_YEARS = new HashMap<>();
 
-    private static final int BACHELOR_ID = 1;
-    private static final int MASTER_ID = 3;
-    private static final int PHD_ID = 4;
+    private static final int BACHELOR_ID = DegreeEnum.BACHELOR.getId();
+    private static final int MASTER_ID = DegreeEnum.MASTER.getId();
+    private static final int PHD_ID = DegreeEnum.PHD.getId();
 
     static {
         Map<String, Integer[]>[] bachelor = new Map[4];
@@ -60,5 +62,10 @@ public class SelectiveCourseConstants {
         phd4.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         phd[3] = phd4;
         SELECTIVE_COURSES_NUMBER.put(PHD_ID, phd);
+        //-------------------------------------------------------
+        // ініціалізація структури, яка вміщує інформацію про курси, студенти яких вибирають вибіркові дисципліни (для кожного освітнього рівня)
+        SELECTIVE_COURSES_CHOOSE_YEARS.put(BACHELOR_ID, new int[]{1, 2, 3});
+        SELECTIVE_COURSES_CHOOSE_YEARS.put(MASTER_ID, new int[]{1});
+        SELECTIVE_COURSES_CHOOSE_YEARS.put(PHD_ID, new int[]{1});
     }
 }
