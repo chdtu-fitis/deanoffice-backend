@@ -19,6 +19,6 @@ public class SelectiveCourseStatisticsService {
     }
 
     public List<StudentDegree> getStudentsNotSelectedSelectiveCourses(int degreeId, Integer studyYear) {
-        return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(2022,1);
+        return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(studyYear,degreeId);
     }
 }

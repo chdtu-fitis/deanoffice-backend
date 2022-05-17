@@ -7,6 +7,6 @@ public interface IStudentsNotRightSelectiveCoursesNumber {
     String getFacultyName();
     String getSpecialityCode();
     int getYear();
-    String getGroup();
+    String getGroupName();
     int getCoursesNumber();
 }

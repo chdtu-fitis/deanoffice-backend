@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentSelectiveCourseMoreOrLessNormDTO;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseAnomaliesService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
 
@@ -28,17 +27,17 @@ public class SelectiveCourseAnomalyController {
     public ResponseEntity<List<StudentSelectiveCourseMoreOrLessNormDTO>> getStudentsSelectedSelectiveCoursesMoreNorm(
             @RequestParam int degreeId,
             @RequestParam @Min(2020) @Max(2040) int studyYear,
-            @RequestParam(required = false) int course,
+            @RequestParam(required = false) int studentYear,
             @RequestParam boolean moreNorm) {
 
-        List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService.getStudentsSelectedSelectiveCourses(degreeId, studyYear, course, moreNorm);
+        List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService.getStudentsSelectedSelectiveCourses(degreeId, studyYear, studentYear, moreNorm);
         List<StudentSelectiveCourseMoreOrLessNormDTO> result = new ArrayList<>();
         for (IStudentsNotRightSelectiveCoursesNumber studentsNotRightSelectiveCoursesNumber : studentDegrees) {
             StudentSelectiveCourseMoreOrLessNormDTO studentsNotRegisteredForSelectiveCoursesDTO = new StudentSelectiveCourseMoreOrLessNormDTO(
                     studentsNotRightSelectiveCoursesNumber.getStudentDegreeId(), studentsNotRightSelectiveCoursesNumber.getName(),
                     studentsNotRightSelectiveCoursesNumber.getSurname(), studentsNotRightSelectiveCoursesNumber.getFacultyName(),
                     studentsNotRightSelectiveCoursesNumber.getSpecialityCode(), studentsNotRightSelectiveCoursesNumber.getYear(),
-                    studentsNotRightSelectiveCoursesNumber.getGroup(), studentsNotRightSelectiveCoursesNumber.getCoursesNumber()
+                    studentsNotRightSelectiveCoursesNumber.getGroupName(), studentsNotRightSelectiveCoursesNumber.getCoursesNumber()
             );
             result.add(studentsNotRegisteredForSelectiveCoursesDTO);
         }

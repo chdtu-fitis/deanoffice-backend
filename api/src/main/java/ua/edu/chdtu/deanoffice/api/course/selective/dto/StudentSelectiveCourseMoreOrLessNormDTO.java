@@ -14,6 +14,6 @@ public class StudentSelectiveCourseMoreOrLessNormDTO {
     String facultyName;
     String specialityCode;
     int year;
-    String group;
+    String GroupName;
     int coursesNumber;
 }

@@ -9,6 +9,8 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsNotRe
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class SelectiveCourseStatisticsController {
     @GetMapping
     public ResponseEntity<List<StudentsNotRegisteredForSelectiveCoursesDTO>> getStudentsNotSelectedSelectiveCourses(
             @RequestParam int degreeId,
-            @RequestParam int studyYear) {
+            @RequestParam @Min(2020) @Max(2040) int studyYear) {
         List<StudentDegree> studentDegrees = selectiveCourseStatisticsService.getStudentsNotSelectedSelectiveCourses(degreeId, studyYear);
         List<StudentsNotRegisteredForSelectiveCoursesDTO> result = new ArrayList<>();
         for (StudentDegree studentDegree : studentDegrees) {
@@ -38,6 +40,4 @@ public class SelectiveCourseStatisticsController {
         }
         return ResponseEntity.ok(result);
     }
-
 }
-
