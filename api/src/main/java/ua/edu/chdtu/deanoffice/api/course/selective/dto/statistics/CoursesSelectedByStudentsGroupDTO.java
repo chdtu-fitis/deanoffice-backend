@@ -5,7 +5,6 @@ import lombok.Setter;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.StudentNameAndId;
 
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter

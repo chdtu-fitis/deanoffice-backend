@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.ICoursesSelectedByStudentsGroup;
@@ -167,7 +166,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     List<IPercentStudentsRegistrationOnCourses> findStudentsRegisteredSelectiveCourseByFacultyAndYearAndSpecialization(@Param("studyYear") int studyYear,
                                                                                                                        @Param("degreeId") int degreeId,
                                                                                                                        @Param("currentYear") int currentYear);
-
+//-----------------------
     @Query(value =
             "SELECT sd.studentGroup.specialization.faculty.abbr AS facultyName, " +
                     "COUNT(DISTINCT sd.id) AS totalCount " +
@@ -269,4 +268,13 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "WHERE scsd.active=true AND scsd.studentDegree.studentGroup.id=:groupId AND scsd.selectiveCourse.studyYear=:studyYear ")
     List<ICoursesSelectedByStudentsGroup> findCoursesSelectedByStudentsGroup(@Param("studyYear") int studyYear,
                                                                              @Param("groupId") int groupId);
+
+    @Query(value =
+            "SELECT  DISTINCT(sd.id) AS studentDegreeId, " +
+                    "CONCAT(sd.student.surname, ' ', sd.student.name) AS studentFullName " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE sd.active=true AND sd.studentGroup.id=:groupId " +
+                    "AND sd.id NOT IN :registeredStudentsIds")
+    List<ICoursesSelectedByStudentsGroup> findNotRegisteredStudents(@Param("groupId") int groupId,
+                                                                    @Param("registeredStudentsIds") List<Integer> registeredStudentsIds);
 }
