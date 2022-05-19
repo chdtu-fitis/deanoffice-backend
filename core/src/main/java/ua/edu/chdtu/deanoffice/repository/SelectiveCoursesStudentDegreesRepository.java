@@ -256,7 +256,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "CONCAT(sd.student.surname, ' ', sd.student.name) AS studentFullName " +
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.active=true AND sd.studentGroup.id=:groupId " +
-                    "AND sd.id NOT IN :listRegisteredStudentsId")
+                    "AND sd.id NOT IN :registeredStudentsIds")
     List<ICoursesSelectedByStudentsGroup> findNotRegisteredStudents(@Param("groupId") int groupId,
-                                                                    @Param("listRegisteredStudentsId") List<Integer> listRegisteredStudentsId);
+                                                                    @Param("registeredStudentsIds") List<Integer> registeredStudentsIds);
 }
