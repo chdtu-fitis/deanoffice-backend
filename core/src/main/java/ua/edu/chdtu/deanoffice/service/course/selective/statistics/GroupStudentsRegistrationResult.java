@@ -7,10 +7,10 @@ import java.util.List;
 @Getter
 @Setter
 public class GroupStudentsRegistrationResult {
-    List<CoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup;
+    List<CourseSelectedByStudentsGroup> coursesSelectedByStudentsGroup;
     List<StudentNameAndId> groupStudentsWithNoSelectedCourses;
 
-    public GroupStudentsRegistrationResult(List<CoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup, List<StudentNameAndId> groupStudentsWithNoSelectedCourses) {
+    public GroupStudentsRegistrationResult(List<CourseSelectedByStudentsGroup> coursesSelectedByStudentsGroup, List<StudentNameAndId> groupStudentsWithNoSelectedCourses) {
         this.coursesSelectedByStudentsGroup = coursesSelectedByStudentsGroup;
         this.groupStudentsWithNoSelectedCourses = groupStudentsWithNoSelectedCourses;
     }

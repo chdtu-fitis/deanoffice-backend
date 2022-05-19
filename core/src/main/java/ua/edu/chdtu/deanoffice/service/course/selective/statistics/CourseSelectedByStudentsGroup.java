@@ -6,7 +6,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CoursesSelectedByStudentsGroup {
+public class CourseSelectedByStudentsGroup {
     int selectiveCourseId;
     int studentDegreeId;
     int semester;
@@ -15,7 +15,7 @@ public class CoursesSelectedByStudentsGroup {
     String courseName;
     List<StudentNameAndId> students;
 
-    public CoursesSelectedByStudentsGroup(int selectiveCourseId, int studentDegreeId, int semester, String courseName, String trainingCycle, String fieldOfKnowledgeCode) {
+    public CourseSelectedByStudentsGroup(int selectiveCourseId, int studentDegreeId, int semester, String courseName, String trainingCycle, String fieldOfKnowledgeCode) {
         this.selectiveCourseId = selectiveCourseId;
         this.studentDegreeId = studentDegreeId;
         this.semester = semester;
@@ -24,6 +24,6 @@ public class CoursesSelectedByStudentsGroup {
         this.trainingCycle = trainingCycle;
     }
 
-    public CoursesSelectedByStudentsGroup() {
+    public CourseSelectedByStudentsGroup() {
     }
 }

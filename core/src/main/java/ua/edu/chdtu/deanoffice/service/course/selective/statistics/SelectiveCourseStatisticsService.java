@@ -7,7 +7,10 @@ import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SelectiveCourseStatisticsService {
@@ -97,36 +100,31 @@ public class SelectiveCourseStatisticsService {
 
     public GroupStudentsRegistrationResult getGroupStudentsRegistrationResult(int studyYear, int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
-        List<CoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroupFiltered = new ArrayList<>();
-        List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
-        List<String> NameCourses = new ArrayList<>();
-        List<Integer> RegisteredStudentsIds = new ArrayList<>();
+        List<CourseSelectedByStudentsGroup> coursesSelectedByStudentsGroupFiltered = new ArrayList<>();
+        List<StudentNameAndId> students;
+        List<String> courseNames = new ArrayList<>();
+        Set<Integer> registeredStudentsIds = new HashSet<>();
         String courseName;
         for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
-            studentsNameAndId = new ArrayList<>();
+            students = new ArrayList<>();
             courseName = cs.getCourseName();
-            if (!(NameCourses.contains(cs.getCourseName()))) {
-                NameCourses.add(courseName);
-                CoursesSelectedByStudentsGroup cssgResult = new CoursesSelectedByStudentsGroup(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
+            if (!(courseNames.contains(cs.getCourseName()))) {
+                courseNames.add(courseName);
+                CourseSelectedByStudentsGroup cssgResult = new CourseSelectedByStudentsGroup(cs.getSelectiveCourseId(), cs.getStudentDegreeId(), cs.getSemester(),
                         cs.getCourseName(), cs.getTrainingCycle(), cs.getFieldOfKnowledgeCode());
                 coursesSelectedByStudentsGroupFiltered.add(cssgResult);
                 for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
                     if (courseName.equals(csbsg.getCourseName())){
-                        studentsNameAndId.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
-                        if (!RegisteredStudentsIds.contains(csbsg.getStudentDegreeId())){
-                            RegisteredStudentsIds.add(csbsg.getStudentDegreeId());
-                        }
+                        students.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
+                        registeredStudentsIds.add(csbsg.getStudentDegreeId());
                     }
                 }
-                cssgResult.setStudents(studentsNameAndId);
+                cssgResult.setStudents(students);
             }
         }
-        List<ICoursesSelectedByStudentsGroup> notRegisteredStudents = selectiveCoursesStudentDegreesRepository.findNotRegisteredStudents(groupId, RegisteredStudentsIds);
-        studentsNameAndId = new ArrayList<>();
-        for (ICoursesSelectedByStudentsGroup nrs : notRegisteredStudents) {
-            studentsNameAndId.add(new StudentNameAndId(nrs.getStudentDegreeId(), nrs.getStudentFullName()));
-        }
-        GroupStudentsRegistrationResult registeredStudentsNameResult = new GroupStudentsRegistrationResult(coursesSelectedByStudentsGroupFiltered,studentsNameAndId);
+        List<ICoursesSelectedByStudentsGroup> notRegisteredStudents = selectiveCoursesStudentDegreesRepository.findNotRegisteredStudents(groupId, new ArrayList(registeredStudentsIds));
+        students = notRegisteredStudents.stream().map(nrs -> new StudentNameAndId(nrs.getStudentDegreeId(), nrs.getStudentFullName())).collect(Collectors.toList());
+        GroupStudentsRegistrationResult registeredStudentsNameResult = new GroupStudentsRegistrationResult(coursesSelectedByStudentsGroupFiltered, students);
         return registeredStudentsNameResult;
     }
 }
