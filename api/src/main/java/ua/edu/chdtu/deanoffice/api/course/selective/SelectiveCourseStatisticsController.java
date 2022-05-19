@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.CoursesSelectedByStudentsGroupDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsNotRegisteredForSelectiveCoursesDTO;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.AppointSelectiveCourse;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IAppointSelectiveCourse;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.RegisteredStudentsNameResult;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 
 import java.util.ArrayList;
@@ -22,8 +22,6 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegis
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByFacultyPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.CoursesSelectedByStudentsGroupResult;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
 
 import javax.validation.constraints.Max;
@@ -84,21 +82,7 @@ public class SelectiveCourseStatisticsController {
     @GetMapping("/registered-by-group")
     public ResponseEntity getRegisteredStudentsName(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                     @RequestParam @NotNull int groupId) {
-        List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.getCoursesSelectedByStudentGroup(studyYear, groupId);
-        return ResponseEntity.ok(strictMap(coursesSelectedByStudentsGroup, CoursesSelectedByStudentsGroupDTO.class));
+        RegisteredStudentsNameResult registeredStudentsNameResult = selectiveCourseStatisticsService.getCoursesSelectedByStudentGroup(studyYear, groupId);
+        return ResponseEntity.ok(strictMap(registeredStudentsNameResult, CoursesSelectedByStudentsGroupDTO.class));
     }
-
-    @PostMapping("/appoint-selective")
-    public ResponseEntity appointSelectiveCourse( @RequestParam @NotNull @Min(2010) @Max(2060) int studyYear
-//                                                  @RequestParam @NotNull int degreeId,
-//                                                  @RequestParam @NotNull int course,
-//                                                  @RequestParam @NotNull String fieldOfStudyCode
-//                                                  @RequestParam @NotNull int appointmentRule
-    )
-    {
-
-        List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCourseStatisticsService.appointSelectiveCourse(studyYear);
-        return ResponseEntity.ok(coursesSelectedByStudentsGroup);
-    }
-
 }

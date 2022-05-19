@@ -93,11 +93,12 @@ public class SelectiveCourseStatisticsService {
         return allStudentsCounts;
     }
 
-    public List<CoursesSelectedByStudentsGroupResult> getCoursesSelectedByStudentGroup(int studyYear, int groupId) {
+    public RegisteredStudentsNameResult getCoursesSelectedByStudentGroup(int studyYear, int groupId) {
         List<ICoursesSelectedByStudentsGroup> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelectedByStudentsGroup(studyYear, groupId);
         List<CoursesSelectedByStudentsGroupResult> coursesSelectedByStudentsGroupFiltered = new ArrayList<>();
         List<StudentNameAndId> studentsNameAndId  =  new ArrayList<>();
         List<String> listNameCourses = new ArrayList<>();
+        List<Integer> listRegisteredStudentsId = new ArrayList<>();
         String courseName;
         for (ICoursesSelectedByStudentsGroup cs : coursesSelectedByStudentsGroup) {
             studentsNameAndId = new ArrayList<>();
@@ -110,36 +111,19 @@ public class SelectiveCourseStatisticsService {
                 for (ICoursesSelectedByStudentsGroup csbsg : coursesSelectedByStudentsGroup) {
                     if (courseName.equals(csbsg.getCourseName())){
                         studentsNameAndId.add(new StudentNameAndId(csbsg.getStudentDegreeId(), csbsg.getStudentFullName()));
+                        if (!listRegisteredStudentsId.contains(csbsg.getStudentDegreeId())){
+                            listRegisteredStudentsId.add(csbsg.getStudentDegreeId());
+                        }
                     }
                 }
                 cssgResult.setStudents(studentsNameAndId);
             }
         }
-        return coursesSelectedByStudentsGroupFiltered;
-    }
-
-    public List<IAppointSelectiveCourse> appointSelectiveCourse(int studyYear) {
-        List<IAppointSelectiveCourse> coursesSelectedByStudentsGroup = selectiveCoursesStudentDegreesRepository.findCoursesSelected(studyYear);
-        List<AppointSelectiveCourse> coursesChosenByStudents = new ArrayList<>();
-        List<String> coursesName;
-        List<String> listStudentName = new ArrayList<>();
-        String studentName;
-        for (IAppointSelectiveCourse as : coursesSelectedByStudentsGroup) {
-            coursesName = new ArrayList<>();
-            studentName = as.getStudentName();
-            if (!(listStudentName.contains(as.getStudentName()))) {
-                listStudentName.add(studentName);
-                AppointSelectiveCourse ascResult = new AppointSelectiveCourse(studentName);
-                coursesChosenByStudents.add(ascResult);
-                for (IAppointSelectiveCourse as2 : coursesSelectedByStudentsGroup) {
-                    if (studentName.equals(as2.getStudentName())){
-                        coursesName.add(as2.getCourseName());
-                    }
-                }
-                ascResult.setCourseNam(coursesName);
-            }
+        List<ICoursesSelectedByStudentsGroup> notRegisteredStudents = selectiveCoursesStudentDegreesRepository.findNotRegisteredStudents(groupId, listRegisteredStudentsId);
+        for (ICoursesSelectedByStudentsGroup nrs : notRegisteredStudents) {
+            studentsNameAndId.add(new StudentNameAndId(nrs.getStudentDegreeId(), nrs.getStudentFullName()));
         }
-        return coursesSelectedByStudentsGroup;
-//        return coursesChosenByStudents;
+        RegisteredStudentsNameResult registeredStudentsNameResult = new RegisteredStudentsNameResult(coursesSelectedByStudentsGroupFiltered,studentsNameAndId);
+        return registeredStudentsNameResult;
     }
 }

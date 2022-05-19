@@ -6,10 +6,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IAppointSelectiveCourse;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.ICoursesSelectedByStudentsGroup;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 
@@ -254,12 +252,11 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                              @Param("groupId") int groupId);
 
     @Query(value =
-            "SELECT DISTINCT scsd.selectiveCourse.course.courseName.name AS courseName " +
-//                    "CONCAT(scsd.studentDegree.student.surname, ' ', scsd.studentDegree.student.name) AS studentName " +
-                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE scsd.active=true AND scsd.studentDegree.studentGroup.studySemesters = 6 " +  //AND scsd.studentDegree.studentGroup.id=1549  //
-                    "AND scsd.selectiveCourse.studyYear=:studyYear AND scsd.studentDegree.specialization.degree.id = 1 " +
-                    "AND scsd.selectiveCourse.fieldOfKnowledge.code = '12' " +
-                    "")
-    List<IAppointSelectiveCourse> findCoursesSelected(@Param("studyYear") int studyYear);
+            "SELECT  DISTINCT(sd.id) AS studentDegreeId, " +
+                    "CONCAT(sd.student.surname, ' ', sd.student.name) AS studentFullName " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE sd.active=true AND sd.studentGroup.id=:groupId " +
+                    "AND sd.id NOT IN :listRegisteredStudentsId")
+    List<ICoursesSelectedByStudentsGroup> findNotRegisteredStudents(@Param("groupId") int groupId,
+                                                                    @Param("listRegisteredStudentsId") List<Integer> listRegisteredStudentsId);
 }
