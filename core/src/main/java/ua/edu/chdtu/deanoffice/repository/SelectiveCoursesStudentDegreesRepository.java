@@ -99,16 +99,13 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "scsd.studentDegree.specialization.speciality.code, :studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear, " +
             "scsd.studentDegree.studentGroup.name, COUNT(scsd.id)" +
             "FROM SelectiveCoursesStudentDegrees AS scsd " +
-            "WHERE scsd.active=true and :studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear = :course " +
             "GROUP BY 6, scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
             "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code," +
             "scsd.selectiveCourse.studyYear, scsd.studentDegree.studentGroup.name, scsd.studentDegree.specialization.degree.id " +
             "having scsd.selectiveCourse.studyYear=:studyYear AND COUNT(scsd.id) > 5 and scsd.studentDegree.specialization.degree.id = :degreeId " +
             "order by scsd.studentDegree.studentGroup.name")
     List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesOverNorm(
-            @Param("studyYear") int studyYear,
-            @Param("degreeId") int degreeId,
-            @Param("course") int course
+            Specification<SelectiveCoursesStudentDegrees> specification
     );
 
     @Query("SELECT scsd.studentDegree.id AS studentDegreeId, " +
@@ -120,9 +117,6 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "scsd.studentDegree.studentGroup.name AS groupName, " +
             "COUNT(scsd.id) AS coursesNumber " +
             "FROM SelectiveCoursesStudentDegrees AS scsd " +
-            "WHERE scsd.active=true AND scsd.selectiveCourse.studyYear=:studyYear " +
-            "AND scsd.studentDegree.specialization.degree.id = :degreeId AND " +
-            ":studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear = :studentYear " + // edited
             "GROUP BY scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
             "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code, 6, " +
             "scsd.studentDegree.studentGroup.name " +

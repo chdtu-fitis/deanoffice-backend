@@ -21,6 +21,7 @@ public class AbnormalStudentsSelectiveCoursesSpecification {
             if(studentYear != 0) {
                 predicates.add(cb.equal(cb.sum(cb.diff(studyYear, root.get("creationYear")), root.get("realBeginYear")), studentYear));
             }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

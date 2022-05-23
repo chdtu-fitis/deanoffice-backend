@@ -30,7 +30,7 @@ public class SelectiveCourseAnomalyController {
             @RequestParam(required = false) int studentYear,
             @RequestParam boolean moreNorm) {
 
-        List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService.getStudentsSelectedSelectiveCourses(degreeId, studyYear, studentYear, moreNorm);
+        List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService. getStudentsSelectedSelectiveCourses(degreeId, studyYear, studentYear, moreNorm);
         List<StudentSelectiveCourseMoreOrLessNormDTO> result = new ArrayList<>();
         for (IStudentsNotRightSelectiveCoursesNumber studentsNotRightSelectiveCoursesNumber : studentDegrees) {
             StudentSelectiveCourseMoreOrLessNormDTO studentsNotRegisteredForSelectiveCoursesDTO = new StudentSelectiveCourseMoreOrLessNormDTO(

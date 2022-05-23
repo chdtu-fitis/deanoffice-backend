@@ -15,12 +15,12 @@ public class SelectiveCourseAnomaliesService {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
     }
 
-    public List<IStudentsNotRightSelectiveCoursesNumber> getStudentsSelectedSelectiveCourses(int degreeId, int studyYear, int studentYear, boolean more) {
-        if (more) {
-            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesOverNorm(degreeId, studyYear, studentYear);
+    public List<IStudentsNotRightSelectiveCoursesNumber> getStudentsSelectedSelectiveCourses(int degreeId, int studyYear, int studentYear, boolean moreNorm) {
+        if (moreNorm) {
+            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesOverNorm(AbnormalStudentsSelectiveCoursesSpecification.getSpecification(degreeId, studyYear, studentYear,true));
         }
         else {
-            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesLessNorm(AbnormalStudentsSelectiveCoursesSpecification.getSpecification());
+            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesLessNorm(AbnormalStudentsSelectiveCoursesSpecification.getSpecification(degreeId, studyYear, studentYear,false));
         }
 
     }
