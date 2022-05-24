@@ -13,7 +13,7 @@ import java.util.List;
 
 public class StudentGroupSpecification {
     public static Specification<StudentGroup> getStudentGroupsWithImportFilters(
-            int degreeId, int currentYear, int year, TuitionForm tuitionForm, int facultyId, int groupId) {
+            int degreeId, int currentYear, int year, TuitionForm tuitionForm, int facultyId, int groupId, boolean isRealYear) {
         return (Root<StudentGroup> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (groupId != 0) {
@@ -21,7 +21,7 @@ public class StudentGroupSpecification {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
             predicates.add(cb.equal(root.get("specialization").get("degree").get("id"), degreeId));
-            predicates.add(cb.equal(cb.sum(cb.diff(currentYear, root.get("creationYear")), root.get("realBeginYear")), year));
+            predicates.add(cb.equal(cb.sum(cb.diff(currentYear, root.get("creationYear")), root.get(isRealYear ? "realBeginYear" : "beginYears")), year));
             predicates.add(cb.equal(root.get("specialization").get("faculty").get("id"), facultyId));
             predicates.add(cb.equal(root.get("active"), true));
             if (tuitionForm != null)
