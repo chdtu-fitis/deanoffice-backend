@@ -20,13 +20,8 @@ import ua.edu.chdtu.deanoffice.service.course.CourseService;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.DepartmentService;
 import ua.edu.chdtu.deanoffice.service.FieldOfKnowledgeService;
-import ua.edu.chdtu.deanoffice.service.TeacherService;
-//import ua.edu.chdtu.deanoffice.api.course.selective.
-
-
 import java.io.*;
 import java.math.BigDecimal;
-import java.sql.Array;
 import java.util.*;
 
 @Service
@@ -49,6 +44,8 @@ public class SelectiveCourseImportService {
     private SelectiveCourseRepository selectiveCourseRepository;
     private CourseRepository courseRepository;
 
+    static final String GENERAL_TRAINING_CYCLE_IN_CSV = "Загальної підготовки";
+
     // TODO: add params
     public SelectiveCourseImportService(SelectiveCourseRepository selectiveCourseRepository, CourseRepository courseRepository) {
         this.selectiveCourseRepository = selectiveCourseRepository;
@@ -66,7 +63,7 @@ public class SelectiveCourseImportService {
             TrainingCycle trainingCycle;
             try {
                 semester = Integer.parseInt(selectiveCourse.getSemester());
-                trainingCycle = selectiveCourse.getTrainingCycle() == "Загальної підготовки" ? TrainingCycle.GENERAL : TrainingCycle.PROFESSIONAL;
+                trainingCycle = selectiveCourse.getTrainingCycle().equals(GENERAL_TRAINING_CYCLE_IN_CSV) ? TrainingCycle.GENERAL : TrainingCycle.PROFESSIONAL;
                 if (trainingCycle == TrainingCycle.PROFESSIONAL)
                     fieldOfKnowledge = Integer.parseInt(selectiveCourse.getFieldOfKnowledge());
                 alert = checkSelectiveCourse(selectiveCourse, semester, fieldOfKnowledge, trainingCycle);
@@ -113,7 +110,6 @@ public class SelectiveCourseImportService {
         return alert;
     }
 
-
     public List<SelectiveCourseCsvBean> getSelectiveCoursesFromStream(InputStream inputStream)  throws Exception {
         if (inputStream == null) {
             throw new Exception("Помилка читання файлу!");
@@ -128,17 +124,6 @@ public class SelectiveCourseImportService {
         }
         return  importedSelectiveCourses;
     }
-
-//    private List<CorrectSelectiveCourse> getCorrectSelectiveCoursesFromBean(List<SelectiveCourseCsvBean> importedSelectiveCourses) {
-//        List<CorrectSelectiveCourse> correctSelectiveCourses = new ArrayList<CorrectSelectiveCourse>();
-//        for (SelectiveCourseCsvBean selectiveCourse : importedSelectiveCourses) {
-//            if (selectiveCourse.getSemester() == null || selectiveCourse.getSemester() == "") {
-//
-//            }
-//        }
-//
-//        return correctSelectiveCourses;
-//    }
 
     private static void trimAllProperties(SelectiveCourseCsvBean selectedCourseCsvBean) {
         selectedCourseCsvBean.setCourseName(selectedCourseCsvBean.getCourseName().trim());
@@ -267,11 +252,9 @@ public class SelectiveCourseImportService {
         return teacherSurnameAndInitials;
     }
 }
-// TODO: CREATE EXCEPTION
+
 class SelectiveCourseImportException extends Exception {
     public SelectiveCourseImportException(String errorMessage) {
         super(errorMessage);
     }
 }
-
-

@@ -6,14 +6,13 @@ import ua.edu.chdtu.deanoffice.entity.PeriodCaseEnum;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -134,7 +133,7 @@ public class SelectiveCourseService {
         int genSequenceNumber = 1, sequenceNumberProf = 1;
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             StringBuilder groupName = new StringBuilder();
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL) {
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.GENERAL) {
                 groupName
                         .append(selectiveCourse.getDegree().getName().substring(0, 1))
                         .append(studyYearLastTwoDigits)
@@ -167,5 +166,4 @@ public class SelectiveCourseService {
         }
         return selectiveCourses;
     }
-    //==============================
 }
