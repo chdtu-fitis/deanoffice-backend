@@ -24,4 +24,6 @@ public class CorrectSelectiveCourse {
         this.department = department;
         this.teacher = teacher;
     }
+
+    public CorrectSelectiveCourse() {}
 }

@@ -66,8 +66,9 @@ public class SelectiveCourseImportService {
             TrainingCycle trainingCycle;
             try {
                 semester = Integer.parseInt(selectiveCourse.getSemester());
-                fieldOfKnowledge = Integer.parseInt(selectiveCourse.getFieldOfKnowledge());
-                trainingCycle = TrainingCycle.valueOf(selectiveCourse.getTrainingCycle());
+                trainingCycle = selectiveCourse.getTrainingCycle() == "Загальної підготовки" ? TrainingCycle.GENERAL : TrainingCycle.PROFESSIONAL;
+                if (trainingCycle == TrainingCycle.PROFESSIONAL)
+                    fieldOfKnowledge = Integer.parseInt(selectiveCourse.getFieldOfKnowledge());
                 alert = checkSelectiveCourse(selectiveCourse, semester, fieldOfKnowledge, trainingCycle);
 
                 if (alert.equals("")) {
@@ -96,17 +97,17 @@ public class SelectiveCourseImportService {
     private String checkSelectiveCourse(SelectiveCourseCsvBean selectiveCourse, Integer semester, Integer fieldOfKnowledge,
                                         TrainingCycle trainingCycle) {
         String alert = "";
-        if (selectiveCourse.getTeacher() != null && selectiveCourse.getTeacher().length() > 7) {
+        if (selectiveCourse.getTeacher().length() > 0 && selectiveCourse.getTeacher().length() < 7) {
             alert += "Викладач вказаний неправильно";
-        } else if (selectiveCourse.getDepartment() != null && selectiveCourse.getDepartment().length() > 0) {
+        } else if (selectiveCourse.getDepartment().length() < 1) {
             alert += "Кафедра вказана неправильно";
-        } else if (selectiveCourse.getDescription() != null && selectiveCourse.getDescription().length() > 30) {
+        } else if (selectiveCourse.getDescription().length() < 1) {
             alert += "Опис вказаний неправильно";
-        } else if (selectiveCourse.getCourseName() != null && selectiveCourse.getCourseName().length() > 2) {
+        } else if (selectiveCourse.getCourseName().length() < 2) {
             alert += "Назва дисципліни вказана неправильно";
-        } else if (fieldOfKnowledge > 0 && fieldOfKnowledge <= 30) {
+        } else if (trainingCycle == TrainingCycle.PROFESSIONAL && (fieldOfKnowledge < 1 || fieldOfKnowledge > 30)) {
             alert += "Галузь знань вказана неправильно";
-        } else if (semester >= 1 && semester <= 8) {
+        } else if (semester < 1 || semester > 8) {
             alert += "Семестр вказаний неправильно";
         }
         return alert;
@@ -119,7 +120,7 @@ public class SelectiveCourseImportService {
         }
         List<SelectiveCourseCsvBean> importedSelectiveCourses = new CsvToBeanBuilder(new InputStreamReader(inputStream))
                 .withSeparator(';')
-                .withType(CorrectSelectiveCourse.class)
+                .withType(SelectiveCourseCsvBean.class)
                 .build()
                 .parse();
         for (SelectiveCourseCsvBean selectiveCourse : importedSelectiveCourses) {
