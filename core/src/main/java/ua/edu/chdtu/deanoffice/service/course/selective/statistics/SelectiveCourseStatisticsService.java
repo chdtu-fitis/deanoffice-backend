@@ -32,10 +32,12 @@ public class SelectiveCourseStatisticsService {
         List<IPercentStudentsRegistrationOnCourses> registeredCounts;
         List<IPercentStudentsRegistrationOnCourses> allStudentsCounts;
         List<IPercentStudentsRegistrationOnCourses> registeredPercent;
+        List<IPercentStudentsRegistrationOnCourses> test;
         switch (selectiveStatisticsCriteria) {
             case YEAR:
                 registeredCounts = selectiveCoursesStudentDegreesRepository.findStudentsRegisteredSelectiveCourseByYear(studyYear, degreeId, currentYear);
                 allStudentsCounts = selectiveCoursesStudentDegreesRepository.findCountStudentsOnYears(degreeId, currentYear, selectiveCoursesChooseYears);
+                test =selectiveCoursesStudentDegreesRepository.test(studyYear, degreeId,currentYear);
                 registeredPercent = getStudentsPercentWhoChosenSelectiveCourse(registeredCounts, allStudentsCounts,
                         (as, regCounts,i)-> as.getStudyYear() == registeredCounts.get(i).getStudyYear());
                 break;
@@ -66,6 +68,7 @@ public class SelectiveCourseStatisticsService {
             default:
                 registeredCounts = selectiveCoursesStudentDegreesRepository.findStudentsRegisteredSelectiveCourseByFacultyAndYearAndSpecialization(studyYear, degreeId, currentYear);
                 allStudentsCounts = selectiveCoursesStudentDegreesRepository.findCountStudentsWhoChosenSelectiveCourseByFacultyAndYearAndSpecialization(degreeId, currentYear, selectiveCoursesChooseYears);
+                test =selectiveCoursesStudentDegreesRepository.test(studyYear, degreeId,currentYear);
                 registeredPercent = getStudentsPercentWhoChosenSelectiveCourse(registeredCounts, allStudentsCounts,
                         (as, regCounts,i)->as.getStudyYear() == registeredCounts.get(i).getStudyYear()
                                 && as.getFacultyName().equals(registeredCounts.get(i).getFacultyName())

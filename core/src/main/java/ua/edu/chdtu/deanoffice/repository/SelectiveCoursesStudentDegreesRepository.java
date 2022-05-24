@@ -96,15 +96,36 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     );
 
     @Query(value =
-            "SELECT (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
+            "SELECT  (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
                     "COUNT(DISTINCT scsd.studentDegree.id) AS registeredCount " +
                     "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "GROUP BY scsd.selectiveCourse.studyYear, scsd.studentDegree.specialization.degree.id, scsd.studentDegree.active, 1 " +
-                    "HAVING scsd.selectiveCourse.studyYear = :studyYear AND scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "ORDER BY studyYear ")
+                    "WHERE scsd.studentDegree.id IN (SELECT scsd.studentDegree.id " +
+                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
+                    "WHERE scsd.selectiveCourse.studyYear = :studyYear " +
+                    "AND scsd.studentDegree.specialization.degree.id=:degreeId " +
+                    "AND scsd.studentDegree.active = true " +
+                    "GROUP BY 1 " +
+                    "HAVING COUNT(scsd.studentDegree.id) = 5) " +
+                    "GROUP BY 1 ")
     List<IPercentStudentsRegistrationOnCourses> findStudentsRegisteredSelectiveCourseByYear(@Param("studyYear") int studyYear,
                                                                                             @Param("degreeId") int degreeId,
                                                                                             @Param("currentYear") int currentYear);
+
+    @Query(value =
+            "SELECT  (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
+                    "COUNT(DISTINCT scsd.studentDegree.id) AS registeredCount " +
+                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
+                    "WHERE scsd.studentDegree.id IN (SELECT scsd.studentDegree.id " +
+                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
+                    "WHERE scsd.selectiveCourse.studyYear = :studyYear " +
+                    "AND scsd.studentDegree.specialization.degree.id=:degreeId " +
+                    "AND scsd.studentDegree.active = true " +
+                    "GROUP BY 1 " +
+                    "HAVING COUNT(scsd.studentDegree.id) < 5) " +
+                    "GROUP BY 1 ")
+    List<IPercentStudentsRegistrationOnCourses> test(@Param("studyYear") int studyYear,
+                                                     @Param("degreeId") int degreeId,
+                                                     @Param("currentYear") int currentYear);
     @Query(value =
             "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr AS facultyName, " +
                     "COUNT(DISTINCT scsd.studentDegree.id) AS registeredCount " +
@@ -180,29 +201,29 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                            @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
 
     @Query(value =
-            "SELECT scsd.studentDegree.studentGroup.name AS groupName," +
-                    "scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
-                    "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "scsd.studentDegree.studentGroup.specialization.department.abbr AS department, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS totalCount " +
-                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE scsd.studentDegree.studentGroup.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "AND (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
-                    "GROUP BY scsd.studentDegree.studentGroup.name, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 3," +
-                    "scsd.studentDegree.studentGroup.specialization.department.abbr " +
-                    "ORDER BY scsd.studentDegree.studentGroup.name")
+            "SELECT sd.studentGroup.name AS groupName," +
+                    "sd.studentGroup.specialization.faculty.abbr as facultyName, " +
+                    "(:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
+                    "sd.studentGroup.specialization.department.abbr AS department, " +
+                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE sd.studentGroup.specialization.degree.id=:degreeId AND sd.active = true " +
+                    "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
+                    "GROUP BY sd.studentGroup.name, sd.studentGroup.specialization.faculty.abbr, 3," +
+                    "sd.studentGroup.specialization.department.abbr " +
+                    "ORDER BY sd.studentGroup.name")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsOnGroup(@Param("degreeId") int degreeId,
                                                                          @Param("currentYear") int currentYear,
                                                                          @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
 
 
     @Query(value =
-            "SELECT (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS totalCount " +
-                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "AND (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
-                    "GROUP BY  scsd.studentDegree.specialization.degree.id, scsd.studentDegree.active, 1 " +
+            "SELECT (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
+                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
+                    "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
+                    "GROUP BY  sd.specialization.degree.id, sd.active, 1 " +
                     "ORDER BY studyYear "
     )
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsOnYears(@Param("degreeId") int degreeId,
@@ -210,14 +231,14 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                          @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
 
     @Query(value =
-            "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
-                    "scsd.studentDegree.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS totalCount " +
-                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE  scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "AND (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
-                    "GROUP BY scsd.studentDegree.specialization.degree.id, " +
-                    "scsd.studentDegree.active, scsd.studentDegree.specialization.name, scsd.studentDegree.studentGroup.specialization.faculty.abbr " +
+            "SELECT sd.studentGroup.specialization.faculty.abbr as facultyName, " +
+                    "sd.specialization.name AS specializationName, " +
+                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE  sd.specialization.degree.id=:degreeId AND sd.active = true " +
+                    "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
+                    "GROUP BY sd.specialization.degree.id, " +
+                    "sd.active, sd.specialization.name, sd.studentGroup.specialization.faculty.abbr " +
                     "ORDER BY facultyName, specializationName ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndSpecialization(@Param("degreeId") int degreeId,
                                                                                                                     @Param("currentYear") int currentYear,
@@ -225,29 +246,29 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
 
     @Query(value =
-            "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
-                    "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS totalCount " +
-                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "AND (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
-                    "GROUP BY scsd.studentDegree.specialization.degree.id, " +
-                    "scsd.studentDegree.active, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 2 " +
+            "SELECT sd.studentGroup.specialization.faculty.abbr as facultyName, " +
+                    "(:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
+                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
+                    "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
+                    "GROUP BY sd.specialization.degree.id, " +
+                    "sd.active, sd.studentGroup.specialization.faculty.abbr, 2 " +
                     "ORDER BY facultyName, studyYear ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYear(@Param("degreeId") int degreeId,
                                                                                                           @Param("currentYear") int currentYear,
                                                                                                           @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
 
     @Query(value =
-            "SELECT scsd.studentDegree.studentGroup.specialization.faculty.abbr as facultyName, " +
-                    "(:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear AS studyYear, " +
-                    "scsd.studentDegree.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT scsd.studentDegree.id) AS totalCount " +
-                    "FROM SelectiveCoursesStudentDegrees AS scsd " +
-                    "WHERE scsd.studentDegree.specialization.degree.id=:degreeId AND scsd.studentDegree.active = true " +
-                    "AND (:currentYear) - scsd.studentDegree.studentGroup.creationYear + scsd.studentDegree.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
-                    "GROUP BY scsd.studentDegree.specialization.degree.id, scsd.studentDegree.specialization.name, " +
-                    "scsd.studentDegree.active, scsd.studentDegree.studentGroup.specialization.faculty.abbr, 2 " +
+            "SELECT sd.studentGroup.specialization.faculty.abbr as facultyName, " +
+                    "(:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
+                    "sd.specialization.name AS specializationName, " +
+                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "FROM StudentDegree AS sd " +
+                    "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
+                    "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
+                    "GROUP BY sd.specialization.degree.id, sd.specialization.name, " +
+                    "sd.active, sd.studentGroup.specialization.faculty.abbr, 2 " +
                     "ORDER BY facultyName, studyYear, specializationName ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYearAndSpecialization(@Param("degreeId") int degreeId,
                                                                                                                            @Param("currentYear") int currentYear,
