@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import java.util.List;
 
 public interface SelectiveCourseRepository extends JpaRepository<SelectiveCourse, Integer> {
+    List<SelectiveCourse> findAllByAvailableTrueAndIdIn(List<Integer> id);
 
     @Query("SELECT sc FROM SelectiveCourse AS sc WHERE sc.available = true " +
             "AND sc.studyYear = :studyYear " +

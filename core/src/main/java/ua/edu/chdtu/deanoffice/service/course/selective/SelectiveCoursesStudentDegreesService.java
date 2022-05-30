@@ -324,6 +324,7 @@ public class SelectiveCoursesStudentDegreesService {
                 .stream()
                 .map(scsd -> scsd.getSelectiveCourse())
                 .collect(Collectors.toList());
+        selectiveCourses.removeAll(alreadyRegistered);
         Set<SelectiveCourse> selectiveCoursesToCheck = new HashSet<>();
         selectiveCoursesToCheck.addAll(alreadyRegistered);
         selectiveCoursesToCheck.addAll(selectiveCourses);
