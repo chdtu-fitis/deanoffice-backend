@@ -339,17 +339,7 @@ public class SelectiveCourseController {
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
         else if (today.after(selectiveCoursesYearParameters.getSecondRoundStartDate()) && today.before(selectiveCoursesYearParameters.getSecondRoundEndDate())) {
-            List<SelectiveCourse> selectiveCoursesFromDB = selectiveCoursesStudentDegreesService
-                    .getSelectiveCoursesStudentDegreeIdByStudentDegreeId(false, selectiveCoursesRegistrationYear + 1, studentDegree.getId())
-                    .getSelectiveCourses();
-
-            if (selectiveCoursesFromDB == null)
-                selectiveCoursesFromDB = selectiveCourses;
-            else
-                selectiveCoursesFromDB.addAll(selectiveCourses);
-
             checkRecordOnSelectiveCoursesData(studentDegree, true, selectiveCourses);
-
             return recordOnSelectiveCoursesByRules(studentDegree, selectiveCourses);
         }
         else

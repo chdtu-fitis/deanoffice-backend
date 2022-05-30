@@ -70,7 +70,7 @@ public class SelectiveCourseService {
     }
 
     public List<SelectiveCourse> getSelectiveCourses(List<Integer> ids) {
-        return selectiveCourseRepository.findAll(ids);
+        return selectiveCourseRepository.findAllByAvailableTrueAndIdIn(ids);
     }
 
     @Transactional
