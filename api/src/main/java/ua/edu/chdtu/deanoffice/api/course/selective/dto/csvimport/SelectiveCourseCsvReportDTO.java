@@ -10,6 +10,6 @@ import java.util.List;
 @Getter
 @Setter
 public class SelectiveCourseCsvReportDTO {
-    private List<CorrectSelectiveCourseDTO> correctSelectiveCourses;
+    private List<SelectiveCourseCsvDTO> correctSelectiveCourses;
     private List<IncorrectSelectiveCourseDTO> incorrectSelectiveCourses;
 }

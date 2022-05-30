@@ -180,8 +180,9 @@ public class SelectiveCourseImportService {
     }
 
     private CourseName getImportedCourseName(String courseNameStr) {
-        if (courseNameRepository.findByName(courseNameStr) != null) {
-            return courseNameRepository.findByName(courseNameStr);
+        CourseName foundCourseName = courseNameRepository.findByName(courseNameStr);
+        if (foundCourseName != null) {
+            return foundCourseName;
         } else {
             CourseName courseName = new CourseName();
             courseName.setName(courseNameStr);
@@ -191,8 +192,9 @@ public class SelectiveCourseImportService {
 
     private Course getImportedCourse(int semester, CourseName courseName,
                                      int hours, int hoursPerCredit) {
-        if (courseRepository.findOne(semester, Constants.CREDIT, courseName.getId(), hours, hoursPerCredit) != null) {
-            return courseRepository.findOne(semester, Constants.CREDIT, courseName.getId(), hours, hoursPerCredit);
+        Course foundCourse = courseRepository.findOne(semester, Constants.CREDIT, courseName.getId(), hours, hoursPerCredit);
+        if (foundCourse != null) {
+            return foundCourse;
         } else {
             Course course = new Course();
             course.setCourseName(courseName);
@@ -206,45 +208,42 @@ public class SelectiveCourseImportService {
     }
 
     private Teacher getImportedTeacher(String teacher, String department) throws SelectiveCourseImportException {
-        if (teacherService.getTeacherBySurnameAndInitialsAndDepartment(getTeacherSurnameAndInitials(teacher),
-                department) != null) {
-            return teacherService.getTeacherBySurnameAndInitialsAndDepartment(getTeacherSurnameAndInitials(teacher),
-                    department);
+        Teacher foundTeacher = teacherService.getTeacherBySurnameAndInitialsAndDepartment(getTeacherSurnameAndInitials(teacher), department);
+        if (foundTeacher != null) {
+            return foundTeacher;
         } else {
             throw new SelectiveCourseImportException("Неправильно вказаний викладач");
         }
     }
 
     private Degree getImportedDegree(int degreeId) throws  SelectiveCourseImportException {
-        if (degreeService.getById(degreeId) != null) {
-            return degreeService.getById(degreeId);
+        Degree foundDegree = degreeService.getById(degreeId);
+        if (foundDegree!= null) {
+            return foundDegree;
         } else {
-            throw new SelectiveCourseImportException("");
+            throw new SelectiveCourseImportException("Освітній ступінь вказаний неправильно");
         }
     }
+
     private Department getImportedDepartment(String departmentAbbr) throws  SelectiveCourseImportException {
         if (Objects.equals(departmentAbbr, "")) {
             throw new SelectiveCourseImportException("Абревіатура кафедри відсутня");
         }
-        if (departmentService.getByAbbr(departmentAbbr) != null) {
-            return departmentService.getByAbbr(departmentAbbr);
+        Department foundDepartment = departmentService.getByAbbr(departmentAbbr);
+        if (foundDepartment!= null) {
+            return foundDepartment;
         } else {
             throw new SelectiveCourseImportException("Кафедра не знайдена");
         }
-    }
-
-
-    public List<String> saveSelectiveCourses() {
-        return null;
     }
 
     private String[] getTeacherSurnameAndInitials(String teacher) {
         String[] teacherSurnameAndInitials = {"", "", ""};
 
         if (teacher != null && !teacher.equals("")) {
-            String[] split1 = teacher.split("[ \\t\\u202F\\u00A0]", 2);
-            teacherSurnameAndInitials[0] = split1[0];
-            String[] teacherInitials = split1[1].split("\\.");
+            String[] splitName = teacher.split("[ \\t\\u202F\\u00A0]", 2);
+            teacherSurnameAndInitials[0] = splitName[0];
+            String[] teacherInitials = splitName[1].split("\\.");
             teacherSurnameAndInitials[1] = teacherInitials[0].trim();
             teacherSurnameAndInitials[2] = teacherInitials[1].trim();
             return teacherSurnameAndInitials;
