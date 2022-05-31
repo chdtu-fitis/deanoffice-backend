@@ -69,16 +69,10 @@ public class ExamReportController extends DocumentResponseController {
 
     @GetMapping("/foreign/docx")
     public ResponseEntity<Resource> generateDocxForSingleStudent(
-            @RequestParam Integer semesterId,
-            @RequestParam List<Integer> studentId) {
-        try {
-
-            File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentId, semesterId, FileFormatEnum.DOCX);
-            return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
-
-        } catch (Exception e) {
-            return handleException(e);
-        }
+            @RequestParam Integer semester,
+            @RequestParam List<Integer> studentIds) throws Exception {
+        File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentIds, semester, FileFormatEnum.DOCX);
+        return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
     @GetMapping("/groups/{groupId}/pdf")
