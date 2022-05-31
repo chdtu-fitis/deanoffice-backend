@@ -9,5 +9,9 @@ public class StudentsRegistrationOnCoursesPercentDTO {
     private int studyYear;
     private int totalCount;
     private int registeredCount;
-    private int percent;
+    private int registeredPercent;
+    private int choosingLessCount;
+    private int choosingLessPercent;
+    private int notRegisteredCount;
+    private int notRegisteredPercent;
 }

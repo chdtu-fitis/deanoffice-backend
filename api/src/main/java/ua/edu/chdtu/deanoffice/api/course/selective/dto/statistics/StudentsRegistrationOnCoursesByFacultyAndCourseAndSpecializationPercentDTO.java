@@ -11,5 +11,9 @@ public class StudentsRegistrationOnCoursesByFacultyAndCourseAndSpecializationPer
     private String specializationName;
     private int totalCount;
     private int registeredCount;
-    private int percent;
+    private int registeredPercent;
+    private int choosingLessCount;
+    private int choosingLessPercent;
+    private int notRegisteredCount;
+    private int notRegisteredPercent;
 }
