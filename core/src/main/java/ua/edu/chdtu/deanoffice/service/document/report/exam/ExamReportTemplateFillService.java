@@ -20,6 +20,7 @@ import ua.edu.chdtu.deanoffice.util.PersonUtil;
 
 import java.io.IOException;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.Set;
 public class ExamReportTemplateFillService extends ExamReportBaseService {
 
     private static final int STARTING_ROW_INDEX = 7;
+    private static final int EXAM_REPORT_STUDENTS_LINES = 57;
     private static final Logger log = LoggerFactory.getLogger(ExamReportTemplateFillService.class);
     private final DocumentIOService documentIOService;
 
@@ -53,6 +55,8 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
 
     WordprocessingMLPackage fillTemplate(String templateName, List<ExamReportDataBean> examReportDataBeans, int x)
             throws IOException, Docx4JException {
+        complementBeansWhenTooManyStudentsInGroup(examReportDataBeans);
+
         WordprocessingMLPackage reportsDocument = fillTemplate(templateName, examReportDataBeans.get(0));
         examReportDataBeans.remove(0);
         if (examReportDataBeans.size() > 0) {
@@ -67,6 +71,22 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
             });
         }
         return reportsDocument;
+    }
+
+    private void complementBeansWhenTooManyStudentsInGroup(List<ExamReportDataBean> examReportDataBeans) {
+        List<ExamReportDataBean> tooManyStudentsReportData = new ArrayList<>();
+        for (ExamReportDataBean erdb: examReportDataBeans) {
+            List<StudentExamReportDataBean> studs = erdb.getStudentExamReportDataBeans();
+            if (studs.size() > EXAM_REPORT_STUDENTS_LINES) {
+                ExamReportDataBean newExamReportDataBean = new ExamReportDataBean(
+                        erdb.getCourseExamReportDataBean(),
+                        erdb.getGroupExamReportDataBean(),
+                        studs.subList(EXAM_REPORT_STUDENTS_LINES, studs.size()));
+                tooManyStudentsReportData.add(newExamReportDataBean);
+                erdb.setStudentExamReportDataBeans(studs.subList(0, EXAM_REPORT_STUDENTS_LINES));
+            }
+        }
+        examReportDataBeans.addAll(tooManyStudentsReportData);
     }
 
     private void fillTableWithStudentInitials(WordprocessingMLPackage template, List<StudentExamReportDataBean> students) {
@@ -87,10 +107,6 @@ public class ExamReportTemplateFillService extends ExamReportBaseService {
         }
         removeUnfilledPlaceholders(template);
     }
-
-
-
-
 
     WordprocessingMLPackage fillTemplate(String templateName, CourseForGroup courseForGroup)
             throws IOException, Docx4JException {
