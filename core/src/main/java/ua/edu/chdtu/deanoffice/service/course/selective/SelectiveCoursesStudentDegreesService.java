@@ -5,7 +5,8 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesYearParameters;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
+import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
@@ -346,10 +347,10 @@ public class SelectiveCoursesStudentDegreesService {
         CoursesNumbersByTrainingCycle cn = calculateCoursesNumberByTrainingCycle(selectiveCourses);
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
-        if (cn.getGeneral()[0] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]
-                || cn.getGeneral()[1] > selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-                || cn.getProfessional()[0] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]
-                || cn.getProfessional()[1] > selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+        if (cn.getGeneral()[0] > selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[0]
+                || cn.getGeneral()[1] > selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[1]
+                || cn.getProfessional()[0] > selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[0]
+                || cn.getProfessional()[1] > selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[1]) {
             throw new InconsistentSelectiveCoursesToAddException();
         }
     }
@@ -358,10 +359,10 @@ public class SelectiveCoursesStudentDegreesService {
         CoursesNumbersByTrainingCycle cn = calculateCoursesNumberByTrainingCycle(selectiveCourses);
         Map<String, Integer[]> selCoursesNumbersByRule =
                 SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear - 1];
-        if (cn.getGeneral()[0] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[0]
-                || cn.getGeneral()[1] != selCoursesNumbersByRule.get(TypeCycle.GENERAL.toString())[1]
-                || cn.getProfessional()[0] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[0]
-                || cn.getProfessional()[1] != selCoursesNumbersByRule.get(TypeCycle.PROFESSIONAL.toString())[1]) {
+        if (cn.getGeneral()[0] != selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[0]
+                || cn.getGeneral()[1] != selCoursesNumbersByRule.get(TrainingCycle.GENERAL.toString())[1]
+                || cn.getProfessional()[0] != selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[0]
+                || cn.getProfessional()[1] != selCoursesNumbersByRule.get(TrainingCycle.PROFESSIONAL.toString())[1]) {
             throw new InconsistentSelectiveCoursesToAddException();
         }
     }
@@ -371,9 +372,9 @@ public class SelectiveCoursesStudentDegreesService {
         int professional[] = {0, 0};
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
             int semester = selectiveCourse.getCourse().getSemester();
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.GENERAL)
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.GENERAL)
                 general[1 - semester % 2]++;
-            if (selectiveCourse.getTrainingCycle() == TypeCycle.PROFESSIONAL)
+            if (selectiveCourse.getTrainingCycle() == TrainingCycle.PROFESSIONAL)
                 professional[1 - semester % 2]++;
         }
         return new CoursesNumbersByTrainingCycle(general, professional);
