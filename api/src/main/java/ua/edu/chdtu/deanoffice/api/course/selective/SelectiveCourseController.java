@@ -49,6 +49,7 @@ import ua.edu.chdtu.deanoffice.service.course.selective.importcsv.SelectiveCours
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -525,28 +526,20 @@ public class SelectiveCourseController {
 
     @Secured({"ROLE_NAVCH_METHOD"})
     @PostMapping("/csv-import-file")
-    public ResponseEntity importSelectiveCoursesCsvFile(@RequestParam("file")MultipartFile uploadFile) {
-        try {
-            validateInputFile(uploadFile);
-            SelectiveCourseCsvReportDTO csvImportReportDTO = new SelectiveCourseCsvReportDTO();
-            SelectiveCourseCsvReport csvImportReport = selectiveCourseImportService.formSelectiveCourseCsvImportReport(
-                    selectiveCourseImportService.getSelectiveCoursesFromStream(uploadFile.getInputStream())
-            );
+    public ResponseEntity importSelectiveCoursesCsvFile(@RequestParam("file")MultipartFile uploadFile) throws Exception {
+        validateInputFile(uploadFile);
+        SelectiveCourseCsvReportDTO csvImportReportDTO = new SelectiveCourseCsvReportDTO();
+        SelectiveCourseCsvReport csvImportReport = selectiveCourseImportService.formSelectiveCourseCsvImportReport(
+                selectiveCourseImportService.getSelectiveCoursesFromStream(uploadFile.getInputStream())
+        );
 
-            List<SelectiveCourseCsvDTO> correctSelectiveCourseDTOS = Mapper.strictMap(csvImportReport.getCorrectSelectiveCourses(), SelectiveCourseCsvDTO.class);
-            List<IncorrectSelectiveCourseDTO> incorrectSelectiveCourseDTOS = Mapper.strictMap(csvImportReport.getIncorrectSelectiveCourses(), IncorrectSelectiveCourseDTO.class);
+        List<SelectiveCourseCsvDTO> correctSelectiveCourseDTOS = Mapper.strictMap(csvImportReport.getCorrectSelectiveCourses(), SelectiveCourseCsvDTO.class);
+        List<IncorrectSelectiveCourseDTO> incorrectSelectiveCourseDTOS = Mapper.strictMap(csvImportReport.getIncorrectSelectiveCourses(), IncorrectSelectiveCourseDTO.class);
 
-            csvImportReportDTO.setCorrectSelectiveCourses(correctSelectiveCourseDTOS);
-            csvImportReportDTO.setIncorrectSelectiveCourses(incorrectSelectiveCourseDTOS);
+        csvImportReportDTO.setCorrectSelectiveCourses(correctSelectiveCourseDTOS);
+        csvImportReportDTO.setIncorrectSelectiveCourses(incorrectSelectiveCourseDTOS);
 
-            return ResponseEntity.ok(csvImportReportDTO);
-        } catch (Exception e) {
-            return handleException(e);
-        }
-    }
-
-    private static ResponseEntity handleException(Exception exception) {
-        return ExceptionHandlerAdvice.handleException(exception, ExamReportsRecordBookController.class, ExceptionToHttpCodeMapUtil.map(exception));
+        return ResponseEntity.ok(csvImportReportDTO);
     }
 
     private void validateInputFile(MultipartFile uploadFile) throws OperationCannotBePerformedException {
