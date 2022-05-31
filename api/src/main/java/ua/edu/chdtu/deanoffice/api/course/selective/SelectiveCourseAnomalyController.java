@@ -27,7 +27,7 @@ public class SelectiveCourseAnomalyController {
     public ResponseEntity<List<StudentSelectiveCourseMoreOrLessNormDTO>> getStudentsSelectedSelectiveCoursesMoreNorm(
             @RequestParam int degreeId,
             @RequestParam @Min(2020) @Max(2040) int studyYear,
-            @RequestParam(required = false) int studentYear,
+            @RequestParam(required = false) Integer studentYear,
             @RequestParam boolean moreNorm) {
 
         List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService. getStudentsSelectedSelectiveCourses(degreeId, studyYear, studentYear, moreNorm);

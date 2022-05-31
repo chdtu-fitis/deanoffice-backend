@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
@@ -95,19 +94,6 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             @Param("degreeId") int degreeId
     );
 
-    @Query("SELECT scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, scsd.studentDegree.specialization.faculty.name, " +
-            "scsd.studentDegree.specialization.speciality.code, :studyYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear, " +
-            "scsd.studentDegree.studentGroup.name, COUNT(scsd.id)" +
-            "FROM SelectiveCoursesStudentDegrees AS scsd " +
-            "GROUP BY 6, scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
-            "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code," +
-            "scsd.selectiveCourse.studyYear, scsd.studentDegree.studentGroup.name, scsd.studentDegree.specialization.degree.id " +
-            "having scsd.selectiveCourse.studyYear=:studyYear AND COUNT(scsd.id) > 5 and scsd.studentDegree.specialization.degree.id = :degreeId " +
-            "order by scsd.studentDegree.studentGroup.name")
-    List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesOverNorm(
-            Specification<SelectiveCoursesStudentDegrees> specification
-    );
-
     @Query("SELECT scsd.studentDegree.id AS studentDegreeId, " +
             "scsd.studentDegree.student.surname AS surname, " +
             "scsd.studentDegree.student.name AS name, " +
@@ -118,13 +104,14 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "COUNT(scsd.id) AS coursesNumber " +
             "FROM SelectiveCoursesStudentDegrees AS scsd " +
             "WHERE scsd.active = true AND scsd.studentDegree.specialization.degree.id=:degreeId " +
-            "AND scsd.selectiveCourse.studyYear=:studyYear AND :currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear=:studentYear " +
+            "AND scsd.selectiveCourse.studyYear=:studyYear " +
+            "AND :currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear IN :studentYears " +
             "GROUP BY scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
             "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code, 6, " +
             "scsd.studentDegree.studentGroup.name " +
-            "having COUNT(scsd.id) < :ceiling AND COUNT(scsd.id) > :floor " +
+            "having COUNT(scsd.id) <= :ceiling AND COUNT(scsd.id) >= :floor " +
             "order by scsd.studentDegree.studentGroup.name")
-    List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesLessNorm(
-            @Param("degreeId") int degreeId, @Param("studyYear") int studyYear, @Param("studentYear") int studentYear,
+    List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesMoreOrLessNorm(
+            @Param("degreeId") int degreeId, @Param("studyYear") int studyYear, @Param("studentYears") List<Integer> studentYears,
             @Param("currentYear") int currentYear, @Param("floor") long floor, @Param("ceiling") long ceiling);
 }

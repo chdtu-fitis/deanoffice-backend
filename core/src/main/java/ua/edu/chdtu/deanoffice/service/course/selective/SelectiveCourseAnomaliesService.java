@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesReposito
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,13 +19,19 @@ public class SelectiveCourseAnomaliesService {
         this.currentYearService = currentYearService;
     }
 
-    public List<IStudentsNotRightSelectiveCoursesNumber> getStudentsSelectedSelectiveCourses(int degreeId, int studyYear, int studentYear, boolean moreNorm) {
+    public List<IStudentsNotRightSelectiveCoursesNumber> getStudentsSelectedSelectiveCourses(int degreeId, int studyYear, Integer studentYear, boolean moreNorm) {
         int currentYear = currentYearService.getYear();
-        if (moreNorm) {
-            return null; //selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesOverNorm(AbnormalStudentsSelectiveCoursesSpecification.getSpecification(degreeId, studyYear, studentYear,true));
+        List<Integer> studentYears = new ArrayList<>();
+        if (studentYear == null) {
+            for (int i = 1; i <= 4; i++)
+                studentYears.add(i);
+        } else {
+            studentYears.add(studentYear);
         }
-        else {
-            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesLessNorm(degreeId, studyYear, studentYear, currentYear, -1L, 5L);
+        if (moreNorm) {
+            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesMoreOrLessNorm(degreeId, studyYear, studentYears, currentYear, 6L, 10L);
+        } else {
+            return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesMoreOrLessNorm(degreeId, studyYear, studentYears, currentYear, 0L, 4L);
         }
     }
 }
