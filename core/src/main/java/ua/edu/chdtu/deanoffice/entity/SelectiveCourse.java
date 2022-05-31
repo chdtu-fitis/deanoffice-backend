@@ -25,7 +25,7 @@ public class SelectiveCourse extends BaseEntity {
     private FieldOfKnowledge fieldOfKnowledge;
     private String otherFieldsOfKnowledge;
     @Enumerated(value = EnumType.STRING)
-    private TypeCycle trainingCycle;
+    private TrainingCycle trainingCycle;
     private String description;
     private int studyYear;
     private boolean available;
