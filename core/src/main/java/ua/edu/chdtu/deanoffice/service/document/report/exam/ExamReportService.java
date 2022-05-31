@@ -47,7 +47,6 @@ public class ExamReportService {
 
     public File createExamReport(List<ExamReportDataBean> examReportDataBeans, FileFormatEnum format) throws Exception {
         if (examReportDataBeans.size() > 0) {
-
             String fileName = LanguageUtil.transliterate(examReportDataBeans.get(0).getGroupExamReportDataBean().getGroupName());
             WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, examReportDataBeans, 0);
             return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
