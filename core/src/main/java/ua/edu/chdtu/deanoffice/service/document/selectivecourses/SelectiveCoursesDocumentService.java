@@ -78,6 +78,7 @@ public class SelectiveCoursesDocumentService {
                     fillGeneralTablesBySemester(template,secondSemester,studyYear,degreeId);
                     break;
                 case 3:
+                case 4:
                     template.getMainDocumentPart().getContent()
                             .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ПРОФЕСІЙНОЇ ПІДГОТОВКИ"));
                     Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TypeCycle.PROFESSIONAL.toString())[0]+
