@@ -473,21 +473,26 @@ public class SelectiveCourseController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /*Повертає правила вибіркових за studentDegreeId або за: id навчального ступеня та курсом студента*/
     @GetMapping("/selection-rules")
-    public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(@RequestParam int studentDegreeId) throws NotFoundException {
-        StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
-        if (studentDegree == null)
-           return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
+    public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(
+            @RequestParam(required = false) Integer studentDegreeId, @RequestParam(required = false) Integer degreeId, @RequestParam(required = false) Integer studentsYear)
+            throws NotFoundException {
+        if (studentDegreeId == null && (degreeId == null || studentsYear == null))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (studentDegreeId != null) {
+            StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
+            if (studentDegree == null)
+                return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
 
-        int studentDegreeYear = studentDegreeService.getRealStudentDegreeYear(studentDegree);
-
+            studentsYear = studentDegreeService.getRealStudentDegreeYear(studentDegree);
+            degreeId = studentDegree.getSpecialization().getDegree().getId();
+        }
         List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = new ArrayList<>();
-
-        for (Map.Entry<String, Integer[]> entry : SELECTIVE_COURSES_NUMBER.get(studentDegree.getSpecialization().getDegree().getId())[studentDegreeYear].entrySet()) {
+        for (Map.Entry<String, Integer[]> entry : SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear].entrySet()) {
             TrainingCycle trainingCycle = TrainingCycle.getTypeCycleByName(entry.getKey());
             selectiveCoursesSelectionRulesDTO.add(new SelectiveCoursesSelectionRulesDTO(trainingCycle, entry.getValue()));
         }
-
         return ResponseEntity.ok(selectiveCoursesSelectionRulesDTO);
     }
 
