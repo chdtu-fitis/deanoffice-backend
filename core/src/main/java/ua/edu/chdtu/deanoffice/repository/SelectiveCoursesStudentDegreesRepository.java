@@ -151,7 +151,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
-                    "GROUP BY  sd.specialization.degree.id, sd.active, 1 " +
+                    "GROUP BY  sd.specialization.degree.id, 1 " +
                     "ORDER BY studyYear "
     )
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsOnYears(@Param("degreeId") int degreeId,
@@ -342,7 +342,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "WHERE  sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
                     "GROUP BY sd.specialization.degree.id, " +
-                    "sd.active, sd.specialization.name, sd.studentGroup.specialization.faculty.abbr " +
+                    "sd.specialization.name, sd.studentGroup.specialization.faculty.abbr " +
                     "ORDER BY facultyName, specializationName ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndSpecialization(@Param("degreeId") int degreeId,
                                                                                                                     @Param("currentYear") int currentYear,
@@ -407,7 +407,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                     "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
                     "GROUP BY sd.specialization.degree.id, " +
-                    "sd.active, sd.studentGroup.specialization.faculty.abbr, 2 " +
+                    "sd.studentGroup.specialization.faculty.abbr, 2 " +
                     "ORDER BY facultyName, studyYear ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYear(@Param("degreeId") int degreeId,
                                                                                                           @Param("currentYear") int currentYear,
@@ -475,7 +475,7 @@ List<IFindStudentsByFacultyAndYearAndSpecialization> findStudentsRegisteredSelec
                     "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
                     "GROUP BY sd.specialization.degree.id, sd.specialization.name, " +
-                    "sd.active, sd.studentGroup.specialization.faculty.abbr, 2 " +
+                    "sd.studentGroup.specialization.faculty.abbr, 2 " +
                     "ORDER BY facultyName, studyYear, specializationName ")
     List<IPercentStudentsRegistrationOnCourses> findCountStudentsWhoChosenSelectiveCourseByFacultyAndYearAndSpecialization(@Param("degreeId") int degreeId,
                                                                                                                            @Param("currentYear") int currentYear,

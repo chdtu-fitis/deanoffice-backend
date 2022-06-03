@@ -4,6 +4,5 @@ import java.util.List;
 
 public interface IStatisticsCondition {
     boolean hasToBeCounted(IPercentStudentsRegistrationOnCourses as,
-                           List<IPercentStudentsRegistrationOnCourses> count,
-                           int i);
+                           IPercentStudentsRegistrationOnCourses count);
 }
