@@ -78,7 +78,7 @@ public class SelectiveCourseStatisticsService {
                 getSumList(choosingLessCounts, selectiveStatisticsCriteria), allStudentsCounts);
     }
 
-    private int getCountSelectiveCourses(Map<String, Integer[]> scn){
+    private int getCountSelectiveCourses(Map<String, Integer[]> scn) {
         int scNumberInTheYear = 0;
         for (Integer[] scn2 : scn.values()) {
             for (Integer scn3 : scn2) {
@@ -183,7 +183,7 @@ public class SelectiveCourseStatisticsService {
                     (as, regCounts) -> as.getStudyYear() == regCounts.getStudyYear() && as.getFacultyName().equals(regCounts.getFacultyName()),
                     (as, regCounts) -> as.getStudyYear() == regCounts.getStudyYear() && as.getFacultyName().equals(regCounts.getFacultyName()));
             break;
-        default:
+        case FACULTY_AND_YEAR_AND_SPECIALIZATION:
             registeredPercents = getStudentsPercentWhoChosenSelectiveCourse(registeredCounts, allStudentsCounts, choosingLessCounts,
                     (as, regCounts) -> as.getStudyYear() == regCounts.getStudyYear()
                             && as.getFacultyName().equals(regCounts.getFacultyName())
@@ -191,6 +191,9 @@ public class SelectiveCourseStatisticsService {
                     (as, regCounts) -> as.getStudyYear() == regCounts.getStudyYear()
                             && as.getFacultyName().equals(regCounts.getFacultyName())
                             && as.getSpecializationName().equals(regCounts.getSpecializationName()));
+            break;
+        default:
+            return null;
     }
     return registeredPercents;
 }
