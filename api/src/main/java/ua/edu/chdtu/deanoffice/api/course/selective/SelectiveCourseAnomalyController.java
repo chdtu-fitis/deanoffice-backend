@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.StudentSelectiveCourseMoreOrLessNormDTO;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseAnomaliesService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
 
@@ -28,9 +29,8 @@ public class SelectiveCourseAnomalyController {
             @RequestParam int degreeId,
             @RequestParam @Min(2020) @Max(2040) int studyYear,
             @RequestParam(required = false) Integer studentYear,
-            @RequestParam boolean moreNorm) {
-
-        List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService. getStudentsSelectedSelectiveCourses(degreeId, studyYear, studentYear, moreNorm);
+            @RequestParam boolean moreNorm) throws OperationCannotBePerformedException {
+        List<IStudentsNotRightSelectiveCoursesNumber> studentDegrees = selectiveCourseAnomaliesService.getStudentsSelectedSelectiveCourses(degreeId, studyYear, studentYear, moreNorm);
         List<StudentSelectiveCourseMoreOrLessNormDTO> result = new ArrayList<>();
         for (IStudentsNotRightSelectiveCoursesNumber studentsNotRightSelectiveCoursesNumber : studentDegrees) {
             StudentSelectiveCourseMoreOrLessNormDTO studentsNotRegisteredForSelectiveCoursesDTO = new StudentSelectiveCourseMoreOrLessNormDTO(

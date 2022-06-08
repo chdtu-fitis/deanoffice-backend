@@ -1,6 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.course.selective;
 
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,5 +61,24 @@ public class SelectiveCourseConstants {
         phd4.put(TypeCycle.GENERAL.toString(), new Integer[]{0, 0});
         phd[3] = phd4;
         SELECTIVE_COURSES_NUMBER.put(PHD_ID, phd);
+    }
+
+    public static int getSelectiveCoursesCount(int degreeId, int studentYear) throws OperationCannotBePerformedException {
+        try {
+            Map<String, Integer[]>[] selectiveCoursesNumberForDegree = SELECTIVE_COURSES_NUMBER.get(degreeId);
+            Map<String, Integer[]> scn = selectiveCoursesNumberForDegree[studentYear];
+            int scNumberInTheYear = 0;
+            for (Integer[] scn2 : scn.values()) {
+                for (Integer scn3 : scn2) {
+                    scNumberInTheYear += scn3;
+                }
+            }
+            return scNumberInTheYear;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new OperationCannotBePerformedException("Не вірно вказано курс");
+        } catch (NullPointerException e) {
+            throw new OperationCannotBePerformedException("Не вірно вказано освітній ступінь або курс");
+        }
+
     }
 }
