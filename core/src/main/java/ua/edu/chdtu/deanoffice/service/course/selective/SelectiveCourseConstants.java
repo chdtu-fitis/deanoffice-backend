@@ -3,8 +3,11 @@ package ua.edu.chdtu.deanoffice.service.course.selective;
 import ua.edu.chdtu.deanoffice.entity.TypeCycle;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 
+import java.time.Year;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class SelectiveCourseConstants {
     //Map structure: degree id -> Map(student study year -> array of selective courses number:
@@ -79,6 +82,29 @@ public class SelectiveCourseConstants {
         } catch (NullPointerException e) {
             throw new OperationCannotBePerformedException("Не вірно вказано освітній ступінь або курс");
         }
+    }
 
+    public static int getSelectiveCoursesCount(int degreeId) throws OperationCannotBePerformedException {
+        try {
+            Map<String, Integer[]>[] selectiveCoursesNumberForDegree = SELECTIVE_COURSES_NUMBER.get(degreeId);
+            Set<Integer> numbers = new HashSet<>();
+            for (Map<String, Integer[]> scn : selectiveCoursesNumberForDegree) {
+                int scNumberInTheYear = 0;
+                for (Integer[] scn2 : scn.values()) {
+                    for (Integer scn3 : scn2) {
+                        scNumberInTheYear += scn3;
+                    }
+                }
+                numbers.add(scNumberInTheYear);
+            }
+            if (numbers.size() == 1)
+                return (Integer) numbers.toArray()[0];
+            else
+                throw new OperationCannotBePerformedException("Для даного освітнього ступеня немає однакової кількості вибіркових дисциплін на всіх курсах");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new OperationCannotBePerformedException("Неправильно вказано курс");
+        } catch (NullPointerException e) {
+            throw new OperationCannotBePerformedException("Неправильно вказано освітній ступінь або курс");
+        }
     }
 }

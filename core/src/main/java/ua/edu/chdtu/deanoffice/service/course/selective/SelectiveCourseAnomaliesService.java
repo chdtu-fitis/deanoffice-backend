@@ -28,7 +28,7 @@ public class SelectiveCourseAnomaliesService {
         if (studentYear == null) {
             for (int i = 1; i <= 4; i++)
                 studentYears.add(i);
-            selectiveCoursesCount = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId, 1);
+            selectiveCoursesCount = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId);
         } else {
             studentYears.add(studentYear);
             selectiveCoursesCount = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId, studentYear);
