@@ -16,6 +16,7 @@ import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IFindStudents
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IFindStudentsByGroup;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IFindStudentsByYear;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
 
 import java.util.List;
 
@@ -67,9 +68,9 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     );
 
     @Query("SELECT DISTINCT scsd.selectiveCourse.course.id FROM SelectiveCoursesStudentDegrees scsd " +
-                  "WHERE scsd.selectiveCourse.course.semester = :semester " +
-                  "AND scsd.studentDegree.id in :studentDegreeIds " +
-                  "AND scsd.active = true")
+            "WHERE scsd.selectiveCourse.course.semester = :semester " +
+            "AND scsd.studentDegree.id in :studentDegreeIds " +
+            "AND scsd.active = true")
     List<Integer> findActiveByYearAndSemesterAndStudentDegrees(
             @Param("semester") int semester,
             @Param("studentDegreeIds") List<Integer> studentDegreeIds
@@ -505,4 +506,25 @@ List<IFindStudentsByFacultyAndYearAndSpecialization> findStudentsRegisteredSelec
                     "AND sd.id NOT IN :registeredStudentsIds")
     List<ICoursesSelectedByStudentsGroup> findNotRegisteredStudents(@Param("groupId") int groupId,
                                                                     @Param("registeredStudentsIds") List<Integer> registeredStudentsIds);
+
+    @Query("SELECT scsd.studentDegree.id AS studentDegreeId, " +
+            "scsd.studentDegree.student.surname AS surname, " +
+            "scsd.studentDegree.student.name AS name, " +
+            "scsd.studentDegree.specialization.faculty.name AS facultyName, " +
+            "scsd.studentDegree.specialization.speciality.code AS specialityCode, " +
+            ":currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear AS year, " +
+            "scsd.studentDegree.studentGroup.name AS groupName, " +
+            "COUNT(scsd.id) AS coursesNumber " +
+            "FROM SelectiveCoursesStudentDegrees AS scsd " +
+            "WHERE scsd.active = true AND scsd.studentDegree.specialization.degree.id=:degreeId " +
+            "AND scsd.selectiveCourse.studyYear=:studyYear " +
+            "AND :currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear IN :studentYears " +
+            "GROUP BY scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
+            "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code, 6, " +
+            "scsd.studentDegree.studentGroup.name " +
+            "having COUNT(scsd.id) <= :ceiling AND COUNT(scsd.id) >= :floor " +
+            "order by scsd.studentDegree.studentGroup.name")
+    List<IStudentsNotRightSelectiveCoursesNumber> findStudentsSelectedSelectiveCoursesMoreOrLessNorm(
+            @Param("degreeId") int degreeId, @Param("studyYear") int studyYear, @Param("studentYears") List<Integer> studentYears,
+            @Param("currentYear") int currentYear, @Param("floor") long floor, @Param("ceiling") long ceiling);
 }

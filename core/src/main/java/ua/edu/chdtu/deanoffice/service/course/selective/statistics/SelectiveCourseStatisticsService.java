@@ -18,7 +18,8 @@ public class SelectiveCourseStatisticsService {
     private SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
     private CurrentYearService currentYearService;
 
-    public SelectiveCourseStatisticsService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository, CurrentYearService currentYearService) {
+    public SelectiveCourseStatisticsService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
+                                            CurrentYearService currentYearService) {
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
         this.currentYearService = currentYearService;
     }
