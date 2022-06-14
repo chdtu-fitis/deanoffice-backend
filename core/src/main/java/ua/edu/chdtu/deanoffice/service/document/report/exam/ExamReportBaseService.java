@@ -29,7 +29,9 @@ public class ExamReportBaseService {
         result.put("CourseName", course.getCourseName());
         result.put("Hours", course.getHours());
         result.put("ExamDate", course.getExamDate());
-        result.put("Year", course.getYearShort());
+        int dbCurrentYear = currentYearService.get().getCurrYear();
+        int currentYear = dbCurrentYear + 1 - (Integer.parseInt(course.getSemester()) % 2);
+        result.put("Year", String.valueOf(currentYear).substring(2));
         result.put("KCType", course.getKnowledgeControlName());
         result.put("TeacherName", course.getTeacherName());
         result.put("TeacherInitials", course.getTeacherInitials());

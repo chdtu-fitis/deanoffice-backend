@@ -1,4 +1,4 @@
-package ua.edu.chdtu.deanoffice.service.course.selective;
+package ua.edu.chdtu.deanoffice.service;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
@@ -13,6 +13,14 @@ public class FieldOfKnowledgeService {
 
     public FieldOfKnowledgeService(FieldOfKnowledgeRepository fieldOfKnowledgeRepository) {
         this.fieldOfKnowledgeRepository = fieldOfKnowledgeRepository;
+    }
+
+    public FieldOfKnowledge getFieldOfKnowledgeByCode(String code) {
+        List<FieldOfKnowledge> fieldsOfKnowledge = fieldOfKnowledgeRepository.findAllByCode(code);
+        if (fieldsOfKnowledge.size() == 1) {
+            return fieldsOfKnowledge.get(0);
+        }
+        return null;
     }
 
     public FieldOfKnowledge getFieldOfKnowledgeById(int id) {

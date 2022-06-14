@@ -9,6 +9,7 @@ import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.entity.ApplicationUser;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.FacultyService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -57,28 +58,18 @@ public class ExamReportController extends DocumentResponseController {
 
     @GetMapping("/selective-courses/docx")
     public ResponseEntity<Resource> generateDocxForSelectiveCourses(
-            @RequestParam List<Integer> selectiveCourseIds) {
-        try {
-            List<ExamReportDataBean> examReportDataBeans = selectiveCourseExamReportDataService.getExamReportData(selectiveCourseIds);
-            File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.DOCX);
-            return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
-        } catch (Exception e) {
-            return handleException(e);
-        }
+            @RequestParam List<Integer> selectiveCourseIds) throws Exception {
+        List<ExamReportDataBean> examReportDataBeans = selectiveCourseExamReportDataService.getExamReportData(selectiveCourseIds);
+        File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.DOCX);
+        return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
     @GetMapping("/foreign/docx")
     public ResponseEntity<Resource> generateDocxForSingleStudent(
-            @RequestParam Integer semesterId,
-            @RequestParam List<Integer> studentId) {
-        try {
-
-            File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentId, semesterId, FileFormatEnum.DOCX);
-            return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
-
-        } catch (Exception e) {
-            return handleException(e);
-        }
+            @RequestParam Integer semester,
+            @RequestParam List<Integer> studentIds) throws Exception {
+        File examReport = examReportForForeignStudentService.createGroupStatementForeign(studentIds, semester, FileFormatEnum.DOCX);
+        return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
     @GetMapping("/groups/{groupId}/pdf")

@@ -39,6 +39,13 @@ public class DepartmentService {
         return this.departmentRepository.findOne(departmentId);
     }
 
+    public Department getByAbbr(String departmentAbbr) {
+        if (this.departmentRepository.getAllByAbbr(true, departmentAbbr).size() == 1) {
+            return this.departmentRepository.getAllByAbbr(true, departmentAbbr).get(0);
+        }
+        return null;
+    }
+
     @FacultyAuthorized
     public Department save(Department department) throws UnauthorizedFacultyDataException {
         return departmentRepository.save(department);

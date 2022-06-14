@@ -1,8 +1,10 @@
 package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
@@ -10,6 +12,8 @@ import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.ExamReportData
 import ua.edu.chdtu.deanoffice.util.LanguageUtil;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,11 +51,14 @@ public class ExamReportService {
 
     public File createExamReport(List<ExamReportDataBean> examReportDataBeans, FileFormatEnum format) throws Exception {
         if (examReportDataBeans.size() > 0) {
-
-            String fileName = LanguageUtil.transliterate(examReportDataBeans.get(0).getGroupExamReportDataBean().getGroupName());
-            WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, examReportDataBeans, 0);
-            return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
+            try {
+                String fileName = LanguageUtil.transliterate(examReportDataBeans.get(0).getGroupExamReportDataBean().getGroupName());
+                WordprocessingMLPackage filledTemplate = examReportTemplateFillService.fillTemplate(TEMPLATE, examReportDataBeans, 0);
+                return documentIOService.saveDocumentToTemp(filledTemplate, fileName, format);
+            } catch (IOException | Docx4JException e) {
+                throw new Exception("Немає даних для побудови відомості");
+            }
         } else
-            throw new Exception();
+            throw new OperationCannotBePerformedException("Немає даних для побудови відомості");
     }
 }

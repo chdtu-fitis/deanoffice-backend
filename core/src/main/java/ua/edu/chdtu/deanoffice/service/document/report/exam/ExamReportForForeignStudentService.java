@@ -134,7 +134,7 @@ public class ExamReportForForeignStudentService extends ExamReportBaseService {
             replacements.put("CourseName", course.getCourseName().getName());
             replacements.put("KCType", course.getKnowledgeControl().getName());
             replacements.put("Hours", String.format("%d", course.getHours()));
-            replacements.put("TeacherInitials", courseForGroup.getTeacher().getInitialsUkr());
+            replacements.put("TeacherInitials", courseForGroup.getTeacher() != null ? courseForGroup.getTeacher().getInitialsUkr() : "");
             replaceInRow(currentRow, replacements);
             tempTable.getContent().add(currentRowIndex, currentRow);
             currentRowIndex++;
