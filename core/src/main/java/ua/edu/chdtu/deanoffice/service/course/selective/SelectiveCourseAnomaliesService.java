@@ -9,11 +9,12 @@ import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotR
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Float.POSITIVE_INFINITY;
+
 @Service
 public class SelectiveCourseAnomaliesService {
     private SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
     private CurrentYearService currentYearService;
-    private final float inf = Float.POSITIVE_INFINITY; // max limit
 
     public SelectiveCourseAnomaliesService(SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository,
                                            CurrentYearService currentYearService) {
@@ -35,7 +36,7 @@ public class SelectiveCourseAnomaliesService {
         }
         if (moreNorm) {
             return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesMoreOrLessNorm(degreeId, studyYear, studentYears, currentYear,
-                    selectiveCoursesCount + 1, (long) inf);
+                    selectiveCoursesCount + 1, (long) POSITIVE_INFINITY);
         } else {
             return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesMoreOrLessNorm(degreeId, studyYear, studentYears, currentYear,
                     0L, selectiveCoursesCount - 1);
