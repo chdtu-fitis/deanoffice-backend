@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegis
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesByGroupPercentDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.GroupStudentsRegistrationResult;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
@@ -62,7 +63,8 @@ public class SelectiveCourseStatisticsController {
     @GetMapping("/registered-percent")
     public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                        @RequestParam @NotNull int degreeId,
-                                                       @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
+                                                       @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria)
+                                                throws OperationCannotBePerformedException {
         List<IPercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);
         switch (selectiveStatisticsCriteria){
             case YEAR:
