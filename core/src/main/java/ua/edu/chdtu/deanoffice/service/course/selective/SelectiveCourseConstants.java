@@ -14,7 +14,7 @@ public class SelectiveCourseConstants {
     //Map structure: degree id -> Map(student study year -> array of selective courses number:
     // element 0 - 1st semester, element 1 - 2nd semester
     public static final Map<Integer, Map<String, Integer[]>[]> SELECTIVE_COURSES_NUMBER = new HashMap<>();
-    public static final Map<Integer, int[]> SELECTIVE_COURSES_CHOOSE_YEARS = new HashMap<>();
+    private static final Map<Integer, int[]> SELECTIVE_COURSES_CHOOSE_YEARS = new HashMap<>();
     public static final Map<Integer, Integer> STUDY_DURATIONS = new HashMap<>();
 
     private static final int BACHELOR_ID = DegreeEnum.BACHELOR.getId();
@@ -90,9 +90,9 @@ public class SelectiveCourseConstants {
             }
             return scNumberInTheYear;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new OperationCannotBePerformedException("Не вірно вказано курс");
+            throw new OperationCannotBePerformedException("Неправильно вказано курс");
         } catch (NullPointerException e) {
-            throw new OperationCannotBePerformedException("Не вірно вказано освітній ступінь або курс");
+            throw new OperationCannotBePerformedException("Неправильно вказано освітній ступінь або курс");
         }
     }
 
