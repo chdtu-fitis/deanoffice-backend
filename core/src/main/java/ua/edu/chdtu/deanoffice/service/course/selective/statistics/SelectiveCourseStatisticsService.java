@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.service.course.selective.statistics;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants;
@@ -9,7 +10,6 @@ import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,17 +28,15 @@ public class SelectiveCourseStatisticsService {
         return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(studyYear, degreeId);
     }
 
-    public List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourse(int studyYear, int degreeId, SelectiveStatisticsCriteria selectiveStatisticsCriteria) {
+    public List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourse(
+            int studyYear, int degreeId, SelectiveStatisticsCriteria selectiveStatisticsCriteria) throws OperationCannotBePerformedException {
         int currentYear = currentYearService.getYear();
-        int[] selectiveCoursesChooseYears = SelectiveCourseConstants.SELECTIVE_COURSES_CHOOSE_YEARS.get(degreeId);
+        int[] selectiveCoursesChooseYears = SelectiveCourseConstants.getSelectiveCourseChooseYears(degreeId, currentYear, studyYear);
         List<List<IPercentStudentsRegistrationOnCourses>> registeredCounts = new ArrayList<>();
         List<IPercentStudentsRegistrationOnCourses> allStudentsCounts = null;
         List<List<IPercentStudentsRegistrationOnCourses>> choosingLessCounts = new ArrayList<>();
-        int scNumberInTheYear;
-        Map<String, Integer[]>[] selectiveCourseNumbers = SelectiveCourseConstants.SELECTIVE_COURSES_NUMBER.get(degreeId);
-        for (int j : SelectiveCourseConstants.SELECTIVE_COURSES_CHOOSE_YEARS.get(degreeId)) {
-            Map<String, Integer[]> scn  = selectiveCourseNumbers[j];
-            scNumberInTheYear = getCountSelectiveCourses(scn);
+        for (int j : selectiveCoursesChooseYears) {
+            int scNumberInTheYear = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId, j, currentYear, studyYear);
             switch (selectiveStatisticsCriteria) {
                 case YEAR:
                     registeredCounts.add(selectiveCoursesStudentDegreesRepository.findStudentsRegisteredSelectiveCourseByYear(studyYear, degreeId, currentYear, scNumberInTheYear, j).stream().collect(Collectors.toList()));
@@ -77,16 +75,6 @@ public class SelectiveCourseStatisticsService {
         }
         return getRegisteredPercents(selectiveStatisticsCriteria, getSumList(registeredCounts, selectiveStatisticsCriteria),
                 getSumList(choosingLessCounts, selectiveStatisticsCriteria), allStudentsCounts);
-    }
-
-    private int getCountSelectiveCourses(Map<String, Integer[]> scn) {
-        int scNumberInTheYear = 0;
-        for (Integer[] scn2 : scn.values()) {
-            for (Integer scn3 : scn2) {
-                scNumberInTheYear += scn3;
-            }
-        }
-        return scNumberInTheYear;
     }
 
     private List<IPercentStudentsRegistrationOnCourses> getSumList (List<List<IPercentStudentsRegistrationOnCourses>> lists,
