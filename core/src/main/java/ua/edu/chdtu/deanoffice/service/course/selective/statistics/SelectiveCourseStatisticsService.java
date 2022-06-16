@@ -31,12 +31,10 @@ public class SelectiveCourseStatisticsService {
     public List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourse(
             int studyYear, int degreeId, SelectiveStatisticsCriteria selectiveStatisticsCriteria) throws OperationCannotBePerformedException {
         int currentYear = currentYearService.getYear();
-//        int[] selectiveCoursesChooseYears = SelectiveCourseConstants.SELECTIVE_COURSES_CHOOSE_YEARS.get(degreeId);
         int[] selectiveCoursesChooseYears = SelectiveCourseConstants.getSelectiveCourseChooseYears(degreeId, currentYear, studyYear);
         List<List<IPercentStudentsRegistrationOnCourses>> registeredCounts = new ArrayList<>();
         List<IPercentStudentsRegistrationOnCourses> allStudentsCounts = null;
         List<List<IPercentStudentsRegistrationOnCourses>> choosingLessCounts = new ArrayList<>();
-//        for (int j : SelectiveCourseConstants.SELECTIVE_COURSES_CHOOSE_YEARS.get(degreeId)) {
         for (int j : selectiveCoursesChooseYears) {
             int scNumberInTheYear = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId, j, currentYear, studyYear);
             switch (selectiveStatisticsCriteria) {
