@@ -15,7 +15,6 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegis
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.statistics.StudentsRegistrationOnCoursesPercentDTO;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
-import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IPercentStudentsRegistrationOnCourses;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.GroupStudentsRegistrationResult;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveCourseStatisticsService;
 
@@ -25,9 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.SelectiveStatisticsCriteria;
+import ua.edu.chdtu.deanoffice.service.course.selective.statistics.PercentStudentsRegistrationOnCourses;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
@@ -64,8 +62,8 @@ public class SelectiveCourseStatisticsController {
     public ResponseEntity getRegisteredStudentsPercent(@RequestParam @NotNull @Min(2010) @Max(2060) int studyYear,
                                                        @RequestParam @NotNull int degreeId,
                                                        @RequestParam @NotNull SelectiveStatisticsCriteria selectiveStatisticsCriteria)
-                                                throws OperationCannotBePerformedException {
-        List<IPercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);
+            throws OperationCannotBePerformedException {
+        List<PercentStudentsRegistrationOnCourses> registeredStudentsPercent = selectiveCourseStatisticsService.getStudentsPercentWhoChosenSelectiveCourse(studyYear, degreeId, selectiveStatisticsCriteria);
         switch (selectiveStatisticsCriteria){
             case YEAR:
                 return ResponseEntity.ok(map(registeredStudentsPercent, StudentsRegistrationOnCoursesPercentDTO.class));
