@@ -6,8 +6,12 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesReposito
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.statistics.IStudentsNotRightSelectiveCoursesNumber;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.Float.POSITIVE_INFINITY;
 
@@ -27,12 +31,12 @@ public class SelectiveCourseAnomaliesService {
         List<Integer> studentYears = new ArrayList<>();
         int selectiveCoursesCount;
         if (studentYear == null) {
-            for (int i = 1; i <= 4; i++)
+            for (Integer i : SelectiveCourseConstants.getSelectiveCourseChooseYears(degreeId, currentYear, studyYear))
                 studentYears.add(i);
             selectiveCoursesCount = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId);
         } else {
             studentYears.add(studentYear);
-            selectiveCoursesCount = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId, studentYear);
+            selectiveCoursesCount = SelectiveCourseConstants.getSelectiveCoursesCount(degreeId, studentYear, currentYear, studyYear);
         }
         if (moreNorm) {
             return selectiveCoursesStudentDegreesRepository.findStudentsSelectedSelectiveCoursesMoreOrLessNorm(degreeId, studyYear, studentYears, currentYear,
