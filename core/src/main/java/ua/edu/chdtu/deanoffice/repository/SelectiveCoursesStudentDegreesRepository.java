@@ -148,7 +148,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                               @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
     @Query(value =
             "SELECT (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "COUNT(DISTINCT sd.id) AS count " +
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
@@ -338,7 +338,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query(value =
             "SELECT sd.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "sd.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "COUNT(DISTINCT sd.id) AS count " +
                     "FROM StudentDegree AS sd " +
                     "WHERE  sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
@@ -403,7 +403,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     @Query(value =
             "SELECT sd.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "(:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
-                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "COUNT(DISTINCT sd.id) AS count " +
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
@@ -471,7 +471,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "SELECT sd.studentGroup.specialization.faculty.abbr as facultyName, " +
                     "(:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear AS studyYear, " +
                     "sd.specialization.name AS specializationName, " +
-                    "COUNT(DISTINCT sd.id) AS totalCount " +
+                    "COUNT(DISTINCT sd.id) AS count " +
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.specialization.degree.id=:degreeId AND sd.active = true " +
                     "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
