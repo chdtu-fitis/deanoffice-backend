@@ -163,8 +163,8 @@ public class GradeService {
         return gradeRepository.save(grades);
     }
 
-    public Grade getGradeForStudentAndCourse(Integer studentDegreeId, Integer courseId) {
-        return gradeRepository.getByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+    public List<Grade> getGradeForStudentAndSemester(Integer studentDegreeId, Integer semester) {
+        return gradeRepository.getByStudentDegreeIdAndSemester(studentDegreeId, semester);
     }
 
     public List<Grade> getGradesByCourseAndGroup(int courseId, int groupId) {

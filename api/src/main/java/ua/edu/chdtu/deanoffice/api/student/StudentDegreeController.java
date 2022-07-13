@@ -15,14 +15,17 @@ import ua.edu.chdtu.deanoffice.api.course.dto.StudentCourseDTO;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.general.mapper.Mapper;
+import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
 import ua.edu.chdtu.deanoffice.api.group.dto.StudentDegreeFullNameDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.StudentCoursesDTO;
+import ua.edu.chdtu.deanoffice.api.student.dto.OneStudentGradeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.student.dto.StudentView;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.service.GradeService;
 import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.StudentService;
@@ -31,6 +34,7 @@ import ua.edu.chdtu.deanoffice.service.course.StudentCourseBean;
 import ua.edu.chdtu.deanoffice.service.security.FacultyAuthorizationService;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +46,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ua.edu.chdtu.deanoffice.api.general.Util.getNewResourceLocation;
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @RestController
 public class StudentDegreeController {
@@ -50,17 +55,19 @@ public class StudentDegreeController {
     private final StudentGroupService studentGroupService;
     private final FacultyAuthorizationService facultyAuthorizationService;
     private final CourseService courseService;
+    private final GradeService gradeService;
 
     @Autowired
     public StudentDegreeController(
-            StudentDegreeService studentDegreeService,
-            StudentService studentService, StudentGroupService studentGroupService,
-            FacultyAuthorizationService facultyAuthorizationService, CourseService courseService) {
+            StudentDegreeService studentDegreeService, StudentService studentService,
+            StudentGroupService studentGroupService, FacultyAuthorizationService facultyAuthorizationService,
+            CourseService courseService, GradeService gradeService) {
         this.studentDegreeService = studentDegreeService;
         this.studentService = studentService;
         this.studentGroupService = studentGroupService;
         this.facultyAuthorizationService = facultyAuthorizationService;
         this.courseService = courseService;
+        this.gradeService = gradeService;
     }
 
     @Secured("ROLE_DEANOFFICER")
@@ -293,6 +300,16 @@ public class StudentDegreeController {
         studentCoursesDTO.setFirstSemesterCourses(Mapper.strictMap(allCoursesInStudyYear[0], StudentCourseDTO.class));
         studentCoursesDTO.setSecondSemesterCourses(Mapper.strictMap(allCoursesInStudyYear[1], StudentCourseDTO.class));
         return ResponseEntity.ok(studentCoursesDTO);
+    }
+
+    @Secured({"ROLE_DEANOFFICER", "ROLE_STUDENT"})
+    @GetMapping("/students/degrees/{id}/grades")
+    public ResponseEntity<List<OneStudentGradeDTO>> getStudentGrades(@PathVariable Integer id, @RequestParam @NotNull Integer semester) {
+        List<Grade> grades = this.gradeService.getGradeForStudentAndSemester(id, semester);
+        List<OneStudentGradeDTO> gradeDtos = grades.stream().map(g ->
+                new OneStudentGradeDTO(g.getCourse().getCourseName().getName(), g.getCourse().getSemester(),
+                        g.getCourse().getKnowledgeControl().getName(), g.getPoints(), g.getGrade())).collect(Collectors.toList());
+        return ResponseEntity.ok(gradeDtos);
     }
 
     private ResponseEntity handleException(Exception exception) {
