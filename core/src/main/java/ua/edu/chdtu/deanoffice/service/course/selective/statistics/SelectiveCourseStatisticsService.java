@@ -25,7 +25,9 @@ public class SelectiveCourseStatisticsService {
     }
 
     public List<StudentDegree> getStudentsNotSelectedSelectiveCourses(Integer studyYear, int degreeId) {
-        return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(studyYear, degreeId);
+        int currentYear = currentYearService.getYear();
+        int[] selectiveCoursesChooseYears = SelectiveCourseConstants.getSelectiveCourseChooseYears(degreeId, currentYear, studyYear);
+        return selectiveCoursesStudentDegreesRepository.findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(studyYear, degreeId, currentYear, selectiveCoursesChooseYears);
     }
 
     public List<IPercentStudentsRegistrationOnCourses> getStudentsPercentWhoChosenSelectiveCourse(

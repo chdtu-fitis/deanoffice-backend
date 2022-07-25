@@ -94,12 +94,14 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                    @Param("status") boolean status);
 
     @Query("SELECT sd FROM StudentDegree sd WHERE sd.specialization.degree.id = :degreeId and sd.active=TRUE " +
+            "AND (:currentYear) - sd.studentGroup.creationYear + sd.studentGroup.realBeginYear IN :selectiveCoursesChooseYears " +
             "and sd.id NOT IN " +
-            "(SELECT DISTINCT scsd.studentDegree.id FROM SelectiveCoursesStudentDegrees AS scsd WHERE scsd.selectiveCourse.studyYear= :studyYear)" +
-            "ORDER BY sd.student.surname,sd.student.name,sd.student.patronimic")
+            "(SELECT DISTINCT scsd.studentDegree.id FROM SelectiveCoursesStudentDegrees AS scsd WHERE scsd.selectiveCourse.studyYear= :studyYear)")
     List<StudentDegree> findStudentsNotSelectedSelectiveCoursesByDegreeAndStudyYear(
             @Param("studyYear") int studyYear,
-            @Param("degreeId") int degreeId
+            @Param("degreeId") int degreeId,
+            @Param("currentYear") int currentYear,
+            @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears
     );
 //----------------------- YEAR ------
     @Query(value =
