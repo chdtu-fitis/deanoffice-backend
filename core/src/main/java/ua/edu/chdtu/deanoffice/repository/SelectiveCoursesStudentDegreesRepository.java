@@ -512,7 +512,7 @@ List<IFindStudentsByFacultyAndYearAndSpecialization> findStudentsRegisteredSelec
     @Query("SELECT scsd.studentDegree.id AS studentDegreeId, " +
             "scsd.studentDegree.student.surname AS surname, " +
             "scsd.studentDegree.student.name AS name, " +
-            "scsd.studentDegree.specialization.faculty.name AS facultyName, " +
+            "scsd.studentDegree.specialization.faculty.abbr AS facultyName, " +
             "scsd.studentDegree.specialization.speciality.code AS specialityCode, " +
             ":currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear AS year, " +
             "scsd.studentDegree.studentGroup.name AS groupName, " +
@@ -522,7 +522,7 @@ List<IFindStudentsByFacultyAndYearAndSpecialization> findStudentsRegisteredSelec
             "AND scsd.selectiveCourse.studyYear=:studyYear " +
             "AND :currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear IN :studentYears " +
             "GROUP BY scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
-            "scsd.studentDegree.specialization.faculty.name, scsd.studentDegree.specialization.speciality.code, 6, " +
+            "scsd.studentDegree.specialization.faculty.abbr, scsd.studentDegree.specialization.speciality.code, 6, " +
             "scsd.studentDegree.studentGroup.name " +
             "having COUNT(scsd.id) <= :ceiling AND COUNT(scsd.id) >= :floor " +
             "order by scsd.studentDegree.studentGroup.name")
