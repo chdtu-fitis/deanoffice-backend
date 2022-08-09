@@ -508,11 +508,9 @@ public class StudentOneYearGradesAbstractService {
         kCTypes.add(Constants.ATTESTATION);
         kCTypes.add(Constants.COURSE_PROJECT);
         kCTypes.add(Constants.COURSEWORK);
-        kCTypes.add(Constants.CREDIT);
         kCTypes.add(Constants.DIFFERENTIATED_CREDIT);
         kCTypes.add(Constants.EXAM);
         kCTypes.add(Constants.STATE_EXAM);
-        kCTypes.add(Constants.NON_GRADED_INTERNSHIP);
         List<Grade> grades = gradeService.getGradesByStudetDegreeIdAndKCTypes(studentDegreeId, kCTypes);
         Long perfect = 0L, good = 0L, satisfactory = 0L;
         for (Grade grade : grades) {
@@ -597,8 +595,8 @@ public class StudentOneYearGradesAbstractService {
         if (tempTable == null) return;
         Tr templateRow;
         int rowToAddIndex = 2;
-        for (PracticeReport PracticeReport : practiceReports) {
-            Map<String, String> replacements = PracticeReport.getDictionary();
+        for (PracticeReport practiceReport : practiceReports) {
+            Map<String, String> replacements = practiceReport.getDictionary();
             templateRow = getTableRow(tempTable, rowToAddIndex);
             replaceInRow(templateRow, replacements);
             rowToAddIndex++;

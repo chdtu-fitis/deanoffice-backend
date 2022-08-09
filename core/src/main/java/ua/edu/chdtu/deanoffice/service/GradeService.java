@@ -15,6 +15,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
@@ -38,15 +39,17 @@ public class GradeService {
 
     private final GradeRepository gradeRepository;
     private final CourseRepository courseRepository;
+    private final CourseForGroupRepository courseForGroupRepository;
     private final SelectiveCoursesStudentDegreesRepository selectiveCourseRepository;
     private final StudentDegreeRepository studentDegreeRepository;
     private KnowledgeControlService knowledgeControlService;
 
     @Autowired
-    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository,
+    public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, CourseForGroupRepository courseForGroupRepository,
                         SelectiveCoursesStudentDegreesRepository selectiveCourseRepository, StudentDegreeRepository studentDegreeRepository, KnowledgeControlService knowledgeControlService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
+        this.courseForGroupRepository = courseForGroupRepository;
         this.selectiveCourseRepository = selectiveCourseRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.knowledgeControlService = knowledgeControlService;
@@ -251,6 +254,9 @@ public class GradeService {
     }
 
     public List<Grade> getGradesByStudetDegreeIdAndKCTypes(Integer studentDegreeId, List<Integer> knowledgeControlsIds) {
-        return gradeRepository.getByStudentDegreeIdAndKCTypes(studentDegreeId, knowledgeControlsIds);
+        StudentDegree sd = studentDegreeRepository.findOne(studentDegreeId);
+        List<CourseForGroup> coursesForGroups = courseForGroupRepository.findAllByStudentGroupId(sd.getStudentGroup().getId());
+        List<Integer> courseIds = coursesForGroups.stream().map(cfg -> cfg.getCourse().getId()).collect(Collectors.toList());
+        return gradeRepository.getByStudentDegreeIdAndCoursesIdsKCTypes(studentDegreeId, courseIds, knowledgeControlsIds);
     }
 }
