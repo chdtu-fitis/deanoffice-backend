@@ -26,30 +26,30 @@ import java.util.*;
 
 @Service
 public class SelectiveCourseImportService {
-
-    private TeacherRepository teacherRepository;
-    private DegreeRepository degreeRepository;
-    private DepartmentRepository departmentRepository;
-    private FieldOfKnowledgeRepository fieldOfKnowledgeRepository;
     private KnowledgeControlRepository knowledgeControlRepository;
     private CourseNameRepository courseNameRepository;
+    private CourseRepository courseRepository;
 
     private SelectiveCourseService selectiveCourseService;
     private FieldOfKnowledgeService fieldOfKnowledgeService;
     private DepartmentService departmentService;
     private DegreeService degreeService;
-    private CourseService courseService;
     private TeacherService teacherService;
-
-    private SelectiveCourseRepository selectiveCourseRepository;
-    private CourseRepository courseRepository;
 
     static final String GENERAL_TRAINING_CYCLE_IN_CSV = "Загальної підготовки";
 
-    // TODO: add params
-    public SelectiveCourseImportService(SelectiveCourseRepository selectiveCourseRepository, CourseRepository courseRepository) {
-        this.selectiveCourseRepository = selectiveCourseRepository;
+    public SelectiveCourseImportService(KnowledgeControlRepository knowledgeControlRepository, CourseNameRepository courseNameRepository,
+                                        CourseRepository courseRepository, SelectiveCourseService selectiveCourseService,
+                                        FieldOfKnowledgeService fieldOfKnowledgeService, DepartmentService departmentService,
+                                        DegreeService degreeService, TeacherService teacherService) {
+        this.knowledgeControlRepository = knowledgeControlRepository;
+        this.courseNameRepository = courseNameRepository;
         this.courseRepository = courseRepository;
+        this.selectiveCourseService = selectiveCourseService;
+        this.fieldOfKnowledgeService = fieldOfKnowledgeService;
+        this.departmentService = departmentService;
+        this.degreeService = degreeService;
+        this.teacherService = teacherService;
     }
 
     public SelectiveCourseCsvReport formSelectiveCourseCsvImportReport(List<SelectiveCourseCsvBean> importedSelectiveCourses) {
@@ -190,8 +190,7 @@ public class SelectiveCourseImportService {
         }
     }
 
-    private Course getImportedCourse(int semester, CourseName courseName,
-                                     int hours, int hoursPerCredit) {
+    private Course getImportedCourse(int semester, CourseName courseName, int hours, int hoursPerCredit) {
         Course foundCourse = courseRepository.findOne(semester, Constants.CREDIT, courseName.getId(), hours, hoursPerCredit);
         if (foundCourse != null) {
             return foundCourse;
@@ -212,7 +211,7 @@ public class SelectiveCourseImportService {
         if (foundTeacher != null) {
             return foundTeacher;
         } else {
-            throw new SelectiveCourseImportException("Неправильно вказаний викладач");
+            throw new SelectiveCourseImportException("Неправильно вказаний викладач (" + teacher + ")");
         }
     }
 
@@ -233,7 +232,7 @@ public class SelectiveCourseImportService {
         if (foundDepartment!= null) {
             return foundDepartment;
         } else {
-            throw new SelectiveCourseImportException("Кафедра не знайдена");
+            throw new SelectiveCourseImportException("Кафедра не знайдена (" + departmentAbbr + ")");
         }
     }
 
