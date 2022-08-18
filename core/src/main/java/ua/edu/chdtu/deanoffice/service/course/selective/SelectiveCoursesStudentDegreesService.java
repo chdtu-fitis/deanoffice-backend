@@ -131,6 +131,8 @@ public class SelectiveCoursesStudentDegreesService {
                 .findAll(SelectiveCoursesStudentDegreeSpecification.getSelectiveCoursesStudentDegree(all, studyYear, Arrays.asList(studentDegreeId)));
 
         if (selectiveCoursesForStudentDegree.size() > 0) {
+            selectiveCoursesForStudentDegree.forEach(elem -> elem.getSelectiveCourse().setAvailable(elem.isActive()));
+
             ExistingId existingId = new ExistingId();
             existingId.setId(selectiveCoursesForStudentDegree.get(0).getStudentDegree().getId());
             selectiveCoursesForStudentDegreeId.setStudentDegree(existingId);
