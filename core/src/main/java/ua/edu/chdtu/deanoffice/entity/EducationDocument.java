@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.entity;
 
 public enum EducationDocument {
     SECONDARY_SCHOOL_CERTIFICATE(1, "Атестат про повну загальну середню освіту", "Certificate of Full Secondary Education"),
-    JUNIOR_BACHELOR_DIPLOMA(2, "Диплом молодшого спеціаліста", "Junior Specialist diploma"),
+    JUNIOR_SPECIALIST_DIPLOMA(2, "Диплом молодшого спеціаліста", "Junior Specialist diploma"),
     BACHELOR_DIPLOMA(3, "Диплом бакалавра", "Bachelor diploma"),
     MASTER_DIPLOMA(4, "Диплом магістра", "Master diploma"),
     PHD_DIPLOMA(5, "Диплом доктора філософії", "PHD diploma"),
@@ -12,7 +12,8 @@ public enum EducationDocument {
     WORKER_QUALIFICATION_DIPLOMA(9, "Свідоцтво про присвоєння(підвищення) робітничої кваліфікації", "Certificate of Appointment (Upgrade) of the Worker Qualification"),
     SPECIALIST_DIPLOMA(10, "Диплом спеціаліста", "Specialist diploma"),
     SECONDARY_SCHOOL_CERTIFICATE1(11, "Свідоцтво про здобуття повної загальної середньої освіти", "Certificate of Full Secondary Education"),
-    TEMPORARY_DONBAS_CERTIFICATE(12, "Довідка (тимчасова) про повну загальну середню освіту (ОЦ «Донбас-Україна»)", "Certificate (temporary) on complete general secondary education (EC \"Donbas-Ukraine\")");
+    TEMPORARY_DONBAS_CERTIFICATE(12, "Довідка (тимчасова) про повну загальну середню освіту (ОЦ «Донбас-Україна»)", "Certificate (temporary) on complete general secondary education (EC \"Donbas-Ukraine\")"),
+    JUNIOR_BACHELOR_DIPLOMA(13, "Диплом фахового молодшого бакалавра", "Junior Bachelor diploma");
 
     private final int id;
     private final String nameUkr;
