@@ -476,20 +476,23 @@ public class SelectiveCourseController {
     /*Повертає правила вибіркових за studentDegreeId або за: id навчального ступеня та курсом студента*/
     @GetMapping("/selection-rules")
     public ResponseEntity<List<SelectiveCoursesSelectionRulesDTO>> getSelectiveCoursesSelectionRules(
-            @RequestParam(required = false) Integer studentDegreeId, @RequestParam(required = false) Integer degreeId, @RequestParam(required = false) Integer studentsYear)
+            @RequestParam(required = false) Integer studentDegreeId, @RequestParam(required = false) Integer degreeId,
+            @RequestParam(required = false) Integer studentsYear, @RequestParam(required = false) Integer calendarYear)
             throws NotFoundException {
-        if (studentDegreeId == null && (degreeId == null || studentsYear == null))
+        if (studentDegreeId == null && (degreeId == null || studentsYear == null || calendarYear == null))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        int studentsYearIndex;
         if (studentDegreeId != null) {
             StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
             if (studentDegree == null)
                 return new ResponseEntity("Не існує studentDegree з таким id", HttpStatus.UNPROCESSABLE_ENTITY);
-
-            studentsYear = studentDegreeService.getRealStudentDegreeYear(studentDegree);
+            studentsYearIndex = studentDegreeService.getRealStudentDegreeYear(studentDegree);
             degreeId = studentDegree.getSpecialization().getDegree().getId();
+        } else {
+            studentsYearIndex = studentsYear + (calendarYear - currentYearService.getYear()) - 1;
         }
         List<SelectiveCoursesSelectionRulesDTO> selectiveCoursesSelectionRulesDTO = new ArrayList<>();
-        for (Map.Entry<String, Integer[]> entry : SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear].entrySet()) {
+        for (Map.Entry<String, Integer[]> entry : SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYearIndex].entrySet()) {
             TrainingCycle trainingCycle = TrainingCycle.getTypeCycleByName(entry.getKey());
             selectiveCoursesSelectionRulesDTO.add(new SelectiveCoursesSelectionRulesDTO(trainingCycle, entry.getValue()));
         }
