@@ -126,6 +126,19 @@ public class GradeService {
                 knowledgeControlTypes);
     }
 
+    public List<List<Grade>> filterOnlyPositiveGrades(List<List<Grade>> grades) {
+        for (int i = 0; i < grades.size(); i++) {
+            List<Grade> oneSortGrades = grades.get(i);
+            if (oneSortGrades != null) {
+                List<Grade> filteredGrades = oneSortGrades.stream()
+                        .filter(grade -> grade.getPoints() != null && grade.getPoints() >= Constants.MINIMAL_SATISFACTORY_POINTS)
+                        .collect(Collectors.toList());
+                grades.set(i, filteredGrades);
+            }
+        }
+        return grades;
+    }
+
     @Transactional
     public void setAcademicDifferenceByGradeIds(Map<Boolean, List<Integer>> academicDifferenceAndGradeIds) {
         List<Integer> gradesIdsWithAcademicDifference = academicDifferenceAndGradeIds.get(true);

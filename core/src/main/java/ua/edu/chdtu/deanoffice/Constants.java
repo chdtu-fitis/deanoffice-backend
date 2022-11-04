@@ -20,6 +20,7 @@ public class Constants {
     public static final Integer ID_SUCCESSFUL_END_MASTER = 16;
 
     public static final int MINIMAL_SATISFACTORY_POINTS = 60;
+
     public static final int FOREIGN_STUDENTS_FACULTY_ID = 8;
     public static final int PHD_FACULTY_ID = 12;
 
