@@ -38,7 +38,7 @@ public abstract class EdeboStudentDataSynchronizationServiceImpl implements Edeb
     private static final String EXPEL_DATE_REGEXP = "[\\W\\w]+Дата[\\s]+відрахування[\\s:]*([0-9]{2}.[0-9]{2}.[0-9]{4})";
     private static final String STUDENT_PREVIOUS_UNIVERSITY_FIELDS_TO_COMPARE[] = {"universityName", "studyStartDate", "studyEndDate"};
     private static final String SECONDARY_STUDENT_DEGREE_FIELDS_TO_COMPARE[] = {"payment", "tuitionForm", "citizenship", "previousDiplomaNumber", "previousDiplomaDate",
-            "previousDiplomaType", "previousDiplomaIssuedBy", "edeboId", "admissionDate", "admissionOrderNumber", "admissionOrderDate", "citizenship"};
+            "previousDiplomaType", "previousDiplomaIssuedBy", "edeboId", "admissionDate", "admissionOrderNumber", "admissionOrderDate"};
     private static final String SECONDARY_STUDENT_FIELDS_TO_COMPARE[] = {
             "surnameEng", "nameEng", "sex"};
     protected static Logger log = LoggerFactory.getLogger(EdeboStudentDataSynchronizationServiceImpl.class);

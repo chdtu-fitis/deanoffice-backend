@@ -15,4 +15,5 @@ public class StudentDegreePrimaryEdeboDataDTO {
     private String fullSpecialityName ;
     private String fullSpecializationName;
     private String groupName;
+    private String edeboId;
 }
