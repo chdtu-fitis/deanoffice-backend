@@ -8,6 +8,7 @@ import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseConstants;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -212,6 +213,7 @@ public class SelectiveCourseStatisticsService {
                         registeredStudentsIds.add(csbsg.getStudentDegreeId());
                     }
                 }
+                students.sort(Comparator.comparing(StudentNameAndId::getName));
                 cssgResult.setStudents(students);
             }
         }
