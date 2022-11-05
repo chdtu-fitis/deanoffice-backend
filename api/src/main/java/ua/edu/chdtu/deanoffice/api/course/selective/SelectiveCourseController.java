@@ -22,9 +22,7 @@ import ua.edu.chdtu.deanoffice.api.course.selective.dto.SelectiveCoursesSelectio
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.csvimport.IncorrectSelectiveCourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.csvimport.SelectiveCourseCsvReportDTO;
 import ua.edu.chdtu.deanoffice.api.course.selective.dto.csvimport.SelectiveCourseImportedResultDTO;
-import ua.edu.chdtu.deanoffice.api.document.informal.recordbooks.ExamReportsRecordBookController;
-import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
-import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
+import ua.edu.chdtu.deanoffice.api.general.dto.FieldOfKnowledgeDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.ResponseMessageDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
@@ -49,7 +47,6 @@ import ua.edu.chdtu.deanoffice.service.course.selective.importcsv.SelectiveCours
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,7 +122,7 @@ public class SelectiveCourseController {
         return selectiveCourseDTOS;
     }
 
-    private List<NamedDTO> getFieldsOfKnowledge(SelectiveCourse selectiveCourse) {
+    private List<FieldOfKnowledgeDTO> getFieldsOfKnowledge(SelectiveCourse selectiveCourse) {
         if (selectiveCourse.getFieldOfKnowledge() != null) {
             List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>();
             fieldsOfKnowledge.add(selectiveCourse.getFieldOfKnowledge());
@@ -135,7 +132,7 @@ public class SelectiveCourseController {
                 List<FieldOfKnowledge> otherFieldsOfKnowledge = fieldOfKnowledgeService.getFieldsOfKnowledge(idsInt);
                 fieldsOfKnowledge.addAll(otherFieldsOfKnowledge);
             }
-            List<NamedDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, NamedDTO.class);
+            List<FieldOfKnowledgeDTO> fieldOfKnowledgeDTOS = map(fieldsOfKnowledge, FieldOfKnowledgeDTO.class);
             return fieldOfKnowledgeDTOS;
         }
         return null;
