@@ -501,7 +501,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                              @Param("groupId") int groupId);
 
     @Query(value =
-            "SELECT  DISTINCT(sd.id) AS studentDegreeId, " +
+            "SELECT DISTINCT(sd.id) AS studentDegreeId, " +
                     "CONCAT(sd.student.surname, ' ', sd.student.name) AS studentFullName " +
                     "FROM StudentDegree AS sd " +
                     "WHERE sd.active=true AND sd.studentGroup.id=:groupId " +
@@ -518,7 +518,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "scsd.studentDegree.studentGroup.name AS groupName, " +
             "COUNT(scsd.id) AS coursesNumber " +
             "FROM SelectiveCoursesStudentDegrees AS scsd " +
-            "WHERE scsd.active = true AND scsd.studentDegree.specialization.degree.id=:degreeId " +
+            "WHERE scsd.active = true AND scsd.studentDegree.active = true AND scsd.studentDegree.specialization.degree.id=:degreeId " +
             "AND scsd.selectiveCourse.studyYear=:studyYear " +
             "AND :currentYear-scsd.studentDegree.studentGroup.creationYear+scsd.studentDegree.studentGroup.realBeginYear IN :studentYears " +
             "GROUP BY scsd.studentDegree.id, scsd.studentDegree.student.surname, scsd.studentDegree.student.name, " +
