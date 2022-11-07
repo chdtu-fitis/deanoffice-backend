@@ -165,7 +165,7 @@ public class SelectiveCoursesDocumentService {
         for (String groupName: selectiveGroupNames) {
             List<SelectiveCourse> selectiveCourses = studentDegreesBySelectiveCourses.keySet()
                                                         .stream()
-                                                        .filter(sc -> sc.getGroupName().equalsIgnoreCase(groupName))
+                                                        .filter(sc -> sc.getGroupName() != null && sc.getGroupName().equalsIgnoreCase(groupName))
                                                         .collect(Collectors.toList());
             selectiveByGroupName.put(groupName, selectiveCourses);
         }

@@ -6,7 +6,9 @@ import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -18,6 +20,8 @@ public class SelectiveCoursesStudentDegrees extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private SelectiveCourse selectiveCourse;
     private boolean active;
+    @Temporal(TemporalType.DATE)
+    private Date createdAt;
 
     public SelectiveCoursesStudentDegrees() {
     }
