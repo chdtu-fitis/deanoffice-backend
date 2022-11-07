@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -239,6 +240,21 @@ public class SelectiveCoursesStudentDegreesService {
 //
 //        return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
 //    }
+
+    public Map<SelectiveCourse, List<StudentDegree>> getStudentDegreesGroupedBySelectiveCourses(int studyYear, int semester, int degreeId) {
+        List<SelectiveCoursesStudentDegrees> coursesForSemester = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemesterAndDegree(studyYear, semester, degreeId);
+        Map<SelectiveCourse, List<SelectiveCoursesStudentDegrees>> selectiveCourseMap = coursesForSemester.stream()
+                .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse));
+        Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourse = new HashMap<>();
+        selectiveCourseMap.keySet().forEach(selectiveCourse -> {
+            List<StudentDegree> studentDegrees = selectiveCourseMap.get(selectiveCourse).stream()
+                    .map(scsd -> scsd.getStudentDegree())
+                    .collect(Collectors.toList());
+
+            studentDegreesBySelectiveCourse.put(selectiveCourse, studentDegrees);
+        });
+        return studentDegreesBySelectiveCourse;
+    }
 
     private List<SelectiveCourse> getAvailableSelectiveCoursesByStudyYearAndDegreeAndSemestersAndIds(
             int calendarYear, StudentDegree studentDegree, List<Integer> selectiveCourseIds) throws OperationCannotBePerformedException {
