@@ -238,7 +238,7 @@ public class SelectiveCoursesStudentDegreesService {
 //        return new SelectiveCoursesStudentDegree(studentDegree, selectiveCoursesAfterSave);
 //    }
 
-    public Map<SelectiveCourse, List<StudentDegree>> getStudentDegreesBySelectiveCourses(int studyYear, int semester, int degreeId) {
+    public Map<SelectiveCourse, List<StudentDegree>> getStudentDegreesGroupedBySelectiveCourses(int studyYear, int semester, int degreeId) {
         List<SelectiveCoursesStudentDegrees> coursesForSemester = selectiveCoursesStudentDegreesRepository.findActiveByYearAndSemesterAndDegree(studyYear, semester, degreeId);
         Map<SelectiveCourse, List<SelectiveCoursesStudentDegrees>> selectiveCourseMap = coursesForSemester.stream()
                 .collect(Collectors.groupingBy(SelectiveCoursesStudentDegrees::getSelectiveCourse));

@@ -124,7 +124,7 @@ public class SelectiveCoursesDocumentService {
                 .getContent()
                 .add(createParagraphText(semester+" СЕМЕСТР"));
 
-        Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = selectiveCoursesStudentDegreesService.getStudentDegreesBySelectiveCourses(studyYear, semester, degreeId);
+        Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semester, degreeId);
 
         Map<TypeCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
                 .stream()
@@ -141,8 +141,8 @@ public class SelectiveCoursesDocumentService {
                                                  int studyYear,
                                                  int degreeId, int coursesCount) throws Docx4JException {
 
-        Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = concatSelectiveCourseBothSemesters(selectiveCoursesStudentDegreesService.getStudentDegreesBySelectiveCourses(studyYear, semesterFirst, degreeId),
-                                                                                                                selectiveCoursesStudentDegreesService.getStudentDegreesBySelectiveCourses(studyYear, semesterSecond, degreeId));
+        Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = concatSelectiveCourseBothSemesters(selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterFirst, degreeId),
+                                                                                                                selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterSecond, degreeId));
 
         Map<TypeCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
                 .stream()
