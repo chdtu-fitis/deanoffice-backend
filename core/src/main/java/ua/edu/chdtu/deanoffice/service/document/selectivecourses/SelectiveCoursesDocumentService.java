@@ -13,7 +13,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
 import ua.edu.chdtu.deanoffice.entity.Speciality;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.TypeCycle;
+import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.service.document.DocumentIOService;
@@ -81,8 +81,8 @@ public class SelectiveCoursesDocumentService {
                 case 4:
                     template.getMainDocumentPart().getContent()
                             .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ПРОФЕСІЙНОЇ ПІДГОТОВКИ"));
-                    Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TypeCycle.PROFESSIONAL.toString())[0]+
-                                            SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TypeCycle.PROFESSIONAL.toString())[1];
+                    Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[0]+
+                                            SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[1];
                     fillProfessionalTablesByFaculty(template,firstSemester,secondSemester,studyYear,degreeId, countCourses);
                     break;
             }
@@ -91,8 +91,8 @@ public class SelectiveCoursesDocumentService {
         if (degreeId == DegreeEnum.MASTER.getId()) {
             template.getMainDocumentPart().getContent()
                     .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ПРОФЕСІЙНОЇ ПІДГОТОВКИ"));
-            Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TypeCycle.PROFESSIONAL.toString())[0]+
-                    SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TypeCycle.PROFESSIONAL.toString())[1];
+            Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[0]+
+                    SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[1];
             fillProfessionalTablesByFaculty(template,firstSemester, secondSemester, studyYear,degreeId, countCourses);
             template.getMainDocumentPart().getContent()
                     .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ЗАГАЛЬНОЇ ПІДГОТОВКИ"));
@@ -126,11 +126,11 @@ public class SelectiveCoursesDocumentService {
 
         Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semester, degreeId);
 
-        Map<TypeCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
+        Map<TrainingCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
                 .stream()
                 .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getTrainingCycle()));
 
-        for (SelectiveCourse selectiveCourse: selectiveByTypeCycle.get(TypeCycle.GENERAL)) {
+        for (SelectiveCourse selectiveCourse: selectiveByTypeCycle.get(TrainingCycle.GENERAL)) {
             fillGeneralTablesBySelectiveCourses(template, studentDegreesBySelectiveCourses.get(selectiveCourse), selectiveCourse);
         }
     }
@@ -144,17 +144,17 @@ public class SelectiveCoursesDocumentService {
         Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = concatSelectiveCourseBothSemesters(selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterFirst, degreeId),
                                                                                                                 selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterSecond, degreeId));
 
-        Map<TypeCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
+        Map<TrainingCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
                 .stream()
                 .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getTrainingCycle()));
 
-        List<String> selectiveGroupNames = selectiveByTypeCycle.get(TypeCycle.PROFESSIONAL).stream()
+        List<String> selectiveGroupNames = selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL).stream()
                                                         .map(SelectiveCourse::getGroupName)
                                                         .distinct()
                                                         .collect(Collectors.toList());
 
         Map<SelectiveCourse,Map<Speciality,List<StudentDegree>>> studentDegreesBySpeciality = new HashMap<>();
-        selectiveByTypeCycle.get(TypeCycle.PROFESSIONAL).forEach(
+        selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL).forEach(
                 selectiveCourse -> {
                     studentDegreesBySpeciality.put(selectiveCourse,
                             studentDegreesBySelectiveCourses.get(selectiveCourse).stream().collect(Collectors.groupingBy(studentDegree -> studentDegree.getSpecialization().getSpeciality())));
@@ -202,7 +202,7 @@ public class SelectiveCoursesDocumentService {
                 }
         );
 
-        for (SelectiveCourse selectiveCourse : selectiveByTypeCycle.get(TypeCycle.PROFESSIONAL)) {
+        for (SelectiveCourse selectiveCourse : selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL)) {
             if (!allPrintedIds.contains(selectiveCourse.getId())) {
                 fillGeneralTablesBySelectiveCourses(template, studentDegreesBySelectiveCourses.get(selectiveCourse), selectiveCourse);
             }
