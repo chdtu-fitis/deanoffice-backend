@@ -101,7 +101,6 @@ public class SelectiveCoursesDocumentService {
         }
 
         String fileName = "вибіркові-"+degreeService.getById(degreeId).getName().toLowerCase()+"-"+studentsYear+"курс-"+studyYear+"-"+(studyYear+1);
-
         return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
     }
 
@@ -140,7 +139,6 @@ public class SelectiveCoursesDocumentService {
                                                  int semesterSecond,
                                                  int studyYear,
                                                  int degreeId, int coursesCount) throws Docx4JException {
-
         Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = concatSelectiveCourseBothSemesters(selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterFirst, degreeId),
                                                                                                                 selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterSecond, degreeId));
 
@@ -153,7 +151,7 @@ public class SelectiveCoursesDocumentService {
                                                         .distinct()
                                                         .collect(Collectors.toList());
 
-        Map<SelectiveCourse,Map<Speciality,List<StudentDegree>>> studentDegreesBySpeciality = new HashMap<>();
+        Map<SelectiveCourse, Map<Speciality, List<StudentDegree>>> studentDegreesBySpeciality = new HashMap<>();
         selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL).forEach(
                 selectiveCourse -> {
                     studentDegreesBySpeciality.put(selectiveCourse,
@@ -174,10 +172,8 @@ public class SelectiveCoursesDocumentService {
 
         List<SelectiveCoursesStudentDegreesGroup> selectiveCoursesStudentDegreesGroups = divisionByGroup(studentDegreesBySelectiveCourses, selectiveCourseStudentDegreesMap, selectiveByGroupName,coursesCount);
 
-        for (SelectiveCoursesStudentDegreesGroup scsdGroup:selectiveCoursesStudentDegreesGroups) {
-
+        for (SelectiveCoursesStudentDegreesGroup scsdGroup : selectiveCoursesStudentDegreesGroups) {
             if (scsdGroup.getCommonSelectiveCourses().size() == coursesCount) {
-
                 template.getMainDocumentPart()
                         .getContent()
                         .addAll(fillProfessionalTableTemplate(scsdGroup.getCommonStudentDegrees(),scsdGroup.getCommonSelectiveCourses())
@@ -187,9 +183,7 @@ public class SelectiveCoursesDocumentService {
                 for (SelectiveCourse selectiveCourse: scsdGroup.getCommonSelectiveCourses()) {
                     fillGeneralTablesBySelectiveCourses(template, scsdGroup.getCommonStudentDegrees(), selectiveCourse);
                 }
-
             }
-
         }
 
         List<Integer> allPrintedIds = new ArrayList<>();
@@ -207,11 +201,10 @@ public class SelectiveCoursesDocumentService {
                 fillGeneralTablesBySelectiveCourses(template, studentDegreesBySelectiveCourses.get(selectiveCourse), selectiveCourse);
             }
         }
-
     }
 
     private Map<SelectiveCourse, StudentDegrees> reorganizationByCommonStudentDegree(Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses,
-                                                                                     Map<SelectiveCourse,Map<Speciality,List<StudentDegree>>> studentDegreesBySpeciality,
+                                                                                     Map<SelectiveCourse, Map<Speciality, List<StudentDegree>>> studentDegreesBySpeciality,
                                                                                      Map<String, List<SelectiveCourse>> selectiveByGroupName, int coursesCount) {
         Map<SelectiveCourse, StudentDegrees> result = new HashMap<>();
         for(String groupName: selectiveByGroupName.keySet()){
@@ -237,7 +230,6 @@ public class SelectiveCoursesDocumentService {
                 }
             }
         }
-
         return result;
     }
 
@@ -256,7 +248,6 @@ public class SelectiveCoursesDocumentService {
                 selectiveCoursesStudentDegreesGroup.setCommonStudentDegrees(selectiveCourseStudentDegrees.get(firstCourseFromList).getCommonStudentDegrees());
                 result.add(selectiveCoursesStudentDegreesGroup);
             }
-
         }
 
         Map<SelectiveCourse, Map<Specialization,List<StudentDegree>>> selectiveCoursesDiffDegrees = new HashMap<>();
@@ -277,7 +268,6 @@ public class SelectiveCoursesDocumentService {
         });
 
         List<Integer> addedCoursesIds = new ArrayList<>();
-
         result.forEach(
                 selectiveCoursesStudentDegreesGroup -> {
                     addedCoursesIds.addAll(
@@ -300,7 +290,6 @@ public class SelectiveCoursesDocumentService {
         });
 
         result.addAll(getSelectiveCoursesGroups(selectiveCoursesDiffDegrees, specializations));
-
         return result;
     }
 

@@ -60,7 +60,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
             "WHERE scsd.selectiveCourse.studyYear = :studyYear " +
             "AND scsd.selectiveCourse.course.semester = :semester " +
             "AND scsd.selectiveCourse.degree.id = :degreeId " +
-            "AND scsd.active = true")
+            "AND scsd.active = true AND scsd.selectiveCourse.available = true")
     List<SelectiveCoursesStudentDegrees> findActiveByYearAndSemesterAndDegree(
             @Param("studyYear") int studyYear,
             @Param("semester") int semester,
