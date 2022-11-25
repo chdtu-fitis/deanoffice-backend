@@ -3,6 +3,8 @@ package ua.edu.chdtu.deanoffice.entity;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
@@ -21,6 +23,7 @@ public class SelectiveCoursesStudentDegrees extends BaseEntity {
     private SelectiveCourse selectiveCourse;
     private boolean active;
     @Temporal(TemporalType.DATE)
+    @Column(insertable = false, updatable = false)
     private Date createdAt;
 
     public SelectiveCoursesStudentDegrees() {
