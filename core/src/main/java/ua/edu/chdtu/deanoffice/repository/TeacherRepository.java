@@ -39,7 +39,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     void setTeachersInactiveByIds(@Param("ids") List<Integer> ids);
 
     @Query("SELECT t FROM Teacher t WHERE t.active=true AND t.surname=:surname AND SUBSTRING(t.name,1,1) =:nameFirstLetter " +
-            "AND SUBSTRING(t.patronimic,1,1)=:patronymicFirstLetter AND t.department.name=:departmentName")
+            "AND SUBSTRING(t.patronimic,1,1)=:patronymicFirstLetter AND t.department.abbr=:departmentName")
     List<Teacher> findAllBySurnameAndInitialsAndDepartment(
             @Param("surname") String surname,
             @Param("nameFirstLetter") String nameFirstLetter,
