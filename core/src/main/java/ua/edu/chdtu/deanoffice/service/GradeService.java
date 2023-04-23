@@ -224,6 +224,48 @@ public class GradeService {
         gradeRepository.delete(gradeId);
     }
 
+    public HashMap<Integer, List<Course>> getAcademicStudentDebtsByGroupId(Integer groupId) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
+
+        HashMap<Integer, List<Course>> debts = new HashMap<>();
+
+        for (StudentDegree sd: studentDegrees) {
+            List<Course> allCourses = getAllCoursesByStudentDegree(sd);
+
+            allCourses.forEach(course -> {
+                boolean isGoodMark = gradeRepository.isStudentHaveGoodMarkFromCourse(sd.getId(), groupId, course.getId());
+
+                if (!isGoodMark) {
+                    debts.computeIfAbsent(sd.getId(), courses -> new ArrayList<>()).add(course);
+                }
+            });
+        }
+
+        return debts;
+    }
+
+    private List<Course> getAllCoursesByStudentDegree(StudentDegree studentDegree) {
+        List<Course> courses = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId());
+        List<Course> selectiveCourses = selectiveCourseRepository.findByStudentDegreeId(studentDegree.getId())
+                .stream()
+                .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
+                .map(SelectiveCourse::getCourse)
+                .collect(Collectors.toList());
+
+        List<Course> allCourses = new ArrayList<>(courses);
+
+        StudentGroup studentGroup = studentDegree.getStudentGroup();
+
+        if (studentGroup.getTuitionTerm()==TuitionTerm.SHORTENED) {
+            Integer semesterShift = (studentGroup.getRealBeginYear() - studentGroup.getBeginYears()) * 2;
+            selectiveCourses.forEach(course -> {course.setSemester(course.getSemester() - semesterShift);});
+        }
+
+        allCourses.addAll(selectiveCourses);
+
+        return allCourses;
+    }
+
     @Transactional
     public void updateNationalGradeByCourseIdAndGradedFalse(int courseId) {
         List<Integer> studentDegreeIds = gradeRepository.getStudentDegreeIdByCourseId(courseId);
