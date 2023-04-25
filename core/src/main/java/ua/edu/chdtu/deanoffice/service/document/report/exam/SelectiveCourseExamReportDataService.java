@@ -50,7 +50,7 @@ public class SelectiveCourseExamReportDataService {
             List <StudentDegree> studentDegrees = coursesDegrees.stream()
                     .map(courseDegree -> courseDegree.getStudentDegree())
                     .filter(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() == FacultyUtil.getUserFacultyIdInt())
-                    .filter(studentDegree -> studentDegree.getStudentGroup().getTuitionForm() == TuitionForm.FULL_TIME)
+//                    .filter(studentDegree -> studentDegree.getStudentGroup().getTuitionForm() == TuitionForm.FULL_TIME)
                     .collect(Collectors.toList());
             if (studentDegrees.size() > 0) {
                 ExamReportDataBean examReportDataBean = new ExamReportDataBean();
