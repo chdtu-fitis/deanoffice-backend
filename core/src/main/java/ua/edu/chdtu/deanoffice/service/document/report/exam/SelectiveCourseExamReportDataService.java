@@ -7,6 +7,7 @@ import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
 import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.TuitionForm;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCourseRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
@@ -49,6 +50,7 @@ public class SelectiveCourseExamReportDataService {
             List <StudentDegree> studentDegrees = coursesDegrees.stream()
                     .map(courseDegree -> courseDegree.getStudentDegree())
                     .filter(studentDegree -> studentDegree.getSpecialization().getFaculty().getId() == FacultyUtil.getUserFacultyIdInt())
+//                    .filter(studentDegree -> studentDegree.getStudentGroup().getTuitionForm() == TuitionForm.FULL_TIME)
                     .collect(Collectors.toList());
             if (studentDegrees.size() > 0) {
                 ExamReportDataBean examReportDataBean = new ExamReportDataBean();
