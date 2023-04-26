@@ -30,7 +30,7 @@ public class StudentGroupService {
     }
 
     public StudentGroup getById(Integer studentGroupId) {
-        return this.studentGroupRepository.findOne(studentGroupId);
+        return this.studentGroupRepository.findById(studentGroupId).get();
     }
 
     public List<StudentGroup> getGroupsByCourse(int courseId, int facultyId) {
@@ -42,7 +42,7 @@ public class StudentGroupService {
     }
 
     private int getCurrentYear() {
-        return currentYearRepository.findOne(1).getCurrYear();
+        return currentYearRepository.findById(1).get().getCurrYear();
     }
 
     public List<StudentGroup> getGroupsByDegreeAndYear(int degreeId, int year, int facultyId) {
@@ -82,12 +82,12 @@ public class StudentGroupService {
 
     public void delete(List<StudentGroup> studentGroups) {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(false));
-        studentGroupRepository.save(studentGroups);
+        studentGroupRepository.saveAll(studentGroups);
     }
 
     public void restore(List<StudentGroup> studentGroups) {
         studentGroups.forEach(studentGroup -> studentGroup.setActive(true));
-        studentGroupRepository.save(studentGroups);
+        studentGroupRepository.saveAll(studentGroups);
     }
   
     public List<StudentGroup> getGroupsThatAreStudyingSameCourseTo(Integer courseIds, Integer facultyId, Integer degreeId) {

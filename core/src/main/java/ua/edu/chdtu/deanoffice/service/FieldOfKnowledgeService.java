@@ -24,7 +24,7 @@ public class FieldOfKnowledgeService {
     }
 
     public FieldOfKnowledge getFieldOfKnowledgeById(int id) {
-        return fieldOfKnowledgeRepository.findOne(id);
+        return fieldOfKnowledgeRepository.findById(id).get();
     }
 
     public List<FieldOfKnowledge> getFieldsOfKnowledge() {
@@ -32,6 +32,6 @@ public class FieldOfKnowledgeService {
     }
 
     public List<FieldOfKnowledge> getFieldsOfKnowledge(List<Integer> ids) {
-        return fieldOfKnowledgeRepository.findAll(ids);
+        return fieldOfKnowledgeRepository.findAllById(ids);
     }
 }

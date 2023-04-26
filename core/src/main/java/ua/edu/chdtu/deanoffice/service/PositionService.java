@@ -17,7 +17,7 @@ public class PositionService {
     }
 
     public Position getById(Integer positionId) {
-        return positionRepository.findOne(positionId);
+        return positionRepository.findById(positionId).get();
     }
 
     public List<Position> getAll() {

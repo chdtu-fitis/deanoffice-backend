@@ -65,7 +65,7 @@ public class SelectiveCourseService {
     }
 
     public SelectiveCourse getById(Integer id) {
-        return selectiveCourseRepository.findOne(id);
+        return selectiveCourseRepository.findById(id).get();
     }
 
     public List<SelectiveCourse> getSelectiveCourses(List<Integer> ids) {

@@ -41,7 +41,7 @@ public class StudentUtil {
     }
 
     public boolean studentDegreeIsActive(int studentDegreeId) {
-        StudentDegree studentDegree = this.studentDegreeRepository.findOne(studentDegreeId);
+        StudentDegree studentDegree = this.studentDegreeRepository.findById(studentDegreeId).get();
         return studentDegree.isActive();
     }
 }

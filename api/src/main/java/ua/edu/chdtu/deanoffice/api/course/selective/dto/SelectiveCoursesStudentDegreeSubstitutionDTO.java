@@ -1,9 +1,9 @@
 package ua.edu.chdtu.deanoffice.api.course.selective.dto;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotEmpty;
 import ua.edu.chdtu.deanoffice.api.general.dto.validation.ExistingIdDTO;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 

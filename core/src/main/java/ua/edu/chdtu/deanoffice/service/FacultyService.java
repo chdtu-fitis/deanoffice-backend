@@ -47,7 +47,7 @@ public class FacultyService {
     }
 
     public Faculty getById(Integer id) {
-        return facultyRepository.findById(id);
+        return facultyRepository.findById(id).get();
     }
 
     public List<Faculty> getAllActive() {

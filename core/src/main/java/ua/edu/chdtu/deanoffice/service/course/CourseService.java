@@ -76,11 +76,11 @@ public class CourseService {
     }
 
     public Course getById(int id) {
-        return courseRepository.findOne(id);
+        return courseRepository.findById(id).get();
     }
 
     public Course getByCourse(Course course) {
-        return courseRepository.findOne(course.getId());
+        return courseRepository.findById(course.getId()).get();
     }
 
     public List<Course> getCoursesByGroupId(Integer groupId) {
@@ -143,7 +143,7 @@ public class CourseService {
     public CoursePaginationBean getAllCourses(int page) {
         int totalOfAllCourses = courseRepository.findTotalOfAllCourses();
         int totalPages = (totalOfAllCourses / ROWS_PER_PAGE) + ((totalOfAllCourses % ROWS_PER_PAGE) == 0 ? 0 : 1);
-        List<Course> items = courseRepository.findAllCourses(new PageRequest(page - 1, ROWS_PER_PAGE));
+        List<Course> items = courseRepository.findAllCourses(PageRequest.of(page - 1, ROWS_PER_PAGE));
         return new CoursePaginationBean(totalPages, page, items);
     }
 
@@ -159,17 +159,17 @@ public class CourseService {
                 courseName, hours, hoursPerCredit, knowledgeControl, nameStartingWith, nameContains, semester);
         int totalOfFilteredCourses = (int) courseRepository.count(specification);
         int totalPages = (totalOfFilteredCourses / ROWS_PER_PAGE) + ((totalOfFilteredCourses % ROWS_PER_PAGE) == 0 ? 0 : 1);
-        Sort orders = new Sort(Sort.Direction.ASC, "semester")
-                .and(new Sort(Sort.Direction.ASC, "knowledgeControl"))
-                .and(new Sort(Sort.Direction.ASC, "courseName"));
-        PageImpl items = courseRepository.findAll(specification, new PageRequest(page - 1, ROWS_PER_PAGE, orders));
+        Sort orders = Sort.by(Sort.Direction.ASC, "semester")
+                .and(Sort.by(Sort.Direction.ASC, "knowledgeControl"))
+                .and(Sort.by(Sort.Direction.ASC, "courseName"));
+        PageImpl items = courseRepository.findAll(specification, PageRequest.of(page - 1, ROWS_PER_PAGE, orders));
         return new CoursePaginationBean(totalPages, page, items.getContent());
     }
 
     public CoursePaginationBean getPaginatedUnusedCourses(int page) {
         int totalOfUnusedCourses = courseRepository.findTotalOfUnusedCourses();
         int totalPages = (totalOfUnusedCourses / ROWS_PER_PAGE) + ((totalOfUnusedCourses % ROWS_PER_PAGE) == 0 ? 0 : 1);
-        List<Course> items = courseRepository.findUnusedCourses(new PageRequest(page - 1, ROWS_PER_PAGE));
+        List<Course> items = courseRepository.findUnusedCourses(PageRequest.of(page - 1, ROWS_PER_PAGE));
         return new CoursePaginationBean(totalPages, page, items);
     }
 
@@ -209,7 +209,7 @@ public class CourseService {
                     if (correctCourse != null) {
                         courseForGroupService.updateCourseIdById(correctCourse.getId(), wrongCourse.getId());
                         gradeRepository.updateCourseIdByCourseId(correctCourse.getId(), wrongCourse.getId());
-                        courseRepository.delete(wrongCourse.getId());
+                        courseRepository.delete(wrongCourse);
                     } else {
                         courseRepository.updateCourseNameIdInCourse(correctId, wrongId, wrongCourse.getId());
                     }

@@ -1,12 +1,13 @@
 package ua.edu.chdtu.deanoffice.webstarter;
 
 import com.zaxxer.hikari.HikariDataSource;
+import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
+//import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +16,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 
 @Configuration
@@ -27,13 +27,13 @@ public class DataSourceConfiguration implements EnvironmentAware {
     private final Logger log = LoggerFactory.getLogger(DataSourceConfiguration.class);
 
 
-    private RelaxedPropertyResolver propertyResolver;
+    //private RelaxedPropertyResolver propertyResolver;
     private Environment env;
 
     @Override
     public void setEnvironment(Environment env) {
         this.env = env;
-        this.propertyResolver = new RelaxedPropertyResolver(env, "spring.datasource.");
+        //this.propertyResolver = new RelaxedPropertyResolver(env, "spring.datasource.");
     }
 
     @Bean(destroyMethod = "close")
@@ -55,5 +55,4 @@ public class DataSourceConfiguration implements EnvironmentAware {
                 .password(dataSourceProperties.getPassword())
                 .build();
     }
-
 }

@@ -84,7 +84,7 @@ public class SelectiveCourseExamReportDataService {
     private GroupExamReportDataBean createGroupBean(SelectiveCourse selectiveCourse) {
         GroupExamReportDataBean groupDataBean = new GroupExamReportDataBean();
         groupDataBean.setAcademicYear(getStudyYear());
-        Faculty faculty = facultyRepository.findById(FacultyUtil.getUserFacultyIdInt());
+        Faculty faculty = facultyRepository.findById(FacultyUtil.getUserFacultyIdInt()).get();
         groupDataBean.setDeanInitials(PersonUtil.makeNameThenSurnameInCapital(faculty.getDean()));
         groupDataBean.setDegreeName(selectiveCourse.getDegree().getName());
         groupDataBean.setFacultyAbbr(faculty.getAbbr());

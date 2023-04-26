@@ -39,7 +39,7 @@ public class QualificationForSpecializationService {
         List<QualificationForSpecialization> qualificationForSpecializations = selected.stream()
                 .map(qualificationId -> create(baseQualificationForSpecialization, qualificationId))
                 .collect(Collectors.toList());
-        this.qualificationForSpecializationRepository.save(qualificationForSpecializations);
+        this.qualificationForSpecializationRepository.saveAll(qualificationForSpecializations);
     }
 
     public QualificationForSpecialization create(
@@ -55,7 +55,7 @@ public class QualificationForSpecializationService {
     public void deleteAll(List<Integer> deleted) throws Exception {
         List<QualificationForSpecialization> qualificationForSpecializations = qualificationForSpecializationRepository.findAllByIds(deleted);
         if (isCurrentYear(qualificationForSpecializations)) {
-            qualificationForSpecializationRepository.delete(qualificationForSpecializations);
+            qualificationForSpecializationRepository.deleteAll(qualificationForSpecializations);
         } else {
             throw new Exception("You can delete qualification for specialization only for current year (" + currentYearService.get() + ")");
         }

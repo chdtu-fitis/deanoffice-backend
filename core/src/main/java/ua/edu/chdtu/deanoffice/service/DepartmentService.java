@@ -36,7 +36,7 @@ public class DepartmentService {
     }
 
     public Department getById(Integer departmentId) {
-        return this.departmentRepository.findOne(departmentId);
+        return this.departmentRepository.findById(departmentId).get();
     }
 
     public Department getByAbbr(String departmentAbbr) {

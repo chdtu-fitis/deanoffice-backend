@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.Faculty;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FacultyRepository extends JpaRepository<Faculty, Integer> {
     @Query(value = "select f.id from student_degree sd " +
@@ -46,7 +47,7 @@ public interface FacultyRepository extends JpaRepository<Faculty, Integer> {
     @Query("select f from Faculty f where upper(f.name)=upper(:name)")
     Faculty findByName(@Param("name") String name);
 
-    Faculty findById(@Param("id") Integer id);
+    Optional<Faculty> findById(@Param("id") Integer id);
 
     @Query("select f from Faculty f where f.active = true order by name")
     List<Faculty> findAllActive();

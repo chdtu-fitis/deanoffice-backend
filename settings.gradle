@@ -1,4 +1,4 @@
 rootProject.name = 'chdtu-dean-office'
 
-include 'core'
-include 'api'
+include ':api'
+include ':core'

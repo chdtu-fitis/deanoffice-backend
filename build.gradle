@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.9.RELEASE'
+		springBootVersion = '2.5.7'
 	}
 	repositories {
 		mavenCentral()
@@ -26,11 +26,14 @@ allprojects {
 	apply plugin: 'org.springframework.boot'
 	apply plugin: 'io.spring.dependency-management'
 
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
+	sourceCompatibility = 1.17
+	targetCompatibility = 1.17
 
 	tasks.withType(JavaCompile) {
 		options.encoding = 'UTF-8'
+	}
+	tasks.withType(Copy) {
+		duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	}
 	test {
 		systemProperty "file.encoding", "utf-8"

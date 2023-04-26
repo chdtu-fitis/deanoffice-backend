@@ -73,6 +73,6 @@ public class StudentSurnameChangeService {
     }
 
     private int getCurrentYear() {
-        return currentYearRepository.findOne(1).getCurrYear();
+        return currentYearRepository.findById(1).get().getCurrYear();
     }
 }

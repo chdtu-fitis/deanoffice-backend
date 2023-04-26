@@ -2,17 +2,8 @@ package ua.edu.chdtu.deanoffice.api.course.selective.dto.csvimport;
 
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.Degree;
-import ua.edu.chdtu.deanoffice.entity.Department;
-import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -39,6 +30,4 @@ public class SelectiveCourseImportWriteDTO {
     @NotNull(message = "Назва дисципліни має бути вказана")
     @Size(min = 3, message = "Назва дисципліни занадто коротка")
     private String courseName;
-
-
 }

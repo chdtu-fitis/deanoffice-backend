@@ -33,7 +33,7 @@ public class CourseForGroupService {
     }
 
     public CourseForGroup getCourseForGroup(int id) {
-        return courseForGroupRepository.findOne(id);
+        return courseForGroupRepository.findById(id).get();
     }
 
     public List<CourseForGroup> getCoursesForGroups(int[] ids) {
@@ -81,10 +81,10 @@ public class CourseForGroupService {
             List<Integer> deleteCoursesIds
     ) throws UnauthorizedFacultyDataException {
         checkFacultyAccessBeforeStoring(updatedCourses, deleteCoursesIds);
-        courseForGroupRepository.save(newCourses);
+        courseForGroupRepository.saveAll(newCourses);
         saveUpdatedCoursesForGroup(updatedCourses);
         for (Integer courseId : deleteCoursesIds) {
-            courseForGroupRepository.delete(courseId);
+            courseForGroupRepository.deleteById(courseId);
         }
     }
 
@@ -94,7 +94,7 @@ public class CourseForGroupService {
             Set<CourseForGroup> coursesForGroup = entry.getValue();
             checkFacultyAccess(new ArrayList<>(coursesForGroup));
         }
-        List<CourseForGroup> coursesForGroupForDelete = courseForGroupRepository.findAll(deleteCoursesIds);
+        List<CourseForGroup> coursesForGroupForDelete = courseForGroupRepository.findAllById(deleteCoursesIds);
         checkFacultyAccess(coursesForGroupForDelete);
     }
 
@@ -111,8 +111,8 @@ public class CourseForGroupService {
         for (CourseForGroup courseForGroup: coursesWithChangedAcademicDifference){
             gradeRepository.updateAcademicDifferenceByCourseIdAndGroupId(courseForGroup.isAcademicDifference(), courseForGroup.getStudentGroup().getId(), courseForGroup.getCourse().getId());
         }
-        courseForGroupRepository.save(coursesWithChangedAcademicDifference);
-        courseForGroupRepository.save(coursesLessChangedAcademicDifference);
+        courseForGroupRepository.saveAll(coursesWithChangedAcademicDifference);
+        courseForGroupRepository.saveAll(coursesLessChangedAcademicDifference);
     }
 
     @Transactional

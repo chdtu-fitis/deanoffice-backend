@@ -59,7 +59,7 @@ public class SelectiveCoursesStudentDegreesService {
     public List<SelectiveCoursesStudentDegrees> create(List<SelectiveCoursesStudentDegrees> selectiveCoursesStudentDegrees) {
         for (SelectiveCoursesStudentDegrees selectiveCourseStudentDegree : selectiveCoursesStudentDegrees)
             selectiveCourseStudentDegree.setActive(true);
-        return this.selectiveCoursesStudentDegreesRepository.save(selectiveCoursesStudentDegrees);
+        return this.selectiveCoursesStudentDegreesRepository.saveAll(selectiveCoursesStudentDegrees);
     }
 
     public List<SelectiveCoursesStudentDegrees> getStudentDegreesForSelectiveCourse(int selectiveCourseId, boolean forFaculty) {
@@ -300,7 +300,7 @@ public class SelectiveCoursesStudentDegreesService {
                 successful++;
             }
         }
-        this.selectiveCoursesStudentDegreesRepository.save(scsdList);
+        this.selectiveCoursesStudentDegreesRepository.saveAll(scsdList);
         return successful;
     }
 

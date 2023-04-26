@@ -154,7 +154,7 @@ public class GradeService {
     public List<Grade> setGradeAndEcts(List<Grade> grades) {
         grades.forEach(grade -> {
             grade.setEcts(EctsGrade.getEctsGrade(grade.getPoints()));
-            Course course = courseRepository.findOne(grade.getCourse().getId());
+            Course course = courseRepository.findById(grade.getCourse().getId()).get();
             grade.setGrade(EctsGrade.getGrade(grade.getPoints(), course.getKnowledgeControl().isGraded()));
         });
         return grades;
@@ -176,7 +176,7 @@ public class GradeService {
     }
 
     public List<Grade> insertGrades(List<Grade> grades) {
-        return gradeRepository.save(grades);
+        return gradeRepository.saveAll(grades);
     }
 
     public List<Grade> getGradeForStudentAndSemester(Integer studentDegreeId, Integer semester) {
@@ -209,7 +209,7 @@ public class GradeService {
             }
             gradeRepository.save(grade);
         }
-        gradeRepository.delete(gradesToDelete);
+        gradeRepository.deleteAll(gradesToDelete);
     }
 
     private void synchronizeGrades(Grade gradeFrom, Grade gradeTo) {
@@ -221,7 +221,7 @@ public class GradeService {
     }
 
     public void deleteGradeById(Integer gradeId) {
-        gradeRepository.delete(gradeId);
+        gradeRepository.deleteById(gradeId);
     }
 
     @Transactional
@@ -267,7 +267,7 @@ public class GradeService {
     }
 
     public List<Grade> getGradesByStudetDegreeIdAndKCTypes(Integer studentDegreeId, List<Integer> knowledgeControlsIds) {
-        StudentDegree sd = studentDegreeRepository.findOne(studentDegreeId);
+        StudentDegree sd = studentDegreeRepository.findById(studentDegreeId).get();
         List<CourseForGroup> coursesForGroups = courseForGroupRepository.findAllByStudentGroupId(sd.getStudentGroup().getId());
         List<Integer> courseIds = coursesForGroups.stream().map(cfg -> cfg.getCourse().getId()).collect(Collectors.toList());
         return gradeRepository.getByStudentDegreeIdAndCoursesIdsKCTypes(studentDegreeId, courseIds, knowledgeControlsIds);

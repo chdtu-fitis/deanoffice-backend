@@ -19,7 +19,7 @@ public class DegreeService {
     }
 
     public Degree getById(Integer degreeId) {
-        return degreeRepository.findOne(degreeId);
+        return degreeRepository.findById(degreeId).get();
     }
 
     public Degree getByName(String degreeName) {

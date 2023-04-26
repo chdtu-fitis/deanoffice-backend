@@ -56,7 +56,7 @@ public class SpecializationService {
     }
 
     public Specialization getById(Integer specializationId) {
-        return specializationRepository.findOne(specializationId);
+        return specializationRepository.findById(specializationId).get();
     }
 
     public Specialization getByNameAndDegreeAndSpecialityAndFaculty(String name, Integer degreeId, Integer specialityId, Integer facultyId) {
@@ -84,7 +84,7 @@ public class SpecializationService {
     }
 
     public Specialization update(Specialization specialization) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        Specialization specializationFromDB = specializationRepository.findOne(specialization.getId());
+        Specialization specializationFromDB = specializationRepository.findById(specialization.getId()).get();
         if (specializationFromDB == null) {
             throw new OperationCannotBePerformedException("Освітньої програми з вказаним ідентифікатором не існує!");
         } else {
@@ -95,12 +95,12 @@ public class SpecializationService {
     }
 
     private void setDependenciesFromDBForCreate(Specialization specialization) {
-        specialization.setSpeciality(specialityRepository.findOne(specialization.getSpeciality().getId()));
-        specialization.setDegree(degreeRepository.findOne(specialization.getDegree().getId()));
-        specialization.setDepartment(departmentRepository.findOne(specialization.getDepartment().getId()));
+        specialization.setSpeciality(specialityRepository.findById(specialization.getSpeciality().getId()).get());
+        specialization.setDegree(degreeRepository.findById(specialization.getDegree().getId()).get());
+        specialization.setDepartment(departmentRepository.findById(specialization.getDepartment().getId()).get());
         if (specialization.getProgramHead() != null)
-            specialization.setProgramHead(teacherRepository.findOne(specialization.getProgramHead().getId()));
-        specialization.setFaculty(facultyRepository.findOne(FacultyUtil.getUserFacultyIdInt()));
+            specialization.setProgramHead(teacherRepository.findById(specialization.getProgramHead().getId()).get());
+        specialization.setFaculty(facultyRepository.findById(FacultyUtil.getUserFacultyIdInt()).get());
     }
 
     private void setDependenciesFromDBForUpdate(Specialization specialization, Specialization specializationFromDB) throws  UnauthorizedFacultyDataException {
@@ -113,26 +113,26 @@ public class SpecializationService {
         if (specialization.getSpeciality().getId() == specializationFromDB.getSpeciality().getId()) {
             specialization.setSpeciality(specializationFromDB.getSpeciality());
         } else {
-            specialization.setSpeciality(specialityRepository.findOne(specialization.getSpeciality().getId()));
+            specialization.setSpeciality(specialityRepository.findById(specialization.getSpeciality().getId()).get());
         }
 
         if (specialization.getDegree().getId() == specializationFromDB.getDegree().getId()) {
             specialization.setDegree(specializationFromDB.getDegree());
         } else {
-            specialization.setDegree(degreeRepository.findOne(specialization.getDegree().getId()));
+            specialization.setDegree(degreeRepository.findById(specialization.getDegree().getId()).get());
         }
 
         if (specialization.getDepartment().getId() == specializationFromDB.getDepartment().getId()) {
             specialization.setDepartment(specializationFromDB.getDepartment());
         } else {
-            specialization.setDepartment(departmentRepository.findOne(specialization.getDepartment().getId()));
+            specialization.setDepartment(departmentRepository.findById(specialization.getDepartment().getId()).get());
         }
 
         if (specialization.getProgramHead() != null) {
             if (specializationFromDB.getProgramHead() != null && specialization.getProgramHead().getId() == specializationFromDB.getProgramHead().getId()) {
                 specialization.setProgramHead(specializationFromDB.getProgramHead());
             } else {
-                specialization.setProgramHead(teacherRepository.findOne(specialization.getProgramHead().getId()));
+                specialization.setProgramHead(teacherRepository.findById(specialization.getProgramHead().getId()).get());
             }
         }
     }

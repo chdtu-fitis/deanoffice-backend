@@ -65,16 +65,16 @@ public class StudentExpelService {
 
         List<StudentDegree> studentDegrees = studentDegreeRepository.getAllByIds(ids);
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
-        studentDegreeRepository.save(studentDegrees);
+        studentDegreeRepository.saveAll(studentDegrees);
 
-        return studentExpelRepository.save(studentExpels);
+        return studentExpelRepository.saveAll(studentExpels);
     }
 
     @Transactional
     public void expelStudents(List<StudentDegree> studentDegrees, Date expelDate, Date orderDate, String orderNumber) {
         List<StudentExpel> studentExpels = new ArrayList<>();
         studentDegrees.forEach(studentDegree -> studentDegree.setActive(false));
-        studentDegreeRepository.save(studentDegrees);
+        studentDegreeRepository.saveAll(studentDegrees);
 
         Map<Integer, OrderReason> orderReasonMap = new HashMap<>();
         orderReasonMap.put(1, orderReasonService.getById(Constants.ID_SUCCESSFUL_END_BACHELOR));
@@ -89,7 +89,7 @@ public class StudentExpelService {
                     orderReasonMap.get(studentDegree.getSpecialization().getDegree().getId()), null));
         }
 
-        studentExpelRepository.save(studentExpels);
+        studentExpelRepository.saveAll(studentExpels);
     }
 
     public List<StudentExpel> getAllExpelledStudents(Integer facultyId) {

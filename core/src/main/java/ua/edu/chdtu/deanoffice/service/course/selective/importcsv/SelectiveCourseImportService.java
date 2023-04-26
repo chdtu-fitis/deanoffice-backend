@@ -208,7 +208,7 @@ public class SelectiveCourseImportService {
             course.setCourseName(courseName);
             course.setSemester(semester);
             course.setHours(120);
-            course.setKnowledgeControl(knowledgeControlRepository.findOne(Constants.CREDIT));
+            course.setKnowledgeControl(knowledgeControlRepository.findById(Constants.CREDIT).get());
             course.setHoursPerCredit(30);
             course.setCredits(new BigDecimal(4));
             return courseRepository.save(course);

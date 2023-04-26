@@ -24,7 +24,7 @@ public class StudentService {
     }
 
     public Student findById(Integer id) {
-        return studentRepository.findOne(id);
+        return studentRepository.findById(id).get();
     }
 
     public List<Student> searchByFullName(String name, String surname, String patronymic) {

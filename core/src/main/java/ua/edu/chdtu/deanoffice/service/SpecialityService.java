@@ -29,7 +29,7 @@ public class SpecialityService {
     }
 
     public Speciality getById(Integer specialityId) {
-        return specialityRepository.findOne(specialityId);
+        return specialityRepository.findById(specialityId).get();
     }
 
     public Speciality getSpecialityByName(String name) {

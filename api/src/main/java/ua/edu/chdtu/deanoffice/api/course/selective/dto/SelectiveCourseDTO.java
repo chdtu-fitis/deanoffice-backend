@@ -8,9 +8,6 @@ import ua.edu.chdtu.deanoffice.api.general.dto.FieldOfKnowledgeDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.NamedDTO;
 import ua.edu.chdtu.deanoffice.api.teacher.TeacherDTO;
 import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
-
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import java.util.List;
 
 @Getter
@@ -23,7 +20,6 @@ public class SelectiveCourseDTO {
     private NamedDTO degree;
     private DepartmentDTO department;
     private List<FieldOfKnowledgeDTO> fieldsOfKnowledge;
-    @Enumerated(EnumType.STRING)
     private TrainingCycle trainingCycle;
     private String description;
     private Integer studyYear;

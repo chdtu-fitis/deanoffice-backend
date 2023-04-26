@@ -139,7 +139,7 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Inte
     int countInactiveStudentGroupsByIds(@Param("ids") List<Integer> ids);
 
     @Query("select sg from StudentGroup sg " +
-            "where active = :active and sg.name in " +
+            "where sg.active = :active and sg.name in " +
             "(select substring(fg.name,1,length(fg.name) - 2) from StudentGroup fg " +
             "where fg.specialization.faculty.id = 8 and fg.active = :active)"
     )

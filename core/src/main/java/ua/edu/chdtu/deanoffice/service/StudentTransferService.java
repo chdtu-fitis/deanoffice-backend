@@ -37,11 +37,11 @@ public class StudentTransferService {
     }
 
     private int getCurrentYear() {
-        return currentYearRepository.findOne(1).getCurrYear();
+        return currentYearRepository.findById(1).get().getCurrYear();
     }
 
     public Integer getStudyYear(Integer studentGroupId){
-        StudentGroup studentGroup = studentGroupRepository.findOne(studentGroupId);
+        StudentGroup studentGroup = studentGroupRepository.findById(studentGroupId).get();
         Integer creationYear = studentGroup.getCreationYear();
         Integer beginYears = studentGroup.getBeginYears();
         Integer currYear = getCurrentYear();

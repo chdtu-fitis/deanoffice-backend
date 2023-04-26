@@ -15,7 +15,7 @@ public class OrderReasonService {
     }
 
     public OrderReason getById(Integer id) {
-        return this.orderReasonRepository.findOne(id);
+        return this.orderReasonRepository.findById(id).get();
     }
 
     public List<OrderReason> getAllByKind(String kind) {

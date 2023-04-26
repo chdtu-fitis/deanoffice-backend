@@ -36,7 +36,7 @@ public class AcquiredCompetenciesService {
     }
 
     private AcquiredCompetencies getById(Integer acquiredCompetenciesId) {
-        return this.acquiredCompetenciesRepository.findOne(acquiredCompetenciesId);
+        return this.acquiredCompetenciesRepository.findById(acquiredCompetenciesId).get();
     }
 
     public void create(AcquiredCompetencies acquiredCompetencies) {
