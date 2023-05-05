@@ -102,11 +102,8 @@ public class GradeUtil {
     }
 
     public static long roundPoints(double points) {
-        NumberFormat format = DecimalFormat.getInstance();
-        DecimalFormatSymbols symbols = ((DecimalFormat) format).getDecimalFormatSymbols();
-        char separator = symbols.getDecimalSeparator();
-
-        double decimalPart = Double.parseDouble("0." + String.format("%.5f", points).split(String.valueOf(separator))[1]);
+        int intPart = (int) points;
+        double decimalPart = points - intPart;
         double precision = 0.001;
         if (Math.abs(decimalPart - 0.5) < precision) {
             points += precision;

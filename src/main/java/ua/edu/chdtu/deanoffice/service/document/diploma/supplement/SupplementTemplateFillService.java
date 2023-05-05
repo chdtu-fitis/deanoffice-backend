@@ -17,6 +17,8 @@ import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.Constants;
 import ua.edu.chdtu.deanoffice.entity.*;
@@ -44,19 +46,21 @@ public class SupplementTemplateFillService {
     //    private RenewedAcademicVacationStudentRepository
     private StudentExpelService studentExpelService;
     private RenewedExpelledStudentService renewedExpelledStudentService;
-
+    private Environment environment;
     public SupplementTemplateFillService(DocumentIOService documentIOService,
                                          QualificationForSpecializationService qualificationForSpecializationService,
                                          AcquiredCompetenciesService acquiredCompetenciesService,
                                          StudentAcademicVacationService studentAcademicVacationService,
                                          StudentExpelService studentExpelService,
-                                         RenewedExpelledStudentService renewedExpelledStudentService) {
+                                         RenewedExpelledStudentService renewedExpelledStudentService,
+                                         Environment environment) {
         this.documentIOService = documentIOService;
         this.qualificationForSpecializationService = qualificationForSpecializationService;
         this.acquiredCompetenciesService = acquiredCompetenciesService;
         this.studentAcademicVacationService = studentAcademicVacationService;
         this.studentExpelService = studentExpelService;
         this.renewedExpelledStudentService = renewedExpelledStudentService;
+        this.environment = environment;
     }
 
     WordprocessingMLPackage fill(String templateFilepath, StudentSummary studentSummary)
@@ -102,7 +106,7 @@ public class SupplementTemplateFillService {
 
         for (List<Grade> gradesSection : studentSummary.getGrades()) {
             for (Grade grade : gradesSection) {
-                Map<String, String> replacements = SupplementTemplateFillService.getGradeDictionary(grade);
+                Map<String, String> replacements = getGradeDictionary(grade);
                 replacements.put("Number", String.format("%2d", gradeNumber++));
                 TemplateUtil.addRowToTable(tableWithGrades, templateRow, rowToAddIndex, replacements);
                 rowToAddIndex++;
@@ -133,7 +137,7 @@ public class SupplementTemplateFillService {
         return result;
     }
 
-    private static Map<String, String> getGradeDictionary(Grade grade) {
+    private Map<String, String> getGradeDictionary(Grade grade) {
         Map<String, String> result = new HashMap<>();
         result.put("Credits", formatCredits(grade.getCourse().getCredits()));
         result.put("LocalGrade", grade.getPoints() == null ? "" : String.format("%d", grade.getPoints()));
@@ -426,12 +430,13 @@ public class SupplementTemplateFillService {
         return result.toString();
     }
 
-    private static String formatCredits(BigDecimal credits) {
+    private String formatCredits(BigDecimal credits) {
         if (credits == null || credits.doubleValue() == BigDecimal.ZERO.doubleValue()) {
             return "-";
         } else {
             String formattedCredits = String.format("%.1f", credits);
-            if (formattedCredits.split(",")[1].equals("0")) {
+            System.out.println(formattedCredits+" -- "+environment.getProperty("server.decimal-point", String.class));
+            if (formattedCredits.split(environment.getProperty("server.decimal-point", String.class))[1].equals("0")) {
                 return String.format("%.0f", credits);
             } else {
                 return formattedCredits;

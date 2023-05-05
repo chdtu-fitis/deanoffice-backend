@@ -23,10 +23,15 @@ flyway:
 #    show_sql: true
 #    format_sql: true
 
-server.port: 8080
-swagger.host: localhost:8080
+server:
+  port: 8080
+  decimal-point: ","
+swagger:
+  host: localhost:8080
 
-faculty.foreign.id: 8
+faculty:
+  foreign:
+    id: 8
 
 security:
   secret: SecretKe487563465347
