@@ -68,6 +68,12 @@ public class TeacherController {
         return ResponseEntity.ok(map(teachers, TeacherDTO.class));
     }
 
+    @GetMapping("/teachers/{id}")
+    public ResponseEntity getTeacherById(@PathVariable @Min(1) int id) {
+        Teacher teacher = teacherService.getTeacher(id);
+        return ResponseEntity.ok(map(teacher, TeacherDTO.class));
+    }
+
     @Secured({"ROLE_DEANOFFICER", "ROLE_NAVCH_METHOD"})
     @PostMapping("/teachers")
     public ResponseEntity addTeacher(@Validated @RequestBody TeacherWriteDTO teacherDTO) {
