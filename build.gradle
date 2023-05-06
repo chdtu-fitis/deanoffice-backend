@@ -1,38 +1,87 @@
-buildscript {
-	ext {
-		springBootVersion = '1.5.9.RELEASE'
-	}
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	}
+plugins {
+    id 'org.springframework.boot' version '2.5.7'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id 'idea'
 }
 
-group = 'ua.edu.chdtu'
-version = "${appVersin}"
+group = 'ua.edu.chdtu.deanoffice'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
-allprojects {
-	repositories {
-		mavenCentral()
-		maven {
-			url "https://maven.atlassian.com/3rdparty"
-		}
-	}
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
 
-	apply plugin: 'java'
-	apply plugin: 'idea'
-	apply plugin: 'org.springframework.boot'
-	apply plugin: 'io.spring.dependency-management'
+repositories {
+    mavenCentral()
+    maven {
+        url "https://maven.atlassian.com/3rdparty"
+    }
+}
 
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
 
-	tasks.withType(JavaCompile) {
-		options.encoding = 'UTF-8'
-	}
-	test {
-		systemProperty "file.encoding", "utf-8"
-	}
+    implementation("io.jsonwebtoken:jjwt:0.9.1")
+
+//	swagger
+    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.8.0'
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.8.0'
+
+// from core
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+
+    implementation(group: 'org.docx4j', name: 'docx4j', version: '3.3.6') {
+        exclude group: 'org.slf4j'
+    }
+
+    implementation(
+            "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
+            "org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",
+    )
+    implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+
+    implementation(
+            "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}",
+    )
+    implementation("org.springframework.boot:spring-boot-starter-undertow:${springBootVersion}")
+
+    implementation("org.flywaydb:flyway-core")
+    implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'
+    implementation('org.modelmapper:modelmapper:3.1.1')
+
+    implementation (
+            "com.zaxxer:HikariCP:${hikariVersion}"
+    )
+    implementation 'com.opencsv:opencsv:5.7.1'
+    implementation 'javax.validation:validation-api:2.0.1.Final'
+
+    runtimeOnly("org.postgresql:postgresql:${postgresqlDriverVersion}")
+//////////////////////////////
+
+    testImplementation(
+            "org.springframework.boot:spring-boot-starter-test:${springBootVersion}",
+    )
+}
+
+processResources {
+    from 'src/main/resources'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.withType(Copy) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
