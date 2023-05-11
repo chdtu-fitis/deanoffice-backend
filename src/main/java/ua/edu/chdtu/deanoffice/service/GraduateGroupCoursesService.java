@@ -35,7 +35,7 @@ public class GraduateGroupCoursesService {
     private static final String FILE_NAME_PREFIX = "PREDMETY_";
 
     public File formDocument(List<CourseForGroup> courseForGroups) throws DocumentException, IOException {
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont);
         PdfPCell numberOfRowHeaderCell = createHeaderCell("№", font);
         PdfPCell semesterHeaderCell = createHeaderCell("Сем.", font);

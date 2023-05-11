@@ -86,7 +86,7 @@ public class SingleStudentAndCourseExamReportService {
         Course course = studentCourse.getCourse();
         CourseForGroup courseForGroup = studentCourse.getCourseForGroup();
 
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont, 14);
         Font courseFont = new Font(baseFont, 13);
         Font boldFont = new Font(baseFont,14, Font.BOLD);
@@ -259,7 +259,7 @@ public class SingleStudentAndCourseExamReportService {
     private PdfPTable addBackForm(Document document, StudentCourse studentCourse) throws DocumentException, IOException {
         StudentDegree student = studentCourse.getStudentDegree();
 
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont, 14);
         Font reasonFont = new Font(baseFont, 12);
         Font underlineFont = new Font(baseFont, 8);

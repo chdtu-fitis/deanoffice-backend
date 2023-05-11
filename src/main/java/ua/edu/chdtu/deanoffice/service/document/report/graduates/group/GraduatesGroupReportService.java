@@ -56,7 +56,7 @@ public class GraduatesGroupReportService {
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
             document.open();
-            BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             Font font = new Font(baseFont, 14);
             document.add(createCenterAlignedParagraph("ЧЕРКАСЬКИЙ ДЕРЖАВНИЙ ТЕХНОЛОГІЧНИЙ УНІВЕРСИТЕТ", font, 0));
             document.add(createCenterAlignedParagraph(group.getSpecialization().getFaculty().getName().toUpperCase(), font, 50));

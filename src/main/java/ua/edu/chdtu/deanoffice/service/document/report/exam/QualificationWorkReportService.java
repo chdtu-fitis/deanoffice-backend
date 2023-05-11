@@ -63,7 +63,7 @@ public class QualificationWorkReportService {
         PdfWriter.getInstance(document, new FileOutputStream(file));
         try {
             document.open();
-            BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
             Font font = new Font(baseFont, 14);
             Font boldFont = new Font(baseFont, 14, Font.BOLD);
             String facultyName = studentGroup.getSpecialization().getFaculty().getName();
