@@ -119,7 +119,7 @@ public class GradesRecordBookService {
     }
 
     private void addStudentsOnPdfTables(List<StudentGroup> studentGroups, PdfPTable table1, PdfPTable table2) throws DocumentException, IOException {
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font = new Font(baseFont);
         Font boldFont = new Font(baseFont, 12, Font.BOLD);
         boolean oneOrTwo = true;
@@ -210,7 +210,7 @@ public class GradesRecordBookService {
     }
 
     private PdfPTable addCoursesOnTable(List<StudentGroup> studentGroups, int semester, int year) throws DocumentException, IOException {
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         Font font1 = new Font(baseFont, 9);
         Font font2 = new Font(baseFont, 8);
         PdfPTable tableMain = new PdfPTable(6);

@@ -24,8 +24,23 @@ repositories {
 }
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    implementation 'org.eclipse.jetty:jetty-webapp:9.+'
+    implementation 'org.eclipse.jetty:jetty-jsp:9.+'
+
     implementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
+
+    implementation(
+            "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
+            "org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",
+    )
+
+    implementation(
+            "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}",
+    )
+    implementation("org.springframework.boot:spring-boot-starter-undertow:${springBootVersion}")
 
     implementation("io.jsonwebtoken:jjwt:0.9.1")
 
@@ -40,21 +55,6 @@ dependencies {
     implementation(group: 'org.docx4j', name: 'docx4j', version: '3.3.6') {
         exclude group: 'org.slf4j'
     }
-
-    implementation(
-            "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}",
-            "org.springframework.boot:spring-boot-starter-logging:${springBootVersion}",
-    )
-    implementation("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-
-    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}") {
-        exclude module: "spring-boot-starter-tomcat"
-    }
-
-    implementation(
-            "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}",
-    )
-    implementation("org.springframework.boot:spring-boot-starter-undertow:${springBootVersion}")
 
     implementation("org.flywaydb:flyway-core")
     implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.0.6'

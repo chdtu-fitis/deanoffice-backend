@@ -34,7 +34,7 @@ public class FormRatingPDFService extends FormRatingBase {
 
 //    @Autowired
     public void setFont() throws IOException, DocumentException {
-        BaseFont baseFont = BaseFont.createFont(ttf.getURI().getPath(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont baseFont = BaseFont.createFont(ttf.getURI().toString(), BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         FONT = new Font(baseFont, FONT_SIZE, Font.NORMAL);
         FONT_TITLE = new Font(baseFont, FONT_SIZE, Font.BOLD);
     }
