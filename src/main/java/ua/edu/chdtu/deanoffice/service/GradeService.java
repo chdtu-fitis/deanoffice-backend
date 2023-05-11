@@ -224,21 +224,37 @@ public class GradeService {
         gradeRepository.deleteById(gradeId);
     }
 
-    public HashMap<Integer, List<Course>> getAcademicStudentDebtsByGroupId(Integer groupId) {
+    public HashMap<Integer, List<List<Course>>> getAcademicStudentDebtsByGroupId(Integer groupId) {
         List<StudentDegree> studentDegrees = studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
 
-        HashMap<Integer, List<Course>> debts = new HashMap<>();
+        HashMap<Integer, List<List<Course>>> debts = new HashMap<>();
 
         for (StudentDegree sd: studentDegrees) {
-            List<Course> allCourses = getAllCoursesByStudentDegree(sd);
+            List<List<Grade>> grades = getGradesByStudentDegreeIdWithSelective(sd.getId());
 
-            allCourses.forEach(course -> {
-                boolean isGoodMark = gradeRepository.isStudentHaveGoodMarkFromCourse(sd.getId(), groupId, course.getId());
+            for (int gradeListIndex = 0; gradeListIndex < grades.size(); gradeListIndex++) {
+                for (Grade grade: grades.get(gradeListIndex)) {
+                    boolean isPointsPassable = !(grade.getPoints() == null || grade.getPoints() <= 60);
+                    boolean isGradePassable = !(grade.getGrade() == null || grade.getGrade() <= 3);
 
-                if (!isGoodMark) {
-                    debts.computeIfAbsent(sd.getId(), courses -> new ArrayList<>()).add(course);
+                    if (isPointsPassable || isGradePassable) {
+                        continue;
+                    }
+
+                    if (debts.get(sd.getId()) == null) {
+                        debts.put(sd.getId(), new ArrayList<>() {
+                            {
+                                add(new ArrayList<>());
+                                add(new ArrayList<>());
+                                add(new ArrayList<>());
+                                add(new ArrayList<>());
+                            }
+                        });
+                    }
+
+                    debts.get(sd.getId()).get(gradeListIndex).add(grade.getCourse());
                 }
-            });
+            }
         }
 
         return debts;
