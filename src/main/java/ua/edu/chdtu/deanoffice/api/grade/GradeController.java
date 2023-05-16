@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionHandlerAdvice;
 import ua.edu.chdtu.deanoffice.api.general.ExceptionToHttpCodeMapUtil;
 import ua.edu.chdtu.deanoffice.api.grade.dto.GradeDTO;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.Grade;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
 import ua.edu.chdtu.deanoffice.service.GradeService;
@@ -28,6 +25,7 @@ import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentD
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -149,5 +147,13 @@ public class GradeController {
 
     private ResponseEntity handleException(Exception exception) {
         return ExceptionHandlerAdvice.handleException(exception, GradeController.class, ExceptionToHttpCodeMapUtil.map(exception));
+    }
+
+    @GetMapping("/{groupId}/debt/academic")
+    public ResponseEntity getStudentDebtsByGroupId(
+            @PathVariable Integer groupId
+    ) {
+        HashMap<Integer, List<Course>> debts = this.gradeService.getAcademicStudentDebtsByGroupId(groupId);
+        return ResponseEntity.ok(debts);
     }
 }

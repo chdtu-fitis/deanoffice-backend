@@ -22,11 +22,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesReposito
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -222,6 +218,26 @@ public class GradeService {
 
     public void deleteGradeById(Integer gradeId) {
         gradeRepository.deleteById(gradeId);
+    }
+
+    public HashMap<Integer, List<Course>> getAcademicStudentDebtsByGroupId(Integer groupId) {
+        List<StudentDegree> studentDegrees = studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
+        HashMap<Integer, List<Course>> debts = new HashMap<>();
+        for (StudentDegree sd: studentDegrees) {
+            List<List<Grade>> grades = getGradesByStudentDegreeIdWithSelective(sd.getId());
+            List<Grade> flatGrades = grades.stream()
+                    .flatMap(List::stream)
+                    .toList();
+            for (Grade grade : flatGrades) {
+                boolean isPointsPassable = !(grade.getPoints() == null || grade.getPoints() < 60);
+                if (isPointsPassable) {
+                    continue;
+                }
+                debts.computeIfAbsent(sd.getId(), g -> new ArrayList<>()).add(grade.getCourse());
+            }
+            debts.get(sd.getId()).sort(Comparator.comparingInt(Course::getSemester));
+        }
+        return debts;
     }
 
     @Transactional
