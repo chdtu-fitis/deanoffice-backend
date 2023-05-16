@@ -22,11 +22,7 @@ import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesReposito
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.util.GradeUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -224,37 +220,29 @@ public class GradeService {
         gradeRepository.deleteById(gradeId);
     }
 
-    public HashMap<Integer, List<List<Course>>> getAcademicStudentDebtsByGroupId(Integer groupId) {
+    public HashMap<Integer, List<Course>> getAcademicStudentDebtsByGroupId(Integer groupId) {
         List<StudentDegree> studentDegrees = studentDegreeRepository.findStudentDegreeByStudentGroupIdAndActive(groupId, true);
 
-        HashMap<Integer, List<List<Course>>> debts = new HashMap<>();
+        HashMap<Integer, List<Course>> debts = new HashMap<>();
 
         for (StudentDegree sd: studentDegrees) {
             List<List<Grade>> grades = getGradesByStudentDegreeIdWithSelective(sd.getId());
 
-            for (int gradeListIndex = 0; gradeListIndex < grades.size(); gradeListIndex++) {
-                for (Grade grade: grades.get(gradeListIndex)) {
-                    boolean isPointsPassable = !(grade.getPoints() == null || grade.getPoints() <= 60);
-                    boolean isGradePassable = !(grade.getGrade() == null || grade.getGrade() <= 3);
+            List<Grade> flatGrades = grades.stream()
+                    .flatMap(List::stream)
+                    .toList();
 
-                    if (isPointsPassable || isGradePassable) {
-                        continue;
-                    }
+            for (Grade grade : flatGrades) {
+                boolean isPointsPassable = !(grade.getPoints() == null || grade.getPoints() < 60);
 
-                    if (debts.get(sd.getId()) == null) {
-                        debts.put(sd.getId(), new ArrayList<>() {
-                            {
-                                add(new ArrayList<>());
-                                add(new ArrayList<>());
-                                add(new ArrayList<>());
-                                add(new ArrayList<>());
-                            }
-                        });
-                    }
-
-                    debts.get(sd.getId()).get(gradeListIndex).add(grade.getCourse());
+                if (isPointsPassable) {
+                    continue;
                 }
+
+                debts.computeIfAbsent(sd.getId(), g -> new ArrayList<>()).add(grade.getCourse());
             }
+
+            debts.get(sd.getId()).sort(Comparator.comparingInt(Course::getSemester));
         }
 
         return debts;
