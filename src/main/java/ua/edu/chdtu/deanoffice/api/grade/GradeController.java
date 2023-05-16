@@ -154,7 +154,6 @@ public class GradeController {
             @PathVariable Integer groupId
     ) {
         HashMap<Integer, List<Course>> debts = this.gradeService.getAcademicStudentDebtsByGroupId(groupId);
-
         return ResponseEntity.ok(debts);
     }
 }
