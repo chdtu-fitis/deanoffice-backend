@@ -44,7 +44,7 @@ public class IndividualCurriculumFillTemplateService {
     private static final Logger log = LoggerFactory.getLogger(IndividualCurriculumFillTemplateService.class);
 
     private final static String TEMPLATE_PATH = TEMPLATES_PATH + "IndividualCurriculum.docx";
-    private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 5;
+    private static final int STARTING_ROW_INDEX_AUTUMN_TABLE = 3;
     private static final int TABLE_INDEX = 4;
     private static final String SPRING_COURSES_KEY = "Spring";
     private static final String AUTUMN_COURSES_KEY = "Autumn";
@@ -193,7 +193,7 @@ public class IndividualCurriculumFillTemplateService {
         practical.addAll(springSemesterPart1.get(PRACTICAL_COURSES_KEY));
         addMainCoursesToTable(tempTable, practical, numberOfRow);
 
-        numberOfRow += practical.size() + 1;
+        numberOfRow += practical.size();
         fillConclusionTable(autumnMainCourses, autumnSelectiveCourses, springMainCourses, springSelectiveCourses,
                 practical, template, numberOfRow);
 
