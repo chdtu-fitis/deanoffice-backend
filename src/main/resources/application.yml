@@ -15,6 +15,10 @@ spring:
       max-request-size: 4MB
   jackson:
     time-zone: Europe/Minsk
+  servlet:
+    multipart:
+      max-file-size: 4MB
+      max-request-size: 4MB
 flyway:
   baseline-on-migrate: true
 
