@@ -435,7 +435,6 @@ public class SupplementTemplateFillService {
             return "-";
         } else {
             String formattedCredits = String.format("%.1f", credits);
-            System.out.println(formattedCredits+" -- "+environment.getProperty("server.decimal-point", String.class));
             if (formattedCredits.split(environment.getProperty("server.decimal-point", String.class))[1].equals("0")) {
                 return String.format("%.0f", credits);
             } else {
