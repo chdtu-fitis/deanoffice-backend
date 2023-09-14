@@ -105,7 +105,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
     );
     //----------------------- YEAR ------
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "(:currentYear-sg.creation_year+sg.real_begin_year) AS studyYear " +
                     "FROM selective_courses_student_degrees scsd " +
                     "JOIN selective_course sc ON sc.id = scsd.selective_course_id " +
@@ -128,7 +128,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                           @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
 
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "(:currentYear-sg.creation_year+sg.real_begin_year) AS studyYear " +
                     "FROM selective_courses_student_degrees scsd " +
                     "JOIN selective_course sc ON sc.id = scsd.selective_course_id " +
@@ -162,7 +162,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                          @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
     //----------------------- FACULTY ------
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName " +
                     "FROM selective_courses_student_degrees scsd " +
                     "JOIN selective_course sc ON sc.id = scsd.selective_course_id " +
@@ -185,7 +185,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                 @Param("selectiveCourseNumber") int selectiveCourseNumber,
                                                                                 @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName " +
                     "FROM selective_courses_student_degrees scsd " +
                     "JOIN selective_course sc ON sc.id = scsd.selective_course_id " +
@@ -220,7 +220,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                            @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
     //----------------------- GROUP ------
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "dp.abbr AS department, " +
                     "f.abbr AS facultyName, " +
                     "sg.name AS groupName, " +
@@ -247,7 +247,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                             @Param("selectiveCourseNumber") int selectiveCourseNumber,
                                                                             @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "dp.abbr AS department, " +
                     "f.abbr AS facultyName, " +
                     "sg.name AS groupName, " +
@@ -290,7 +290,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                          @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
     //---------------- FACULTY_AND_SPECIALIZATION --------------
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName, " +
                     "sz.name AS specializationName  " +
                     "FROM selective_courses_student_degrees scsd " +
@@ -314,7 +314,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                                   @Param("selectiveCourseNumber") int selectiveCourseNumber,
                                                                                                                   @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName, " +
                     "sz.name AS specializationName " +
                     "FROM selective_courses_student_degrees scsd " +
@@ -353,7 +353,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
 
     //-------------- FACULTY_AND_YEAR ---------
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName, " +
                     "(:currentYear-sg.creation_year+sg.real_begin_year) AS studyYear " +
                     "FROM selective_courses_student_degrees scsd " +
@@ -378,7 +378,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                               @Param("selectiveCourseNumber") int selectiveCourseNumber,
                                                                                               @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName, " +
                     "(:currentYear-sg.creation_year+sg.real_begin_year) AS studyYear " +
                     "FROM selective_courses_student_degrees scsd " +
@@ -417,7 +417,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                           @Param("selectiveCoursesChooseYears") int[] selectiveCoursesChooseYears);
     //--------------  FACULTY_AND_YEAR_AND_SPECIALIZATION  ----------------
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName, " +
                     "sz.name AS specializationName, " +
                     "(:currentYear-sg.creation_year+sg.real_begin_year) AS studyYear " +
@@ -443,7 +443,7 @@ public interface SelectiveCoursesStudentDegreesRepository extends JpaRepository<
                                                                                                                                 @Param("selectiveCourseNumber") int selectiveCourseNumber,
                                                                                                                                 @Param("selectiveCoursesChooseYears") int selectiveCoursesChooseYears);
     @Query(value =
-            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS registeredCount, " +
+            "SELECT COUNT(DISTINCT scsd.student_degree_id) AS count, " +
                     "f.abbr AS facultyName, " +
                     "sz.name AS specializationName, " +
                     "(:currentYear-sg.creation_year+sg.real_begin_year) AS studyYear " +
