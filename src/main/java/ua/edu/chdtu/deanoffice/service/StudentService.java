@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentStatus;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
+import ua.edu.chdtu.deanoffice.api.student.dto.ShortStudentInfoDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -73,5 +74,19 @@ public class StudentService {
             return StudentStatus.ACADEMIC_VACATION;
         else
             return StudentStatus.NO;
+    }
+
+    public List<ShortStudentInfoDTO> getAllActiveStudents() {
+        List<Object> allActiveStudents = studentRepository.getAllActiveStudent();
+        return allActiveStudents.stream()
+                .filter(obj -> obj instanceof Object[] && ((Object[]) obj).length >= 6)
+                .map(obj -> {
+                    Object[] objArray = (Object[]) obj;
+                    int id = Integer.parseInt(objArray[0].toString());
+                    String fullName = objArray[1] + " " + objArray[2] + " " + objArray[3];                     String groupName = (String) objArray[4];
+                    double specialityCode = Double.parseDouble(objArray[5].toString());
+                    return new ShortStudentInfoDTO(id, fullName, groupName, specialityCode);
+                })
+                .collect(Collectors.toList());
     }
 }
