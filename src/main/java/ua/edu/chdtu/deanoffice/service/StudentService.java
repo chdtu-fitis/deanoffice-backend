@@ -76,8 +76,14 @@ public class StudentService {
             return StudentStatus.NO;
     }
 
-    public List<ShortStudentInfoDTO> getAllActiveStudents() {
-        List<Object> allActiveStudents = studentRepository.getAllActiveStudent();
+    public List<ShortStudentInfoDTO> getAllActiveStudents(String facultyAbbr) {
+        List<Object> allActiveStudents;
+        if (facultyAbbr == null) {
+            allActiveStudents = studentRepository.getAllActiveStudent();
+        }
+        else {
+            allActiveStudents = studentRepository.getAllActiveStudentByFaculty(facultyAbbr);
+        }
         return allActiveStudents.stream()
                 .filter(obj -> obj instanceof Object[] && ((Object[]) obj).length >= 6)
                 .map(obj -> {

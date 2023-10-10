@@ -123,8 +123,8 @@ public class StudentController {
     }
 
     @GetMapping("all-active-students")
-    public ResponseEntity getAllActiveStudents(){
-        List<ShortStudentInfoDTO> shortStudentsInfo = studentService.getAllActiveStudents();
+    public ResponseEntity<List<ShortStudentInfoDTO>> getAllActiveStudents(@RequestParam(required = false) String facultyAbbr) {
+        List<ShortStudentInfoDTO> shortStudentsInfo = studentService.getAllActiveStudents(facultyAbbr);
         return ResponseEntity.ok(shortStudentsInfo);
     }
 }

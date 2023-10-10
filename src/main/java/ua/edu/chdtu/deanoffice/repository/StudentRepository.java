@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ua.edu.chdtu.deanoffice.entity.Faculty;
 import ua.edu.chdtu.deanoffice.entity.Student;
 
 import java.util.Date;
@@ -26,6 +27,12 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             "join s.degrees degrees " +
             "WHERE degrees.active = true")
     List<Object> getAllActiveStudent();
+
+    @Query("SELECT s.id, s.surname, s.name, s.patronimic, degrees.studentGroup.name, degrees.specialization.speciality.code " +
+            "FROM Student s " +
+            "join s.degrees degrees " +
+            "WHERE degrees.active = true AND degrees.specialization.faculty.abbr = ?1")
+    List<Object> getAllActiveStudentByFaculty(String facultyAbbr);
 
 //    @Query("select s from Student s " +
 //            "where s.name = :name " +
