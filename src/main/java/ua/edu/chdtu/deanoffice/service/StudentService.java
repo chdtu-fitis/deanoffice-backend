@@ -90,7 +90,7 @@ public class StudentService {
                     Object[] objArray = (Object[]) obj;
                     int id = Integer.parseInt(objArray[0].toString());
                     String fullName = objArray[1] + " " + objArray[2] + " " + objArray[3];                     String groupName = (String) objArray[4];
-                    double specialityCode = Double.parseDouble(objArray[5].toString());
+                    String specialityCode = objArray[5].toString();
                     return new ShortStudentInfoDTO(id, fullName, groupName, specialityCode);
                 })
                 .collect(Collectors.toList());

@@ -2,17 +2,17 @@ package ua.edu.chdtu.deanoffice.api.student.dto;
 
 public class ShortStudentInfoDTO {
 
-    int id;
-    String fullName;
+    private int id;
+    private String fullName;
 
-    String groupName;
+    private String groupName;
 
-    double specialityCode;
+    private String specialityCode;
 
     public ShortStudentInfoDTO() {
     }
 
-    public ShortStudentInfoDTO(int id, String fullName, String groupName, double specialityCode) {
+    public ShortStudentInfoDTO(int id, String fullName, String groupName, String specialityCode) {
         this.id = id;
         this.fullName = fullName;
         this.groupName = groupName;
@@ -43,11 +43,11 @@ public class ShortStudentInfoDTO {
         this.groupName = groupName;
     }
 
-    public double getSpecialityCode() {
+    public String getSpecialityCode() {
         return specialityCode;
     }
 
-    public void setSpecialityCode(double specialityCode) {
+    public void setSpecialityCode(String specialityCode) {
         this.specialityCode = specialityCode;
     }
 }
