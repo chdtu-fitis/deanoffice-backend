@@ -77,22 +77,23 @@ public class StudentService {
     }
 
     public List<ShortStudentInfoDTO> getAllActiveStudents(String facultyAbbr) {
-        List<Object> allActiveStudents;
+        List<ShortStudentInfoBean> allActiveStudents;
+
         if (facultyAbbr == null) {
-            allActiveStudents = studentRepository.getAllActiveStudent();
+            allActiveStudents = studentRepository.getAllActiveStudents();
         }
         else {
-            allActiveStudents = studentRepository.getAllActiveStudentByFaculty(facultyAbbr);
+            allActiveStudents = studentRepository.getAllActiveStudentsByFaculty(facultyAbbr);
         }
-        return allActiveStudents.stream()
-                .filter(obj -> obj instanceof Object[] && ((Object[]) obj).length >= 6)
-                .map(obj -> {
-                    Object[] objArray = (Object[]) obj;
-                    int id = Integer.parseInt(objArray[0].toString());
-                    String fullName = objArray[1] + " " + objArray[2] + " " + objArray[3];                     String groupName = (String) objArray[4];
-                    String specialityCode = objArray[5].toString();
-                    return new ShortStudentInfoDTO(id, fullName, groupName, specialityCode);
-                })
+        List<ShortStudentInfoDTO> shortStudentsInfo = allActiveStudents.stream()
+                .map(studentInfoBean -> new ShortStudentInfoDTO(
+                        studentInfoBean.getId(),
+                        studentInfoBean.getSurname() + " " + studentInfoBean.getName() + " " + studentInfoBean.getPatronimic(),
+                        studentInfoBean.getStudentGroupName(),
+                        studentInfoBean.getSpecialityCode()
+                ))
                 .collect(Collectors.toList());
+
+        return shortStudentsInfo;
     }
 }
