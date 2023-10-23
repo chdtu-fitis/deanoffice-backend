@@ -11,14 +11,14 @@ spring:
     show-sql: true
   http:
     multipart:
-      max-file-size: 4MB
-      max-request-size: 4MB
+      max-file-size: 8MB
+      max-request-size: 8MB
   jackson:
     time-zone: Europe/Minsk
   servlet:
     multipart:
-      max-file-size: 4MB
-      max-request-size: 4MB
+      max-file-size: 8MB
+      max-request-size: 8MB
 flyway:
   baseline-on-migrate: true
 
