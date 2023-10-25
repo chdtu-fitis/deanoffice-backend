@@ -1,5 +1,10 @@
 package ua.edu.chdtu.deanoffice.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ShortStudentInfoBean {
 
     private int id;
@@ -18,54 +23,6 @@ public class ShortStudentInfoBean {
         this.name = name;
         this.patronimic = patronimic;
         this.studentGroupName = studentGroupName;
-        this.specialityCode = specialityCode;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPatronimic() {
-        return patronimic;
-    }
-
-    public void setPatronimic(String patronimic) {
-        this.patronimic = patronimic;
-    }
-
-    public String getStudentGroupName() {
-        return studentGroupName;
-    }
-
-    public void setStudentGroupName(String studentGroupName) {
-        this.studentGroupName = studentGroupName;
-    }
-
-    public String getSpecialityCode() {
-        return specialityCode;
-    }
-
-    public void setSpecialityCode(String specialityCode) {
         this.specialityCode = specialityCode;
     }
 }
