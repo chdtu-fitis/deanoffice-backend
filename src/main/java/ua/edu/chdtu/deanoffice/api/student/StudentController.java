@@ -124,7 +124,14 @@ public class StudentController {
 
     @GetMapping("all-active-students")
     public ResponseEntity<List<ShortStudentInfoDTO>> getAllActiveStudents(@RequestParam(required = false) String facultyAbbr) {
-        List<ShortStudentInfoDTO> shortStudentsInfo = studentService.getAllActiveStudents(facultyAbbr);
+        List<ShortStudentInfoDTO> shortStudentsInfo = studentService.getAllActiveStudents(facultyAbbr).stream()
+                .map(studentInfoBean -> new ShortStudentInfoDTO(
+                        studentInfoBean.getId(),
+                        studentInfoBean.getSurname() + " " + studentInfoBean.getName() + " " + studentInfoBean.getPatronimic(),
+                        studentInfoBean.getStudentGroupName(),
+                        studentInfoBean.getSpecialityCode()
+                ))
+                .collect(Collectors.toList());;
         return ResponseEntity.ok(shortStudentsInfo);
     }
 }

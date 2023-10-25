@@ -76,7 +76,7 @@ public class StudentService {
             return StudentStatus.NO;
     }
 
-    public List<ShortStudentInfoDTO> getAllActiveStudents(String facultyAbbr) {
+    public List<ShortStudentInfoBean> getAllActiveStudents(String facultyAbbr) {
         List<ShortStudentInfoBean> allActiveStudents;
 
         if (facultyAbbr == null) {
@@ -85,15 +85,7 @@ public class StudentService {
         else {
             allActiveStudents = studentRepository.getAllActiveStudentsByFaculty(facultyAbbr);
         }
-        List<ShortStudentInfoDTO> shortStudentsInfo = allActiveStudents.stream()
-                .map(studentInfoBean -> new ShortStudentInfoDTO(
-                        studentInfoBean.getId(),
-                        studentInfoBean.getSurname() + " " + studentInfoBean.getName() + " " + studentInfoBean.getPatronimic(),
-                        studentInfoBean.getStudentGroupName(),
-                        studentInfoBean.getSpecialityCode()
-                ))
-                .collect(Collectors.toList());
 
-        return shortStudentsInfo;
+        return allActiveStudents;
     }
 }
