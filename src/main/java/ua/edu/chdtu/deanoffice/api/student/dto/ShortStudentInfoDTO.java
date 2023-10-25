@@ -1,5 +1,10 @@
 package ua.edu.chdtu.deanoffice.api.student.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ShortStudentInfoDTO {
 
     private int id;
@@ -16,38 +21,6 @@ public class ShortStudentInfoDTO {
         this.id = id;
         this.fullName = fullName;
         this.groupName = groupName;
-        this.specialityCode = specialityCode;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public String getSpecialityCode() {
-        return specialityCode;
-    }
-
-    public void setSpecialityCode(String specialityCode) {
         this.specialityCode = specialityCode;
     }
 }
