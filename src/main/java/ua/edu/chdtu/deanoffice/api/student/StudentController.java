@@ -21,6 +21,7 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.superclasses.NameEntity;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.service.StudentService;
+import ua.edu.chdtu.deanoffice.api.student.dto.ShortStudentInfoDTO;
 
 import java.util.List;
 import java.util.Objects;
@@ -119,5 +120,18 @@ public class StudentController {
     public ResponseEntity<StudentStatusDTO> getStudentStatus(@RequestParam int studentId) {
         StudentStatusDTO studentStatusDTO = new StudentStatusDTO(studentService.getStudentStatus(studentId));
         return ResponseEntity.ok(studentStatusDTO);
+    }
+
+    @GetMapping("all-active-students")
+    public ResponseEntity<List<ShortStudentInfoDTO>> getAllActiveStudents(@RequestParam(required = false) String facultyAbbr) {
+        List<ShortStudentInfoDTO> shortStudentsInfo = studentService.getAllActiveStudents(facultyAbbr).stream()
+                .map(studentInfoBean -> new ShortStudentInfoDTO(
+                        studentInfoBean.getId(),
+                        studentInfoBean.getSurname() + " " + studentInfoBean.getName() + " " + studentInfoBean.getPatronimic(),
+                        studentInfoBean.getStudentGroupName(),
+                        studentInfoBean.getSpecialityCode()
+                ))
+                .collect(Collectors.toList());;
+        return ResponseEntity.ok(shortStudentsInfo);
     }
 }
