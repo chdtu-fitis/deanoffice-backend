@@ -1,6 +1,5 @@
 package ua.edu.chdtu.deanoffice.service;
 
-import org.apache.regexp.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
