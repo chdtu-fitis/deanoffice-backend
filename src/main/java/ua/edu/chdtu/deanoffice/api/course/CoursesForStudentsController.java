@@ -14,6 +14,7 @@ import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStuden
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.course.CoursesForStudentsService;
@@ -44,7 +45,8 @@ public class CoursesForStudentsController {
     public ResponseEntity addCoursesForStudents(@PathVariable int studentDegreeId,
                                                 @RequestBody List<CourseForStudentWriteDTO> coursesForStudents)
             throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        String result = coursesForStudentsService.addCoursesForStudentDegree(studentDegreeId, coursesForStudents);
+        StudentDegree studentDegree = coursesForStudentsService.getStudentDegreeById(studentDegreeId);
+        String result = coursesForStudentsService.insertCoursesForStudentDegree(studentDegree, coursesForStudents);
         return new ResponseEntity(result, HttpStatus.CREATED);
     }
 }

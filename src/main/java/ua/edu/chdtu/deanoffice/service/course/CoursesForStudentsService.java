@@ -1,11 +1,9 @@
 package ua.edu.chdtu.deanoffice.service.course;
 
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
-import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
@@ -16,7 +14,6 @@ import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,13 +36,6 @@ public class CoursesForStudentsService {
 
     public List<CourseForStudent> getCoursesForStudentDegreeAndSemester(List<Integer> studentDegreeIds, int semester) {
         return coursesForStudentsRepository.getByStudentIdAndSemester(studentDegreeIds, semester);
-    }
-
-    public String addCoursesForStudentDegree(int studentDegreeId, List<CourseForStudentWriteDTO> coursesForStudents)
-            throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
-        StudentDegree studentDegree = getStudentDegreeById(studentDegreeId);
-        String resultDescription = insertCoursesForStudentDegree(studentDegree, coursesForStudents);
-        return resultDescription;
     }
 
     @FacultyAuthorized
