@@ -77,7 +77,7 @@ public class GradeService {
     public List<List<Grade>> getGradesByStudentDegreeIdWithSelective(Integer studentDegreeId) {
         StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
         List<Course> courses = courseRepository.getByGroupId(studentDegree.getStudentGroup().getId());
-        List<Course> selectiveCourses = selectiveCourseRepository.findByStudentDegreeId(studentDegreeId)
+        List<Course> selectiveCourses = selectiveCourseRepository.findByStudentDegreeIdAndActive(studentDegreeId, true)
                                             .stream()
                                             .map(SelectiveCoursesStudentDegrees::getSelectiveCourse)
                                             .map(SelectiveCourse::getCourse)
