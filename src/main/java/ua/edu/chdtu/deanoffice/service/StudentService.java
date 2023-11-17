@@ -5,6 +5,7 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentStatus;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
+import ua.edu.chdtu.deanoffice.api.student.dto.ShortStudentInfoDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -73,5 +74,18 @@ public class StudentService {
             return StudentStatus.ACADEMIC_VACATION;
         else
             return StudentStatus.NO;
+    }
+
+    public List<ShortStudentInfoBean> getAllActiveStudents(String facultyAbbr) {
+        List<ShortStudentInfoBean> allActiveStudents;
+
+        if (facultyAbbr == null) {
+            allActiveStudents = studentRepository.getAllActiveStudents();
+        }
+        else {
+            allActiveStudents = studentRepository.getAllActiveStudentsByFaculty(facultyAbbr);
+        }
+
+        return allActiveStudents;
     }
 }

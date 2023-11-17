@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.Student;
+import ua.edu.chdtu.deanoffice.service.ShortStudentInfoBean;
 
 import java.util.Date;
 import java.util.List;
@@ -21,6 +22,17 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             @Param("surname") String surname,
             @Param("patronimic") String patronimic
     );
+    @Query("SELECT NEW ua.edu.chdtu.deanoffice.service.ShortStudentInfoBean(s.id, s.surname, s.name, s.patronimic, degrees.studentGroup.name, degrees.specialization.speciality.code) " +
+            "FROM Student s " +
+            "JOIN s.degrees degrees " +
+            "WHERE degrees.active = true")
+    List<ShortStudentInfoBean> getAllActiveStudents();
+
+    @Query("SELECT NEW ua.edu.chdtu.deanoffice.service.ShortStudentInfoBean(s.id, s.surname, s.name, s.patronimic, degrees.studentGroup.name, degrees.specialization.speciality.code) " +
+            "FROM Student s " +
+            "join s.degrees degrees " +
+            "WHERE degrees.active = true AND degrees.specialization.faculty.abbr = ?1")
+    List<ShortStudentInfoBean> getAllActiveStudentsByFaculty(String facultyAbbr);
 
 //    @Query("select s from Student s " +
 //            "where s.name = :name " +
