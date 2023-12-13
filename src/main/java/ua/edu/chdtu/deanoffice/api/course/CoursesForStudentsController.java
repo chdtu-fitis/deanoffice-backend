@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
+import ua.edu.chdtu.deanoffice.api.general.dto.MessageDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
@@ -47,6 +48,6 @@ public class CoursesForStudentsController {
             throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         StudentDegree studentDegree = coursesForStudentsService.getStudentDegreeById(studentDegreeId);
         String result = coursesForStudentsService.insertCoursesForStudentDegree(studentDegree, coursesForStudents);
-        return new ResponseEntity(result, HttpStatus.CREATED);
+        return new ResponseEntity(new MessageDTO(result), HttpStatus.CREATED);
     }
 }

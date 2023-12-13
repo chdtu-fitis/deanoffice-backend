@@ -6,5 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StudentDegreeDTO {
+    private int id;
     private StudentDTO student;
 }

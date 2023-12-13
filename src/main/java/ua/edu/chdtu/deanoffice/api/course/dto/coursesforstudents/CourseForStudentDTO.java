@@ -3,7 +3,6 @@ package ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents;
 import lombok.Getter;
 import lombok.Setter;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
-import ua.edu.chdtu.deanoffice.api.order.dto.StudentDegreeDTO;
 import ua.edu.chdtu.deanoffice.api.teacher.TeacherDTO;
 import ua.edu.chdtu.deanoffice.entity.CourseType;
 
