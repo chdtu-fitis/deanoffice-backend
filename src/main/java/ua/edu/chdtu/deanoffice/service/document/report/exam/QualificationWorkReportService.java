@@ -31,16 +31,15 @@ public class QualificationWorkReportService {
     private StudentGroupService studentGroupService;
     private GradeService gradeService;
 
-    private final int ROWS_PER_PAGE = 15;
+    private final int ROWS_PER_PAGE = 21;
 
     private final float NUMBER_CELL_WIDTH = 0.3f;
     private final float PIP_CELL_WIDTH = 1.7f;
     private final float AVERAGE_MARK = 0.4f;
     private final float ZV_WIDTH = 0.4f;
-    private final float GRADE_CELL = 1.5f;
+    private final float GRADE_CELL = 1f;
     private final float NATIONAL_GRADE = 1f;
     private final float HUNDRED_GRADE = 1f;
-    private final float ECTS = 1f;
     private final float PROTOKOL_NUMBER_WIDTH = 1f;
     private final float SIGNATURE_WIDTH = 0.6f;
 
@@ -73,7 +72,7 @@ public class QualificationWorkReportService {
                     facultyName.substring(0, 1).toUpperCase() + facultyName.substring(1).toLowerCase(),
                     font, 0));
             document.add(createCenterAlignedParagraph("Відомість кваліфікаційної роботи " + groupName.toLowerCase() + "а", font, 0));
-            document.add(createCenterAlignedParagraph("группа " + studentGroup.getName(), boldFont, 0));
+            document.add(createCenterAlignedParagraph("група " + studentGroup.getName(), boldFont, 0));
             document.add(createTableWithHeaders(baseFont));
             document.add(fillTable(baseFont, studentGroup));
             Paragraph textBottom = new Paragraph("Декан " + studentGroup.getSpecialization().getFaculty().getAbbr()
@@ -90,9 +89,9 @@ public class QualificationWorkReportService {
     }
 
     private PdfPTable fillTable(BaseFont baseFont, StudentGroup studentGroup) throws DocumentException {
-        PdfPTable table = new PdfPTable(9);
+        PdfPTable table = new PdfPTable(8);
         table.setWidthPercentage(100);
-        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, NATIONAL_GRADE - 0.5f, HUNDRED_GRADE - 0.5f, ECTS - 0.5f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
+        table.setWidths(new float[]{NUMBER_CELL_WIDTH, PIP_CELL_WIDTH, AVERAGE_MARK, ZV_WIDTH, NATIONAL_GRADE - 0.5f, HUNDRED_GRADE - 0.5f, PROTOKOL_NUMBER_WIDTH, SIGNATURE_WIDTH});
         Font font = new Font(baseFont, 12);
 
         int count = 1, studentsCount = 0;
@@ -120,26 +119,22 @@ public class QualificationWorkReportService {
             table.addCell(new PdfPCell(new Paragraph(studentFullName, font)));
             table.addCell(new PdfPCell(createCell(grade, font, 0)));
 
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 5; i++) {
                 table.addCell(new PdfPCell(new Paragraph()));
             }
 
             if (studentsCount / ROWS_PER_PAGE == 1) {
-
                 for (int i = 0; i < 10; i++) {
-                    for (int j = 0; j < 9; j++) {
+                    for (int j = 0; j < 8; j++) {
                         PdfPCell cell = new PdfPCell(createCell(" ", font, 0));
                             cell.setBorderColor(BaseColor.WHITE);
                         table.addCell(cell);
                     }
                 }
-
                 studentsCount = 0;
             }
-
             studentsCount++;
         }
-
         return table;
     }
 
@@ -164,7 +159,7 @@ public class QualificationWorkReportService {
         table.addCell(createCell("Середній бал", font, 0));
         table.addCell(createCell("ЗВ", font, 40));
         table.addCell(createGradeTable(font));
-        table.addCell(createCell("Дата і номер протоколу державної екзаменаційної комісії", font, 0));
+        table.addCell(createCell("Дата і номер протоколу екзаменаційної комісії", font, 0));
         table.addCell(createCell("Підпис зав.каф", font, 0));
         return table;
     }
@@ -172,14 +167,13 @@ public class QualificationWorkReportService {
     private PdfPCell createGradeTable(Font font) throws DocumentException {
         PdfPCell gradeCell = new PdfPCell();
         gradeCell.setPadding(0);
-        PdfPTable gradeTable = new PdfPTable(3);
-        gradeTable.setWidths(new float[]{NATIONAL_GRADE, HUNDRED_GRADE, ECTS});
+        PdfPTable gradeTable = new PdfPTable(2);
+        gradeTable.setWidths(new float[]{NATIONAL_GRADE, HUNDRED_GRADE});
         gradeTable.setWidthPercentage(100);
-        gradeTable.addCell(createGradeCell("Оцінка", font, 4,
+        gradeTable.addCell(createGradeCell("Оцінка", font, 3,
                 PdfPCell.NO_BORDER, 25));
-        gradeTable.addCell(createCell("за націона льною шкалою", font, 0));
+        gradeTable.addCell(createCell("за традицій ною шкалою", font, 0));
         gradeTable.addCell(createCell("кількість балів за 100 бальною шкалою", font, 0));
-        gradeTable.addCell(createCell("ECTS", font, 0));
         gradeCell.addElement(gradeTable);
         return gradeCell;
     }
