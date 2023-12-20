@@ -67,6 +67,14 @@ public class DiplomaSupplementController extends DocumentResponseController {
         try {
             Map<String, String> coursesWithoutEnglishTranslation =
                     courseNameService.getGraduatesCoursesWithEmptyEngName(user.getFaculty().getId(), degreeId);
+//            String courseNames = "";
+//            String whereClause = "";
+//            for (Map.Entry<String, String> entry : coursesWithoutEnglishTranslation.entrySet()) {
+//                whereClause += entry.getKey()+"\n";
+//                courseNames = courseNames+"name='"+entry.getKey() + "' OR ";
+//            }
+//            System.out.println(whereClause);
+//            System.out.println(courseNames);
             List<CourseNameWithoutEngDTO> courseNamesWithoutEngDTOList = new ArrayList<>();
             for (Map.Entry<String, String> entry : coursesWithoutEnglishTranslation.entrySet())
                 courseNamesWithoutEngDTOList.add(new CourseNameWithoutEngDTO(entry.getKey(), entry.getValue()));
