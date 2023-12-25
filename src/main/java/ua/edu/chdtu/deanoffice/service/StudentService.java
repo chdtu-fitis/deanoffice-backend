@@ -35,15 +35,22 @@ public class StudentService {
         );
     }
 
-    public List<Integer> searchStudentByFullNameAndSpecialityCode(String name, String surname,
+    public Integer searchStudentByFullNameAndSpecialityCode(String name, String surname,
                                                                   String patronymic, String code) {
-        List<Integer> finedStudent = studentRepository.findAllByFullNameUkrAndSpecialityCode(
-                toCapitalizedCase(name),
-                toCapitalizedCase(surname),
-                toCapitalizedCase(patronymic),
-                toCapitalizedCase(code)
-        );
-        return finedStudent;
+        if (patronymic.equals("")) {
+            return studentRepository.findAllByFullNameUkrAndSpecialityCode(
+                    toCapitalizedCase(name),
+                    toCapitalizedCase(surname),
+                    toCapitalizedCase(code)
+            );
+        } else {
+            return studentRepository.findAllByFullNameUkrAndSpecialityCode(
+                    toCapitalizedCase(name),
+                    toCapitalizedCase(surname),
+                    toCapitalizedCase(patronymic),
+                    toCapitalizedCase(code)
+            );
+        }
     }
 
     public Student searchByFullNameAndBirthDate(String name, String surname, String patronymic, Date birthDate ){

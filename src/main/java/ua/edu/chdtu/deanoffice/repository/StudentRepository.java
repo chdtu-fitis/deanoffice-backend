@@ -23,18 +23,29 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             @Param("patronimic") String patronimic
     );
 
-    @Query("select s.id from StudentDegree sd " +
+    @Query("select distinct s.id from StudentDegree sd " +
             "join sd.student s " +
             "join sd.specialization.speciality sp " +
-            "where s.name like %:name% " +
-            "and s.surname like %:surname% " +
-            "and s.patronimic like %:patronimic% " +
-            "and sp.code = :code " +
-            "GROUP BY s.id ")
-    List<Integer> findAllByFullNameUkrAndSpecialityCode(
+            "where s.name = :name " +
+            "and s.surname = :surname " +
+            "and s.patronimic = :patronimic " +
+            "and sp.code = :code ")
+    Integer findAllByFullNameUkrAndSpecialityCode(
             @Param("name") String name,
             @Param("surname") String surname,
             @Param("patronimic") String patronimic,
+            @Param("code") String code
+    );
+
+    @Query("select distinct s.id from StudentDegree sd " +
+            "join sd.student s " +
+            "join sd.specialization.speciality sp " +
+            "where s.name = :name " +
+            "and s.surname = :surname " +
+            "and sp.code = :code ")
+    Integer findAllByFullNameUkrAndSpecialityCode(
+            @Param("name") String name,
+            @Param("surname") String surname,
             @Param("code") String code
     );
 
