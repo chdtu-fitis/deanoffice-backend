@@ -58,10 +58,10 @@ public class StudentController {
     @Secured("ROLE_ADMIN")
     @GetMapping("/search-by-name-and-code")
     public Integer searchStudentByFullNameAndSpecialityCode(
-            @RequestParam(value = "surname", defaultValue = "", required = false) String surname,
-            @RequestParam(value = "name", defaultValue = "", required = false) String name,
-            @RequestParam(value = "patronimic", defaultValue = "") String patronimic,
-            @RequestParam(value = "code", defaultValue = "", required = false) String code
+            @RequestParam(value = "surname") String surname,
+            @RequestParam(value = "name") String name,
+            @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic,
+            @RequestParam(value = "code") String code
     ) {
         return studentService.searchStudentByFullNameAndSpecialityCode(name, surname, patronimic,code);
     }
