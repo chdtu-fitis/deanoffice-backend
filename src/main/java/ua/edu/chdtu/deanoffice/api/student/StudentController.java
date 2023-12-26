@@ -55,7 +55,6 @@ public class StudentController {
         });
         return foundStudentsDTO;
     }
-    @Secured("ROLE_ADMIN")
     @GetMapping("/search-by-name-and-code")
     public Integer searchStudentByFullNameAndSpecialityCode(
             @RequestParam(value = "surname") String surname,
