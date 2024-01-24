@@ -55,6 +55,7 @@ public class StudentController {
         });
         return foundStudentsDTO;
     }
+    @Secured({"ROLE_DEANOFFICER", "ROLE_ADMIN", "ROLE_NAVCH_METHOD"})
     @GetMapping("/search-by-name-and-code")
     public Integer[] searchStudentByFullNameAndSpecialityCode(
             @RequestParam(value = "surname") String surname,
