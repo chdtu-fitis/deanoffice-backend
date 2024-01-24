@@ -56,7 +56,7 @@ public class StudentController {
         return foundStudentsDTO;
     }
     @GetMapping("/search-by-name-and-code")
-    public Integer searchStudentByFullNameAndSpecialityCode(
+    public Integer[] searchStudentByFullNameAndSpecialityCode(
             @RequestParam(value = "surname") String surname,
             @RequestParam(value = "name") String name,
             @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic,

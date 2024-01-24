@@ -30,7 +30,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             "and s.surname = :surname " +
             "and s.patronimic = :patronimic " +
             "and sp.code = :code ")
-    Integer findAllByFullNameUkrAndSpecialityCode(
+    Integer[] findAllByFullNameUkrAndSpecialityCode(
             @Param("name") String name,
             @Param("surname") String surname,
             @Param("patronimic") String patronimic,
@@ -43,7 +43,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             "where s.name = :name " +
             "and s.surname = :surname " +
             "and sp.code = :code ")
-    Integer findAllByFullNameUkrAndSpecialityCode(
+    Integer[] findAllByFullNameUkrAndSpecialityCode(
             @Param("name") String name,
             @Param("surname") String surname,
             @Param("code") String code

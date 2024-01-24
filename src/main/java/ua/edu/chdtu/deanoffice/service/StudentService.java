@@ -35,7 +35,7 @@ public class StudentService {
         );
     }
 
-    public Integer searchStudentByFullNameAndSpecialityCode(String name, String surname,
+    public Integer[] searchStudentByFullNameAndSpecialityCode(String name, String surname,
                                                                   String patronymic, String code) {
         if (patronymic.equals("")) {
             return studentRepository.findAllByFullNameUkrAndSpecialityCode(
