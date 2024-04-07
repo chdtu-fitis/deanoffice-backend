@@ -55,6 +55,16 @@ public class StudentController {
         });
         return foundStudentsDTO;
     }
+    @Secured({"ROLE_DEANOFFICER", "ROLE_ADMIN", "ROLE_NAVCH_METHOD"})
+    @GetMapping("/search-by-name-and-code")
+    public Integer[] searchStudentByFullNameAndSpecialityCode(
+            @RequestParam(value = "surname") String surname,
+            @RequestParam(value = "name") String name,
+            @RequestParam(value = "patronimic", defaultValue = "", required = false) String patronimic,
+            @RequestParam(value = "code") String code
+    ) {
+        return studentService.searchStudentByFullNameAndSpecialityCode(name, surname, patronimic,code);
+    }
 
     private String getGroupNamesForStudent(Student student) {
         return student.getDegrees().stream()
