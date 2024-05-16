@@ -22,6 +22,33 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
             @Param("surname") String surname,
             @Param("patronimic") String patronimic
     );
+
+    @Query("select distinct s.id from StudentDegree sd " +
+            "join sd.student s " +
+            "join sd.specialization.speciality sp " +
+            "where s.name = :name " +
+            "and s.surname = :surname " +
+            "and s.patronimic = :patronimic " +
+            "and sp.code = :code ")
+    Integer[] findAllByFullNameUkrAndSpecialityCode(
+            @Param("name") String name,
+            @Param("surname") String surname,
+            @Param("patronimic") String patronimic,
+            @Param("code") String code
+    );
+
+    @Query("select distinct s.id from StudentDegree sd " +
+            "join sd.student s " +
+            "join sd.specialization.speciality sp " +
+            "where s.name = :name " +
+            "and s.surname = :surname " +
+            "and sp.code = :code ")
+    Integer[] findAllByFullNameUkrAndSpecialityCode(
+            @Param("name") String name,
+            @Param("surname") String surname,
+            @Param("code") String code
+    );
+
     @Query("SELECT NEW ua.edu.chdtu.deanoffice.service.ShortStudentInfoBean(s.id, s.surname, s.name, s.patronimic, degrees.studentGroup.name, degrees.specialization.speciality.code) " +
             "FROM Student s " +
             "JOIN s.degrees degrees " +

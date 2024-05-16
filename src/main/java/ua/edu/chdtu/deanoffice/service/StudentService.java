@@ -5,7 +5,6 @@ import ua.edu.chdtu.deanoffice.entity.Student;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentStatus;
 import ua.edu.chdtu.deanoffice.repository.StudentRepository;
-import ua.edu.chdtu.deanoffice.api.student.dto.ShortStudentInfoDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -34,6 +33,24 @@ public class StudentService {
                 toCapitalizedCase(surname),
                 toCapitalizedCase(patronymic)
         );
+    }
+
+    public Integer[] searchStudentByFullNameAndSpecialityCode(String name, String surname,
+                                                                  String patronymic, String code) {
+        if (patronymic.equals("")) {
+            return studentRepository.findAllByFullNameUkrAndSpecialityCode(
+                    toCapitalizedCase(name),
+                    toCapitalizedCase(surname),
+                    toCapitalizedCase(code)
+            );
+        } else {
+            return studentRepository.findAllByFullNameUkrAndSpecialityCode(
+                    toCapitalizedCase(name),
+                    toCapitalizedCase(surname),
+                    toCapitalizedCase(patronymic),
+                    toCapitalizedCase(code)
+            );
+        }
     }
 
     public Student searchByFullNameAndBirthDate(String name, String surname, String patronymic, Date birthDate ){

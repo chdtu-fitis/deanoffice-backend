@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.document.selectivecourses;
 
+import org.apache.commons.collections4.SetUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -9,9 +10,8 @@ import org.docx4j.wml.Text;
 import org.docx4j.wml.Tr;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.DegreeEnum;
+import ua.edu.chdtu.deanoffice.entity.FieldOfKnowledge;
 import ua.edu.chdtu.deanoffice.entity.SelectiveCourse;
-import ua.edu.chdtu.deanoffice.entity.Speciality;
-import ua.edu.chdtu.deanoffice.entity.Specialization;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.TrainingCycle;
 import ua.edu.chdtu.deanoffice.service.DegreeService;
@@ -24,6 +24,7 @@ import ua.edu.chdtu.deanoffice.util.comparators.StudentDegreeFullNameComparator;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,8 @@ public class SelectiveCoursesDocumentService {
     private static final String TEMPLATE_GENERAL_TABLE = TEMPLATES_PATH + "SelectiveCoursesGeneralTable.docx";
     private static final String TEMPLATE_PROF_TABLE = TEMPLATES_PATH + "SelectiveCoursesProfessionalTable.docx";
 
+    private static final String STUDENTS_WITH_RIGHT_COURSES_COUNT = "common";
+    private static final String STUDENTS_WITH_WRONG_COURSES_COUNT = "wrong";
     private final DocumentIOService documentIOService;
     private DegreeService degreeService;
     private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
@@ -79,11 +82,11 @@ public class SelectiveCoursesDocumentService {
                     break;
                 case 3:
                 case 4:
-                    template.getMainDocumentPart().getContent()
-                            .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ПРОФЕСІЙНОЇ ПІДГОТОВКИ"));
+                        template.getMainDocumentPart().getContent()
+                                .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ПРОФЕСІЙНОЇ ПІДГОТОВКИ"));
                     Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[0]+
                                             SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[1];
-                    fillProfessionalTablesByFaculty(template,firstSemester,secondSemester,studyYear,degreeId, countCourses);
+                    fillProfessionalTablesByFieldOfKnowladge(template,firstSemester,secondSemester,studyYear,degreeId, countCourses);
                     break;
             }
         }
@@ -93,14 +96,14 @@ public class SelectiveCoursesDocumentService {
                     .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ПРОФЕСІЙНОЇ ПІДГОТОВКИ"));
             Integer countCourses = SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[0]+
                     SELECTIVE_COURSES_NUMBER.get(degreeId)[studentsYear-1].get(TrainingCycle.PROFESSIONAL.toString())[1];
-            fillProfessionalTablesByFaculty(template,firstSemester, secondSemester, studyYear,degreeId, countCourses);
+            fillProfessionalTablesByFieldOfKnowladge(template,firstSemester, secondSemester, studyYear,degreeId, countCourses);
             template.getMainDocumentPart().getContent()
                     .add(createParagraphText("ДИСЦИПЛІНИ ЦИКЛУ ЗАГАЛЬНОЇ ПІДГОТОВКИ"));
             fillGeneralTablesBySemester(template,firstSemester,studyYear,degreeId);
             fillGeneralTablesBySemester(template,secondSemester,studyYear,degreeId);
         }
 
-        String fileName = "вибіркові-"+degreeService.getById(degreeId).getName().toLowerCase()+"-"+studentsYear+"курс-"+studyYear+"-"+(studyYear+1);
+        String fileName = "selective-order-"+degreeService.getById(degreeId).getNameEng().toLowerCase()+"-"+studentsYear+"k-"+studyYear+"-"+(studyYear+1);
         return documentIOService.saveDocumentToTemp(template, fileName, FileFormatEnum.DOCX);
     }
 
@@ -134,194 +137,93 @@ public class SelectiveCoursesDocumentService {
         }
     }
 
-    private void fillProfessionalTablesByFaculty(WordprocessingMLPackage template,
-                                                 int semesterFirst,
-                                                 int semesterSecond,
-                                                 int studyYear,
-                                                 int degreeId, int coursesCount) throws Docx4JException {
+    private void fillProfessionalTablesByFieldOfKnowladge(WordprocessingMLPackage template,
+                                                          int semesterFirst,
+                                                          int semesterSecond,
+                                                          int studyYear,
+                                                          int degreeId, int coursesCount) throws Docx4JException {
         Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = concatSelectiveCourseBothSemesters(selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterFirst, degreeId),
-                                                                                                                selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterSecond, degreeId));
+                selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterSecond, degreeId));
+        Map<FieldOfKnowledge, List<SelectiveCourse>> selectiveByFK = studentDegreesBySelectiveCourses.keySet()
+                                                                                .stream()
+                                                                                .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getFieldOfKnowledge()));
+        Map<FieldOfKnowledge, List<SelectiveCourse>> allSpecialityStudentsCourses = new HashMap<>();
+        Map<FieldOfKnowledge, List<SelectiveCourse>> partSpecialityStudentsCourses = new HashMap<>();
 
-        Map<TrainingCycle, List<SelectiveCourse>> selectiveByTypeCycle = studentDegreesBySelectiveCourses.keySet()
-                .stream()
-                .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getTrainingCycle()));
-
-        List<String> selectiveGroupNames = selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL).stream()
-                                                        .map(SelectiveCourse::getGroupName)
-                                                        .distinct()
-                                                        .collect(Collectors.toList());
-
-        Map<SelectiveCourse, Map<Speciality, List<StudentDegree>>> studentDegreesBySpeciality = new HashMap<>();
-        selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL).forEach(
-                selectiveCourse -> {
-                    studentDegreesBySpeciality.put(selectiveCourse,
-                            studentDegreesBySelectiveCourses.get(selectiveCourse).stream().collect(Collectors.groupingBy(studentDegree -> studentDegree.getSpecialization().getSpeciality())));
-                }
-        );
-
-        Map<String,List<SelectiveCourse>> selectiveByGroupName = new HashMap<>();
-        for (String groupName: selectiveGroupNames) {
-            List<SelectiveCourse> selectiveCourses = studentDegreesBySelectiveCourses.keySet()
-                                                        .stream()
-                                                        .filter(sc -> sc.getGroupName() != null && sc.getGroupName().equalsIgnoreCase(groupName))
-                                                        .collect(Collectors.toList());
-            selectiveByGroupName.put(groupName, selectiveCourses);
+        List<FieldOfKnowledge> fieldsOfKnowledge = new ArrayList<>(selectiveByFK.keySet());
+        fieldsOfKnowledge.sort(Comparator.comparing(FieldOfKnowledge::getCode));
+        for (FieldOfKnowledge fk :fieldsOfKnowledge){
+            if (selectiveByFK.get(fk).size() == coursesCount) {
+                allSpecialityStudentsCourses.put(fk, selectiveByFK.get(fk));
+            } else {
+                partSpecialityStudentsCourses.put(fk, selectiveByFK.get(fk));
+            }
         }
 
-        Map<SelectiveCourse, StudentDegrees> selectiveCourseStudentDegreesMap = reorganizationByCommonStudentDegree(studentDegreesBySelectiveCourses, studentDegreesBySpeciality, selectiveByGroupName, coursesCount);
+        StringBuilder wrongs = new StringBuilder();
 
-        List<SelectiveCoursesStudentDegreesGroup> selectiveCoursesStudentDegreesGroups = divisionByGroup(studentDegreesBySelectiveCourses, selectiveCourseStudentDegreesMap, selectiveByGroupName,coursesCount);
-
-        for (SelectiveCoursesStudentDegreesGroup scsdGroup : selectiveCoursesStudentDegreesGroups) {
-            if (scsdGroup.getCommonSelectiveCourses().size() == coursesCount) {
-                template.getMainDocumentPart()
+        for (FieldOfKnowledge fk :allSpecialityStudentsCourses.keySet()){
+            List<SelectiveCourse> selectiveCourses = allSpecialityStudentsCourses.get(fk);
+            List<StudentDegree> wrongStudentsDegrees = getCommonAndWrongStudentsDegreesForSelectiveCourses(selectiveCourses, studentDegreesBySelectiveCourses).get(STUDENTS_WITH_WRONG_COURSES_COUNT);
+            List<StudentDegree> commonStudentDegrees = getCommonAndWrongStudentsDegreesForSelectiveCourses(selectiveCourses, studentDegreesBySelectiveCourses).get(STUDENTS_WITH_RIGHT_COURSES_COUNT);
+            List<SelectiveCourse> commonSelectiveCourses = new ArrayList<>(allSpecialityStudentsCourses.get(fk));
+            template.getMainDocumentPart()
                         .getContent()
-                        .addAll(fillProfessionalTableTemplate(scsdGroup.getCommonStudentDegrees(),scsdGroup.getCommonSelectiveCourses())
+                        .addAll(fillProfessionalTableTemplate(commonStudentDegrees,commonSelectiveCourses)
                                 .getMainDocumentPart()
                                 .getContent());
-            } else {
-                for (SelectiveCourse selectiveCourse: scsdGroup.getCommonSelectiveCourses()) {
-                    fillGeneralTablesBySelectiveCourses(template, scsdGroup.getCommonStudentDegrees(), selectiveCourse);
-                }
+            String wrongString = wrongStudentsDegrees
+                    .stream()
+                    .map(sd -> String.format("група: %s, cтудент: %s; ", sd.getStudentGroup().getName(), sd.getStudent().getSurname() + " " + sd.getStudent().getName() + " " + sd.getStudent().getPatronimic()))
+                    .collect(Collectors.joining("; "));
+            wrongs.append(wrongString);
+        }
+
+        for (FieldOfKnowledge fk :partSpecialityStudentsCourses.keySet()){
+            template.getMainDocumentPart().getContent()
+                    .add(createParagraphText("Галузь " + fk.getCode() + " " + fk.getName()));
+            List<SelectiveCourse> selectiveCourses = partSpecialityStudentsCourses.get(fk);
+            selectiveCourses.sort((o1, o2) -> o1.getCourse().getSemester().compareTo(o2.getCourse().getSemester()));
+            for (SelectiveCourse selectiveCourse: selectiveCourses) {
+                List<StudentDegree> studentDegrees = studentDegreesBySelectiveCourses.get(selectiveCourse);
+                fillGeneralTablesBySelectiveCourses(template, studentDegrees, selectiveCourse);
             }
         }
 
-        List<Integer> allPrintedIds = new ArrayList<>();
+        template.getMainDocumentPart().getContent()
+                .add(createParagraphText("Помилки: \n" + wrongs.toString() ));
 
-        selectiveCoursesStudentDegreesGroups.forEach(
-                selectiveCoursesStudentDegreesGroup -> {
-                    allPrintedIds.addAll(
-                    selectiveCoursesStudentDegreesGroup.getCommonSelectiveCourses().stream().map(selectiveCourse -> selectiveCourse.getId()).collect(Collectors.toList())
-                    );
-                }
-        );
-
-        for (SelectiveCourse selectiveCourse : selectiveByTypeCycle.get(TrainingCycle.PROFESSIONAL)) {
-            if (!allPrintedIds.contains(selectiveCourse.getId())) {
-                fillGeneralTablesBySelectiveCourses(template, studentDegreesBySelectiveCourses.get(selectiveCourse), selectiveCourse);
-            }
-        }
     }
 
-    private Map<SelectiveCourse, StudentDegrees> reorganizationByCommonStudentDegree(Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses,
-                                                                                     Map<SelectiveCourse, Map<Speciality, List<StudentDegree>>> studentDegreesBySpeciality,
-                                                                                     Map<String, List<SelectiveCourse>> selectiveByGroupName, int coursesCount) {
-        Map<SelectiveCourse, StudentDegrees> result = new HashMap<>();
-        for(String groupName: selectiveByGroupName.keySet()){
-            List<Integer> allStudentDegreeIds = new ArrayList<>();
-            List<SelectiveCourse> selectiveCourses = selectiveByGroupName.get(groupName);
+    private Map<String, List<StudentDegree>> getCommonAndWrongStudentsDegreesForSelectiveCourses(List<SelectiveCourse> selectiveCourses, Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses) {
+        Set<Set<Integer>> studentDegreeIds = new HashSet<>();
 
-            if (selectiveCourses.size() == coursesCount) { //&& !containSpecialities(studentDegreesBySpeciality, selectiveCourses, specialitiesCodes)
-
-                selectiveByGroupName.get(groupName).forEach(
-                        selectiveCourse -> allStudentDegreeIds.addAll(studentDegreesBySelectiveCourses.get(selectiveCourse).stream().map(sDegree -> sDegree.getId()).collect(Collectors.toList()))
-                        );
-
-                List<Integer> common = allStudentDegreeIds.stream().distinct().collect(Collectors.toList());
-
-                selectiveByGroupName.get(groupName).forEach(selectiveCourse ->
-                        common.retainAll(studentDegreesBySelectiveCourses.get(selectiveCourse).stream().map(sDegree -> sDegree.getId()).collect(Collectors.toList()))
-                );
-
-                for (SelectiveCourse selectiveCourse : selectiveByGroupName.get(groupName)) {
-                    List<StudentDegree> commonStudentDegree = studentDegreesBySelectiveCourses.get(selectiveCourse).stream().filter(studentDegree -> common.contains(studentDegree.getId())).collect(Collectors.toList());
-                    List<StudentDegree> differentStudentDegree = studentDegreesBySelectiveCourses.get(selectiveCourse).stream().filter(studentDegree -> !common.contains(studentDegree.getId())).collect(Collectors.toList());
-                    result.put(selectiveCourse, new StudentDegrees(commonStudentDegree, differentStudentDegree));
-                }
-            }
+        for (SelectiveCourse sc : selectiveCourses) {
+            studentDegreeIds.add(studentDegreesBySelectiveCourses.get(sc).stream().map(StudentDegree::getId).collect(Collectors.toSet()));
         }
-        return result;
-    }
 
-    private List<SelectiveCoursesStudentDegreesGroup> divisionByGroup(Map<SelectiveCourse, List<StudentDegree>> generalStudentDegreesBySelectiveCourses,
-                                                                      Map<SelectiveCourse, StudentDegrees> selectiveCourseStudentDegrees,
-                                                                      Map<String, List<SelectiveCourse>> selectiveByGroupName,
-                                                                      int countCourses) {
-        List<SelectiveCoursesStudentDegreesGroup> result = new ArrayList<>();
-
-        for(String groupName: selectiveByGroupName.keySet()){
-            if (selectiveByGroupName.get(groupName).size()==countCourses) {
-                SelectiveCoursesStudentDegreesGroup selectiveCoursesStudentDegreesGroup = new SelectiveCoursesStudentDegreesGroup();
-                selectiveCoursesStudentDegreesGroup.setCommonSelectiveCourses(selectiveByGroupName.get(groupName));
-
-                SelectiveCourse firstCourseFromList = selectiveByGroupName.get(groupName).get(0);
-                selectiveCoursesStudentDegreesGroup.setCommonStudentDegrees(selectiveCourseStudentDegrees.get(firstCourseFromList).getCommonStudentDegrees());
-                result.add(selectiveCoursesStudentDegreesGroup);
+        Set<Integer> diff = new HashSet<Integer>();
+        for (Set<Integer> ids1 : studentDegreeIds) {
+            for (Set<Integer> ids2 : studentDegreeIds) {
+                diff.addAll(SetUtils.difference(ids1, ids2));
             }
         }
 
-        Map<SelectiveCourse, Map<Specialization,List<StudentDegree>>> selectiveCoursesDiffDegrees = new HashMap<>();
-
-        selectiveCourseStudentDegrees.keySet().forEach(selectiveCourse -> {
-                    if (selectiveCourseStudentDegrees.get(selectiveCourse).getDifferentStudentDegrees().size() > 0) {
-                        Map<Specialization, List<StudentDegree>> studentsBySpec = selectiveCourseStudentDegrees.get(selectiveCourse).getDifferentStudentDegrees()
-                                .stream()
-                                .collect(Collectors.groupingBy(studentDegree -> studentDegree.getSpecialization()));
-                        selectiveCoursesDiffDegrees.put(selectiveCourse, studentsBySpec);
-                    }
-                }
-        );
-
-        Set<Specialization> specializations = new HashSet<>();
-        selectiveCoursesDiffDegrees.keySet().forEach(selectiveCourse -> {
-            specializations.addAll(selectiveCoursesDiffDegrees.get(selectiveCourse).keySet());
-        });
-
-        List<Integer> addedCoursesIds = new ArrayList<>();
-        result.forEach(
-                selectiveCoursesStudentDegreesGroup -> {
-                    addedCoursesIds.addAll(
-                            selectiveCoursesStudentDegreesGroup.getCommonSelectiveCourses().stream().map(selectiveCourse -> selectiveCourse.getId()).collect(Collectors.toList())
-                    );
-                }
-        );
-
-        generalStudentDegreesBySelectiveCourses.keySet().forEach(selectiveCourse -> {
-            if (!addedCoursesIds.contains(selectiveCourse.getId())) {
-                Map<Specialization, List<StudentDegree>> studentsBySpec = generalStudentDegreesBySelectiveCourses.get(selectiveCourse)
-                        .stream()
-                        .collect(Collectors.groupingBy(studentDegree -> studentDegree.getSpecialization()));
-                studentsBySpec.keySet().forEach(specialization -> {
-                    if (specializations.contains(specialization))
-                        selectiveCoursesDiffDegrees.put(selectiveCourse, studentsBySpec);//this put by with all specialization
-                    //TODO: maybe put student degree for one specialization
-                });
-            }
-        });
-
-        result.addAll(getSelectiveCoursesGroups(selectiveCoursesDiffDegrees, specializations));
-        return result;
-    }
-
-    private List<SelectiveCoursesStudentDegreesGroup> getSelectiveCoursesGroups(Map<SelectiveCourse, Map<Specialization,List<StudentDegree>>> selectiveCoursesDiffDegrees, Set<Specialization> specializations) {
-        List<SelectiveCoursesStudentDegreesGroup> commonSelectiveCourses = new ArrayList<>();
-
-        specializations.forEach(specialization -> {
-            SelectiveCoursesStudentDegreesGroup selectiveCoursesStudentDegreesGroup = new SelectiveCoursesStudentDegreesGroup();
-
-            selectiveCoursesDiffDegrees.keySet().forEach(selectiveCourse -> {
-                List<StudentDegree> studentDegrees = selectiveCoursesDiffDegrees.get(selectiveCourse).get(specialization);
-                if (studentDegrees!= null && studentDegrees.size() > 0) {
-                    selectiveCoursesStudentDegreesGroup.getCommonStudentDegrees().addAll(studentDegrees);
-                    selectiveCoursesStudentDegreesGroup.getCommonSelectiveCourses().add(selectiveCourse);
-                }
-            });
-            List<StudentDegree> students = selectiveCoursesStudentDegreesGroup.getCommonStudentDegrees().stream().distinct().collect(Collectors.toList());
-            selectiveCoursesStudentDegreesGroup.setCommonStudentDegrees(students);
-            commonSelectiveCourses.add(selectiveCoursesStudentDegreesGroup);
-        });
-
-        return commonSelectiveCourses;
-    }
-
-    private boolean containSpecialities(Map<SelectiveCourse,Map<Speciality,List<StudentDegree>>> studentDegreesBySpeciality, List<SelectiveCourse> selectiveCourses, String[] codes) {
-        for(SelectiveCourse selectiveCourse: selectiveCourses) {
-            for(Speciality speciality:studentDegreesBySpeciality.get(selectiveCourse).keySet()){
-                if (speciality.getCode().equalsIgnoreCase(codes[0]) || speciality.getCode().equalsIgnoreCase(codes[1]))
-                    return true;
-            }
+        Set<StudentDegree> commonStudentDegree = new HashSet<>();
+        for (SelectiveCourse sc : selectiveCourses) {
+            commonStudentDegree.addAll(studentDegreesBySelectiveCourses.get(sc).stream().filter(studentDegree ->!diff.contains(studentDegree.getId())).collect(Collectors.toList()));
         }
-        return false;
+
+        Map<String, List<StudentDegree>> commonAndWrongStudentDegrees = new HashMap<>();
+        commonAndWrongStudentDegrees.put(STUDENTS_WITH_RIGHT_COURSES_COUNT, new ArrayList<>(commonStudentDegree));
+
+        Set<StudentDegree> wrongStudentDegree = new HashSet<>();
+        for (SelectiveCourse sc : selectiveCourses) {
+            wrongStudentDegree.addAll(studentDegreesBySelectiveCourses.get(sc).stream().filter(studentDegree ->diff.contains(studentDegree.getId())).collect(Collectors.toList()));
+        }
+        commonAndWrongStudentDegrees.put(STUDENTS_WITH_WRONG_COURSES_COUNT, new ArrayList<>(wrongStudentDegree));
+
+        return commonAndWrongStudentDegrees;
     }
 
     private WordprocessingMLPackage fillProfessionalTableTemplate(List<StudentDegree> studentDegrees, List<SelectiveCourse> selectiveCourses) throws Docx4JException {
@@ -460,50 +362,4 @@ public class SelectiveCoursesDocumentService {
         tempTable.getContent().remove(templateRow);
     }
 
-    class SelectiveCoursesStudentDegreesGroup {
-        private List<SelectiveCourse> commonSelectiveCourses = new ArrayList<>();
-        private List<StudentDegree> commonStudentDegrees = new ArrayList<>();
-
-        public List<SelectiveCourse> getCommonSelectiveCourses() {
-            return commonSelectiveCourses;
-        }
-
-        public void setCommonSelectiveCourses(List<SelectiveCourse> commonSelectiveCourses) {
-            this.commonSelectiveCourses = new ArrayList<>(commonSelectiveCourses);
-        }
-
-        public List<StudentDegree> getCommonStudentDegrees() {
-            return commonStudentDegrees;
-        }
-
-        public void setCommonStudentDegrees(List<StudentDegree> commonStudentDegrees) {
-            this.commonStudentDegrees = new ArrayList<>(commonStudentDegrees);
-        }
-    }
-
-    class StudentDegrees {
-        private List<StudentDegree> commonStudentDegrees = new ArrayList<>();
-        private List<StudentDegree> differentStudentDegrees = new ArrayList<>();
-
-        public StudentDegrees(List<StudentDegree> commonStudentDegrees, List<StudentDegree> differentStudentDegrees) {
-            this.commonStudentDegrees = new ArrayList<>(commonStudentDegrees);
-            this.differentStudentDegrees = new ArrayList<>(differentStudentDegrees);
-        }
-
-        public List<StudentDegree> getCommonStudentDegrees() {
-            return commonStudentDegrees;
-        }
-
-        public void setCommonStudentDegrees(List<StudentDegree> commonStudentDegrees) {
-            this.commonStudentDegrees = new ArrayList<>(commonStudentDegrees);
-        }
-
-        public List<StudentDegree> getDifferentStudentDegrees() {
-            return differentStudentDegrees;
-        }
-
-        public void setDifferentStudentDegrees(List<StudentDegree> differentStudentDegrees) {
-            this.differentStudentDegrees = new ArrayList<>(differentStudentDegrees);
-        }
-    }
 }
