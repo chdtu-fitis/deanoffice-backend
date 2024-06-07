@@ -196,7 +196,7 @@ public class GradeService {
             }
             grade.setCourse(course);
             Boolean newGradedValue = gradedDefinition.get(NEW_GRADED_VALUE);
-            if (newGradedValue != null) {
+            if (newGradedValue != null && grade.getPoints() != null) {
                 if (newGradedValue) {
                     grade.setGrade(GradeUtil.getGradeFromPoints(grade.getPoints()));
                 } else {
