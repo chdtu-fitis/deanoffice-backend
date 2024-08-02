@@ -28,6 +28,7 @@ public class SpecializationWriteDTO {
     private ExistingIdDTO programHead;
     private String certificateNumber;
     private Date certificateDate;
+    private Date certificateExpires;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
     private int normativeCreditsNumber;

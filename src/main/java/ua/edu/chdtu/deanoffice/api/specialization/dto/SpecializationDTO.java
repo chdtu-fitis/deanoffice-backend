@@ -34,6 +34,7 @@ public class SpecializationDTO {
     private TeacherDTO programHead;
     private String certificateNumber;
     private Date certificateDate;
+    private Date certificateExpires;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
     private int normativeCreditsNumber;
