@@ -34,6 +34,7 @@ public class Specialization extends NameWithEngAndActiveEntity {
     private String certificateNumber;
     @Temporal(TemporalType.DATE)
     private Date certificateDate;
+    @Temporal(TemporalType.DATE)
     private Date certificateExpires;
     private String certificateIssuedBy;
     private String certificateIssuedByEng;
