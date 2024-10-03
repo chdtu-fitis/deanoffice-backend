@@ -17,6 +17,7 @@ import ua.edu.chdtu.deanoffice.entity.TuitionTerm;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
 import ua.edu.chdtu.deanoffice.repository.CourseForGroupRepository;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
+import ua.edu.chdtu.deanoffice.repository.CoursesForStudentsRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.repository.SelectiveCoursesStudentDegreesRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
@@ -37,16 +38,18 @@ public class GradeService {
     private final CourseRepository courseRepository;
     private final CourseForGroupRepository courseForGroupRepository;
     private final SelectiveCoursesStudentDegreesRepository selectiveCourseRepository;
+    private final CoursesForStudentsRepository coursesForStudentsRepository;
     private final StudentDegreeRepository studentDegreeRepository;
     private KnowledgeControlService knowledgeControlService;
 
     @Autowired
     public GradeService(GradeRepository gradeRepository, CourseRepository courseRepository, CourseForGroupRepository courseForGroupRepository,
-                        SelectiveCoursesStudentDegreesRepository selectiveCourseRepository, StudentDegreeRepository studentDegreeRepository, KnowledgeControlService knowledgeControlService) {
+                        SelectiveCoursesStudentDegreesRepository selectiveCourseRepository, CoursesForStudentsRepository coursesForStudentsRepository, StudentDegreeRepository studentDegreeRepository, KnowledgeControlService knowledgeControlService) {
         this.gradeRepository = gradeRepository;
         this.courseRepository = courseRepository;
         this.courseForGroupRepository = courseForGroupRepository;
         this.selectiveCourseRepository = selectiveCourseRepository;
+        this.coursesForStudentsRepository = coursesForStudentsRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.knowledgeControlService = knowledgeControlService;
     }
@@ -110,6 +113,28 @@ public class GradeService {
         grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
         grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART3)));
         grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART4)));
+
+        return grades;
+    }
+
+    public List<List<Grade>> getRecreditedGradesByStudentDegreeId(Integer studentDegreeId) {
+        StudentDegree studentDegree = studentDegreeRepository.getById(studentDegreeId);
+        List<Course> courses = coursesForStudentsRepository.getRecreditedByStudentDegreeId(studentDegree.getId());
+
+        List<List<Grade>> grades = new ArrayList<>();
+
+        if (courses.isEmpty()) {
+            grades.add(new ArrayList<>());
+            grades.add(new ArrayList<>());
+            grades.add(new ArrayList<>());
+            return grades;
+        }
+
+        List<Integer> courseIds = courses.stream().map(BaseEntity::getId).collect(Collectors.toList());
+
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART1)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART2)));
+        grades.add(getGrades(studentDegree, courseIds, Arrays.asList(KNOWLEDGE_CONTROL_PART3)));
 
         return grades;
     }

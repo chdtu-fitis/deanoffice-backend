@@ -115,6 +115,16 @@ public class SupplementTemplateFillService {
             //Need to skip header of the next section
             rowToAddIndex++;
         }
+        for (List<Grade> gradesSection : studentSummary.getRecreditedGrades()) {
+            for (Grade grade : gradesSection) {
+                Map<String, String> replacements = getGradeDictionary(grade);
+                replacements.put("Number", String.format("%2d", gradeNumber++));
+                TemplateUtil.addRowToTable(tableWithGrades, templateRow, rowToAddIndex, replacements);
+                rowToAddIndex++;
+            }
+            //Need to skip header of the next section
+            rowToAddIndex++;
+        }
         tableWithGrades.getContent().remove(templateRow);
 
         if (tableWithGrades.getContent().size() < 50) {

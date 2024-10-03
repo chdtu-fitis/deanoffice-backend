@@ -47,7 +47,8 @@ public class DiplomaSupplementService {
         StudentDegree studentDegree = studentDegreeService.getById(studentDegreeId);
         Student student = studentDegree.getStudent();
         List<List<Grade>> grades = gradeService.getGradesByStudentDegreeIdWithSelective(studentDegreeId);
-        StudentSummary studentSummary = new StudentSummary(studentDegree, grades);
+        List<List<Grade>> recreditedGrades = gradeService.getRecreditedGradesByStudentDegreeId(studentDegreeId);
+        StudentSummary studentSummary = new StudentSummary(studentDegree, grades, recreditedGrades);
         complementQualificationWorkDescription(studentSummary);
 
         String fileName = student.getSurnameEng() + "_" + studentSummary.getStudent().getNameEng();

@@ -28,6 +28,7 @@ public class StudentSummary {
 
     private StudentDegree studentDegree;
     private List<List<Grade>> grades;
+    private List<List<Grade>> recreditedGrades;
     private Integer totalHours;
     private BigDecimal totalCredits;
 
@@ -40,6 +41,15 @@ public class StudentSummary {
         combineMultipleSemesterCourseGrades();
     }
 
+    public StudentSummary(StudentDegree studentDegree, List<List<Grade>> grades, List<List<Grade>> recreditedGrades) {
+        this.studentDegree = studentDegree;
+        this.grades = grades;
+        this.recreditedGrades = recreditedGrades;
+        removeUnwantedGrades();
+        calculateTotalHours();
+        calculateTotalCredits();
+        combineMultipleSemesterCourseGrades();
+    }
     protected StudentSummary() {
     }
 

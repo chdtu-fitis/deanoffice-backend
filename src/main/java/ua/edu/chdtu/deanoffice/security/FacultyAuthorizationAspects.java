@@ -2,10 +2,13 @@ package ua.edu.chdtu.deanoffice.security;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.Department;
 import ua.edu.chdtu.deanoffice.entity.Specialization;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
@@ -83,4 +86,15 @@ public class FacultyAuthorizationAspects {
                 throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вказаний студент належить до іншого факультету");
         }
     }
+
+    @Before("within(ua.edu.chdtu.deanoffice.service.course.CoursesForStudentsService) " +
+            "&& @annotation(ua.edu.chdtu.deanoffice.security.FacultyAuthorized) " +
+            "&& args(studentDegree, ..)")
+    public void beforeInsertOrUpdateOrDeleteCoursesForStudent(@NotNull StudentDegree studentDegree) throws UnauthorizedFacultyDataException {
+        int userFacultyId = FacultyUtil.getUserFacultyIdInt();
+        int studentFacultyId = studentDegree.getSpecialization().getFaculty().getId();
+        if (userFacultyId != studentFacultyId)
+            throw new UnauthorizedFacultyDataException(ACCESS_FORBIDDEN_FOR_USER + " Вибраний студент належить до іншого факультету");
+    }
+
 }
