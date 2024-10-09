@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
+import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.DeleteStudentsRequestDTO;
 import ua.edu.chdtu.deanoffice.api.general.dto.MessageDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
@@ -52,4 +53,19 @@ public class CoursesForStudentsController {
         String result = coursesForStudentsService.deleteSelectiveCourseForStudentByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
         return ResponseEntity.ok(result);
     }
+
+    @Secured({"ROLE_DEANOFFICER"})
+    @DeleteMapping("/courses-for-students/delete-students/forFaculty={forFaculty}")
+    public ResponseEntity<String> deleteStudentsFromSelectiveCourse(
+            @PathVariable boolean forFaculty,
+            @RequestBody DeleteStudentsRequestDTO request) {
+        try {
+            String result = coursesForStudentsService.deleteStudentsFromSelectiveCourses(request.getStudentDegreeIds(), request.getCourseIds(), forFaculty);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при удалении студентов: " + e.getMessage());
+        }
+    }
+
 }

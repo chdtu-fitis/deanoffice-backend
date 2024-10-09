@@ -2,10 +2,7 @@ package ua.edu.chdtu.deanoffice.service.course;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -13,7 +10,10 @@ import ua.edu.chdtu.deanoffice.repository.CoursesForStudentsRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
+import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,15 +23,17 @@ public class CoursesForStudentsService {
     private StudentDegreeRepository studentDegreeRepository;
     private CourseRepository courseRepository;
     private TeacherRepository teacherRepository;
+    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     public CoursesForStudentsService(CoursesForStudentsRepository coursesForStudentsRepository,
                                      StudentDegreeRepository studentDegreeRepository,
                                      CourseRepository courseRepository,
-                                     TeacherRepository teacherRepository) {
+                                     TeacherRepository teacherRepository, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
         this.coursesForStudentsRepository = coursesForStudentsRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
+        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     public List<CourseForStudent> getCoursesForStudentDegreeAndSemester(List<Integer> studentDegreeIds, int semester) {
@@ -77,5 +79,41 @@ public class CoursesForStudentsService {
         } catch (Exception e) {
             return "Помилка при видаленні предмету: " + e.getMessage();
         }
+    }
+
+    @FacultyAuthorized
+    public String deleteStudentsFromSelectiveCourses(List<Integer> studentDegreeIds, List<Integer> courseIds, boolean forFaculty) {
+        StringBuilder result = new StringBuilder();
+        try {
+            for (Integer courseId : courseIds) {
+                // Усі студенти для i-го курсу
+                List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegrees =
+                        selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(courseId, forFaculty);
+                // Додаємо їх id до списку
+                List<Integer> studentsIdOnCourse = new ArrayList<>();
+                for (SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees : selectiveCoursesForStudentDegrees) {
+                    studentsIdOnCourse.add(selectiveCoursesStudentDegrees.getStudentDegree().getId());
+                }
+
+                // Якщо студент є на курсі - видаляємо
+                List<Integer> successfullyDeletedIds = new ArrayList<>();
+                for (Integer studentDegreeId : studentDegreeIds) {
+                    if (studentsIdOnCourse.contains(studentDegreeId)) {
+                        coursesForStudentsRepository.deleteSelectiveCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+                        successfullyDeletedIds.add(studentDegreeId);
+                    }
+                }
+
+                if (!successfullyDeletedIds.isEmpty()) {
+                    result.append("Успішно видалені студенти з ID: ").append(successfullyDeletedIds).append(" з курса під ID: ").append(courseId).append(".\n");
+                } else {
+                    result.append("Немає студентів для видалення з курсу з ID: ").append(courseId).append(".\n");
+                }
+            }
+        } catch (Exception e) {
+            return "Помилка при видаленні студентів: " + e.getMessage();
+        }
+
+        return result.toString();
     }
 }
