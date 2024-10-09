@@ -3,12 +3,7 @@ package ua.edu.chdtu.deanoffice.api.course;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentDTO;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
@@ -49,5 +44,12 @@ public class CoursesForStudentsController {
         StudentDegree studentDegree = coursesForStudentsService.getStudentDegreeById(studentDegreeId);
         String result = coursesForStudentsService.insertCoursesForStudentDegree(studentDegree, coursesForStudents);
         return new ResponseEntity(new MessageDTO(result), HttpStatus.CREATED);
+    }
+
+    @Secured({"ROLE_DEANOFFICER"})
+    @DeleteMapping("/students/{studentDegreeId}/courses/{courseId}")
+    public ResponseEntity<String> deleteCourseForStudent(@PathVariable int studentDegreeId, @PathVariable int courseId) throws UnauthorizedFacultyDataException {
+        String result = coursesForStudentsService.deleteCourseForStudent(studentDegreeId, courseId);
+        return ResponseEntity.ok(result);
     }
 }

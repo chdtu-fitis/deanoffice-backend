@@ -68,4 +68,14 @@ public class CoursesForStudentsService {
                 new OperationCannotBePerformedException("Студента з таким id не існує"));
         return studentDegree;
     }
+
+    @FacultyAuthorized
+    public String deleteCourseForStudent(int studentDegreeId, int courseId) {
+        try {
+            coursesForStudentsRepository.deleteByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+            return "Предмет видалено.";
+        } catch (Exception e) {
+            return "Помилка при видаленні предмету: " + e.getMessage();
+        }
+    }
 }
