@@ -70,9 +70,9 @@ public class CoursesForStudentsService {
     }
 
     @FacultyAuthorized
-    public String deleteCourseForStudent(int studentDegreeId, int courseId) {
+    public String deleteSelectiveCourseForStudentByStudentDegreeIdAndCourseId(int studentDegreeId, int courseId) {
         try {
-            coursesForStudentsRepository.deleteByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+            coursesForStudentsRepository.deleteSelectiveCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
             return "Предмет видалено.";
         } catch (Exception e) {
             return "Помилка при видаленні предмету: " + e.getMessage();
