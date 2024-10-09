@@ -64,7 +64,7 @@ public class CoursesForStudentsController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Ошибка при удалении студентов: " + e.getMessage());
+                    .body("Помилка при видаленні студентів: " + e.getMessage());
         }
     }
 
