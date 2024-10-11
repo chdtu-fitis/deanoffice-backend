@@ -3,6 +3,7 @@ package ua.edu.chdtu.deanoffice.service.course;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
 import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -23,17 +24,15 @@ public class CoursesForStudentsService {
     private StudentDegreeRepository studentDegreeRepository;
     private CourseRepository courseRepository;
     private TeacherRepository teacherRepository;
-    private SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
 
     public CoursesForStudentsService(CoursesForStudentsRepository coursesForStudentsRepository,
                                      StudentDegreeRepository studentDegreeRepository,
                                      CourseRepository courseRepository,
-                                     TeacherRepository teacherRepository, SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
+                                     TeacherRepository teacherRepository) {
         this.coursesForStudentsRepository = coursesForStudentsRepository;
         this.studentDegreeRepository = studentDegreeRepository;
         this.courseRepository = courseRepository;
         this.teacherRepository = teacherRepository;
-        this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
     }
 
     public List<CourseForStudent> getCoursesForStudentDegreeAndSemester(List<Integer> studentDegreeIds, int semester) {
@@ -72,34 +71,47 @@ public class CoursesForStudentsService {
     }
 
     @FacultyAuthorized
-    public String deleteSelectiveCourseForStudentByStudentDegreeIdAndCourseId(int studentDegreeId, int courseId) {
+    public void deleteStudentFromCourseByStudentDegreeIdAndCourseId(int studentDegreeId, int courseId) throws NotFoundException, OperationCannotBePerformedException {
+        // Проверяем, существует ли студент и курс
+        boolean studentExists = coursesForStudentsRepository.existsByStudentDegreeId(studentDegreeId);
+        boolean courseExists = coursesForStudentsRepository.existsByCourseId(courseId);
+
+        List<Integer> studentsIdOnCourse =
+                coursesForStudentsRepository.getStudentsOnCourseByCourseId(courseId);
+
+        if (!courseExists) {
+            throw new NotFoundException("Курс з ID: " + courseId + " не знайдено.");
+        }
+        if (!studentExists) {
+            throw new NotFoundException("Студент з ID: " + studentDegreeId + " не знайдено.");
+        }
+        if (!studentsIdOnCourse.contains(studentDegreeId)) {
+            throw new NotFoundException("Студента з ID: " + studentDegreeId + " не зареєстровано на курсі з ID: " + courseId);
+        }
+
+        // Выполняем удаление
         try {
-            coursesForStudentsRepository.deleteSelectiveCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
-            return "Предмет видалено.";
+            coursesForStudentsRepository.deleteStudentFromCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
         } catch (Exception e) {
-            return "Помилка при видаленні предмету: " + e.getMessage();
+            throw new OperationCannotBePerformedException("Помилка при видаленні предмету: " + e.getMessage());
         }
     }
 
+
     @FacultyAuthorized
-    public String deleteStudentsFromSelectiveCourses(List<Integer> studentDegreeIds, List<Integer> courseIds, boolean forFaculty) {
+    public String deleteStudentsFromCourses(List<Integer> studentDegreeIds, List<Integer> courseIds) {
         StringBuilder result = new StringBuilder();
         try {
             for (Integer courseId : courseIds) {
                 // Усі студенти для i-го курсу
-                List<SelectiveCoursesStudentDegrees> selectiveCoursesForStudentDegrees =
-                        selectiveCoursesStudentDegreesService.getStudentDegreesForSelectiveCourse(courseId, forFaculty);
-                // Додаємо їх id до списку
-                List<Integer> studentsIdOnCourse = new ArrayList<>();
-                for (SelectiveCoursesStudentDegrees selectiveCoursesStudentDegrees : selectiveCoursesForStudentDegrees) {
-                    studentsIdOnCourse.add(selectiveCoursesStudentDegrees.getStudentDegree().getId());
-                }
+                List<Integer> studentsIdOnCourse =
+                        coursesForStudentsRepository.getStudentsOnCourseByCourseId(courseId);
 
                 // Якщо студент є на курсі - видаляємо
                 List<Integer> successfullyDeletedIds = new ArrayList<>();
                 for (Integer studentDegreeId : studentDegreeIds) {
                     if (studentsIdOnCourse.contains(studentDegreeId)) {
-                        coursesForStudentsRepository.deleteSelectiveCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+                        coursesForStudentsRepository.deleteStudentFromCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
                         successfullyDeletedIds.add(studentDegreeId);
                     }
                 }

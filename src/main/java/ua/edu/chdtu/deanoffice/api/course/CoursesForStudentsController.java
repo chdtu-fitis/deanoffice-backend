@@ -12,6 +12,7 @@ import ua.edu.chdtu.deanoffice.api.general.dto.MessageDTO;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
 import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.service.course.CoursesForStudentsService;
@@ -48,19 +49,20 @@ public class CoursesForStudentsController {
     }
 
     @Secured({"ROLE_DEANOFFICER"})
-    @DeleteMapping("/courses-for-students/{studentDegreeId}/selective-courses/{courseId}")
-    public ResponseEntity<String> deleteSelectiveCourseForStudent(@PathVariable int studentDegreeId, @PathVariable int courseId) throws UnauthorizedFacultyDataException {
-        String result = coursesForStudentsService.deleteSelectiveCourseForStudentByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
-        return ResponseEntity.ok(result);
+    @DeleteMapping("/courses-for-students/delete-student/{studentDegreeId}/FromCourse/{courseId}")
+    public ResponseEntity<String> deleteStudentFromCourse(@PathVariable int studentDegreeId, @PathVariable int courseId)
+            throws UnauthorizedFacultyDataException, NotFoundException, OperationCannotBePerformedException {
+        coursesForStudentsService.deleteStudentFromCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+        String successMessage = "Студента з ID: " + studentDegreeId + " видалено з курсу під ID: " + courseId;
+        return ResponseEntity.ok(successMessage); // Возвращаем сообщение об успешном удалении
     }
 
     @Secured({"ROLE_DEANOFFICER"})
-    @DeleteMapping("/courses-for-students/delete-students/forFaculty={forFaculty}")
-    public ResponseEntity<String> deleteStudentsFromSelectiveCourse(
-            @PathVariable boolean forFaculty,
+    @DeleteMapping("/courses-for-students/delete-students/")
+    public ResponseEntity<String> deleteStudentsFromCourse(
             @RequestBody DeleteStudentsRequestDTO request) {
         try {
-            String result = coursesForStudentsService.deleteStudentsFromSelectiveCourses(request.getStudentDegreeIds(), request.getCourseIds(), forFaculty);
+            String result = coursesForStudentsService.deleteStudentsFromCourses(request.getStudentDegreeIds(), request.getCourseIds());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

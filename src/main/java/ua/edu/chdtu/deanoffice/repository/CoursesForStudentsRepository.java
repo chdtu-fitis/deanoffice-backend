@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
-import ua.edu.chdtu.deanoffice.entity.CourseType;
 
 import java.util.List;
 
@@ -23,8 +22,18 @@ public interface CoursesForStudentsRepository extends JpaRepository<CourseForStu
             "order by cfs.studentDegree.id, cfs.course.semester, cfs.course.knowledgeControl.name, cfs.course.courseName.name")
     List<Course> getRecreditedByStudentDegreeId(@Param("studentDegreeId") Integer studentDegreeId);
 
-    @Query("delete from SelectiveCoursesStudentDegrees scsd where scsd.studentDegree.id = :studentDegreeId and scsd.selectiveCourse.id = :courseId")
+    @Query("delete from CourseForStudent cfs where cfs.studentDegree.id = :studentDegreeId and cfs.course.id = :courseId")
     @Modifying
     @Transactional
-    void deleteSelectiveCourseByStudentDegreeIdAndCourseId(@Param("studentDegreeId") int studentDegreeId, @Param("courseId") int courseId);
+    void deleteStudentFromCourseByStudentDegreeIdAndCourseId(@Param("studentDegreeId") int studentDegreeId, @Param("courseId") int courseId);
+
+    @Query("select studentDegree.id from CourseForStudent cfs where cfs.course.id = :courseID")
+    List<Integer> getStudentsOnCourseByCourseId(@Param("courseID") int courseID);
+
+    @Query("select count(cfs) > 0 from CourseForStudent cfs where cfs.studentDegree.id = :studentDegreeId")
+    boolean existsByStudentDegreeId(@Param("studentDegreeId") int studentDegreeId);
+
+    @Query("select count(cfs) > 0 from CourseForStudent cfs where cfs.course.id = :courseId")
+    boolean existsByCourseId(@Param("courseId") int courseId);
+
 }
