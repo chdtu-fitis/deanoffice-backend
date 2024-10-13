@@ -64,9 +64,10 @@ public class CoursesForStudentsController {
         try {
             String result = coursesForStudentsService.deleteStudentsFromCourses(request.getStudentDegreeIds(), request.getCourseIds());
             return ResponseEntity.ok(result);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Помилка при видаленні студентів: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Помилка при видаленні студентів: " + e.getMessage());
         }
     }
 

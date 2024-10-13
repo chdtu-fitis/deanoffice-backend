@@ -14,9 +14,8 @@ import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CoursesForStudentsService {
@@ -72,7 +71,7 @@ public class CoursesForStudentsService {
 
     @FacultyAuthorized
     public void deleteStudentFromCourseByStudentDegreeIdAndCourseId(int studentDegreeId, int courseId) throws NotFoundException, OperationCannotBePerformedException {
-        // Проверяем, существует ли студент и курс
+        // Перевірка існування студенту та курсу
         boolean studentExists = coursesForStudentsRepository.existsByStudentDegreeId(studentDegreeId);
         boolean courseExists = coursesForStudentsRepository.existsByCourseId(courseId);
 
@@ -89,7 +88,7 @@ public class CoursesForStudentsService {
             throw new NotFoundException("Студента з ID: " + studentDegreeId + " не зареєстровано на курсі з ID: " + courseId);
         }
 
-        // Выполняем удаление
+        // Видалення
         try {
             coursesForStudentsRepository.deleteStudentFromCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
         } catch (Exception e) {
@@ -99,33 +98,82 @@ public class CoursesForStudentsService {
 
 
     @FacultyAuthorized
-    public String deleteStudentsFromCourses(List<Integer> studentDegreeIds, List<Integer> courseIds) {
+    public String deleteStudentsFromCourses(List<Integer> studentDegreeIds, List<Integer> courseIds) throws NotFoundException {
         StringBuilder result = new StringBuilder();
-        try {
-            for (Integer courseId : courseIds) {
-                // Усі студенти для i-го курсу
-                List<Integer> studentsIdOnCourse =
-                        coursesForStudentsRepository.getStudentsOnCourseByCourseId(courseId);
+        boolean anySuccess = false;  // Помечаем, что хотя бы одно действие прошло успешно
+        List<Integer> failedCourses = new ArrayList<>();  // Курсы, которые не найдены
+        List<Integer> failedStudents = new ArrayList<>(); // Студенты, которые не найдены
+        Set<Integer> notValidCourse = new HashSet<>();
+        Set<Integer> successfullyDeletedStudents = new HashSet<>();
 
-                // Якщо студент є на курсі - видаляємо
-                List<Integer> successfullyDeletedIds = new ArrayList<>();
-                for (Integer studentDegreeId : studentDegreeIds) {
-                    if (studentsIdOnCourse.contains(studentDegreeId)) {
-                        coursesForStudentsRepository.deleteStudentFromCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
-                        successfullyDeletedIds.add(studentDegreeId);
-                    }
-                }
+        List<String> failureReasons = new ArrayList<>();
 
-                if (!successfullyDeletedIds.isEmpty()) {
-                    result.append("Успішно видалені студенти з ID: ").append(successfullyDeletedIds).append(" з курса під ID: ").append(courseId).append(".\n");
+        // Перевірка існування студентів
+        List<Integer> existingStudents = studentDegreeIds.stream()
+                .filter(coursesForStudentsRepository::existsByStudentDegreeId)
+                .toList();
+
+        // Перевірка існування курсів
+        for (Integer courseId : courseIds) {
+            if (!coursesForStudentsRepository.existsByCourseId(courseId)) {
+                failedCourses.add(courseId);
+                failureReasons.add("Курс з ID " + courseId + " не знайдено.");
+                continue; // Якщо курсу не існує - пропускаємо
+            }
+
+            List<Integer> studentsIdOnCourse = coursesForStudentsRepository.getStudentsOnCourseByCourseId(courseId);
+            List<Integer> successfullyDeletedIds = new ArrayList<>();
+
+            for (Integer studentDegreeId : existingStudents) {
+                if (studentsIdOnCourse.contains(studentDegreeId)) {
+                    coursesForStudentsRepository.deleteStudentFromCourseByStudentDegreeIdAndCourseId(studentDegreeId, courseId);
+                    successfullyDeletedIds.add(studentDegreeId);
+                    successfullyDeletedStudents.add(studentDegreeId);
+                    anySuccess = true;
                 } else {
-                    result.append("Немає студентів для видалення з курсу з ID: ").append(courseId).append(".\n");
+                    notValidCourse.add(studentDegreeId);
                 }
             }
-        } catch (Exception e) {
-            return "Помилка при видаленні студентів: " + e.getMessage();
+
+            if (!successfullyDeletedIds.isEmpty()) {
+                result.append("Успішно видалені студенти з ID: ")
+                        .append(successfullyDeletedIds)
+                        .append(" з курса під ID: ").append(courseId).append(".\n");
+            }
+        }
+
+        // Додаємо неіснуючих студентів у список помилок
+        failedStudents.addAll(studentDegreeIds.stream()
+                .filter(studentId -> !existingStudents.contains(studentId))
+                .toList());
+
+        if (!failedStudents.isEmpty()) {
+            result.append("Студенти з ID: ").append(failedStudents)
+                    .append(" не існують або не зареєстровані на жодному курсі.\n");
+            failureReasons.add("Студенти з ID " + failedStudents + " не існують або не зареєстровані на жодному курсі."); // Добавляем причину
+        }
+        if (!failedCourses.isEmpty()) {
+            result.append("Курси з ID ").append(failedCourses)
+                    .append(" не знайдено.\n");
+        }
+
+        Set<Integer> difference = new HashSet<>(notValidCourse);
+        difference.removeAll(successfullyDeletedStudents);
+
+        if (!difference.isEmpty()) {
+            result.append("Студенти з ID: ").append(notValidCourse)
+                    .append(" не зареєстровані на обраних курсах.\n");
+            failureReasons.add("Студенти з ID " + difference + " не зареєстровані на обраних курсах.");
+        }
+
+        if (!anySuccess) {
+            String reasons = String.join("\n", failureReasons);
+            throw new NotFoundException("Операція завершилася невдачею: жодного студента не вдалося видалити.\n" + reasons);
         }
 
         return result.toString();
     }
+
+
+
 }
