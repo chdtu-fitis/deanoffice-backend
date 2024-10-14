@@ -53,10 +53,8 @@ public class CoursesForStudentsController {
     }
 
     @Secured({"ROLE_DEANOFFICER"})
-    @DeleteMapping("/courses-for-students/delete-courses/{studentDegreeId}")
-    public ResponseEntity deleteCoursesForStudent(@PathVariable int studentDegreeId,
-                                                              @RequestBody List<Integer> courseIds)
-            throws UnauthorizedFacultyDataException {
+    @DeleteMapping("/courses-for-students/{studentDegreeId}")
+    public ResponseEntity deleteCoursesForStudent(@PathVariable int studentDegreeId, @RequestParam List<Integer> courseIds) throws UnauthorizedFacultyDataException {
         String result = coursesForStudentsService.deleteCoursesForStudent(studentDegreeId, courseIds);
         return new ResponseEntity(new MessageDTO(result), HttpStatus.OK);
     }

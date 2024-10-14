@@ -22,9 +22,9 @@ public interface CoursesForStudentsRepository extends JpaRepository<CourseForStu
             "order by cfs.studentDegree.id, cfs.course.semester, cfs.course.knowledgeControl.name, cfs.course.courseName.name")
     List<Course> getRecreditedByStudentDegreeId(@Param("studentDegreeId") Integer studentDegreeId);
 
-    @Query("delete from CourseForStudent cfs where cfs.studentDegree.id = :studentDegreeId and cfs.course.id = :courseId")
+    @Query("delete from CourseForStudent cfs where cfs.studentDegree.id = :studentDegreeId and cfs.course.id IN :courseIds")
     @Modifying
     @Transactional
-    int deleteStudentFromCourseByStudentDegreeIdAndCourseId(@Param("studentDegreeId") int studentDegreeId, @Param("courseId") int courseId);
+    int deleteByStudentDegreeIdAndCourseIds(@Param("studentDegreeId") int studentDegreeId, @Param("courseIds") List<Integer> courseIds);
 
 }
