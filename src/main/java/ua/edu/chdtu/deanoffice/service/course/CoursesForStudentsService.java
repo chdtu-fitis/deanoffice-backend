@@ -2,8 +2,10 @@ package ua.edu.chdtu.deanoffice.service.course;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
-import ua.edu.chdtu.deanoffice.entity.*;
-import ua.edu.chdtu.deanoffice.exception.NotFoundException;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -11,11 +13,9 @@ import ua.edu.chdtu.deanoffice.repository.CoursesForStudentsRepository;
 import ua.edu.chdtu.deanoffice.repository.StudentDegreeRepository;
 import ua.edu.chdtu.deanoffice.repository.TeacherRepository;
 import ua.edu.chdtu.deanoffice.security.FacultyAuthorized;
-import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCourseService;
-import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CoursesForStudentsService {
