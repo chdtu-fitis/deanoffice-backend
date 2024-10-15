@@ -71,20 +71,22 @@ public class CoursesForStudentsService {
 
     @FacultyAuthorized
     public String deleteCoursesForStudent(int studentDegreeId, List<Integer> courseIds) throws UnauthorizedFacultyDataException {
-        int deleted = 0, notDeleted = 0;
+        int deletedRecordsCount = 0, notDeletedRecordsCount = 0;
+        String errorMessage = "";
         try {
-            int removeRequest = coursesForStudentsRepository.deleteByStudentDegreeIdAndCourseIds(studentDegreeId, courseIds);
-            if (removeRequest > 0) {
-                deleted += removeRequest;
-            }
-            notDeleted = courseIds.size() - removeRequest;
+            deletedRecordsCount = coursesForStudentsRepository.deleteByStudentDegreeIdAndCourseIds(studentDegreeId, courseIds);
+            notDeletedRecordsCount = courseIds.size() - deletedRecordsCount;
         } catch(Exception e) {
-            notDeleted = courseIds.size();
+            notDeletedRecordsCount = courseIds.size();
+            errorMessage = e.getMessage();
         }
 
-        String result = "Видалено " + deleted + " предметів.";
-        if (notDeleted > 0) {
-            result += " Помилка при видаленні " + notDeleted + " предметів.";
+        String result = "Видалено " + deletedRecordsCount + " предметів.";
+        if (notDeletedRecordsCount > 0) {
+            result += " Помилка при видаленні " + notDeletedRecordsCount + " предметів.";
+        }
+        if (!errorMessage.isEmpty()) {
+            result += " Причина помилки: " + errorMessage;
         }
         return result;
     }
