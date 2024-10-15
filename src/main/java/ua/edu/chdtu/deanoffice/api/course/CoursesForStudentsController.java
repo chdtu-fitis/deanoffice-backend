@@ -58,5 +58,4 @@ public class CoursesForStudentsController {
         String result = coursesForStudentsService.deleteCoursesForStudent(studentDegreeId, courseIds);
         return new ResponseEntity(new MessageDTO(result), HttpStatus.OK);
     }
-    
 }
