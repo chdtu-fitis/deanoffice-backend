@@ -71,7 +71,7 @@ public class CoursesForStudentsService {
 
     @FacultyAuthorized
     public String deleteCoursesForStudent(int studentDegreeId, List<Integer> courseIds) throws UnauthorizedFacultyDataException {
-        int deletedRecordsCount = 0, notDeletedRecordsCount = 0;
+        int deletedRecordsCount = 0, notDeletedRecordsCount;
         String errorMessage = "";
         try {
             deletedRecordsCount = coursesForStudentsRepository.deleteByStudentDegreeIdAndCourseIds(studentDegreeId, courseIds);
