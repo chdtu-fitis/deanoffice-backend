@@ -68,4 +68,26 @@ public class CoursesForStudentsService {
                 new OperationCannotBePerformedException("Студента з таким id не існує"));
         return studentDegree;
     }
+
+    @FacultyAuthorized
+    public String deleteCoursesForStudent(int studentDegreeId, List<Integer> courseIds) throws UnauthorizedFacultyDataException {
+        int deletedRecordsCount = 0, notDeletedRecordsCount;
+        String errorMessage = "";
+        try {
+            deletedRecordsCount = coursesForStudentsRepository.deleteByStudentDegreeIdAndCourseIds(studentDegreeId, courseIds);
+            notDeletedRecordsCount = courseIds.size() - deletedRecordsCount;
+        } catch(Exception e) {
+            notDeletedRecordsCount = courseIds.size();
+            errorMessage = e.getMessage();
+        }
+
+        String result = "Видалено " + deletedRecordsCount + " предметів.";
+        if (notDeletedRecordsCount > 0) {
+            result += " Помилка при видаленні " + notDeletedRecordsCount + " предметів.";
+        }
+        if (!errorMessage.isEmpty()) {
+            result += " Причина помилки: " + errorMessage;
+        }
+        return result;
+    }
 }
