@@ -15,6 +15,7 @@ import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
 import ua.edu.chdtu.deanoffice.service.document.FileFormatEnum;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportForForeignStudentService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.ExamReportService;
+import ua.edu.chdtu.deanoffice.service.document.report.exam.RegularExamReportDataService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.SelectiveCourseExamReportDataService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.ExamReportDataBean;
 import ua.edu.chdtu.deanoffice.webstarter.security.CurrentUser;
@@ -26,6 +27,7 @@ import java.util.List;
 @RequestMapping("/documents/exam-report")
 public class ExamReportController extends DocumentResponseController {
 
+    private final RegularExamReportDataService regularExamReportDataService;
     private ExamReportService examReportService;
     private FacultyService facultyService;
     private ExamReportForForeignStudentService examReportForForeignStudentService;
@@ -35,11 +37,12 @@ public class ExamReportController extends DocumentResponseController {
     public ExamReportController(ExamReportService examReportService,
                                 FacultyService facultyService,
                                 ExamReportForForeignStudentService examReportForForeignStudentService,
-                                SelectiveCourseExamReportDataService selectiveCourseExamReportDataService) {
+                                SelectiveCourseExamReportDataService selectiveCourseExamReportDataService, RegularExamReportDataService regularExamReportDataService) {
         this.examReportService = examReportService;
         this.facultyService = facultyService;
         this.examReportForForeignStudentService = examReportForForeignStudentService;
         this.selectiveCourseExamReportDataService = selectiveCourseExamReportDataService;
+        this.regularExamReportDataService = regularExamReportDataService;
     }
 
     @GetMapping("/groups/{groupId}/docx")
@@ -49,7 +52,9 @@ public class ExamReportController extends DocumentResponseController {
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File examReport = examReportService.createGroupStatement(groupId, courseIds, FileFormatEnum.DOCX);
+            List<ExamReportDataBean> examReportDataBeans = regularExamReportDataService.getExamReportData(courseIds, groupId);
+            File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.DOCX);
+
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
         } catch (Exception e) {
             return handleException(e);
@@ -61,6 +66,7 @@ public class ExamReportController extends DocumentResponseController {
             @RequestParam List<Integer> selectiveCourseIds) throws Exception {
         List<ExamReportDataBean> examReportDataBeans = selectiveCourseExamReportDataService.getExamReportData(selectiveCourseIds);
         File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.DOCX);
+
         return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
     }
 
@@ -79,7 +85,9 @@ public class ExamReportController extends DocumentResponseController {
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            File examReport = examReportService.createGroupStatement(groupId, courseIds, FileFormatEnum.PDF);
+            List<ExamReportDataBean> examReportDataBeans = regularExamReportDataService.getExamReportData(courseIds, groupId);
+            File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.PDF);
+
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);
         } catch (Exception e) {
             return handleException(e);
