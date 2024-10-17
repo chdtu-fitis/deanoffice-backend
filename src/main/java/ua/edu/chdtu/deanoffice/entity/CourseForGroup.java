@@ -2,7 +2,7 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.entity.superclasses.BaseCourse;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -12,16 +12,13 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "courses_for_groups")
-public class CourseForGroup extends BaseEntity {
-    @ManyToOne
-    private Course course;
+public class CourseForGroup extends BaseCourse {
     @ManyToOne
     private StudentGroup studentGroup;
-    @ManyToOne
-    private Teacher teacher;
     @Temporal(TemporalType.DATE)
     private Date examDate;
     private boolean academicDifference;
+
 
     @Override
     public boolean equals(Object o) {
