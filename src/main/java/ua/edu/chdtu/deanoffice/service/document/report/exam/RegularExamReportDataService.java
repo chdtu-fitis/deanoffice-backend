@@ -1,5 +1,7 @@
 package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
@@ -13,21 +15,23 @@ import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.GroupExamRepor
 import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.StudentExamReportDataBean;
 
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+@Getter
+@Setter
 @Service
 public class RegularExamReportDataService extends ExamReportDataBaseService {
     private final CourseForGroupService courseForGroupService;
     private final StudentGroupService studentGroupService;
     private final StudentDegreeService studentDegreeService;
+    private int studentGroupId;
+    private StudentGroup studentGroup;
+    private CourseForGroup currentCourseForGroup;
 
-
-    public List<ExamReportDataBean> getExamReportData() {
-        return null;
-    }
 
     public RegularExamReportDataService(CourseForGroupService courseForGroupService, CurrentYearService currentYearService,
                                                 FacultyRepository facultyRepository, StudentGroupService studentGroupService, StudentDegreeService studentDegreeService) {
@@ -38,20 +42,22 @@ public class RegularExamReportDataService extends ExamReportDataBaseService {
 
     }
 
-    public List<ExamReportDataBean> getExamReportData(List<Integer> baseCourseIds, int studentGroupId) {
+    public List<ExamReportDataBean> getExamReportData() {
         List<ExamReportDataBean> examReportDataBeans = new ArrayList<>();
 
         List<StudentDegree> studentDegrees = studentDegreeService.getAllByGroupId(studentGroupId);
         StudentGroup studentGroup = studentGroupService.getById(studentGroupId);
+        this.studentGroup = studentGroup;
         String groupName = studentGroup.getName();
-        String degreeName = studentDegrees.get(1).getSpecialization().getDegree().getName();
+        String degreeName = studentGroup.getSpecialization().getDegree().getName();
 
         List<StudentExamReportDataBean> studentExamReportDataBeans = createStudentsBean(studentDegrees);
 
-        List<CourseForGroup> coursesForGroup = getCoursesForGroup(baseCourseIds, studentGroupId);
+        List<CourseForGroup> coursesForGroup = getCoursesForGroup();
         for (CourseForGroup courseForGroup : coursesForGroup) {
+            setCurrentCourseForGroup(courseForGroup);
             CourseExamReportDataBean courseExamReportDataBean = createCourseBean(courseForGroup);
-            GroupExamReportDataBean groupExamReportDataBean = createGroupBean(courseForGroup, degreeName, groupName);
+            GroupExamReportDataBean groupExamReportDataBean = createGroupBean(degreeName, groupName);
             ExamReportDataBean examReportDataBean = createExamReportDataBean(courseExamReportDataBean, groupExamReportDataBean, studentExamReportDataBeans);
             examReportDataBeans.add(examReportDataBean);
         }
@@ -59,14 +65,24 @@ public class RegularExamReportDataService extends ExamReportDataBaseService {
         return examReportDataBeans;
     }
 
+    protected String getExamDateFieldReplacement() {
+        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        CourseForGroup courseForGroup = getCurrentCourseForGroup();
+        if (courseForGroup.getExamDate() != null) {
+            return dateFormat.format(courseForGroup.getExamDate());
+        } else {
+            return "";
+        }
+    }
 
-    private List<CourseForGroup> getCoursesForGroup(List<Integer> baseCourseIds, int studentGroupId) {
-        return baseCourseIds.stream()
-                .map(baseCourseId -> courseForGroupService.getCourseForGroup(studentGroupId, baseCourseId))
-                .collect(Collectors.toList());
+    protected Integer getGroupSemester() {
+        return this.studentGroup.getStudySemesters();
     }
 
 
-
-
+    private List<CourseForGroup> getCoursesForGroup() {
+        return getCourseIds().stream()
+                .map(groupCourseId -> courseForGroupService.getCourseForGroup(getStudentGroupId(), groupCourseId))
+                .collect(Collectors.toList());
+    }
 }

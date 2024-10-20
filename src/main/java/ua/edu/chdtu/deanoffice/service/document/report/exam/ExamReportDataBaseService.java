@@ -1,7 +1,10 @@
 package ua.edu.chdtu.deanoffice.service.document.report.exam;
 
+import lombok.Setter;
+import lombok.Getter;
 import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.entity.superclasses.BaseCourse;
+import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.repository.FacultyRepository;
 import ua.edu.chdtu.deanoffice.service.CurrentYearService;
 import ua.edu.chdtu.deanoffice.service.document.report.exam.beans.CourseExamReportDataBean;
@@ -16,9 +19,12 @@ import java.util.List;
 
 import static ua.edu.chdtu.deanoffice.util.PersonUtil.makeNameThenSurnameInCapital;
 
+@Setter
+@Getter
 public abstract class ExamReportDataBaseService {
     private final CurrentYearService currentYearService;
     private final FacultyRepository facultyRepository;
+    private List<Integer> courseIds;
 
     public ExamReportDataBaseService(CurrentYearService currentYearService,
                                         FacultyRepository facultyRepository) {
@@ -26,6 +32,7 @@ public abstract class ExamReportDataBaseService {
         this.facultyRepository = facultyRepository;
     }
 
+    abstract List<ExamReportDataBean> getExamReportData() throws Exception;
 
     protected ExamReportDataBean createExamReportDataBean(CourseExamReportDataBean courseExamReportDataBean,
                                                         GroupExamReportDataBean groupExamReportDataBean,
@@ -38,14 +45,15 @@ public abstract class ExamReportDataBaseService {
         return examReportDataBean;
     }
 
-
     protected CourseExamReportDataBean createCourseBean(BaseCourse baseCourse) {
+        Course course = baseCourse.getCourse();
         CourseExamReportDataBean courseDataBean = new CourseExamReportDataBean();
-        courseDataBean.setCourseName(baseCourse.getCourse().getCourseName().getName());
-        courseDataBean.setExamDate("");
-        courseDataBean.setHours("" + baseCourse.getCourse().getHours());
-        courseDataBean.setKnowledgeControlName(baseCourse.getCourse().getKnowledgeControl().getName());
-        courseDataBean.setSemester("" + baseCourse.getCourse().getSemester());
+        courseDataBean.setCourseName(course.getCourseName().getName());
+
+        courseDataBean.setExamDate(getExamDateFieldReplacement());
+        courseDataBean.setHours("" + course.getHours());
+        courseDataBean.setKnowledgeControlName(course.getKnowledgeControl().getName());
+        courseDataBean.setSemester("" + course.getSemester());
 
         if (baseCourse.getTeacher() != null) {
             Teacher teacher = baseCourse.getTeacher();
@@ -57,7 +65,9 @@ public abstract class ExamReportDataBaseService {
         return courseDataBean;
     }
 
-    protected GroupExamReportDataBean createGroupBean(BaseCourse baseCourse, String degreeName, String groupName) {
+    abstract String getExamDateFieldReplacement();
+
+    protected GroupExamReportDataBean createGroupBean(String degreeName, String groupName) {
         GroupExamReportDataBean groupDataBean = new GroupExamReportDataBean();
         groupDataBean.setAcademicYear(getStudyYear());
         Faculty faculty = facultyRepository.findById(FacultyUtil.getUserFacultyIdInt()).get();
@@ -65,7 +75,7 @@ public abstract class ExamReportDataBaseService {
         groupDataBean.setDegreeName(degreeName);
         groupDataBean.setFacultyAbbr(faculty.getAbbr());
         groupDataBean.setGroupName(groupName);
-        groupDataBean.setGroupStudyYear(getGroupCourse(baseCourse));
+        groupDataBean.setGroupStudyYear(getGroupCourse(getGroupSemester()));
         return groupDataBean;
     }
 
@@ -74,9 +84,11 @@ public abstract class ExamReportDataBaseService {
         return String.format("%4d-%4d", currentYear, currentYear + 1);
     }
 
-    private String getGroupCourse(BaseCourse baseCourse) {
-        return "" + (baseCourse.getCourse().getSemester() + 1) / 2;
+    private String getGroupCourse(Integer semester) {
+        return "" + (semester + 1) / 2;
     }
+
+    abstract Integer getGroupSemester();
 
     protected List<StudentExamReportDataBean> createStudentsBean(List<StudentDegree> studentDegrees) {
         List<StudentExamReportDataBean> studentExamReportDataBeans = new ArrayList<>();

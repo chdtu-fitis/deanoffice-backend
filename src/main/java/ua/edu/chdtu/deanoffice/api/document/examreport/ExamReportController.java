@@ -52,7 +52,9 @@ public class ExamReportController extends DocumentResponseController {
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            List<ExamReportDataBean> examReportDataBeans = regularExamReportDataService.getExamReportData(courseIds, groupId);
+            regularExamReportDataService.setCourseIds(courseIds);
+            regularExamReportDataService.setStudentGroupId(groupId);
+            List<ExamReportDataBean> examReportDataBeans = regularExamReportDataService.getExamReportData();
             File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.DOCX);
 
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
@@ -64,7 +66,8 @@ public class ExamReportController extends DocumentResponseController {
     @GetMapping("/selective-courses/docx")
     public ResponseEntity<Resource> generateDocxForSelectiveCourses(
             @RequestParam List<Integer> selectiveCourseIds) throws Exception {
-        List<ExamReportDataBean> examReportDataBeans = selectiveCourseExamReportDataService.getExamReportData(selectiveCourseIds);
+        selectiveCourseExamReportDataService.setCourseIds(selectiveCourseIds);
+        List<ExamReportDataBean> examReportDataBeans = selectiveCourseExamReportDataService.getExamReportData();
         File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.DOCX);
 
         return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_DOCX);
@@ -85,7 +88,9 @@ public class ExamReportController extends DocumentResponseController {
             @CurrentUser ApplicationUser user) {
         try {
             facultyService.checkGroup(groupId, user.getFaculty().getId());
-            List<ExamReportDataBean> examReportDataBeans = regularExamReportDataService.getExamReportData(courseIds, groupId);
+            regularExamReportDataService.setCourseIds(courseIds);
+            regularExamReportDataService.setStudentGroupId(groupId);
+            List<ExamReportDataBean> examReportDataBeans = regularExamReportDataService.getExamReportData();
             File examReport = examReportService.createExamReport(examReportDataBeans, FileFormatEnum.PDF);
 
             return buildDocumentResponseEntity(examReport, examReport.getName(), MEDIA_TYPE_PDF);

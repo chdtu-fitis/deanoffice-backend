@@ -17,10 +17,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class SelectiveCourseExamReportDataService extends ExamReportDataBaseService {
-    private SelectiveCourseRepository selectiveCourseRepository;
-    private CurrentYearService currentYearService;
-    private FacultyRepository facultyRepository;
-    private SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
+    private final SelectiveCourseRepository selectiveCourseRepository;
+    private final SelectiveCoursesStudentDegreesRepository selectiveCoursesStudentDegreesRepository;
+    private SelectiveCourse currentSelectiveCourse;
 
     public SelectiveCourseExamReportDataService(SelectiveCourseRepository selectiveCourseRepository, CurrentYearService currentYearService,
                                                 FacultyRepository facultyRepository,
@@ -30,11 +29,12 @@ public class SelectiveCourseExamReportDataService extends ExamReportDataBaseServ
         this.selectiveCoursesStudentDegreesRepository = selectiveCoursesStudentDegreesRepository;
     }
 
-    public List<ExamReportDataBean> getExamReportData(List<Integer> selectiveCourseIds) {
+    public List<ExamReportDataBean> getExamReportData() {
         List<ExamReportDataBean> examReportDataBeans = new ArrayList<>();
 
-        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findByIdIn(selectiveCourseIds);
+        List<SelectiveCourse> selectiveCourses = selectiveCourseRepository.findByIdIn(this.getCourseIds());
         for (SelectiveCourse selectiveCourse : selectiveCourses) {
+            this.currentSelectiveCourse = selectiveCourse;
             List<SelectiveCoursesStudentDegrees> coursesDegrees = selectiveCoursesStudentDegreesRepository.findActiveBySelectiveCourse(selectiveCourse.getId());
             List <StudentDegree> studentDegrees = coursesDegrees.stream()
                     .map(courseDegree -> courseDegree.getStudentDegree())
@@ -53,7 +53,15 @@ public class SelectiveCourseExamReportDataService extends ExamReportDataBaseServ
         return examReportDataBeans;
     }
 
+    protected Integer getGroupSemester() {
+        return this.currentSelectiveCourse.getCourse().getSemester();
+    }
+
+    protected String getExamDateFieldReplacement() {
+        return "";
+    }
+
     private GroupExamReportDataBean createGroupBean(SelectiveCourse selectiveCourse) {
-        return createGroupBean(selectiveCourse, selectiveCourse.getDegree().getName(), selectiveCourse.getGroupName());
+        return createGroupBean(selectiveCourse.getDegree().getName(), selectiveCourse.getGroupName());
     }
 }
