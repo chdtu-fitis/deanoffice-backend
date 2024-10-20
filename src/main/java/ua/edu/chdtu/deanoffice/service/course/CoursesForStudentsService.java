@@ -2,10 +2,7 @@ package ua.edu.chdtu.deanoffice.service.course;
 
 import org.springframework.stereotype.Service;
 import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.entity.*;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
@@ -36,6 +33,10 @@ public class CoursesForStudentsService {
 
     public List<CourseForStudent> getCoursesForStudentDegreeAndSemester(List<Integer> studentDegreeIds, int semester) {
         return coursesForStudentsRepository.getByStudentIdAndSemester(studentDegreeIds, semester);
+    }
+
+    public List<CourseForStudent> getByIds(List<Integer> courseIds) {
+        return coursesForStudentsRepository.findByIds(courseIds);
     }
 
     @FacultyAuthorized
