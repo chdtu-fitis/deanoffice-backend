@@ -1,8 +1,10 @@
 package ua.edu.chdtu.deanoffice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
 
@@ -23,5 +25,10 @@ public interface CoursesForStudentsRepository extends JpaRepository<CourseForStu
     @Query("SELECT cfs FROM CourseForStudent AS cfs " +
             "WHERE cfs.id IN (:ids)")
     List<CourseForStudent> findByIds(@Param("ids") List<Integer> ids);
+
+    @Modifying
+    @Transactional
+    @Query("delete from CourseForStudent cfs where cfs.studentDegree.id = :studentDegreeId and cfs.course.id IN :courseIds")
+    int deleteByStudentDegreeIdAndCourseIds(@Param("studentDegreeId") int studentDegreeId, @Param("courseIds") List<Integer> courseIds);
 }
 
