@@ -22,8 +22,13 @@ public interface CoursesForStudentsRepository extends JpaRepository<CourseForStu
             "order by cfs.studentDegree.id, cfs.course.semester, cfs.course.knowledgeControl.name, cfs.course.courseName.name")
     List<Course> getRecreditedByStudentDegreeId(@Param("studentDegreeId") Integer studentDegreeId);
 
+    @Query("SELECT cfs FROM CourseForStudent AS cfs " +
+            "WHERE cfs.id IN (:ids)")
+    List<CourseForStudent> findByIds(@Param("ids") List<Integer> ids);
+
     @Modifying
     @Transactional
     @Query("delete from CourseForStudent cfs where cfs.studentDegree.id = :studentDegreeId and cfs.course.id IN :courseIds")
     int deleteByStudentDegreeIdAndCourseIds(@Param("studentDegreeId") int studentDegreeId, @Param("courseIds") List<Integer> courseIds);
 }
+

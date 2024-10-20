@@ -2,7 +2,8 @@ package ua.edu.chdtu.deanoffice.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import ua.edu.chdtu.deanoffice.entity.superclasses.BaseEntity;
+import ua.edu.chdtu.deanoffice.entity.superclasses.BaseCourse;
+
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,11 +13,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @Setter
-public class SelectiveCourse extends BaseEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Course course;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Teacher teacher;
+public class SelectiveCourse extends BaseCourse {
     @ManyToOne(fetch = FetchType.LAZY)
     private Degree degree;
     @ManyToOne(fetch = FetchType.LAZY)
