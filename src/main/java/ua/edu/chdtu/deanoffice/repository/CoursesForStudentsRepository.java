@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForStudent;
-import ua.edu.chdtu.deanoffice.entity.CourseType;
 
 import java.util.List;
 
@@ -20,4 +19,9 @@ public interface CoursesForStudentsRepository extends JpaRepository<CourseForStu
             "where cfs.studentDegree.id = :studentDegreeId and cfs.courseType ='RECREDIT' " +
             "order by cfs.studentDegree.id, cfs.course.semester, cfs.course.knowledgeControl.name, cfs.course.courseName.name")
     List<Course> getRecreditedByStudentDegreeId(@Param("studentDegreeId") Integer studentDegreeId);
+
+    @Query("SELECT cfs FROM CourseForStudent AS cfs " +
+            "WHERE cfs.id IN (:ids)")
+    List<CourseForStudent> findByIds(@Param("ids") List<Integer> ids);
 }
+
