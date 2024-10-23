@@ -4,8 +4,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.edu.chdtu.deanoffice.api.course.CourseController;
+import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
+import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
 import ua.edu.chdtu.deanoffice.entity.Course;
 import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
 import ua.edu.chdtu.deanoffice.entity.CourseName;
@@ -14,20 +18,20 @@ import ua.edu.chdtu.deanoffice.entity.StudentDegree;
 import ua.edu.chdtu.deanoffice.entity.StudentGroup;
 import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
+import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
-import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
-import ua.edu.chdtu.deanoffice.service.CourseNameService;
-import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
-import ua.edu.chdtu.deanoffice.service.StudentGroupService;
+import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
+import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
 @Service
 public class CourseService {
@@ -38,12 +42,13 @@ public class CourseService {
     private final CourseForGroupService courseForGroupService;
     private final GradeRepository gradeRepository;
     private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
+    private final GradeService gradeService;
     private final int ROWS_PER_PAGE = 50;
 
     public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService,
                          CourseNameService courseNameService, CourseForGroupService courseForGroupService,
                          GradeRepository gradeRepository, StudentDegreeService studentDegreeService,
-                         SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService) {
+                         SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService, GradeService gradeService) {
         this.courseRepository = courseRepository;
         this.studentGroupService = studentGroupService;
         this.courseNameService = courseNameService;
@@ -51,6 +56,7 @@ public class CourseService {
         this.gradeRepository = gradeRepository;
         this.studentDegreeService = studentDegreeService;
         this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
+        this.gradeService = gradeService;
     }
 
     public Course getCourseByAllAttributes(Course course) {
@@ -265,5 +271,70 @@ public class CourseService {
         return new StudentCourseBean(c.getCourseName().getName(), c.getHours(),
                 c.getCredits(), c.getSemester(), t != null ? t.getName() + " " + t.getSurname() : "",
                 c.getKnowledgeControl().getName(), isSelective);
+    }
+
+    private void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
+        Map<String, Boolean> gradeDefinition = gradeService.evaluateGradedChange(oldKnowledgeControlId, newKnowledgeControlId);
+        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null) {
+            if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE)) {
+                gradeService.updateNationalGradeByCourseIdAndGradedTrue(newCourseId);
+            } else {
+                gradeService.updateNationalGradeByCourseIdAndGradedFalse(newCourseId);
+            }
+        }
+    }
+
+    private Course updateCourseName(CourseName courseName, Course newCourse) {
+        CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
+        if (courseNameFromDB != null) {
+            newCourse.setCourseName(courseNameFromDB);
+        } else {
+            CourseName newCourseName = new CourseName();
+            newCourseName.setName(courseName.getName());
+            newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
+        }
+        return newCourse;
+    }
+
+    public CourseDTO updateCourse(int groupId, CourseForGroupUpdateHolder coursesForGroupHolder) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException {
+        CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
+        if (courseForGroup.getStudentGroup().getSpecialization().getFaculty().getId() != FacultyUtil.getUserFacultyIdInt()
+                || courseForGroup.getStudentGroup().getId() != groupId) {
+            throw new UnauthorizedFacultyDataException();
+        }
+        if (courseForGroup.getCourse().getCourseName().getId() == coursesForGroupHolder.getNewCourse().getCourseName().getId()
+                && courseForGroup.getCourse().getHoursPerCredit().equals(coursesForGroupHolder.getNewCourse().getHoursPerCredit())
+                && courseForGroup.getCourse().getHours().equals(coursesForGroupHolder.getNewCourse().getHours())
+                && courseForGroup.getCourse().getKnowledgeControl().getId() == coursesForGroupHolder.getNewCourse().getKnowledgeControl().getId()) {
+            throw new OperationCannotBePerformedException("Не змінено жодного атрибуту предмету");
+        }
+
+        Course newCourse = map(coursesForGroupHolder.getNewCourse(), Course.class);
+        int oldCourseId = coursesForGroupHolder.getOldCourseId();
+        Course oldCourse = getById(oldCourseId);
+        Course courseFromDb = getCourseByAllAttributes(newCourse);
+        if (courseFromDb != null) {
+            newCourse = courseFromDb;
+            double correctCredits = Math.abs((0.0 + courseFromDb.getHours()) / courseFromDb.getHoursPerCredit());
+            if (Math.abs(correctCredits - courseFromDb.getCredits().doubleValue()) > 0.005) {
+                courseFromDb.setCredits(new BigDecimal(correctCredits));
+                createOrUpdateCourse(courseFromDb);
+            }
+            courseForGroupService.updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId, oldCourse.getKnowledgeControl().getId());
+        } else {
+            CourseName courseName = map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
+            newCourse = updateCourseName(courseName, newCourse);
+            if (courseForGroupService.hasSoleCourse(oldCourseId)) {
+                int oldKnowledgeControlId = oldCourse.getKnowledgeControl().getId();
+                int newKnowledgeControlId = newCourse.getKnowledgeControl().getId();
+                createOrUpdateCourse(newCourse);
+                adjustNationalGrade(oldKnowledgeControlId, newKnowledgeControlId, newCourse.getId());
+            } else {
+                newCourse.setId(0);
+                newCourse = createOrUpdateCourse(newCourse);
+                courseForGroupService.updateCourseInCoursesForGroupsAndGrade(courseForGroup, newCourse, oldCourseId, groupId, oldCourse.getKnowledgeControl().getId());
+            }
+        }
+        return map(newCourse, CourseDTO.class);
     }
 }

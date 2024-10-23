@@ -2,6 +2,7 @@ package ua.edu.chdtu.deanoffice.api.course;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -170,70 +171,15 @@ public class CourseController {
     @Secured({"ROLE_DEANOFFICER"})
     @PutMapping("/groups/{groupId}/courses")
     @JsonView(CourseForGroupView.Course.class)
-    public ResponseEntity updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder)
-            throws UnauthorizedFacultyDataException {
-        CourseForGroup courseForGroup = courseForGroupService.getCourseForGroup(coursesForGroupHolder.getCourseForGroupId());
-        if (courseForGroup.getStudentGroup().getSpecialization().getFaculty().getId() != FacultyUtil.getUserFacultyIdInt()
-                || courseForGroup.getStudentGroup().getId() != groupId) {
-            throw new UnauthorizedFacultyDataException();
+    public ResponseEntity<?> updateCourseForGroup(@PathVariable int groupId, @RequestBody CourseForGroupUpdateHolder coursesForGroupHolder) {
+        try {
+            CourseDTO updatedCourse = courseService.updateCourse(groupId, coursesForGroupHolder);
+            return ResponseEntity.ok(updatedCourse);
+        } catch (OperationCannotBePerformedException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UnauthorizedFacultyDataException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
-        if (courseForGroup.getCourse().getCourseName().getId() == coursesForGroupHolder.getNewCourse().getCourseName().getId()
-                && courseForGroup.getCourse().getHoursPerCredit().equals(coursesForGroupHolder.getNewCourse().getHoursPerCredit())
-                && courseForGroup.getCourse().getHours().equals(coursesForGroupHolder.getNewCourse().getHours())
-                && courseForGroup.getCourse().getKnowledgeControl().getId() == coursesForGroupHolder.getNewCourse().getKnowledgeControl().getId()) {
-            return ResponseEntity.badRequest().body("Не змінено жодного атрибуту предмету");
-        }
-
-        Course newCourse = map(coursesForGroupHolder.getNewCourse(), Course.class);
-        int oldCourseId = coursesForGroupHolder.getOldCourseId();
-        Course oldCourse = courseService.getById(oldCourseId);
-        Course courseFromDb = courseService.getCourseByAllAttributes(newCourse);
-        if (courseFromDb != null) {
-            newCourse = courseFromDb;
-            double correctCredits = Math.abs((0.0 + courseFromDb.getHours()) / courseFromDb.getHoursPerCredit());
-            if (Math.abs(correctCredits - courseFromDb.getCredits().doubleValue()) > 0.005) {
-                courseFromDb.setCredits(new BigDecimal(correctCredits));
-                courseService.createOrUpdateCourse(courseFromDb);
-            }
-            courseForGroupService.updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId, oldCourse.getKnowledgeControl().getId());
-        } else {
-            CourseName courseName = map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
-            newCourse = updateCourseName(courseName, newCourse);
-            if (courseForGroupService.hasSoleCourse(oldCourseId)) {
-                int oldKnowledgeControlId = oldCourse.getKnowledgeControl().getId();
-                int newKnowledgeControlId = newCourse.getKnowledgeControl().getId();
-                courseService.createOrUpdateCourse(newCourse);
-                adjustNationalGrade(oldKnowledgeControlId, newKnowledgeControlId, newCourse.getId());
-            } else {
-                newCourse.setId(0);
-                newCourse = courseService.createOrUpdateCourse(newCourse);
-                courseForGroupService.updateCourseInCoursesForGroupsAndGrade(courseForGroup, newCourse, oldCourseId, groupId, oldCourse.getKnowledgeControl().getId());
-            }
-        }
-        return ResponseEntity.ok(map(newCourse, CourseDTO.class));
-    }
-
-    private void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
-        Map<String, Boolean> gradeDefinition = gradeService.evaluateGradedChange(oldKnowledgeControlId, newKnowledgeControlId);
-        if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null) {
-            if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE)) {
-                gradeService.updateNationalGradeByCourseIdAndGradedTrue(newCourseId);
-            } else {
-                gradeService.updateNationalGradeByCourseIdAndGradedFalse(newCourseId);
-            }
-        }
-    }
-
-    private Course updateCourseName(CourseName courseName, Course newCourse) {
-        CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
-        if (courseNameFromDB != null) {
-            newCourse.setCourseName(courseNameFromDB);
-        } else {
-            CourseName newCourseName = new CourseName();
-            newCourseName.setName(courseName.getName());
-            newCourse.setCourseName(courseNameService.saveCourseName(newCourseName));
-        }
-        return newCourse;
     }
 
     @Secured({"ROLE_DEANOFFICER"})
