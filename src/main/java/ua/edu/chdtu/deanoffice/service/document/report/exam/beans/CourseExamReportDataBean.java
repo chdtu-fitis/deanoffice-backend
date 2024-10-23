@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CourseExamReportDataBean {
-    private String yearShort = "";
     private String examDate = "";
     private String courseName = "";
     private String semester = "";
