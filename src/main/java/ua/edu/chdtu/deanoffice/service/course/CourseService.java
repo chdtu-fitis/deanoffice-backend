@@ -1,5 +1,6 @@
 package ua.edu.chdtu.deanoffice.service.course;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -9,27 +10,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.api.course.CourseController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
+import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
-import ua.edu.chdtu.deanoffice.entity.Course;
-import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
-import ua.edu.chdtu.deanoffice.entity.CourseName;
-import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
-import ua.edu.chdtu.deanoffice.entity.StudentDegree;
-import ua.edu.chdtu.deanoffice.entity.StudentGroup;
-import ua.edu.chdtu.deanoffice.entity.Teacher;
+import ua.edu.chdtu.deanoffice.api.course.util.CourseForStudentUpdateHolder;
+import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
+import ua.edu.chdtu.deanoffice.repository.CoursesForStudentsRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
 import ua.edu.chdtu.deanoffice.service.*;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
@@ -42,13 +38,15 @@ public class CourseService {
     private final CourseForGroupService courseForGroupService;
     private final GradeRepository gradeRepository;
     private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
+    private final CoursesForStudentsService coursesForStudentsService;
     private final GradeService gradeService;
     private final int ROWS_PER_PAGE = 50;
+    private final CoursesForStudentsRepository coursesForStudentsRepository;
 
     public CourseService(CourseRepository courseRepository, StudentGroupService studentGroupService,
                          CourseNameService courseNameService, CourseForGroupService courseForGroupService,
                          GradeRepository gradeRepository, StudentDegreeService studentDegreeService,
-                         SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService, GradeService gradeService) {
+                         SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService, CoursesForStudentsService coursesForStudentsService, GradeService gradeService, CoursesForStudentsRepository coursesForStudentsRepository) {
         this.courseRepository = courseRepository;
         this.studentGroupService = studentGroupService;
         this.courseNameService = courseNameService;
@@ -56,7 +54,9 @@ public class CourseService {
         this.gradeRepository = gradeRepository;
         this.studentDegreeService = studentDegreeService;
         this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
+        this.coursesForStudentsService = coursesForStudentsService;
         this.gradeService = gradeService;
+        this.coursesForStudentsRepository = coursesForStudentsRepository;
     }
 
     public Course getCourseByAllAttributes(Course course) {
@@ -273,7 +273,7 @@ public class CourseService {
                 c.getKnowledgeControl().getName(), isSelective);
     }
 
-    private void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
+    public void adjustNationalGrade(int oldKnowledgeControlId, int newKnowledgeControlId, int newCourseId) {
         Map<String, Boolean> gradeDefinition = gradeService.evaluateGradedChange(oldKnowledgeControlId, newKnowledgeControlId);
         if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE) != null) {
             if (gradeDefinition.get(GradeService.NEW_GRADED_VALUE)) {
@@ -284,7 +284,7 @@ public class CourseService {
         }
     }
 
-    private Course updateCourseName(CourseName courseName, Course newCourse) {
+    public Course updateCourseName(CourseName courseName, Course newCourse) {
         CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
         if (courseNameFromDB != null) {
             newCourse.setCourseName(courseNameFromDB);
@@ -336,5 +336,41 @@ public class CourseService {
             }
         }
         return map(newCourse, CourseDTO.class);
+    }
+
+    public CourseDTO updateCourse(int studentDegreeId, CourseForStudentUpdateHolder courseForStudentUpdateHolder) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException, NotFoundException {
+        Course oldCourse = getById(courseForStudentUpdateHolder.getOldCourseId());
+        Course newCourse = map(courseForStudentUpdateHolder.getNewCourse(), Course.class);
+        Course courseFromDb = getCourseByAllAttributes(newCourse);
+        if(!coursesForStudentsRepository.existsByCourseIdAndStudentDegreeId(courseForStudentUpdateHolder.getOldCourseId(), studentDegreeId)) {
+            throw new NotFoundException("Неправильно заданий параметр курсу чи студента");
+        }
+        if (oldCourse.getCourseName().getId() == newCourse.getCourseName().getId()
+                && oldCourse.getHoursPerCredit().equals(newCourse.getHoursPerCredit())
+                && oldCourse.getHours().equals(newCourse.getHours())
+                && oldCourse.getKnowledgeControl().getId() == newCourse.getKnowledgeControl().getId()) {
+            throw new OperationCannotBePerformedException("Не змінено жодного атрибуту предмету");
+        }
+
+        if (courseFromDb != null) {
+            newCourse = courseFromDb;
+            newCourse = fixCredits(studentDegreeId, oldCourse, newCourse, courseFromDb);
+        } else {
+            newCourse.setId(0);
+            newCourse = createOrUpdateCourse(newCourse);
+            newCourse = fixCredits(studentDegreeId, oldCourse, newCourse, newCourse);
+        }
+        return map(newCourse, CourseDTO.class);
+    }
+
+    @NotNull
+    private Course fixCredits(int studentDegreeId, Course oldCourse, Course newCourse, Course fixingCourse) {
+        double correctCredits = Math.abs((0.0 + fixingCourse.getHours()) / fixingCourse.getHoursPerCredit());
+        if (Math.abs(correctCredits - fixingCourse.getCredits().doubleValue()) > 0.005) {
+            fixingCourse.setCredits(new BigDecimal(correctCredits));
+            newCourse = createOrUpdateCourse(fixingCourse);
+        }
+        coursesForStudentsRepository.updateByCourseIdAndStudentDegreeId(studentDegreeId, newCourse.getId(), oldCourse.getId());
+        return newCourse;
     }
 }

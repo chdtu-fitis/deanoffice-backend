@@ -27,4 +27,11 @@ public interface CoursesForStudentsRepository extends JpaRepository<CourseForStu
     @Transactional
     int deleteByStudentDegreeIdAndCourseIds(@Param("studentDegreeId") int studentDegreeId, @Param("courseIds") List<Integer> courseIds);
 
+    @Query("update CourseForStudent cfs SET cfs.course.id = :courseId where cfs.studentDegree.id = :studentDegreeId and cfs.course.id = :oldCourseId")
+    @Modifying
+    @Transactional
+    int updateByCourseIdAndStudentDegreeId(@Param("studentDegreeId") int studentDegreeId, @Param("courseId") int courseId, @Param("oldCourseId") int oldCourseId);
+
+    @Query("select count(cfs) > 0 from CourseForStudent cfs where cfs.course.id = :courseId and cfs.studentDegree.id = :studentDegreeId")
+    boolean existsByCourseIdAndStudentDegreeId(@Param("courseId") int courseId, @Param("studentDegreeId") int studentDegreeId);
 }
