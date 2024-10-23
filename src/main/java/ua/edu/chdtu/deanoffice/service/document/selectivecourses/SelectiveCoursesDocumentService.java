@@ -144,6 +144,12 @@ public class SelectiveCoursesDocumentService {
                                                           int degreeId, int coursesCount) throws Docx4JException {
         Map<SelectiveCourse, List<StudentDegree>> studentDegreesBySelectiveCourses = concatSelectiveCourseBothSemesters(selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterFirst, degreeId),
                 selectiveCoursesStudentDegreesService.getStudentDegreesGroupedBySelectiveCourses(studyYear, semesterSecond, degreeId));
+        studentDegreesBySelectiveCourses = studentDegreesBySelectiveCourses.entrySet().stream()
+                .filter(sdsc -> sdsc.getKey().getTrainingCycle() == TrainingCycle.PROFESSIONAL)
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+//        studentDegreesBySelectiveCourses = studentDegreesBySelectiveCourses.entrySet().stream()
+//                .filter(sdsc -> sdsc.getKey().getFieldOfKnowledge() != null)
+//                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
         Map<FieldOfKnowledge, List<SelectiveCourse>> selectiveByFK = studentDegreesBySelectiveCourses.keySet()
                                                                                 .stream()
                                                                                 .collect(Collectors.groupingBy(selectiveCourse -> selectiveCourse.getFieldOfKnowledge()));
