@@ -63,7 +63,9 @@ public class CoursesForStudentsController {
 
     @Secured({"ROLE_DEANOFFICER"})
     @PutMapping("/courses-for-students/{studentDegreeId}/courses")
-    public ResponseEntity<?> updateCourseForStudent(@PathVariable int studentDegreeId, @RequestBody CourseForStudentUpdateHolder coursesForStudentUpdateHolder) throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
+    public ResponseEntity<?> updateCourseForStudent(@PathVariable int studentDegreeId,
+                                                    @RequestBody CourseForStudentUpdateHolder coursesForStudentUpdateHolder)
+                                                    throws OperationCannotBePerformedException, UnauthorizedFacultyDataException {
         try {
             CourseDTO updatedCourse = courseService.updateCourse(studentDegreeId, coursesForStudentUpdateHolder);
             return ResponseEntity.ok(updatedCourse);
