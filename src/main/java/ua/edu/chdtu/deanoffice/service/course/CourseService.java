@@ -35,7 +35,6 @@ public class CourseService {
     private final CourseForGroupService courseForGroupService;
     private final GradeRepository gradeRepository;
     private final SelectiveCoursesStudentDegreesService selectiveCoursesStudentDegreesService;
-    private final CoursesForStudentsService coursesForStudentsService;
     private final GradeService gradeService;
     private final int ROWS_PER_PAGE = 50;
     private final CoursesForStudentsRepository coursesForStudentsRepository;
@@ -51,7 +50,6 @@ public class CourseService {
         this.gradeRepository = gradeRepository;
         this.studentDegreeService = studentDegreeService;
         this.selectiveCoursesStudentDegreesService = selectiveCoursesStudentDegreesService;
-        this.coursesForStudentsService = coursesForStudentsService;
         this.gradeService = gradeService;
         this.coursesForStudentsRepository = coursesForStudentsRepository;
     }
