@@ -341,6 +341,13 @@ public class CourseService {
     public CourseDTO updateCourse(int studentDegreeId, CourseForStudentUpdateHolder courseForStudentUpdateHolder) throws UnauthorizedFacultyDataException, OperationCannotBePerformedException, NotFoundException {
         Course oldCourse = getById(courseForStudentUpdateHolder.getOldCourseId());
         Course newCourse = map(courseForStudentUpdateHolder.getNewCourse(), Course.class);
+        if (!Objects.equals(oldCourse.getCourseName().getName(), newCourse.getCourseName().getName()) || !Objects.equals(oldCourse.getCourseName().getNameEng(), newCourse.getCourseName().getNameEng())) {
+            CourseName courseName = map(courseForStudentUpdateHolder.getNewCourse().getCourseName(), CourseName.class);
+            newCourse = updateCourseName(courseName, newCourse);
+        } else {
+            System.out.println("Назви однакові");
+        }
+
         Course courseFromDb = getCourseByAllAttributes(newCourse);
         if(!coursesForStudentsRepository.existsByCourseIdAndStudentDegreeId(courseForStudentUpdateHolder.getOldCourseId(), studentDegreeId)) {
             throw new NotFoundException("Неправильно заданий параметр курсу чи студента");
@@ -353,24 +360,22 @@ public class CourseService {
         }
 
         if (courseFromDb != null) {
-            newCourse = courseFromDb;
-            newCourse = fixCredits(studentDegreeId, oldCourse, newCourse, courseFromDb);
+            newCourse = fixCredits(courseFromDb);
         } else {
             newCourse.setId(0);
-            newCourse = createOrUpdateCourse(newCourse);
-            newCourse = fixCredits(studentDegreeId, oldCourse, newCourse, newCourse);
+            fixCredits(newCourse);
         }
+        newCourse = createOrUpdateCourse(newCourse);
+        coursesForStudentsRepository.updateByCourseIdAndStudentDegreeId(studentDegreeId, newCourse.getId(), oldCourse.getId());
         return map(newCourse, CourseDTO.class);
     }
 
     @NotNull
-    private Course fixCredits(int studentDegreeId, Course oldCourse, Course newCourse, Course fixingCourse) {
+    private Course fixCredits(Course fixingCourse) {
         double correctCredits = Math.abs((0.0 + fixingCourse.getHours()) / fixingCourse.getHoursPerCredit());
         if (Math.abs(correctCredits - fixingCourse.getCredits().doubleValue()) > 0.005) {
             fixingCourse.setCredits(new BigDecimal(correctCredits));
-            newCourse = createOrUpdateCourse(fixingCourse);
         }
-        coursesForStudentsRepository.updateByCourseIdAndStudentDegreeId(studentDegreeId, newCourse.getId(), oldCourse.getId());
-        return newCourse;
+        return fixingCourse;
     }
 }
