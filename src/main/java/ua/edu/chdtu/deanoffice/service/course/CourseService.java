@@ -5,12 +5,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.edu.chdtu.deanoffice.api.course.CourseController;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
-import ua.edu.chdtu.deanoffice.api.course.dto.coursesforstudents.CourseForStudentWriteDTO;
 import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
 import ua.edu.chdtu.deanoffice.api.course.util.CourseForStudentUpdateHolder;
 import ua.edu.chdtu.deanoffice.entity.*;
@@ -344,10 +341,7 @@ public class CourseService {
         if (!Objects.equals(oldCourse.getCourseName().getName(), newCourse.getCourseName().getName()) || !Objects.equals(oldCourse.getCourseName().getNameEng(), newCourse.getCourseName().getNameEng())) {
             CourseName courseName = map(courseForStudentUpdateHolder.getNewCourse().getCourseName(), CourseName.class);
             newCourse = updateCourseName(courseName, newCourse);
-        } else {
-            System.out.println("Назви однакові");
         }
-
         Course courseFromDb = getCourseByAllAttributes(newCourse);
         if(!coursesForStudentsRepository.existsByCourseIdAndStudentDegreeId(courseForStudentUpdateHolder.getOldCourseId(), studentDegreeId)) {
             throw new NotFoundException("Неправильно заданий параметр курсу чи студента");
