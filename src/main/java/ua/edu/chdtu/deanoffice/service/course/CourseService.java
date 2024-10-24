@@ -325,11 +325,7 @@ public class CourseService {
         Course courseFromDb = getCourseByAllAttributes(newCourse);
         if (courseFromDb != null) {
             newCourse = courseFromDb;
-            double correctCredits = Math.abs((0.0 + courseFromDb.getHours()) / courseFromDb.getHoursPerCredit());
-            if (Math.abs(correctCredits - courseFromDb.getCredits().doubleValue()) > 0.005) {
-                courseFromDb.setCredits(new BigDecimal(correctCredits));
-                createOrUpdateCourse(courseFromDb);
-            }
+            fixCredits(newCourse);
             courseForGroupService.updateCourseInCoursesForGroupsAndGrade(courseForGroup, courseFromDb, oldCourseId, groupId, oldCourse.getKnowledgeControl().getId());
         } else {
             CourseName courseName = map(coursesForGroupHolder.getNewCourse().getCourseName(), CourseName.class);
