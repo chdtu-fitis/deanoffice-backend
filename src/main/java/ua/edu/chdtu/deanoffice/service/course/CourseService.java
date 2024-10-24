@@ -10,19 +10,33 @@ import org.springframework.transaction.annotation.Transactional;
 import ua.edu.chdtu.deanoffice.api.course.dto.CourseDTO;
 import ua.edu.chdtu.deanoffice.api.course.util.CourseForGroupUpdateHolder;
 import ua.edu.chdtu.deanoffice.api.course.util.CourseForStudentUpdateHolder;
-import ua.edu.chdtu.deanoffice.entity.*;
+import ua.edu.chdtu.deanoffice.entity.Course;
+import ua.edu.chdtu.deanoffice.entity.CourseForGroup;
+import ua.edu.chdtu.deanoffice.entity.CourseName;
+import ua.edu.chdtu.deanoffice.entity.SelectiveCoursesStudentDegrees;
+import ua.edu.chdtu.deanoffice.entity.StudentDegree;
+import ua.edu.chdtu.deanoffice.entity.StudentGroup;
+import ua.edu.chdtu.deanoffice.entity.Teacher;
 import ua.edu.chdtu.deanoffice.exception.NotFoundException;
 import ua.edu.chdtu.deanoffice.exception.OperationCannotBePerformedException;
 import ua.edu.chdtu.deanoffice.exception.UnauthorizedFacultyDataException;
 import ua.edu.chdtu.deanoffice.repository.CourseRepository;
 import ua.edu.chdtu.deanoffice.repository.CoursesForStudentsRepository;
 import ua.edu.chdtu.deanoffice.repository.GradeRepository;
-import ua.edu.chdtu.deanoffice.service.*;
+import ua.edu.chdtu.deanoffice.service.CourseForGroupService;
+import ua.edu.chdtu.deanoffice.service.CourseNameService;
+import ua.edu.chdtu.deanoffice.service.GradeService;
+import ua.edu.chdtu.deanoffice.service.StudentDegreeService;
+import ua.edu.chdtu.deanoffice.service.StudentGroupService;
 import ua.edu.chdtu.deanoffice.service.course.selective.SelectiveCoursesStudentDegreesService;
 import ua.edu.chdtu.deanoffice.util.FacultyUtil;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static ua.edu.chdtu.deanoffice.api.general.mapper.Mapper.map;
 
@@ -279,6 +293,7 @@ public class CourseService {
         }
     }
 
+    @Transactional
     public Course updateCourseName(CourseName courseName, Course newCourse) {
         CourseName courseNameFromDB = courseNameService.getCourseNameByName(courseName.getName());
         if (courseNameFromDB != null) {
